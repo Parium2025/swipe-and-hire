@@ -32,8 +32,256 @@ const SearchJobs = () => {
   const [selectedSubcategory, setSelectedSubcategory] = useState('');
   const [selectedEmploymentType, setSelectedEmploymentType] = useState('all-types');
 
-  // Job categories with subcategories - inspired by AF
+  // Job categories with subcategories - based on AF structure
   const jobCategories = [
+    { 
+      value: 'administration', 
+      label: 'Administration, ekonomi, juridik', 
+      icon: '📊',
+      keywords: ['administration', 'ekonomi', 'redovisning', 'controller', 'assistent', 'sekreterare', 'koordinator', 'projektledare', 'juridik', 'advokat'],
+      subcategories: [
+        'Administratörer och sekreterare',
+        'Apotekare m.fl.',
+        'Arkivarier och bibliotekarier m.fl.',
+        'Assistenter och administratörer',
+        'Banktjänstemän och försäkringsrådgivare',
+        'Controllers och analytiker',
+        'Ekonomiassistenter och redovisningsekonomer', 
+        'Företagsledare',
+        'Jurister',
+        'Löne- och personaladministratörer',
+        'Projektledare',
+        'Sekreterare och kontorspersonal',
+        'Skatteexperter och redovisningskonsulter'
+      ]
+    },
+    { 
+      value: 'construction', 
+      label: 'Bygg och anläggning', 
+      icon: '🏗️',
+      keywords: ['bygg', 'snickare', 'elektriker', 'anläggning', 'murare', 'målare', 'byggledare', 'platschef', 'vvs'],
+      subcategories: [
+        'Anläggningsarbetare',
+        'Betongarbetare',
+        'Byggarbetsledare',
+        'Byggnadsingenjörer och arkitekter',
+        'Byggplåtslagare',
+        'Byggnadsarbetare',
+        'Elektriker',
+        'Fasadarbetare', 
+        'Glas- och fönstermontörer',
+        'Golvläggare',
+        'Isoleringsmontörer',
+        'Kranförare',
+        'Målare',
+        'Murare',
+        'Plattsättare',
+        'Rörmokare och VVS-montörer',
+        'Snickare',
+        'Takläggare',
+        'Väg- och anläggningsarbetare'
+      ]
+    },
+    { 
+      value: 'management', 
+      label: 'Chefer och verksamhetsledare', 
+      icon: '👔',
+      keywords: ['chef', 'ledare', 'verksamhet', 'director', 'manager', 'vd', 'platschef', 'avdelningschef'],
+      subcategories: [
+        'Administrationschefer',
+        'Driftchefer inom industri',
+        'Ekonomichefer',
+        'Finanschefer',
+        'Försäljnings- och marknadschefer',
+        'HR-chefer',
+        'IT-chefer',
+        'Produktionschefer',
+        'Projektchefer',
+        'Restaurang- och hotellchefer',
+        'Säljchefer',
+        'Teknikchefer',
+        'Utbildningschefer',
+        'VD och koncernchefer',
+        'Verksamhetschefer'
+      ]
+    },
+    { 
+      value: 'it', 
+      label: 'Data/IT', 
+      icon: '💻',
+      keywords: ['utvecklare', 'programmerare', 'IT', 'data', 'systemadministratör', 'webb', 'mjukvara', 'frontend', 'backend', 'fullstack', 'devops', 'cybersäkerhet'],
+      subcategories: [
+        'Applikationsutvecklare',
+        'Business analysts',
+        'Databasadministratörer',
+        'DevOps-ingenjörer',
+        'Frontend-utvecklare',
+        'Backend-utvecklare',
+        'Fullstack-utvecklare',
+        'IT-arkitekter',
+        'IT-konsulter',
+        'IT-projektledare',
+        'IT-säkerhetsspecialister',
+        'Mjukvaruingenjörer',
+        'Nätverksadministratörer',
+        'Systemadministratörer',
+        'Systemanalytiker',
+        'Testare och QA-specialister',
+        'UX/UI-designers',
+        'Webbutvecklare'
+      ]
+    },
+    { 
+      value: 'sales', 
+      label: 'Försäljning, inköp, marknadsföring', 
+      icon: '📈',
+      keywords: ['försäljning', 'sales', 'säljare', 'account', 'marketing', 'marknadsföring', 'reklam', 'kommunikation', 'pr', 'inköp'],
+      subcategories: [
+        'Account managers',
+        'Butikssäljare',
+        'Digital marknadsförare',
+        'E-handelsspecialister',
+        'Event- och mässorganisatörer',
+        'Försäljningsrepresentanter',
+        'Inköpare',
+        'Kommunikatörer',
+        'Kundansvariga',
+        'Marknadsanalytiker',
+        'Marknadsförare',
+        'PR-specialister',
+        'Reklamproducenter',
+        'Säljare inom detaljhandel',
+        'Säljchefer',
+        'Telefonförsäljare'
+      ]
+    },
+    { 
+      value: 'crafts', 
+      label: 'Hantverkyrken', 
+      icon: '🔨',
+      keywords: ['hantverk', 'smed', 'keramiker', 'snickare', 'träarbete', 'metallarbete'],
+      subcategories: [
+        'Barberare och frisörer',
+        'Bagare och konditorer',
+        'Båtbyggare',
+        'Dekoratörer och florister',
+        'Finsnickar',
+        'Glas- och keramikarbetare',
+        'Guldsmed er',
+        'Instrumentmakare',
+        'Juvelerare',
+        'Korgmakare',
+        'Kött- och fiskberedare',
+        'Läderhantverkare',
+        'Möbelsnickare',
+        'Musikinstrumentmakare',
+        'Optiker',
+        'Silversmeder',
+        'Slaktare',
+        'Träsnidare',
+        'Urmakare'
+      ]
+    },
+    { 
+      value: 'restaurant', 
+      label: 'Hotell, restaurang, storhushåll', 
+      icon: '🍽️',
+      keywords: ['kock', 'servitör', 'hotell', 'restaurang', 'storhushåll', 'bagare', 'konditor', 'hovmästare'],
+      subcategories: [
+        'Bagare och konditorer',
+        'Bartenders',
+        'Cateringpersonal',
+        'Hovmästare',
+        'Hotellreceptionister',
+        'Kockar',
+        'Kökspersonal',
+        'Restaurangchefer',
+        'Servitörer',
+        'Sommelier',
+        'Storhushållspersonal',
+        'Städpersonal inom hotell'
+      ]
+    },
+    { 
+      value: 'healthcare', 
+      label: 'Hälso- och sjukvård', 
+      icon: '🏥',
+      keywords: ['sjuksköterska', 'läkare', 'vård', 'omsorg', 'tandläkare', 'fysioterapeut', 'undersköterska', 'vårdbiträde'],
+      subcategories: [
+        'Ambulanspersonal',
+        'Apotekstekniker',
+        'Arbetsterapeuter',
+        'Barnmorskor',
+        'Biomedicinska analytiker',
+        'Dietister',
+        'Fysioterapeuter',
+        'Hörselskadetekniker',
+        'Kuratorer',
+        'Läkare',
+        'Medicintekniker',
+        'Naprapat er',
+        'Optiker',
+        'Ortopedtekniker',
+        'Röntgensjuksköterskor',
+        'Sjukgymnaster',
+        'Sjuksköterskor',
+        'Tandhygienister',
+        'Tandläkare',
+        'Tandtekniker',
+        'Undersköterskor',
+        'Vårdbiträden'
+      ]
+    },
+    { 
+      value: 'industry', 
+      label: 'Industriell tillverkning', 
+      icon: '🏭',
+      keywords: ['industri', 'tillverkning', 'produktion', 'maskinoperatör', 'kvalitet', 'process', 'tekniker'],
+      subcategories: [
+        'Fordonsreparatörer',
+        'Gjutare och formgjutare',
+        'Industriarbetare',
+        'Kemitekniker',
+        'Maskinoperatörer',
+        'Maskinreparatörer',
+        'Metallarbetare',
+        'Monteringsarbetare',
+        'Packare',
+        'Plastarbetare',
+        'Processtekniker',
+        'Produktionsarbetare',
+        'Kvalitetskon trollanter',
+        'Svetsa re',
+        'Textilarbetare',
+        'Träarbetare',
+        'Verktygsm akare'
+      ]
+    },
+    { 
+      value: 'installation', 
+      label: 'Installation, drift, underhåll', 
+      icon: '⚙️',
+      keywords: ['installation', 'drift', 'underhåll', 'reparatör', 'tekniker', 'service'],
+      subcategories: [
+        'Anläggningsreparatörer',
+        'Automationstekniker',
+        'Drifttekn iker',
+        'El- och teletekniker',
+        'Fastighetssk ötare',
+        'Fastighetstekniker',
+        'Hissmontörer',
+        'HVAC-tekniker',
+        'Industri elektriker',
+        'Installations tekniker',
+        'Kraftverkstekniker',
+        'Kyltekn iker',
+        'Maskinmontörer',
+        'Reparatörer',
+        'Servicetekniker',
+        'Underhållstekniker',
+        'Ventilationsmontörer'
+      ]
+    },
     { 
       value: 'logistics', 
       label: 'Transport', 
@@ -63,111 +311,164 @@ const SearchJobs = () => {
       ]
     },
     { 
-      value: 'it', 
-      label: 'Data/IT', 
-      icon: '💻',
-      keywords: ['utvecklare', 'programmerare', 'IT', 'data', 'systemadministratör', 'webb', 'mjukvara', 'frontend', 'backend', 'fullstack', 'devops', 'cybersäkerhet'],
+      value: 'beauty', 
+      label: 'Kropps- och skönhetsvård', 
+      icon: '💄',
+      keywords: ['frisör', 'skönhet', 'massage', 'naglar', 'kosmetolog'],
       subcategories: [
-        'Systemutvecklare',
-        'Frontend-utvecklare', 
-        'Backend-utvecklare',
-        'Databasadministratörer',
-        'IT-säkerhet',
-        'Systemadministratörer',
-        'UX/UI-designers',
-        'DevOps-ingenjörer'
+        'Barberare',
+        'Frisörer',
+        'Hudterapeuter',
+        'Kosmetologer',
+        'Massörer',
+        'Nageltekniker',
+        'Skönhetsterapeuter'
       ]
     },
     { 
-      value: 'healthcare', 
-      label: 'Vård & Omsorg', 
-      icon: '🏥',
-      keywords: ['sjuksköterska', 'läkare', 'vård', 'omsorg', 'tandläkare', 'fysioterapeut', 'undersköterska', 'vårdbiträde'],
+      value: 'creative', 
+      label: 'Kultur, media, design', 
+      icon: '🎨',
+      keywords: ['design', 'grafisk', 'kreativ', 'media', 'journalist', 'fotograf', 'video', 'kultur', 'konstnär'],
       subcategories: [
-        'Sjuksköterskor',
-        'Undersköterskor',
-        'Läkare',
-        'Vårdbiträden', 
-        'Arbetsterapeuter',
-        'Fysioterapeuter',
-        'Tandhygienister',
-        'Ambulanspersonal'
+        'Artister och musiker',
+        'Dansare och koreografer',
+        'Designers',
+        'Filmproducenter',
+        'Fotografer',
+        'Grafiska formgivare',
+        'Illustratörer',
+        'Journalister',
+        'Konstnärer',
+        'Kulturarrangörer',
+        'Ljudtekniker',
+        'Museipersonal',
+        'Redaktörer',
+        'Scentekniker',
+        'Skådespelare',
+        'Videoproducenter',
+        'Webdesigners'
       ]
     },
     { 
-      value: 'administration', 
-      label: 'Ekonomi & Administration', 
-      icon: '📊',
-      keywords: ['administration', 'ekonomi', 'redovisning', 'controller', 'assistent', 'sekreterare', 'koordinator', 'projektledare'],
+      value: 'military', 
+      label: 'Militärt arbete', 
+      icon: '🎖️',
+      keywords: ['militär', 'försvar', 'soldat', 'officer'],
       subcategories: [
-        'Ekonomiassistenter',
-        'Redovisningsekonomer',
-        'Controllers',
-        'Ekonomichefer',
-        'Löneadministratörer',
-        'Administratörer',
-        'Personaladministratörer'
+        'Befäl',
+        'Gruppbefäl',
+        'Officerare',
+        'Soldater',
+        'Specialister'
       ]
     },
     { 
-      value: 'sales', 
-      label: 'Försäljning & Kundservice', 
-      icon: '💼',
-      keywords: ['försäljning', 'sales', 'säljare', 'account', 'kundservice', 'butik'],
+      value: 'agriculture', 
+      label: 'Naturbruk', 
+      icon: '🌾',
+      keywords: ['lantbruk', 'jordbruk', 'skog', 'djur', 'trädgård'],
       subcategories: [
-        'Säljare',
-        'Kundtjänst',
-        'Butikssäljare',
-        'Account managers',
-        'Telefonförsäljare',
-        'Butikschefer',
-        'Visual merchandisers'
+        'Djurskötare',
+        'Fiskare',
+        'Jägare',
+        'Jordbruksarbetare',
+        'Lantarbetare',
+        'Skogsarbetare',
+        'Trädgårdsarbetare',
+        'Veterinärer'
       ]
     },
     { 
-      value: 'construction', 
-      label: 'Bygg & Anläggning', 
-      icon: '🏗️',
-      keywords: ['bygg', 'snickare', 'elektriker', 'anläggning', 'murare', 'målare', 'byggledare', 'platschef', 'vvs'],
+      value: 'science', 
+      label: 'Naturvetenskapligt arbete', 
+      icon: '🔬',
+      keywords: ['forskning', 'vetenskap', 'laboratorium', 'kemi', 'biologi'],
       subcategories: [
-        'Byggnadsarbetare',
-        'Elektriker',
-        'VVS-montörer',
-        'Målare',
-        'Snickare',
-        'Maskinförare',
-        'Betongarbetare',
-        'Plattsättare'
-      ]
-    },
-    { 
-      value: 'restaurant', 
-      label: 'Hotell & Restaurang', 
-      icon: '🍽️',
-      keywords: ['kock', 'servitör', 'hotell', 'restaurang', 'storhushåll', 'bagare', 'konditor', 'hovmästare'],
-      subcategories: [
-        'Kockar',
-        'Servitörer',
-        'Hotellreceptionister',
-        'Städpersonal',
-        'Bartenders',
-        'Hovmästare',
-        'Kökspersonal'
+        'Biologer',
+        'Forskare',
+        'Fysiker',
+        'Kemister',
+        'Laboratorieassistenter',
+        'Matematiker',
+        'Meteorologer'
       ]
     },
     { 
       value: 'education', 
-      label: 'Utbildning', 
+      label: 'Pedagogiskt arbete', 
       icon: '📚',
       keywords: ['lärare', 'utbildning', 'skola', 'universitet', 'förskola', 'pedagog', 'barnskötare', 'fritidsledare'],
       subcategories: [
+        'Barnskötare',
+        'Fritidspedagoger',
+        'Förskollärare',
         'Grundskollärare',
         'Gymnasielärare',
-        'Förskollärare',
-        'Fritidspedagoger',
+        'Högskolelärare',
+        'Lärarassistenter',
+        'Musikpedagoger',
         'Speciallärare',
         'Studie- och yrkesvägledare',
-        'Lärarassistenter'
+        'Universitetslektor er'
+      ]
+    },
+    { 
+      value: 'cleaning', 
+      label: 'Sanering och renhållning', 
+      icon: '🧹',
+      keywords: ['städ', 'rengöring', 'sanering', 'renhållning'],
+      subcategories: [
+        'Lokalvårdare',
+        'Renhållningsarbetare',
+        'Saneringsarbetare',
+        'Städpersonal',
+        'Toalettömmare'
+      ]
+    },
+    { 
+      value: 'social', 
+      label: 'Socialt arbete', 
+      icon: '🤝',
+      keywords: ['social', 'socialtjänst', 'stöd', 'hjälp', 'omsorg'],
+      subcategories: [
+        'Behandlingsassistenter',
+        'Familjerådgivare',
+        'Socionomer',
+        'Socialsekreterare',
+        'Stödpedagoger',
+        'Terapeuter'
+      ]
+    },
+    { 
+      value: 'security', 
+      label: 'Säkerhetsarbete', 
+      icon: '🛡️',
+      keywords: ['säkerhet', 'vakt', 'polis', 'brandman'],
+      subcategories: [
+        'Brandmän',
+        'Civilförsvarsarbetare',
+        'Ordningsvakter',
+        'Poliser',
+        'Säkerhetsvakter',
+        'Väktare'
+      ]
+    },
+    { 
+      value: 'technical', 
+      label: 'Tekniskt arbete', 
+      icon: '🔧',
+      keywords: ['ingenjör', 'tekniker', 'konstruktör', 'design', 'utveckling'],
+      subcategories: [
+        'Arkitekter',
+        'Byggingenj örer',
+        'Civilingenjörer',
+        'Konstruktörer',
+        'Lantmätare',
+        'Maskiningenjörer',
+        'Produktutvecklare',
+        'Tekniker',
+        'Tekniska ritare'
       ]
     }
   ];
