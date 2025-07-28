@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { MapPin, Clock, Euro, Heart, X, Building2, Users, Mail, Info } from 'lucide-react';
+import JobApplicationDialog from './JobApplicationDialog';
 
 interface JobPosting {
   id: string;
@@ -32,6 +33,8 @@ const JobSwipe = () => {
   const [currentJobIndex, setCurrentJobIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [swiping, setSwiping] = useState(false);
+  const [showApplicationDialog, setShowApplicationDialog] = useState(false);
+  const [currentJobQuestions, setCurrentJobQuestions] = useState<any[]>([]);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -80,27 +83,60 @@ const JobSwipe = () => {
     setSwiping(true);
 
     try {
-      // Here we could save the swipe to database for future matching
-      // For now, just move to next job
-      
-      toast({
-        title: liked ? "Intresserad!" : "Inte intressant",
-        description: liked 
-          ? "Du har visat intresse för denna tjänst" 
-          : "Du har passerat denna tjänst"
-      });
+      if (liked) {
+        // When liked, fetch questions and show application dialog
+        const { data: questions, error } = await supabase
+          .from('job_questions')
+          .select('*')
+          .eq('job_id', jobId)
+          .order('order_index');
 
-      // Move to next job
-      setTimeout(() => {
-        setCurrentJobIndex(prev => prev + 1);
+        if (error) {
+          console.error('Error fetching questions:', error);
+        }
+
+        setCurrentJobQuestions(questions || []);
+        setShowApplicationDialog(true);
         setSwiping(false);
-      }, 300);
+      } else {
+        // Not interested, just move to next job
+        toast({
+          title: "Inte intressant",
+          description: "Du har passerat denna tjänst"
+        });
 
+        setTimeout(() => {
+          setCurrentJobIndex(prev => prev + 1);
+          setSwiping(false);
+        }, 300);
+      }
     } catch (error) {
       setSwiping(false);
       toast({
         title: "Ett fel uppstod",
         description: "Kunde inte registrera ditt val.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleApplicationSubmit = async (answers: Record<string, any>) => {
+    try {
+      // Here you would save the application to database
+      // For now, just show success message
+      toast({
+        title: "Ansökan skickad!",
+        description: "Din ansökan har skickats till arbetsgivaren"
+      });
+
+      // Move to next job
+      setTimeout(() => {
+        setCurrentJobIndex(prev => prev + 1);
+      }, 1000);
+    } catch (error) {
+      toast({
+        title: "Ett fel uppstod",
+        description: "Kunde inte skicka ansökan",
         variant: "destructive"
       });
     }
@@ -296,6 +332,14 @@ const JobSwipe = () => {
           <p>Tryck ❤️ om du är intresserad eller ✕ för att passa</p>
         </div>
       </div>
+
+      <JobApplicationDialog
+        open={showApplicationDialog}
+        onOpenChange={setShowApplicationDialog}
+        job={currentJob}
+        questions={currentJobQuestions}
+        onSubmit={handleApplicationSubmit}
+      />
     </div>
   );
 };
