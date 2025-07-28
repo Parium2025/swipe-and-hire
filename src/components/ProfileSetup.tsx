@@ -33,6 +33,11 @@ const ProfileSetup = () => {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user?.id}/profile-image.${fileExt}`;
 
+      // Remove old image first
+      await supabase.storage
+        .from('job-applications')
+        .remove([fileName]);
+
       const { error: uploadError } = await supabase.storage
         .from('job-applications')
         .upload(fileName, file, {
@@ -45,7 +50,9 @@ const ProfileSetup = () => {
         .from('job-applications')
         .getPublicUrl(fileName);
 
-      setProfileImageUrl(publicUrl);
+      // Add cache busting parameter
+      const imageUrl = `${publicUrl}?t=${Date.now()}`;
+      setProfileImageUrl(imageUrl);
       
       toast({
         title: "Profilbild uppladdad!",
