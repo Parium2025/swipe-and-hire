@@ -417,13 +417,15 @@ const SearchJobs = () => {
       value: 'cleaning', 
       label: 'Sanering och renhållning', 
       icon: '🧹',
-      keywords: ['städ', 'rengöring', 'sanering', 'renhållning'],
+      keywords: ['städ', 'rengöring', 'sanering', 'renhållning', 'lokalvård', 'skorstensfejare'],
       subcategories: [
-        'Lokalvårdare',
-        'Renhållningsarbetare',
-        'Saneringsarbetare',
-        'Städpersonal',
-        'Toalettömmare'
+        'Bilrekonditionerare, fönsterputsare m.fl.',
+        'Renhållnings- och återvinningsarbetare',
+        'Saneringsarbetare m.fl.',
+        'Skorstensfjejare',
+        'Städare',
+        'Städledare och husfruar',
+        'Övrig hemservicepersonal m.fl.'
       ]
     },
     { 
