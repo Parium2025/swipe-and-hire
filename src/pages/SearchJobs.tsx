@@ -737,6 +737,17 @@ const SearchJobs = () => {
   // Get the matching role for current job title search
   const matchingRole = findMatchingRole(jobTitleSearch);
 
+  // Auto-apply matching role to filters when a match is found
+  const handleAutoApplyRole = () => {
+    if (matchingRole) {
+      setSelectedCategory(matchingRole.category.value);
+      if (matchingRole.subcategory) {
+        setSelectedSubcategory(matchingRole.subcategory);
+      }
+      setJobTitleSearch(''); // Clear the search since we're now using category filters
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Hero Section */}
@@ -867,20 +878,29 @@ const SearchJobs = () => {
                       </div>
                     )}
                   </div>
-                  {matchingRole.subcategory && (
+                  <div className="flex gap-2 mt-2">
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="mt-2 h-8 text-xs"
-                      onClick={() => {
-                        setSelectedCategory(matchingRole.category.value);
-                        setSelectedSubcategory(matchingRole.subcategory!);
-                        setJobTitleSearch('');
-                      }}
+                      className="h-8 text-xs"
+                      onClick={handleAutoApplyRole}
                     >
-                      🔄 Använd denna kategorisering
+                      🔄 Använd som filter
                     </Button>
-                  )}
+                    {matchingRole.matchType === 'keyword' && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 text-xs"
+                        onClick={() => {
+                          setSelectedCategory(matchingRole.category.value);
+                          setJobTitleSearch('');
+                        }}
+                      >
+                        📂 Visa hela kategorin
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -924,6 +944,45 @@ const SearchJobs = () => {
               </Select>
             </div>
           </div>
+
+          {/* Active Filters Display */}
+          {(selectedCategory !== 'all-categories' || selectedSubcategory) && (
+            <div className="pt-4 border-t">
+              <div className="flex items-center gap-2 mb-3">
+                <Filter className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium text-primary">Aktiva filter:</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {selectedCategory !== 'all-categories' && (
+                  <Badge variant="default" className="gap-2">
+                    <span>{jobCategories.find(cat => cat.value === selectedCategory)?.icon}</span>
+                    <span>{jobCategories.find(cat => cat.value === selectedCategory)?.label}</span>
+                    <button 
+                      onClick={() => {
+                        setSelectedCategory('all-categories');
+                        setSelectedSubcategory('');
+                      }}
+                      className="ml-1 hover:bg-primary-foreground/20 rounded p-1"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+                {selectedSubcategory && (
+                  <Badge variant="secondary" className="gap-2">
+                    <span>🎯</span>
+                    <span>{selectedSubcategory}</span>
+                    <button 
+                      onClick={() => setSelectedSubcategory('')}
+                      className="ml-1 hover:bg-secondary-foreground/20 rounded p-1"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Search Actions */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t">
