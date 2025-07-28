@@ -26,7 +26,7 @@ const Subscription = () => {
     {
       id: 'premium',
       name: 'Premium',
-      price: '199',
+      price: '29',
       period: 'månad',
       description: 'För seriösa jobbsökare och små företag',
       features: [
@@ -40,25 +40,6 @@ const Subscription = () => {
       icon: Crown,
       buttonText: 'Uppgradera till Premium',
       recommended: true
-    },
-    {
-      id: 'enterprise',
-      name: 'Enterprise',
-      price: '999',
-      period: 'månad',
-      description: 'För stora företag och organisationer',
-      features: [
-        'Allt i Premium',
-        'Obegränsade teammedlemmar',
-        'Anpassade integrations',
-        'Dedikerad account manager',
-        'SLA-garantier',
-        'Anpassad rapportering',
-        'White-label lösningar'
-      ],
-      icon: Zap,
-      buttonText: 'Kontakta försäljning',
-      recommended: false
     }
   ];
 
@@ -93,7 +74,7 @@ const Subscription = () => {
       </Card>
 
       {/* Pricing Plans */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
         {plans.map((plan) => {
           const Icon = plan.icon;
           const isCurrent = plan.id === currentPlan;
