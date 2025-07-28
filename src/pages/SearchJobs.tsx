@@ -703,13 +703,28 @@ const SearchJobs = () => {
   const findMatchingRole = (searchTitle: string) => {
     if (!searchTitle.trim()) return null;
     
-    const searchLower = searchTitle.toLowerCase();
+    const searchLower = searchTitle.toLowerCase().trim();
     
     for (const category of jobCategories) {
-      // Check if search matches any subcategory
+      // Check if search matches any subcategory with improved matching
       for (const subcategory of category.subcategories) {
-        if (subcategory.toLowerCase().includes(searchLower) || 
-            searchLower.includes(subcategory.toLowerCase())) {
+        const subcategoryLower = subcategory.toLowerCase();
+        
+        // Multiple matching strategies for better accuracy
+        if (
+          subcategoryLower.includes(searchLower) || 
+          searchLower.includes(subcategoryLower) ||
+          // Remove common suffixes/prefixes for better matching
+          subcategoryLower.replace(/\s*m\.fl\.$/, '').includes(searchLower) ||
+          searchLower.includes(subcategoryLower.replace(/\s*m\.fl\.$/, '')) ||
+          // Handle plural/singular variations
+          subcategoryLower.replace(/r$/, '').includes(searchLower.replace(/r$/, '')) ||
+          // Handle compound words (chaufför variations)
+          (searchLower.includes('chaufför') && subcategoryLower.includes('chaufför')) ||
+          (searchLower.includes('chauffö') && subcategoryLower.includes('chaufför')) ||
+          // Fuzzy matching for common typos
+          levenshteinDistance(searchLower, subcategoryLower) <= 2
+        ) {
           return {
             category: category,
             subcategory: subcategory,
@@ -718,10 +733,15 @@ const SearchJobs = () => {
         }
       }
       
-      // Check if search matches any keywords
+      // Check if search matches any keywords with improved matching
       for (const keyword of category.keywords) {
-        if (keyword.toLowerCase().includes(searchLower) || 
-            searchLower.includes(keyword.toLowerCase())) {
+        const keywordLower = keyword.toLowerCase();
+        if (
+          keywordLower.includes(searchLower) || 
+          searchLower.includes(keywordLower) ||
+          (searchLower.includes('chaufför') && keywordLower.includes('chaufför')) ||
+          levenshteinDistance(searchLower, keywordLower) <= 1
+        ) {
           return {
             category: category,
             subcategory: null,
@@ -732,6 +752,30 @@ const SearchJobs = () => {
     }
     
     return null;
+  };
+
+  // Simple Levenshtein distance function for fuzzy matching
+  const levenshteinDistance = (str1: string, str2: string): number => {
+    if (str1.length < str2.length) [str1, str2] = [str2, str1];
+    if (str2.length === 0) return str1.length;
+    
+    const matrix = Array(str2.length + 1).fill(null).map(() => Array(str1.length + 1).fill(null));
+    
+    for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
+    for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
+    
+    for (let j = 1; j <= str2.length; j++) {
+      for (let i = 1; i <= str1.length; i++) {
+        const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+        matrix[j][i] = Math.min(
+          matrix[j - 1][i] + 1,
+          matrix[j][i - 1] + 1,
+          matrix[j - 1][i - 1] + cost
+        );
+      }
+    }
+    
+    return matrix[str2.length][str1.length];
   };
 
   // Get the matching role for current job title search
