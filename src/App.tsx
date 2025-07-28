@@ -20,6 +20,12 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/profile" element={<Index />} />
+            <Route path="/subscription" element={<Index />} />
+            <Route path="/support" element={<Index />} />
+            <Route path="/settings" element={<Index />} />
+            <Route path="/billing" element={<Index />} />
+            <Route path="/payment" element={<Index />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

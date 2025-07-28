@@ -1,17 +1,23 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/AppSidebar';
 import EmployerDashboard from '@/components/EmployerDashboard';
 import JobSwipe from '@/components/JobSwipe';
-import { ArrowRightLeft } from 'lucide-react';
 import ProfileSetup from '@/components/ProfileSetup';
+import Profile from '@/pages/Profile';
+import Subscription from '@/pages/Subscription';
+import Support from '@/pages/Support';
+import { ArrowRightLeft } from 'lucide-react';
 
 const Index = () => {
   const { user, profile, signOut, loading, switchRole } = useAuth();
   const [switching, setSwitching] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -40,6 +46,66 @@ const Index = () => {
     return <ProfileSetup />;
   }
 
+  // Render sidebar layout for profile pages
+  const sidebarRoutes = ['/profile', '/subscription', '/billing', '/payment', '/support', '/settings'];
+  const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
+
+  if (isSidebarRoute) {
+    const renderSidebarContent = () => {
+      switch (location.pathname) {
+        case '/profile':
+          return <Profile />;
+        case '/subscription':
+          return <Subscription />;
+        case '/support':
+          return <Support />;
+        default:
+          return <Profile />;
+      }
+    };
+
+    return (
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full">
+          <AppSidebar />
+          <div className="flex-1">
+            <header className="h-16 flex items-center justify-between border-b bg-background px-6">
+              <div className="flex items-center gap-4">
+                <SidebarTrigger />
+                <div>
+                  <h1 className="text-xl font-bold">Parium</h1>
+                  <p className="text-sm text-muted-foreground">
+                    {profile.role === 'employer' ? 'Arbetsgivare' : 'Jobbsökare'}: {profile.first_name} {profile.last_name}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button 
+                  onClick={async () => {
+                    setSwitching(true);
+                    await switchRole(profile.role === 'employer' ? 'job_seeker' : 'employer');
+                    setSwitching(false);
+                    navigate('/');
+                  }}
+                  disabled={switching}
+                  variant="outline"
+                  size="sm"
+                >
+                  <ArrowRightLeft className="mr-2 h-4 w-4" />
+                  {switching ? 'Byter...' : `Byt till ${profile.role === 'employer' ? 'jobbsökare' : 'arbetsgivare'}`}
+                </Button>
+              </div>
+            </header>
+            
+            <main className="p-6">
+              {renderSidebarContent()}
+            </main>
+          </div>
+        </div>
+      </SidebarProvider>
+    );
+  }
+
   // Show employer dashboard for employers
   if (profile.role === 'employer') {
     return (
@@ -53,6 +119,13 @@ const Index = () => {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <Button 
+                onClick={() => navigate('/profile')}
+                variant="outline"
+                size="sm"
+              >
+                Min Profil
+              </Button>
               <Button 
                 onClick={async () => {
                   setSwitching(true);
@@ -92,6 +165,13 @@ const Index = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <Button 
+              onClick={() => navigate('/profile')}
+              variant="outline"
+              size="sm"
+            >
+              Min Profil
+            </Button>
             <Button 
               onClick={async () => {
                 setSwitching(true);

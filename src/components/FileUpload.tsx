@@ -18,7 +18,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   onFileUploaded,
   onFileRemoved,
   currentFile,
-  acceptedFileTypes = ['image/*', 'video/*', 'application/pdf', '.doc', '.docx'],
+  acceptedFileTypes = ['image/*', 'video/*', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
   maxFileSize = 10 * 1024 * 1024, // 10MB default
   questionType
 }) => {
