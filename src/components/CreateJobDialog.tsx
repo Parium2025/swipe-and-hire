@@ -20,6 +20,8 @@ interface JobFormData {
   salary_max: string;
   employment_type: string;
   work_schedule: string;
+  contact_email: string;
+  application_instructions: string;
 }
 
 interface CreateJobDialogProps {
@@ -37,7 +39,9 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
     salary_min: '',
     salary_max: '',
     employment_type: '',
-    work_schedule: ''
+    work_schedule: '',
+    contact_email: '',
+    application_instructions: ''
   });
 
   const { user } = useAuth();
@@ -59,7 +63,9 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
         salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         employment_type: formData.employment_type || null,
-        work_schedule: formData.work_schedule || null
+        work_schedule: formData.work_schedule || null,
+        contact_email: formData.contact_email || null,
+        application_instructions: formData.application_instructions || null
       };
 
       const { error } = await supabase
@@ -89,7 +95,9 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
         salary_min: '',
         salary_max: '',
         employment_type: '',
-        work_schedule: ''
+        work_schedule: '',
+        contact_email: '',
+        application_instructions: ''
       });
 
       setOpen(false);
@@ -221,6 +229,35 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
               placeholder="Beskriv vilka krav och kvalifikationer som krävs för tjänsten..."
               rows={3}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="contact_email">Kontakt-email *</Label>
+            <Input
+              id="contact_email"
+              type="email"
+              value={formData.contact_email}
+              onChange={(e) => handleInputChange('contact_email', e.target.value)}
+              placeholder="kontakt@företag.se"
+              required
+            />
+            <p className="text-xs text-muted-foreground">
+              E-postadress som jobbsökare kan kontakta för frågor om tjänsten
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="application_instructions">Ansökningsinstruktioner</Label>
+            <Textarea
+              id="application_instructions"
+              value={formData.application_instructions}
+              onChange={(e) => handleInputChange('application_instructions', e.target.value)}
+              placeholder="Hur ska kandidater ansöka? Via e-post, telefon eller webbsida?"
+              rows={3}
+            />
+            <p className="text-xs text-muted-foreground">
+              Beskriv hur jobbsökare ska ansöka till tjänsten
+            </p>
           </div>
 
           <div className="flex gap-2 pt-4">

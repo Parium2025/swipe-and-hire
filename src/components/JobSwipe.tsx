@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { MapPin, Clock, Euro, Heart, X, Building2, Users } from 'lucide-react';
+import { MapPin, Clock, Euro, Heart, X, Building2, Users, Mail, Info } from 'lucide-react';
 
 interface JobPosting {
   id: string;
@@ -16,6 +16,8 @@ interface JobPosting {
   salary_max?: number;
   employment_type?: string;
   work_schedule?: string;
+  contact_email?: string;
+  application_instructions?: string;
   created_at: string;
   employer_id: string;
   profiles: {
@@ -221,12 +223,49 @@ const JobSwipe = () => {
             </div>
 
             {/* Description */}
-            <div className="mb-6">
+            <div className="mb-4">
               <h4 className="font-semibold mb-2">Beskrivning</h4>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {currentJob.description}
               </p>
             </div>
+
+            {/* Application Instructions */}
+            {currentJob.application_instructions && (
+              <div className="mb-4">
+                <h4 className="font-semibold mb-2 flex items-center gap-2">
+                  <Info className="h-4 w-4" />
+                  Så här ansöker du
+                </h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {currentJob.application_instructions}
+                </p>
+              </div>
+            )}
+
+            {/* Contact Info */}
+            {currentJob.contact_email && (
+              <div className="mb-6">
+                <h4 className="font-semibold mb-2 flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Kontakt
+                </h4>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => {
+                    window.open(`mailto:${currentJob.contact_email}?subject=Fråga om tjänsten: ${currentJob.title}`, '_blank');
+                  }}
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  Maila arbetsgivaren
+                </Button>
+                <p className="text-xs text-muted-foreground mt-1 text-center">
+                  {currentJob.contact_email}
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 

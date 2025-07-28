@@ -16,7 +16,9 @@ export type Database = {
     Tables: {
       job_postings: {
         Row: {
+          application_instructions: string | null
           applications_count: number
+          contact_email: string | null
           created_at: string
           description: string
           employer_id: string
@@ -33,7 +35,9 @@ export type Database = {
           work_schedule: string | null
         }
         Insert: {
+          application_instructions?: string | null
           applications_count?: number
+          contact_email?: string | null
           created_at?: string
           description: string
           employer_id: string
@@ -50,7 +54,9 @@ export type Database = {
           work_schedule?: string | null
         }
         Update: {
+          application_instructions?: string | null
           applications_count?: number
+          contact_email?: string | null
           created_at?: string
           description?: string
           employer_id?: string
@@ -75,6 +81,21 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      Parium: {
+        Row: {
+          created_at: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
