@@ -43,9 +43,24 @@ const Index = () => {
                 Arbetsgivare: {profile.first_name} {profile.last_name}
               </p>
             </div>
-            <Button onClick={signOut} variant="outline">
-              Logga ut
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button 
+                onClick={async () => {
+                  setSwitching(true);
+                  await switchRole('job_seeker');
+                  setSwitching(false);
+                }}
+                disabled={switching}
+                variant="outline"
+                size="sm"
+              >
+                <ArrowRightLeft className="mr-2 h-4 w-4" />
+                {switching ? 'Byter...' : 'Byt till jobbsökare'}
+              </Button>
+              <Button onClick={signOut} variant="outline">
+                Logga ut
+              </Button>
+            </div>
           </div>
         </header>
         
