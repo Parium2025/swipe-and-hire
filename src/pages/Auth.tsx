@@ -36,7 +36,11 @@ const Auth = () => {
     try {
       if (isLogin) {
         const result = await signIn(email, password);
-        if (result.error && result.error.message === 'Email not confirmed') {
+        // Show resend button for email confirmation errors or invalid credentials (which might be due to unconfirmed email)
+        if (result.error && (
+          result.error.code === 'email_not_confirmed' || 
+          result.error.message === 'Invalid login credentials'
+        )) {
           setShowResend(true);
         }
       } else {

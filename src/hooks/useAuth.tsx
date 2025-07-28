@@ -138,7 +138,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) {
         toast({
           title: "Inloggningsfel",
-          description: error.message,
+          description: error.code === 'email_not_confirmed' 
+            ? "Du behöver bekräfta din e-post först."
+            : error.message,
           variant: "destructive"
         });
         return { error };
