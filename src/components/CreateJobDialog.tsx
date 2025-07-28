@@ -59,6 +59,9 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
     setLoading(true);
 
     try {
+      // Automatically categorize the job based on title and description
+      const category = categorizeJob(formData.title, formData.description);
+      
       const jobData = {
         employer_id: user.id,
         title: formData.title,
@@ -70,7 +73,8 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
         employment_type: formData.employment_type || null,
         work_schedule: formData.work_schedule || null,
         contact_email: formData.contact_email || null,
-        application_instructions: formData.application_instructions || null
+        application_instructions: formData.application_instructions || null,
+        category // Add the auto-generated category
       };
 
       const { data, error } = await supabase

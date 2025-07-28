@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           application_instructions: string | null
           applications_count: number
+          category: string | null
           contact_email: string | null
           created_at: string
           description: string
@@ -37,6 +38,7 @@ export type Database = {
         Insert: {
           application_instructions?: string | null
           applications_count?: number
+          category?: string | null
           contact_email?: string | null
           created_at?: string
           description: string
@@ -56,6 +58,7 @@ export type Database = {
         Update: {
           application_instructions?: string | null
           applications_count?: number
+          category?: string | null
           contact_email?: string | null
           created_at?: string
           description?: string
