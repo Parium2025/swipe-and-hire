@@ -143,6 +143,7 @@ export type Database = {
           bio: string | null
           company_name: string | null
           created_at: string
+          cv_url: string | null
           first_name: string | null
           id: string
           last_name: string | null
@@ -159,6 +160,7 @@ export type Database = {
           bio?: string | null
           company_name?: string | null
           created_at?: string
+          cv_url?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
@@ -175,6 +177,7 @@ export type Database = {
           bio?: string | null
           company_name?: string | null
           created_at?: string
+          cv_url?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null

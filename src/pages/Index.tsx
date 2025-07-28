@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import EmployerDashboard from '@/components/EmployerDashboard';
 import JobSwipe from '@/components/JobSwipe';
 import { ArrowRightLeft } from 'lucide-react';
+import ProfileSetup from '@/components/ProfileSetup';
 
 const Index = () => {
   const { user, profile, signOut, loading, switchRole } = useAuth();
@@ -30,6 +31,13 @@ const Index = () => {
 
   if (!user || !profile) {
     return null;
+  }
+
+  // Check if profile needs setup (basic info missing)
+  const needsProfileSetup = !profile.bio && !profile.location && !profile.profile_image_url;
+  
+  if (needsProfileSetup) {
+    return <ProfileSetup />;
   }
 
   // Show employer dashboard for employers
