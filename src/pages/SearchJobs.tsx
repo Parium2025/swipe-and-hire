@@ -383,15 +383,18 @@ const SearchJobs = () => {
       value: 'science', 
       label: 'Naturvetenskapligt arbete', 
       icon: '🔬',
-      keywords: ['forskning', 'vetenskap', 'laboratorium', 'kemi', 'biologi'],
+      keywords: ['forskning', 'vetenskap', 'laboratorium', 'kemi', 'biologi', 'fysik', 'matematik'],
       subcategories: [
-        'Biologer',
-        'Forskare',
-        'Fysiker',
+        'Cell- och molekylärbiologer m.fl.',
+        'Farmakologer och biomedicinare',
+        'Fysiker och astronomer',
+        'Geologer och geofysiker m.fl.',
         'Kemister',
-        'Laboratorieassistenter',
-        'Matematiker',
-        'Meteorologer'
+        'Matematiker och aktuarier',
+        'Meteorologer',
+        'Miljö- och hälsoskyddsinspektörer',
+        'Specialister inom miljöskydd och miljöteknik',
+        'Växt- och djurbiologer'
       ]
     },
     { 
