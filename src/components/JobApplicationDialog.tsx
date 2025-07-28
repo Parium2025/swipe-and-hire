@@ -51,7 +51,13 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
   const handleSubmit = async () => {
     // Validate required questions
     const requiredQuestions = questions.filter(q => q.is_required);
-    const missingAnswers = requiredQuestions.filter(q => !answers[q.id] || answers[q.id] === '');
+    const missingAnswers = requiredQuestions.filter(q => {
+      const answer = answers[q.id];
+      if (q.question_type === 'multiple_choice') {
+        return !Array.isArray(answer) || answer.length === 0;
+      }
+      return !answer || answer === '';
+    });
     
     if (missingAnswers.length > 0) {
       toast({
@@ -137,14 +143,8 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
         )}
 
         {question.question_type === 'multiple_choice' && (
-          <Select
-            value={answers[question.id] || ''}
-            onValueChange={(value) => handleAnswerChange(question.id, value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Välj ett alternativ" />
-            </SelectTrigger>
-            <SelectContent className="bg-background border border-border shadow-lg z-50 pointer-events-auto">
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-2">
               {(() => {
                 let options = question.options;
                 if (typeof options === 'string') {
@@ -155,14 +155,53 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
                     options = [];
                   }
                 }
-                return Array.isArray(options) && options.map((option, index) => (
-                  <SelectItem key={index} value={option} className="cursor-pointer">
-                    {option}
-                  </SelectItem>
-                ));
+                
+                const selectedOptions = Array.isArray(answers[question.id]) 
+                  ? answers[question.id] 
+                  : answers[question.id] 
+                    ? [answers[question.id]] 
+                    : [];
+
+                return Array.isArray(options) && options.map((option, index) => {
+                  const isSelected = selectedOptions.includes(option);
+                  return (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => {
+                        const currentSelected = Array.isArray(answers[question.id]) 
+                          ? answers[question.id] 
+                          : answers[question.id] 
+                            ? [answers[question.id]] 
+                            : [];
+                        
+                        let newSelected;
+                        if (isSelected) {
+                          newSelected = currentSelected.filter(item => item !== option);
+                        } else {
+                          newSelected = [...currentSelected, option];
+                        }
+                        
+                        handleAnswerChange(question.id, newSelected);
+                      }}
+                      className={`px-3 py-2 rounded-md border text-sm font-medium transition-colors ${
+                        isSelected
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'bg-background hover:bg-muted border-border hover:border-muted-foreground'
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  );
+                });
               })()}
-            </SelectContent>
-          </Select>
+            </div>
+            {Array.isArray(answers[question.id]) && answers[question.id].length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                Valda: {answers[question.id].join(', ')}
+              </p>
+            )}
+          </div>
         )}
       </div>
     );
