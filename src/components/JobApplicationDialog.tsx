@@ -79,6 +79,9 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
   };
 
   const renderQuestion = (question: JobQuestion) => {
+    console.log('Rendering question:', question);
+    console.log('Question options:', question.options, 'Type:', typeof question.options, 'Is Array:', Array.isArray(question.options));
+    
     const questionIcon = {
       yes_no: <CheckSquare className="h-4 w-4" />,
       text: <FileText className="h-4 w-4" />,

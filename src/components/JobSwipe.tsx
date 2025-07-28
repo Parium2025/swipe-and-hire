@@ -95,6 +95,9 @@ const JobSwipe = () => {
           console.error('Error fetching questions:', error);
         }
 
+        console.log('Fetched questions for job:', jobId, questions);
+        console.log('Questions with options:', questions?.filter(q => q.question_type === 'multiple_choice'));
+
         setCurrentJobQuestions(questions || []);
         setShowApplicationDialog(true);
         setSwiping(false);
