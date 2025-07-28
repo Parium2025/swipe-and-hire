@@ -780,6 +780,14 @@ const SearchJobs = () => {
 
   // Get the matching role for current job title search
   const matchingRole = findMatchingRole(jobTitleSearch);
+  
+  // Debug logging
+  console.log('🔍 Debug - jobTitleSearch:', jobTitleSearch);
+  console.log('🔍 Debug - matchingRole:', matchingRole);
+  
+  // Let's also check if "Renhållningschaufför" exists in our categories
+  const cleaningCategory = jobCategories.find(cat => cat.value === 'cleaning');
+  console.log('🔍 Debug - cleaning category subcategories:', cleaningCategory?.subcategories);
 
   // Auto-apply matching role to filters when a match is found
   const handleAutoApplyRole = () => {
