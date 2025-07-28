@@ -430,14 +430,23 @@ const SearchJobs = () => {
       value: 'social', 
       label: 'Socialt arbete', 
       icon: '🤝',
-      keywords: ['social', 'socialtjänst', 'stöd', 'hjälp', 'omsorg'],
+      keywords: ['social', 'socialtjänst', 'stöd', 'hjälp', 'omsorg', 'kurator', 'behandling'],
       subcategories: [
-        'Behandlingsassistenter',
-        'Familjerådgivare',
-        'Socionomer',
+        'Barnskötare',
+        'Begravnings- och krematoriepersonal',
+        'Behandlingsassistenter och socialpedagoger m.fl.',
+        'Biståndshandläggare m.fl.',
+        'Diakoner',
+        'Friskvårdskonsulenter och hälsopedagoger m.fl.',
+        'Fritidsledare m.fl.',
+        'Kuratorer',
+        'Pastorer m.fl.',
+        'Personliga assistenter',
+        'Präster',
         'Socialsekreterare',
-        'Stödpedagoger',
-        'Terapeuter'
+        'Vårdare, boendestödjare',
+        'Övrig servicepersonal',
+        'Övriga yrken inom socialt arbete'
       ]
     },
     { 
