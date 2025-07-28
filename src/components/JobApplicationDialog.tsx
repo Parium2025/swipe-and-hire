@@ -145,11 +145,22 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
               <SelectValue placeholder="Välj ett alternativ" />
             </SelectTrigger>
             <SelectContent className="bg-background border border-border shadow-lg z-50 pointer-events-auto">
-              {Array.isArray(question.options) && question.options.map((option, index) => (
-                <SelectItem key={index} value={option} className="cursor-pointer">
-                  {option}
-                </SelectItem>
-              ))}
+              {(() => {
+                let options = question.options;
+                if (typeof options === 'string') {
+                  try {
+                    options = JSON.parse(options);
+                  } catch (e) {
+                    console.error('Failed to parse options:', e);
+                    options = [];
+                  }
+                }
+                return Array.isArray(options) && options.map((option, index) => (
+                  <SelectItem key={index} value={option} className="cursor-pointer">
+                    {option}
+                  </SelectItem>
+                ));
+              })()}
             </SelectContent>
           </Select>
         )}
