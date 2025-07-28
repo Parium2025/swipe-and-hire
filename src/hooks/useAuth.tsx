@@ -118,7 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       toast({
         title: "Registrering lyckad",
-        description: "Kontrollera din e-post för att verifiera ditt konto."
+        description: "Du kan nu logga in direkt (e-postbekräftelse är inaktiverad för utveckling)."
       });
 
       return {};
