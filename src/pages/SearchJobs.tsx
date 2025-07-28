@@ -444,14 +444,18 @@ const SearchJobs = () => {
       value: 'security', 
       label: 'Säkerhetsarbete', 
       icon: '🛡️',
-      keywords: ['säkerhet', 'vakt', 'polis', 'brandman'],
+      keywords: ['säkerhet', 'vakt', 'polis', 'brandman', 'ordning', 'bevakning'],
       subcategories: [
+        'Arbetsmiljöingenjörer, yrkes- och miljöhygieniker',
+        'Brandingenjörer och byggnadsinspektörer m.fl.',
         'Brandmän',
-        'Civilförsvarsarbetare',
-        'Ordningsvakter',
+        'Kriminalvårdare',
         'Poliser',
-        'Säkerhetsvakter',
-        'Väktare'
+        'SOS-operatörer m.fl.',
+        'Säkerhetsinspektörer m.fl.',
+        'Tull- och kustbevakningtjänstemän',
+        'Väktare och ordningsvakter',
+        'Övrig bevaknings- och säkerhetspersonal'
       ]
     },
     { 
