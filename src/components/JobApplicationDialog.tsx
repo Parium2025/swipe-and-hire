@@ -141,7 +141,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
             <SelectTrigger>
               <SelectValue placeholder="Välj ett alternativ" />
             </SelectTrigger>
-            <SelectContent className="bg-background border border-border shadow-lg z-50">
+            <SelectContent className="bg-background border border-border shadow-lg z-50 pointer-events-auto">
               {Array.isArray(question.options) && question.options.map((option, index) => (
                 <SelectItem key={index} value={option} className="cursor-pointer">
                   {option}
