@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useEffect } from 'react';
+import { Mail } from 'lucide-react';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -17,8 +18,9 @@ const Auth = () => {
   const [lastName, setLastName] = useState('');
   const [role, setRole] = useState<'job_seeker' | 'employer'>('job_seeker');
   const [loading, setLoading] = useState(false);
+  const [showResend, setShowResend] = useState(false);
   
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, user, resendConfirmation } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,19 +35,30 @@ const Auth = () => {
 
     try {
       if (isLogin) {
-        await signIn(email, password);
+        const result = await signIn(email, password);
+        if (result.error && result.error.message === 'Email not confirmed') {
+          setShowResend(true);
+        }
       } else {
         await signUp(email, password, {
           role,
           first_name: firstName,
           last_name: lastName
         });
+        setShowResend(true);
       }
     } catch (error) {
       console.error('Auth error:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!email) return;
+    setLoading(true);
+    await resendConfirmation(email);
+    setLoading(false);
   };
 
   return (
@@ -181,6 +194,27 @@ const Auth = () => {
               </form>
             </TabsContent>
           </Tabs>
+          
+          {showResend && email && (
+            <div className="mt-4 p-4 bg-muted rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Mail size={16} />
+                <span className="text-sm font-medium">E-post inte bekräftad</span>
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">
+                Du behöver bekräfta din e-post ({email}) innan du kan logga in.
+              </p>
+              <Button 
+                onClick={handleResendConfirmation}
+                variant="outline" 
+                size="sm"
+                disabled={loading}
+                className="w-full"
+              >
+                {loading ? 'Skickar...' : 'Skicka ny bekräftelsemail'}
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
