@@ -377,6 +377,7 @@ const SearchJobs = () => {
         'Bangårdspersonal', 
         'Brevbärare och postterminalarbetare',
         'Buss- och spårvagnsförare',
+        'Distributionschaufför',
         'Fartygsbefäl m.fl.',
         'Flygledare',
         'Hamnarbetare',
@@ -521,6 +522,7 @@ const SearchJobs = () => {
       subcategories: [
         'Bilrekonditionerare, fönsterputsare m.fl.',
         'Renhållnings- och återvinningsarbetare',
+        'Renhållningschaufför',
         'Saneringsarbetare m.fl.',
         'Skorstensfjejare',
         'Städare',
