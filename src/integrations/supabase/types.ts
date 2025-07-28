@@ -14,6 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      job_postings: {
+        Row: {
+          applications_count: number
+          created_at: string
+          description: string
+          employer_id: string
+          employment_type: string | null
+          id: string
+          is_active: boolean
+          location: string
+          requirements: string | null
+          salary_max: number | null
+          salary_min: number | null
+          title: string
+          updated_at: string
+          views_count: number
+          work_schedule: string | null
+        }
+        Insert: {
+          applications_count?: number
+          created_at?: string
+          description: string
+          employer_id: string
+          employment_type?: string | null
+          id?: string
+          is_active?: boolean
+          location: string
+          requirements?: string | null
+          salary_max?: number | null
+          salary_min?: number | null
+          title: string
+          updated_at?: string
+          views_count?: number
+          work_schedule?: string | null
+        }
+        Update: {
+          applications_count?: number
+          created_at?: string
+          description?: string
+          employer_id?: string
+          employment_type?: string | null
+          id?: string
+          is_active?: boolean
+          location?: string
+          requirements?: string | null
+          salary_max?: number | null
+          salary_min?: number | null
+          title?: string
+          updated_at?: string
+          views_count?: number
+          work_schedule?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_postings_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           bio: string | null
