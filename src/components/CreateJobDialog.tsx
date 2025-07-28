@@ -8,8 +8,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Loader2 } from 'lucide-react';
+import JobQuestionsManager from '@/components/JobQuestionsManager';
 
 interface JobFormData {
   title: string;
@@ -31,6 +33,8 @@ interface CreateJobDialogProps {
 const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("basic");
+  const [createdJobId, setCreatedJobId] = useState<string | null>(null);
   const [formData, setFormData] = useState<JobFormData>({
     title: '',
     description: '',
@@ -68,9 +72,11 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
         application_instructions: formData.application_instructions || null
       };
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('job_postings')
-        .insert([jobData]);
+        .insert([jobData])
+        .select()
+        .single();
 
       if (error) {
         toast({
@@ -81,27 +87,17 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
         return;
       }
 
+      // Save the created job ID and move to questions tab
+      setCreatedJobId(data.id);
+      setActiveTab("questions");
+
       toast({
-        title: "Annons skapad!",
-        description: "Din jobbannons har publicerats."
+        title: "Grundinfo sparad!",
+        description: "Nu kan du lägga till ansökningsfrågor eller avsluta."
       });
 
-      // Reset form
-      setFormData({
-        title: '',
-        description: '',
-        requirements: '',
-        location: '',
-        salary_min: '',
-        salary_max: '',
-        employment_type: '',
-        work_schedule: '',
-        contact_email: '',
-        application_instructions: ''
-      });
+      setActiveTab("questions");
 
-      setOpen(false);
-      onJobCreated();
     } catch (error) {
       toast({
         title: "Ett fel uppstod",
@@ -111,6 +107,26 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleClose = () => {
+    // Reset everything when closing
+    setFormData({
+      title: '',
+      description: '',
+      requirements: '',
+      location: '',
+      salary_min: '',
+      salary_max: '',
+      employment_type: '',
+      work_schedule: '',
+      contact_email: '',
+      application_instructions: ''
+    });
+    setCreatedJobId(null);
+    setActiveTab("basic");
+    setOpen(false);
+    onJobCreated();
   };
 
   const handleInputChange = (field: keyof JobFormData, value: string) => {
@@ -128,157 +144,184 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
           Skapa ny annons
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Skapa ny jobbannons</DialogTitle>
           <DialogDescription>
-            Fyll i informationen om tjänsten du vill rekrytera till.
+            Fyll i informationen om tjänsten och lägg till ansökningsfrågor.
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Jobbtitel *</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => handleInputChange('title', e.target.value)}
-              placeholder="t.ex. Lagerarbetare, Lastbilschaufför"
-              required
-            />
-          </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="basic">Grundinformation</TabsTrigger>
+            <TabsTrigger value="questions" disabled={!createdJobId}>
+              Ansökningsfrågor
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="basic" className="space-y-4 mt-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Jobbtitel *</Label>
+                <Input
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => handleInputChange('title', e.target.value)}
+                  placeholder="t.ex. Lagerarbetare, Lastbilschaufför"
+                  required
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="location">Plats *</Label>
-            <Input
-              id="location"
-              value={formData.location}
-              onChange={(e) => handleInputChange('location', e.target.value)}
-              placeholder="t.ex. Stockholm, Göteborg"
-              required
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="location">Plats *</Label>
+                <Input
+                  id="location"
+                  value={formData.location}
+                  onChange={(e) => handleInputChange('location', e.target.value)}
+                  placeholder="t.ex. Stockholm, Göteborg"
+                  required
+                />
+              </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="salary_min">Minimilön (kr/mån)</Label>
-              <Input
-                id="salary_min"
-                type="number"
-                value={formData.salary_min}
-                onChange={(e) => handleInputChange('salary_min', e.target.value)}
-                placeholder="25000"
-              />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="salary_min">Minimilön (kr/mån)</Label>
+                  <Input
+                    id="salary_min"
+                    type="number"
+                    value={formData.salary_min}
+                    onChange={(e) => handleInputChange('salary_min', e.target.value)}
+                    placeholder="25000"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="salary_max">Maxlön (kr/mån)</Label>
+                  <Input
+                    id="salary_max"
+                    type="number"
+                    value={formData.salary_max}
+                    onChange={(e) => handleInputChange('salary_max', e.target.value)}
+                    placeholder="35000"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="employment_type">Anställningsform</Label>
+                <Select value={formData.employment_type} onValueChange={(value) => handleInputChange('employment_type', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Välj anställningsform" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="full_time">Heltid</SelectItem>
+                    <SelectItem value="part_time">Deltid</SelectItem>
+                    <SelectItem value="contract">Konsult</SelectItem>
+                    <SelectItem value="temporary">Tillfällig</SelectItem>
+                    <SelectItem value="internship">Praktik</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="work_schedule">Arbetstider</Label>
+                <Input
+                  id="work_schedule"
+                  value={formData.work_schedule}
+                  onChange={(e) => handleInputChange('work_schedule', e.target.value)}
+                  placeholder="t.ex. 08:00-17:00, Skiftarbete"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="contact_email">Kontakt-email *</Label>
+                <Input
+                  id="contact_email"
+                  type="email"
+                  value={formData.contact_email}
+                  onChange={(e) => handleInputChange('contact_email', e.target.value)}
+                  placeholder="kontakt@företag.se"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Beskrivning *</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
+                  rows={4}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="requirements">Krav och kvalifikationer</Label>
+                <Textarea
+                  id="requirements"
+                  value={formData.requirements}
+                  onChange={(e) => handleInputChange('requirements', e.target.value)}
+                  placeholder="Beskriv vilka krav och kvalifikationer som krävs för tjänsten..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="application_instructions">Ansökningsinstruktioner</Label>
+                <Textarea
+                  id="application_instructions"
+                  value={formData.application_instructions}
+                  onChange={(e) => handleInputChange('application_instructions', e.target.value)}
+                  placeholder="Hur ska kandidater ansöka? Via e-post, telefon eller webbsida?"
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  type="submit" 
+                  disabled={loading}
+                  className="flex-1"
+                >
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {loading ? 'Skapar...' : 'Spara och fortsätt'}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setOpen(false)}
+                  disabled={loading}
+                >
+                  Avbryt
+                </Button>
+              </div>
+            </form>
+          </TabsContent>
+
+          <TabsContent value="questions" className="space-y-4 mt-6">
+            <JobQuestionsManager 
+              jobId={createdJobId} 
+              onQuestionsChange={() => {}} 
+            />
+            
+            <div className="flex gap-2 pt-4">
+              <Button 
+                onClick={handleClose}
+                className="flex-1"
+              >
+                Avsluta och publicera
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setActiveTab("basic")}
+              >
+                Tillbaka
+              </Button>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="salary_max">Maxlön (kr/mån)</Label>
-              <Input
-                id="salary_max"
-                type="number"
-                value={formData.salary_max}
-                onChange={(e) => handleInputChange('salary_max', e.target.value)}
-                placeholder="35000"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="employment_type">Anställningsform</Label>
-            <Select value={formData.employment_type} onValueChange={(value) => handleInputChange('employment_type', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Välj anställningsform" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="full_time">Heltid</SelectItem>
-                <SelectItem value="part_time">Deltid</SelectItem>
-                <SelectItem value="contract">Konsult</SelectItem>
-                <SelectItem value="temporary">Tillfällig</SelectItem>
-                <SelectItem value="internship">Praktik</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="work_schedule">Arbetstider</Label>
-            <Input
-              id="work_schedule"
-              value={formData.work_schedule}
-              onChange={(e) => handleInputChange('work_schedule', e.target.value)}
-              placeholder="t.ex. 08:00-17:00, Skiftarbete"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Beskrivning *</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
-              rows={4}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="requirements">Krav och kvalifikationer</Label>
-            <Textarea
-              id="requirements"
-              value={formData.requirements}
-              onChange={(e) => handleInputChange('requirements', e.target.value)}
-              placeholder="Beskriv vilka krav och kvalifikationer som krävs för tjänsten..."
-              rows={3}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="contact_email">Kontakt-email *</Label>
-            <Input
-              id="contact_email"
-              type="email"
-              value={formData.contact_email}
-              onChange={(e) => handleInputChange('contact_email', e.target.value)}
-              placeholder="kontakt@företag.se"
-              required
-            />
-            <p className="text-xs text-muted-foreground">
-              E-postadress som jobbsökare kan kontakta för frågor om tjänsten
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="application_instructions">Ansökningsinstruktioner</Label>
-            <Textarea
-              id="application_instructions"
-              value={formData.application_instructions}
-              onChange={(e) => handleInputChange('application_instructions', e.target.value)}
-              placeholder="Hur ska kandidater ansöka? Via e-post, telefon eller webbsida?"
-              rows={3}
-            />
-            <p className="text-xs text-muted-foreground">
-              Beskriv hur jobbsökare ska ansöka till tjänsten
-            </p>
-          </div>
-
-          <div className="flex gap-2 pt-4">
-            <Button 
-              type="submit" 
-              disabled={loading}
-              className="flex-1"
-            >
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {loading ? 'Skapar...' : 'Skapa annons'}
-            </Button>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => setOpen(false)}
-              disabled={loading}
-            >
-              Avbryt
-            </Button>
-          </div>
-        </form>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

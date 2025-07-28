@@ -7,8 +7,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import JobQuestionsManager from '@/components/JobQuestionsManager';
 
 interface JobPosting {
   id: string;
@@ -46,6 +48,7 @@ interface EditJobDialogProps {
 
 const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogProps) => {
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("basic");
   const [formData, setFormData] = useState<JobFormData>({
     title: '',
     description: '',
@@ -141,143 +144,174 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Redigera jobbannons</DialogTitle>
           <DialogDescription>
-            Uppdatera informationen om tjänsten.
+            Uppdatera informationen om tjänsten och hantera ansökningsfrågor.
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="edit_title">Jobbtitel *</Label>
-            <Input
-              id="edit_title"
-              value={formData.title}
-              onChange={(e) => handleInputChange('title', e.target.value)}
-              required
-            />
-          </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="basic">Grundinformation</TabsTrigger>
+            <TabsTrigger value="questions">Ansökningsfrågor</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="basic" className="space-y-4 mt-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_title">Jobbtitel *</Label>
+                <Input
+                  id="edit_title"
+                  value={formData.title}
+                  onChange={(e) => handleInputChange('title', e.target.value)}
+                  required
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="edit_location">Plats *</Label>
-            <Input
-              id="edit_location"
-              value={formData.location}
-              onChange={(e) => handleInputChange('location', e.target.value)}
-              required
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_location">Plats *</Label>
+                <Input
+                  id="edit_location"
+                  value={formData.location}
+                  onChange={(e) => handleInputChange('location', e.target.value)}
+                  required
+                />
+              </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit_salary_min">Minimilön (kr/mån)</Label>
-              <Input
-                id="edit_salary_min"
-                type="number"
-                value={formData.salary_min}
-                onChange={(e) => handleInputChange('salary_min', e.target.value)}
-              />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit_salary_min">Minimilön (kr/mån)</Label>
+                  <Input
+                    id="edit_salary_min"
+                    type="number"
+                    value={formData.salary_min}
+                    onChange={(e) => handleInputChange('salary_min', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit_salary_max">Maxlön (kr/mån)</Label>
+                  <Input
+                    id="edit_salary_max"
+                    type="number"
+                    value={formData.salary_max}
+                    onChange={(e) => handleInputChange('salary_max', e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit_employment_type">Anställningsform</Label>
+                <Select value={formData.employment_type || 'unspecified'} onValueChange={(value) => handleInputChange('employment_type', value === 'unspecified' ? '' : value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Välj anställningsform" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unspecified">Ej specificerat</SelectItem>
+                    <SelectItem value="full_time">Heltid</SelectItem>
+                    <SelectItem value="part_time">Deltid</SelectItem>
+                    <SelectItem value="contract">Konsult</SelectItem>
+                    <SelectItem value="temporary">Tillfällig</SelectItem>
+                    <SelectItem value="internship">Praktik</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit_work_schedule">Arbetstider</Label>
+                <Input
+                  id="edit_work_schedule"
+                  value={formData.work_schedule}
+                  onChange={(e) => handleInputChange('work_schedule', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit_contact_email">Kontakt-email *</Label>
+                <Input
+                  id="edit_contact_email"
+                  type="email"
+                  value={formData.contact_email}
+                  onChange={(e) => handleInputChange('contact_email', e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit_description">Beskrivning *</Label>
+                <Textarea
+                  id="edit_description"
+                  value={formData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  rows={4}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit_requirements">Krav och kvalifikationer</Label>
+                <Textarea
+                  id="edit_requirements"
+                  value={formData.requirements}
+                  onChange={(e) => handleInputChange('requirements', e.target.value)}
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit_application_instructions">Ansökningsinstruktioner</Label>
+                <Textarea
+                  id="edit_application_instructions"
+                  value={formData.application_instructions}
+                  onChange={(e) => handleInputChange('application_instructions', e.target.value)}
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  type="submit" 
+                  disabled={loading}
+                  className="flex-1"
+                >
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {loading ? 'Uppdaterar...' : 'Spara ändringar'}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => onOpenChange(false)}
+                  disabled={loading}
+                >
+                  Avbryt
+                </Button>
+              </div>
+            </form>
+          </TabsContent>
+
+          <TabsContent value="questions" className="space-y-4 mt-6">
+            <JobQuestionsManager 
+              jobId={job?.id || null} 
+              onQuestionsChange={onJobUpdated} 
+            />
+            
+            <div className="flex gap-2 pt-4">
+              <Button 
+                onClick={() => onOpenChange(false)}
+                className="flex-1"
+              >
+                Stäng
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setActiveTab("basic")}
+              >
+                Tillbaka till grundinfo
+              </Button>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit_salary_max">Maxlön (kr/mån)</Label>
-              <Input
-                id="edit_salary_max"
-                type="number"
-                value={formData.salary_max}
-                onChange={(e) => handleInputChange('salary_max', e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="edit_employment_type">Anställningsform</Label>
-            <Select value={formData.employment_type || 'unspecified'} onValueChange={(value) => handleInputChange('employment_type', value === 'unspecified' ? '' : value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Välj anställningsform" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="unspecified">Ej specificerat</SelectItem>
-                <SelectItem value="full_time">Heltid</SelectItem>
-                <SelectItem value="part_time">Deltid</SelectItem>
-                <SelectItem value="contract">Konsult</SelectItem>
-                <SelectItem value="temporary">Tillfällig</SelectItem>
-                <SelectItem value="internship">Praktik</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="edit_work_schedule">Arbetstider</Label>
-            <Input
-              id="edit_work_schedule"
-              value={formData.work_schedule}
-              onChange={(e) => handleInputChange('work_schedule', e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="edit_contact_email">Kontakt-email *</Label>
-            <Input
-              id="edit_contact_email"
-              type="email"
-              value={formData.contact_email}
-              onChange={(e) => handleInputChange('contact_email', e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="edit_description">Beskrivning *</Label>
-            <Textarea
-              id="edit_description"
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              rows={4}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="edit_requirements">Krav och kvalifikationer</Label>
-            <Textarea
-              id="edit_requirements"
-              value={formData.requirements}
-              onChange={(e) => handleInputChange('requirements', e.target.value)}
-              rows={3}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="edit_application_instructions">Ansökningsinstruktioner</Label>
-            <Textarea
-              id="edit_application_instructions"
-              value={formData.application_instructions}
-              onChange={(e) => handleInputChange('application_instructions', e.target.value)}
-              rows={3}
-            />
-          </div>
-
-          <div className="flex gap-2 pt-4">
-            <Button 
-              type="submit" 
-              disabled={loading}
-              className="flex-1"
-            >
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {loading ? 'Uppdaterar...' : 'Uppdatera annons'}
-            </Button>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => onOpenChange(false)}
-              disabled={loading}
-            >
-              Avbryt
-            </Button>
-          </div>
-        </form>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

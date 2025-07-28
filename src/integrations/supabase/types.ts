@@ -82,6 +82,47 @@ export type Database = {
           },
         ]
       }
+      job_questions: {
+        Row: {
+          created_at: string
+          id: string
+          is_required: boolean
+          job_id: string
+          options: Json | null
+          order_index: number
+          question_text: string
+          question_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          job_id: string
+          options?: Json | null
+          order_index?: number
+          question_text: string
+          question_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          job_id?: string
+          options?: Json | null
+          order_index?: number
+          question_text?: string
+          question_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_questions_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       Parium: {
         Row: {
           created_at: string
