@@ -133,7 +133,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
           </div>
         )}
 
-        {question.question_type === 'multiple_choice' && question.options && (
+        {question.question_type === 'multiple_choice' && (
           <Select
             value={answers[question.id] || ''}
             onValueChange={(value) => handleAnswerChange(question.id, value)}
@@ -142,7 +142,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
               <SelectValue placeholder="Välj ett alternativ" />
             </SelectTrigger>
             <SelectContent>
-              {question.options.map((option, index) => (
+              {Array.isArray(question.options) && question.options.map((option, index) => (
                 <SelectItem key={index} value={option}>
                   {option}
                 </SelectItem>
