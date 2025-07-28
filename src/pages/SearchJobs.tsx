@@ -697,6 +697,44 @@ const SearchJobs = () => {
     setSearchTerm('');
   };
 
+  // New function to find matching category and subcategory for a job title search
+  const findMatchingRole = (searchTitle: string) => {
+    if (!searchTitle.trim()) return null;
+    
+    const searchLower = searchTitle.toLowerCase();
+    
+    for (const category of jobCategories) {
+      // Check if search matches any subcategory
+      for (const subcategory of category.subcategories) {
+        if (subcategory.toLowerCase().includes(searchLower) || 
+            searchLower.includes(subcategory.toLowerCase())) {
+          return {
+            category: category,
+            subcategory: subcategory,
+            matchType: 'subcategory'
+          };
+        }
+      }
+      
+      // Check if search matches any keywords
+      for (const keyword of category.keywords) {
+        if (keyword.toLowerCase().includes(searchLower) || 
+            searchLower.includes(keyword.toLowerCase())) {
+          return {
+            category: category,
+            subcategory: null,
+            matchType: 'keyword'
+          };
+        }
+      }
+    }
+    
+    return null;
+  };
+
+  // Get the matching role for current job title search
+  const matchingRole = findMatchingRole(jobTitleSearch);
+
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Hero Section */}
@@ -806,6 +844,43 @@ const SearchJobs = () => {
                   className="pl-12 h-12 text-base"
                 />
               </div>
+              
+              {/* Role Match Indicator */}
+              {matchingRole && jobTitleSearch && (
+                <div className="mt-3 p-4 bg-primary/10 border border-primary/20 rounded-lg">
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-primary font-medium">🎯 Rollmatch:</span>
+                    <span className="text-muted-foreground">
+                      {matchingRole.matchType === 'subcategory' ? 'Exakt roll hittad' : 'Kategori match'}
+                    </span>
+                  </div>
+                  <div className="mt-2 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">{matchingRole.category.icon}</span>
+                      <span className="font-medium text-primary">{matchingRole.category.label}</span>
+                    </div>
+                    {matchingRole.subcategory && (
+                      <div className="ml-6 text-sm text-muted-foreground">
+                        → {matchingRole.subcategory}
+                      </div>
+                    )}
+                  </div>
+                  {matchingRole.subcategory && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="mt-2 h-8 text-xs"
+                      onClick={() => {
+                        setSelectedCategory(matchingRole.category.value);
+                        setSelectedSubcategory(matchingRole.subcategory!);
+                        setJobTitleSearch('');
+                      }}
+                    >
+                      🔄 Använd denna kategorisering
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Location - Enhanced */}
