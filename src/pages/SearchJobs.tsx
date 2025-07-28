@@ -800,6 +800,38 @@ const SearchJobs = () => {
     }
   };
 
+  // Get suggestions for job title autocomplete
+  const getJobTitleSuggestions = (searchTerm: string) => {
+    if (!searchTerm.trim() || searchTerm.length < 2) return [];
+    
+    const searchLower = searchTerm.toLowerCase().trim();
+    const suggestions: Array<{title: string, category: any}> = [];
+    
+    // Collect all subcategories that match the search term
+    jobCategories.forEach(category => {
+      category.subcategories.forEach(subcategory => {
+        if (subcategory.toLowerCase().includes(searchLower)) {
+          suggestions.push({
+            title: subcategory,
+            category: category
+          });
+        }
+      });
+    });
+    
+    // Sort by relevance (exact start match first, then contains)
+    return suggestions.sort((a, b) => {
+      const aStarts = a.title.toLowerCase().startsWith(searchLower);
+      const bStarts = b.title.toLowerCase().startsWith(searchLower);
+      if (aStarts && !bStarts) return -1;
+      if (!aStarts && bStarts) return 1;
+      return a.title.localeCompare(b.title);
+    }).slice(0, 8); // Limit to 8 suggestions
+  };
+
+  const jobTitleSuggestions = getJobTitleSuggestions(jobTitleSearch);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Hero Section */}
@@ -896,18 +928,53 @@ const SearchJobs = () => {
               </div>
             </div>
 
-            {/* Job Title Search - NEW */}
-            <div className="space-y-3">
+            {/* Job Title Search with Autocomplete */}
+            <div className="space-y-3 relative">
               <Label htmlFor="jobTitleSearch" className="text-base font-medium">Specifik jobbtitel</Label>
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="jobTitleSearch"
-                  placeholder="T.ex. 'Lastbilsförare' eller 'Truckförare'"
+                  placeholder="T.ex. 'renhållning' eller 'lastbils'"
                   value={jobTitleSearch}
-                  onChange={(e) => setJobTitleSearch(e.target.value)}
+                  onChange={(e) => {
+                    setJobTitleSearch(e.target.value);
+                    setShowSuggestions(true);
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                   className="pl-12 h-12 text-base"
                 />
+                
+                {/* Autocomplete Suggestions Dropdown */}
+                {showSuggestions && jobTitleSuggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
+                    <div className="p-2 border-b text-xs text-muted-foreground font-medium">
+                      💡 Klicka för att välja jobbtitel
+                    </div>
+                    {jobTitleSuggestions.map((suggestion, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-3 hover:bg-muted cursor-pointer border-b border-border/50 last:border-b-0"
+                        onClick={() => {
+                          setJobTitleSearch(suggestion.title);
+                          setShowSuggestions(false);
+                        }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg">{suggestion.category.icon}</span>
+                          <div>
+                            <div className="font-medium text-sm">{suggestion.title}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {suggestion.category.label}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-xs text-primary">Välj →</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               
               {/* Role Match Indicator */}
