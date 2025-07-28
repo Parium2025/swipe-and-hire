@@ -1,12 +1,14 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import EmployerDashboard from '@/components/EmployerDashboard';
+import { ArrowRightLeft } from 'lucide-react';
 
 const Index = () => {
-  const { user, profile, signOut, loading } = useAuth();
+  const { user, profile, signOut, loading, switchRole } = useAuth();
+  const [switching, setSwitching] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -79,10 +81,31 @@ const Index = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <p><strong>Namn:</strong> {profile.first_name} {profile.last_name}</p>
-                <p><strong>E-post:</strong> {user.email}</p>
-                <p><strong>Roll:</strong> Jobbsökare</p>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <p><strong>Namn:</strong> {profile.first_name} {profile.last_name}</p>
+                  <p><strong>E-post:</strong> {user.email}</p>
+                  <p><strong>Roll:</strong> Jobbsökare</p>
+                </div>
+                
+                <div className="pt-4 border-t">
+                  <Button 
+                    onClick={async () => {
+                      setSwitching(true);
+                      await switchRole('employer');
+                      setSwitching(false);
+                    }}
+                    disabled={switching}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <ArrowRightLeft className="mr-2 h-4 w-4" />
+                    {switching ? 'Byter roll...' : 'Byt till arbetsgivare'}
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-2 text-center">
+                    Byt till arbetsgivare för att publicera jobbannonser
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>

@@ -30,6 +30,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error?: any }>;
   resendConfirmation: (email: string) => Promise<{ error?: any }>;
+  switchRole: (newRole: UserRole) => Promise<{ error?: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -230,6 +231,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const switchRole = async (newRole: UserRole) => {
+    if (!user) return { error: 'No user logged in' };
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: newRole })
+        .eq('user_id', user.id);
+
+      if (error) {
+        toast({
+          title: "Fel vid rollbyte",
+          description: error.message,
+          variant: "destructive"
+        });
+        return { error };
+      }
+
+      // Refresh profile
+      await fetchProfile(user.id);
+      
+      toast({
+        title: "Roll uppdaterad!",
+        description: `Du är nu registrerad som ${newRole === 'employer' ? 'arbetsgivare' : 'jobbsökare'}.`
+      });
+
+      return {};
+    } catch (error) {
+      return { error };
+    }
+  };
+
   const value = {
     user,
     session,
@@ -239,7 +272,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signIn,
     signOut,
     updateProfile,
-    resendConfirmation
+    resendConfirmation,
+    switchRole
   };
 
   return (
