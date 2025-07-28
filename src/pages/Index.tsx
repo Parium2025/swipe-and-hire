@@ -9,6 +9,7 @@ import EmployerDashboard from '@/components/EmployerDashboard';
 import JobSwipe from '@/components/JobSwipe';
 import ProfileSetup from '@/components/ProfileSetup';
 import Profile from '@/pages/Profile';
+import SearchJobs from '@/pages/SearchJobs';
 import Subscription from '@/pages/Subscription';
 import Support from '@/pages/Support';
 import { ArrowRightLeft } from 'lucide-react';
@@ -47,7 +48,7 @@ const Index = () => {
   }
 
   // Render sidebar layout for profile pages
-  const sidebarRoutes = ['/profile', '/subscription', '/billing', '/payment', '/support', '/settings'];
+  const sidebarRoutes = ['/profile', '/search-jobs', '/subscription', '/billing', '/payment', '/support', '/settings'];
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
 
   if (isSidebarRoute) {
@@ -55,6 +56,8 @@ const Index = () => {
       switch (location.pathname) {
         case '/profile':
           return <Profile />;
+        case '/search-jobs':
+          return <SearchJobs />;
         case '/subscription':
           return <Subscription />;
         case '/support':
