@@ -121,22 +121,31 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
 
       // Insert new questions
       const questionsToInsert = questions
-        .filter(q => q.question_text.trim())
+        .filter(q => q.question_text && q.question_text.trim().length > 0)
         .map(q => ({
           job_id: jobId,
-          question_text: q.question_text,
+          question_text: q.question_text.trim(),
           question_type: q.question_type,
-          options: q.options && q.options.length > 0 ? JSON.stringify(q.options.filter(o => o.trim())) : null,
+          options: q.options && q.options.length > 0 ? JSON.stringify(q.options.filter(o => o && o.trim().length > 0)) : null,
           is_required: q.is_required,
           order_index: q.order_index
         }));
+
+      console.log('Questions to insert:', questionsToInsert);
 
       if (questionsToInsert.length > 0) {
         const { error } = await supabase
           .from('job_questions')
           .insert(questionsToInsert);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Insert error:', error);
+          throw error;
+        }
+        
+        console.log('Questions inserted successfully');
+      } else {
+        console.log('No questions to insert - all questions are empty');
       }
 
       toast({
