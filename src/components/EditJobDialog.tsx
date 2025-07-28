@@ -193,12 +193,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
           <div className="space-y-2">
             <Label htmlFor="edit_employment_type">Anställningsform</Label>
-            <Select value={formData.employment_type} onValueChange={(value) => handleInputChange('employment_type', value)}>
+            <Select value={formData.employment_type || 'unspecified'} onValueChange={(value) => handleInputChange('employment_type', value === 'unspecified' ? '' : value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Välj anställningsform" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Ej specificerat</SelectItem>
+                <SelectItem value="unspecified">Ej specificerat</SelectItem>
                 <SelectItem value="full_time">Heltid</SelectItem>
                 <SelectItem value="part_time">Deltid</SelectItem>
                 <SelectItem value="contract">Konsult</SelectItem>
