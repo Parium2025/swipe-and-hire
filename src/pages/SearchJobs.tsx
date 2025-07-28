@@ -705,26 +705,14 @@ const SearchJobs = () => {
     
     const searchLower = searchTitle.toLowerCase().trim();
     
+    // FIRST: Try exact matches (highest priority)
     for (const category of jobCategories) {
-      // Check if search matches any subcategory with improved matching
       for (const subcategory of category.subcategories) {
         const subcategoryLower = subcategory.toLowerCase();
         
-        // Multiple matching strategies for better accuracy
-        if (
-          subcategoryLower.includes(searchLower) || 
-          searchLower.includes(subcategoryLower) ||
-          // Remove common suffixes/prefixes for better matching
-          subcategoryLower.replace(/\s*m\.fl\.$/, '').includes(searchLower) ||
-          searchLower.includes(subcategoryLower.replace(/\s*m\.fl\.$/, '')) ||
-          // Handle plural/singular variations
-          subcategoryLower.replace(/r$/, '').includes(searchLower.replace(/r$/, '')) ||
-          // Handle compound words (chaufför variations)
-          (searchLower.includes('chaufför') && subcategoryLower.includes('chaufför')) ||
-          (searchLower.includes('chauffö') && subcategoryLower.includes('chaufför')) ||
-          // Fuzzy matching for common typos
-          levenshteinDistance(searchLower, subcategoryLower) <= 2
-        ) {
+        // Exact match
+        if (subcategoryLower === searchLower) {
+          console.log('🎯 Exact match found:', subcategory);
           return {
             category: category,
             subcategory: subcategory,
@@ -732,16 +720,50 @@ const SearchJobs = () => {
           };
         }
       }
-      
-      // Check if search matches any keywords with improved matching
+    }
+    
+    // SECOND: Try close matches (contains, but prefer longer matches)
+    let bestMatch = null;
+    let bestScore = 0;
+    
+    for (const category of jobCategories) {
+      for (const subcategory of category.subcategories) {
+        const subcategoryLower = subcategory.toLowerCase();
+        
+        // Calculate match score (longer overlaps get higher scores)
+        let score = 0;
+        if (subcategoryLower.includes(searchLower)) {
+          score = searchLower.length; // Full search term found
+        } else if (searchLower.includes(subcategoryLower.replace(/\s*m\.fl\.$/, ''))) {
+          score = subcategoryLower.replace(/\s*m\.fl\.$/, '').length; // Subcategory name found
+        }
+        
+        if (score > bestScore) {
+          bestScore = score;
+          bestMatch = {
+            category: category,
+            subcategory: subcategory,
+            matchType: 'subcategory'
+          };
+        }
+      }
+    }
+    
+    if (bestMatch) {
+      console.log('🎯 Best contains match found:', bestMatch.subcategory, 'score:', bestScore);
+      return bestMatch;
+    }
+    
+    // THIRD: Try fuzzy matching and keywords (lowest priority)
+    for (const category of jobCategories) {
+      // Check keywords first
       for (const keyword of category.keywords) {
         const keywordLower = keyword.toLowerCase();
         if (
           keywordLower.includes(searchLower) || 
-          searchLower.includes(keywordLower) ||
-          (searchLower.includes('chaufför') && keywordLower.includes('chaufför')) ||
-          levenshteinDistance(searchLower, keywordLower) <= 1
+          searchLower.includes(keywordLower)
         ) {
+          console.log('🎯 Keyword match found:', category.label);
           return {
             category: category,
             subcategory: null,
