@@ -400,17 +400,24 @@ const SearchJobs = () => {
       icon: '📚',
       keywords: ['lärare', 'utbildning', 'skola', 'universitet', 'förskola', 'pedagog', 'barnskötare', 'fritidsledare'],
       subcategories: [
-        'Barnskötare',
+        'Doktorander',
+        'Elevassistenter m.fl.',
+        'Forskarassistenter m.fl.',
         'Fritidspedagoger',
         'Förskollärare',
         'Grundskollärare',
         'Gymnasielärare',
-        'Högskolelärare',
-        'Lärarassistenter',
-        'Musikpedagoger',
-        'Speciallärare',
+        'Idrottsstränare och instruktörer m.fl.',
+        'Lärare i yrkesämnen',
+        'Professionella idrottutövare',
+        'Professorer',
+        'Speciallärare och specialpedagoger m.fl.',
         'Studie- och yrkesvägledare',
-        'Universitetslektor er'
+        'Trafiklarare',
+        'Universitets- och högskolelektorer',
+        'Övriga pedagoger med teoretisk specialistkompetens',
+        'Övriga universitets- och högskolelärare',
+        'Övriga utbildare och instruktörer'
       ]
     },
     { 
