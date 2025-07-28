@@ -25,9 +25,9 @@ const SearchJobs = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedEmploymentType, setSelectedEmploymentType] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('all-locations');
+  const [selectedCategory, setSelectedCategory] = useState('all-categories');
+  const [selectedEmploymentType, setSelectedEmploymentType] = useState('all-types');
 
   // Job categories - like AF but better organized
   const jobCategories = [
@@ -73,16 +73,16 @@ const SearchJobs = () => {
         query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
       }
 
-      if (selectedLocation) {
+      if (selectedLocation && selectedLocation !== 'all-locations') {
         query = query.ilike('location', `%${selectedLocation}%`);
       }
 
-      if (selectedEmploymentType) {
+      if (selectedEmploymentType && selectedEmploymentType !== 'all-types') {
         query = query.eq('employment_type', selectedEmploymentType);
       }
 
       // Apply category filter
-      if (selectedCategory) {
+      if (selectedCategory && selectedCategory !== 'all-categories') {
         const category = jobCategories.find(cat => cat.value === selectedCategory);
         if (category) {
           const keywordConditions = category.keywords.map(keyword => 
@@ -191,12 +191,12 @@ const SearchJobs = () => {
             {/* Location */}
             <div className="space-y-2">
               <Label>Plats</Label>
-              <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+              <Select value={selectedLocation} onValueChange={(value) => setSelectedLocation(value === 'all-locations' ? '' : value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Välj plats" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Alla platser</SelectItem>
+                  <SelectItem value="all-locations">Alla platser</SelectItem>
                   {locations.map((location) => (
                     <SelectItem key={location} value={location}>
                       {location}
@@ -209,12 +209,12 @@ const SearchJobs = () => {
             {/* Category */}
             <div className="space-y-2">
               <Label>Kategori</Label>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select value={selectedCategory} onValueChange={(value) => setSelectedCategory(value === 'all-categories' ? '' : value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Välj kategori" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Alla kategorier</SelectItem>
+                  <SelectItem value="all-categories">Alla kategorier</SelectItem>
                   {jobCategories.map((category) => (
                     <SelectItem key={category.value} value={category.value}>
                       {category.label}
@@ -227,12 +227,12 @@ const SearchJobs = () => {
             {/* Employment Type */}
             <div className="space-y-2">
               <Label>Anställningsform</Label>
-              <Select value={selectedEmploymentType} onValueChange={setSelectedEmploymentType}>
+              <Select value={selectedEmploymentType} onValueChange={(value) => setSelectedEmploymentType(value === 'all-types' ? '' : value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Välj typ" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Alla typer</SelectItem>
+                  <SelectItem value="all-types">Alla typer</SelectItem>
                   {employmentTypes.map((type) => (
                     <SelectItem key={type.value} value={type.value}>
                       {type.label}
@@ -253,9 +253,9 @@ const SearchJobs = () => {
               size="sm"
               onClick={() => {
                 setSearchTerm('');
-                setSelectedLocation('');
-                setSelectedCategory('');
-                setSelectedEmploymentType('');
+                setSelectedLocation('all-locations');
+                setSelectedCategory('all-categories');
+                setSelectedEmploymentType('all-types');
               }}
             >
               Rensa filter
