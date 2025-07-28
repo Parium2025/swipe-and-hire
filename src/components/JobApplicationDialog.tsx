@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import FileUpload from './FileUpload';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -120,25 +121,59 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
         )}
 
         {question.question_type === 'text' && (
-          <Textarea
-            placeholder="Skriv ditt svar här..."
-            value={answers[question.id] || ''}
-            onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-            className="min-h-[80px]"
-          />
+          <div className="space-y-3">
+            <Textarea
+              placeholder="Skriv ditt svar här..."
+              value={answers[question.id] || ''}
+              onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+              className="min-h-[80px]"
+            />
+            <div className="border-t pt-3">
+              <p className="text-sm text-muted-foreground mb-2 flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Eller ladda upp dokument (CV, personligt brev, etc.)
+              </p>
+              <FileUpload
+                questionType="document"
+                acceptedFileTypes={['application/pdf', '.doc', '.docx', 'image/*']}
+                maxFileSize={10 * 1024 * 1024}
+                onFileUploaded={(url, fileName) => {
+                  const currentText = answers[question.id] || '';
+                  const newText = currentText + (currentText ? '\n\n' : '') + `Bifogat dokument: ${fileName} (${url})`;
+                  handleAnswerChange(question.id, newText);
+                }}
+                onFileRemoved={() => {
+                  // Remove the file reference from the text
+                  const currentText = answers[question.id] || '';
+                  const lines = currentText.split('\n');
+                  const filteredLines = lines.filter(line => !line.includes('Bifogat dokument:'));
+                  handleAnswerChange(question.id, filteredLines.join('\n').trim());
+                }}
+              />
+            </div>
+          </div>
         )}
 
         {question.question_type === 'video' && (
-          <div className="space-y-2">
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground flex items-center gap-2">
+              <Video className="h-4 w-4" />
+              Ladda upp en video eller länka till en video
+            </p>
             <Input
               type="url"
-              placeholder="Länk till videosvar (YouTube, Vimeo, etc.)"
+              placeholder="Eller klistra in länk till video (YouTube, Vimeo, etc.)"
               value={answers[question.id] || ''}
               onChange={(e) => handleAnswerChange(question.id, e.target.value)}
             />
-            <p className="text-xs text-muted-foreground">
-              Ladda upp din video på YouTube, Vimeo eller annan plattform och klistra in länken här
-            </p>
+            <FileUpload
+              questionType="video"
+              acceptedFileTypes={['video/*']}
+              maxFileSize={50 * 1024 * 1024}
+              onFileUploaded={(url, fileName) => handleAnswerChange(question.id, url)}
+              onFileRemoved={() => handleAnswerChange(question.id, '')}
+              currentFile={answers[question.id] && answers[question.id].startsWith('http') && !answers[question.id].includes('youtube') && !answers[question.id].includes('vimeo') ? { url: answers[question.id], name: 'Uppladdad video' } : undefined}
+            />
           </div>
         )}
 
