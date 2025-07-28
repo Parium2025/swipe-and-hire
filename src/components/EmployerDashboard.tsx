@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2 } from 'lucide-react';
 import CreateJobDialog from '@/components/CreateJobDialog';
+import EditJobDialog from '@/components/EditJobDialog';
 
 interface JobPosting {
   id: string;
@@ -19,6 +20,8 @@ interface JobPosting {
   salary_max?: number;
   employment_type?: string;
   work_schedule?: string;
+  contact_email?: string;
+  application_instructions?: string;
   is_active: boolean;
   views_count: number;
   applications_count: number;
@@ -29,6 +32,8 @@ interface JobPosting {
 const EmployerDashboard = () => {
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const { user, profile } = useAuth();
   const { toast } = useToast();
 
@@ -129,6 +134,11 @@ const EmployerDashboard = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const handleEditJob = (job: JobPosting) => {
+    setEditingJob(job);
+    setEditDialogOpen(true);
   };
 
   const getEmploymentTypeLabel = (type?: string) => {
@@ -270,7 +280,11 @@ const EmployerDashboard = () => {
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleEditJob(job)}
+                    >
                       <Edit size={14} className="mr-1" />
                       Redigera
                     </Button>
@@ -290,6 +304,13 @@ const EmployerDashboard = () => {
           ))
         )}
       </div>
+
+      <EditJobDialog
+        job={editingJob}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onJobUpdated={fetchJobs}
+      />
     </div>
   );
 };
