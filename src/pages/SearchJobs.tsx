@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Search, MapPin, Clock, Building, Filter, Heart, ExternalLink, X } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Search, MapPin, Clock, Building, Filter, Heart, ExternalLink, X, ChevronDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Job {
@@ -25,83 +26,149 @@ const SearchJobs = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [jobTitleSearch, setJobTitleSearch] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('all-locations');
   const [selectedCategory, setSelectedCategory] = useState('all-categories');
+  const [selectedSubcategory, setSelectedSubcategory] = useState('');
   const [selectedEmploymentType, setSelectedEmploymentType] = useState('all-types');
 
-  // Job categories - inspired by AF but better organized and more comprehensive
+  // Job categories with subcategories - inspired by AF
   const jobCategories = [
+    { 
+      value: 'logistics', 
+      label: 'Transport', 
+      icon: '🚛',
+      keywords: ['lager', 'logistik', 'transport', 'distribution', 'chaufför', 'lastbil', 'gaffeltruck', 'leverans'],
+      subcategories: [
+        'Arbetsledare inom lager och terminal',
+        'Bangårdspersonal', 
+        'Brevbärare och postterminalarbetare',
+        'Buss- och spårvagnsförare',
+        'Fartygsbefäl m.fl.',
+        'Flygledare',
+        'Hamnarbetare',
+        'Kabinpersonal m.fl.',
+        'Lager- och terminalpersonal', 
+        'Lastbilsförare m.fl.',
+        'Lokförare',
+        'Maskinbefäl',
+        'Matroser och jungman m.fl.',
+        'Piloter m.fl.',
+        'Ramppersonal, flyttkarlar och varupåfyllare m.fl.',
+        'Reklamutdelare och tidningsdistributörer',
+        'Taxiförare m.fl.',
+        'Transportledare och transportsamordnare',
+        'Truckförare',
+        'Tågvärdar och ombordansvariga m.fl.'
+      ]
+    },
     { 
       value: 'it', 
       label: 'Data/IT', 
       icon: '💻',
-      keywords: ['utvecklare', 'programmerare', 'IT', 'data', 'systemadministratör', 'webb', 'mjukvara', 'frontend', 'backend', 'fullstack', 'devops', 'cybersäkerhet'] 
-    },
-    { 
-      value: 'administration', 
-      label: 'Administration & Ekonomi', 
-      icon: '📊',
-      keywords: ['administration', 'ekonomi', 'redovisning', 'controller', 'assistent', 'sekreterare', 'koordinator', 'projektledare'] 
-    },
-    { 
-      value: 'sales', 
-      label: 'Försäljning & Marknadsföring', 
-      icon: '📈',
-      keywords: ['försäljning', 'sales', 'säljare', 'account', 'marketing', 'marknadsföring', 'reklam', 'kommunikation', 'pr'] 
+      keywords: ['utvecklare', 'programmerare', 'IT', 'data', 'systemadministratör', 'webb', 'mjukvara', 'frontend', 'backend', 'fullstack', 'devops', 'cybersäkerhet'],
+      subcategories: [
+        'Systemutvecklare',
+        'Frontend-utvecklare', 
+        'Backend-utvecklare',
+        'Databasadministratörer',
+        'IT-säkerhet',
+        'Systemadministratörer',
+        'UX/UI-designers',
+        'DevOps-ingenjörer'
+      ]
     },
     { 
       value: 'healthcare', 
-      label: 'Hälso- & Sjukvård', 
+      label: 'Vård & Omsorg', 
       icon: '🏥',
-      keywords: ['sjuksköterska', 'läkare', 'vård', 'omsorg', 'tandläkare', 'fysioterapeut', 'undersköterska', 'vårdbiträde'] 
+      keywords: ['sjuksköterska', 'läkare', 'vård', 'omsorg', 'tandläkare', 'fysioterapeut', 'undersköterska', 'vårdbiträde'],
+      subcategories: [
+        'Sjuksköterskor',
+        'Undersköterskor',
+        'Läkare',
+        'Vårdbiträden', 
+        'Arbetsterapeuter',
+        'Fysioterapeuter',
+        'Tandhygienister',
+        'Ambulanspersonal'
+      ]
     },
     { 
-      value: 'education', 
-      label: 'Pedagogiskt Arbete', 
-      icon: '🎓',
-      keywords: ['lärare', 'utbildning', 'skola', 'universitet', 'förskola', 'pedagog', 'barnskötare', 'fritidsledare'] 
+      value: 'administration', 
+      label: 'Ekonomi & Administration', 
+      icon: '📊',
+      keywords: ['administration', 'ekonomi', 'redovisning', 'controller', 'assistent', 'sekreterare', 'koordinator', 'projektledare'],
+      subcategories: [
+        'Ekonomiassistenter',
+        'Redovisningsekonomer',
+        'Controllers',
+        'Ekonomichefer',
+        'Löneadministratörer',
+        'Administratörer',
+        'Personaladministratörer'
+      ]
+    },
+    { 
+      value: 'sales', 
+      label: 'Försäljning & Kundservice', 
+      icon: '💼',
+      keywords: ['försäljning', 'sales', 'säljare', 'account', 'kundservice', 'butik'],
+      subcategories: [
+        'Säljare',
+        'Kundtjänst',
+        'Butikssäljare',
+        'Account managers',
+        'Telefonförsäljare',
+        'Butikschefer',
+        'Visual merchandisers'
+      ]
     },
     { 
       value: 'construction', 
       label: 'Bygg & Anläggning', 
       icon: '🏗️',
-      keywords: ['bygg', 'snickare', 'elektriker', 'anläggning', 'murare', 'målare', 'byggledare', 'platschef', 'vvs'] 
-    },
-    { 
-      value: 'consulting', 
-      label: 'Konsultuppdrag', 
-      icon: '💼',
-      keywords: ['konsult', 'rådgivare', 'expert', 'specialist', 'senior', 'lead', 'arkitekt', 'strategisk'] 
-    },
-    { 
-      value: 'logistics', 
-      label: 'Transport & Logistik', 
-      icon: '🚛',
-      keywords: ['lager', 'logistik', 'transport', 'distribution', 'chaufför', 'lastbil', 'gaffeltruck', 'leverans'] 
-    },
-    { 
-      value: 'service', 
-      label: 'Service & Kundtjänst', 
-      icon: '🤝',
-      keywords: ['kundtjänst', 'service', 'support', 'reception', 'värdinna', 'säkerhet', 'städ', 'bemötande'] 
+      keywords: ['bygg', 'snickare', 'elektriker', 'anläggning', 'murare', 'målare', 'byggledare', 'platschef', 'vvs'],
+      subcategories: [
+        'Byggnadsarbetare',
+        'Elektriker',
+        'VVS-montörer',
+        'Målare',
+        'Snickare',
+        'Maskinförare',
+        'Betongarbetare',
+        'Plattsättare'
+      ]
     },
     { 
       value: 'restaurant', 
       label: 'Hotell & Restaurang', 
       icon: '🍽️',
-      keywords: ['kock', 'servitör', 'hotell', 'restaurang', 'storhushåll', 'bagare', 'konditor', 'hovmästare'] 
+      keywords: ['kock', 'servitör', 'hotell', 'restaurang', 'storhushåll', 'bagare', 'konditor', 'hovmästare'],
+      subcategories: [
+        'Kockar',
+        'Servitörer',
+        'Hotellreceptionister',
+        'Städpersonal',
+        'Bartenders',
+        'Hovmästare',
+        'Kökspersonal'
+      ]
     },
     { 
-      value: 'industry', 
-      label: 'Industriell Tillverkning', 
-      icon: '🏭',
-      keywords: ['industri', 'tillverkning', 'produktion', 'maskinoperatör', 'kvalitet', 'process', 'tekniker'] 
-    },
-    { 
-      value: 'creative', 
-      label: 'Kultur & Media', 
-      icon: '🎨',
-      keywords: ['design', 'grafisk', 'kreativ', 'media', 'journalist', 'fotograf', 'video', 'kultur', 'konstnar'] 
+      value: 'education', 
+      label: 'Utbildning', 
+      icon: '📚',
+      keywords: ['lärare', 'utbildning', 'skola', 'universitet', 'förskola', 'pedagog', 'barnskötare', 'fritidsledare'],
+      subcategories: [
+        'Grundskollärare',
+        'Gymnasielärare',
+        'Förskollärare',
+        'Fritidspedagoger',
+        'Speciallärare',
+        'Studie- och yrkesvägledare',
+        'Lärarassistenter'
+      ]
     }
   ];
 
@@ -132,7 +199,26 @@ const SearchJobs = () => {
 
       // Apply search filters
       if (searchTerm) {
-        query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
+        query = query.or(`company_name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
+      }
+
+      // Apply job title search
+      if (jobTitleSearch) {
+        query = query.ilike('title', `%${jobTitleSearch}%`);
+      }
+
+      // Apply subcategory filter (more specific than category)
+      if (selectedSubcategory) {
+        query = query.ilike('title', `%${selectedSubcategory}%`);
+      } else if (selectedCategory && selectedCategory !== 'all-categories') {
+        // Apply category filter only if no subcategory is selected
+        const category = jobCategories.find(cat => cat.value === selectedCategory);
+        if (category) {
+          const keywordConditions = category.keywords.map(keyword => 
+            `title.ilike.%${keyword}%,description.ilike.%${keyword}%`
+          ).join(',');
+          query = query.or(keywordConditions);
+        }
       }
 
       if (selectedLocation && selectedLocation !== 'all-locations') {
@@ -141,17 +227,6 @@ const SearchJobs = () => {
 
       if (selectedEmploymentType && selectedEmploymentType !== 'all-types') {
         query = query.eq('employment_type', selectedEmploymentType);
-      }
-
-      // Apply category filter
-      if (selectedCategory && selectedCategory !== 'all-categories') {
-        const category = jobCategories.find(cat => cat.value === selectedCategory);
-        if (category) {
-          const keywordConditions = category.keywords.map(keyword => 
-            `title.ilike.%${keyword}%,description.ilike.%${keyword}%`
-          ).join(',');
-          query = query.or(keywordConditions);
-        }
       }
 
       const { data, error } = await query.limit(20);
@@ -174,7 +249,7 @@ const SearchJobs = () => {
 
   useEffect(() => {
     fetchJobs();
-  }, [searchTerm, selectedLocation, selectedCategory, selectedEmploymentType]);
+  }, [searchTerm, jobTitleSearch, selectedLocation, selectedCategory, selectedSubcategory, selectedEmploymentType]);
 
   const formatSalary = (min?: number, max?: number) => {
     if (min && max) {
@@ -189,6 +264,7 @@ const SearchJobs = () => {
 
   const handleQuickCategory = (category: string) => {
     setSelectedCategory(category);
+    setSelectedSubcategory(''); // Clear subcategory when selecting main category
     setSearchTerm('');
   };
 
@@ -215,22 +291,49 @@ const SearchJobs = () => {
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {jobCategories.map((category) => (
-              <Button
-                key={category.value}
-                variant={selectedCategory === category.value ? "default" : "outline"}
-                size="lg"
-                onClick={() => handleQuickCategory(category.value)}
-                className={`h-20 flex flex-col items-center gap-2 transition-all duration-200 hover:scale-105 ${
-                  selectedCategory === category.value 
-                    ? 'shadow-lg border-primary' 
-                    : 'hover:shadow-md hover:border-primary/50'
-                }`}
-              >
-                <span className="text-2xl">{category.icon}</span>
-                <span className="text-sm font-medium text-center leading-tight">
-                  {category.label}
-                </span>
-              </Button>
+              <DropdownMenu key={category.value}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant={selectedCategory === category.value ? "default" : "outline"}
+                    size="lg"
+                    className={`h-20 flex flex-col items-center gap-2 transition-all duration-200 hover:scale-105 ${
+                      selectedCategory === category.value 
+                        ? 'shadow-lg border-primary' 
+                        : 'hover:shadow-md hover:border-primary/50'
+                    }`}
+                  >
+                    <span className="text-2xl">{category.icon}</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm font-medium text-center leading-tight">
+                        {category.label}
+                      </span>
+                      <ChevronDown className="h-3 w-3" />
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-64 max-h-96 overflow-y-auto bg-popover border shadow-lg">
+                  <DropdownMenuItem
+                    onClick={() => handleQuickCategory(category.value)}
+                    className="font-medium text-primary cursor-pointer"
+                  >
+                    {category.icon} Alla inom {category.label}
+                  </DropdownMenuItem>
+                  <Separator className="my-1" />
+                  {category.subcategories.map((subcategory) => (
+                    <DropdownMenuItem
+                      key={subcategory}
+                      onClick={() => {
+                        setSelectedCategory(category.value);
+                        setSelectedSubcategory(subcategory);
+                        setSearchTerm('');
+                      }}
+                      className="text-sm cursor-pointer"
+                    >
+                      {subcategory}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             ))}
           </div>
         </CardContent>
@@ -245,17 +348,32 @@ const SearchJobs = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Search Term - Enhanced */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* General Search Term */}
             <div className="space-y-3">
-              <Label htmlFor="search" className="text-base font-medium">Sök på jobbtitel eller företag</Label>
+              <Label htmlFor="search" className="text-base font-medium">Sök på företag eller beskrivning</Label>
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="search"
-                  placeholder="T.ex. 'Frontend utvecklare' eller 'Volvo'"
+                  placeholder="T.ex. 'Volvo' eller 'hemarbete'"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-12 h-12 text-base"
+                />
+              </div>
+            </div>
+
+            {/* Job Title Search - NEW */}
+            <div className="space-y-3">
+              <Label htmlFor="jobTitleSearch" className="text-base font-medium">Specifik jobbtitel</Label>
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  id="jobTitleSearch"
+                  placeholder="T.ex. 'Lastbilsförare' eller 'Truckförare'"
+                  value={jobTitleSearch}
+                  onChange={(e) => setJobTitleSearch(e.target.value)}
                   className="pl-12 h-12 text-base"
                 />
               </div>
@@ -307,7 +425,7 @@ const SearchJobs = () => {
               <p className="text-lg font-medium">
                 <span className="text-primary">{jobs.length}</span> jobb hittades
               </p>
-              {(searchTerm || selectedLocation !== 'all-locations' || selectedCategory !== 'all-categories' || selectedEmploymentType !== 'all-types') && (
+              {(searchTerm || jobTitleSearch || selectedLocation !== 'all-locations' || selectedCategory !== 'all-categories' || selectedSubcategory || selectedEmploymentType !== 'all-types') && (
                 <Badge variant="secondary" className="text-sm">
                   Filter aktiva
                 </Badge>
@@ -317,8 +435,10 @@ const SearchJobs = () => {
               variant="outline"
               onClick={() => {
                 setSearchTerm('');
+                setJobTitleSearch('');
                 setSelectedLocation('all-locations');
                 setSelectedCategory('all-categories');
+                setSelectedSubcategory('');
                 setSelectedEmploymentType('all-types');
               }}
               className="flex items-center gap-2"
@@ -352,8 +472,10 @@ const SearchJobs = () => {
                   variant="outline"
                   onClick={() => {
                     setSearchTerm('');
+                    setJobTitleSearch('');
                     setSelectedLocation('all-locations');
                     setSelectedCategory('all-categories');
+                    setSelectedSubcategory('');
                     setSelectedEmploymentType('all-types');
                   }}
                 >
