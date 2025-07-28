@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Search, MapPin, Clock, Building, Filter, Heart, ExternalLink } from 'lucide-react';
+import { Search, MapPin, Clock, Building, Filter, Heart, ExternalLink, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Job {
@@ -29,18 +29,80 @@ const SearchJobs = () => {
   const [selectedCategory, setSelectedCategory] = useState('all-categories');
   const [selectedEmploymentType, setSelectedEmploymentType] = useState('all-types');
 
-  // Job categories - like AF but better organized
+  // Job categories - inspired by AF but better organized and more comprehensive
   const jobCategories = [
-    { value: 'it', label: 'IT & Data', keywords: ['utvecklare', 'programmerare', 'IT', 'data', 'systemadministratör', 'webb'] },
-    { value: 'consulting', label: 'Konsultuppdrag', keywords: ['konsult', 'rådgivare', 'expert', 'specialist'] },
-    { value: 'warehouse', label: 'Lager & Logistik', keywords: ['lager', 'logistik', 'transport', 'distribution'] },
-    { value: 'sales', label: 'Försäljning', keywords: ['försäljning', 'sales', 'säljare', 'account'] },
-    { value: 'marketing', label: 'Marknadsföring', keywords: ['marketing', 'marknadsföring', 'reklam', 'kommunikation'] },
-    { value: 'finance', label: 'Ekonomi & Finans', keywords: ['ekonomi', 'redovisning', 'finans', 'controller'] },
-    { value: 'healthcare', label: 'Vård & Omsorg', keywords: ['sjuksköterska', 'läkare', 'vård', 'omsorg'] },
-    { value: 'education', label: 'Utbildning', keywords: ['lärare', 'utbildning', 'skola', 'universitet'] },
-    { value: 'construction', label: 'Bygg & Anläggning', keywords: ['bygg', 'snickare', 'elektriker', 'anläggning'] },
-    { value: 'service', label: 'Service & Kundtjänst', keywords: ['kundtjänst', 'service', 'support', 'reception'] }
+    { 
+      value: 'it', 
+      label: 'Data/IT', 
+      icon: '💻',
+      keywords: ['utvecklare', 'programmerare', 'IT', 'data', 'systemadministratör', 'webb', 'mjukvara', 'frontend', 'backend', 'fullstack', 'devops', 'cybersäkerhet'] 
+    },
+    { 
+      value: 'administration', 
+      label: 'Administration & Ekonomi', 
+      icon: '📊',
+      keywords: ['administration', 'ekonomi', 'redovisning', 'controller', 'assistent', 'sekreterare', 'koordinator', 'projektledare'] 
+    },
+    { 
+      value: 'sales', 
+      label: 'Försäljning & Marknadsföring', 
+      icon: '📈',
+      keywords: ['försäljning', 'sales', 'säljare', 'account', 'marketing', 'marknadsföring', 'reklam', 'kommunikation', 'pr'] 
+    },
+    { 
+      value: 'healthcare', 
+      label: 'Hälso- & Sjukvård', 
+      icon: '🏥',
+      keywords: ['sjuksköterska', 'läkare', 'vård', 'omsorg', 'tandläkare', 'fysioterapeut', 'undersköterska', 'vårdbiträde'] 
+    },
+    { 
+      value: 'education', 
+      label: 'Pedagogiskt Arbete', 
+      icon: '🎓',
+      keywords: ['lärare', 'utbildning', 'skola', 'universitet', 'förskola', 'pedagog', 'barnskötare', 'fritidsledare'] 
+    },
+    { 
+      value: 'construction', 
+      label: 'Bygg & Anläggning', 
+      icon: '🏗️',
+      keywords: ['bygg', 'snickare', 'elektriker', 'anläggning', 'murare', 'målare', 'byggledare', 'platschef', 'vvs'] 
+    },
+    { 
+      value: 'consulting', 
+      label: 'Konsultuppdrag', 
+      icon: '💼',
+      keywords: ['konsult', 'rådgivare', 'expert', 'specialist', 'senior', 'lead', 'arkitekt', 'strategisk'] 
+    },
+    { 
+      value: 'logistics', 
+      label: 'Transport & Logistik', 
+      icon: '🚛',
+      keywords: ['lager', 'logistik', 'transport', 'distribution', 'chaufför', 'lastbil', 'gaffeltruck', 'leverans'] 
+    },
+    { 
+      value: 'service', 
+      label: 'Service & Kundtjänst', 
+      icon: '🤝',
+      keywords: ['kundtjänst', 'service', 'support', 'reception', 'värdinna', 'säkerhet', 'städ', 'bemötande'] 
+    },
+    { 
+      value: 'restaurant', 
+      label: 'Hotell & Restaurang', 
+      icon: '🍽️',
+      keywords: ['kock', 'servitör', 'hotell', 'restaurang', 'storhushåll', 'bagare', 'konditor', 'hovmästare'] 
+    },
+    { 
+      value: 'industry', 
+      label: 'Industriell Tillverkning', 
+      icon: '🏭',
+      keywords: ['industri', 'tillverkning', 'produktion', 'maskinoperatör', 'kvalitet', 'process', 'tekniker'] 
+    },
+    { 
+      value: 'creative', 
+      label: 'Kultur & Media', 
+      icon: '🎨',
+      keywords: ['design', 'grafisk', 'kreativ', 'media', 'journalist', 'fotograf', 'video', 'kultur', 'konstnar'] 
+    }
   ];
 
   const locations = [
@@ -131,111 +193,107 @@ const SearchJobs = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Sök Jobb</h1>
-        <p className="text-muted-foreground">
-          Hitta ditt nästa drömjobb med våra smarta sökverktyg
+    <div className="max-w-7xl mx-auto space-y-8">
+      {/* Hero Section */}
+      <div className="text-center space-y-4 py-8">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+          Hitta ditt drömjobb
+        </h1>
+        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          Enkel, smart och snabb jobbsökning. Välj kategori eller sök fritt - vi hjälper dig hitta rätt.
         </p>
       </div>
 
-      {/* Quick Category Buttons */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Populära kategorier</CardTitle>
-          <CardDescription>Klicka för att snabbt hitta jobb inom dessa områden</CardDescription>
+      {/* Smart Category Grid */}
+      <Card className="border-0 shadow-lg bg-gradient-to-br from-background to-muted/30">
+        <CardHeader className="text-center pb-6">
+          <CardTitle className="text-2xl">Välj yrkesområde</CardTitle>
+          <CardDescription className="text-lg">
+            Klicka på ett område för att se alla lediga jobb
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {jobCategories.slice(0, 6).map((category) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {jobCategories.map((category) => (
               <Button
                 key={category.value}
                 variant={selectedCategory === category.value ? "default" : "outline"}
-                size="sm"
+                size="lg"
                 onClick={() => handleQuickCategory(category.value)}
-                className="flex items-center gap-2"
+                className={`h-20 flex flex-col items-center gap-2 transition-all duration-200 hover:scale-105 ${
+                  selectedCategory === category.value 
+                    ? 'shadow-lg border-primary' 
+                    : 'hover:shadow-md hover:border-primary/50'
+                }`}
               >
-                <Building className="h-4 w-4" />
-                {category.label}
+                <span className="text-2xl">{category.icon}</span>
+                <span className="text-sm font-medium text-center leading-tight">
+                  {category.label}
+                </span>
               </Button>
             ))}
           </div>
         </CardContent>
       </Card>
 
-      {/* Search Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      {/* Advanced Search - Collapsible */}
+      <Card className="border-primary/20">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
             <Filter className="h-5 w-5" />
-            Sökfilter
+            Avancerad sökning
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Search Term */}
-            <div className="space-y-2">
-              <Label htmlFor="search">Sökord</Label>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Search Term - Enhanced */}
+            <div className="space-y-3">
+              <Label htmlFor="search" className="text-base font-medium">Sök på jobbtitel eller företag</Label>
               <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="search"
-                  placeholder="Jobbtitel, företag..."
+                  placeholder="T.ex. 'Frontend utvecklare' eller 'Volvo'"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-12 h-12 text-base"
                 />
               </div>
             </div>
 
-            {/* Location */}
-            <div className="space-y-2">
-              <Label>Plats</Label>
+            {/* Location - Enhanced */}
+            <div className="space-y-3">
+              <Label className="text-base font-medium">Välj plats</Label>
               <Select value={selectedLocation} onValueChange={(value) => setSelectedLocation(value === 'all-locations' ? '' : value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Välj plats" />
+                <SelectTrigger className="h-12">
+                  <SelectValue placeholder="Alla platser i Sverige" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-locations">Alla platser</SelectItem>
+                  <SelectItem value="all-locations">🇸🇪 Alla platser</SelectItem>
                   {locations.map((location) => (
                     <SelectItem key={location} value={location}>
-                      {location}
+                      📍 {location}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Category */}
-            <div className="space-y-2">
-              <Label>Kategori</Label>
-              <Select value={selectedCategory} onValueChange={(value) => setSelectedCategory(value === 'all-categories' ? '' : value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Välj kategori" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all-categories">Alla kategorier</SelectItem>
-                  {jobCategories.map((category) => (
-                    <SelectItem key={category.value} value={category.value}>
-                      {category.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Employment Type */}
-            <div className="space-y-2">
-              <Label>Anställningsform</Label>
+            {/* Employment Type - Enhanced */}
+            <div className="space-y-3">
+              <Label className="text-base font-medium">Anställningsform</Label>
               <Select value={selectedEmploymentType} onValueChange={(value) => setSelectedEmploymentType(value === 'all-types' ? '' : value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Välj typ" />
+                <SelectTrigger className="h-12">
+                  <SelectValue placeholder="Alla anställningsformer" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-types">Alla typer</SelectItem>
+                  <SelectItem value="all-types">💼 Alla typer</SelectItem>
                   {employmentTypes.map((type) => (
                     <SelectItem key={type.value} value={type.value}>
-                      {type.label}
+                      {type.value === 'Heltid' ? '🕘' : 
+                       type.value === 'Deltid' ? '🕐' : 
+                       type.value === 'Konsult' ? '💻' : 
+                       type.value === 'Praktik' ? '🎓' : '⏰'} {type.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -243,91 +301,166 @@ const SearchJobs = () => {
             </div>
           </div>
 
-          {/* Clear Filters */}
-          <div className="flex justify-between items-center pt-2">
-            <p className="text-sm text-muted-foreground">
-              {jobs.length} jobb hittades
-            </p>
+          {/* Search Actions */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t">
+            <div className="flex items-center gap-4">
+              <p className="text-lg font-medium">
+                <span className="text-primary">{jobs.length}</span> jobb hittades
+              </p>
+              {(searchTerm || selectedLocation !== 'all-locations' || selectedCategory !== 'all-categories' || selectedEmploymentType !== 'all-types') && (
+                <Badge variant="secondary" className="text-sm">
+                  Filter aktiva
+                </Badge>
+              )}
+            </div>
             <Button
               variant="outline"
-              size="sm"
               onClick={() => {
                 setSearchTerm('');
                 setSelectedLocation('all-locations');
                 setSelectedCategory('all-categories');
                 setSelectedEmploymentType('all-types');
               }}
+              className="flex items-center gap-2"
             >
-              Rensa filter
+              <X className="h-4 w-4" />
+              Rensa alla filter
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Job Results */}
-      <div className="space-y-4">
+      {/* Results Section */}
+      <div className="space-y-6">
         {loading ? (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">Söker jobb...</p>
+          <div className="text-center py-16">
+            <div className="inline-flex items-center gap-3">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p className="text-lg text-muted-foreground">Söker bland tusentals jobb...</p>
+            </div>
           </div>
         ) : jobs.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-8">
-              <p className="text-muted-foreground">Inga jobb hittades med dina sökkriterier.</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Prova att ändra dina filter eller sökord.
-              </p>
+          <Card className="text-center py-16">
+            <CardContent>
+              <div className="space-y-4">
+                <div className="text-6xl">🔍</div>
+                <h3 className="text-xl font-semibold">Inga jobb hittades</h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  Inga jobb matchade dina sökkriterier. Prova att ändra dina filter eller sökord.
+                </p>
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSelectedLocation('all-locations');
+                    setSelectedCategory('all-categories');
+                    setSelectedEmploymentType('all-types');
+                  }}
+                >
+                  Visa alla jobb
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ) : (
-          jobs.map((job) => (
-            <Card key={job.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold mb-2">{job.title}</h3>
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-3">
-                      <div className="flex items-center gap-1">
-                        <Building className="h-4 w-4" />
-                        {job.company_name}
+          <>
+            {/* Results Header */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold">
+                {selectedCategory !== 'all-categories' 
+                  ? `${jobCategories.find(cat => cat.value === selectedCategory)?.label} Jobb`
+                  : 'Alla Jobb'
+                }
+              </h2>
+              <Select value="newest" onValueChange={() => {}}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Sortera efter" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Senast publicerade</SelectItem>
+                  <SelectItem value="relevant">Mest relevanta</SelectItem>
+                  <SelectItem value="salary">Högsta lönen</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {/* Job Cards */}
+            <div className="grid gap-6">
+              {jobs.map((job) => (
+                <Card key={job.id} className="group hover:shadow-xl transition-all duration-300 border-l-4 border-l-transparent hover:border-l-primary">
+                  <CardContent className="p-8">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1 space-y-4">
+                        {/* Job Header */}
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-2">
+                            <h3 className="text-2xl font-bold group-hover:text-primary transition-colors">
+                              {job.title}
+                            </h3>
+                            <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
+                              <div className="flex items-center gap-2 font-medium">
+                                <Building className="h-5 w-5" />
+                                {job.company_name}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <MapPin className="h-5 w-5" />
+                                {job.location}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-5 w-5" />
+                                {job.employment_type}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Category Badge */}
+                          {selectedCategory !== 'all-categories' && (
+                            <Badge className="bg-primary/10 text-primary border-primary/20">
+                              {jobCategories.find(cat => cat.value === selectedCategory)?.icon} {' '}
+                              {jobCategories.find(cat => cat.value === selectedCategory)?.label}
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        {/* Job Description */}
+                        <p className="text-muted-foreground text-lg leading-relaxed">
+                          {job.description.length > 200 
+                            ? `${job.description.substring(0, 200)}...` 
+                            : job.description
+                          }
+                        </p>
+                        
+                        {/* Job Footer */}
+                        <div className="flex items-center justify-between pt-4 border-t">
+                          <div className="flex items-center gap-4">
+                            <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50 text-base px-3 py-1">
+                              💰 {formatSalary(job.salary_min, job.salary_max)}
+                            </Badge>
+                            <span className="text-sm text-muted-foreground">
+                              📅 {new Date(job.created_at).toLocaleDateString('sv-SE', {
+                                day: 'numeric',
+                                month: 'long'
+                              })}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <MapPin className="h-4 w-4" />
-                        {job.location}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        {job.employment_type}
+                      
+                      {/* Action Buttons */}
+                      <div className="flex flex-col gap-3 ml-8">
+                        <Button size="lg" className="px-8">
+                          <ExternalLink className="h-5 w-5 mr-2" />
+                          Ansök nu
+                        </Button>
+                        <Button variant="outline" size="lg">
+                          <Heart className="h-5 w-5" />
+                        </Button>
                       </div>
                     </div>
-                    
-                    <p className="text-muted-foreground mb-3 line-clamp-2">
-                      {job.description.substring(0, 150)}...
-                    </p>
-                    
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline" className="text-green-700 border-green-200">
-                        {formatSalary(job.salary_min, job.salary_max)}
-                      </Badge>
-                      <p className="text-xs text-muted-foreground">
-                        Publicerad {new Date(job.created_at).toLocaleDateString('sv-SE')}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-col gap-2 ml-4">
-                    <Button size="sm">
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Ansök
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Heart className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>

@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { categorizeJob } from '@/lib/jobCategorization';
 import { Plus, Loader2 } from 'lucide-react';
 import JobQuestionsManager from '@/components/JobQuestionsManager';
 
