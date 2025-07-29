@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,15 +20,23 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [showResend, setShowResend] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
+  const [isPasswordReset, setIsPasswordReset] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   
-  const { signIn, signUp, user, resendConfirmation, resetPassword } = useAuth();
+  const { signIn, signUp, user, resendConfirmation, resetPassword, updatePassword } = useAuth();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
       navigate('/');
     }
-  }, [user, navigate]);
+    
+    // Check if this is a password reset URL
+    const isReset = searchParams.get('reset') === 'true';
+    setIsPasswordReset(isReset);
+  }, [user, navigate, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,6 +85,29 @@ const Auth = () => {
     setLoading(false);
   };
 
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (newPassword !== confirmPassword) {
+      alert('Lösenorden matchar inte');
+      return;
+    }
+    
+    if (newPassword.length < 6) {
+      alert('Lösenordet måste vara minst 6 tecken långt');
+      return;
+    }
+    
+    setLoading(true);
+    const result = await updatePassword(newPassword);
+    
+    if (!result.error) {
+      navigate('/');
+    }
+    
+    setLoading(false);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
@@ -87,116 +118,40 @@ const Auth = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs value={isLogin ? 'login' : 'signup'} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger 
-                value="login" 
-                onClick={() => setIsLogin(true)}
-              >
-                Logga in
-              </TabsTrigger>
-              <TabsTrigger 
-                value="signup" 
-                onClick={() => setIsLogin(false)}
-              >
-                Registrera
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="login">
-              <form onSubmit={handleSubmit} className="space-y-4">
+          {isPasswordReset ? (
+            // Password Reset Form
+            <div className="space-y-4">
+              <div className="text-center mb-6">
+                <h3 className="text-lg font-semibold">Återställ ditt lösenord</h3>
+                <p className="text-sm text-muted-foreground">
+                  Ange ditt nya lösenord nedan
+                </p>
+              </div>
+              
+              <form onSubmit={handlePasswordReset} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">E-post</Label>
+                  <Label htmlFor="newPassword">Nytt lösenord</Label>
                   <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="password">Lösenord</Label>
-                  <Input
-                    id="password"
+                    id="newPassword"
                     type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={loading}
-                >
-                  {loading ? 'Loggar in...' : 'Logga in'}
-                </Button>
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="signup">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">Förnamn</Label>
-                    <Input
-                      id="firstName"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Efternamn</Label>
-                    <Input
-                      id="lastName"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-3">
-                  <Label>Jag är en</Label>
-                  <RadioGroup 
-                    value={role} 
-                    onValueChange={(value) => setRole(value as 'job_seeker' | 'employer')}
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="job_seeker" id="job_seeker" />
-                      <Label htmlFor="job_seeker">Jobbsökare</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="employer" id="employer" />
-                      <Label htmlFor="employer">Arbetsgivare</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email">E-post</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="password">Lösenord</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
                     required
                     minLength={6}
+                    placeholder="Minst 6 tecken"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Bekräfta lösenord</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    placeholder="Ange lösenordet igen"
                   />
                 </div>
                 
@@ -205,52 +160,177 @@ const Auth = () => {
                   className="w-full" 
                   disabled={loading}
                 >
-                  {loading ? 'Registrerar...' : 'Registrera konto'}
+                  {loading ? 'Uppdaterar...' : 'Uppdatera lösenord'}
                 </Button>
               </form>
-            </TabsContent>
-          </Tabs>
-          
-          {showResend && email && (
-            <div className="mt-4 p-4 bg-muted rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Mail size={16} />
-                <span className="text-sm font-medium">E-post inte bekräftad</span>
-              </div>
-              <p className="text-sm text-muted-foreground mb-3">
-                Du behöver bekräfta din e-post ({email}) innan du kan logga in.
-              </p>
-              <Button 
-                onClick={handleResendConfirmation}
-                variant="outline" 
-                size="sm"
-                disabled={loading}
-                className="w-full"
-              >
-                {loading ? 'Skickar...' : 'Skicka ny bekräftelsemail'}
-              </Button>
             </div>
-          )}
-          
-          {showResetPassword && email && (
-            <div className="mt-4 p-4 bg-muted rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Key size={16} />
-                <span className="text-sm font-medium">Problem med lösenord?</span>
-              </div>
-              <p className="text-sm text-muted-foreground mb-3">
-                Om du har glömt ditt lösenord kan du återställa det här.
-              </p>
-              <Button 
-                onClick={() => resetPassword(email)}
-                variant="outline" 
-                size="sm"
-                disabled={loading}
-                className="w-full"
-              >
-                Återställ lösenord
-              </Button>
-            </div>
+          ) : (
+            // Normal Login/Signup Forms
+            <>
+              <Tabs value={isLogin ? 'login' : 'signup'} className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger 
+                    value="login" 
+                    onClick={() => setIsLogin(true)}
+                  >
+                    Logga in
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="signup" 
+                    onClick={() => setIsLogin(false)}
+                  >
+                    Registrera
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="login">
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">E-post</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="password">Lösenord</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <Button 
+                      type="submit" 
+                      className="w-full" 
+                      disabled={loading}
+                    >
+                      {loading ? 'Loggar in...' : 'Logga in'}
+                    </Button>
+                  </form>
+                </TabsContent>
+                
+                <TabsContent value="signup">
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName">Förnamn</Label>
+                        <Input
+                          id="firstName"
+                          value={firstName}
+                          onChange={(e) => setFirstName(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName">Efternamn</Label>
+                        <Input
+                          id="lastName"
+                          value={lastName}
+                          onChange={(e) => setLastName(e.target.value)}
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email">E-post</Label>
+                      <Input
+                        id="signup-email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password">Lösenord</Label>
+                      <Input
+                        id="signup-password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <Label>Jag är</Label>
+                      <RadioGroup
+                        value={role}
+                        onValueChange={(value: 'job_seeker' | 'employer') => setRole(value)}
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="job_seeker" id="job_seeker" />
+                          <Label htmlFor="job_seeker">Jobbsökare</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="employer" id="employer" />
+                          <Label htmlFor="employer">Arbetsgivare</Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full" 
+                      disabled={loading}
+                    >
+                      {loading ? 'Registrerar...' : 'Registrera konto'}
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
+              
+              {showResend && email && (
+                <div className="mt-4 p-4 bg-muted rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Mail size={16} />
+                    <span className="text-sm font-medium">E-post inte bekräftad</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Du behöver bekräfta din e-post ({email}) innan du kan logga in.
+                  </p>
+                  <Button 
+                    onClick={handleResendConfirmation}
+                    variant="outline" 
+                    size="sm"
+                    disabled={loading}
+                    className="w-full"
+                  >
+                    {loading ? 'Skickar...' : 'Skicka ny bekräftelsemail'}
+                  </Button>
+                </div>
+              )}
+              
+              {showResetPassword && email && (
+                <div className="mt-4 p-4 bg-muted rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Key size={16} />
+                    <span className="text-sm font-medium">Problem med lösenord?</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Om du har glömt ditt lösenord kan du återställa det här.
+                  </p>
+                  <Button 
+                    onClick={() => resetPassword(email)}
+                    variant="outline" 
+                    size="sm"
+                    disabled={loading}
+                    className="w-full"
+                  >
+                    Återställ lösenord
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
