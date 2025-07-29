@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useEffect } from 'react';
-import { Mail } from 'lucide-react';
+import { Mail, Key } from 'lucide-react';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -19,6 +19,7 @@ const Auth = () => {
   const [role, setRole] = useState<'job_seeker' | 'employer'>('job_seeker');
   const [loading, setLoading] = useState(false);
   const [showResend, setShowResend] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
   
   const { signIn, signUp, user, resendConfirmation } = useAuth();
   const navigate = useNavigate();
@@ -33,23 +34,34 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
+    // Reset states
+    setShowResend(false);
+    setShowResetPassword(false);
+
     try {
       if (isLogin) {
         const result = await signIn(email, password);
-        // Show resend button for email confirmation errors or invalid credentials (which might be due to unconfirmed email)
-        if (result.error && (
-          result.error.code === 'email_not_confirmed' || 
-          result.error.message === 'Invalid login credentials'
-        )) {
-          setShowResend(true);
+        
+        if (result.error) {
+          // Specific handling for different error types
+          if (result.error.code === 'email_not_confirmed') {
+            setShowResend(true);
+          } else if (result.error.message === 'Invalid login credentials') {
+            // For invalid credentials, show reset password option
+            setShowResetPassword(true);
+          }
         }
       } else {
-        await signUp(email, password, {
+        const result = await signUp(email, password, {
           role,
           first_name: firstName,
           last_name: lastName
         });
-        setShowResend(true);
+        
+        // Only show resend if signup was successful (no error)
+        if (!result.error) {
+          setShowResend(true);
+        }
       }
     } catch (error) {
       console.error('Auth error:', error);
@@ -216,6 +228,30 @@ const Auth = () => {
                 className="w-full"
               >
                 {loading ? 'Skickar...' : 'Skicka ny bekräftelsemail'}
+              </Button>
+            </div>
+          )}
+          
+          {showResetPassword && email && (
+            <div className="mt-4 p-4 bg-muted rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Key size={16} />
+                <span className="text-sm font-medium">Problem med lösenord?</span>
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">
+                Om du har glömt ditt lösenord kan du återställa det här.
+              </p>
+              <Button 
+                onClick={() => {
+                  // TODO: Implement password reset functionality
+                  console.log('Reset password for:', email);
+                }}
+                variant="outline" 
+                size="sm"
+                disabled={loading}
+                className="w-full"
+              >
+                Återställ lösenord
               </Button>
             </div>
           )}
