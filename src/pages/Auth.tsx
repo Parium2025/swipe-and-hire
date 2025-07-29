@@ -21,7 +21,7 @@ const Auth = () => {
   const [showResend, setShowResend] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
   
-  const { signIn, signUp, user, resendConfirmation } = useAuth();
+  const { signIn, signUp, user, resendConfirmation, resetPassword } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -242,10 +242,7 @@ const Auth = () => {
                 Om du har glömt ditt lösenord kan du återställa det här.
               </p>
               <Button 
-                onClick={() => {
-                  // TODO: Implement password reset functionality
-                  console.log('Reset password for:', email);
-                }}
+                onClick={() => resetPassword(email)}
                 variant="outline" 
                 size="sm"
                 disabled={loading}

@@ -30,6 +30,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error?: any }>;
   resendConfirmation: (email: string) => Promise<{ error?: any }>;
+  resetPassword: (email: string) => Promise<{ error?: any }>;
   switchRole: (newRole: UserRole) => Promise<{ error?: any }>;
 }
 
@@ -231,6 +232,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth?reset=true`
+      });
+
+      if (error) {
+        toast({
+          title: "Fel vid lösenordsåterställning",
+          description: error.message,
+          variant: "destructive"
+        });
+        return { error };
+      }
+
+      toast({
+        title: "Återställningsmail skickat!",
+        description: "Kontrollera din e-post för instruktioner om lösenordsåterställning."
+      });
+
+      return {};
+    } catch (error) {
+      return { error };
+    }
+  };
+
   const switchRole = async (newRole: UserRole) => {
     if (!user) return { error: 'No user logged in' };
 
@@ -273,6 +300,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut,
     updateProfile,
     resendConfirmation,
+    resetPassword,
     switchRole
   };
 
