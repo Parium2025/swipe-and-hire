@@ -29,13 +29,14 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
-      navigate('/');
-    }
-    
-    // Check if this is a password reset URL
+    // Check if this is a password reset URL first
     const isReset = searchParams.get('reset') === 'true';
     setIsPasswordReset(isReset);
+    
+    // Only redirect logged-in users if it's NOT a password reset
+    if (user && !isReset) {
+      navigate('/');
+    }
   }, [user, navigate, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
