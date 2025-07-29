@@ -7,8 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Separator } from '@/components/ui/separator';
 import { useEffect } from 'react';
-import { Mail, Key } from 'lucide-react';
+import { Mail, Key, Linkedin } from 'lucide-react';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -24,7 +25,7 @@ const Auth = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
-  const { signIn, signUp, user, resendConfirmation, resetPassword, updatePassword } = useAuth();
+  const { signIn, signUp, signInWithLinkedIn, user, resendConfirmation, resetPassword, updatePassword } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -109,6 +110,12 @@ const Auth = () => {
     setLoading(false);
   };
 
+  const handleLinkedInLogin = async () => {
+    setLoading(true);
+    await signInWithLinkedIn();
+    setLoading(false);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
@@ -168,6 +175,30 @@ const Auth = () => {
           ) : (
             // Normal Login/Signup Forms
             <>
+              {/* LinkedIn Login Button */}
+              <div className="mb-6">
+                <Button 
+                  onClick={handleLinkedInLogin}
+                  variant="outline"
+                  className="w-full flex items-center gap-3 py-6 bg-[#0077B5] hover:bg-[#0066A3] text-white border-[#0077B5] hover:border-[#0066A3]"
+                  disabled={loading}
+                >
+                  <Linkedin className="h-5 w-5" />
+                  {loading ? 'Ansluter...' : 'Fortsätt med LinkedIn'}
+                </Button>
+                
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <Separator className="w-full" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      Eller fortsätt med e-post
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               <Tabs value={isLogin ? 'login' : 'signup'} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger 

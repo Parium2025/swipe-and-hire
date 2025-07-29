@@ -27,6 +27,7 @@ interface AuthContextType {
   loading: boolean;
   signUp: (email: string, password: string, userData: { role: UserRole; first_name: string; last_name: string }) => Promise<{ error?: any }>;
   signIn: (email: string, password: string) => Promise<{ error?: any }>;
+  signInWithLinkedIn: () => Promise<{ error?: any }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error?: any }>;
   resendConfirmation: (email: string) => Promise<{ error?: any }>;
@@ -153,6 +154,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Välkommen tillbaka!",
         description: "Du är nu inloggad."
       });
+
+      return {};
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  const signInWithLinkedIn = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'linkedin_oidc',
+        options: {
+          redirectTo: `${window.location.origin}/`
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "LinkedIn-inloggning misslyckades",
+          description: error.message,
+          variant: "destructive"
+        });
+        return { error };
+      }
 
       return {};
     } catch (error) {
@@ -324,6 +349,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     signUp,
     signIn,
+    signInWithLinkedIn,
     signOut,
     updateProfile,
     resendConfirmation,
