@@ -61,7 +61,15 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Parium brand colors
+				'parium-navy': 'hsl(215 100% 12%)',
+				'parium-blue': 'hsl(200 100% 60%)',
+				'parium-light': 'hsl(200 100% 95%)'
+			},
+			backgroundImage: {
+				'gradient-parium': 'var(--gradient-primary)',
+				'gradient-subtle': 'var(--gradient-subtle)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

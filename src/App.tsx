@@ -20,7 +20,7 @@ const App = () => (
         <BrowserRouter>
           <div className="min-h-screen">
             <Header />
-            <main className="pt-14">
+            <main className="pt-16">
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
