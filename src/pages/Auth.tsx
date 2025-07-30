@@ -265,7 +265,15 @@ const Auth = () => {
                           </div>
                           
                           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                            Välkommen till Parium
+                            Välkommen till 
+                            <span className="inline-block ml-1">
+                              <span className="inline-block animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>P</span>
+                              <span className="inline-block animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>a</span>
+                              <span className="inline-block animate-fade-in" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>r</span>
+                              <span className="inline-block animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>i</span>
+                              <span className="inline-block animate-fade-in" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>u</span>
+                              <span className="inline-block animate-fade-in" style={{ animationDelay: '0.6s', animationFillMode: 'both' }}>m</span>
+                            </span>
                           </CardTitle>
                           
                           <CardDescription className="text-muted-foreground/80 text-lg mt-2">
