@@ -8,6 +8,7 @@ import { AppSidebar } from '@/components/AppSidebar';
 import EmployerDashboard from '@/components/EmployerDashboard';
 import JobSwipe from '@/components/JobSwipe';
 import ProfileSetup from '@/components/ProfileSetup';
+import ProfileSelector from '@/components/ProfileSelector';
 import Profile from '@/pages/Profile';
 import SearchJobs from '@/pages/SearchJobs';
 import Subscription from '@/pages/Subscription';
@@ -17,14 +18,18 @@ import { ArrowRightLeft } from 'lucide-react';
 const Index = () => {
   const { user, profile, signOut, loading, switchRole } = useAuth();
   const [switching, setSwitching] = useState(false);
+  const [showProfileSelector, setShowProfileSelector] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
+    } else if (user && profile && !location.pathname.startsWith('/profile') && !location.pathname.startsWith('/search-jobs') && !location.pathname.startsWith('/subscription') && !location.pathname.startsWith('/support') && !location.pathname.startsWith('/settings') && !location.pathname.startsWith('/billing') && !location.pathname.startsWith('/payment')) {
+      // Show profile selector on first visit to main page
+      setShowProfileSelector(true);
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, profile, location.pathname]);
 
   if (loading) {
     return (
@@ -38,6 +43,11 @@ const Index = () => {
 
   if (!user || !profile) {
     return null;
+  }
+
+  // Show profile selector first
+  if (showProfileSelector) {
+    return <ProfileSelector onProfileSelected={() => setShowProfileSelector(false)} />;
   }
 
   // Check if profile needs setup (basic info missing)
