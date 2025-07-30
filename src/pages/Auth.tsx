@@ -127,66 +127,103 @@ const Auth = () => {
       ) : (
         <>
           {/* Hero Section */}
-          <div className="relative min-h-screen lg:min-h-[60vh] bg-gradient-parium">
-            <div 
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-              style={{ backgroundImage: `url(${heroImage})` }}
-            >
-              <div className="absolute inset-0 bg-primary/80"></div>
+          <div className="relative min-h-screen bg-gradient-parium overflow-hidden">
+            {/* Animated background patterns */}
+            <div className="absolute inset-0">
+              <div 
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
+                style={{ backgroundImage: `url(${heroImage})` }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
+              
+              {/* Floating geometric shapes */}
+              <div className="absolute top-20 left-10 w-32 h-32 bg-secondary/10 rounded-full blur-3xl animate-pulse"></div>
+              <div className="absolute bottom-32 right-16 w-48 h-48 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+              <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-secondary/5 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '2s' }}></div>
             </div>
             
-            <div className="relative z-10 min-h-screen lg:min-h-[60vh] flex">
+            <div className="relative z-10 min-h-screen flex">
               {/* Left side - Hero content */}
               <div className="hidden lg:flex lg:w-1/2 flex-col justify-center px-12 text-primary-foreground">
-                <div className="max-w-lg">
-                  <h1 className="text-5xl font-bold mb-6 leading-tight">
-                    Hitta din <span className="text-secondary">perfekta</span> match
+                <div className="max-w-lg animate-fade-in">
+                  {/* Logo with glow effect */}
+                  <div className="mb-8">
+                    <div className="relative">
+                      <div className="absolute inset-0 blur-2xl bg-secondary/30 rounded-full"></div>
+                      <img 
+                        src="/lovable-uploads/3e52da4e-167e-4ebf-acfb-6a70a68cfaef.png" 
+                        alt="Parium" 
+                        className="relative h-16 w-auto"
+                      />
+                    </div>
+                  </div>
+                  
+                  <h1 className="text-6xl font-bold mb-6 leading-tight">
+                    Hitta din 
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent"> perfekta</span> match
                   </h1>
-                  <p className="text-xl mb-8 text-primary-foreground/90">
-                    Parium kopplar samman talanger med företag genom intelligent matchmaking. 
-                    Upptäck karriärmöjligheter som passar just dig.
+                  
+                  <p className="text-xl mb-12 text-primary-foreground/90 leading-relaxed">
+                    Parium revolutionerar rekrytering genom AI-driven matchmaking. 
+                    Upptäck karriärmöjligheter som är skapade för just dig.
                   </p>
                   
-                  <div className="grid grid-cols-1 gap-4 mb-8">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-secondary/20 p-2 rounded-lg">
-                        <Target className="h-5 w-5 text-secondary" />
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-4 group">
+                      <div className="bg-gradient-to-r from-secondary/20 to-accent/20 p-3 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                        <Target className="h-6 w-6 text-secondary" />
                       </div>
-                      <span className="text-primary-foreground/90">Smart matchmaking baserat på dina färdigheter</span>
+                      <span className="text-primary-foreground/90 text-lg">AI-driven precision matching</span>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="bg-secondary/20 p-2 rounded-lg">
-                        <Users className="h-5 w-5 text-secondary" />
+                    <div className="flex items-center gap-4 group">
+                      <div className="bg-gradient-to-r from-secondary/20 to-accent/20 p-3 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                        <Users className="h-6 w-6 text-secondary" />
                       </div>
-                      <span className="text-primary-foreground/90">Direktkontakt med ledande företag</span>
+                      <span className="text-primary-foreground/90 text-lg">Direct access to decision makers</span>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="bg-secondary/20 p-2 rounded-lg">
-                        <Zap className="h-5 w-5 text-secondary" />
+                    <div className="flex items-center gap-4 group">
+                      <div className="bg-gradient-to-r from-secondary/20 to-accent/20 p-3 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                        <Zap className="h-6 w-6 text-secondary" />
                       </div>
-                      <span className="text-primary-foreground/90">Snabb och enkel ansökningsprocess</span>
+                      <span className="text-primary-foreground/90 text-lg">Lightning-fast recruitment process</span>
                     </div>
                   </div>
                 </div>
               </div>
               
-              {/* Right side - Auth form */}
+              {/* Right side - Modern Auth form */}
               <div className="w-full lg:w-1/2 flex items-center justify-center p-4 lg:p-12">
-                <Card className="w-full max-w-md bg-background/95 backdrop-blur-sm border-0 shadow-2xl">
-                  <CardHeader className="text-center pb-4">
-                    <div className="mb-4">
-                      <img 
-                        src="/lovable-uploads/3e52da4e-167e-4ebf-acfb-6a70a68cfaef.png" 
-                        alt="Parium" 
-                        className="h-12 w-auto mx-auto"
-                      />
-                    </div>
-                    <CardTitle className="text-2xl font-bold text-primary">Välkommen till Parium</CardTitle>
-                    <CardDescription className="text-muted-foreground">
-                      {isPasswordReset ? 'Återställ ditt lösenord' : 'Börja din karriärresa idag'}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
+                <div className="w-full max-w-md animate-scale-in">
+                  {/* Glassmorphism card */}
+                  <div className="relative">
+                    {/* Card glow effect */}
+                    <div className="absolute -inset-1 bg-gradient-to-r from-secondary/20 to-accent/20 rounded-3xl blur-lg"></div>
+                    
+                    <Card className="relative bg-background/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-3xl overflow-hidden">
+                      {/* Header with modern gradient */}
+                      <div className="relative bg-gradient-to-r from-secondary/5 to-accent/5 border-b border-white/10">
+                        <CardHeader className="text-center pb-6 pt-8">
+                          <div className="mb-6">
+                            <div className="relative mx-auto w-fit">
+                              <div className="absolute inset-0 blur-xl bg-secondary/20 rounded-full"></div>
+                              <img 
+                                src="/lovable-uploads/3e52da4e-167e-4ebf-acfb-6a70a68cfaef.png" 
+                                alt="Parium" 
+                                className="relative h-14 w-auto"
+                              />
+                            </div>
+                          </div>
+                          
+                          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                            Välkommen till Parium
+                          </CardTitle>
+                          
+                          <CardDescription className="text-muted-foreground/80 text-lg mt-2">
+                            {isPasswordReset ? 'Återställ ditt lösenord' : 'Din framtid väntar på dig'}
+                          </CardDescription>
+                        </CardHeader>
+                      </div>
+                  <CardContent className="p-8 pt-6">
                     {isPasswordReset ? (
                       // Password Reset Form
                       <div className="space-y-4">
@@ -434,7 +471,9 @@ const Auth = () => {
                       </>
                     )}
                   </CardContent>
-                </Card>
+                    </Card>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
