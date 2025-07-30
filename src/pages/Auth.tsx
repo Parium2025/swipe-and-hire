@@ -136,6 +136,25 @@ const Auth = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
               
+              {/* Blinkande ljus - högra hörnet */}
+              <div className="absolute top-10 right-10 w-3 h-3 bg-secondary/40 rounded-full animate-pulse" style={{ animationDuration: '1.5s', animationIterationCount: 'infinite' }}></div>
+              <div className="absolute top-16 right-20 w-2 h-2 bg-accent/30 rounded-full animate-pulse" style={{ animationDuration: '2s', animationIterationCount: 'infinite', animationDelay: '0.5s' }}></div>
+              
+              {/* Blinkande ljus - vänstra hörnet */}
+              <div className="absolute top-12 left-8 w-3 h-3 bg-accent/40 rounded-full animate-pulse" style={{ animationDuration: '1.8s', animationIterationCount: 'infinite' }}></div>
+              <div className="absolute top-6 left-16 w-2 h-2 bg-secondary/30 rounded-full animate-pulse" style={{ animationDuration: '2.2s', animationIterationCount: 'infinite', animationDelay: '0.7s' }}></div>
+              
+              {/* Små stjärnor */}
+              <div className="absolute top-1/4 left-1/3 w-1 h-1 bg-accent/60 rounded-full animate-pulse" style={{ animationDuration: '3s', animationIterationCount: 'infinite' }}>
+                <div className="absolute inset-0 bg-accent/40 rounded-full animate-ping" style={{ animationDuration: '3s', animationIterationCount: 'infinite' }}></div>
+              </div>
+              <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-secondary/60 rounded-full animate-pulse" style={{ animationDuration: '2.5s', animationIterationCount: 'infinite', animationDelay: '1s' }}>
+                <div className="absolute inset-0 bg-secondary/40 rounded-full animate-ping" style={{ animationDuration: '2.5s', animationIterationCount: 'infinite', animationDelay: '1s' }}></div>
+              </div>
+              <div className="absolute bottom-1/4 left-1/4 w-1 h-1 bg-accent/50 rounded-full animate-pulse" style={{ animationDuration: '4s', animationIterationCount: 'infinite', animationDelay: '2s' }}>
+                <div className="absolute inset-0 bg-accent/30 rounded-full animate-ping" style={{ animationDuration: '4s', animationIterationCount: 'infinite', animationDelay: '2s' }}></div>
+              </div>
+              
               {/* Animated floating elements representing mobile interaction */}
               <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce" style={{ animationDuration: '2s', animationIterationCount: 'infinite' }}></div>
               <div className="absolute top-32 left-16 w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDuration: '2.5s', animationIterationCount: 'infinite', animationDelay: '0.5s' }}></div>
