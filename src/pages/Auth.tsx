@@ -265,14 +265,14 @@ const Auth = () => {
                           </div>
                           
                           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                            Välkommen till 
-                            <span className="inline-block ml-1">
-                              <span className="inline-block opacity-0 animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}>P</span>
-                              <span className="inline-block opacity-0 animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>a</span>
-                              <span className="inline-block opacity-0 animate-fade-in" style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}>r</span>
-                              <span className="inline-block opacity-0 animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>i</span>
-                              <span className="inline-block opacity-0 animate-fade-in" style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}>u</span>
-                              <span className="inline-block opacity-0 animate-fade-in" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>m</span>
+                            Välkommen till{' '}
+                            <span className="inline-flex">
+                              <span className="animate-fade-in" style={{ animationDelay: '0s', animationDuration: '0.6s', animationFillMode: 'both' }}>P</span>
+                              <span className="animate-fade-in" style={{ animationDelay: '0.1s', animationDuration: '0.6s', animationFillMode: 'both' }}>a</span>
+                              <span className="animate-fade-in" style={{ animationDelay: '0.2s', animationDuration: '0.6s', animationFillMode: 'both' }}>r</span>
+                              <span className="animate-fade-in" style={{ animationDelay: '0.3s', animationDuration: '0.6s', animationFillMode: 'both' }}>i</span>
+                              <span className="animate-fade-in" style={{ animationDelay: '0.4s', animationDuration: '0.6s', animationFillMode: 'both' }}>u</span>
+                              <span className="animate-fade-in" style={{ animationDelay: '0.5s', animationDuration: '0.6s', animationFillMode: 'both' }}>m</span>
                             </span>
                           </CardTitle>
                           
