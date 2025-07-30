@@ -172,23 +172,23 @@ const Auth = () => {
                   </h1>
                   
                   <div className="mb-8 space-y-4 flex flex-col items-center">
-                    <div className="flex items-center gap-3 text-primary-foreground/90">
+                    <div className="flex items-center text-primary-foreground/90">
                       <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                         <div className="w-2 h-2 bg-secondary rounded-full"></div>
                       </div>
-                      <span className="text-lg">Smart matchmaking</span>
+                      <span className="text-lg ml-3">Smart matchmaking</span>
                     </div>
-                    <div className="flex items-center gap-3 text-primary-foreground/90">
+                    <div className="flex items-center text-primary-foreground/90">
                       <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                         <div className="w-2 h-2 bg-accent rounded-full"></div>
                       </div>
-                      <span className="text-lg">Direktkontakt med företag</span>
+                      <span className="text-lg ml-3">Direktkontakt med företag</span>
                     </div>
-                    <div className="flex items-center gap-3 text-primary-foreground/90">
+                    <div className="flex items-center text-primary-foreground/90">
                       <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                         <div className="w-2 h-2 bg-secondary rounded-full"></div>
                       </div>
-                      <span className="text-lg">Snabb ansökningsprocess</span>
+                      <span className="text-lg ml-3">Snabb ansökningsprocess</span>
                     </div>
                   </div>
                   
@@ -514,23 +514,23 @@ const Auth = () => {
                 Hitta din perfekta jobbmatch
               </h2>
               <div className="space-y-3 flex flex-col items-center max-w-sm mx-auto">
-                <div className="flex items-center gap-3 text-muted-foreground">
+                <div className="flex items-center text-muted-foreground">
                   <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                     <Target className="h-5 w-5 text-secondary" />
                   </div>
-                  <span className="text-sm">Smart matchmaking</span>
+                  <span className="text-sm ml-3">Smart matchmaking</span>
                 </div>
-                <div className="flex items-center gap-3 text-muted-foreground">
+                <div className="flex items-center text-muted-foreground">
                   <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                     <Users className="h-5 w-5 text-secondary" />
                   </div>
-                  <span className="text-sm">Direktkontakt med företag</span>
+                  <span className="text-sm ml-3">Direktkontakt med företag</span>
                 </div>
-                <div className="flex items-center gap-3 text-muted-foreground">
+                <div className="flex items-center text-muted-foreground">
                   <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                     <Zap className="h-5 w-5 text-secondary" />
                   </div>
-                  <span className="text-sm">Snabb ansökningsprocess</span>
+                  <span className="text-sm ml-3">Snabb ansökningsprocess</span>
                 </div>
               </div>
             </div>
