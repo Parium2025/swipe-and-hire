@@ -171,7 +171,7 @@ const Auth = () => {
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent ml-2"> jobbmatch</span>
                   </h1>
                   
-                  <div className="mb-8 space-y-4 flex flex-col items-start">
+                  <div className="mb-8 space-y-4 flex flex-col items-center">
                     <div className="flex items-center gap-3 text-primary-foreground/90">
                       <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                         <div className="w-2 h-2 bg-secondary rounded-full"></div>
@@ -513,7 +513,7 @@ const Auth = () => {
               <h2 className="text-2xl font-bold text-primary mb-4">
                 Hitta din perfekta jobbmatch
               </h2>
-              <div className="space-y-3 flex flex-col items-start max-w-sm mx-auto">
+              <div className="space-y-3 flex flex-col items-center max-w-sm mx-auto">
                 <div className="flex items-center gap-3 text-muted-foreground">
                   <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
                     <Target className="h-5 w-5 text-secondary" />
