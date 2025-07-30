@@ -173,15 +173,21 @@ const Auth = () => {
                   
                   <div className="mb-8 space-y-4 flex flex-col items-center">
                     <div className="flex items-center gap-3 text-primary-foreground/90">
-                      <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                      <div className="w-5 h-5 flex items-center justify-center">
+                        <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                      </div>
                       <span className="text-lg">Smart matchmaking</span>
                     </div>
                     <div className="flex items-center gap-3 text-primary-foreground/90">
-                      <div className="w-2 h-2 bg-accent rounded-full"></div>
+                      <div className="w-5 h-5 flex items-center justify-center">
+                        <div className="w-2 h-2 bg-accent rounded-full"></div>
+                      </div>
                       <span className="text-lg">Direktkontakt med företag</span>
                     </div>
                     <div className="flex items-center gap-3 text-primary-foreground/90">
-                      <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                      <div className="w-5 h-5 flex items-center justify-center">
+                        <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                      </div>
                       <span className="text-lg">Snabb ansökningsprocess</span>
                     </div>
                   </div>
@@ -509,15 +515,21 @@ const Auth = () => {
               </h2>
               <div className="space-y-3 flex flex-col items-center max-w-sm mx-auto">
                 <div className="flex items-center gap-3 text-muted-foreground">
-                  <Target className="h-5 w-5 text-secondary" />
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <Target className="h-5 w-5 text-secondary" />
+                  </div>
                   <span className="text-sm">Smart matchmaking</span>
                 </div>
                 <div className="flex items-center gap-3 text-muted-foreground">
-                  <Users className="h-5 w-5 text-secondary" />
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <Users className="h-5 w-5 text-secondary" />
+                  </div>
                   <span className="text-sm">Direktkontakt med företag</span>
                 </div>
                 <div className="flex items-center gap-3 text-muted-foreground">
-                  <Zap className="h-5 w-5 text-secondary" />
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <Zap className="h-5 w-5 text-secondary" />
+                  </div>
                   <span className="text-sm">Snabb ansökningsprocess</span>
                 </div>
               </div>
