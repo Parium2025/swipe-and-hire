@@ -15,7 +15,6 @@ import AnimatedIntro from '@/components/AnimatedIntro';
 
 const Auth = () => {
   const [showIntro, setShowIntro] = useState(true);
-  const [showWelcome, setShowWelcome] = useState(true);
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -120,95 +119,11 @@ const Auth = () => {
     setLoading(false);
   };
 
-  // Welcome Screen Component
-  const WelcomeScreen = () => (
-    <div className="min-h-screen bg-gradient-parium relative overflow-hidden">
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${heroImage})` }}
-      >
-        <div className="absolute inset-0 bg-primary/90"></div>
-      </div>
-      
-      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center text-center px-4">
-        <div className="max-w-4xl mx-auto">
-          {/* Logo */}
-          <div className="mb-8">
-            <img 
-              src="/lovable-uploads/3e52da4e-167e-4ebf-acfb-6a70a68cfaef.png" 
-              alt="Parium" 
-              className="h-16 md:h-20 w-auto mx-auto"
-            />
-          </div>
-          
-          {/* Main Heading */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-primary-foreground mb-6 leading-tight">
-            Din karriär.
-            <br />
-            <span className="text-secondary">Dina villkor.</span>
-          </h1>
-          
-          {/* Subtitle */}
-          <p className="text-xl md:text-2xl text-primary-foreground/90 mb-12 max-w-3xl mx-auto">
-            Parium förenar talanger med framtidens arbetsplatser. Upptäck möjligheter som matchar exakt vad du söker.
-          </p>
-          
-          {/* Feature highlights */}
-          <div className="grid md:grid-cols-3 gap-8 mb-12 max-w-4xl mx-auto">
-            <div className="bg-background/10 backdrop-blur-sm rounded-2xl p-6 border border-primary-foreground/20">
-              <div className="bg-secondary/20 p-3 rounded-xl w-fit mx-auto mb-4">
-                <Target className="h-8 w-8 text-secondary" />
-              </div>
-              <h3 className="text-lg font-semibold text-primary-foreground mb-2">Smart Matchning</h3>
-              <p className="text-primary-foreground/80 text-sm">AI-driven matchning baserat på dina färdigheter och mål</p>
-            </div>
-            
-            <div className="bg-background/10 backdrop-blur-sm rounded-2xl p-6 border border-primary-foreground/20">
-              <div className="bg-secondary/20 p-3 rounded-xl w-fit mx-auto mb-4">
-                <Users className="h-8 w-8 text-secondary" />
-              </div>
-              <h3 className="text-lg font-semibold text-primary-foreground mb-2">Direktkontakt</h3>
-              <p className="text-primary-foreground/80 text-sm">Kommunicera direkt med arbetsgivare och beslutsfattare</p>
-            </div>
-            
-            <div className="bg-background/10 backdrop-blur-sm rounded-2xl p-6 border border-primary-foreground/20">
-              <div className="bg-secondary/20 p-3 rounded-xl w-fit mx-auto mb-4">
-                <Zap className="h-8 w-8 text-secondary" />
-              </div>
-              <h3 className="text-lg font-semibold text-primary-foreground mb-2">Snabb Process</h3>
-              <p className="text-primary-foreground/80 text-sm">Från matchning till intervju på rekordtid</p>
-            </div>
-          </div>
-          
-          {/* CTA Button */}
-          <Button 
-            onClick={() => setShowWelcome(false)}
-            size="lg"
-            className="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-12 py-6 text-lg font-semibold rounded-full shadow-2xl hover:shadow-secondary/25 transition-all duration-300 transform hover:scale-105"
-          >
-            Kom igång nu
-          </Button>
-          
-          {/* Bottom tagline */}
-          <p className="text-primary-foreground/60 text-sm mt-8">
-            Redan medlem? <button 
-              onClick={() => setShowWelcome(false)} 
-              className="text-secondary hover:text-secondary/80 underline transition-colors"
-            >
-              Logga in här
-            </button>
-          </p>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-background">
       {showIntro ? (
         <AnimatedIntro onComplete={() => setShowIntro(false)} />
-      ) : showWelcome ? (
-        <WelcomeScreen />
       ) : (
         <>
           {/* Hero Section */}
