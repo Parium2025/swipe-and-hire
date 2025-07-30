@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import { useEffect } from 'react';
 import { Mail, Key, Linkedin, Users, Target, Zap } from 'lucide-react';
-import heroImage from '@/assets/hero-auth.jpg';
+import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import AnimatedIntro from '@/components/AnimatedIntro';
 
 const Auth = () => {
@@ -128,18 +128,26 @@ const Auth = () => {
         <>
           {/* Hero Section */}
           <div className="relative min-h-screen bg-gradient-parium overflow-hidden">
-            {/* Animated background patterns */}
+            {/* Modern animated mobile background */}
             <div className="absolute inset-0">
               <div 
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
-                style={{ backgroundImage: `url(${heroImage})` }}
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30 animate-pulse"
+                style={{ backgroundImage: `url(${modernMobileBg})` }}
               />
               <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
               
-              {/* Floating geometric shapes */}
-              <div className="absolute top-20 left-10 w-32 h-32 bg-secondary/10 rounded-full blur-3xl animate-pulse"></div>
-              <div className="absolute bottom-32 right-16 w-48 h-48 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-              <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-secondary/5 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+              {/* Animated floating elements representing mobile interaction */}
+              <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce"></div>
+              <div className="absolute top-32 left-16 w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }}></div>
+              <div className="absolute top-24 left-20 w-3 h-3 bg-secondary/20 rounded-full animate-bounce" style={{ animationDelay: '1s' }}></div>
+              
+              <div className="absolute bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full animate-bounce" style={{ animationDelay: '1.5s' }}></div>
+              <div className="absolute bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full animate-bounce" style={{ animationDelay: '2s' }}></div>
+              <div className="absolute bottom-36 right-24 w-2 h-2 bg-accent/35 rounded-full animate-bounce" style={{ animationDelay: '2.5s' }}></div>
+              
+              {/* Swipe gesture indicators */}
+              <div className="absolute top-1/2 left-1/4 w-8 h-1 bg-gradient-to-r from-transparent via-secondary/40 to-transparent animate-pulse transform rotate-45" style={{ animationDelay: '0.3s' }}></div>
+              <div className="absolute top-1/2 right-1/4 w-8 h-1 bg-gradient-to-r from-transparent via-accent/40 to-transparent animate-pulse transform -rotate-45" style={{ animationDelay: '1.3s' }}></div>
             </div>
             
             <div className="relative z-10 min-h-screen flex">
@@ -287,11 +295,11 @@ const Auth = () => {
                           
                           <div className="relative my-6">
                             <div className="absolute inset-0 flex items-center">
-                              <Separator className="w-full" />
+                              <div className="w-full h-px bg-gradient-to-r from-transparent via-border/50 to-transparent"></div>
                             </div>
-                            <div className="relative flex justify-center text-xs uppercase">
-                              <span className="bg-background px-2 text-muted-foreground">
-                                Eller fortsätt med e-post
+                            <div className="relative flex justify-center">
+                              <span className="bg-background/80 backdrop-blur-sm px-4 py-1 text-xs uppercase text-muted-foreground/70 rounded-full border border-border/20">
+                                Eller med e-post
                               </span>
                             </div>
                           </div>
