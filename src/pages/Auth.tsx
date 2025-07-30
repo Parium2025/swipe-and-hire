@@ -167,8 +167,8 @@ const Auth = () => {
                   </div>
                   
                   <h1 className="text-6xl font-bold mb-6 leading-tight">
-                    Hitta din 
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent"> perfekta</span> jobbmatch
+                    Hitta din perfekta
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent"> jobbmatch</span>
                   </h1>
                   
                   <div className="mb-8 space-y-4">
