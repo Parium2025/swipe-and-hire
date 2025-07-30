@@ -509,15 +509,15 @@ const Auth = () => {
               </h2>
               <div className="space-y-3 flex flex-col items-center max-w-sm mx-auto">
                 <div className="flex items-center gap-3 text-muted-foreground">
-                  <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                  <Target className="h-5 w-5 text-secondary" />
                   <span className="text-sm">Smart matchmaking</span>
                 </div>
                 <div className="flex items-center gap-3 text-muted-foreground">
-                  <div className="w-2 h-2 bg-accent rounded-full"></div>
+                  <Users className="h-5 w-5 text-secondary" />
                   <span className="text-sm">Direktkontakt med företag</span>
                 </div>
                 <div className="flex items-center gap-3 text-muted-foreground">
-                  <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                  <Zap className="h-5 w-5 text-secondary" />
                   <span className="text-sm">Snabb ansökningsprocess</span>
                 </div>
               </div>
