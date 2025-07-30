@@ -168,8 +168,23 @@ const Auth = () => {
                   
                   <h1 className="text-6xl font-bold mb-6 leading-tight">
                     Hitta din 
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent"> perfekta</span> match
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent"> perfekta</span> jobbmatch
                   </h1>
+                  
+                  <div className="mb-8 space-y-4">
+                    <div className="flex items-center gap-3 text-primary-foreground/90">
+                      <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                      <span className="text-lg">Smart matchmaking</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-primary-foreground/90">
+                      <div className="w-2 h-2 bg-accent rounded-full"></div>
+                      <span className="text-lg">Direktkontakt med företag</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-primary-foreground/90">
+                      <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                      <span className="text-lg">Snabb ansökningsprocess</span>
+                    </div>
+                  </div>
                   
                   <p className="text-xl mb-12 text-primary-foreground/90 leading-relaxed">
                     Parium revolutionerar rekrytering genom AI-driven matchmaking. 
