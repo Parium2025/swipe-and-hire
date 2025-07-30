@@ -58,12 +58,12 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
             : 'scale-100 opacity-100 translate-y-0'
         }`}>
           <h1 className="text-3xl md:text-4xl font-bold text-primary-foreground text-center tracking-wider">
-            <span className="inline-block animate-fade-in">P</span>
-            <span className="inline-block animate-fade-in" style={{ animationDelay: '0.1s' }}>A</span>
-            <span className="inline-block animate-fade-in" style={{ animationDelay: '0.2s' }}>R</span>
-            <span className="inline-block animate-fade-in" style={{ animationDelay: '0.3s' }}>I</span>
-            <span className="inline-block animate-fade-in" style={{ animationDelay: '0.4s' }}>U</span>
-            <span className="inline-block animate-fade-in" style={{ animationDelay: '0.5s' }}>M</span>
+            <span className="inline-block opacity-0 animate-fade-in" style={{ animationDelay: '1s', animationDuration: '0.8s', animationFillMode: 'forwards' }}>P</span>
+            <span className="inline-block opacity-0 animate-fade-in" style={{ animationDelay: '1.2s', animationDuration: '0.8s', animationFillMode: 'forwards' }}>A</span>
+            <span className="inline-block opacity-0 animate-fade-in" style={{ animationDelay: '1.4s', animationDuration: '0.8s', animationFillMode: 'forwards' }}>R</span>
+            <span className="inline-block opacity-0 animate-fade-in" style={{ animationDelay: '1.6s', animationDuration: '0.8s', animationFillMode: 'forwards' }}>I</span>
+            <span className="inline-block opacity-0 animate-fade-in" style={{ animationDelay: '1.8s', animationDuration: '0.8s', animationFillMode: 'forwards' }}>U</span>
+            <span className="inline-block opacity-0 animate-fade-in" style={{ animationDelay: '2.0s', animationDuration: '0.8s', animationFillMode: 'forwards' }}>M</span>
           </h1>
           
           {/* Subtitle */}
