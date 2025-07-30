@@ -137,17 +137,17 @@ const Auth = () => {
               <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
               
               {/* Animated floating elements representing mobile interaction */}
-              <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce opacity-0 animate-fade-in"></div>
-              <div className="absolute top-32 left-16 w-2 h-2 bg-accent/40 rounded-full animate-bounce opacity-0 animate-fade-in" style={{ animationDelay: '0.1s' }}></div>
-              <div className="absolute top-24 left-20 w-3 h-3 bg-secondary/20 rounded-full animate-bounce opacity-0 animate-fade-in" style={{ animationDelay: '0.2s' }}></div>
+              <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce" style={{ animationDuration: '2s', animationIterationCount: 'infinite' }}></div>
+              <div className="absolute top-32 left-16 w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDuration: '2.5s', animationIterationCount: 'infinite', animationDelay: '0.5s' }}></div>
+              <div className="absolute top-24 left-20 w-3 h-3 bg-secondary/20 rounded-full animate-bounce" style={{ animationDuration: '3s', animationIterationCount: 'infinite', animationDelay: '1s' }}></div>
               
-              <div className="absolute bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full animate-bounce opacity-0 animate-fade-in" style={{ animationDelay: '0.3s' }}></div>
-              <div className="absolute bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full animate-bounce opacity-0 animate-fade-in" style={{ animationDelay: '0.4s' }}></div>
-              <div className="absolute bottom-36 right-24 w-2 h-2 bg-accent/35 rounded-full animate-bounce opacity-0 animate-fade-in" style={{ animationDelay: '0.5s' }}></div>
+              <div className="absolute bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full animate-bounce" style={{ animationDuration: '2.2s', animationIterationCount: 'infinite', animationDelay: '1.5s' }}></div>
+              <div className="absolute bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full animate-bounce" style={{ animationDuration: '2.8s', animationIterationCount: 'infinite', animationDelay: '2s' }}></div>
+              <div className="absolute bottom-36 right-24 w-2 h-2 bg-accent/35 rounded-full animate-bounce" style={{ animationDuration: '2.3s', animationIterationCount: 'infinite', animationDelay: '2.5s' }}></div>
               
               {/* Swipe gesture indicators */}
-              <div className="absolute top-1/2 left-1/4 w-8 h-1 bg-gradient-to-r from-transparent via-secondary/40 to-transparent animate-pulse transform rotate-45 opacity-0 animate-fade-in" style={{ animationDelay: '0.6s' }}></div>
-              <div className="absolute top-1/2 right-1/4 w-8 h-1 bg-gradient-to-r from-transparent via-accent/40 to-transparent animate-pulse transform -rotate-45 opacity-0 animate-fade-in" style={{ animationDelay: '0.7s' }}></div>
+              <div className="absolute top-1/2 left-1/4 w-8 h-1 bg-gradient-to-r from-transparent via-secondary/40 to-transparent animate-pulse transform rotate-45" style={{ animationDuration: '3s', animationIterationCount: 'infinite', animationDelay: '0.3s' }}></div>
+              <div className="absolute top-1/2 right-1/4 w-8 h-1 bg-gradient-to-r from-transparent via-accent/40 to-transparent animate-pulse transform -rotate-45" style={{ animationDuration: '4s', animationIterationCount: 'infinite', animationDelay: '1.3s' }}></div>
             </div>
             
             <div className="relative z-10 min-h-screen flex">
