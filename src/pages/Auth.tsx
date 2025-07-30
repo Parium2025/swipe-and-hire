@@ -171,7 +171,7 @@ const Auth = () => {
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent ml-2"> jobbmatch</span>
                   </h1>
                   
-                  <div className="mb-8 space-y-4">
+                  <div className="mb-8 space-y-4 flex flex-col items-center">
                     <div className="flex items-center gap-3 text-primary-foreground/90">
                       <div className="w-2 h-2 bg-secondary rounded-full"></div>
                       <span className="text-lg">Smart matchmaking</span>
@@ -507,16 +507,16 @@ const Auth = () => {
               <h2 className="text-2xl font-bold text-primary mb-4">
                 Hitta din perfekta jobbmatch
               </h2>
-              <div className="grid grid-cols-1 gap-3 max-w-sm mx-auto">
-                <div className="flex items-center gap-3">
+              <div className="grid grid-cols-1 gap-3 max-w-sm mx-auto text-center">
+                <div className="flex items-center justify-center gap-3">
                   <Target className="h-5 w-5 text-secondary" />
                   <span className="text-sm text-muted-foreground">Smart matchmaking</span>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center gap-3">
                   <Users className="h-5 w-5 text-secondary" />
                   <span className="text-sm text-muted-foreground">Direktkontakt med företag</span>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center gap-3">
                   <Zap className="h-5 w-5 text-secondary" />
                   <span className="text-sm text-muted-foreground">Snabb ansökningsprocess</span>
                 </div>
