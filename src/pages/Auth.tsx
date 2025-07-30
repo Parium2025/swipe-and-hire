@@ -171,24 +171,26 @@ const Auth = () => {
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent ml-2"> jobbmatch</span>
                   </h1>
                   
-                  <div className="mb-8 space-y-4 flex flex-col items-center">
-                    <div className="flex items-center text-primary-foreground/90">
-                      <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
-                        <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                  <div className="mb-8 flex justify-center">
+                    <div className="space-y-4">
+                      <div className="flex items-center text-primary-foreground/90">
+                        <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                          <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                        </div>
+                        <span className="text-lg ml-3">Smart matchmaking</span>
                       </div>
-                      <span className="text-lg ml-3">Smart matchmaking</span>
-                    </div>
-                    <div className="flex items-center text-primary-foreground/90">
-                      <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
-                        <div className="w-2 h-2 bg-accent rounded-full"></div>
+                      <div className="flex items-center text-primary-foreground/90">
+                        <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                          <div className="w-2 h-2 bg-accent rounded-full"></div>
+                        </div>
+                        <span className="text-lg ml-3">Direktkontakt med företag</span>
                       </div>
-                      <span className="text-lg ml-3">Direktkontakt med företag</span>
-                    </div>
-                    <div className="flex items-center text-primary-foreground/90">
-                      <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
-                        <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                      <div className="flex items-center text-primary-foreground/90">
+                        <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                          <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                        </div>
+                        <span className="text-lg ml-3">Snabb ansökningsprocess</span>
                       </div>
-                      <span className="text-lg ml-3">Snabb ansökningsprocess</span>
                     </div>
                   </div>
                   
@@ -513,24 +515,26 @@ const Auth = () => {
               <h2 className="text-2xl font-bold text-primary mb-4">
                 Hitta din perfekta jobbmatch
               </h2>
-              <div className="space-y-3 flex flex-col items-center max-w-sm mx-auto">
-                <div className="flex items-center text-muted-foreground">
-                  <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
-                    <Target className="h-5 w-5 text-secondary" />
+              <div className="flex justify-center">
+                <div className="space-y-3">
+                  <div className="flex items-center text-muted-foreground">
+                    <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                      <Target className="h-5 w-5 text-secondary" />
+                    </div>
+                    <span className="text-sm ml-3">Smart matchmaking</span>
                   </div>
-                  <span className="text-sm ml-3">Smart matchmaking</span>
-                </div>
-                <div className="flex items-center text-muted-foreground">
-                  <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
-                    <Users className="h-5 w-5 text-secondary" />
+                  <div className="flex items-center text-muted-foreground">
+                    <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                      <Users className="h-5 w-5 text-secondary" />
+                    </div>
+                    <span className="text-sm ml-3">Direktkontakt med företag</span>
                   </div>
-                  <span className="text-sm ml-3">Direktkontakt med företag</span>
-                </div>
-                <div className="flex items-center text-muted-foreground">
-                  <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
-                    <Zap className="h-5 w-5 text-secondary" />
+                  <div className="flex items-center text-muted-foreground">
+                    <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                      <Zap className="h-5 w-5 text-secondary" />
+                    </div>
+                    <span className="text-sm ml-3">Snabb ansökningsprocess</span>
                   </div>
-                  <span className="text-sm ml-3">Snabb ansökningsprocess</span>
                 </div>
               </div>
             </div>
