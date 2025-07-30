@@ -11,8 +11,10 @@ import { Separator } from '@/components/ui/separator';
 import { useEffect } from 'react';
 import { Mail, Key, Linkedin, Users, Target, Zap } from 'lucide-react';
 import heroImage from '@/assets/hero-auth.jpg';
+import AnimatedIntro from '@/components/AnimatedIntro';
 
 const Auth = () => {
+  const [showIntro, setShowIntro] = useState(true);
   const [showWelcome, setShowWelcome] = useState(true);
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -203,7 +205,9 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {showWelcome ? (
+      {showIntro ? (
+        <AnimatedIntro onComplete={() => setShowIntro(false)} />
+      ) : showWelcome ? (
         <WelcomeScreen />
       ) : (
         <>
