@@ -14,7 +14,6 @@ import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import AnimatedIntro from '@/components/AnimatedIntro';
 
 const Auth = () => {
-  const [showIntro, setShowIntro] = useState(true);
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -150,12 +149,8 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {showIntro ? (
-        <AnimatedIntro onComplete={() => setShowIntro(false)} />
-      ) : (
-        <>
-          {/* Hero Section */}
-          <div className="relative min-h-screen bg-gradient-parium overflow-hidden">
+      {/* Hero Section */}
+      <div className="relative min-h-screen bg-gradient-parium overflow-hidden">
             {/* Modern animated mobile background */}
             <div className="absolute inset-0">
               <div 
@@ -704,12 +699,10 @@ const Auth = () => {
                     </div>
                     <span className="text-sm ml-3">Snabb ansökningsprocess</span>
                   </div>
-                </div>
-              </div>
             </div>
           </div>
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 };
