@@ -137,13 +137,15 @@ const Auth = () => {
   const handleLinkedInLogin = async () => {
     console.log('🔥 LinkedIn login attempt started');
     setLoading(true);
+    
     try {
-      const result = await signInWithLinkedIn();
-      console.log('🔥 LinkedIn login result:', result);
+      // Force full browser redirect instead of popup
+      const redirectUrl = `${window.location.origin}/auth`;
+      window.location.href = `https://rvtsfnaqlnggfkoqygbm.supabase.co/auth/v1/authorize?provider=linkedin_oidc&redirect_to=${encodeURIComponent(redirectUrl)}`;
     } catch (error) {
       console.log('🔥 LinkedIn login error:', error);
+      setLoading(false);
     }
-    setLoading(false);
   };
 
 
