@@ -48,11 +48,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+    let sessionInitialized = false;
 
     // Handle initial session check first
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
+      if (!mounted || sessionInitialized) return;
       
+      sessionInitialized = true;
       console.log('Initial session check:', session?.user?.id);
       
       setSession(session);
@@ -74,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         console.log('Auth state change:', event, session?.user?.id);
         
-        // Skip INITIAL_SESSION as we already handled it above
+        // Skip ALL INITIAL_SESSION events to prevent duplicates
         if (event === 'INITIAL_SESSION') {
           return;
         }
@@ -99,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscription.unsubscribe();
     };
   }, []);
+
 
   const fetchProfile = async (userId: string) => {
     try {
