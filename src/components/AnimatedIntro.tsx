@@ -13,11 +13,11 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
       setPhase('logo');
     }, 200);
 
-    // Complete after logo animation - much faster
+    // Complete after all letter animations finish (last letter starts at 2.0s + 0.8s duration)
     const completeTimer = setTimeout(() => {
       setPhase('complete');
       onComplete();
-    }, 1500); // Reduced to 1.5 seconds for better UX
+    }, 3000); // Back to 3s to show all letters properly
 
     return () => {
       clearTimeout(logoTimer);
