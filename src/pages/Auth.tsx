@@ -14,6 +14,10 @@ import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import AnimatedIntro from '@/components/AnimatedIntro';
 
 const Auth = () => {
+  // Only show intro on first visit
+  const [showIntro, setShowIntro] = useState(() => {
+    return !localStorage.getItem('parium-intro-seen');
+  });
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -149,8 +153,15 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="relative min-h-screen bg-gradient-parium overflow-hidden">
+      {showIntro ? (
+        <AnimatedIntro onComplete={() => {
+          setShowIntro(false);
+          localStorage.setItem('parium-intro-seen', 'true');
+        }} />
+      ) : (
+        <>
+          {/* Hero Section */}
+          <div className="relative min-h-screen bg-gradient-parium overflow-hidden">
             {/* Modern animated mobile background */}
             <div className="absolute inset-0">
               <div 
@@ -703,6 +714,8 @@ const Auth = () => {
           </div>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 };
