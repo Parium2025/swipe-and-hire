@@ -11,13 +11,13 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
     // Start with logo animation
     const logoTimer = setTimeout(() => {
       setPhase('logo');
-    }, 300);
+    }, 200);
 
-    // Complete after logo animation
+    // Complete after logo animation - much faster
     const completeTimer = setTimeout(() => {
       setPhase('complete');
       onComplete();
-    }, 3000); // 3 seconds total
+    }, 1500); // Reduced to 1.5 seconds for better UX
 
     return () => {
       clearTimeout(logoTimer);
