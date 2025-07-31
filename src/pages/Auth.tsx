@@ -14,9 +14,9 @@ import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import AnimatedIntro from '@/components/AnimatedIntro';
 
 const Auth = () => {
-  // Only show intro on first visit
+  // Show intro each time app is opened, but not when navigating within session
   const [showIntro, setShowIntro] = useState(() => {
-    return !localStorage.getItem('parium-intro-seen');
+    return !sessionStorage.getItem('parium-intro-seen');
   });
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -156,7 +156,7 @@ const Auth = () => {
       {showIntro ? (
         <AnimatedIntro onComplete={() => {
           setShowIntro(false);
-          localStorage.setItem('parium-intro-seen', 'true');
+          sessionStorage.setItem('parium-intro-seen', 'true');
         }} />
       ) : (
         <>
