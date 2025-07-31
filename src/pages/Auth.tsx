@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import { useEffect } from 'react';
-import { Mail, Key, Linkedin, Users, Target, Zap } from 'lucide-react';
+import { Mail, Key, Linkedin, Users, Target, Zap, Eye, EyeOff, User, Building2, Phone } from 'lucide-react';
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import AnimatedIntro from '@/components/AnimatedIntro';
 
@@ -20,7 +20,12 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [company, setCompany] = useState('');
+  const [jobTitle, setJobTitle] = useState('');
+  const [phone, setPhone] = useState('');
   const [role, setRole] = useState<'job_seeker' | 'employer'>('job_seeker');
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(0);
   const [loading, setLoading] = useState(false);
   const [showResend, setShowResend] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
@@ -29,6 +34,22 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   
   const { signIn, signUp, signInWithLinkedIn, user, resendConfirmation, resetPassword, updatePassword } = useAuth();
+  
+  // Password strength calculation
+  const calculatePasswordStrength = (password: string) => {
+    let strength = 0;
+    if (password.length >= 8) strength += 1;
+    if (/[A-Z]/.test(password)) strength += 1;
+    if (/[a-z]/.test(password)) strength += 1;
+    if (/[0-9]/.test(password)) strength += 1;
+    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+    return strength;
+  };
+
+  const handlePasswordChange = (newPassword: string) => {
+    setPassword(newPassword);
+    setPasswordStrength(calculatePasswordStrength(newPassword));
+  };
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -399,16 +420,20 @@ const Auth = () => {
                             </form>
                           </TabsContent>
                           
-                          <TabsContent value="signup">
-                            <form onSubmit={handleSubmit} className="space-y-4">
+                           <TabsContent value="signup">
+                            <form onSubmit={handleSubmit} className="space-y-5">
                               <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                  <Label htmlFor="firstName">Förnamn</Label>
+                                  <Label htmlFor="firstName" className="flex items-center gap-2">
+                                    <User className="h-4 w-4 text-muted-foreground" />
+                                    Förnamn
+                                  </Label>
                                   <Input
                                     id="firstName"
                                     value={firstName}
                                     onChange={(e) => setFirstName(e.target.value)}
                                     required
+                                    placeholder="Ange förnamn"
                                     className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                                   />
                                 </div>
@@ -419,34 +444,147 @@ const Auth = () => {
                                     value={lastName}
                                     onChange={(e) => setLastName(e.target.value)}
                                     required
+                                    placeholder="Ange efternamn"
                                     className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                                   />
                                 </div>
                               </div>
                               
                               <div className="space-y-2">
-                                <Label htmlFor="signup-email">E-post</Label>
+                                <Label htmlFor="signup-email" className="flex items-center gap-2">
+                                  <Mail className="h-4 w-4 text-muted-foreground" />
+                                  E-post
+                                </Label>
                                 <Input
                                   id="signup-email"
                                   type="email"
                                   value={email}
                                   onChange={(e) => setEmail(e.target.value)}
                                   required
+                                  placeholder="namn@företag.se"
                                   className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                                 />
                               </div>
                               
                               <div className="space-y-2">
-                                <Label htmlFor="signup-password">Lösenord</Label>
+                                <Label htmlFor="phone" className="flex items-center gap-2">
+                                  <Phone className="h-4 w-4 text-muted-foreground" />
+                                  Telefonnummer
+                                </Label>
                                 <Input
-                                  id="signup-password"
-                                  type="password"
-                                  value={password}
-                                  onChange={(e) => setPassword(e.target.value)}
-                                  required
-                                  minLength={6}
+                                  id="phone"
+                                  type="tel"
+                                  value={phone}
+                                  onChange={(e) => setPhone(e.target.value)}
+                                  placeholder="070-123 45 67"
                                   className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                                 />
+                              </div>
+                              
+                              {/* Conditional professional fields based on role */}
+                              {role === 'employer' && (
+                                <div className="space-y-4 p-4 bg-accent/30 rounded-lg border border-border/20">
+                                  <div className="space-y-2">
+                                    <Label htmlFor="company" className="flex items-center gap-2">
+                                      <Building2 className="h-4 w-4 text-muted-foreground" />
+                                      Företag
+                                    </Label>
+                                    <Input
+                                      id="company"
+                                      value={company}
+                                      onChange={(e) => setCompany(e.target.value)}
+                                      required={role === 'employer'}
+                                      placeholder="Företagsnamn AB"
+                                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label htmlFor="jobTitle">Titel/Position</Label>
+                                    <Input
+                                      id="jobTitle"
+                                      value={jobTitle}
+                                      onChange={(e) => setJobTitle(e.target.value)}
+                                      placeholder="VD, HR-chef, Rekryterare..."
+                                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {role === 'job_seeker' && (
+                                <div className="space-y-2">
+                                  <Label htmlFor="jobTitle" className="flex items-center gap-2">
+                                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                                    Nuvarande titel (valfritt)
+                                  </Label>
+                                  <Input
+                                    id="jobTitle"
+                                    value={jobTitle}
+                                    onChange={(e) => setJobTitle(e.target.value)}
+                                    placeholder="Utvecklare, Designer, Säljare..."
+                                    className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                                  />
+                                </div>
+                              )}
+                              
+                              <div className="space-y-2">
+                                <Label htmlFor="signup-password" className="flex items-center gap-2">
+                                  <Key className="h-4 w-4 text-muted-foreground" />
+                                  Lösenord
+                                </Label>
+                                <div className="relative">
+                                  <Input
+                                    id="signup-password"
+                                    type={showPassword ? "text" : "password"}
+                                    value={password}
+                                    onChange={(e) => handlePasswordChange(e.target.value)}
+                                    required
+                                    minLength={8}
+                                    placeholder="Minst 8 tecken"
+                                    className="transition-all duration-200 focus:ring-2 focus:ring-primary/20 pr-10"
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                  >
+                                    {showPassword ? (
+                                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                    ) : (
+                                      <Eye className="h-4 w-4 text-muted-foreground" />
+                                    )}
+                                  </Button>
+                                </div>
+                                
+                                {/* Password strength indicator */}
+                                {password && (
+                                  <div className="space-y-2">
+                                    <div className="flex gap-1">
+                                      {[1, 2, 3, 4, 5].map((level) => (
+                                        <div
+                                          key={level}
+                                          className={`h-1 flex-1 rounded-full transition-colors ${
+                                            passwordStrength >= level
+                                              ? passwordStrength <= 2
+                                                ? 'bg-destructive'
+                                                : passwordStrength <= 3
+                                                ? 'bg-yellow-500'
+                                                : 'bg-green-500'
+                                              : 'bg-muted'
+                                          }`}
+                                        />
+                                      ))}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                      {passwordStrength <= 2 && 'Svagt lösenord'}
+                                      {passwordStrength === 3 && 'Okej lösenord'}
+                                      {passwordStrength === 4 && 'Starkt lösenord'}
+                                      {passwordStrength === 5 && 'Mycket starkt lösenord'}
+                                    </p>
+                                  </div>
+                                )}
                               </div>
                               
                               <div className="space-y-3">
