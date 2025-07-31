@@ -27,7 +27,7 @@ interface AuthContextType {
   loading: boolean;
   signUp: (email: string, password: string, userData: { role: UserRole; first_name: string; last_name: string }) => Promise<{ error?: any }>;
   signIn: (email: string, password: string) => Promise<{ error?: any }>;
-  signInWithLinkedIn: () => Promise<{ error?: any }>;
+  signInWithGoogle: () => Promise<{ error?: any }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error?: any }>;
   resendConfirmation: (email: string) => Promise<{ error?: any }>;
@@ -161,32 +161,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signInWithLinkedIn = async () => {
+  const signInWithGoogle = async () => {
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'linkedin_oidc',
+        provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/`,
-          skipBrowserRedirect: true
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         }
       });
-      
-      // If skipBrowserRedirect is true, manually redirect
-      if (data?.url) {
-        window.location.href = data.url;
-        return { data, error: null };
-      }
 
       if (error) {
         toast({
-          title: "LinkedIn-inloggning misslyckades",
+          title: "Google-inloggning misslyckades",
           description: error.message,
           variant: "destructive"
         });
         return { error };
       }
 
-      return {};
+      return { data };
     } catch (error) {
       return { error };
     }
@@ -356,7 +353,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     signUp,
     signIn,
-    signInWithLinkedIn,
+    signInWithGoogle,
     signOut,
     updateProfile,
     resendConfirmation,
