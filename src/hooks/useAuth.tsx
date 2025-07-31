@@ -47,15 +47,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
-    let initialCheckDone = false;
+    let mounted = true;
 
-    // Set up auth state listener
+    // Handle initial session check first
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      
+      console.log('Initial session check:', session?.user?.id);
+      
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        fetchProfile(session.user.id).then(() => {
+          if (mounted) setLoading(false);
+        });
+      } else {
+        setLoading(false);
+      }
+    });
+
+    // Set up auth state listener after initial check
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
+        if (!mounted) return;
+        
         console.log('Auth state change:', event, session?.user?.id);
         
-        // Skip the first INITIAL_SESSION event as we handle it with getSession
-        if (event === 'INITIAL_SESSION' && !initialCheckDone) {
+        // Skip INITIAL_SESSION as we already handled it above
+        if (event === 'INITIAL_SESSION') {
           return;
         }
         
@@ -63,33 +83,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          setTimeout(async () => {
-            await fetchProfile(session.user.id);
+          setTimeout(() => {
+            if (mounted) {
+              fetchProfile(session.user.id);
+            }
           }, 0);
         } else {
           setProfile(null);
         }
-        
-        setLoading(false);
       }
     );
 
-    // Handle initial session check
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session check:', session?.user?.id);
-      initialCheckDone = true;
-      
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchProfile = async (userId: string) => {
