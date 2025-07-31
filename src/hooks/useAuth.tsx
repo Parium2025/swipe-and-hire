@@ -27,7 +27,8 @@ interface AuthContextType {
   loading: boolean;
   signUp: (email: string, password: string, userData: { role: UserRole; first_name: string; last_name: string }) => Promise<{ error?: any }>;
   signIn: (email: string, password: string) => Promise<{ error?: any }>;
-  signInWithGoogle: () => Promise<{ error?: any }>;
+  signInWithPhone: (phone: string) => Promise<{ error?: any }>;
+  verifyOtp: (phone: string, otp: string) => Promise<{ error?: any }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error?: any }>;
   resendConfirmation: (email: string) => Promise<{ error?: any }>;
@@ -172,30 +173,69 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signInWithGoogle = async () => {
+  const signInWithPhone = async (phone: string) => {
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+      const { data, error } = await supabase.auth.signInWithOtp({
+        phone: phone,
         options: {
-          redirectTo: 'https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/',
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          }
+          channel: 'sms'
         }
       });
 
       if (error) {
         toast({
-          title: "Google-inloggning misslyckades",
+          title: "SMS-fel",
           description: error.message,
           variant: "destructive"
         });
         return { error };
       }
 
+      toast({
+        title: "SMS skickad",
+        description: "Kontrollera din telefon för verifieringskod"
+      });
+
       return { data };
     } catch (error) {
+      toast({
+        title: "SMS-fel",
+        description: "Kunde inte skicka SMS",
+        variant: "destructive"
+      });
+      return { error };
+    }
+  };
+
+  const verifyOtp = async (phone: string, otp: string) => {
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        phone,
+        token: otp,
+        type: 'sms'
+      });
+
+      if (error) {
+        toast({
+          title: "Verifieringsfel",
+          description: error.message,
+          variant: "destructive"
+        });
+        return { error };
+      }
+
+      toast({
+        title: "Inloggad!",
+        description: "Du är nu inloggad via telefon"
+      });
+
+      return { data };
+    } catch (error) {
+      toast({
+        title: "Verifieringsfel",
+        description: "Fel kod eller utgången kod",
+        variant: "destructive"
+      });
       return { error };
     }
   };
@@ -364,7 +404,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     signUp,
     signIn,
-    signInWithGoogle,
+    signInWithPhone,
+    verifyOtp,
     signOut,
     updateProfile,
     resendConfirmation,
