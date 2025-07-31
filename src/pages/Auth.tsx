@@ -135,8 +135,14 @@ const Auth = () => {
   };
 
   const handleLinkedInLogin = async () => {
+    console.log('🔥 LinkedIn login attempt started');
     setLoading(true);
-    await signInWithLinkedIn();
+    try {
+      const result = await signInWithLinkedIn();
+      console.log('🔥 LinkedIn login result:', result);
+    } catch (error) {
+      console.log('🔥 LinkedIn login error:', error);
+    }
     setLoading(false);
   };
 
