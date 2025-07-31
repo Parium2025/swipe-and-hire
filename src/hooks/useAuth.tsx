@@ -163,13 +163,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithLinkedIn = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'linkedin_oidc',
         options: {
           redirectTo: `${window.location.origin}/`,
-          skipBrowserRedirect: false
+          skipBrowserRedirect: true
         }
       });
+      
+      // If skipBrowserRedirect is true, manually redirect
+      if (data?.url) {
+        window.location.href = data.url;
+        return { data, error: null };
+      }
 
       if (error) {
         toast({
