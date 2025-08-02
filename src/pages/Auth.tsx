@@ -39,17 +39,29 @@ const Auth = () => {
   
   const { signIn, signUp, user, resendConfirmation, resetPassword, updatePassword } = useAuth();
   
-  // Popular email domains for suggestions
+  // Popular email domains for suggestions (Swedish and international)
   const popularDomains = [
     '@gmail.com',
+    '@gmail.se',
     '@hotmail.com', 
     '@hotmail.se',
     '@outlook.com',
+    '@outlook.se',
     '@yahoo.com',
+    '@yahoo.se',
     '@icloud.com',
     '@live.se',
+    '@live.com',
     '@telia.com',
-    '@spray.se'
+    '@spray.se',
+    '@bredband2.com',
+    '@comhem.se',
+    '@me.com',
+    '@msn.com',
+    '@aol.com',
+    '@protonmail.com',
+    '@yandex.com',
+    '@mail.ru'
   ];
 
   // Handle email input with suggestions
@@ -419,7 +431,14 @@ const Auth = () => {
                                   value={email}
                                   onChange={(e) => handleEmailChange(e.target.value)}
                                   onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 200)}
-                                  onFocus={() => email.includes('@') && !email.includes('.') && setShowEmailSuggestions(true)}
+                                  onFocus={() => {
+                                    if (email.includes('@')) {
+                                      const [, domainPart] = email.split('@');
+                                      if (domainPart.length > 0 && !email.includes('.')) {
+                                        setShowEmailSuggestions(true);
+                                      }
+                                    }
+                                  }}
                                   required
                                   placeholder="din.email@gmail.com"
                                   className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
@@ -526,7 +545,14 @@ const Auth = () => {
                                   value={email}
                                   onChange={(e) => handleEmailChange(e.target.value)}
                                   onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 200)}
-                                  onFocus={() => email.includes('@') && !email.includes('.') && setShowEmailSuggestions(true)}
+                                  onFocus={() => {
+                                    if (email.includes('@')) {
+                                      const [, domainPart] = email.split('@');
+                                      if (domainPart.length > 0 && !email.includes('.')) {
+                                        setShowEmailSuggestions(true);
+                                      }
+                                    }
+                                  }}
                                   required
                                   placeholder="din.email@gmail.com"
                                   className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
