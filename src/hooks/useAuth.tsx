@@ -146,8 +146,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       toast({
         title: "Registrering lyckad",
-        description: "Du kan nu logga in direkt (e-postbekräftelse är inaktiverad för utveckling)."
+        description: "Kontrollera din e-post för att bekräfta ditt konto."
       });
+
+      // Send custom confirmation email
+      try {
+        const redirectUrl = `${window.location.origin}/`;
+        await supabase.functions.invoke('send-confirmation-email', {
+          body: {
+            email,
+            confirmationUrl: redirectUrl,
+            type: 'signup'
+          }
+        });
+      } catch (emailError) {
+        console.log('Custom email send failed, falling back to Supabase default');
+      }
 
       return {};
     } catch (error) {
@@ -343,6 +357,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Återställningsmail skickat!",
         description: "Kontrollera din e-post för instruktioner om lösenordsåterställning."
       });
+
+      // Send custom reset email
+      try {
+        const resetUrl = `${window.location.origin}/auth?reset=true`;
+        await supabase.functions.invoke('send-confirmation-email', {
+          body: {
+            email,
+            confirmationUrl: resetUrl,
+            type: 'reset'
+          }
+        });
+      } catch (emailError) {
+        console.log('Custom email send failed, falling back to Supabase default');
+      }
 
       return {};
     } catch (error) {
