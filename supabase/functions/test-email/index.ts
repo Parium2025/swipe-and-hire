@@ -39,7 +39,7 @@ const handler = async (req: Request): Promise<Response> => {
         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden;">
           
           <!-- Header -->
-          <div style="background-color: #3b82f6; padding: 40px 30px; text-align: center;">
+          <div style="background-color: #1a237e; padding: 40px 30px; text-align: center;">
             <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Välkommen till Parium!</h1>
             <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 18px;">Framtiden börjar med ett swipe</p>
           </div>
@@ -54,7 +54,7 @@ const handler = async (req: Request): Promise<Response> => {
             <!-- Button -->
             <div style="text-align: center; margin: 30px 0;">
               <a href="${testConfirmationUrl}" 
-                 style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 15px 30px; border-radius: 5px; font-size: 16px; font-weight: bold;">
+                 style="display: inline-block; background-color: #1a237e; color: #ffffff; text-decoration: none; padding: 15px 30px; border-radius: 5px; font-size: 16px; font-weight: bold;">
                 👉 Bekräfta min e-postadress
               </a>
             </div>
@@ -75,11 +75,11 @@ const handler = async (req: Request): Promise<Response> => {
             </div>
             
             <!-- Test notice -->
-            <div style="background-color: #dbeafe; border: 1px solid #3b82f6; border-radius: 5px; padding: 15px; margin: 20px 0;">
-              <p style="color: #1d4ed8; font-size: 14px; margin: 0; text-align: center; font-weight: bold;">
+            <div style="background-color: #e8eaf6; border: 1px solid #1a237e; border-radius: 5px; padding: 15px; margin: 20px 0;">
+              <p style="color: #1a237e; font-size: 14px; margin: 0; text-align: center; font-weight: bold;">
                 📧 Detta är ett test-meddelande
               </p>
-              <p style="color: #1d4ed8; font-size: 14px; margin: 5px 0 0 0; text-align: center;">
+              <p style="color: #1a237e; font-size: 14px; margin: 5px 0 0 0; text-align: center;">
                 Utvecklingssyfte - klicka inte på länken om du inte förväntar dig detta
               </p>
             </div>
