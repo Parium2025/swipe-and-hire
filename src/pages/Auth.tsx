@@ -758,7 +758,7 @@ const Auth = () => {
                               <span className="text-sm font-medium">E-post inte bekräftad</span>
                             </div>
                             <p className="text-sm text-muted-foreground mb-3">
-                              Du behöver bekräfta din e-post ({email}) innan du kan logga in.
+                              Du behöver bekräfta din e-post ({email}) innan du kan logga in. Om du inte hittar mailet kolla även din skräppost.
                             </p>
                             <Button 
                               onClick={handleResendConfirmation}
