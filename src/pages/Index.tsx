@@ -9,6 +9,7 @@ import EmployerDashboard from '@/components/EmployerDashboard';
 import JobSwipe from '@/components/JobSwipe';
 import ProfileSetup from '@/components/ProfileSetup';
 import ProfileSelector from '@/components/ProfileSelector';
+import ProfileBuilder from '@/components/ProfileBuilder';
 import Profile from '@/pages/Profile';
 import SearchJobs from '@/pages/SearchJobs';
 import Subscription from '@/pages/Subscription';
@@ -26,8 +27,10 @@ const Index = () => {
     if (!loading && !user) {
       navigate('/auth');
     } else if (user && profile && !location.pathname.startsWith('/profile') && !location.pathname.startsWith('/search-jobs') && !location.pathname.startsWith('/subscription') && !location.pathname.startsWith('/support') && !location.pathname.startsWith('/settings') && !location.pathname.startsWith('/billing') && !location.pathname.startsWith('/payment')) {
-      // Show profile selector on first visit to main page
-      setShowProfileSelector(true);
+      // Show profile selector only for admin (fredrikandits@hotmail.com)
+      if (user.email === 'fredrikandits@hotmail.com') {
+        setShowProfileSelector(true);
+      }
     }
   }, [user, loading, navigate, profile, location.pathname]);
 
@@ -45,15 +48,21 @@ const Index = () => {
     return null;
   }
 
-  // Show profile selector first
-  if (showProfileSelector) {
+  // Show profile selector first (admin only)
+  if (showProfileSelector && user.email === 'fredrikandits@hotmail.com') {
     return <ProfileSelector onProfileSelected={() => setShowProfileSelector(false)} />;
   }
 
   // Check if profile needs setup (basic info missing)
   const needsProfileSetup = !profile.bio && !profile.location && !profile.profile_image_url;
   
-  if (needsProfileSetup) {
+  // For job seekers, show ProfileBuilder instead of ProfileSetup
+  if (needsProfileSetup && profile.role === 'job_seeker') {
+    return <ProfileBuilder onProfileCompleted={() => window.location.reload()} />;
+  }
+  
+  // For employers, show old ProfileSetup
+  if (needsProfileSetup && profile.role === 'employer') {
     return <ProfileSetup />;
   }
 
@@ -93,20 +102,22 @@ const Index = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <Button 
-                  onClick={async () => {
-                    setSwitching(true);
-                    await switchRole(profile.role === 'employer' ? 'job_seeker' : 'employer');
-                    setSwitching(false);
-                    navigate('/');
-                  }}
-                  disabled={switching}
-                  variant="outline"
-                  size="sm"
-                >
-                  <ArrowRightLeft className="mr-2 h-4 w-4" />
-                  {switching ? 'Byter...' : `Byt till ${profile.role === 'employer' ? 'jobbsökare' : 'arbetsgivare'}`}
-                </Button>
+                {user.email === 'fredrikandits@hotmail.com' && (
+                  <Button 
+                    onClick={async () => {
+                      setSwitching(true);
+                      await switchRole(profile.role === 'employer' ? 'job_seeker' : 'employer');
+                      setSwitching(false);
+                      navigate('/');
+                    }}
+                    disabled={switching}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <ArrowRightLeft className="mr-2 h-4 w-4" />
+                    {switching ? 'Byter...' : `Byt till ${profile.role === 'employer' ? 'jobbsökare' : 'arbetsgivare'}`}
+                  </Button>
+                )}
               </div>
             </header>
             
@@ -139,19 +150,21 @@ const Index = () => {
               >
                 Min Profil
               </Button>
-              <Button 
-                onClick={async () => {
-                  setSwitching(true);
-                  await switchRole('job_seeker');
-                  setSwitching(false);
-                }}
-                disabled={switching}
-                variant="outline"
-                size="sm"
-              >
-                <ArrowRightLeft className="mr-2 h-4 w-4" />
-                {switching ? 'Byter...' : 'Byt till jobbsökare'}
-              </Button>
+              {user.email === 'fredrikandits@hotmail.com' && (
+                <Button 
+                  onClick={async () => {
+                    setSwitching(true);
+                    await switchRole('job_seeker');
+                    setSwitching(false);
+                  }}
+                  disabled={switching}
+                  variant="outline"
+                  size="sm"
+                >
+                  <ArrowRightLeft className="mr-2 h-4 w-4" />
+                  {switching ? 'Byter...' : 'Byt till jobbsökare'}
+                </Button>
+              )}
               <Button onClick={signOut} variant="outline">
                 Logga ut
               </Button>
@@ -185,19 +198,21 @@ const Index = () => {
             >
               Min Profil
             </Button>
-            <Button 
-              onClick={async () => {
-                setSwitching(true);
-                await switchRole('employer');
-                setSwitching(false);
-              }}
-              disabled={switching}
-              variant="outline"
-              size="sm"
-            >
-              <ArrowRightLeft className="mr-2 h-4 w-4" />
-              {switching ? 'Byter...' : 'Byt till arbetsgivare'}
-            </Button>
+            {user.email === 'fredrikandits@hotmail.com' && (
+              <Button 
+                onClick={async () => {
+                  setSwitching(true);
+                  await switchRole('employer');
+                  setSwitching(false);
+                }}
+                disabled={switching}
+                variant="outline"
+                size="sm"
+              >
+                <ArrowRightLeft className="mr-2 h-4 w-4" />
+                {switching ? 'Byter...' : 'Byt till arbetsgivare'}
+              </Button>
+            )}
             <Button onClick={signOut} variant="outline">
               Logga ut
             </Button>
