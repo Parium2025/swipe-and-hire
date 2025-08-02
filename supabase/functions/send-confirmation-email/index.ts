@@ -9,6 +9,20 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+interface AuthWebhookRequest {
+  user: {
+    email: string;
+    id: string;
+  };
+  email_data: {
+    token: string;
+    token_hash: string;
+    redirect_to?: string;
+    email_action_type: string;
+    site_url: string;
+  };
+}
+
 interface ConfirmationEmailRequest {
   email: string;
   confirmationUrl: string;
@@ -22,7 +36,30 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, confirmationUrl, type }: ConfirmationEmailRequest = await req.json();
+    const requestBody = await req.json();
+    
+    // Check if this is a Supabase auth webhook or direct API call
+    let email: string;
+    let confirmationUrl: string;
+    let type: 'signup' | 'reset';
+
+    if (requestBody.user && requestBody.email_data) {
+      // This is a Supabase auth webhook
+      const { user, email_data }: AuthWebhookRequest = requestBody;
+      email = user.email;
+      
+      // Build confirmation URL
+      const baseUrl = email_data.site_url || 'https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com';
+      confirmationUrl = `${Deno.env.get('SUPABASE_URL')}/auth/v1/verify?token=${email_data.token_hash}&type=${email_data.email_action_type}&redirect_to=${encodeURIComponent(baseUrl)}`;
+      
+      type = email_data.email_action_type === 'signup' ? 'signup' : 'reset';
+    } else {
+      // This is a direct API call
+      const { email: directEmail, confirmationUrl: directUrl, type: directType }: ConfirmationEmailRequest = requestBody;
+      email = directEmail;
+      confirmationUrl = directUrl;
+      type = directType;
+    }
 
     console.log(`Sending ${type} email to: ${email}`);
 
