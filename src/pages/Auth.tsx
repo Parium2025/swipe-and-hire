@@ -461,7 +461,7 @@ const Auth = () => {
                                 />
                               </div>
                               
-                              {/* Conditional professional fields based on role */}
+                              {/* Conditional professional fields - only for employers */}
                               {role === 'employer' && (
                                 <div className="space-y-4 p-4 bg-accent/30 rounded-lg border border-border/20">
                                   <div className="space-y-2">
@@ -488,22 +488,6 @@ const Auth = () => {
                                       className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                                     />
                                   </div>
-                                </div>
-                              )}
-                              
-                              {role === 'job_seeker' && (
-                                <div className="space-y-2">
-                                  <Label htmlFor="jobTitle" className="flex items-center gap-2">
-                                    <Building2 className="h-4 w-4 text-muted-foreground" />
-                                    Nuvarande titel (valfritt)
-                                  </Label>
-                                  <Input
-                                    id="jobTitle"
-                                    value={jobTitle}
-                                    onChange={(e) => setJobTitle(e.target.value)}
-                                    placeholder="Utvecklare, Designer, Säljare..."
-                                    className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                                  />
                                 </div>
                               )}
                               
