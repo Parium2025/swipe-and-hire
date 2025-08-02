@@ -56,20 +56,30 @@ const Auth = () => {
   const handleEmailChange = (value: string) => {
     setEmail(value);
     
-    // Show suggestions if user typed @ but hasn't completed domain
-    if (value.includes('@') && !value.includes('.')) {
-      const [localPart] = value.split('@');
-      const suggestions = popularDomains.map(domain => localPart + domain);
-      setEmailSuggestions(suggestions);
-      setShowEmailSuggestions(true);
-    } else if (value.includes('@') && value.split('@')[1].length > 0) {
-      // Filter suggestions based on what user has typed after @
+    if (value.includes('@')) {
       const [localPart, domainPart] = value.split('@');
-      const filteredSuggestions = popularDomains
-        .filter(domain => domain.toLowerCase().includes(domainPart.toLowerCase()))
-        .map(domain => localPart + domain);
-      setEmailSuggestions(filteredSuggestions);
-      setShowEmailSuggestions(filteredSuggestions.length > 0 && !popularDomains.some(d => value.endsWith(d)));
+      
+      if (domainPart.length === 0) {
+        // Just typed @, show all suggestions
+        const suggestions = popularDomains.map(domain => localPart + domain);
+        setEmailSuggestions(suggestions);
+        setShowEmailSuggestions(true);
+      } else {
+        // Filter suggestions based on what user has typed after @
+        const filteredDomains = popularDomains.filter(domain => {
+          // Remove @ from domain and check if it starts with what user typed
+          const domainWithoutAt = domain.substring(1);
+          return domainWithoutAt.toLowerCase().startsWith(domainPart.toLowerCase());
+        });
+        
+        if (filteredDomains.length > 0) {
+          const suggestions = filteredDomains.map(domain => localPart + domain);
+          setEmailSuggestions(suggestions);
+          setShowEmailSuggestions(true);
+        } else {
+          setShowEmailSuggestions(false);
+        }
+      }
     } else {
       setShowEmailSuggestions(false);
     }
