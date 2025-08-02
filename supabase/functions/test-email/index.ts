@@ -41,7 +41,7 @@ const handler = async (req: Request): Promise<Response> => {
           <!-- Header -->
           <div style="background-color: #3b82f6; padding: 40px 30px; text-align: center;">
             <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Välkommen till Parium!</h1>
-            <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 18px;">🚀 Din karriärresa börjar här</p>
+            <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 18px;">Framtiden börjar med ett swipe</p>
           </div>
           
           <!-- Content -->
