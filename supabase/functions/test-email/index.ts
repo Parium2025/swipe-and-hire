@@ -96,7 +96,7 @@ const handler = async (req: Request): Promise<Response> => {
             </p>
             
             <p style="color: #999999; font-size: 12px; margin: 20px 0 0 0;">
-              Parium - AI-driven rekrytering för framtidens arbetsmarknad
+              Parium – Framtidens jobbsök börjar här.
             </p>
           </div>
           
