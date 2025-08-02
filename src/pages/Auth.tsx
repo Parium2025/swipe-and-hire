@@ -7,9 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Separator } from '@/components/ui/separator';
 import { useEffect } from 'react';
-import { Mail, Key, Users, Target, Zap, Eye, EyeOff, User, Building2, Phone } from 'lucide-react';
+import { Mail, Key, Users, Target, Zap, Eye, EyeOff, User, Building2 } from 'lucide-react';
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import AnimatedIntro from '@/components/AnimatedIntro';
 
@@ -25,7 +24,6 @@ const Auth = () => {
   const [lastName, setLastName] = useState('');
   const [company, setCompany] = useState('');
   const [jobTitle, setJobTitle] = useState('');
-  const [phone, setPhone] = useState('');
   const [role, setRole] = useState<'job_seeker' | 'employer'>('job_seeker');
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
@@ -36,12 +34,7 @@ const Auth = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
-  // SMS verification states
-  const [showSmsVerification, setShowSmsVerification] = useState(false);
-  const [smsCode, setSmsCode] = useState('');
-  const [pendingPhone, setPendingPhone] = useState('');
-  
-  const { signIn, signUp, signInWithPhone, verifyOtp, user, resendConfirmation, resetPassword, updatePassword } = useAuth();
+  const { signIn, signUp, user, resendConfirmation, resetPassword, updatePassword } = useAuth();
   
   // Password strength calculation
   const calculatePasswordStrength = (password: string) => {
@@ -94,46 +87,19 @@ const Auth = () => {
           }
         }
       } else {
-        // For signup, first send SMS verification
-        if (phone) {
-          const result = await signInWithPhone(phone);
-          if (!result.error) {
-            setPendingPhone(phone);
-            setShowSmsVerification(true);
-          }
-        } else {
-          // Fallback to email signup if no phone
-          const result = await signUp(email, password, {
-            role,
-            first_name: firstName,
-            last_name: lastName
-          });
-          
-          if (!result.error) {
-            setShowResend(true);
-          }
+        // Email signup
+        const result = await signUp(email, password, {
+          role,
+          first_name: firstName,
+          last_name: lastName
+        });
+        
+        if (!result.error) {
+          setShowResend(true);
         }
       }
     } catch (error) {
       console.error('Auth error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSmsVerification = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const result = await verifyOtp(pendingPhone, smsCode);
-      if (!result.error) {
-        // SMS verification successful, now complete signup with profile data
-        // This will happen automatically as the user is now authenticated
-        setShowSmsVerification(false);
-      }
-    } catch (error) {
-      console.error('SMS verification error:', error);
     } finally {
       setLoading(false);
     }
@@ -168,8 +134,6 @@ const Auth = () => {
     
     setLoading(false);
   };
-
-
 
   return (
     <div className="min-h-screen bg-background">
@@ -328,57 +292,7 @@ const Auth = () => {
                         </CardHeader>
                       </div>
                   <CardContent className="p-8 pt-6">
-                    {showSmsVerification ? (
-                      // SMS Verification Form
-                      <div className="space-y-4">
-                        <div className="text-center mb-6">
-                          <div className="mb-4">
-                            <Phone className="h-12 w-12 mx-auto text-secondary" />
-                          </div>
-                          <h3 className="text-lg font-semibold">Verifiera ditt telefonnummer</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Vi har skickat en kod till {pendingPhone}
-                          </p>
-                        </div>
-                        
-                        <form onSubmit={handleSmsVerification} className="space-y-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="smsCode">Verifieringskod</Label>
-                            <Input
-                              id="smsCode"
-                              type="text"
-                              value={smsCode}
-                              onChange={(e) => setSmsCode(e.target.value)}
-                              required
-                              placeholder="123456"
-                              maxLength={6}
-                              className="text-center text-lg tracking-widest"
-                            />
-                          </div>
-                          
-                          <Button 
-                            type="submit" 
-                            className="w-full" 
-                            disabled={loading}
-                          >
-                            {loading ? 'Verifierar...' : 'Verifiera'}
-                          </Button>
-                          
-                          <Button 
-                            type="button" 
-                            variant="outline"
-                            className="w-full" 
-                            onClick={() => {
-                              setShowSmsVerification(false);
-                              setSmsCode('');
-                              setPendingPhone('');
-                            }}
-                          >
-                            Tillbaka
-                          </Button>
-                        </form>
-                      </div>
-                    ) : isPasswordReset ? (
+                    {isPasswordReset ? (
                       // Password Reset Form
                       <div className="space-y-4">
                         <div className="text-center mb-6">
@@ -509,39 +423,21 @@ const Auth = () => {
                                 </div>
                               </div>
                               
-               <div className="space-y-2">
-                                 <Label htmlFor="phone" className="flex items-center gap-2">
-                                   <Phone className="h-4 w-4 text-muted-foreground" />
-                                   Telefonnummer (rekommenderas)
-                                 </Label>
-                                 <Input
-                                   id="phone"
-                                   type="tel"
-                                   value={phone}
-                                   onChange={(e) => setPhone(e.target.value)}
-                                   placeholder="+46701234567"
-                                   className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                                 />
-                                 <p className="text-xs text-muted-foreground">
-                                   Med telefonnummer får du snabb SMS-verifiering
-                                 </p>
-                               </div>
-                               
-                               <div className="space-y-2">
-                                 <Label htmlFor="signup-email" className="flex items-center gap-2">
-                                   <Mail className="h-4 w-4 text-muted-foreground" />
-                                   E-post {!phone && '(krävs om inget telefonnummer)'}
-                                 </Label>
-                                 <Input
-                                   id="signup-email"
-                                   type="email"
-                                   value={email}
-                                   onChange={(e) => setEmail(e.target.value)}
-                                   required={!phone}
-                                   placeholder="namn@företag.se"
-                                   className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                                 />
-                               </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="signup-email" className="flex items-center gap-2">
+                                  <Mail className="h-4 w-4 text-muted-foreground" />
+                                  E-post
+                                </Label>
+                                <Input
+                                  id="signup-email"
+                                  type="email"
+                                  value={email}
+                                  onChange={(e) => setEmail(e.target.value)}
+                                  required
+                                  placeholder="namn@företag.se"
+                                  className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                                />
+                              </div>
                               
                               {/* Conditional professional fields based on role */}
                               {role === 'employer' && (
