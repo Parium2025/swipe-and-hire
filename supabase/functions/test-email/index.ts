@@ -46,21 +46,23 @@ const handler = async (req: Request): Promise<Response> => {
           
           <!-- Content -->
           <div style="padding: 40px 30px;">
-            <h2 style="color: #333333; margin: 0 0 20px 0; font-size: 24px; text-align: center;">
-              Bekräfta din e-postadress
-            </h2>
-            
-            <p style="color: #666666; margin: 0 0 30px 0; font-size: 16px; line-height: 1.5; text-align: center;">
-              Tack för att du valde Parium som din partner för framtidens karriär. Ett klick kvar till att upptäcka ditt drömjobb.
+            <p style="color: #333333; margin: 0 0 20px 0; font-size: 18px; line-height: 1.6; text-align: center;">
+              Parium handlar om att göra jobbsökande så enkelt som det borde vara.<br>
+              Vi behöver bara bekräfta din e-post – sen är du igång.
             </p>
             
             <!-- Button -->
             <div style="text-align: center; margin: 30px 0;">
               <a href="${testConfirmationUrl}" 
                  style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 15px 30px; border-radius: 5px; font-size: 16px; font-weight: bold;">
-                ✓ Bekräfta e-postadress
+                👉 Bekräfta min e-postadress
               </a>
             </div>
+            
+            <p style="color: #666666; margin: 20px 0 0 0; font-size: 16px; line-height: 1.6; text-align: center;">
+              Tack för att du är med oss från början.<br>
+              Det här kan bli starten på något riktigt bra.
+            </p>
             
             <!-- Alternative link -->
             <div style="margin: 30px 0; padding: 20px; background-color: #f8f9fa; border-radius: 5px;">
