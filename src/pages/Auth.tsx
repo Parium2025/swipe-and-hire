@@ -25,6 +25,7 @@ const Auth = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const [company, setCompany] = useState('');
   const [jobTitle, setJobTitle] = useState('');
   const [role, setRole] = useState<'job_seeker' | 'employer'>('job_seeker');
@@ -95,6 +96,52 @@ const Auth = () => {
     } else {
       setShowEmailSuggestions(false);
     }
+  };
+
+  // Smart phone validation for Swedish numbers
+  const validatePhoneNumber = (phoneNumber: string) => {
+    if (!phoneNumber.trim()) return { isValid: true, error: '' };
+    
+    // Remove all non-numeric characters except +
+    const cleaned = phoneNumber.replace(/[^\d+]/g, '');
+    
+    // Check if it's a Swedish number (starts with +46, 0046, or 0)
+    let isSwedish = false;
+    let digitsOnly = '';
+    
+    if (cleaned.startsWith('+46')) {
+      isSwedish = true;
+      digitsOnly = cleaned.substring(3);
+    } else if (cleaned.startsWith('0046')) {
+      isSwedish = true;
+      digitsOnly = cleaned.substring(4);
+    } else if (cleaned.startsWith('0')) {
+      isSwedish = true;
+      digitsOnly = cleaned.substring(1);
+    } else if (cleaned.match(/^\d+$/)) {
+      // Only digits, assume Swedish if 9-11 digits
+      if (cleaned.length >= 9 && cleaned.length <= 11) {
+        isSwedish = true;
+        digitsOnly = cleaned.startsWith('0') ? cleaned.substring(1) : cleaned;
+      }
+    }
+    
+    if (isSwedish) {
+      if (digitsOnly.length !== 9) {
+        return {
+          isValid: false,
+          error: `Svenska telefonnummer ska ha 10 siffror (du har ${digitsOnly.length + 1})`
+        };
+      }
+    }
+    
+    return { isValid: true, error: '' };
+  };
+
+  const handlePhoneChange = (value: string) => {
+    setPhone(value);
+    const validation = validatePhoneNumber(value);
+    setPhoneError(validation.error);
   };
   
   // Password strength calculation
@@ -527,11 +574,14 @@ const Auth = () => {
                                   id="phone"
                                   type="tel"
                                   value={phone}
-                                  onChange={(e) => setPhone(e.target.value)}
+                                  onChange={(e) => handlePhoneChange(e.target.value)}
                                   required
                                   placeholder="070-123 45 65"
-                                  className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                                  className={`transition-all duration-200 focus:ring-2 focus:ring-primary/20 ${phoneError ? 'border-destructive' : ''}`}
                                 />
+                                {phoneError && (
+                                  <p className="text-sm text-destructive mt-1">{phoneError}</p>
+                                )}
                               </div>
                               
                               <div className="space-y-2 relative">
