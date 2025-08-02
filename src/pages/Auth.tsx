@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,8 +39,10 @@ const Auth = () => {
   const [isPasswordReset, setIsPasswordReset] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [testEmailSent, setTestEmailSent] = useState(false);
   
   const { signIn, signUp, user, resendConfirmation, resetPassword, updatePassword } = useAuth();
+  const { toast } = useToast();
   
   // Popular email domains for suggestions (Swedish and international)
   const popularDomains = [
@@ -142,6 +146,32 @@ const Auth = () => {
     setPhone(value);
     const validation = validatePhoneNumber(value);
     setPhoneError(validation.error);
+  };
+
+  const sendTestEmail = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.functions.invoke('test-email', {
+        body: { email: 'fredrikandits@hotmail.com' }
+      });
+      
+      if (error) throw error;
+      
+      setTestEmailSent(true);
+      toast({
+        title: "Test-mail skickat!",
+        description: "Kontrollera fredrikandits@hotmail.com för att se hur e-posten ser ut."
+      });
+    } catch (error) {
+      console.error('Test email error:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte skicka test-mail",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
   
   // Password strength calculation
@@ -787,6 +817,26 @@ const Auth = () => {
                             </Button>
                           </div>
                         )}
+                        
+                        {/* Test Email Button - Development only */}
+                        <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Mail size={16} className="text-blue-600" />
+                            <span className="text-sm font-medium text-blue-800">Test E-postmeddelande</span>
+                          </div>
+                          <p className="text-sm text-blue-600 mb-3">
+                            Skicka ett test-mail till fredrikandits@hotmail.com för att se hur Pariums e-post ser ut.
+                          </p>
+                          <Button 
+                            onClick={sendTestEmail}
+                            variant="outline" 
+                            size="sm"
+                            disabled={loading || testEmailSent}
+                            className="w-full border-blue-300 text-blue-700 hover:bg-blue-50"
+                          >
+                            {loading ? 'Skickar...' : testEmailSent ? 'Test-mail skickat! ✓' : 'Skicka test-mail'}
+                          </Button>
+                        </div>
                       </>
                     )}
                   </CardContent>
