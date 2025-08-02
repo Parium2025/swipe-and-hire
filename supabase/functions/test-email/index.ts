@@ -32,94 +32,74 @@ const handler = async (req: Request): Promise<Response> => {
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Välkommen till Parium</title>
       </head>
-      <body style="margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f8fafc; line-height: 1.6;">
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f8fafc;">
-          <tr>
-            <td style="padding: 40px 20px;">
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto;">
-                
-                <!-- Header with Parium branding -->
-                <tr>
-                  <td style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%); padding: 50px 40px; text-align: center; border-radius: 16px 16px 0 0;">
-                    <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">
-                      Välkommen till Parium
-                    </h1>
-                    <p style="color: rgba(255,255,255,0.95); margin: 12px 0 0 0; font-size: 20px; font-weight: 300;">
-                      🚀 Din karriärresa börjar här
-                    </p>
-                  </td>
-                </tr>
-                
-                <!-- Main content -->
-                <tr>
-                  <td style="background: #ffffff; padding: 50px 40px; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
-                    <h2 style="color: #111827; margin: 0 0 24px 0; font-size: 28px; font-weight: 600; text-align: center;">
-                      Bekräfta din e-postadress
-                    </h2>
-                    
-                    <p style="color: #4b5563; margin: 0 0 32px 0; font-size: 18px; text-align: center; line-height: 1.7;">
-                      Tack för att du valde Parium som din partner för framtidens karriär. Ett klick kvar till att upptäcka ditt drömjobb.
-                    </p>
-                    
-                    <!-- CTA Button -->
-                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                      <tr>
-                        <td style="text-align: center; padding: 20px 0;">
-                          <a href="${testConfirmationUrl}" 
-                             style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: #ffffff; text-decoration: none; padding: 18px 40px; border-radius: 12px; font-weight: 600; font-size: 18px; box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.35); transition: all 0.2s;">
-                            ✓ Bekräfta e-postadress
-                          </a>
-                        </td>
-                      </tr>
-                    </table>
-                    
-                    <!-- Alternative link -->
-                    <div style="margin: 40px 0; padding: 24px; background: #f9fafb; border-radius: 12px; border: 1px solid #e5e7eb;">
-                      <p style="color: #6b7280; font-size: 14px; margin: 0 0 12px 0; font-weight: 500;">
-                        Fungerar inte knappen? Kopiera länken nedan:
-                      </p>
-                      <p style="color: #3b82f6; font-size: 14px; word-break: break-all; margin: 0; font-family: 'SF Mono', Consolas, monospace; background: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #ddd6fe;">
-                        ${testConfirmationUrl}
-                      </p>
-                    </div>
-                    
-                    <!-- Test notice -->
-                    <div style="background: #eff6ff; border: 2px solid #3b82f6; border-radius: 12px; padding: 20px; margin: 32px 0;">
-                      <p style="color: #1e40af; font-size: 16px; margin: 0; font-weight: 600; text-align: center;">
-                        📧 Detta är ett test-meddelande
-                      </p>
-                      <p style="color: #1e40af; font-size: 14px; margin: 8px 0 0 0; text-align: center;">
-                        Utvecklingssyfte - klicka inte på länken om du inte förväntar dig detta
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-                
-                <!-- Footer -->
-                <tr>
-                  <td style="background: #ffffff; padding: 40px; text-align: center; border-radius: 0 0 16px 16px; border: 1px solid #e5e7eb;">
-                    <p style="color: #9ca3af; font-size: 14px; margin: 0 0 12px 0;">
-                      Fick du detta mail av misstag? Ignorera det bara.
-                    </p>
-                    <p style="color: #111827; font-size: 16px; margin: 0; font-weight: 600;">
-                      Med vänliga hälsningar,<br>
-                      <span style="background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; color: #6366f1;">Parium-teamet</span>
-                    </p>
-                    
-                    <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
-                      <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                        Parium - AI-driven rekrytering för framtidens arbetsmarknad
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-                
-              </table>
-            </td>
-          </tr>
-        </table>
+      <body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f5f5f5;">
+        
+        <!-- Simple container -->
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden;">
+          
+          <!-- Header -->
+          <div style="background-color: #6366f1; padding: 40px 30px; text-align: center;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Välkommen till Parium!</h1>
+            <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 18px;">🚀 Din karriärresa börjar här</p>
+          </div>
+          
+          <!-- Content -->
+          <div style="padding: 40px 30px;">
+            <h2 style="color: #333333; margin: 0 0 20px 0; font-size: 24px; text-align: center;">
+              Bekräfta din e-postadress
+            </h2>
+            
+            <p style="color: #666666; margin: 0 0 30px 0; font-size: 16px; line-height: 1.5; text-align: center;">
+              Tack för att du valde Parium som din partner för framtidens karriär. Ett klick kvar till att upptäcka ditt drömjobb.
+            </p>
+            
+            <!-- Button -->
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${testConfirmationUrl}" 
+                 style="display: inline-block; background-color: #6366f1; color: #ffffff; text-decoration: none; padding: 15px 30px; border-radius: 5px; font-size: 16px; font-weight: bold;">
+                ✓ Bekräfta e-postadress
+              </a>
+            </div>
+            
+            <!-- Alternative link -->
+            <div style="margin: 30px 0; padding: 20px; background-color: #f8f9fa; border-radius: 5px;">
+              <p style="color: #666666; font-size: 14px; margin: 0 0 10px 0;">
+                Fungerar inte knappen? Kopiera länken nedan:
+              </p>
+              <p style="color: #0066cc; font-size: 14px; word-break: break-all; margin: 0;">
+                ${testConfirmationUrl}
+              </p>
+            </div>
+            
+            <!-- Test notice -->
+            <div style="background-color: #e3f2fd; border: 1px solid #2196f3; border-radius: 5px; padding: 15px; margin: 20px 0;">
+              <p style="color: #1976d2; font-size: 14px; margin: 0; text-align: center; font-weight: bold;">
+                📧 Detta är ett test-meddelande
+              </p>
+              <p style="color: #1976d2; font-size: 14px; margin: 5px 0 0 0; text-align: center;">
+                Utvecklingssyfte - klicka inte på länken om du inte förväntar dig detta
+              </p>
+            </div>
+          </div>
+          
+          <!-- Footer -->
+          <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e9ecef;">
+            <p style="color: #666666; font-size: 14px; margin: 0 0 10px 0;">
+              Fick du detta mail av misstag? Ignorera det bara.
+            </p>
+            <p style="color: #333333; font-size: 16px; margin: 0; font-weight: bold;">
+              Med vänliga hälsningar,<br>
+              Parium-teamet
+            </p>
+            
+            <p style="color: #999999; font-size: 12px; margin: 20px 0 0 0;">
+              Parium - AI-driven rekrytering för framtidens arbetsmarknad
+            </p>
+          </div>
+          
+        </div>
+        
       </body>
       </html>
     `;
