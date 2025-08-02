@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useEffect } from 'react';
-import { Mail, Key, Users, Target, Zap, Eye, EyeOff, User, Building2 } from 'lucide-react';
+import { Mail, Key, Users, Target, Zap, Eye, EyeOff, User, Building2, Phone } from 'lucide-react';
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import AnimatedIntro from '@/components/AnimatedIntro';
 
@@ -22,6 +22,7 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
   const [company, setCompany] = useState('');
   const [jobTitle, setJobTitle] = useState('');
   const [role, setRole] = useState<'job_seeker' | 'employer'>('job_seeker');
@@ -91,7 +92,8 @@ const Auth = () => {
         const result = await signUp(email, password, {
           role,
           first_name: firstName,
-          last_name: lastName
+          last_name: lastName,
+          phone: phone
         });
         
         if (!result.error) {
@@ -395,7 +397,8 @@ const Auth = () => {
                           
                            <TabsContent value="signup">
                             <form onSubmit={handleSubmit} className="space-y-5">
-                              <div className="grid grid-cols-2 gap-4">
+                              {/* Namn på samma rad */}
+                              <div className="grid grid-cols-2 gap-3">
                                 <div className="space-y-2">
                                   <Label htmlFor="firstName" className="flex items-center gap-2">
                                     <User className="h-4 w-4 text-muted-foreground" />
@@ -406,21 +409,40 @@ const Auth = () => {
                                     value={firstName}
                                     onChange={(e) => setFirstName(e.target.value)}
                                     required
-                                    placeholder="Ange förnamn"
+                                    placeholder="Förnamn"
                                     className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                                   />
                                 </div>
                                 <div className="space-y-2">
-                                  <Label htmlFor="lastName">Efternamn</Label>
+                                  <Label htmlFor="lastName" className="flex items-center gap-2 opacity-0">
+                                    <User className="h-4 w-4" />
+                                    Placeholder
+                                  </Label>
                                   <Input
                                     id="lastName"
                                     value={lastName}
                                     onChange={(e) => setLastName(e.target.value)}
                                     required
-                                    placeholder="Ange efternamn"
+                                    placeholder="Efternamn"
                                     className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                                   />
                                 </div>
+                              </div>
+                              
+                              <div className="space-y-2">
+                                <Label htmlFor="phone" className="flex items-center gap-2">
+                                  <Phone className="h-4 w-4 text-muted-foreground" />
+                                  Telefonnummer
+                                </Label>
+                                <Input
+                                  id="phone"
+                                  type="tel"
+                                  value={phone}
+                                  onChange={(e) => setPhone(e.target.value)}
+                                  required
+                                  placeholder="070-123 45 67"
+                                  className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                                />
                               </div>
                               
                               <div className="space-y-2">
