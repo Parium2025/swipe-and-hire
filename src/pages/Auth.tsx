@@ -428,7 +428,7 @@ const Auth = () => {
                           </CardTitle>
                           
                           <CardDescription className="text-muted-foreground/80 text-lg mt-2">
-                            {isPasswordReset ? 'Återställ ditt lösenord' : 'Din framtid väntar på dig'}
+                            {isPasswordReset ? 'Återställ ditt lösenord' : 'Framtiden börjar med ett swipe'}
                           </CardDescription>
                         </CardHeader>
                       </div>
