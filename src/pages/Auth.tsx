@@ -158,6 +158,8 @@ const Auth = () => {
       if (error) throw error;
       
       setTestEmailSent(true);
+      // Reset after 2 seconds so user can send more test emails
+      setTimeout(() => setTestEmailSent(false), 2000);
       toast({
         title: "Test-mail skickat!",
         description: "Kontrollera fredrikandits@hotmail.com för att se hur e-posten ser ut."
@@ -831,10 +833,10 @@ const Auth = () => {
                             onClick={sendTestEmail}
                             variant="outline" 
                             size="sm"
-                            disabled={loading || testEmailSent}
+                            disabled={loading}
                             className="w-full border-blue-300 text-blue-700 hover:bg-blue-50"
                           >
-                            {loading ? 'Skickar...' : testEmailSent ? 'Test-mail skickat! ✓' : 'Skicka test-mail'}
+                            {loading ? 'Skickar...' : testEmailSent ? 'Skickat! Skicka igen?' : 'Skicka test-mail'}
                           </Button>
                         </div>
                       </>
