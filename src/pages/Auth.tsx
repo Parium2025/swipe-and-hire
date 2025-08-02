@@ -529,7 +529,7 @@ const Auth = () => {
                                   value={phone}
                                   onChange={(e) => setPhone(e.target.value)}
                                   required
-                                  placeholder="070-12345 65"
+                                  placeholder="070-123 45 65"
                                   className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                                 />
                               </div>
