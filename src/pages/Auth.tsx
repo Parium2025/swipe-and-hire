@@ -17,6 +17,8 @@ const Auth = () => {
   const [showIntro, setShowIntro] = useState(() => {
     return !sessionStorage.getItem('parium-intro-seen');
   });
+  const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
+  const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,6 +38,42 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   
   const { signIn, signUp, user, resendConfirmation, resetPassword, updatePassword } = useAuth();
+  
+  // Popular email domains for suggestions
+  const popularDomains = [
+    '@gmail.com',
+    '@hotmail.com', 
+    '@hotmail.se',
+    '@outlook.com',
+    '@yahoo.com',
+    '@icloud.com',
+    '@live.se',
+    '@telia.com',
+    '@spray.se'
+  ];
+
+  // Handle email input with suggestions
+  const handleEmailChange = (value: string) => {
+    setEmail(value);
+    
+    // Show suggestions if user typed @ but hasn't completed domain
+    if (value.includes('@') && !value.includes('.')) {
+      const [localPart] = value.split('@');
+      const suggestions = popularDomains.map(domain => localPart + domain);
+      setEmailSuggestions(suggestions);
+      setShowEmailSuggestions(true);
+    } else if (value.includes('@') && value.split('@')[1].length > 0) {
+      // Filter suggestions based on what user has typed after @
+      const [localPart, domainPart] = value.split('@');
+      const filteredSuggestions = popularDomains
+        .filter(domain => domain.toLowerCase().includes(domainPart.toLowerCase()))
+        .map(domain => localPart + domain);
+      setEmailSuggestions(filteredSuggestions);
+      setShowEmailSuggestions(filteredSuggestions.length > 0 && !popularDomains.some(d => value.endsWith(d)));
+    } else {
+      setShowEmailSuggestions(false);
+    }
+  };
   
   // Password strength calculation
   const calculatePasswordStrength = (password: string) => {
@@ -363,16 +401,38 @@ const Auth = () => {
                           
                           <TabsContent value="login">
                             <form onSubmit={handleSubmit} className="space-y-4">
-                              <div className="space-y-2">
+                              <div className="space-y-2 relative">
                                 <Label htmlFor="email">E-post</Label>
                                 <Input
                                   id="email"
                                   type="email"
                                   value={email}
-                                  onChange={(e) => setEmail(e.target.value)}
+                                  onChange={(e) => handleEmailChange(e.target.value)}
+                                  onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 200)}
+                                  onFocus={() => email.includes('@') && !email.includes('.') && setShowEmailSuggestions(true)}
                                   required
+                                  placeholder="din.email@gmail.com"
                                   className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                                 />
+                                
+                                {/* Email suggestions dropdown */}
+                                {showEmailSuggestions && emailSuggestions.length > 0 && (
+                                  <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-40 overflow-y-auto">
+                                    {emailSuggestions.slice(0, 5).map((suggestion, index) => (
+                                      <button
+                                        key={index}
+                                        type="button"
+                                        className="w-full px-3 py-2 text-left hover:bg-accent text-sm transition-colors"
+                                        onClick={() => {
+                                          setEmail(suggestion);
+                                          setShowEmailSuggestions(false);
+                                        }}
+                                      >
+                                        {suggestion}
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                               <div className="space-y-2">
                                 <Label htmlFor="password">Lösenord</Label>
@@ -445,7 +505,7 @@ const Auth = () => {
                                 />
                               </div>
                               
-                              <div className="space-y-2">
+                              <div className="space-y-2 relative">
                                 <Label htmlFor="signup-email" className="flex items-center gap-2">
                                   <Mail className="h-4 w-4 text-muted-foreground" />
                                   E-post
@@ -454,11 +514,32 @@ const Auth = () => {
                                   id="signup-email"
                                   type="email"
                                   value={email}
-                                  onChange={(e) => setEmail(e.target.value)}
+                                  onChange={(e) => handleEmailChange(e.target.value)}
+                                  onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 200)}
+                                  onFocus={() => email.includes('@') && !email.includes('.') && setShowEmailSuggestions(true)}
                                   required
-                                  placeholder="namn@företag.se"
+                                  placeholder="din.email@gmail.com"
                                   className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                                 />
+                                
+                                {/* Email suggestions dropdown */}
+                                {showEmailSuggestions && emailSuggestions.length > 0 && (
+                                  <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-40 overflow-y-auto">
+                                    {emailSuggestions.slice(0, 5).map((suggestion, index) => (
+                                      <button
+                                        key={index}
+                                        type="button"
+                                        className="w-full px-3 py-2 text-left hover:bg-accent text-sm transition-colors"
+                                        onClick={() => {
+                                          setEmail(suggestion);
+                                          setShowEmailSuggestions(false);
+                                        }}
+                                      >
+                                        {suggestion}
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                               
                               {/* Conditional professional fields - only for employers */}
