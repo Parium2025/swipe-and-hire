@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useDevice } from '@/hooks/use-device';
 import AnimatedIntro from '@/components/AnimatedIntro';
 import AuthMobile from '@/components/AuthMobile';
+import AuthTablet from '@/components/AuthTablet';
 import AuthDesktop from '@/components/AuthDesktop';
 
 const Auth = () => {
@@ -17,7 +18,7 @@ const Auth = () => {
   const { user, updatePassword } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
+  const device = useDevice();
 
   useEffect(() => {
     const isReset = searchParams.get('reset') === 'true';
@@ -58,9 +59,22 @@ const Auth = () => {
   }
 
   // Använd rätt komponent baserat på skärmstorlek
-  if (isMobile) {
+  if (device === 'mobile') {
     return (
       <AuthMobile
+        isPasswordReset={isPasswordReset}
+        newPassword={newPassword}
+        setNewPassword={setNewPassword}
+        confirmPassword={confirmPassword}
+        setConfirmPassword={setConfirmPassword}
+        handlePasswordReset={handlePasswordReset}
+      />
+    );
+  }
+
+  if (device === 'tablet') {
+    return (
+      <AuthTablet
         isPasswordReset={isPasswordReset}
         newPassword={newPassword}
         setNewPassword={setNewPassword}
