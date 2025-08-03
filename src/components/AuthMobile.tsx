@@ -318,7 +318,7 @@ const AuthMobile = ({
 
           {/* Auth form */}
           <div className="w-full max-w-sm">
-            <Card className="bg-background/95 backdrop-blur-xl border-0 shadow-2xl rounded-2xl overflow-hidden">
+            <Card className="bg-background/30 backdrop-blur-xl border-0 shadow-2xl rounded-2xl overflow-hidden">
               <CardContent className="p-6">
                 <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => setIsLogin(value === 'login')}>
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted">
