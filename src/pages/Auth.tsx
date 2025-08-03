@@ -301,8 +301,24 @@ const Auth = () => {
               <div className="absolute top-1/2 right-1/4 w-8 h-1 bg-gradient-to-r from-transparent via-accent/40 to-transparent animate-pulse transform -rotate-45" style={{ animationDuration: '4s', animationIterationCount: 'infinite', animationDelay: '1.3s' }}></div>
             </div>
             
-            <div className="relative z-10 min-h-screen flex">
-              {/* Left side - Hero content */}
+            <div className="relative z-10 min-h-screen flex flex-col lg:flex-row">
+              {/* Mobile header - compact version */}
+              <div className="lg:hidden text-center py-6 px-4 text-primary-foreground">
+                <div className="mb-4">
+                  <img 
+                    src="/lovable-uploads/3e52da4e-167e-4ebf-acfb-6a70a68cfaef.png" 
+                    alt="Parium" 
+                    className="h-12 w-auto mx-auto"
+                  />
+                </div>
+                <h1 className="text-2xl font-bold mb-2">
+                  Välkommen till 
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent"> Parium</span>
+                </h1>
+                <p className="text-sm text-primary-foreground/80">Framtiden börjar med ett swipe</p>
+              </div>
+
+              {/* Desktop Left side - Hero content */}
               <div className="hidden lg:flex lg:w-1/2 flex-col justify-center px-12 text-primary-foreground">
                 <div className="max-w-lg animate-fade-in">
                   {/* Logo with glow effect */}
@@ -373,8 +389,8 @@ const Auth = () => {
                 </div>
               </div>
               
-              {/* Right side - Modern Auth form */}
-              <div className="w-full lg:w-1/2 flex items-center justify-center p-4 lg:p-12">
+              {/* Auth form - responsive sizing */}
+              <div className="flex-1 lg:w-1/2 flex items-center justify-center p-4 lg:p-12">
                 <div className="w-full max-w-md animate-scale-in">
                   {/* Glassmorphism card */}
                   <div className="relative">
