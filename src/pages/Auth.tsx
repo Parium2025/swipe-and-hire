@@ -308,12 +308,11 @@ const Auth = () => {
                   {/* Logo with glow effect */}
                   <div className="mb-8">
                     <div className="relative">
-                      <div className="absolute inset-0 blur-2xl bg-secondary/70 rounded-full animate-pulse"></div>
-                      <div className="absolute inset-0 blur-lg bg-accent/50 rounded-full"></div>
+                      <div className="absolute inset-0 blur-2xl bg-secondary/30 rounded-full"></div>
                       <img 
                         src="/lovable-uploads/3e52da4e-167e-4ebf-acfb-6a70a68cfaef.png" 
                         alt="Parium" 
-                        className="relative h-16 w-auto brightness-150 contrast-125 saturate-110 drop-shadow-2xl"
+                        className="relative h-16 w-auto"
                       />
                     </div>
                   </div>
@@ -388,12 +387,11 @@ const Auth = () => {
                         <CardHeader className="text-center pb-6 pt-8">
                           <div className="mb-6">
                             <div className="relative mx-auto w-fit">
-                              <div className="absolute inset-0 blur-xl bg-secondary/60 rounded-full animate-pulse"></div>
-                              <div className="absolute inset-0 blur-md bg-accent/40 rounded-full"></div>
+                              <div className="absolute inset-0 blur-xl bg-secondary/20 rounded-full"></div>
                               <img 
                                 src="/lovable-uploads/3e52da4e-167e-4ebf-acfb-6a70a68cfaef.png" 
                                 alt="Parium" 
-                                className="relative h-14 w-auto brightness-150 contrast-125 saturate-110 drop-shadow-2xl"
+                                className="relative h-14 w-auto"
                               />
                             </div>
                           </div>
