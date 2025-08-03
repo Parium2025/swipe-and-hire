@@ -161,7 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       toast({
         title: "Registrering lyckad",
-        description: "Kontrollera din e-post för att bekräfta ditt konto. OBS: Kolla även din skräppost - vi kanske gömmer oss där!",
+        description: "Kontrollera din e-post för att bekräfta ditt konto. Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.",
         duration: 8000
       });
 
@@ -345,7 +345,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       toast({
         title: "Bekräftelsemail skickat!",
-        description: "Kontrollera din e-post för att bekräfta ditt konto. OBS: Kolla även din skräppost - vi kanske gömmer oss där!",
+        description: "Kontrollera din e-post för att bekräfta ditt konto. Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.",
         duration: 8000
       });
 
@@ -372,7 +372,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       toast({
         title: "Återställningsmail skickat!",
-        description: "Kontrollera din e-post för instruktioner om lösenordsåterställning. OBS: Kolla även din skräppost - vi kanske gömmer oss där!",
+        description: "Kontrollera din e-post för instruktioner om lösenordsåterställning. Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.",
         duration: 8000
       });
 
