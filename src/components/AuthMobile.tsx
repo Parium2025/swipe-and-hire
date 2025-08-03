@@ -383,7 +383,7 @@ const AuthMobile = ({
                           </Button>
                         </div>
                       </div>
-                      <Button type="submit" className="w-full" disabled={loading}>
+                      <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" disabled={loading}>
                         {loading ? 'Loggar in...' : 'Logga in'}
                       </Button>
                       
@@ -559,7 +559,7 @@ const AuthMobile = ({
                         </RadioGroup>
                       </div>
                       
-                      <Button type="submit" className="w-full" disabled={loading}>
+                      <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" disabled={loading}>
                         {loading ? 'Registrerar...' : 'Registrera'}
                       </Button>
                     </form>
