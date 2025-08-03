@@ -262,22 +262,10 @@ const Auth = () => {
           <div className="relative min-h-screen bg-gradient-parium overflow-hidden">
             {/* Modern animated mobile background */}
             <div className="absolute inset-0">
-              {/* Telefon som bakgrund */}
               <div 
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80"
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30 animate-pulse"
                 style={{ backgroundImage: `url(${phoneWithPariumLogo})` }}
               />
-              
-              {/* Parium logga positionerad inuti telefonens skärm */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="relative top-8">
-                  <div 
-                    className="w-80 h-96 bg-cover bg-center bg-no-repeat opacity-60 rounded-3xl"
-                    style={{ backgroundImage: `url(/lovable-uploads/2c95d432-8011-484a-a974-f736c2ce709e.png)` }}
-                  />
-                </div>
-              </div>
-              
               <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
               
               {/* Blinkande ljus - högra hörnet */}
@@ -304,15 +292,9 @@ const Auth = () => {
               <div className="absolute top-32 left-16 w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDuration: '2.5s' }}></div>
               <div className="absolute top-24 left-20 w-3 h-3 bg-secondary/20 rounded-full animate-bounce" style={{ animationDuration: '3s' }}></div>
               
-              <div className="absolute bottom-40 right-20 w-4 h-4 bg-accent/25 rounded-full animate-bounce" style={{ animationDuration: '2.2s' }}></div>
-              <div className="absolute bottom-32 right-16 w-2 h-2 bg-secondary/20 rounded-full animate-bounce" style={{ animationDuration: '2.8s' }}></div>
-              <div className="absolute bottom-36 right-24 w-1 h-1 bg-accent/30 rounded-full animate-bounce" style={{ animationDuration: '2.3s' }}></div>
-              
-              {/* Färre, subtilare blinkande effekter i högra nedersta hörnet */}
-              <div className="absolute bottom-20 right-8 w-2 h-2 bg-secondary/30 rounded-full animate-pulse" style={{ animationDuration: '1.7s' }}>
-                <div className="absolute inset-0 bg-secondary/15 rounded-full animate-ping" style={{ animationDuration: '1.7s' }}></div>
-              </div>
-              <div className="absolute bottom-16 right-28 w-2 h-2 bg-accent/25 rounded-full animate-bounce" style={{ animationDuration: '2.6s' }}></div>
+              <div className="absolute bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full animate-bounce" style={{ animationDuration: '2.2s' }}></div>
+              <div className="absolute bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full animate-bounce" style={{ animationDuration: '2.8s' }}></div>
+              <div className="absolute bottom-36 right-24 w-2 h-2 bg-accent/35 rounded-full animate-bounce" style={{ animationDuration: '2.3s' }}></div>
               
               {/* Swipe gesture indicators */}
               <div className="absolute top-1/2 left-1/4 w-8 h-1 bg-gradient-to-r from-transparent via-secondary/40 to-transparent animate-pulse transform rotate-45" style={{ animationDuration: '3s', animationIterationCount: 'infinite', animationDelay: '0.3s' }}></div>
