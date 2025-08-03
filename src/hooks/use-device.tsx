@@ -4,7 +4,16 @@ const MOBILE_BREAKPOINT = 768
 const TABLET_BREAKPOINT = 1024
 
 export function useDevice() {
-  const [device, setDevice] = React.useState<'mobile' | 'tablet' | 'desktop'>('desktop')
+  // Detect initial device type immediately to prevent flash
+  const getInitialDevice = () => {
+    if (typeof window === 'undefined') return 'desktop'
+    const width = window.innerWidth
+    if (width < MOBILE_BREAKPOINT) return 'mobile'
+    if (width < TABLET_BREAKPOINT) return 'tablet'
+    return 'desktop'
+  }
+
+  const [device, setDevice] = React.useState<'mobile' | 'tablet' | 'desktop'>(getInitialDevice)
 
   React.useEffect(() => {
     const updateDevice = () => {
