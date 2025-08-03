@@ -486,14 +486,15 @@ const AuthMobile = ({
                           <Phone className="h-4 w-4 inline mr-2" />
                           Telefon
                         </Label>
-                        <Input
-                          id="phone"
-                          type="tel"
-                          value={phone}
-                          onChange={(e) => handlePhoneChange(e.target.value)}
-                          className="mt-1"
-                          placeholder="070-123 45 67"
-                        />
+                         <Input
+                           id="phone"
+                           type="tel"
+                           value={phone}
+                           onChange={(e) => handlePhoneChange(e.target.value)}
+                           className="mt-1"
+                           placeholder="070-123 45 67"
+                           required
+                         />
                         {phoneError && (
                           <p className="text-destructive text-xs mt-1">{phoneError}</p>
                         )}
