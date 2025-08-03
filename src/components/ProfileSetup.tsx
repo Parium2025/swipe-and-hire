@@ -12,7 +12,7 @@ import { User, MapPin, Building, FileText, Camera } from 'lucide-react';
 import FileUpload from './FileUpload';
 
 const ProfileSetup = () => {
-  const { profile, updateProfile, user } = useAuth();
+  const { profile, userRole, updateProfile, user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   
@@ -26,7 +26,7 @@ const ProfileSetup = () => {
   const [cvUrl, setCvUrl] = useState('');
   const [cvFileName, setCvFileName] = useState('');
 
-  const isEmployer = profile?.role === 'employer';
+  const isEmployer = userRole?.role === 'employer';
 
   const uploadProfileImage = async (file: File) => {
     try {

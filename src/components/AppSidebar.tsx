@@ -48,7 +48,7 @@ const supportItems = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
-  const { profile, signOut } = useAuth();
+  const { profile, userRole, signOut } = useAuth();
   const location = useLocation();
   const currentPath = location.pathname;
 
@@ -56,7 +56,7 @@ export function AppSidebar() {
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive ? 'bg-muted text-primary font-medium' : 'hover:bg-muted/50';
 
-  const isEmployer = profile?.role === 'employer';
+  const isEmployer = userRole?.role === 'employer';
 
   return (
     <Sidebar
@@ -79,7 +79,7 @@ export function AppSidebar() {
                   {profile?.first_name} {profile?.last_name}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {profile?.role === 'employer' ? 'Arbetsgivare' : 'Jobbsökare'}
+                  {userRole?.role === 'employer' ? 'Arbetsgivare' : 'Jobbsökare'}
                 </p>
               </div>
             </div>

@@ -17,7 +17,7 @@ import Support from '@/pages/Support';
 import { ArrowRightLeft } from 'lucide-react';
 
 const Index = () => {
-  const { user, profile, signOut, loading, switchRole } = useAuth();
+  const { user, profile, userRole, signOut, loading, switchRole } = useAuth();
   const [switching, setSwitching] = useState(false);
   const [showProfileSelector, setShowProfileSelector] = useState(false);
   const navigate = useNavigate();
@@ -57,12 +57,12 @@ const Index = () => {
   const needsProfileSetup = !profile.bio && !profile.location && !profile.profile_image_url;
   
   // For job seekers, show ProfileBuilder instead of ProfileSetup
-  if (needsProfileSetup && profile.role === 'job_seeker') {
+  if (needsProfileSetup && userRole?.role === 'job_seeker') {
     return <ProfileBuilder onProfileCompleted={() => window.location.reload()} />;
   }
   
   // For employers, show old ProfileSetup
-  if (needsProfileSetup && profile.role === 'employer') {
+  if (needsProfileSetup && userRole?.role === 'employer') {
     return <ProfileSetup />;
   }
 
@@ -97,7 +97,7 @@ const Index = () => {
                 <div>
                   <h1 className="text-xl font-bold">Parium</h1>
                   <p className="text-sm text-muted-foreground">
-                    {profile.role === 'employer' ? 'Arbetsgivare' : 'Jobbsökare'}: {profile.first_name} {profile.last_name}
+                    {userRole?.role === 'employer' ? 'Arbetsgivare' : 'Jobbsökare'}: {profile.first_name} {profile.last_name}
                   </p>
                 </div>
               </div>
@@ -106,7 +106,7 @@ const Index = () => {
                   <Button 
                     onClick={async () => {
                       setSwitching(true);
-                      await switchRole(profile.role === 'employer' ? 'job_seeker' : 'employer');
+                      await switchRole(userRole?.role === 'employer' ? 'job_seeker' : 'employer');
                       setSwitching(false);
                       navigate('/');
                     }}
@@ -115,7 +115,7 @@ const Index = () => {
                     size="sm"
                   >
                     <ArrowRightLeft className="mr-2 h-4 w-4" />
-                    {switching ? 'Byter...' : `Byt till ${profile.role === 'employer' ? 'jobbsökare' : 'arbetsgivare'}`}
+                    {switching ? 'Byter...' : `Byt till ${userRole?.role === 'employer' ? 'jobbsökare' : 'arbetsgivare'}`}
                   </Button>
                 )}
               </div>
@@ -131,7 +131,7 @@ const Index = () => {
   }
 
   // Show employer dashboard for employers
-  if (profile.role === 'employer') {
+  if (userRole?.role === 'employer') {
     return (
       <div className="min-h-screen bg-background">
         <header className="border-b bg-background">

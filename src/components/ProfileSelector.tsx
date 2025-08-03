@@ -11,7 +11,7 @@ interface ProfileSelectorProps {
 }
 
 const ProfileSelector = ({ onProfileSelected }: ProfileSelectorProps) => {
-  const { profile, user, switchRole } = useAuth();
+  const { profile, userRole, user, switchRole } = useAuth();
   const [switching, setSwitching] = useState(false);
 
   const handleRoleSwitch = async (newRole: 'job_seeker' | 'employer') => {
@@ -21,7 +21,7 @@ const ProfileSelector = ({ onProfileSelected }: ProfileSelectorProps) => {
     onProfileSelected();
   };
 
-  const currentRole = profile?.role || 'job_seeker';
+  const currentRole = userRole?.role || 'job_seeker';
   
   // Mock profiles for demonstration - in real app, these would come from database
   const profiles = [

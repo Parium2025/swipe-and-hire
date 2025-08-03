@@ -60,6 +60,7 @@ interface AuthContextType {
   isSuperAdmin: () => boolean;
   isCompanyUser: () => boolean;
   getRedirectPath: () => string;
+  switchRole: (newRole: UserRole) => Promise<{ error?: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -512,6 +513,68 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const switchRole = async (newRole: UserRole): Promise<{ error?: any }> => {
+    if (!user) return { error: 'No user logged in' };
+
+    try {
+      // Deactivate current role
+      if (userRole) {
+        await supabase
+          .from('user_roles')
+          .update({ is_active: false })
+          .eq('id', userRole.id);
+      }
+
+      // Activate or create new role
+      const { data: existingRole, error: fetchError } = await supabase
+        .from('user_roles')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('role', newRole)
+        .maybeSingle();
+
+      if (fetchError) return { error: fetchError };
+
+      if (existingRole) {
+        // Activate existing role
+        const { error: updateError } = await supabase
+          .from('user_roles')
+          .update({ is_active: true })
+          .eq('id', existingRole.id);
+
+        if (updateError) return { error: updateError };
+      } else {
+        // Create new role
+        const { error: insertError } = await supabase
+          .from('user_roles')
+          .insert([{
+            user_id: user.id,
+            role: newRole,
+            is_active: true
+          }]);
+
+        if (insertError) return { error: insertError };
+      }
+
+      // Refresh user data
+      await fetchUserData(user.id);
+      
+      toast({
+        title: "Roll bytt",
+        description: `Du har bytt till ${newRole === 'job_seeker' ? 'jobbsökande' : 'arbetsgivare'}.`
+      });
+
+      return {};
+    } catch (error) {
+      toast({
+        title: "Fel vid rollbyte",
+        description: "Kunde inte byta roll. Försök igen.",
+        variant: "destructive"
+      });
+      return { error };
+    }
+  };
+
   const value = {
     user,
     session,
@@ -531,7 +594,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     hasRole,
     isSuperAdmin,
     isCompanyUser,
-    getRedirectPath
+    getRedirectPath,
+    switchRole
   };
 
   return (
