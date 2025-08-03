@@ -321,9 +321,19 @@ const AuthMobile = ({
             <Card className="bg-background/95 backdrop-blur-sm border border-white/10 shadow-2xl rounded-2xl">
               <CardContent className="p-6">
                 <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => setIsLogin(value === 'login')}>
-                  <TabsList className="grid w-full grid-cols-2 mb-6">
-                    <TabsTrigger value="login">Logga in</TabsTrigger>
-                    <TabsTrigger value="signup">Registrera</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted">
+                    <TabsTrigger 
+                      value="login" 
+                      className="data-[state=active]:bg-parium-navy data-[state=active]:text-white"
+                    >
+                      Logga in
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="signup"
+                      className="data-[state=active]:bg-parium-navy data-[state=active]:text-white"
+                    >
+                      Registrera
+                    </TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="login">
