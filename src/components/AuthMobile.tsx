@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Eye, EyeOff, User, Building2 } from 'lucide-react';
+import { Eye, EyeOff, User, Building2, Mail, Key, Phone } from 'lucide-react';
 
 interface AuthMobileProps {
   isPasswordReset: boolean;
@@ -27,31 +27,140 @@ const AuthMobile = ({
   setConfirmPassword, 
   handlePasswordReset 
 }: AuthMobileProps) => {
+  const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
+  const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [company, setCompany] = useState('');
+  const [jobTitle, setJobTitle] = useState('');
   const [role, setRole] = useState<'job_seeker' | 'employer'>('job_seeker');
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(0);
   const [loading, setLoading] = useState(false);
   const [showResend, setShowResend] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
 
-  const { signIn, signUp, resendConfirmation } = useAuth();
+  const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Popular email domains for suggestions (Swedish and international)
+  const popularDomains = [
+    '@gmail.com', '@gmail.se', '@hotmail.com', '@hotmail.se', '@outlook.com', '@outlook.se',
+    '@yahoo.com', '@yahoo.se', '@icloud.com', '@live.se', '@live.com', '@telia.com', '@spray.se',
+    '@bredband2.com', '@comhem.se', '@me.com', '@msn.com', '@aol.com', '@protonmail.com', 
+    '@yandex.com', '@mail.ru'
+  ];
+
+  // Handle email input with suggestions
+  const handleEmailChange = (value: string) => {
+    setEmail(value);
+    
+    if (value.includes('@')) {
+      const [localPart, domainPart] = value.split('@');
+      
+      if (domainPart.length === 0) {
+        const suggestions = popularDomains.map(domain => localPart + domain);
+        setEmailSuggestions(suggestions);
+        setShowEmailSuggestions(true);
+      } else {
+        const filteredDomains = popularDomains.filter(domain => {
+          const domainWithoutAt = domain.substring(1);
+          return domainWithoutAt.toLowerCase().startsWith(domainPart.toLowerCase());
+        });
+        
+        if (filteredDomains.length > 0) {
+          const suggestions = filteredDomains.map(domain => localPart + domain);
+          setEmailSuggestions(suggestions);
+          setShowEmailSuggestions(true);
+        } else {
+          setShowEmailSuggestions(false);
+        }
+      }
+    } else {
+      setShowEmailSuggestions(false);
+    }
+  };
+
+  // Smart phone validation for Swedish numbers
+  const validatePhoneNumber = (phoneNumber: string) => {
+    if (!phoneNumber.trim()) return { isValid: true, error: '' };
+    
+    const cleaned = phoneNumber.replace(/[^\d+]/g, '');
+    let isSwedish = false;
+    let digitsOnly = '';
+    
+    if (cleaned.startsWith('+46')) {
+      isSwedish = true;
+      digitsOnly = cleaned.substring(3);
+    } else if (cleaned.startsWith('0046')) {
+      isSwedish = true;
+      digitsOnly = cleaned.substring(4);
+    } else if (cleaned.startsWith('0')) {
+      isSwedish = true;
+      digitsOnly = cleaned.substring(1);
+    } else if (cleaned.match(/^\d+$/)) {
+      if (cleaned.length >= 9 && cleaned.length <= 11) {
+        isSwedish = true;
+        digitsOnly = cleaned.startsWith('0') ? cleaned.substring(1) : cleaned;
+      }
+    }
+    
+    if (isSwedish) {
+      if (digitsOnly.length !== 9) {
+        return {
+          isValid: false,
+          error: `Svenska telefonnummer ska ha 10 siffror (du har ${digitsOnly.length + 1})`
+        };
+      }
+    }
+    
+    return { isValid: true, error: '' };
+  };
+
+  const handlePhoneChange = (value: string) => {
+    setPhone(value);
+    const validation = validatePhoneNumber(value);
+    setPhoneError(validation.error);
+  };
+
+  // Password strength calculation
+  const calculatePasswordStrength = (password: string) => {
+    let strength = 0;
+    if (password.length >= 8) strength += 1;
+    if (/[A-Z]/.test(password)) strength += 1;
+    if (/[a-z]/.test(password)) strength += 1;
+    if (/[0-9]/.test(password)) strength += 1;
+    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+    return strength;
+  };
+
+  const handlePasswordChange = (newPassword: string) => {
+    setPassword(newPassword);
+    setPasswordStrength(calculatePasswordStrength(newPassword));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setShowResend(false);
+    setShowResetPassword(false);
 
     try {
       if (isLogin) {
         const result = await signIn(email, password);
-        if (result.error?.code === 'email_not_confirmed') {
-          setShowResend(true);
+        
+        if (result.error) {
+          if (result.error.code === 'email_not_confirmed') {
+            setShowResend(true);
+          } else if (result.error.message === 'Invalid login credentials') {
+            setShowResetPassword(true);
+          }
         }
       } else {
         const result = await signUp(email, password, {
@@ -60,6 +169,7 @@ const AuthMobile = ({
           last_name: lastName,
           phone: phone
         });
+        
         if (!result.error) {
           setShowResend(true);
         }
@@ -75,6 +185,20 @@ const AuthMobile = ({
     if (!email) return;
     setLoading(true);
     await resendConfirmation(email);
+    setLoading(false);
+  };
+
+  const handleResetPassword = async () => {
+    if (!email) {
+      toast({
+        title: "E-post krävs",
+        description: "Ange din e-postadress först",
+        variant: "destructive"
+      });
+      return;
+    }
+    setLoading(true);
+    await resetPassword(email);
     setLoading(false);
   };
 
@@ -186,25 +310,48 @@ const AuthMobile = ({
 
                   <TabsContent value="login">
                     <form onSubmit={handleSubmit} className="space-y-4">
-                      <div>
-                        <Label htmlFor="email">E-post</Label>
+                      <div className="relative">
+                        <Label htmlFor="email">
+                          <Mail className="h-4 w-4 inline mr-2" />
+                          E-post
+                        </Label>
                         <Input
                           id="email"
                           type="email"
                           value={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          onChange={(e) => handleEmailChange(e.target.value)}
                           required
                           className="mt-1"
                         />
+                        {showEmailSuggestions && emailSuggestions.length > 0 && (
+                          <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-40 overflow-y-auto">
+                            {emailSuggestions.slice(0, 5).map((suggestion, index) => (
+                              <button
+                                key={index}
+                                type="button"
+                                className="w-full px-3 py-2 text-left hover:bg-muted text-sm"
+                                onClick={() => {
+                                  setEmail(suggestion);
+                                  setShowEmailSuggestions(false);
+                                }}
+                              >
+                                {suggestion}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <div>
-                        <Label htmlFor="password">Lösenord</Label>
+                        <Label htmlFor="password">
+                          <Key className="h-4 w-4 inline mr-2" />
+                          Lösenord
+                        </Label>
                         <div className="relative mt-1">
                           <Input
                             id="password"
                             type={showPassword ? 'text' : 'password'}
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={(e) => handlePasswordChange(e.target.value)}
                             required
                           />
                           <Button
@@ -221,6 +368,20 @@ const AuthMobile = ({
                       <Button type="submit" className="w-full" disabled={loading}>
                         {loading ? 'Loggar in...' : 'Logga in'}
                       </Button>
+                      
+                      {showResetPassword && (
+                        <div className="mt-4 p-3 bg-muted/50 rounded-lg text-center">
+                          <p className="text-sm mb-2">Glömt lösenordet?</p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleResetPassword}
+                            disabled={loading}
+                          >
+                            Återställ lösenord
+                          </Button>
+                        </div>
+                      )}
                     </form>
                   </TabsContent>
 
@@ -248,35 +409,65 @@ const AuthMobile = ({
                           />
                         </div>
                       </div>
-                      <div>
-                        <Label htmlFor="email">E-post</Label>
+                      <div className="relative">
+                        <Label htmlFor="email">
+                          <Mail className="h-4 w-4 inline mr-2" />
+                          E-post
+                        </Label>
                         <Input
                           id="email"
                           type="email"
                           value={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          onChange={(e) => handleEmailChange(e.target.value)}
                           required
                           className="mt-1"
                         />
+                        {showEmailSuggestions && emailSuggestions.length > 0 && (
+                          <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-40 overflow-y-auto">
+                            {emailSuggestions.slice(0, 5).map((suggestion, index) => (
+                              <button
+                                key={index}
+                                type="button"
+                                className="w-full px-3 py-2 text-left hover:bg-muted text-sm"
+                                onClick={() => {
+                                  setEmail(suggestion);
+                                  setShowEmailSuggestions(false);
+                                }}
+                              >
+                                {suggestion}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <div>
-                        <Label htmlFor="phone">Telefon</Label>
+                        <Label htmlFor="phone">
+                          <Phone className="h-4 w-4 inline mr-2" />
+                          Telefon
+                        </Label>
                         <Input
                           id="phone"
                           type="tel"
                           value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
+                          onChange={(e) => handlePhoneChange(e.target.value)}
                           className="mt-1"
+                          placeholder="070-123 45 67"
                         />
+                        {phoneError && (
+                          <p className="text-destructive text-xs mt-1">{phoneError}</p>
+                        )}
                       </div>
                       <div>
-                        <Label htmlFor="password">Lösenord</Label>
+                        <Label htmlFor="password">
+                          <Key className="h-4 w-4 inline mr-2" />
+                          Lösenord
+                        </Label>
                         <div className="relative mt-1">
                           <Input
                             id="password"
                             type={showPassword ? 'text' : 'password'}
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={(e) => handlePasswordChange(e.target.value)}
                             required
                           />
                           <Button
@@ -289,6 +480,31 @@ const AuthMobile = ({
                             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                           </Button>
                         </div>
+                        {password && (
+                          <div className="mt-2">
+                            <div className="flex items-center gap-1">
+                              {[...Array(5)].map((_, i) => (
+                                <div
+                                  key={i}
+                                  className={`h-1 flex-1 rounded ${
+                                    i < passwordStrength
+                                      ? passwordStrength < 3
+                                        ? 'bg-destructive'
+                                        : passwordStrength < 5
+                                        ? 'bg-yellow-500'
+                                        : 'bg-green-500'
+                                      : 'bg-muted'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {passwordStrength < 3 && 'Svagt lösenord'}
+                              {passwordStrength >= 3 && passwordStrength < 5 && 'Medel lösenord'}
+                              {passwordStrength >= 5 && 'Starkt lösenord'}
+                            </p>
+                          </div>
+                        )}
                       </div>
                       
                       <div>
