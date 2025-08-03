@@ -126,6 +126,48 @@ export type Database = {
           },
         ]
       }
+      organizations: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          max_recruiters: number | null
+          name: string
+          org_number: string | null
+          subscription_plan: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          max_recruiters?: number | null
+          name: string
+          org_number?: string | null
+          subscription_plan?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          max_recruiters?: number | null
+          name?: string
+          org_number?: string | null
+          subscription_plan?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       Parium: {
         Row: {
           created_at: string
@@ -152,6 +194,7 @@ export type Database = {
           last_name: string | null
           location: string | null
           org_number: string | null
+          organization_id: string | null
           phone: string | null
           profile_image_url: string | null
           role: Database["public"]["Enums"]["user_role"]
@@ -169,6 +212,7 @@ export type Database = {
           last_name?: string | null
           location?: string | null
           org_number?: string | null
+          organization_id?: string | null
           phone?: string | null
           profile_image_url?: string | null
           role: Database["public"]["Enums"]["user_role"]
@@ -186,6 +230,7 @@ export type Database = {
           last_name?: string | null
           location?: string | null
           org_number?: string | null
+          organization_id?: string | null
           phone?: string | null
           profile_image_url?: string | null
           role?: Database["public"]["Enums"]["user_role"]
@@ -193,7 +238,53 @@ export type Database = {
           user_id?: string
           video_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          organization_id: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          organization_id?: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          organization_id?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -203,7 +294,12 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      user_role: "job_seeker" | "employer"
+      user_role:
+        | "super_admin"
+        | "company_admin"
+        | "recruiter"
+        | "job_seeker"
+        | "employer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -331,7 +427,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      user_role: ["job_seeker", "employer"],
+      user_role: [
+        "super_admin",
+        "company_admin",
+        "recruiter",
+        "job_seeker",
+        "employer",
+      ],
     },
   },
 } as const
