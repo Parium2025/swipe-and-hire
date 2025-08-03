@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useEffect } from 'react';
 import { Mail, Key, Users, Target, Zap, Eye, EyeOff, User, Building2, Phone } from 'lucide-react';
-import pariumMobileBg from '@/assets/parium-mobile-bg.jpg';
+import modernMobileBgParium from '@/assets/modern-mobile-bg-parium.jpg';
 import AnimatedIntro from '@/components/AnimatedIntro';
 
 const Auth = () => {
@@ -263,8 +263,8 @@ const Auth = () => {
             {/* Modern animated mobile background */}
             <div className="absolute inset-0">
               <div 
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40 animate-pulse"
-                style={{ backgroundImage: `url(${pariumMobileBg})` }}
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30 animate-pulse"
+                style={{ backgroundImage: `url(${modernMobileBgParium})` }}
               />
               <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
               
