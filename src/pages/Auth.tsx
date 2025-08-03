@@ -258,204 +258,8 @@ const Auth = () => {
         }} />
       ) : (
         <>
-          {/* Mobile Layout */}
-          <div className="lg:hidden min-h-screen bg-gradient-parium p-4 flex flex-col">
-            {/* Mobile Header */}
-            <div className="flex flex-col items-center text-center pt-8 pb-6">
-              <img 
-                src="/lovable-uploads/3e52da4e-167e-4ebf-acfb-6a70a68cfaef.png" 
-                alt="Parium" 
-                className="h-12 w-auto mb-4"
-              />
-              <h1 className="text-2xl font-bold text-primary-foreground">
-                Välkommen till Parium
-              </h1>
-              <p className="text-primary-foreground/80 text-sm mt-2">
-                Framtiden börjar med ett swipe
-              </p>
-            </div>
-
-            {/* Mobile Auth Form */}
-            <div className="flex-1 flex items-center justify-center">
-              <div className="w-full max-w-sm">
-                <Card className="bg-background/95 backdrop-blur border border-white/20 shadow-xl rounded-2xl">
-                  <CardContent className="p-6">
-                    {isPasswordReset ? (
-                      <form onSubmit={handlePasswordReset} className="space-y-4">
-                        <div className="text-center mb-6">
-                          <h2 className="text-xl font-semibold">Nytt lösenord</h2>
-                        </div>
-                        <div className="space-y-4">
-                          <div>
-                            <Label htmlFor="new-password">Nytt lösenord</Label>
-                            <Input
-                              id="new-password"
-                              type="password"
-                              value={newPassword}
-                              onChange={(e) => setNewPassword(e.target.value)}
-                              required
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="confirm-password">Bekräfta lösenord</Label>
-                            <Input
-                              id="confirm-password"
-                              type="password"
-                              value={confirmPassword}
-                              onChange={(e) => setConfirmPassword(e.target.value)}
-                              required
-                            />
-                          </div>
-                          <Button type="submit" className="w-full" disabled={loading}>
-                            {loading ? 'Uppdaterar...' : 'Uppdatera lösenord'}
-                          </Button>
-                        </div>
-                      </form>
-                    ) : (
-                      <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => setIsLogin(value === 'login')}>
-                        <TabsList className="grid w-full grid-cols-2 mb-6">
-                          <TabsTrigger value="login">Logga in</TabsTrigger>
-                          <TabsTrigger value="signup">Registrera</TabsTrigger>
-                        </TabsList>
-                        
-                        <TabsContent value="login">
-                          <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                              <Label htmlFor="email">E-post</Label>
-                              <Input
-                                id="email"
-                                type="email"
-                                value={email}
-                                onChange={(e) => handleEmailChange(e.target.value)}
-                                placeholder="din.email@gmail.com"
-                                required
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="password">Lösenord</Label>
-                              <Input
-                                id="password"
-                                type="password"
-                                value={password}
-                                onChange={(e) => handlePasswordChange(e.target.value)}
-                                required
-                              />
-                            </div>
-                            <Button type="submit" className="w-full" disabled={loading}>
-                              {loading ? 'Loggar in...' : 'Logga in'}
-                            </Button>
-                          </form>
-                        </TabsContent>
-                        
-                        <TabsContent value="signup">
-                          <form onSubmit={handleSubmit} className="space-y-4">
-                            <div className="space-y-4">
-                              <div>
-                                <Label>Jag är</Label>
-                                <RadioGroup
-                                  value={role}
-                                  onValueChange={(value: 'job_seeker' | 'employer') => setRole(value)}
-                                  className="flex space-x-4 mt-2"
-                                >
-                                  <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="job_seeker" id="job_seeker" />
-                                    <Label htmlFor="job_seeker">Jobbs&ouml;kare</Label>
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="employer" id="employer" />
-                                    <Label htmlFor="employer">Företag</Label>
-                                  </div>
-                                </RadioGroup>
-                              </div>
-                              
-                              <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                  <Label htmlFor="firstName">Förnamn</Label>
-                                  <Input
-                                    id="firstName"
-                                    value={firstName}
-                                    onChange={(e) => setFirstName(e.target.value)}
-                                    required
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="lastName">Efternamn</Label>
-                                  <Input
-                                    id="lastName"
-                                    value={lastName}
-                                    onChange={(e) => setLastName(e.target.value)}
-                                    required
-                                  />
-                                </div>
-                              </div>
-                              
-                              <div>
-                                <Label htmlFor="email">E-post</Label>
-                                <Input
-                                  id="email"
-                                  type="email"
-                                  value={email}
-                                  onChange={(e) => handleEmailChange(e.target.value)}
-                                  placeholder="din.email@gmail.com"
-                                  required
-                                />
-                              </div>
-                              
-                              <div>
-                                <Label htmlFor="password">Lösenord</Label>
-                                <Input
-                                  id="password"
-                                  type="password"
-                                  value={password}
-                                  onChange={(e) => handlePasswordChange(e.target.value)}
-                                  required
-                                />
-                              </div>
-                            </div>
-                            
-                            <Button type="submit" className="w-full" disabled={loading}>
-                              {loading ? 'Registrerar...' : 'Registrera'}
-                            </Button>
-                          </form>
-                        </TabsContent>
-                      </Tabs>
-                    )}
-                    
-                    {showResend && (
-                      <div className="mt-4 p-3 bg-secondary/10 rounded-lg">
-                        <p className="text-sm text-center mb-2">Bekräfta din e-post för att fortsätta</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="w-full"
-                          onClick={handleResendConfirmation}
-                        >
-                          Skicka igen
-                        </Button>
-                      </div>
-                    )}
-                    
-                    {showResetPassword && (
-                      <div className="mt-4 p-3 bg-accent/10 rounded-lg">
-                        <p className="text-sm text-center mb-2">Glömt lösenordet?</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="w-full"
-                          onClick={() => resetPassword(email)}
-                        >
-                          Återställ lösenord
-                        </Button>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </div>
-
-          {/* Desktop Layout */}
-          <div className="hidden lg:block relative min-h-screen bg-gradient-parium overflow-hidden">
+          {/* Hero Section */}
+          <div className="relative min-h-screen bg-gradient-parium overflow-hidden">
             {/* Modern animated mobile background */}
             <div className="absolute inset-0">
               <div 
@@ -499,7 +303,7 @@ const Auth = () => {
             
             <div className="relative z-10 min-h-screen flex">
               {/* Left side - Hero content */}
-              <div className="flex lg:w-1/2 flex-col justify-center px-12 text-primary-foreground">
+              <div className="hidden lg:flex lg:w-1/2 flex-col justify-center px-12 text-primary-foreground">
                 <div className="max-w-lg animate-fade-in">
                   {/* Logo with glow effect */}
                   <div className="mb-8">
@@ -601,334 +405,203 @@ const Auth = () => {
                           </CardDescription>
                         </CardHeader>
                       </div>
-                      <CardContent className="p-8 pt-6">
-                        {isPasswordReset ? (
-                          <form onSubmit={handlePasswordReset} className="space-y-4">
-                            <div className="text-center mb-6">
-                              <h3 className="text-lg font-semibold">Återställ ditt lösenord</h3>
-                              <p className="text-sm text-muted-foreground">
-                                Ange ditt nya lösenord nedan
-                              </p>
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="desktop-new-password">Nytt lösenord</Label>
-                              <Input
-                                id="desktop-new-password"
-                                type="password"
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                required
-                                minLength={6}
-                                placeholder="Minst 6 tecken"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="desktop-confirm-password">Bekräfta lösenord</Label>
-                              <Input
-                                id="desktop-confirm-password"
-                                type="password"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                required
-                                minLength={6}
-                                placeholder="Ange lösenordet igen"
-                              />
-                            </div>
-                            <Button type="submit" className="w-full" disabled={loading}>
-                              {loading ? 'Uppdaterar...' : 'Uppdatera lösenord'}
-                            </Button>
-                          </form>
-                        ) : (
-                          <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => setIsLogin(value === 'login')}>
-                            <TabsList className="grid w-full grid-cols-2 mb-6">
-                              <TabsTrigger value="login">Logga in</TabsTrigger>
-                              <TabsTrigger value="signup">Registrera</TabsTrigger>
-                            </TabsList>
-                            
-                            <TabsContent value="login">
-                              <form onSubmit={handleSubmit} className="space-y-4">
-                                <div className="space-y-2 relative">
-                                  <Label htmlFor="desktop-email">E-post</Label>
-                                  <Input
-                                    id="desktop-email"
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => handleEmailChange(e.target.value)}
-                                    onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 200)}
-                                    onFocus={() => {
-                                      if (email.includes('@')) {
-                                        const [, domainPart] = email.split('@');
-                                        if (domainPart.length > 0 && !email.includes('.')) {
-                                          setShowEmailSuggestions(true);
-                                        }
-                                      }
-                                    }}
-                                    required
-                                    placeholder="din.email@gmail.com"
-                                    className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                                  />
-                                  
-                                  {/* Email suggestions dropdown */}
-                                  {showEmailSuggestions && emailSuggestions.length > 0 && (
-                                    <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-40 overflow-y-auto">
-                                      {emailSuggestions.slice(0, 5).map((suggestion, index) => (
-                                        <button
-                                          key={index}
-                                          type="button"
-                                          className="w-full px-3 py-2 text-left hover:bg-accent text-sm transition-colors"
-                                          onClick={() => {
-                                            setEmail(suggestion);
-                                            setShowEmailSuggestions(false);
-                                          }}
-                                        >
-                                          {suggestion}
-                                        </button>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="space-y-2">
-                                  <Label htmlFor="desktop-password">Lösenord</Label>
-                                  <Input
-                                    id="desktop-password"
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                                  />
-                                </div>
-                                <Button 
-                                  type="submit" 
-                                  className="w-full py-6 bg-primary hover:bg-primary/90 transition-all duration-200" 
-                                  disabled={loading}
-                                >
-                                  {loading ? 'Loggar in...' : 'Logga in'}
-                                </Button>
-                              </form>
-                            </TabsContent>
-                            
-                            <TabsContent value="signup">
-                              <form onSubmit={handleSubmit} className="space-y-5">
-                                <div className="space-y-2">
-                                  <Label>Jag är</Label>
-                                  <RadioGroup
-                                    value={role}
-                                    onValueChange={(value: 'job_seeker' | 'employer') => setRole(value)}
-                                    className="flex space-x-4 mt-2"
-                                  >
-                                    <div className="flex items-center space-x-2">
-                                      <RadioGroupItem value="job_seeker" id="desktop_job_seeker" />
-                                      <Label htmlFor="desktop_job_seeker">Jobbs&ouml;kare</Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                      <RadioGroupItem value="employer" id="desktop_employer" />
-                                      <Label htmlFor="desktop_employer">Företag</Label>
-                                    </div>
-                                  </RadioGroup>
-                                </div>
-                                
-                                <div className="grid grid-cols-2 gap-3">
-                                  <div className="space-y-2">
-                                    <Label htmlFor="desktop-firstName" className="flex items-center gap-2">
-                                      <User className="h-4 w-4 text-muted-foreground" />
-                                      Förnamn
-                                    </Label>
-                                    <Input
-                                      id="desktop-firstName"
-                                      value={firstName}
-                                      onChange={(e) => setFirstName(e.target.value)}
-                                      required
-                                      placeholder="Förnamn"
-                                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                                    />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label htmlFor="desktop-lastName" className="flex items-center gap-2 opacity-0">
-                                      <User className="h-4 w-4" />
-                                      Placeholder
-                                    </Label>
-                                    <Input
-                                      id="desktop-lastName"
-                                      value={lastName}
-                                      onChange={(e) => setLastName(e.target.value)}
-                                      required
-                                      placeholder="Efternamn"
-                                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                                    />
-                                  </div>
-                                </div>
-                                
-                                <div className="space-y-2">
-                                  <Label htmlFor="desktop-phone" className="flex items-center gap-2">
-                                    <Phone className="h-4 w-4 text-muted-foreground" />
-                                    Telefonnummer
-                                  </Label>
-                                  <Input
-                                    id="desktop-phone"
-                                    type="tel"
-                                    value={phone}
-                                    onChange={(e) => handlePhoneChange(e.target.value)}
-                                    required
-                                    placeholder="070-123 45 65"
-                                    className={`transition-all duration-200 focus:ring-2 focus:ring-primary/20 ${phoneError ? 'border-destructive' : ''}`}
-                                  />
-                                  {phoneError && (
-                                    <p className="text-sm text-destructive mt-1">{phoneError}</p>
-                                  )}
-                                </div>
-                                
-                                <div className="space-y-2 relative">
-                                  <Label htmlFor="desktop-signup-email" className="flex items-center gap-2">
-                                    <Mail className="h-4 w-4 text-muted-foreground" />
-                                    E-post
-                                  </Label>
-                                  <Input
-                                    id="desktop-signup-email"
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => handleEmailChange(e.target.value)}
-                                    onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 200)}
-                                    required
-                                    placeholder="din.email@gmail.com"
-                                    className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                                  />
-                                  
-                                  {/* Email suggestions dropdown */}
-                                  {showEmailSuggestions && emailSuggestions.length > 0 && (
-                                    <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-40 overflow-y-auto">
-                                      {emailSuggestions.slice(0, 5).map((suggestion, index) => (
-                                        <button
-                                          key={index}
-                                          type="button"
-                                          className="w-full px-3 py-2 text-left hover:bg-accent text-sm transition-colors"
-                                          onClick={() => {
-                                            setEmail(suggestion);
-                                            setShowEmailSuggestions(false);
-                                          }}
-                                        >
-                                          {suggestion}
-                                        </button>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                                
-                                <div className="space-y-2 relative">
-                                  <Label htmlFor="desktop-signup-password" className="flex items-center gap-2">
-                                    <Key className="h-4 w-4 text-muted-foreground" />
-                                    Lösenord
-                                  </Label>
-                                  <div className="relative">
-                                    <Input
-                                      id="desktop-signup-password"
-                                      type={showPassword ? "text" : "password"}
-                                      value={password}
-                                      onChange={(e) => handlePasswordChange(e.target.value)}
-                                      required
-                                      minLength={6}
-                                      placeholder="Minst 6 tecken"
-                                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/20 pr-10"
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={() => setShowPassword(!showPassword)}
-                                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
-                                    >
-                                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                    </button>
-                                  </div>
-                                  
-                                  {/* Password strength indicator */}
-                                  {password && (
-                                    <div className="space-y-2">
-                                      <div className="flex space-x-1">
-                                        {[1, 2, 3, 4, 5].map((level) => (
-                                          <div
-                                            key={level}
-                                            className={`h-1 flex-1 rounded-full transition-colors ${
-                                              passwordStrength >= level
-                                                ? passwordStrength <= 2
-                                                  ? 'bg-destructive'
-                                                  : passwordStrength <= 3
-                                                  ? 'bg-warning'
-                                                  : 'bg-green-500'
-                                                : 'bg-muted'
-                                            }`}
-                                          />
-                                        ))}
-                                      </div>
-                                      <p className="text-xs text-muted-foreground">
-                                        {passwordStrength <= 2 && 'Svagt lösenord'}
-                                        {passwordStrength === 3 && 'Okej lösenord'}
-                                        {passwordStrength >= 4 && 'Starkt lösenord'}
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-                                
-                                <Button 
-                                  type="submit" 
-                                  className="w-full py-6 bg-primary hover:bg-primary/90 transition-all duration-200" 
-                                  disabled={loading || phoneError !== ''}
-                                >
-                                  {loading ? 'Registrerar...' : 'Registrera'}
-                                </Button>
-                              </form>
-                            </TabsContent>
-                          </Tabs>
-                        )}
+                  <CardContent className="p-8 pt-6">
+                    {isPasswordReset ? (
+                      // Password Reset Form
+                      <div className="space-y-4">
+                        <div className="text-center mb-6">
+                          <h3 className="text-lg font-semibold">Återställ ditt lösenord</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Ange ditt nya lösenord nedan
+                          </p>
+                        </div>
                         
-                        {showResend && (
-                          <div className="mt-6 p-4 bg-secondary/10 rounded-xl border border-secondary/20">
-                            <div className="text-center space-y-3">
-                              <div className="p-2 bg-secondary/20 rounded-full w-fit mx-auto">
-                                <Mail className="h-5 w-5 text-secondary" />
+                        <form onSubmit={handlePasswordReset} className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="newPassword">Nytt lösenord</Label>
+                            <Input
+                              id="newPassword"
+                              type="password"
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
+                              required
+                              minLength={6}
+                              placeholder="Minst 6 tecken"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="confirmPassword">Bekräfta lösenord</Label>
+                            <Input
+                              id="confirmPassword"
+                              type="password"
+                              value={confirmPassword}
+                              onChange={(e) => setConfirmPassword(e.target.value)}
+                              required
+                              minLength={6}
+                              placeholder="Ange lösenordet igen"
+                            />
+                          </div>
+                          
+                          <Button 
+                            type="submit" 
+                            className="w-full" 
+                            disabled={loading}
+                          >
+                            {loading ? 'Uppdaterar...' : 'Uppdatera lösenord'}
+                          </Button>
+                        </form>
+                      </div>
+                    ) : (
+                      // Normal Login/Signup Forms
+                      <>
+                        <Tabs value={isLogin ? 'login' : 'signup'} className="w-full">
+                          <TabsList className="grid w-full grid-cols-2 mb-6">
+                            <TabsTrigger 
+                              value="login" 
+                              onClick={() => setIsLogin(true)}
+                              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                            >
+                              Logga in
+                            </TabsTrigger>
+                            <TabsTrigger 
+                              value="signup" 
+                              onClick={() => setIsLogin(false)}
+                              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                            >
+                              Registrera
+                            </TabsTrigger>
+                          </TabsList>
+                          
+                          <TabsContent value="login">
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                              <div className="space-y-2 relative">
+                                <Label htmlFor="email">E-post</Label>
+                                <Input
+                                  id="email"
+                                  type="email"
+                                  value={email}
+                                  onChange={(e) => handleEmailChange(e.target.value)}
+                                  onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 200)}
+                                  onFocus={() => {
+                                    if (email.includes('@')) {
+                                      const [, domainPart] = email.split('@');
+                                      if (domainPart.length > 0 && !email.includes('.')) {
+                                        setShowEmailSuggestions(true);
+                                      }
+                                    }
+                                  }}
+                                  required
+                                  placeholder="din.email@gmail.com"
+                                  className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                                />
+                                
+                                {/* Email suggestions dropdown */}
+                                {showEmailSuggestions && emailSuggestions.length > 0 && (
+                                  <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-40 overflow-y-auto">
+                                    {emailSuggestions.slice(0, 5).map((suggestion, index) => (
+                                      <button
+                                        key={index}
+                                        type="button"
+                                        className="w-full px-3 py-2 text-left hover:bg-accent text-sm transition-colors"
+                                        onClick={() => {
+                                          setEmail(suggestion);
+                                          setShowEmailSuggestions(false);
+                                        }}
+                                      >
+                                        {suggestion}
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
-                              <div>
-                                <h3 className="font-semibold">Bekräfta din e-post</h3>
-                                <p className="text-sm text-muted-foreground">
-                                  Vi har skickat en bekräftelselänk till din e-post
-                                </p>
+                              <div className="space-y-2">
+                                <Label htmlFor="password">Lösenord</Label>
+                                <Input
+                                  id="password"
+                                  type="password"
+                                  value={password}
+                                  onChange={(e) => setPassword(e.target.value)}
+                                  required
+                                  className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                                />
                               </div>
                               <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="w-full"
-                                onClick={handleResendConfirmation}
+                                type="submit" 
+                                className="w-full py-6 bg-primary hover:bg-primary/90 transition-all duration-200" 
                                 disabled={loading}
                               >
-                                {loading ? 'Skickar...' : 'Skicka igen'}
+                                {loading ? 'Loggar in...' : 'Logga in'}
                               </Button>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {showResetPassword && (
-                          <div className="mt-6 p-4 bg-accent/10 rounded-xl border border-accent/20">
-                            <div className="text-center space-y-3">
-                              <div className="p-2 bg-accent/20 rounded-full w-fit mx-auto">
-                                <Key className="h-5 w-5 text-accent" />
+                            </form>
+                          </TabsContent>
+                          
+                           <TabsContent value="signup">
+                            <form onSubmit={handleSubmit} className="space-y-5">
+                              {/* Namn på samma rad */}
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                  <Label htmlFor="firstName" className="flex items-center gap-2">
+                                    <User className="h-4 w-4 text-muted-foreground" />
+                                    Förnamn
+                                  </Label>
+                                  <Input
+                                    id="firstName"
+                                    value={firstName}
+                                    onChange={(e) => setFirstName(e.target.value)}
+                                    required
+                                    placeholder="Förnamn"
+                                    className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="lastName" className="flex items-center gap-2 opacity-0">
+                                    <User className="h-4 w-4" />
+                                    Placeholder
+                                  </Label>
+                                  <Input
+                                    id="lastName"
+                                    value={lastName}
+                                    onChange={(e) => setLastName(e.target.value)}
+                                    required
+                                    placeholder="Efternamn"
+                                    className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                                  />
+                                </div>
                               </div>
-                              <div>
-                                <h3 className="font-semibold">Glömt lösenordet?</h3>
-                                <p className="text-sm text-muted-foreground">
-                                  Vi skickar en återställningslänk till din e-post
-                                </p>
+                              
+                              <div className="space-y-2">
+                                <Label htmlFor="phone" className="flex items-center gap-2">
+                                  <Phone className="h-4 w-4 text-muted-foreground" />
+                                  Telefonnummer
+                                </Label>
+                                <Input
+                                  id="phone"
+                                  type="tel"
+                                  value={phone}
+                                  onChange={(e) => handlePhoneChange(e.target.value)}
+                                  required
+                                  placeholder="070-123 45 65"
+                                  className={`transition-all duration-200 focus:ring-2 focus:ring-primary/20 ${phoneError ? 'border-destructive' : ''}`}
+                                />
+                                {phoneError && (
+                                  <p className="text-sm text-destructive mt-1">{phoneError}</p>
+                                )}
                               </div>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="w-full"
-                                onClick={() => resetPassword(email)}
-                                disabled={loading || !email}
-                              >
-                                {loading ? 'Skickar...' : 'Återställ lösenord'}
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-                      </CardContent>
+                              
+                              <div className="space-y-2 relative">
+                                <Label htmlFor="signup-email" className="flex items-center gap-2">
+                                  <Mail className="h-4 w-4 text-muted-foreground" />
+                                  E-post
+                                </Label>
+                                <Input
+                                  id="signup-email"
+                                  type="email"
+                                  value={email}
+                                  onChange={(e) => handleEmailChange(e.target.value)}
+                                  onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 200)}
+                                  onFocus={() => {
+                                    if (email.includes('@')) {
                                       const [, domainPart] = email.split('@');
                                       if (domainPart.length > 0 && !email.includes('.')) {
                                         setShowEmailSuggestions(true);
