@@ -27,7 +27,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const emailResponse = await resend.emails.send({
-      from: "Parium <noreply@send.parium.se>",
+      from: "Parium <onboarding@resend.dev>",
       to: [user.email],
       subject: "Återställ ditt lösenord - Parium",
       html: `
