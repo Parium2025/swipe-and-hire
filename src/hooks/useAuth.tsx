@@ -3,12 +3,30 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
-type UserRole = 'job_seeker' | 'employer';
+export type UserRole = 'super_admin' | 'company_admin' | 'recruiter' | 'job_seeker' | 'employer';
+
+interface UserRoleData {
+  id: string;
+  user_id: string;
+  role: UserRole;
+  organization_id?: string;
+  is_active: boolean;
+}
+
+interface Organization {
+  id: string;
+  name: string;
+  org_number?: string;
+  website?: string;
+  description?: string;
+  logo_url?: string;
+  subscription_plan: string;
+  max_recruiters: number;
+}
 
 interface Profile {
   id: string;
   user_id: string;
-  role: UserRole;
   first_name?: string;
   last_name?: string;
   phone?: string;
@@ -18,14 +36,18 @@ interface Profile {
   location?: string;
   profile_image_url?: string;
   video_url?: string;
+  cv_url?: string;
+  organization_id?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
+  userRole: UserRoleData | null;
+  organization: Organization | null;
   loading: boolean;
-  signUp: (email: string, password: string, userData: { role: UserRole; first_name: string; last_name: string; phone?: string }) => Promise<{ error?: any }>;
+  signUp: (email: string, password: string, userData: { role: UserRole; first_name: string; last_name: string; phone?: string; organization_id?: string }) => Promise<{ error?: any }>;
   signIn: (email: string, password: string) => Promise<{ error?: any }>;
   signInWithPhone: (phone: string) => Promise<{ error?: any }>;
   verifyOtp: (phone: string, otp: string) => Promise<{ error?: any }>;
@@ -34,7 +56,10 @@ interface AuthContextType {
   resendConfirmation: (email: string) => Promise<{ error?: any }>;
   resetPassword: (email: string) => Promise<{ error?: any }>;
   updatePassword: (newPassword: string) => Promise<{ error?: any }>;
-  switchRole: (newRole: UserRole) => Promise<{ error?: any }>;
+  hasRole: (role: UserRole) => boolean;
+  isSuperAdmin: () => boolean;
+  isCompanyUser: () => boolean;
+  getRedirectPath: () => string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,6 +68,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [userRole, setUserRole] = useState<UserRoleData | null>(null);
+  const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -61,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        fetchProfile(session.user.id).then(() => {
+        fetchUserData(session.user.id).then(() => {
           if (mounted) setLoading(false);
         });
       } else {
@@ -87,11 +114,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (session?.user) {
           setTimeout(() => {
             if (mounted) {
-              fetchProfile(session.user.id);
+              fetchUserData(session.user.id);
             }
           }, 0);
         } else {
           setProfile(null);
+          setUserRole(null);
+          setOrganization(null);
         }
       }
     );
@@ -102,27 +131,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-
-  const fetchProfile = async (userId: string) => {
+  const fetchUserData = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      // Fetch profile
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
         .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching profile:', error);
-        return;
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+      } else {
+        setProfile(profileData);
       }
 
-      setProfile(data);
+      // Fetch user role
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .maybeSingle();
+
+      if (roleError) {
+        console.error('Error fetching user role:', roleError);
+      } else {
+        setUserRole(roleData);
+
+        // Fetch organization if user has one
+        if (roleData?.organization_id) {
+          const { data: orgData, error: orgError } = await supabase
+            .from('organizations')
+            .select('*')
+            .eq('id', roleData.organization_id)
+            .maybeSingle();
+
+          if (orgError) {
+            console.error('Error fetching organization:', orgError);
+          } else {
+            setOrganization(orgData);
+          }
+        }
+      }
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      console.error('Error fetching user data:', error);
     }
   };
 
-  const signUp = async (email: string, password: string, userData: { role: UserRole; first_name: string; last_name: string; phone?: string }) => {
+  const signUp = async (email: string, password: string, userData: { role: UserRole; first_name: string; last_name: string; phone?: string; organization_id?: string }) => {
     try {
       const redirectUrl = `${window.location.origin}/`;
       
@@ -286,6 +344,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setSession(null);
     setProfile(null);
+    setUserRole(null);
+    setOrganization(null);
     toast({
       title: "Utloggad",
       description: "Du har loggats ut."
@@ -311,7 +371,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Refresh profile
-      await fetchProfile(user.id);
+      await fetchUserData(user.id);
       
       toast({
         title: "Profil uppdaterad",
@@ -422,35 +482,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const switchRole = async (newRole: UserRole) => {
-    if (!user) return { error: 'No user logged in' };
+  // Helper functions for role checking
+  const hasRole = (role: UserRole): boolean => {
+    return userRole?.role === role;
+  };
 
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ role: newRole })
-        .eq('user_id', user.id);
+  const isSuperAdmin = (): boolean => {
+    return hasRole('super_admin');
+  };
 
-      if (error) {
-        toast({
-          title: "Fel vid rollbyte",
-          description: error.message,
-          variant: "destructive"
-        });
-        return { error };
-      }
+  const isCompanyUser = (): boolean => {
+    return hasRole('company_admin') || hasRole('recruiter') || hasRole('employer');
+  };
 
-      // Refresh profile
-      await fetchProfile(user.id);
-      
-      toast({
-        title: "Roll uppdaterad!",
-        description: `Du är nu registrerad som ${newRole === 'employer' ? 'arbetsgivare' : 'jobbsökare'}.`
-      });
-
-      return {};
-    } catch (error) {
-      return { error };
+  const getRedirectPath = (): string => {
+    if (!userRole) return '/';
+    
+    switch (userRole.role) {
+      case 'super_admin':
+        return '/admin';
+      case 'company_admin':
+      case 'recruiter':
+      case 'employer':
+        return '/employer';
+      case 'job_seeker':
+        return '/jobs';
+      default:
+        return '/';
     }
   };
 
@@ -458,6 +516,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     session,
     profile,
+    userRole,
+    organization,
     loading,
     signUp,
     signIn,
@@ -468,7 +528,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     resendConfirmation,
     resetPassword,
     updatePassword,
-    switchRole
+    hasRole,
+    isSuperAdmin,
+    isCompanyUser,
+    getRedirectPath
   };
 
   return (

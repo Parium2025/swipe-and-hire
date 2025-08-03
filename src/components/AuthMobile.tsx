@@ -548,7 +548,6 @@ const AuthMobile = ({
                           </div>
                         )}
                       </div>
-                      
                       <div>
                         <Label>Jag är:</Label>
                         <RadioGroup 
@@ -568,10 +567,10 @@ const AuthMobile = ({
                             <Label htmlFor="employer" className="flex items-center cursor-pointer">
                               <Building2 className="h-4 w-4 mr-2" />
                               Arbetsgivare
-                            </Label>
-                          </div>
-                        </RadioGroup>
-                      </div>
+                             </Label>
+                           </div>
+                         </RadioGroup>
+                       </div>
                       
                       <Button type="submit" className="w-full bg-parium-navy hover:bg-parium-navy/90 text-white" disabled={loading}>
                         {loading ? 'Registrerar...' : 'Registrera'}
