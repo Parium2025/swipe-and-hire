@@ -262,10 +262,22 @@ const Auth = () => {
           <div className="relative min-h-screen bg-gradient-parium overflow-hidden">
             {/* Modern animated mobile background */}
             <div className="absolute inset-0">
+              {/* Telefon som bakgrund */}
               <div 
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80 animate-pulse"
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80"
                 style={{ backgroundImage: `url(${phoneWithPariumLogo})` }}
               />
+              
+              {/* Parium logga positionerad inuti telefonens skärm */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="relative top-8">
+                  <div 
+                    className="w-80 h-96 bg-cover bg-center bg-no-repeat opacity-60 rounded-3xl"
+                    style={{ backgroundImage: `url(/lovable-uploads/2c95d432-8011-484a-a974-f736c2ce709e.png)` }}
+                  />
+                </div>
+              </div>
+              
               <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
               
               {/* Blinkande ljus - högra hörnet */}
