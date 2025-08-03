@@ -136,12 +136,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
+        let errorTitle = "Registreringsfel";
+        let errorDescription = error.message;
+
+        // Handle specific error cases
+        if (error.message.includes("already been registered") || error.message.includes("already registered")) {
+          errorTitle = "E-post redan registrerad";
+          errorDescription = "Det finns redan ett konto med denna e-postadress. Försök logga in istället.";
+        } else if (error.message.includes("Password should be")) {
+          errorTitle = "Lösenordet är för svagt";
+          errorDescription = "Lösenordet måste vara minst 6 tecken långt.";
+        } else if (error.message.includes("Invalid email")) {
+          errorTitle = "Ogiltig e-postadress";
+          errorDescription = "Ange en giltig e-postadress.";
+        }
+
         toast({
-          title: "Registreringsfel",
-          description: error.message,
+          title: errorTitle,
+          description: errorDescription,
           variant: "destructive"
         });
-        return { error };
+        return { error: { ...error, userFriendlyMessage: errorDescription, isExistingUser: error.message.includes("already") } };
       }
 
       toast({
