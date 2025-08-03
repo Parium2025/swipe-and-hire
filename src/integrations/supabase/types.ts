@@ -27,6 +27,7 @@ export type Database = {
           id: string
           is_active: boolean
           location: string
+          organization_id: string | null
           requirements: string | null
           salary_max: number | null
           salary_min: number | null
@@ -47,6 +48,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           location: string
+          organization_id?: string | null
           requirements?: string | null
           salary_max?: number | null
           salary_min?: number | null
@@ -67,6 +69,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           location?: string
+          organization_id?: string | null
           requirements?: string | null
           salary_max?: number | null
           salary_min?: number | null
@@ -82,6 +85,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "job_postings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -291,7 +301,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_organization: {
+        Args: { user_uuid: string }
+        Returns: string
+      }
+      get_user_role: {
+        Args: { user_uuid: string; org_uuid?: string }
+        Returns: string
+      }
+      is_super_admin: {
+        Args: { user_uuid: string }
+        Returns: boolean
+      }
     }
     Enums: {
       user_role:
