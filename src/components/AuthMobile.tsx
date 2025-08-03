@@ -390,9 +390,14 @@ const AuthMobile = ({
                             size="sm"
                             onClick={handleResetPassword}
                             disabled={loading}
+                            className="mb-3"
                           >
                             Återställ lösenord
                           </Button>
+                          <div className="text-xs text-muted-foreground bg-secondary/10 p-2 rounded border-l-4 border-secondary">
+                            <p className="font-medium">💡 Tips:</p>
+                            <p>Mailen hamnar ofta i skräppost - kolla där också!</p>
+                          </div>
                         </div>
                       )}
                     </form>
@@ -552,9 +557,12 @@ const AuthMobile = ({
                 </Tabs>
 
                 {showResend && (
-                  <div className="mt-4 p-3 bg-secondary/10 rounded-lg text-center">
-                    <p className="text-sm mb-2">Kolla din e-post för bekräftelselänk</p>
-                    <p className="text-xs text-muted-foreground mb-3">OBS: Kolla även din skräppost - vi kanske gömmer oss där!</p>
+                  <div className="mt-4 p-4 bg-secondary/10 rounded-lg text-center border border-secondary/20">
+                    <p className="text-sm mb-2 font-medium">📧 Kolla din e-post för bekräftelselänk</p>
+                    <div className="bg-orange-50 border border-orange-200 rounded p-2 mb-3">
+                      <p className="text-xs text-orange-800 font-medium">⚠️ VIKTIGT</p>
+                      <p className="text-xs text-orange-700">Kolla även din skräppost - vi kanske gömmer oss där!</p>
+                    </div>
                     <Button
                       variant="outline"
                       size="sm"
