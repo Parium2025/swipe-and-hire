@@ -273,9 +273,6 @@ const AuthMobile = ({
         {/* Soft fade at bottom to prevent hard edges */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary-dark via-primary-dark/80 to-transparent"></div>
         
-        {/* Glowing sun effect - bottom right */}
-        <div className="absolute bottom-8 right-8 w-32 h-32 bg-gradient-radial from-secondary/40 via-accent/30 to-transparent rounded-full animate-pulse blur-xl" style={{ animationDuration: '4s' }}></div>
-        
         {/* Animated floating elements */}
         <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce" style={{ animationDuration: '2s' }}></div>
         <div className="absolute top-32 left-16 w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDuration: '2.5s' }}></div>
