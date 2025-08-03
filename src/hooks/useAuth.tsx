@@ -161,7 +161,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       toast({
         title: "Registrering lyckad",
-        description: "Kontrollera din e-post för att bekräfta ditt konto."
+        description: "Kontrollera din e-post för att bekräfta ditt konto. OBS: Kolla även din skräppost - vi kanske gömmer oss där!",
+        duration: 8000
       });
 
       // Send custom confirmation email
@@ -344,7 +345,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       toast({
         title: "Bekräftelsemail skickat!",
-        description: "Kontrollera din e-post för att bekräfta ditt konto."
+        description: "Kontrollera din e-post för att bekräfta ditt konto. OBS: Kolla även din skräppost - vi kanske gömmer oss där!",
+        duration: 8000
       });
 
       return {};
@@ -370,7 +372,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       toast({
         title: "Återställningsmail skickat!",
-        description: "Kontrollera din e-post för instruktioner om lösenordsåterställning."
+        description: "Kontrollera din e-post för instruktioner om lösenordsåterställning. OBS: Kolla även din skräppost - vi kanske gömmer oss där!",
+        duration: 8000
       });
 
       // Send custom reset email

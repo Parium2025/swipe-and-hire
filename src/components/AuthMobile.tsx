@@ -554,6 +554,7 @@ const AuthMobile = ({
                 {showResend && (
                   <div className="mt-4 p-3 bg-secondary/10 rounded-lg text-center">
                     <p className="text-sm mb-2">Kolla din e-post för bekräftelselänk</p>
+                    <p className="text-xs text-muted-foreground mb-3">OBS: Kolla även din skräppost - vi kanske gömmer oss där!</p>
                     <Button
                       variant="outline"
                       size="sm"

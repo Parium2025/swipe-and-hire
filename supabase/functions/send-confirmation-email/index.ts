@@ -216,7 +216,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const emailResponse = await resend.emails.send({
-      from: "Parium Team <noreply@send.parium.se>",
+      from: "Parium Team <noreply@resend.dev>",
       to: [email],
       subject: subject,
       html: htmlContent,
