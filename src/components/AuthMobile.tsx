@@ -273,26 +273,26 @@ const AuthMobile = ({
         {/* Soft fade at bottom to prevent hard edges */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary-dark via-primary-dark/80 to-transparent"></div>
         
-        {/* Animated floating elements */}
-        <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce" style={{ animationDuration: '2s' }}></div>
-        <div className="absolute top-32 left-16 w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDuration: '2.5s' }}></div>
-        <div className="absolute top-24 left-20 w-3 h-3 bg-secondary/20 rounded-full animate-bounce" style={{ animationDuration: '3s' }}></div>
+        {/* Animated floating elements - stable positions */}
+        <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full" style={{ animation: 'bounce 2s infinite', animationFillMode: 'both', animationDelay: '0s' }}></div>
+        <div className="absolute top-32 left-16 w-2 h-2 bg-accent/40 rounded-full" style={{ animation: 'bounce 2.5s infinite', animationFillMode: 'both', animationDelay: '0.5s' }}></div>
+        <div className="absolute top-24 left-20 w-3 h-3 bg-secondary/20 rounded-full" style={{ animation: 'bounce 3s infinite', animationFillMode: 'both', animationDelay: '1s' }}></div>
         
-        <div className="absolute bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full animate-bounce" style={{ animationDuration: '2.2s' }}></div>
-        <div className="absolute bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full animate-bounce" style={{ animationDuration: '2.8s' }}></div>
-        <div className="absolute bottom-36 right-24 w-2 h-2 bg-accent/35 rounded-full animate-bounce" style={{ animationDuration: '2.3s' }}></div>
+        <div className="absolute bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full" style={{ animation: 'bounce 2.2s infinite', animationFillMode: 'both', animationDelay: '0.2s' }}></div>
+        <div className="absolute bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full" style={{ animation: 'bounce 2.8s infinite', animationFillMode: 'both', animationDelay: '0.8s' }}></div>
+        <div className="absolute bottom-36 right-24 w-2 h-2 bg-accent/35 rounded-full" style={{ animation: 'bounce 2.3s infinite', animationFillMode: 'both', animationDelay: '0.3s' }}></div>
         
-        {/* Pulsing lights */}
-        <div className="absolute top-10 right-10 w-3 h-3 bg-secondary/40 rounded-full animate-pulse" style={{ animationDuration: '1.5s' }}></div>
-        <div className="absolute top-16 right-20 w-2 h-2 bg-accent/30 rounded-full animate-pulse" style={{ animationDuration: '2s' }}></div>
-        <div className="absolute top-12 left-8 w-3 h-3 bg-accent/40 rounded-full animate-pulse" style={{ animationDuration: '1.8s' }}></div>
+        {/* Pulsing lights - stable positions */}
+        <div className="absolute top-10 right-10 w-3 h-3 bg-secondary/40 rounded-full" style={{ animation: 'pulse 1.5s infinite', animationFillMode: 'both', animationDelay: '0s' }}></div>
+        <div className="absolute top-16 right-20 w-2 h-2 bg-accent/30 rounded-full" style={{ animation: 'pulse 2s infinite', animationFillMode: 'both', animationDelay: '0.4s' }}></div>
+        <div className="absolute top-12 left-8 w-3 h-3 bg-accent/40 rounded-full" style={{ animation: 'pulse 1.8s infinite', animationFillMode: 'both', animationDelay: '0.6s' }}></div>
         
-        {/* Small stars */}
-        <div className="absolute top-1/4 left-1/3 w-1 h-1 bg-accent/60 rounded-full animate-pulse" style={{ animationDuration: '3s' }}>
-          <div className="absolute inset-0 bg-accent/40 rounded-full animate-ping" style={{ animationDuration: '3s' }}></div>
+        {/* Small stars - stable positions */}
+        <div className="absolute top-1/4 left-1/3 w-1 h-1 bg-accent/60 rounded-full" style={{ animation: 'pulse 3s infinite', animationFillMode: 'both', animationDelay: '0s' }}>
+          <div className="absolute inset-0 bg-accent/40 rounded-full" style={{ animation: 'ping 3s infinite', animationFillMode: 'both', animationDelay: '0s' }}></div>
         </div>
-        <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-secondary/60 rounded-full animate-pulse" style={{ animationDuration: '2.5s' }}>
-          <div className="absolute inset-0 bg-secondary/40 rounded-full animate-ping" style={{ animationDuration: '2.5s' }}></div>
+        <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-secondary/60 rounded-full" style={{ animation: 'pulse 2.5s infinite', animationFillMode: 'both', animationDelay: '0.5s' }}>
+          <div className="absolute inset-0 bg-secondary/40 rounded-full" style={{ animation: 'ping 2.5s infinite', animationFillMode: 'both', animationDelay: '0.5s' }}></div>
         </div>
       </div>
 
