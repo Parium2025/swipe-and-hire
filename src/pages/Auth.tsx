@@ -263,7 +263,11 @@ const Auth = () => {
             {/* Modern animated mobile background */}
             <div className="absolute inset-0">
               <div 
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-90"
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80"
+                style={{ backgroundImage: `url(${phoneWithPariumLogo})` }}
+              />
+              <div 
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60"
                 style={{ backgroundImage: `url(/lovable-uploads/2c95d432-8011-484a-a974-f736c2ce709e.png)` }}
               />
               <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
