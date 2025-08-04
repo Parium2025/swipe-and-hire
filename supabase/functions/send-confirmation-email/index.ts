@@ -1,7 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const hookSecret = Deno.env.get('SEND_EMAIL_HOOK_SECRET') as string;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -36,7 +38,24 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const requestBody = await req.json();
+    const payload = await req.text();
+    const headers = Object.fromEntries(req.headers);
+    
+    // Verify webhook signature if hook secret is available
+    if (hookSecret) {
+      const wh = new Webhook(hookSecret);
+      try {
+        wh.verify(payload, headers);
+      } catch (err) {
+        console.error("Webhook verification failed:", err);
+        return new Response(JSON.stringify({ error: "Webhook verification failed" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+    }
+
+    const requestBody = JSON.parse(payload);
     
     // Check if this is a Supabase auth webhook or direct API call
     let email: string;
@@ -216,7 +235,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const emailResponse = await resend.emails.send({
-      from: "Parium Team <noreply@resend.dev>",
+      from: "Parium Team <noreply@parium.se>",
       to: [email],
       subject: subject,
       html: htmlContent,
