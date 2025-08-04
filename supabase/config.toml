@@ -11,7 +11,7 @@ verify_jwt = false
 
 [auth]
 enable_signup = true
-enable_confirmations = true
+enable_confirmations = false
 [auth.email.template.invite]
 subject = "Välkommen till Parium"
 content_path = "./supabase/templates/invite.html"
