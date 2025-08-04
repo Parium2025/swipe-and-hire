@@ -24,7 +24,7 @@ content_path = "./supabase/templates/confirmation.html"
 subject = "Återställ ditt lösenord - Parium"  
 content_path = "./supabase/templates/recovery.html"
 
-[auth.external.email]
+[auth.hook.send_email]
 enabled = true
-url = "https://rvtsfnaqlnggfkoqygbm.supabase.co/functions/v1/send-confirmation-email"
-secret = "env(SEND_EMAIL_HOOK_SECRET)"
+uri = "https://rvtsfnaqlnggfkoqygbm.supabase.co/functions/v1/send-confirmation-email"
+secrets = ["SEND_EMAIL_HOOK_SECRET"]
