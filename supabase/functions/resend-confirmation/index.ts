@@ -114,21 +114,11 @@ const handler = async (req: Request): Promise<Response> => {
                   <tr>
                     <td style="background-color: #1E3A8A; padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0;">
                       
-                      <table border="0" cellpadding="0" cellspacing="0" width="100%">
-                        <tr>
-                          <td align="center">
-                            <div style="width: 80px; height: 80px; background-color: rgba(255,255,255,0.2); border-radius: 40px; margin: 0 auto 24px auto; line-height: 80px; text-align: center;">
-                              <span style="font-family: Arial, Helvetica, sans-serif; font-size: 36px; font-weight: bold; color: #ffffff;">P</span>
-                            </div>
-                          </td>
-                        </tr>
-                      </table>
-                      
-                      <h1 style="margin: 0 0 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 24px; font-weight: bold; color: #ffffff;">
-                        Ny bekräftelselänk 📬
+                      <h1 style="margin: 0 0 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 28px; font-weight: bold; color: #ffffff;">
+                        Parium
                       </h1>
                       <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #ffffff;">
-                        Din nya bekräftelselänk är här!
+                        Framtiden börjar med ett swipe
                       </p>
                     </td>
                   </tr>

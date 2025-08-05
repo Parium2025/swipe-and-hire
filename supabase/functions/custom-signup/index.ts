@@ -132,11 +132,11 @@ const handler = async (req: Request): Promise<Response> => {
                   <tr>
                     <td style="background-color: #1E3A8A; padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0;">
                       
-                      <h1 style="margin: 0 0 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 24px; font-weight: bold; color: #ffffff;">
-                        Framtiden börjar med ett swipe.
+                      <h1 style="margin: 0 0 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 28px; font-weight: bold; color: #ffffff;">
+                        Parium
                       </h1>
                       <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #ffffff;">
-                        Välkommen till Parium!
+                        Framtiden börjar med ett swipe
                       </p>
                     </td>
                   </tr>
