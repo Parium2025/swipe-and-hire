@@ -65,20 +65,50 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await resend.emails.send({
       from: "Parium <noreply@parium.se>",
       to: [email],
-      subject: "Välkommen till Parium - Bekräfta din e-post",
+      subject: "Bekräfta ditt Parium-konto",
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #1a237e;">Välkommen till Parium!</h1>
-          <p>Tack för att du registrerade dig. Klicka på länken nedan för att bekräfta din e-postadress:</p>
-          <div style="text-align: center; margin: 32px 0;">
-            <a href="${confirmationUrl}" 
-               style="background-color: #1a237e; color: white; padding: 12px 24px; 
-                      text-decoration: none; border-radius: 6px; display: inline-block;">
-              Bekräfta e-post
-            </a>
-          </div>
-          <p>Om knappen inte fungerar, kopiera denna länk: ${confirmationUrl}</p>
-        </div>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Bekräfta ditt Parium-konto</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8fafc;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 40px 0;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin: 0 auto;">
+                  <tr>
+                    <td style="padding: 40px;">
+                      <h1 style="color: #1a237e; margin: 0 0 24px 0; font-size: 28px; font-weight: 600;">Välkommen till Parium!</h1>
+                      <p style="color: #475569; font-size: 16px; line-height: 24px; margin: 0 0 32px 0;">
+                        Tack för att du skapade ett konto. För att komma igång behöver du bekräfta din e-postadress genom att klicka på knappen nedan.
+                      </p>
+                      <div style="text-align: center; margin: 32px 0;">
+                        <a href="${confirmationUrl}" 
+                           style="background-color: #1a237e; color: white; padding: 16px 32px; 
+                                  text-decoration: none; border-radius: 8px; display: inline-block; 
+                                  font-weight: 600; font-size: 16px;">
+                          Bekräfta e-postadress
+                        </a>
+                      </div>
+                      <p style="color: #64748b; font-size: 14px; line-height: 20px; margin: 32px 0 0 0;">
+                        Om knappen inte fungerar kan du kopiera och klistra in denna länk i din webbläsare:<br>
+                        <span style="word-break: break-all; color: #1a237e;">${confirmationUrl}</span>
+                      </p>
+                      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0;">
+                      <p style="color: #94a3b8; font-size: 12px; margin: 0;">
+                        Detta e-postmeddelande skickades till ${email} eftersom du registrerade dig för ett Parium-konto.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
       `,
     });
 
