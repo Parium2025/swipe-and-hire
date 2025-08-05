@@ -12,6 +12,9 @@ verify_jwt = false
 [functions.custom-signup]
 verify_jwt = false
 
+[functions.delete-user]
+verify_jwt = false
+
 [functions.cleanup-expired-confirmations]
 verify_jwt = false
 
