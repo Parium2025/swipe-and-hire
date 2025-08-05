@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      email_confirmations: {
+        Row: {
+          confirmed_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          token: string
+          user_id: string
+        }
+        Insert: {
+          confirmed_at?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          token: string
+          user_id: string
+        }
+        Update: {
+          confirmed_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          token?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       job_postings: {
         Row: {
           application_instructions: string | null
@@ -301,6 +331,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_expired_confirmations: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_user_organization: {
         Args: { user_uuid: string }
         Returns: string
