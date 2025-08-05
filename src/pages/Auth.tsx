@@ -15,19 +15,44 @@ const Auth = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const { user, updatePassword } = useAuth();
+  const { user, updatePassword, confirmEmail } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const device = useDevice();
 
   useEffect(() => {
     const isReset = searchParams.get('reset') === 'true';
+    const confirmToken = searchParams.get('confirm');
+    
     setIsPasswordReset(isReset);
+    
+    // Hantera e-postbekräftelse
+    if (confirmToken) {
+      handleEmailConfirmation(confirmToken);
+      return;
+    }
     
     if (user && !isReset) {
       navigate('/');
     }
   }, [user, navigate, searchParams]);
+
+  const handleEmailConfirmation = async (token: string) => {
+    try {
+      const result = await confirmEmail(token);
+      alert(`${result.message} Du kan nu logga in.`);
+      // Ta bort confirm parametern från URL
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('confirm');
+      navigate(`/auth?${newSearchParams.toString()}`, { replace: true });
+    } catch (error: any) {
+      alert(error.message || 'Ett fel inträffade vid bekräftelse av e-post');
+      // Ta bort confirm parametern från URL
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('confirm');
+      navigate(`/auth?${newSearchParams.toString()}`, { replace: true });
+    }
+  };
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();

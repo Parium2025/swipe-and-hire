@@ -61,6 +61,8 @@ interface AuthContextType {
   isCompanyUser: () => boolean;
   getRedirectPath: () => string;
   switchRole: (newRole: UserRole) => Promise<{ error?: any }>;
+  confirmEmail: (token: string) => Promise<{ success: boolean; message: string; email: string }>;
+  cleanupExpiredConfirmations: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -566,6 +568,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Bekräfta e-post funktion
+  const confirmEmail = async (token: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('confirm-email', {
+        body: { token }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      return { success: true, message: data.message, email: data.email };
+    } catch (error: any) {
+      console.error('Email confirmation error:', error);
+      throw error;
+    }
+  };
+
+  // Cleanup-funktion för Edge Function
+  const cleanupExpiredConfirmations = async () => {
+    try {
+      await supabase.functions.invoke('cleanup-expired-confirmations');
+    } catch (error) {
+      console.error('Cleanup error:', error);
+    }
+  };
+
   const value = {
     user,
     session,
@@ -586,7 +619,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isSuperAdmin,
     isCompanyUser,
     getRedirectPath,
-    switchRole
+    switchRole,
+    confirmEmail,
+    cleanupExpiredConfirmations
   };
 
   return (

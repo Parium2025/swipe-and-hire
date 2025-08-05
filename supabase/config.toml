@@ -9,6 +9,15 @@ verify_jwt = false
 [functions.test-email]
 verify_jwt = false
 
+[functions.custom-signup]
+verify_jwt = false
+
+[functions.cleanup-expired-confirmations]
+verify_jwt = false
+
+[functions.confirm-email]
+verify_jwt = false
+
 [auth]
 enable_signup = true
 enable_confirmations = false

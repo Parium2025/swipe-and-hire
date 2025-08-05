@@ -56,10 +56,23 @@ const handler = async (req: Request): Promise<Response> => {
     // 2. Skapa bekräftelsetoken
     const confirmationToken = crypto.randomUUID();
     
-    // 3. Spara token i databasen (du kan skapa en tabell för detta)
-    // För nu: skicka e-post direkt
+    // 3. Spara token i databasen
+    const { error: tokenError } = await supabase
+      .from('email_confirmations')
+      .insert({
+        user_id: user.user.id,
+        email,
+        token: confirmationToken
+      });
+
+    if (tokenError) {
+      console.error('Error saving confirmation token:', tokenError);
+      // Ta bort användaren om token-sparandet misslyckades
+      await supabase.auth.admin.deleteUser(user.user.id);
+      throw new Error('Fel vid skapande av bekräftelsetoken');
+    }
     
-    const confirmationUrl = `${req.headers.get('origin')}/auth?confirm=${confirmationToken}&email=${encodeURIComponent(email)}`;
+    const confirmationUrl = `${req.headers.get('origin')}/auth?confirm=${confirmationToken}`;
 
     // 4. Skicka bekräftelsemejl via Resend
     const emailResponse = await resend.emails.send({
