@@ -11,7 +11,15 @@ verify_jwt = false
 
 [auth]
 enable_signup = true
-enable_confirmations = false
+enable_confirmations = true
+
+[auth.email.smtp]
+host = "smtp.resend.com"
+port = 587
+user = "resend"
+pass = "env(RESEND_API_KEY)"
+admin_email = "noreply@parium.se"
+max_frequency = "1s"
 
 [auth.email.template.invite]
 subject = "Välkommen till Parium"
