@@ -183,64 +183,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, userData: { role: UserRole; first_name: string; last_name: string; phone?: string; organization_id?: string }) => {
     try {
-      const redirectUrl = `${window.location.origin}/`;
-      
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: redirectUrl,
+      // Use our custom signup function that bypasses Supabase rate limits
+      const { data, error } = await supabase.functions.invoke('custom-signup', {
+        body: {
+          email,
+          password,
           data: userData
         }
       });
 
       if (error) {
-        let errorTitle = "Registreringsfel";
-        let errorDescription = error.message;
+        throw error;
+      }
 
-        // Handle specific error cases
-        if (error.message.includes("already been registered") || error.message.includes("already registered")) {
-          errorTitle = "E-post redan registrerad";
-          errorDescription = "Det finns redan ett konto med denna e-postadress. Försök logga in istället.";
-        } else if (error.message.includes("Password should be")) {
-          errorTitle = "Lösenordet är för svagt";
-          errorDescription = "Lösenordet måste vara minst 6 tecken långt.";
-        } else if (error.message.includes("Invalid email")) {
-          errorTitle = "Ogiltig e-postadress";
-          errorDescription = "Ange en giltig e-postadress.";
-        }
-
-        toast({
-          title: errorTitle,
-          description: errorDescription,
-          variant: "destructive"
-        });
-        return { error: { ...error, userFriendlyMessage: errorDescription, isExistingUser: error.message.includes("already") } };
+      if (data?.error) {
+        throw new Error(data.error);
       }
 
       toast({
-        title: "Registrering lyckad",
-        description: "Kontrollera din e-post för att bekräfta ditt konto. Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.",
+        title: "Registrering lyckad!",
+        description: "Kolla din e-post för bekräftelselänk. Hittar du oss inte? Kolla skräpposten!",
         duration: 8000
       });
 
-      // Send custom confirmation email
-      try {
-        const redirectUrl = `${window.location.origin}/`;
-        await supabase.functions.invoke('send-confirmation-email', {
-          body: {
-            email,
-            confirmationUrl: redirectUrl,
-            type: 'signup'
-          }
-        });
-      } catch (emailError) {
-        console.log('Custom email send failed, falling back to Supabase default');
+      return { user: data?.user };
+    } catch (error: any) {
+      console.error("Custom signup error:", error);
+      
+      let errorTitle = "Registreringsfel";
+      let errorDescription = error.message || "Ett oväntat fel inträffade. Försök igen.";
+
+      // Handle specific error cases
+      if (errorDescription.includes("already been registered") || errorDescription.includes("already registered")) {
+        errorTitle = "E-post redan registrerad";
+        errorDescription = "Det finns redan ett konto med denna e-postadress. Försök logga in istället.";
+      } else if (errorDescription.includes("Password should be")) {
+        errorTitle = "Lösenordet är för svagt";
+        errorDescription = "Lösenordet måste vara minst 6 tecken långt.";
+      } else if (errorDescription.includes("Invalid email")) {
+        errorTitle = "Ogiltig e-postadress";
+        errorDescription = "Ange en giltig e-postadress.";
       }
 
-      return {};
-    } catch (error) {
-      return { error };
+      toast({
+        title: errorTitle,
+        description: errorDescription,
+        variant: "destructive"
+      });
+      
+      return { error: { message: errorDescription, userFriendlyMessage: errorDescription, isExistingUser: errorDescription.includes("already") } };
     }
   };
 
