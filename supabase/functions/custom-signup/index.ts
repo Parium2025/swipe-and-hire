@@ -28,6 +28,8 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { email, password, data }: SignupRequest = await req.json();
+    
+    const firstName = data?.first_name || 'där';
 
     console.log(`Attempting signup for email: ${email}`);
 
@@ -145,10 +147,11 @@ const handler = async (req: Request): Promise<Response> => {
                   <tr>
                     <td style="padding: 40px 30px;">
                       
-                      <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
-                        Hej och varmt välkommen till <strong>Parium</strong> – appen som gör jobbsök enkelt, snabbt och mänskligt.<br><br>
-                        Du är bara ett klick från att börja upptäcka möjligheter som faktiskt passar dig.
-                      </p>
+                       <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+                         Hej ${firstName}!<br><br>
+                         Du har just klivit in i nästa generation av jobbsök.<br>
+                         Med Parium swipar du dig fram till möjligheter som faktiskt kan förändra din vardag.
+                       </p>
                       
                       <!-- Button -->
                       <table border="0" cellpadding="0" cellspacing="0" width="100%">
