@@ -38,6 +38,18 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (signupError) {
+      // Handle existing user case
+      if (signupError.message.includes("already been registered") || signupError.message.includes("User already registered")) {
+        return new Response(JSON.stringify({ 
+          error: "E-post redan registrerad. Det finns redan ett konto med denna e-postadress. Försök logga in istället." 
+        }), {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+            ...corsHeaders,
+          },
+        });
+      }
       throw new Error(signupError.message);
     }
 
