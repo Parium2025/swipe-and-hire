@@ -174,9 +174,9 @@ const handler = async (req: Request): Promise<Response> => {
                       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
                         <tr>
                           <td style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827;">
-                            <p style="margin: 0 0 12px 0;">🎯 Matcha med jobb som passar dig</p>
-                            <p style="margin: 0 0 12px 0;">⚡ Swipea, ansök och gå vidare på sekunder</p>
-                            <p style="margin: 0;">🚀 Spara tid med smarta och effektiva verktyg</p>
+                            <p style="margin: 0 0 12px 0;">• Matcha med jobb som passar dig</p>
+                            <p style="margin: 0 0 12px 0;">• Swipea, ansök och gå vidare på sekunder</p>
+                            <p style="margin: 0;">• Spara tid med smarta och effektiva verktyg</p>
                           </td>
                         </tr>
                       </table>
