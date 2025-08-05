@@ -100,52 +100,55 @@ const handler = async (req: Request): Promise<Response> => {
         <head>
           <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-          <title>Bekräfta ditt Parium-konto</title>
+          <title>Ny bekräftelselänk - Parium</title>
         </head>
-        <body style="margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
+        <body style="margin: 0; padding: 0; background-color: #F9FAFB; font-family: Arial, Helvetica, sans-serif;">
           
-          <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f4f7fa; min-width: 100%;">
+          <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F9FAFB;">
             <tr>
               <td align="center" style="padding: 40px 20px;">
                 
-                <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); max-width: 600px;">
+                <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; max-width: 600px;">
                   
+                  <!-- Header -->
                   <tr>
-                    <td style="background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%); background-color: #1a237e; border-radius: 16px 16px 0 0; padding: 40px 30px; text-align: center;">
+                    <td style="background-color: #1E3A8A; padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0;">
                       
                       <table border="0" cellpadding="0" cellspacing="0" width="100%">
                         <tr>
                           <td align="center">
-                            <div style="width: 80px; height: 80px; background-color: rgba(255,255,255,0.2); border-radius: 50%; margin: 0 auto 24px auto; line-height: 80px; text-align: center;">
-                              <span style="font-family: Arial, sans-serif; font-size: 36px; font-weight: bold; color: #ffffff; vertical-align: middle;">P</span>
+                            <div style="width: 80px; height: 80px; background-color: rgba(255,255,255,0.2); border-radius: 40px; margin: 0 auto 24px auto; line-height: 80px; text-align: center;">
+                              <span style="font-family: Arial, Helvetica, sans-serif; font-size: 36px; font-weight: bold; color: #ffffff;">P</span>
                             </div>
                           </td>
                         </tr>
                       </table>
                       
-                      <h1 style="margin: 0 0 8px 0; font-family: Arial, sans-serif; font-size: 24px; font-weight: bold; color: #ffffff; line-height: 1.2;">
+                      <h1 style="margin: 0 0 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 24px; font-weight: bold; color: #ffffff;">
                         Ny bekräftelselänk 📬
                       </h1>
-                      <p style="margin: 0; font-family: Arial, sans-serif; font-size: 16px; color: rgba(255,255,255,0.9); line-height: 1.4;">
+                      <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #ffffff;">
                         Din nya bekräftelselänk är här!
                       </p>
                     </td>
                   </tr>
                   
+                  <!-- Content -->
                   <tr>
                     <td style="padding: 40px 30px;">
                       
-                      <p style="margin: 0 0 24px 0; font-family: Arial, sans-serif; font-size: 16px; color: #4a5568; text-align: center; line-height: 1.5;">
+                      <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
                         Du begärde en ny bekräftelselänk. Klicka på knappen nedan för att bekräfta din e-postadress och aktivera ditt Parium-konto.
                       </p>
                       
+                      <!-- Button -->
                       <table border="0" cellpadding="0" cellspacing="0" width="100%">
                         <tr>
                           <td align="center" style="padding: 20px 0;">
                             <table border="0" cellpadding="0" cellspacing="0">
                               <tr>
-                                <td style="background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%); background-color: #1a237e; border-radius: 50px; padding: 18px 40px;">
-                                  <a href="${confirmationUrl}" style="font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; display: block;">
+                                <td style="background-color: #1E3A8A; border-radius: 10px; padding: 0;">
+                                  <a href="${confirmationUrl}" style="display: block; font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 10px;">
                                     ✨ Bekräfta mitt konto
                                   </a>
                                 </td>
@@ -155,30 +158,44 @@ const handler = async (req: Request): Promise<Response> => {
                         </tr>
                       </table>
                       
+                      <!-- Features list -->
                       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
                         <tr>
-                          <td style="background-color: #f8fafc; border-radius: 12px; padding: 20px;">
-                            <p style="margin: 0 0 12px 0; font-family: Arial, sans-serif; font-size: 14px; color: #64748b; text-align: center; font-weight: 500;">
+                          <td style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827;">
+                            <p style="margin: 0 0 12px 0;">🎯 Matcha med jobb som passar dig</p>
+                            <p style="margin: 0 0 12px 0;">⚡ Swipea, ansök och gå vidare på sekunder</p>
+                            <p style="margin: 0;">💎 Få tillgång till smarta verktyg för din karriär</p>
+                          </td>
+                        </tr>
+                      </table>
+                      
+                      <!-- Alternative link -->
+                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
+                        <tr>
+                          <td style="background-color: #F9FAFB; padding: 20px; border-radius: 8px;">
+                            <p style="margin: 0 0 12px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #6B7280; text-align: center;">
                               Fungerar knappen inte? Kopiera denna länk:
                             </p>
-                            <p style="margin: 0; font-family: Arial, sans-serif; font-size: 12px; color: #1a237e; background-color: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; word-break: break-all; text-align: center;">
+                            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #1E3A8A; word-break: break-all; text-align: center;">
                               ${confirmationUrl}
                             </p>
                           </td>
                         </tr>
                       </table>
                       
-                      <p style="margin: 32px 0 0 0; font-family: Arial, sans-serif; font-size: 14px; color: #9ca3af; text-align: center;">
+                      <p style="margin: 32px 0 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #9CA3AF; text-align: center;">
                         ⏰ Denna länk är giltig i 5 minuter
                       </p>
                       
                     </td>
                   </tr>
                   
+                  <!-- Footer -->
                   <tr>
-                    <td style="background-color: #f8fafc; padding: 24px 30px; text-align: center; border-top: 1px solid #e2e8f0; border-radius: 0 0 16px 16px;">
-                      <p style="margin: 0; font-family: Arial, sans-serif; font-size: 12px; color: #9ca3af;">
-                        © 2024 Parium. Framtidens karriärplattform.
+                    <td style="background-color: #F9FAFB; padding: 24px 30px; text-align: center; border-top: 1px solid #E5E7EB; border-radius: 0 0 12px 12px;">
+                      <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #6B7280;">
+                        Parium AB · Stockholm<br>
+                        Du får detta mail för att du registrerat ett konto i Parium-appen.
                       </p>
                     </td>
                   </tr>
