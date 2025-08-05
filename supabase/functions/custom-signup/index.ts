@@ -111,191 +111,89 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await resend.emails.send({
       from: "Parium <noreply@parium.se>",
       to: [email],
-      subject: "✨ Välkommen till Parium - Bekräfta ditt premium-konto",
+      subject: "Bekräfta ditt konto – Parium",
       html: `
-        <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-        <html xmlns="http://www.w3.org/1999/xhtml">
+        <!DOCTYPE html>
+        <html lang="sv">
         <head>
-          <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-          <title>Välkommen till Parium</title>
-          <!--[if mso]>
-          <style type="text/css">
-            .fallback-font { font-family: Arial, sans-serif !important; }
-            .outlook-fix { mso-table-lspace: 0pt !important; mso-table-rspace: 0pt !important; }
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Bekräfta ditt konto – Parium</title>
+          <style>
+            body {
+              background-color: #F9FAFB;
+              font-family: 'Inter', sans-serif;
+              margin: 0;
+              padding: 0;
+              color: #111827;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              background-color: #ffffff;
+              padding: 24px;
+              border-radius: 12px;
+            }
+            .header {
+              font-size: 24px;
+              font-weight: 600;
+              text-align: center;
+              margin-bottom: 24px;
+            }
+            .intro {
+              font-size: 16px;
+              line-height: 1.5;
+              margin-bottom: 32px;
+              text-align: center;
+            }
+            .button {
+              display: inline-block;
+              background-color: #1E3A8A;
+              color: #ffffff;
+              text-decoration: none;
+              padding: 14px 28px;
+              border-radius: 10px;
+              font-weight: 600;
+              font-size: 16px;
+              text-align: center;
+              margin: 0 auto;
+              display: block;
+              width: fit-content;
+            }
+            .features {
+              margin-top: 40px;
+              margin-bottom: 32px;
+              font-size: 16px;
+            }
+            .features li {
+              margin-bottom: 12px;
+            }
+            .footer-text {
+              font-size: 14px;
+              color: #6B7280;
+              text-align: center;
+              margin-top: 40px;
+            }
           </style>
-          <![endif]-->
         </head>
-        <body style="margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
-          
-          <!-- Preheader text -->
-          <div style="display: none; font-size: 1px; color: #fefefe; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
-            Bekräfta ditt Parium-konto och börja din premium-upplevelse idag! ✨
+        <body>
+          <div class="container">
+            <div class="header">Framtiden börjar med ett swipe.</div>
+            <div class="intro">
+              Hej och varmt välkommen till <strong>Parium</strong> – appen som gör jobbsök enkelt, snabbt och mänskligt.<br><br>
+              Du är bara ett klick från att börja upptäcka möjligheter som faktiskt passar dig.
+            </div>
+            <a href="${confirmationUrl}" class="button">Bekräfta mitt konto</a>
+            <ul class="features">
+              <li>🎯 Matcha med jobb som passar dig</li>
+              <li>⚡ Swipea, ansök och gå vidare på sekunder</li>
+              <li>💎 Få tillgång till smarta verktyg för din karriär</li>
+            </ul>
+            <div class="footer-text">
+              Parium AB · Stockholm<br>
+              Du får detta mail för att du registrerat ett konto i Parium-appen.
+            </div>
           </div>
-          
-          <!-- Main container -->
-          <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f4f7fa; min-width: 100%;" class="outlook-fix">
-            <tr>
-              <td align="center" style="padding: 40px 20px;">
-                
-                <!-- Email content wrapper -->
-                <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); max-width: 600px;" class="outlook-fix">
-                  
-                  <!-- Header with gradient background -->
-                  <tr>
-                    <td style="background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%); background-color: #1a237e; border-radius: 16px 16px 0 0; padding: 40px 30px; text-align: center;">
-                      
-                      <!-- Logo placeholder -->
-                      <table border="0" cellpadding="0" cellspacing="0" width="100%">
-                        <tr>
-                          <td align="center">
-                            <div style="width: 80px; height: 80px; background-color: rgba(255,255,255,0.2); border-radius: 50%; margin: 0 auto 24px auto; line-height: 80px; text-align: center;">
-                              <span style="font-family: Arial, sans-serif; font-size: 36px; font-weight: bold; color: #ffffff; vertical-align: middle;">P</span>
-                            </div>
-                          </td>
-                        </tr>
-                      </table>
-                      
-                      <!-- Header text -->
-                      <h1 style="margin: 0 0 8px 0; font-family: Arial, sans-serif; font-size: 28px; font-weight: bold; color: #ffffff; line-height: 1.2;" class="fallback-font">
-                        Välkommen till Parium
-                      </h1>
-                      <p style="margin: 0; font-family: Arial, sans-serif; font-size: 16px; color: rgba(255,255,255,0.9); line-height: 1.4;" class="fallback-font">
-                        Din premium karriärplattform
-                      </p>
-                    </td>
-                  </tr>
-                  
-                  <!-- Main content -->
-                  <tr>
-                    <td style="padding: 40px 30px;">
-                      
-                      <!-- Welcome message -->
-                      <h2 style="margin: 0 0 16px 0; font-family: Arial, sans-serif; font-size: 22px; font-weight: bold; color: #1a202c; text-align: center; line-height: 1.3;" class="fallback-font">
-                        Tack för att du valde Parium! 🎉
-                      </h2>
-                      
-                      <p style="margin: 0 0 32px 0; font-family: Arial, sans-serif; font-size: 16px; color: #4a5568; text-align: center; line-height: 1.5;" class="fallback-font">
-                        Du är bara ett klick ifrån att upptäcka framtidens jobbsökningsupplevelse. Bekräfta din e-postadress för att komma igång.
-                      </p>
-                      
-                      <!-- CTA Button -->
-                      <table border="0" cellpadding="0" cellspacing="0" width="100%">
-                        <tr>
-                          <td align="center" style="padding: 20px 0;">
-                            <table border="0" cellpadding="0" cellspacing="0">
-                              <tr>
-                                <td style="background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%); background-color: #1a237e; border-radius: 50px; padding: 18px 40px;">
-                                  <a href="${confirmationUrl}" style="font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; display: block;" class="fallback-font">
-                                    ✨ Bekräfta mitt konto
-                                  </a>
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                      </table>
-                      
-                      <!-- Features section -->
-                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 40px;">
-                        <tr>
-                          <td>
-                            <h3 style="margin: 0 0 24px 0; font-family: Arial, sans-serif; font-size: 18px; font-weight: bold; color: #1a202c; text-align: center;" class="fallback-font">
-                              Vad väntar dig:
-                            </h3>
-                          </td>
-                        </tr>
-                        
-                        <!-- Feature 1 -->
-                        <tr>
-                          <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
-                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
-                              <tr>
-                                <td width="32" style="vertical-align: top; padding-right: 12px;">
-                                  <span style="font-size: 20px;">🎯</span>
-                                </td>
-                                <td style="vertical-align: top;">
-                                  <span style="font-family: Arial, sans-serif; font-size: 14px; color: #4a5568; font-weight: 500;" class="fallback-font">
-                                    Intelligenta jobbrekommendationer
-                                  </span>
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                        
-                        <!-- Feature 2 -->
-                        <tr>
-                          <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
-                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
-                              <tr>
-                                <td width="32" style="vertical-align: top; padding-right: 12px;">
-                                  <span style="font-size: 20px;">⚡</span>
-                                </td>
-                                <td style="vertical-align: top;">
-                                  <span style="font-family: Arial, sans-serif; font-size: 14px; color: #4a5568; font-weight: 500;" class="fallback-font">
-                                    Snabb och enkel ansökningsprocess
-                                  </span>
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                        
-                        <!-- Feature 3 -->
-                        <tr>
-                          <td style="padding: 12px 0;">
-                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
-                              <tr>
-                                <td width="32" style="vertical-align: top; padding-right: 12px;">
-                                  <span style="font-size: 20px;">🚀</span>
-                                </td>
-                                <td style="vertical-align: top;">
-                                  <span style="font-family: Arial, sans-serif; font-size: 14px; color: #4a5568; font-weight: 500;" class="fallback-font">
-                                    Premium karriärverktyg
-                                  </span>
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                      </table>
-                      
-                      <!-- Alternative link section -->
-                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 40px;">
-                        <tr>
-                          <td style="background-color: #f8fafc; border-radius: 12px; padding: 24px;">
-                            <p style="margin: 0 0 12px 0; font-family: Arial, sans-serif; font-size: 14px; color: #64748b; text-align: center; font-weight: 500;" class="fallback-font">
-                              Fungerar knappen inte? Kopiera denna länk:
-                            </p>
-                            <p style="margin: 0; font-family: Arial, sans-serif; font-size: 12px; color: #1a237e; background-color: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; word-break: break-all; text-align: center;" class="fallback-font">
-                              ${confirmationUrl}
-                            </p>
-                          </td>
-                        </tr>
-                      </table>
-                      
-                    </td>
-                  </tr>
-                  
-                  <!-- Footer -->
-                  <tr>
-                    <td style="background-color: #f8fafc; padding: 30px; text-align: center; border-top: 1px solid #e2e8f0; border-radius: 0 0 16px 16px;">
-                      <p style="margin: 0 0 8px 0; font-family: Arial, sans-serif; font-size: 12px; color: #9ca3af;" class="fallback-font">
-                        Detta meddelande skickades till <strong>${email}</strong>
-                      </p>
-                      <p style="margin: 0; font-family: Arial, sans-serif; font-size: 12px; color: #9ca3af;" class="fallback-font">
-                        © 2024 Parium. Framtidens karriärplattform.
-                      </p>
-                    </td>
-                  </tr>
-                  
-                </table>
-                
-              </td>
-            </tr>
-          </table>
-          
         </body>
         </html>
       `,
