@@ -380,31 +380,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resendConfirmation = async (email: string) => {
     try {
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`
-        }
+      const { data, error } = await supabase.functions.invoke('resend-confirmation', {
+        body: { email }
       });
 
       if (error) {
-        toast({
-          title: "Fel vid skickning av bekräftelse",
-          description: error.message,
-          variant: "destructive"
-        });
-        return { error };
+        console.error('Resend confirmation error:', error);
+        throw error;
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
       }
 
       toast({
-        title: "Bekräftelsemail skickat!",
-        description: "Kontrollera din e-post för att bekräfta ditt konto. Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.",
-        duration: 8000
+        title: "Ny bekräftelselänk skickad!",
+        description: "Kolla din e-post för den nya bekräftelselänken. Den är giltig i 5 minuter.",
+        duration: 6000
       });
 
-      return {};
-    } catch (error) {
+      return { success: true };
+    } catch (error: any) {
+      console.error('Resend confirmation error:', error);
+      
+      toast({
+        title: "Kunde inte skicka bekräftelselänk",
+        description: error.message || "Ett fel inträffade. Försök igen.",
+        variant: "destructive"
+      });
+      
       return { error };
     }
   };
