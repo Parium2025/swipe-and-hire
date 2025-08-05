@@ -31,7 +31,31 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Attempting signup for email: ${email}`);
 
-    // 1. Skapa användare utan bekräftelse
+    // 1. Först, försök ta bort befintlig användare om den finns
+    try {
+      const { data: listData, error: listError } = await supabase.auth.admin.listUsers();
+      
+      if (!listError && listData?.users) {
+        const existingUser = listData.users.find(u => u.email === email);
+        
+        if (existingUser) {
+          console.log(`Found existing user ${existingUser.id}, deleting first...`);
+          
+          // Ta bort från relaterade tabeller
+          await supabase.from('email_confirmations').delete().eq('user_id', existingUser.id);
+          await supabase.from('profiles').delete().eq('user_id', existingUser.id);
+          await supabase.from('user_roles').delete().eq('user_id', existingUser.id);
+          
+          // Ta bort användaren
+          await supabase.auth.admin.deleteUser(existingUser.id);
+          console.log('Existing user deleted successfully');
+        }
+      }
+    } catch (cleanupError) {
+      console.error('Cleanup error (continuing anyway):', cleanupError);
+    }
+
+    // 2. Skapa användare utan bekräftelse
     const { data: user, error: signupError } = await supabase.auth.admin.createUser({
       email,
       password,
@@ -39,50 +63,18 @@ const handler = async (req: Request): Promise<Response> => {
       user_metadata: data || {}
     });
 
-    console.log('Signup result:', { user: user?.user?.id, error: signupError });
+    console.log('Signup result:', { userId: user?.user?.id, error: signupError?.message });
 
     if (signupError) {
       console.error('Signup error details:', signupError);
       
-      // Handle existing user case
+      // Handle existing user case (fallback)
       if (signupError.message.includes("already been registered") || 
           signupError.message.includes("User already registered") ||
           signupError.message.includes("email_exists")) {
         
-        // Försök ta bort befintlig användare och skapa på nytt
-        console.log(`Email ${email} already exists, attempting to find and delete...`);
-        
-        try {
-          // Lista alla användare för att hitta den med rätt e-post
-          const { data: listData, error: listError } = await supabase.auth.admin.listUsers();
-          
-          if (!listError && listData?.users) {
-            const existingUser = listData.users.find(u => u.email === email);
-            
-            if (existingUser) {
-              console.log(`Found existing user ${existingUser.id}, deleting...`);
-              
-              // Ta bort från relaterade tabeller
-              await supabase.from('email_confirmations').delete().eq('user_id', existingUser.id);
-              await supabase.from('profiles').delete().eq('user_id', existingUser.id);
-              await supabase.from('user_roles').delete().eq('user_id', existingUser.id);
-              
-              // Ta bort användaren
-              const { error: deleteError } = await supabase.auth.admin.deleteUser(existingUser.id);
-              
-              if (!deleteError) {
-                console.log('User deleted, retrying signup...');
-                // Försök skapa användaren igen
-                return handler(req);
-              }
-            }
-          }
-        } catch (cleanupError) {
-          console.error('Cleanup error:', cleanupError);
-        }
-        
         return new Response(JSON.stringify({ 
-          error: "E-post redan registrerad. Försök igen om en minut eller använd en annan e-postadress." 
+          error: "E-post redan registrerad. Vänta en minut och försök igen, eller använd en annan e-postadress." 
         }), {
           status: 400,
           headers: {
