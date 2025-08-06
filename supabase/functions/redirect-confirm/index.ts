@@ -13,8 +13,9 @@ const handler = async (req: Request): Promise<Response> => {
   console.log('Confirm page accessed with token:', token);
   
   if (!token) {
-    return new Response(getErrorPage('Ingen bekräftelsetoken hittades.'), {
-      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    return new Response('Ingen bekräftelsetoken hittades.', { 
+      status: 400,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' }
     });
   }
 
@@ -27,14 +28,21 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     if (confirmError || !confirmation) {
-      return new Response(getErrorPage('Ogiltigt eller utgånget bekräftelsetoken.'), {
-        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      console.log('Invalid token:', token);
+      return new Response('Ogiltigt eller utgånget bekräftelsetoken.', { 
+        status: 400,
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' }
       });
     }
 
     if (confirmation.confirmed_at) {
-      return new Response(getSuccessPage('Ditt konto är redan aktiverat!', true), {
-        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      console.log('Token already confirmed:', token);
+      // Omdirigera till inloggning med success-parameter
+      return new Response(null, {
+        status: 302,
+        headers: {
+          'Location': 'https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?confirmed=already',
+        },
       });
     }
 
@@ -46,8 +54,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (updateError) {
       console.error('Error updating confirmation:', updateError);
-      return new Response(getErrorPage('Ett fel inträffade vid bekräftelse.'), {
-        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      return new Response('Ett fel inträffade vid bekräftelse.', { 
+        status: 500,
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' }
       });
     }
 
@@ -61,17 +70,26 @@ const handler = async (req: Request): Promise<Response> => {
       console.error('Error confirming user:', authError);
     }
 
-    return new Response(getSuccessPage('Ditt konto har aktiverats!'), {
-      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    console.log('Email confirmed successfully for token:', token);
+    
+    // Omdirigera till inloggning med success-parameter
+    return new Response(null, {
+      status: 302,
+      headers: {
+        'Location': 'https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?confirmed=success',
+      },
     });
 
   } catch (error) {
     console.error('Confirmation error:', error);
-    return new Response(getErrorPage('Ett oväntat fel inträffade.'), {
-      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    return new Response('Ett oväntat fel inträffade.', { 
+      status: 500,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' }
     });
   }
 };
+
+serve(handler);
 
 function getSuccessPage(message: string, alreadyConfirmed = false): string {
   return `

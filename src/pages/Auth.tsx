@@ -28,20 +28,32 @@ const Auth = () => {
   useEffect(() => {
     const isReset = searchParams.get('reset') === 'true';
     const confirmToken = searchParams.get('confirm');
+    const confirmed = searchParams.get('confirmed');
     
-    console.log('Auth useEffect - URL params:', { isReset, confirmToken, currentUrl: window.location.href });
+    console.log('Auth useEffect - URL params:', { isReset, confirmToken, confirmed, currentUrl: window.location.href });
+    
+    // Hantera bekräftelsestatusmeddelanden från redirect
+    if (confirmed === 'success') {
+      setConfirmationStatus('success');
+      setConfirmationMessage('Ditt konto har aktiverats! Du kan nu logga in.');
+      console.log('Showing success confirmation message');
+    } else if (confirmed === 'already') {
+      setConfirmationStatus('already-confirmed');
+      setConfirmationMessage('Ditt konto är redan aktiverat. Du kan logga in direkt.');
+      console.log('Showing already confirmed message');
+    }
     
     setIsPasswordReset(isReset);
     
     // Hantera e-postbekräftelse - prioritera detta över allt annat
-    if (confirmToken) {
+    if (confirmToken && !confirmed) {
       console.log('Found confirm token, handling email confirmation:', confirmToken);
       handleEmailConfirmation(confirmToken);
       return;
     }
     
     // Endast navigera om användaren är inloggad OCH det inte är password reset
-    if (user && !isReset && confirmationStatus === 'none') {
+    if (user && !isReset && confirmationStatus === 'none' && !confirmed) {
       console.log('User is logged in, navigating to home');
       navigate('/');
     }
