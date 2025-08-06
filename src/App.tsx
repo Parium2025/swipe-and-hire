@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import EmailConfirm from "./pages/EmailConfirm";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/hooks/useAuth";
 import { Header } from "@/components/Header";
@@ -24,6 +25,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/confirm" element={<EmailConfirm />} />
                 <Route path="/profile" element={<Index />} />
                 <Route path="/search-jobs" element={<Index />} />
                 <Route path="/subscription" element={<Index />} />

@@ -107,7 +107,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Fel vid skapande av bekräftelsetoken');
     }
     
-    const confirmationUrl = `${req.headers.get('origin')}/auth?confirm=${confirmationToken}`;
+    const confirmationUrl = `${req.headers.get('origin')}/confirm?confirm=${confirmationToken}`;
 
     // 4. Skicka bekräftelsemejl via Resend
     const emailResponse = await resend.emails.send({
