@@ -108,7 +108,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
     
     // Direkt bekräftelsesida som fungerar i alla mail-klienter
-    const confirmationUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/email-confirm?confirm=${confirmationToken}`;
+    const confirmationUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/confirm?confirm=${confirmationToken}`;
 
     // 4. Skicka bekräftelsemejl via Resend
     const emailResponse = await resend.emails.send({
