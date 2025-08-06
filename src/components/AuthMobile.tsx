@@ -229,7 +229,6 @@ const AuthMobile = ({
               src="/lovable-uploads/parium-logo-final.png" 
               alt="Parium" 
               className="h-12 w-auto mx-auto mb-4"
-              onError={(e) => console.log('Auth mobile reset logo failed:', e)}
             />
             <CardTitle>Nytt lösenord</CardTitle>
           </CardHeader>
@@ -308,7 +307,6 @@ const AuthMobile = ({
                   src="/lovable-uploads/parium-logo-final.png" 
                   alt="Parium" 
                   className="relative h-16 w-auto"
-                  onError={(e) => console.log('Auth mobile main logo failed:', e)}
                 />
               </div>
             </div>
