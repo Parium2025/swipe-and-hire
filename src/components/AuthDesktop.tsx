@@ -171,9 +171,7 @@ const AuthDesktop = ({
         });
         
         if (!result.error) {
-          // Registrering lyckades - navigera till verifieringssida
-          localStorage.setItem('pending-verification-email', email);
-          navigate(`/verify?email=${encodeURIComponent(email)}`);
+          setShowResend(true);
         }
       }
     } catch (error) {

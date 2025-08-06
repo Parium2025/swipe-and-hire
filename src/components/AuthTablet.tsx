@@ -177,9 +177,7 @@ const AuthTablet = ({
             }, 2000);
           }
         } else {
-          // Registrering lyckades - navigera till verifieringssida
-          localStorage.setItem('pending-verification-email', email);
-          navigate(`/verify?email=${encodeURIComponent(email)}`);
+          setShowResend(true);
         }
       }
     } catch (error) {

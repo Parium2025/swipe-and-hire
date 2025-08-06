@@ -21,9 +21,6 @@ export type Database = {
           email: string
           expires_at: string
           id: string
-          pin_attempts: number | null
-          pin_code: string | null
-          pin_expires_at: string | null
           token: string
           user_id: string
         }
@@ -33,9 +30,6 @@ export type Database = {
           email: string
           expires_at?: string
           id?: string
-          pin_attempts?: number | null
-          pin_code?: string | null
-          pin_expires_at?: string | null
           token: string
           user_id: string
         }
@@ -45,9 +39,6 @@ export type Database = {
           email?: string
           expires_at?: string
           id?: string
-          pin_attempts?: number | null
-          pin_code?: string | null
-          pin_expires_at?: string | null
           token?: string
           user_id?: string
         }
