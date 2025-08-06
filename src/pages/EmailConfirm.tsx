@@ -15,14 +15,18 @@ const EmailConfirm = () => {
   useEffect(() => {
     const confirmToken = searchParams.get('confirm');
     
-    console.log('EmailConfirm - token:', confirmToken, 'URL:', window.location.href);
+    console.log('EmailConfirm - All URL params:', Object.fromEntries(searchParams.entries()));
+    console.log('EmailConfirm - token:', confirmToken, 'Full URL:', window.location.href);
+    console.log('EmailConfirm - User agent:', navigator.userAgent);
     
     if (!confirmToken) {
+      console.log('No confirmation token found');
       setStatus('error');
       setMessage('Ingen bekräftelsetoken hittades i länken.');
       return;
     }
 
+    console.log('Found confirmation token, starting confirmation process');
     handleEmailConfirmation(confirmToken);
   }, [searchParams]);
 

@@ -107,7 +107,8 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Fel vid skapande av bekräftelsetoken');
     }
     
-    const confirmationUrl = `${req.headers.get('origin')}/confirm?confirm=${confirmationToken}`;
+    // KRITISK FIX för Safari/iPhone: Skapa en universal link som alltid fungerar
+    const confirmationUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/confirm?confirm=${confirmationToken}&t=${Date.now()}`;
 
     // 4. Skicka bekräftelsemejl via Resend
     const emailResponse = await resend.emails.send({

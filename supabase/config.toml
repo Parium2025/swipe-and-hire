@@ -25,17 +25,5 @@ verify_jwt = false
 verify_jwt = false
 
 [auth]
-enable_signup = true
+enable_signup = false
 enable_confirmations = false
-
-[auth.email.template.invite]
-subject = "Välkommen till Parium"
-content_path = "./supabase/templates/invite.html"
-
-[auth.email.template.confirmation]
-subject = "Välkommen till Parium - Bekräfta din e-post"
-content_path = "./supabase/templates/confirmation.html"
-
-[auth.email.template.recovery]
-subject = "Återställ ditt lösenord - Parium"  
-content_path = "./supabase/templates/recovery.html"
