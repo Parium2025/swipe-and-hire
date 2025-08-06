@@ -24,6 +24,9 @@ verify_jwt = false
 [functions.confirm-email]
 verify_jwt = false
 
+[functions.redirect-confirm]
+verify_jwt = false
+
 [auth]
 enable_signup = false
 enable_confirmations = false
