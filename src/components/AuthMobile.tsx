@@ -300,18 +300,18 @@ const AuthMobile = ({
         {/* Header med logo och text */}
         <div className="flex-1 flex flex-col justify-center items-center px-6 pt-12 pb-6">
           <div className="text-center mb-8">
-            <div className="mb-4">
+            <div className="mb-2">
               <div className="relative mx-auto w-fit">
                 <div className="absolute inset-0 blur-xl bg-secondary/30 rounded-full"></div>
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
-                  className="relative h-30 w-auto"
+                  className="relative h-20 w-auto"
                 />
               </div>
             </div>
             
-            <h1 className="text-3xl font-bold text-primary-foreground mb-4">
+            <h1 className="text-3xl font-bold text-primary-foreground mb-2">
               Välkommen till Parium
             </h1>
             <p className="text-primary-foreground/80 text-lg mb-8">
