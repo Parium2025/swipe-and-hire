@@ -107,8 +107,8 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Fel vid skapande av bekräftelsetoken');
     }
     
-    // KRITISK FIX för Safari/iPhone: Skapa en universal link som alltid fungerar
-    const confirmationUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/confirm?confirm=${confirmationToken}&t=${Date.now()}`;
+    // PLAN Z: Smart mellanlandningssida som detekterar in-app browsers
+    const confirmationUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/email-redirect?confirm=${confirmationToken}`;
 
     // 4. Skicka bekräftelsemejl via Resend
     const emailResponse = await resend.emails.send({
