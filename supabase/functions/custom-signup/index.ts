@@ -107,8 +107,10 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Fel vid skapande av bekräftelsetoken');
     }
     
-    // Direkt bekräftelsesida som fungerar i alla mail-klienter
+    // Gmail-säker bekräftelsesida 
     const confirmationUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/confirm?confirm=${confirmationToken}`;
+    
+    console.log(`Sending confirmation email to ${email} with URL: ${confirmationUrl}`);
 
     // 4. Skicka bekräftelsemejl via Resend
     const emailResponse = await resend.emails.send({
