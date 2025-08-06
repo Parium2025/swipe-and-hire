@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import EmailConfirm from "./pages/EmailConfirm";
 import EmailRedirect from "./pages/EmailRedirect";
+import EmailVerification from "./pages/EmailVerification";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/hooks/useAuth";
 import { Header } from "@/components/Header";
@@ -26,6 +27,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/verify" element={<EmailVerification />} />
                 <Route path="/email-redirect" element={<EmailRedirect />} />
                 <Route path="/confirm" element={<EmailConfirm />} />
                 <Route path="/profile" element={<Index />} />
