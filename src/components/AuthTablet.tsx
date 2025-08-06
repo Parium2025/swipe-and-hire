@@ -278,7 +278,7 @@ const AuthTablet = ({
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
-                  className="relative h-24 w-auto"
+                  className="relative h-30 w-auto"
                 />
               </div>
             </div>
