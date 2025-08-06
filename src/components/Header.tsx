@@ -13,7 +13,7 @@ export const Header = () => {
           className="flex items-center gap-3 p-2 hover:bg-accent/50 rounded-lg transition-colors"
         >
           <img 
-            src="/lovable-uploads/parium-logo-transparent.png" 
+            src="/lovable-uploads/parium-logo-final.png" 
             alt="Parium" 
             className="h-8 w-auto"
           />

@@ -194,7 +194,7 @@ const AuthDesktop = ({
         <Card className="w-full max-w-md bg-background/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-3xl">
           <CardHeader className="text-center">
             <img 
-              src="/lovable-uploads/parium-logo-transparent.png" 
+              src="/lovable-uploads/parium-logo-final.png" 
               alt="Parium" 
               className="h-16 w-auto mx-auto mb-6"
             />
@@ -268,7 +268,7 @@ const AuthDesktop = ({
               <div className="relative">
                 <div className="absolute inset-0 blur-2xl bg-secondary/30 rounded-full"></div>
                 <img 
-                  src="/lovable-uploads/parium-logo-transparent.png" 
+                  src="/lovable-uploads/parium-logo-final.png" 
                   alt="Parium" 
                   className="relative h-16 w-auto"
                 />
