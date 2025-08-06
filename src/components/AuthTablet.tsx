@@ -220,6 +220,7 @@ const AuthTablet = ({
               src="/lovable-uploads/parium-logo-final.png" 
               alt="Parium" 
               className="h-14 w-auto mx-auto mb-4"
+              onError={(e) => console.log('Auth tablet reset logo failed:', e)}
             />
             <CardTitle className="text-xl">Nytt lösenord</CardTitle>
           </CardHeader>
@@ -279,6 +280,7 @@ const AuthTablet = ({
                   src="/lovable-uploads/parium-logo-final.png" 
                   alt="Parium" 
                   className="relative h-16 w-auto"
+                  onError={(e) => console.log('Auth tablet main logo failed:', e)}
                 />
               </div>
             </div>

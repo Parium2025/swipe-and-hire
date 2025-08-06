@@ -16,6 +16,10 @@ export const Header = () => {
             src="/lovable-uploads/parium-logo-final.png" 
             alt="Parium" 
             className="h-8 w-auto"
+            onError={(e) => {
+              console.log('Logo failed to load:', e);
+              e.currentTarget.style.display = 'none';
+            }}
           />
         </Button>
         

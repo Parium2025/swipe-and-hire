@@ -197,6 +197,7 @@ const AuthDesktop = ({
               src="/lovable-uploads/parium-logo-final.png" 
               alt="Parium" 
               className="h-16 w-auto mx-auto mb-6"
+              onError={(e) => console.log('Auth desktop reset logo failed:', e)}
             />
             <CardTitle className="text-2xl">Återställ lösenord</CardTitle>
             <CardDescription>Ange ditt nya lösenord</CardDescription>
@@ -271,6 +272,7 @@ const AuthDesktop = ({
                   src="/lovable-uploads/parium-logo-final.png" 
                   alt="Parium" 
                   className="relative h-16 w-auto"
+                  onError={(e) => console.log('Auth desktop main logo failed:', e)}
                 />
               </div>
             </div>
