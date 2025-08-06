@@ -217,7 +217,7 @@ const AuthTablet = ({
         <Card className="w-full max-w-lg bg-background/95 backdrop-blur-sm border border-white/10 shadow-2xl rounded-2xl">
           <CardHeader className="text-center pb-4">
             <img 
-              src="/lovable-uploads/parium-logo-final.png" 
+              src="/lovable-uploads/parium-logo-transparent.png" 
               alt="Parium" 
               className="h-14 w-auto mx-auto mb-4"
             />
@@ -276,7 +276,7 @@ const AuthTablet = ({
               <div className="relative mx-auto lg:mx-0 w-fit">
                 <div className="absolute inset-0 blur-xl bg-secondary/30 rounded-full"></div>
                 <img 
-                  src="/lovable-uploads/parium-logo-final.png" 
+                  src="/lovable-uploads/parium-logo-transparent.png" 
                   alt="Parium" 
                   className="relative h-16 w-auto"
                 />
