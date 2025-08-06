@@ -47,27 +47,26 @@ const Auth = () => {
       const result = await confirmEmail(token);
       setConfirmationStatus('success');
       setConfirmationMessage(result.message);
-      // Ta bort confirm parametern från URL
-      const newSearchParams = new URLSearchParams(searchParams);
-      newSearchParams.delete('confirm');
-      navigate(`/auth?${newSearchParams.toString()}`, { replace: true });
     } catch (error: any) {
       const errorMessage = error.message || 'Ett fel inträffade vid bekräftelse av e-post';
       
       // Kolla om det är "redan bekräftad" felet
-      if (errorMessage.includes('redan bekräftad')) {
+      if (errorMessage.includes('redan bekräftad') || errorMessage.includes('already')) {
         setConfirmationStatus('already-confirmed');
         setConfirmationMessage('Ditt konto är redan aktiverat. Du kan logga in direkt.');
+      } else if (errorMessage.includes('utgången') || errorMessage.includes('expired')) {
+        setConfirmationStatus('error');
+        setConfirmationMessage('Bekräftelselänken har gått ut. Du kan registrera dig igen med samma e-postadress.');
       } else {
         setConfirmationStatus('error');
-        setConfirmationMessage(errorMessage);
+        setConfirmationMessage('Denna bekräftelselänk är inte längre giltig. Kontakta support om problemet kvarstår.');
       }
-      
-      // Ta bort confirm parametern från URL
-      const newSearchParams = new URLSearchParams(searchParams);
-      newSearchParams.delete('confirm');
-      navigate(`/auth?${newSearchParams.toString()}`, { replace: true });
     }
+    
+    // Ta bort confirm parametern från URL
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.delete('confirm');
+    navigate(`/auth?${newSearchParams.toString()}`, { replace: true });
   };
 
   const handlePasswordReset = async (e: React.FormEvent) => {
