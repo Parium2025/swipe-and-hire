@@ -107,10 +107,10 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Fel vid skapande av bekräftelsetoken');
     }
     
-    // Gmail-säker bekräftelsesida 
-    const confirmationUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/confirm?confirm=${confirmationToken}`;
+    // Använd Supabase Edge Function för omdirigering (undviker Lovable-proxy)
+    const confirmationUrl = `https://rvtsfnaqlnggfkoqygbm.supabase.co/functions/v1/redirect-confirm?token=${confirmationToken}`;
     
-    console.log(`Sending confirmation email to ${email} with URL: ${confirmationUrl}`);
+    console.log(`Sending confirmation email to ${email} with redirect URL: ${confirmationUrl}`);
 
     // 4. Skicka bekräftelsemejl via Resend
     const emailResponse = await resend.emails.send({
