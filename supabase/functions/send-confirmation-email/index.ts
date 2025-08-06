@@ -67,9 +67,10 @@ const handler = async (req: Request): Promise<Response> => {
       const { user, email_data }: AuthWebhookRequest = requestBody;
       email = user.email;
       
-      // Build confirmation URL
+      // Build confirmation URL - lead directly to our app with the token
       const baseUrl = email_data.site_url || 'https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com';
-      confirmationUrl = `${Deno.env.get('SUPABASE_URL')}/auth/v1/verify?token=${email_data.token_hash}&type=${email_data.email_action_type}&redirect_to=${encodeURIComponent(baseUrl)}`;
+      // Use our custom confirm parameter instead of Supabase's verify endpoint
+      confirmationUrl = `${baseUrl}/auth?confirm=${email_data.token_hash}`;
       
       type = email_data.email_action_type === 'signup' ? 'signup' : 'reset';
     } else {
