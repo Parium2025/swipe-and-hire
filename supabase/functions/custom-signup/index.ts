@@ -88,16 +88,18 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(signupError.message);
     }
 
-    // 2. Skapa bekräftelsetoken
+    // 2. Skapa bekräftelsetoken och PIN-kod
     const confirmationToken = crypto.randomUUID();
+    const pinCode = Math.floor(100000 + Math.random() * 900000).toString(); // 6-siffrig PIN
     
-    // 3. Spara token i databasen
+    // 3. Spara token och PIN i databasen
     const { error: tokenError } = await supabase
       .from('email_confirmations')
       .insert({
         user_id: user.user.id,
         email,
-        token: confirmationToken
+        token: confirmationToken,
+        pin_code: pinCode
       });
 
     if (tokenError) {
@@ -107,14 +109,14 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Fel vid skapande av bekräftelsetoken');
     }
     
-    // PLAN Z: Smart mellanlandningssida som detekterar in-app browsers
-    const confirmationUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/email-redirect?confirm=${confirmationToken}`;
+    // 4. Skapa bekräftelse-URL med email för backup
+    const confirmationUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/verify?confirm=${confirmationToken}&email=${encodeURIComponent(email)}`;
 
-    // 4. Skicka bekräftelsemejl via Resend
+    // 5. Skicka bekräftelsemejl med flera alternativ
     const emailResponse = await resend.emails.send({
       from: "Parium <noreply@parium.se>",
       to: [email],
-      subject: "Bekräfta ditt konto – Parium",
+      subject: "Bekräfta ditt konto – Parium (3 enkla sätt)",
       html: `
         <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
         <html xmlns="http://www.w3.org/1999/xhtml">
@@ -148,20 +150,40 @@ const handler = async (req: Request): Promise<Response> => {
                   <tr>
                     <td style="padding: 40px 30px;">
                       
-                       <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
-                         Hej ${firstName}!<br><br>
-                         Du har just klivit in i nästa generation av jobbsök.<br>
-                         Med Parium swipar du dig fram till möjligheter som faktiskt kan förändra din vardag.
-                       </p>
+                        <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+                          Hej ${firstName}!<br><br>
+                          Du har just klivit in i nästa generation av jobbsök.<br>
+                          <strong>Bekräfta ditt konto på 3 enkla sätt:</strong>
+                        </p>
+
+                        <!-- PIN-kod sektion -->
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 24px;">
+                          <tr>
+                            <td style="background-color: #EF4444; border-radius: 10px; padding: 16px; text-align: center;">
+                              <p style="margin: 0 0 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: bold; color: #ffffff;">
+                                🔐 SNABBASTE SÄTTET - PIN-KOD
+                              </p>
+                              <p style="margin: 0 0 12px 0; font-family: Arial, Helvetica, sans-serif; font-size: 24px; font-weight: bold; color: #ffffff; letter-spacing: 3px;">
+                                ${pinCode}
+                              </p>
+                              <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #ffffff;">
+                                Ange denna kod på bekräftelsesidan
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
                       
-                      <!-- Button -->
-                      <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <!-- Email-länk sektion -->
+                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 20px;">
                         <tr>
-                          <td align="center" style="padding: 20px 0;">
+                          <td style="background-color: #1E3A8A; border-radius: 10px; padding: 12px; text-align: center;">
+                            <p style="margin: 0 0 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #ffffff;">
+                              📧 ALTERNATIV 2 - EMAIL-LÄNK
+                            </p>
                             <table border="0" cellpadding="0" cellspacing="0">
                               <tr>
-                                <td style="background-color: #1E3A8A; border-radius: 10px; padding: 0;">
-                                  <a href="${confirmationUrl}" style="display: block; font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 10px;">
+                                <td style="background-color: #ffffff; border-radius: 6px; padding: 0;">
+                                  <a href="${confirmationUrl}" style="display: block; font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: bold; color: #1E3A8A; text-decoration: none; padding: 10px 20px; border-radius: 6px;">
                                     Bekräfta mitt konto
                                   </a>
                                 </td>
@@ -171,25 +193,42 @@ const handler = async (req: Request): Promise<Response> => {
                         </tr>
                       </table>
                       
-                      <!-- Features list -->
-                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
+                      <!-- Problem med Gmail sektion -->
+                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 20px;">
                         <tr>
-                          <td style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827;">
-                            <p style="margin: 0 0 12px 0;">• Matcha med jobb som passar dig</p>
-                            <p style="margin: 0 0 12px 0;">• Swipea, ansök och gå vidare på sekunder</p>
+                          <td style="background-color: #FFA500; border-radius: 10px; padding: 12px;">
+                            <p style="margin: 0 0 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; font-weight: bold; color: #000000; text-align: center;">
+                              📱 GMAIL-APP PROBLEM?
+                            </p>
+                            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: #000000; text-align: center;">
+                              Om länken inte fungerar i Gmail-appen:<br/>
+                              • Använd PIN-koden ovan ELLER<br/>
+                              • Kopiera länken och öppna i Safari
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- Funktioner -->
+                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 20px;">
+                        <tr>
+                          <td style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #111827; text-align: center;">
+                            <p style="margin: 0 0 8px 0; font-weight: bold;">När kontot är aktiverat kan du:</p>
+                            <p style="margin: 0 0 6px 0;">• Matcha med jobb som passar dig</p>
+                            <p style="margin: 0 0 6px 0;">• Swipea, ansök och gå vidare på sekunder</p>
                             <p style="margin: 0;">• Spara tid med smarta och effektiva verktyg</p>
                           </td>
                         </tr>
                       </table>
                       
-                      <!-- Alternative link -->
-                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
+                      <!-- Backup länk -->
+                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 20px;">
                         <tr>
-                          <td style="background-color: #F9FAFB; padding: 20px; border-radius: 8px;">
-                            <p style="margin: 0 0 12px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #6B7280; text-align: center;">
-                              Fungerar inte knappen? Kopiera länken nedan:
+                          <td style="background-color: #F9FAFB; padding: 16px; border-radius: 8px;">
+                            <p style="margin: 0 0 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #6B7280; text-align: center;">
+                              🌐 ALTERNATIV 3 - MANUELL LÄNK
                             </p>
-                            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #1E3A8A; word-break: break-all; text-align: center;">
+                            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: #1E3A8A; word-break: break-all; text-align: center;">
                               ${confirmationUrl}
                             </p>
                           </td>
