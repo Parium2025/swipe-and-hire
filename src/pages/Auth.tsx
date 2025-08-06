@@ -29,35 +29,47 @@ const Auth = () => {
     const isReset = searchParams.get('reset') === 'true';
     const confirmToken = searchParams.get('confirm');
     
+    console.log('Auth useEffect - URL params:', { isReset, confirmToken, currentUrl: window.location.href });
+    
     setIsPasswordReset(isReset);
     
-    // Hantera e-postbekräftelse
+    // Hantera e-postbekräftelse - prioritera detta över allt annat
     if (confirmToken) {
+      console.log('Found confirm token, handling email confirmation:', confirmToken);
       handleEmailConfirmation(confirmToken);
       return;
     }
     
-    if (user && !isReset) {
+    // Endast navigera om användaren är inloggad OCH det inte är password reset
+    if (user && !isReset && confirmationStatus === 'none') {
+      console.log('User is logged in, navigating to home');
       navigate('/');
     }
-  }, [user, navigate, searchParams]);
+  }, [user, navigate, searchParams, confirmationStatus]);
 
   const handleEmailConfirmation = async (token: string) => {
+    console.log('Starting email confirmation with token:', token);
+    
     try {
       const result = await confirmEmail(token);
+      console.log('Email confirmation successful:', result);
       setConfirmationStatus('success');
       setConfirmationMessage(result.message);
     } catch (error: any) {
+      console.log('Email confirmation error:', error);
       const errorMessage = error.message || 'Ett fel inträffade vid bekräftelse av e-post';
       
       // Kolla om det är "redan bekräftad" felet
       if (errorMessage.includes('redan bekräftad') || errorMessage.includes('already')) {
+        console.log('Account already confirmed');
         setConfirmationStatus('already-confirmed');
         setConfirmationMessage('Ditt konto är redan aktiverat. Du kan logga in direkt.');
       } else if (errorMessage.includes('utgången') || errorMessage.includes('expired')) {
+        console.log('Confirmation link expired');
         setConfirmationStatus('error');
         setConfirmationMessage('Bekräftelselänken har gått ut. Du kan registrera dig igen med samma e-postadress.');
       } else {
+        console.log('Other confirmation error');
         setConfirmationStatus('error');
         setConfirmationMessage('Denna bekräftelselänk är inte längre giltig. Kontakta support om problemet kvarstår.');
       }
@@ -66,7 +78,9 @@ const Auth = () => {
     // Ta bort confirm parametern från URL
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.delete('confirm');
-    navigate(`/auth?${newSearchParams.toString()}`, { replace: true });
+    const newUrl = `/auth?${newSearchParams.toString()}`;
+    console.log('Navigating to:', newUrl);
+    navigate(newUrl, { replace: true });
   };
 
   const handlePasswordReset = async (e: React.FormEvent) => {
