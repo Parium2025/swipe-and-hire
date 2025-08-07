@@ -173,17 +173,17 @@ const AuthMobile = ({
         });
         
         if (result.error) {
-          // If user already exists, suggest switching to login
+          // If user already exists, show specific message and switch to login
           if (result.error.isExistingUser) {
             toast({
-              title: "Kontot finns redan",
-              description: "Ett konto med denna e-post finns redan. Växlar till inloggning...",
+              title: result.error.error || "Kontot finns redan",
+              description: result.error.message || "Ett konto med denna e-post finns redan. Växlar till inloggning...",
               variant: "default"
             });
             // Auto-switch to login tab after a short delay
             setTimeout(() => {
               setIsLogin(true);
-            }, 2000);
+            }, 3000);
           }
         } else {
           setShowResend(true);

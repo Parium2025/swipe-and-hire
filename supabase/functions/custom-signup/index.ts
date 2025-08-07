@@ -33,7 +33,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Attempting signup for email: ${email}`);
 
-    // 1. Först, försök ta bort befintlig användare om den finns
+    // 1. Kontrollera om användaren redan finns och är bekräftad
     try {
       const { data: listData, error: listError } = await supabase.auth.admin.listUsers();
       
@@ -41,16 +41,33 @@ const handler = async (req: Request): Promise<Response> => {
         const existingUser = listData.users.find(u => u.email === email);
         
         if (existingUser) {
-          console.log(`Found existing user ${existingUser.id}, deleting first...`);
-          
-          // Ta bort från relaterade tabeller
-          await supabase.from('email_confirmations').delete().eq('user_id', existingUser.id);
-          await supabase.from('profiles').delete().eq('user_id', existingUser.id);
-          await supabase.from('user_roles').delete().eq('user_id', existingUser.id);
-          
-          // Ta bort användaren
-          await supabase.auth.admin.deleteUser(existingUser.id);
-          console.log('Existing user deleted successfully');
+          // Kontrollera om användaren är bekräftad
+          if (existingUser.email_confirmed_at) {
+            console.log(`User ${email} already exists and is confirmed`);
+            return new Response(JSON.stringify({ 
+              error: "Hoppsan! Den här adressen är redan registrerad",
+              message: `Det ser ut som att du redan har ett konto med ${email}.\nLogga gärna in – eller återställ lösenordet om du har glömt det.`,
+              isExistingUser: true
+            }), {
+              status: 400,
+              headers: {
+                "Content-Type": "application/json",
+                ...corsHeaders,
+              },
+            });
+          } else {
+            // Användaren finns men är inte bekräftad - ta bort och skapa ny
+            console.log(`Found existing unconfirmed user ${existingUser.id}, deleting first...`);
+            
+            // Ta bort från relaterade tabeller
+            await supabase.from('email_confirmations').delete().eq('user_id', existingUser.id);
+            await supabase.from('profiles').delete().eq('user_id', existingUser.id);
+            await supabase.from('user_roles').delete().eq('user_id', existingUser.id);
+            
+            // Ta bort användaren
+            await supabase.auth.admin.deleteUser(existingUser.id);
+            console.log('Existing unconfirmed user deleted successfully');
+          }
         }
       }
     } catch (cleanupError) {

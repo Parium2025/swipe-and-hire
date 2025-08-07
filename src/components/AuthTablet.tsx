@@ -168,13 +168,13 @@ const AuthTablet = ({
         if (result.error) {
           if (result.error.isExistingUser) {
             toast({
-              title: "Kontot finns redan",
-              description: "Ett konto med denna e-post finns redan. Växlar till inloggning...",
+              title: result.error.error || "Kontot finns redan",
+              description: result.error.message || "Ett konto med denna e-post finns redan. Växlar till inloggning...",
               variant: "default"
             });
             setTimeout(() => {
               setIsLogin(true);
-            }, 2000);
+            }, 3000);
           }
         } else {
           setShowResend(true);
