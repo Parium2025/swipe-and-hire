@@ -113,13 +113,23 @@ const handler = async (req: Request): Promise<Response> => {
                 Vi behöver bara bekräfta din e-post – sen är du igång.
               </p>
               
-              <!-- Button -->
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${confirmationUrl}" 
-                   style="display: inline-block; background-color: #1a237e; color: #ffffff; text-decoration: none; padding: 15px 30px; border-radius: 5px; font-size: 16px; font-weight: bold;">
-                  👉 Bekräfta min e-postadress
-                </a>
-              </div>
+              <!-- Button with perfect mobile centering -->
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 30px 0;">
+                <tr>
+                  <td align="center">
+                    <table border="0" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="background-color: #1a237e; border-radius: 5px;">
+                          <a href="${confirmationUrl}" 
+                             style="display: block; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; padding: 15px 30px; border-radius: 5px; min-width: 200px; text-align: center; box-sizing: border-box;">
+                            👉 Bekräfta min e-postadress
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
               
               <p style="color: #666666; margin: 20px 0 0 0; font-size: 16px; line-height: 1.6; text-align: center;">
                 Tack för att du är med oss från början.<br>

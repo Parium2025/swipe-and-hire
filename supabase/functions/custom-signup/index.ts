@@ -156,14 +156,14 @@ const handler = async (req: Request): Promise<Response> => {
                          Med Parium swipar du dig fram till möjligheter som faktiskt kan förändra din vardag.
                        </p>
                       
-                      <!-- Button -->
+                      <!-- Button with perfect mobile centering -->
                       <table border="0" cellpadding="0" cellspacing="0" width="100%">
                         <tr>
                           <td align="center" style="padding: 20px 0;">
                             <table border="0" cellpadding="0" cellspacing="0">
                               <tr>
                                 <td style="background-color: #1E3A8A; border-radius: 10px; padding: 0;">
-                                  <a href="${confirmationUrl}" style="display: block; font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 10px;">
+                                  <a href="${confirmationUrl}" style="display: block; font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 10px; min-width: 200px; text-align: center; box-sizing: border-box;">
                                     Bekräfta mitt konto
                                   </a>
                                 </td>
