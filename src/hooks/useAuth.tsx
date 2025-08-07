@@ -185,38 +185,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, userData: { role: UserRole; first_name: string; last_name: string; phone?: string; organization_id?: string }) => {
     try {
-      // Use our custom signup function that bypasses Supabase rate limits
-      const { data, error } = await supabase.functions.invoke('custom-signup', {
-        body: {
-          email,
-          password,
+      console.log('Starting standard Supabase signup for:', email);
+      
+      // Använd Supabase's inbyggda signup med Gmail-kompatibel e-postbekräftelse
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth`,
           data: userData
         }
       });
 
       if (error) {
+        console.error('Supabase signup error:', error);
         throw error;
       }
 
-      if (data?.error) {
-        throw new Error(data.error);
+      console.log('Supabase signup result:', data);
+      
+      // Om användaren skapades men e-post inte bekräftad
+      if (data.user && !data.user.email_confirmed_at) {
+        console.log('User created but email not confirmed yet');
+        
+        toast({
+          title: "Registrering lyckad!",
+          description: "Kontrollera din e-post för att aktivera ditt konto. Gmail-användare: kolla även skräpposten!",
+          duration: 10000
+        });
+        
+        return { 
+          user: data.user, 
+          message: 'Kontrollera din e-post för att aktivera ditt konto.'
+        };
       }
-
-      toast({
-        title: "Registrering lyckad!",
-        description: "Kolla din e-post för bekräftelselänk. Hittar du oss inte? Kolla skräpposten!",
-        duration: 8000
-      });
-
-      return { user: data?.user };
+      
+      // Om användaren direkt är bekräftad (inte vanligt med e-postbekräftelse påslaget)
+      if (data.user?.email_confirmed_at) {
+        toast({
+          title: "Välkommen!",
+          description: "Ditt konto har skapats och du är nu inloggad.",
+        });
+      }
+      
+      return { user: data.user };
     } catch (error: any) {
-      console.error("Custom signup error:", error);
+      console.error("Signup error:", error);
       
       let errorTitle = "Registreringsfel";
       let errorDescription = error.message || "Ett oväntat fel inträffade. Försök igen.";
 
       // Handle specific error cases
-      if (errorDescription.includes("already been registered") || errorDescription.includes("already registered")) {
+      if (errorDescription.includes("already been registered") || errorDescription.includes("already registered") || errorDescription.includes("already")) {
         errorTitle = "E-post redan registrerad";
         errorDescription = "Det finns redan ett konto med denna e-postadress. Försök logga in istället.";
       } else if (errorDescription.includes("Password should be")) {
