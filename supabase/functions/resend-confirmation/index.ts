@@ -131,19 +131,23 @@ const handler = async (req: Request): Promise<Response> => {
                         Du begärde en ny bekräftelselänk. Klicka på knappen nedan för att bekräfta din e-postadress och aktivera ditt Parium-konto.
                       </p>
                       
-                      <!-- Button with perfect mobile centering -->
-                      <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <!-- Button with bulletproof mobile centering -->
+                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
                         <tr>
-                          <td align="center" style="padding: 20px 0;">
-                            <table border="0" cellpadding="0" cellspacing="0">
-                              <tr>
-                                <td style="background-color: #1E3A8A; border-radius: 10px; padding: 0;">
-                                  <a href="${confirmationUrl}" style="display: block; font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 10px; min-width: 200px; text-align: center; box-sizing: border-box;">
-                                    ✨ Bekräfta mitt konto
-                                  </a>
-                                </td>
-                              </tr>
-                            </table>
+                          <td align="center" style="padding: 0;">
+                            <!--[if mso]>
+                            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" style="height:48px;v-text-anchor:middle;width:280px;" arcsize="21%" stroke="f" fillcolor="#1E3A8A">
+                            <w:anchorlock/>
+                            <center>
+                            <![endif]-->
+                            <a href="${confirmationUrl}" 
+                               style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none; mso-hide: all;">
+                              ✨ Bekräfta mitt konto
+                            </a>
+                            <!--[if mso]>
+                            </center>
+                            </v:roundrect>
+                            <![endif]-->
                           </td>
                         </tr>
                       </table>

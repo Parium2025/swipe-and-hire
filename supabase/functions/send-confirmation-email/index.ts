@@ -113,20 +113,23 @@ const handler = async (req: Request): Promise<Response> => {
                 Vi behöver bara bekräfta din e-post – sen är du igång.
               </p>
               
-              <!-- Button with perfect mobile centering -->
-              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 30px 0;">
+              <!-- Button with bulletproof mobile centering -->
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
                 <tr>
-                  <td align="center">
-                    <table border="0" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td style="background-color: #1a237e; border-radius: 5px;">
-                          <a href="${confirmationUrl}" 
-                             style="display: block; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; padding: 15px 30px; border-radius: 5px; min-width: 200px; text-align: center; box-sizing: border-box;">
-                            👉 Bekräfta min e-postadress
-                          </a>
-                        </td>
-                      </tr>
-                    </table>
+                  <td align="center" style="padding: 0;">
+                    <!--[if mso]>
+                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" style="height:48px;v-text-anchor:middle;width:280px;" arcsize="21%" stroke="f" fillcolor="#1a237e">
+                    <w:anchorlock/>
+                    <center>
+                    <![endif]-->
+                    <a href="${confirmationUrl}" 
+                       style="background-color: #1a237e; border-radius: 5px; color: #ffffff; display: inline-block; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none; mso-hide: all;">
+                      👉 Bekräfta min e-postadress
+                    </a>
+                    <!--[if mso]>
+                    </center>
+                    </v:roundrect>
+                    <![endif]-->
                   </td>
                 </tr>
               </table>
