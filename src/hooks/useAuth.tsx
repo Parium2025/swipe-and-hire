@@ -206,13 +206,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data?.error || data?.success === false) {
         // Hantera befintlig användare med specifik flagga
         if (data.isExistingUser) {
-          toast({
-            title: data.error || "Hoppsan! Den här adressen är redan registrerad",
-            description: data.message || `Det ser ut som att du redan har ett konto med ${email}. Logga gärna in – eller återställ lösenordet om du har glömt det.`,
-            variant: "default",
-            duration: 8000
-          });
-          
           return { 
             error: { 
               message: data.error || "Email already exists", 
@@ -226,13 +219,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         // Hantera andra fel med redan registrerad text (fallback)
         if (data.error && (data.error.includes("already registered") || data.error.includes("already been registered"))) {
-          toast({
-            title: "Hoppsan! Den här adressen är redan registrerad",
-            description: `Det ser ut som att du redan har ett konto med ${email}. Logga gärna in – eller återställ lösenordet om du har glömt det.`,
-            variant: "default",
-            duration: 8000
-          });
-          
           return { 
             error: { 
               message: "Email already exists", 
