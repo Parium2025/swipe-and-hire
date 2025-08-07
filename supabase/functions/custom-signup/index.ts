@@ -46,7 +46,7 @@ const handler = async (req: Request): Promise<Response> => {
             console.log(`User ${email} already exists and is confirmed`);
             return new Response(JSON.stringify({ 
               success: false,
-              error: "Hoppsan! Den här adressen är redan registrerad",
+              error: "Hoppsan! Den här adressen är redan registrerad.",
               message: `Det ser ut som att du redan har ett konto med ${email}.\nLogga gärna in – eller återställ lösenordet om du har glömt det.`,
               isExistingUser: true
             }), {
