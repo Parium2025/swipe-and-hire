@@ -27,18 +27,29 @@ const Auth = () => {
 
   useEffect(() => {
     const isReset = searchParams.get('reset') === 'true';
+    const confirmed = searchParams.get('confirmed');
     
-    console.log('Auth useEffect - URL params:', { isReset, currentUrl: window.location.href });
+    console.log('Auth useEffect - URL params:', { isReset, confirmed, currentUrl: window.location.href });
+    
+    // Hantera bekräftelsestatusmeddelanden från redirect
+    if (confirmed === 'success') {
+      setConfirmationStatus('success');
+      setConfirmationMessage('🎉 Fantastiskt! Ditt konto har aktiverats och du kan nu logga in i Parium.');
+      console.log('Showing success confirmation message');
+    } else if (confirmed === 'already') {
+      setConfirmationStatus('already-confirmed');
+      setConfirmationMessage('✅ Perfekt! Ditt konto är redan aktiverat och redo att användas.');
+      console.log('Showing already confirmed message');
+    }
     
     setIsPasswordReset(isReset);
     
-    // Supabase hanterar automatiskt e-postbekräftelse via hash-parametrar
-    // Vi behöver bara kontrollera om användaren är inloggad
-    if (user && !isReset) {
+    // Endast navigera om användaren är inloggad OCH det inte är password reset
+    if (user && !isReset && confirmationStatus === 'none' && !confirmed) {
       console.log('User is logged in, navigating to home');
       navigate('/');
     }
-  }, [user, navigate, searchParams]);
+  }, [user, navigate, searchParams, confirmationStatus]);
 
   const handleEmailConfirmation = async (token: string) => {
     console.log('Starting email confirmation with token:', token);

@@ -43,70 +43,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (confirmation.confirmed_at) {
       console.log('Token already confirmed:', token);
-      
-      // HTML för redan aktiverat konto
-      const htmlContent = `<!DOCTYPE html>
-<html lang="sv">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Redan aktiverat - Parium</title>
-  <style>
-    body { 
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #1E3A8A, #3B82F6);
-      color: white;
-      margin: 0;
-      padding: 20px;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-    .container {
-      max-width: 400px;
-      background: rgba(255,255,255,0.1);
-      padding: 40px 30px;
-      border-radius: 16px;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.2);
-    }
-    .logo { font-size: 24px; font-weight: bold; margin-bottom: 20px; }
-    .icon { font-size: 60px; margin: 20px 0; }
-    h1 { font-size: 28px; margin: 20px 0; }
-    p { font-size: 16px; line-height: 1.5; margin: 15px 0; opacity: 0.9; }
-    .button {
-      display: inline-block;
-      background: #10B981;
-      color: white;
-      padding: 14px 28px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600;
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="logo">Parium</div>
-    <div class="icon">✅</div>
-    <h1>Redan aktiverat!</h1>
-    <p><strong>Ditt konto är redan aktiverat!</strong></p>
-    <p>Du kan logga in direkt och börja använda Parium.</p>
-    <a href="https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth" class="button">
-      Logga in nu
-    </a>
-  </div>
-</body>
-</html>`;
-
-      return new Response(htmlContent, {
-        status: 200,
-        headers: { 
-          'Content-Type': 'text/html; charset=utf-8'
-        }
+      // Omdirigera till React-appen för redan aktiverat konto
+      return new Response(null, {
+        status: 302,
+        headers: {
+          'Location': 'https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?confirmed=already',
+        },
       });
     }
 
@@ -139,69 +81,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Email confirmed successfully for token:', token);
     
-    // Skapa en enkel HTML-sida som garanterat fungerar
-    const htmlContent = `<!DOCTYPE html>
-<html lang="sv">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Konto aktiverat - Parium</title>
-  <style>
-    body { 
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #1E3A8A, #3B82F6);
-      color: white;
-      margin: 0;
-      padding: 20px;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-    .container {
-      max-width: 400px;
-      background: rgba(255,255,255,0.1);
-      padding: 40px 30px;
-      border-radius: 16px;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.2);
-    }
-    .logo { font-size: 24px; font-weight: bold; margin-bottom: 20px; }
-    .icon { font-size: 60px; margin: 20px 0; }
-    h1 { font-size: 28px; margin: 20px 0; }
-    p { font-size: 16px; line-height: 1.5; margin: 15px 0; opacity: 0.9; }
-    .button {
-      display: inline-block;
-      background: #10B981;
-      color: white;
-      padding: 14px 28px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600;
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="logo">Parium</div>
-    <div class="icon">✅</div>
-    <h1>Välkommen!</h1>
-    <p><strong>Ditt konto har aktiverats!</strong></p>
-    <p>Du kan nu logga in och börja swipa dig fram till din nästa jobbmöjlighet.</p>
-    <a href="https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth" class="button">
-      Logga in nu
-    </a>
-  </div>
-</body>
-</html>`;
-
-    return new Response(htmlContent, {
-      status: 200,
-      headers: { 
-        'Content-Type': 'text/html; charset=utf-8'
-      }
+    // Omdirigera till React-appen med bekräftelseparameter
+    return new Response(null, {
+      status: 302,
+      headers: {
+        'Location': 'https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?confirmed=success',
+      },
     });
 
   } catch (error) {
