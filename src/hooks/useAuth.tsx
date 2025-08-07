@@ -204,9 +204,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       console.log('Supabase signup result:', data);
       
-      // Om användaren skapades men e-post inte bekräftad
+      // Kontrollera om detta är en "repeated signup" (användaren finns redan)
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        console.log('User already exists - repeated signup detected');
+        
+        toast({
+          title: "E-postadressen finns redan registrerad",
+          description: `${email} har redan ett konto i systemet. Försök logga in istället eller använd "Glömt lösenord" om du inte kommer ihåg det.`,
+          variant: "destructive",
+          duration: 8000
+        });
+        
+        return { 
+          error: { 
+            message: "Email already exists", 
+            userFriendlyMessage: "E-postadressen finns redan registrerad",
+            isExistingUser: true 
+          }
+        };
+      }
+      
+      // Om användaren skapades men e-post inte bekräftad (ny användare)
       if (data.user && !data.user.email_confirmed_at) {
-        console.log('User created but email not confirmed yet');
+        console.log('New user created but email not confirmed yet');
         
         toast({
           title: "Registrering lyckad!",
@@ -238,7 +258,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Handle specific error cases
       if (errorDescription.includes("already been registered") || errorDescription.includes("already registered") || errorDescription.includes("already")) {
         errorTitle = "E-post redan registrerad";
-        errorDescription = "Det finns redan ett konto med denna e-postadress. Försök logga in istället.";
+        errorDescription = `${email} har redan ett konto i systemet. Försök logga in istället.`;
       } else if (errorDescription.includes("Password should be")) {
         errorTitle = "Lösenordet är för svagt";
         errorDescription = "Lösenordet måste vara minst 6 tecken långt.";
@@ -253,7 +273,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         variant: "destructive"
       });
       
-      return { error: { message: errorDescription, userFriendlyMessage: errorDescription, isExistingUser: errorDescription.includes("already") } };
+      return { error: { message: errorDescription, userFriendlyMessage: errorDescription, isExistingUser: errorDescription.includes("redan") } };
     }
   };
 
