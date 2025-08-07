@@ -370,8 +370,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // är det troligt att kontot inte existerar
           if (existingProfiles !== null) {
             toast({
-              title: "E-post inte registrerad",
-              description: "Tyvärr finns inte denna mail registrerad hos oss. Tryck på registrera så kommer du skapa ett konto.",
+              title: "Vi hittar inget konto med den här e-postadressen",
+              description: "Vill du komma igång? Tryck på Registrera för att skapa ett konto direkt.",
               variant: "default",
               duration: 8000
             });
