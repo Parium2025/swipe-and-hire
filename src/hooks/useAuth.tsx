@@ -209,8 +209,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log('User already exists - repeated signup detected');
         
         toast({
-          title: "E-postadressen finns redan registrerad",
-          description: `${email} har redan ett konto i systemet. Försök logga in istället eller använd "Glömt lösenord" om du inte kommer ihåg det.`,
+          title: "Hoppsan! Den här adressen är redan registrerad",
+          description: `Det ser ut som att du redan har ett konto med ${email}. Logga gärna in – eller återställ lösenordet om du har glömt det.`,
           variant: "destructive",
           duration: 8000
         });
@@ -257,8 +257,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Handle specific error cases
       if (errorDescription.includes("already been registered") || errorDescription.includes("already registered") || errorDescription.includes("already")) {
-        errorTitle = "E-post redan registrerad";
-        errorDescription = `${email} har redan ett konto i systemet. Försök logga in istället.`;
+        errorTitle = "Hoppsan! Den här adressen är redan registrerad";
+        errorDescription = `Det ser ut som att du redan har ett konto med ${email}. Logga gärna in – eller återställ lösenordet om du har glömt det.`;
       } else if (errorDescription.includes("Password should be")) {
         errorTitle = "Lösenordet är för svagt";
         errorDescription = "Lösenordet måste vara minst 6 tecken långt.";
