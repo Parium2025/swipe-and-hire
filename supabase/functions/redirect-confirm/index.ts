@@ -37,12 +37,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (confirmation.confirmed_at) {
       console.log('Token already confirmed:', token);
-      // Omdirigera till inloggning med success-parameter
-      return new Response(null, {
-        status: 302,
-        headers: {
-          'Location': 'https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?confirmed=already',
-        },
+      // Visa bekräftelsesida för redan aktiverat konto
+      return new Response(getSuccessPage('Ditt konto är redan aktiverat!', true), {
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
       });
     }
 
@@ -72,12 +69,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Email confirmed successfully for token:', token);
     
-    // Omdirigera till inloggning med success-parameter
-    return new Response(null, {
-      status: 302,
-      headers: {
-        'Location': 'https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?confirmed=success',
-      },
+    // Visa bekräftelsesida istället för direkt omdirigering
+    return new Response(getSuccessPage('Ditt konto har aktiverats!'), {
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
     });
 
   } catch (error) {
@@ -101,7 +95,7 @@ function getSuccessPage(message: string, alreadyConfirmed = false): string {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <style>
         body { 
-          font-family: Arial, sans-serif; 
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
           text-align: center; 
           padding: 20px;
           background: linear-gradient(135deg, #1E3A8A, #3B82F6);
@@ -116,47 +110,90 @@ function getSuccessPage(message: string, alreadyConfirmed = false): string {
           max-width: 500px;
           background: rgba(255,255,255,0.1);
           padding: 40px;
-          border-radius: 12px;
+          border-radius: 16px;
           backdrop-filter: blur(10px);
           border: 1px solid rgba(255,255,255,0.2);
+          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .logo {
+          font-size: 24px;
+          font-weight: bold;
+          margin-bottom: 30px;
+          opacity: 0.9;
         }
         .icon {
-          font-size: 64px;
+          font-size: 80px;
           margin-bottom: 20px;
+          animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+          }
+          40% {
+            transform: translateY(-10px);
+          }
+          60% {
+            transform: translateY(-5px);
+          }
         }
         h1 {
           margin: 20px 0;
-          font-size: 28px;
+          font-size: 32px;
+          font-weight: 700;
         }
         p {
-          margin: 15px 0;
-          font-size: 16px;
-          line-height: 1.5;
+          margin: 20px 0;
+          font-size: 18px;
+          line-height: 1.6;
+          opacity: 0.9;
+        }
+        .success-text {
+          font-size: 20px;
+          font-weight: 600;
+          margin: 25px 0;
+          color: #10B981;
+          background: rgba(16, 185, 129, 0.1);
+          padding: 15px;
+          border-radius: 8px;
+          border: 1px solid rgba(16, 185, 129, 0.3);
         }
         .button {
           display: inline-block;
-          background: white;
-          color: #1E3A8A;
-          padding: 12px 24px;
-          border-radius: 8px;
+          background: linear-gradient(135deg, #10B981, #059669);
+          color: white;
+          padding: 16px 32px;
+          border-radius: 12px;
           text-decoration: none;
-          font-weight: bold;
-          margin-top: 20px;
-          transition: background 0.3s;
+          font-weight: 600;
+          font-size: 16px;
+          margin-top: 30px;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
         }
         .button:hover {
-          background: #f0f0f0;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+        }
+        .subtitle {
+          font-size: 16px;
+          opacity: 0.8;
+          margin-top: 10px;
         }
       </style>
     </head>
     <body>
       <div class="container">
+        <div class="logo">Parium</div>
         <div class="icon">✅</div>
-        <h1>Parium</h1>
-        <h2>${message}</h2>
+        <h1>${alreadyConfirmed ? 'Redan aktiverat!' : 'Välkommen!'}</h1>
+        <div class="success-text">
+          ${message}
+        </div>
         <p>Du kan nu logga in i Parium och börja swipa dig fram till din nästa jobbmöjlighet.</p>
+        <p class="subtitle">Framtiden börjar med ett swipe 🚀</p>
         <a href="https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth" class="button">
-          Logga in
+          Logga in nu
         </a>
       </div>
     </body>
