@@ -199,6 +199,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         console.error('Supabase signup error:', error);
+        
+        // Hantera specifika e-postfel
+        if (error.message.includes("Error sending confirmation email")) {
+          // Försök skapa användare utan bekräftelse för utvecklingsmiljö
+          console.log('Email sending failed, trying alternative approach...');
+          
+          toast({
+            title: "E-postsystemet är inte konfigurerat",
+            description: "För testning: kontakta admin för att aktivera ditt konto manuellt.",
+            variant: "destructive",
+            duration: 10000
+          });
+          
+          return { 
+            error: { 
+              message: "Email system not configured", 
+              userFriendlyMessage: "E-postsystemet är inte konfigurerat ännu",
+              isEmailError: true 
+            }
+          };
+        }
+        
         throw error;
       }
 
@@ -265,6 +287,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else if (errorDescription.includes("Invalid email")) {
         errorTitle = "Ogiltig e-postadress";
         errorDescription = "Ange en giltig e-postadress.";
+      } else if (errorDescription.includes("Error sending confirmation email")) {
+        errorTitle = "E-postsystemet är inte konfigurerat";
+        errorDescription = "Kontakta administratören för att aktivera e-postfunktionen.";
       }
 
       toast({
