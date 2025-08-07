@@ -203,7 +203,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       console.log('Custom signup result:', data);
 
-      if (data?.error) {
+      if (data?.error || data?.success === false) {
         // Hantera befintlig användare med specifik flagga
         if (data.isExistingUser) {
           toast({
@@ -225,7 +225,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         
         // Hantera andra fel med redan registrerad text (fallback)
-        if (data.error.includes("already registered") || data.error.includes("already been registered")) {
+        if (data.error && (data.error.includes("already registered") || data.error.includes("already been registered"))) {
           toast({
             title: "Hoppsan! Den här adressen är redan registrerad",
             description: `Det ser ut som att du redan har ett konto med ${email}. Logga gärna in – eller återställ lösenordet om du har glömt det.`,
@@ -256,6 +256,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error: any) {
       console.error("Signup error:", error);
       
+      // Hantera Edge Function responser som kommer som fel
+      if (error?.context?.body) {
+        try {
+          const errorData = typeof error.context.body === 'string' 
+            ? JSON.parse(error.context.body) 
+            : error.context.body;
+          
+          if (errorData?.isExistingUser) {
+            toast({
+              title: errorData.error || "Hoppsan! Den här adressen är redan registrerad",
+              description: errorData.message || `Det ser ut som att du redan har ett konto med ${email}. Logga gärna in – eller återställ lösenordet om du har glömt det.`,
+              variant: "default",
+              duration: 8000
+            });
+            
+            return { 
+              error: { 
+                message: errorData.error || "Email already exists", 
+                userFriendlyMessage: errorData.message || "E-postadressen finns redan registrerad",
+                isExistingUser: true,
+                error: errorData.error,
+                originalMessage: errorData.message
+              }
+            };
+          }
+        } catch (parseError) {
+          console.error('Error parsing edge function response:', parseError);
+        }
+      }
+      
       let errorTitle = "Registreringsfel";
       let errorDescription = error.message || "Ett oväntat fel inträffade. Försök igen.";
 
@@ -263,6 +293,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (errorDescription.includes("already been registered") || errorDescription.includes("already registered") || errorDescription.includes("already")) {
         errorTitle = "Hoppsan! Den här adressen är redan registrerad";
         errorDescription = `Det ser ut som att du redan har ett konto med ${email}. Logga gärna in – eller återställ lösenordet om du har glömt det.`;
+        
+        toast({
+          title: errorTitle,
+          description: errorDescription,
+          variant: "default",
+          duration: 8000
+        });
+        
+        return { 
+          error: { 
+            message: "Email already exists", 
+            userFriendlyMessage: errorDescription,
+            isExistingUser: true 
+          }
+        };
       } else if (errorDescription.includes("Password should be")) {
         errorTitle = "Lösenordet är för svagt";
         errorDescription = "Lösenordet måste vara minst 6 tecken långt.";
