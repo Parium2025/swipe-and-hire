@@ -185,92 +185,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, userData: { role: UserRole; first_name: string; last_name: string; phone?: string; organization_id?: string }) => {
     try {
-      console.log('Starting standard Supabase signup for:', email);
+      console.log('Starting custom signup with Resend for:', email);
       
-      // Använd Supabase's inbyggda signup med Gmail-kompatibel e-postbekräftelse
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth`,
+      // Använd din befintliga custom-signup Edge Function som använder Resend
+      const { data, error } = await supabase.functions.invoke('custom-signup', {
+        body: {
+          email,
+          password,
           data: userData
         }
       });
 
       if (error) {
-        console.error('Supabase signup error:', error);
-        
-        // Hantera specifika e-postfel
-        if (error.message.includes("Error sending confirmation email")) {
-          // Försök skapa användare utan bekräftelse för utvecklingsmiljö
-          console.log('Email sending failed, trying alternative approach...');
-          
+        console.error('Custom signup error:', error);
+        throw error;
+      }
+
+      console.log('Custom signup result:', data);
+
+      if (data?.error) {
+        // Hantera befintlig användare
+        if (data.error.includes("already registered") || data.error.includes("already been registered")) {
           toast({
-            title: "E-postsystemet är inte konfigurerat",
-            description: "För testning: kontakta admin för att aktivera ditt konto manuellt.",
+            title: "Hoppsan! Den här adressen är redan registrerad",
+            description: `Det ser ut som att du redan har ett konto med ${email}. Logga gärna in – eller återställ lösenordet om du har glömt det.`,
             variant: "destructive",
-            duration: 10000
+            duration: 8000
           });
           
           return { 
             error: { 
-              message: "Email system not configured", 
-              userFriendlyMessage: "E-postsystemet är inte konfigurerat ännu",
-              isEmailError: true 
+              message: "Email already exists", 
+              userFriendlyMessage: "E-postadressen finns redan registrerad",
+              isExistingUser: true 
             }
           };
         }
         
-        throw error;
+        throw new Error(data.error);
       }
 
-      console.log('Supabase signup result:', data);
-      
-      // Kontrollera om detta är en "repeated signup" (användaren finns redan)
-      if (data.user && data.user.identities && data.user.identities.length === 0) {
-        console.log('User already exists - repeated signup detected');
-        
-        toast({
-          title: "Hoppsan! Den här adressen är redan registrerad",
-          description: `Det ser ut som att du redan har ett konto med ${email}. Logga gärna in – eller återställ lösenordet om du har glömt det.`,
-          variant: "destructive",
-          duration: 8000
-        });
-        
-        return { 
-          error: { 
-            message: "Email already exists", 
-            userFriendlyMessage: "E-postadressen finns redan registrerad",
-            isExistingUser: true 
-          }
-        };
-      }
-      
-      // Om användaren skapades men e-post inte bekräftad (ny användare)
-      if (data.user && !data.user.email_confirmed_at) {
-        console.log('New user created but email not confirmed yet');
-        
-        toast({
-          title: "Registrering lyckad!",
-          description: "Kontrollera din e-post för att aktivera ditt konto. Gmail-användare: kolla även skräpposten!",
-          duration: 10000
-        });
-        
-        return { 
-          user: data.user, 
-          message: 'Kontrollera din e-post för att aktivera ditt konto.'
-        };
-      }
-      
-      // Om användaren direkt är bekräftad (inte vanligt med e-postbekräftelse påslaget)
-      if (data.user?.email_confirmed_at) {
-        toast({
-          title: "Välkommen!",
-          description: "Ditt konto har skapats och du är nu inloggad.",
-        });
-      }
-      
-      return { user: data.user };
+      // Registrering lyckades
+      toast({
+        title: "Registrering lyckad!",
+        description: "Kontrollera din e-post för att aktivera ditt konto. Gmail-användare: kolla även skräpposten!",
+        duration: 10000
+      });
+
+      return { user: data?.user };
     } catch (error: any) {
       console.error("Signup error:", error);
       
@@ -287,9 +249,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else if (errorDescription.includes("Invalid email")) {
         errorTitle = "Ogiltig e-postadress";
         errorDescription = "Ange en giltig e-postadress.";
-      } else if (errorDescription.includes("Error sending confirmation email")) {
-        errorTitle = "E-postsystemet är inte konfigurerat";
-        errorDescription = "Kontakta administratören för att aktivera e-postfunktionen.";
       }
 
       toast({
