@@ -132,7 +132,10 @@ const Auth = () => {
                   {confirmationMessage}
                 </p>
                 <Button 
-                  onClick={() => setConfirmationStatus('none')}
+                  onClick={() => {
+                    setConfirmationStatus('none');
+                    navigate('/auth', { replace: true });
+                  }}
                   className="w-full"
                 >
                   Logga in
@@ -150,7 +153,10 @@ const Auth = () => {
                   {confirmationMessage}
                 </p>
                 <Button 
-                  onClick={() => setConfirmationStatus('none')}
+                  onClick={() => {
+                    setConfirmationStatus('none');
+                    navigate('/auth', { replace: true });
+                  }}
                   className="w-full"
                 >
                   Logga in
@@ -168,7 +174,10 @@ const Auth = () => {
                   {confirmationMessage}
                 </p>
                 <Button 
-                  onClick={() => setConfirmationStatus('none')}
+                  onClick={() => {
+                    setConfirmationStatus('none');
+                    navigate('/auth', { replace: true });
+                  }}
                   className="w-full"
                 >
                   Försök igen
