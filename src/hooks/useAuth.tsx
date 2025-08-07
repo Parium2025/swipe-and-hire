@@ -145,6 +145,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (profileError) {
         console.error('Error fetching profile:', profileError);
+      } else if (!profileData) {
+        console.log('Profile not found for user, logging out...');
+        // Om profilen inte finns, logga ut användaren
+        await signOut();
+        return;
       } else {
         setProfile(profileData);
       }
