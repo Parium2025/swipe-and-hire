@@ -400,32 +400,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resendConfirmation = async (email: string) => {
     try {
-      const { data, error } = await supabase.functions.invoke('resend-confirmation', {
-        body: { email }
+      console.log('Resending confirmation email using Supabase native method for:', email);
+      
+      // Använd Supabase's inbyggda resend funktionalitet
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth`
+        }
       });
 
       if (error) {
-        console.error('Resend confirmation error:', error);
+        console.error('Supabase resend error:', error);
         throw error;
       }
 
-      if (data?.error) {
-        throw new Error(data.error);
-      }
+      console.log('Confirmation email resent successfully');
 
       toast({
         title: "Ny bekräftelselänk skickad!",
-        description: "Kolla din e-post för den nya bekräftelselänken. Den är giltig i 5 minuter.",
-        duration: 6000
+        description: "Kolla din e-post för den nya bekräftelselänken. Gmail-användare: kontrollera även skräpposten!",
+        duration: 8000
       });
 
       return { success: true };
     } catch (error: any) {
       console.error('Resend confirmation error:', error);
       
+      let errorMessage = error.message || "Ett fel inträffade. Försök igen.";
+      
+      // Hantera specifika felmeddelanden
+      if (errorMessage.includes("Email rate limit")) {
+        errorMessage = "För många e-postförfrågningar. Vänta en stund innan du försöker igen.";
+      } else if (errorMessage.includes("User not found")) {
+        errorMessage = "Ingen användare hittades med denna e-postadress.";
+      }
+      
       toast({
         title: "Kunde inte skicka bekräftelselänk",
-        description: error.message || "Ett fel inträffade. Försök igen.",
+        description: errorMessage,
         variant: "destructive"
       });
       
