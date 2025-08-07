@@ -204,12 +204,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('Custom signup result:', data);
 
       if (data?.error) {
-        // Hantera befintlig användare
+        // Hantera befintlig användare med specifik flagga
+        if (data.isExistingUser) {
+          toast({
+            title: data.error || "Hoppsan! Den här adressen är redan registrerad",
+            description: data.message || `Det ser ut som att du redan har ett konto med ${email}. Logga gärna in – eller återställ lösenordet om du har glömt det.`,
+            variant: "default",
+            duration: 8000
+          });
+          
+          return { 
+            error: { 
+              message: data.error || "Email already exists", 
+              userFriendlyMessage: data.message || "E-postadressen finns redan registrerad",
+              isExistingUser: true,
+              error: data.error,
+              originalMessage: data.message
+            }
+          };
+        }
+        
+        // Hantera andra fel med redan registrerad text (fallback)
         if (data.error.includes("already registered") || data.error.includes("already been registered")) {
           toast({
             title: "Hoppsan! Den här adressen är redan registrerad",
             description: `Det ser ut som att du redan har ett konto med ${email}. Logga gärna in – eller återställ lösenordet om du har glömt det.`,
-            variant: "destructive",
+            variant: "default",
             duration: 8000
           });
           
