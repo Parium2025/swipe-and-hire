@@ -13,9 +13,12 @@ const handler = async (req: Request): Promise<Response> => {
   console.log('Confirm page accessed with token:', token);
   
   if (!token) {
-    return new Response('Ingen bekräftelsetoken hittades.', { 
+    return new Response(getErrorPage('Ingen bekräftelsetoken hittades.'), { 
       status: 400,
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+      headers: { 
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-cache'
+      }
     });
   }
 
@@ -29,9 +32,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (confirmError || !confirmation) {
       console.log('Invalid token:', token);
-      return new Response('Ogiltigt eller utgånget bekräftelsetoken.', { 
+      return new Response(getErrorPage('Ogiltigt eller utgånget bekräftelsetoken.'), { 
         status: 400,
-        headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+        headers: { 
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-cache'
+        }
       });
     }
 
@@ -39,7 +45,11 @@ const handler = async (req: Request): Promise<Response> => {
       console.log('Token already confirmed:', token);
       // Visa bekräftelsesida för redan aktiverat konto
       return new Response(getSuccessPage('Ditt konto är redan aktiverat!', true), {
-        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+        status: 200,
+        headers: { 
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-cache'
+        },
       });
     }
 
@@ -51,9 +61,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (updateError) {
       console.error('Error updating confirmation:', updateError);
-      return new Response('Ett fel inträffade vid bekräftelse.', { 
+      return new Response(getErrorPage('Ett fel inträffade vid bekräftelse.'), { 
         status: 500,
-        headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+        headers: { 
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-cache'
+        }
       });
     }
 
@@ -71,14 +84,21 @@ const handler = async (req: Request): Promise<Response> => {
     
     // Visa bekräftelsesida istället för direkt omdirigering
     return new Response(getSuccessPage('Ditt konto har aktiverats!'), {
-      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      status: 200,
+      headers: { 
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-cache'
+      },
     });
 
   } catch (error) {
     console.error('Confirmation error:', error);
-    return new Response('Ett oväntat fel inträffade.', { 
+    return new Response(getErrorPage('Ett oväntat fel inträffade.'), { 
       status: 500,
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+      headers: { 
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-cache'
+      }
     });
   }
 };
