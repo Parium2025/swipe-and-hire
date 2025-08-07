@@ -44,7 +44,7 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
             
             {/* Logo image */}
             <img 
-              src="/lovable-uploads/3e52da4e-167e-4ebf-acfb-6a70a68cfaef.png" 
+              src="/lovable-uploads/parium-logo-transparent.png" 
               alt="Parium" 
               className="relative h-24 md:h-32 w-auto"
             />
