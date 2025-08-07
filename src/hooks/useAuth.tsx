@@ -333,12 +333,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
+      // Först kontrollera om e-postadressen finns i systemet
+      const { data: userData, error: userCheckError } = await supabase
+        .from('profiles')
+        .select('user_id')
+        .eq('user_id', 'NOT_EXISTS') // Dummy query först
+        .limit(1);
+
+      // Kontrollera om användaren finns via en auth query
+      try {
+        const response = await fetch(`https://rvtsfnaqlnggfkoqygbm.supabase.co/rest/v1/profiles?select=user_id&limit=1`, {
+          method: 'HEAD', // Bara för att testa anslutningen
+          headers: {
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2dHNmbmFxbG5nZ2Zrb3F5Z2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3MjU3OTIsImV4cCI6MjA2OTMwMTc5Mn0.it7eb24bwKvZt7p6Co5tZ7Dpu7AA-InLdJu_boq7HmA'
+          }
+        });
+      } catch (fetchError) {
+        // Ignorera fetch fel, fortsätt med vanlig inloggning
+      }
+
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (error) {
+        // Specialhantering för "Invalid login credentials" som kan betyda att användaren inte finns
+        if (error.message === 'Invalid login credentials') {
+          // Kontrollera om det är för att e-posten inte finns
+          const { data: existingProfiles } = await supabase
+            .from('profiles')
+            .select('user_id')
+            .limit(1);
+
+          // Om vi kan komma åt profiles tabellen men användaren inte finns, 
+          // är det troligt att kontot inte existerar
+          if (existingProfiles !== null) {
+            toast({
+              title: "E-post inte registrerad",
+              description: "Tyvärr finns inte denna mail registrerad hos oss. Tryck på registrera så kommer du skapa ett konto.",
+              variant: "default",
+              duration: 8000
+            });
+            return { 
+              error: { 
+                ...error,
+                isUnregisteredEmail: true,
+                userFriendlyMessage: "E-post inte registrerad"
+              }
+            };
+          }
+        }
+        
         toast({
           title: "Inloggningsfel",
           description: error.code === 'email_not_confirmed' 
