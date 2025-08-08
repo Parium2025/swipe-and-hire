@@ -101,7 +101,7 @@ const handler = async (req: Request): Promise<Response> => {
           <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden;">
             
             <!-- Header -->
-            <div style="background-color: #1a237e; padding: 40px 30px; text-align: center;">
+            <div style="background-color: #1E3A8A; padding: 40px 30px; text-align: center;">
               <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Välkommen till Parium!</h1>
               <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 18px;">Framtiden börjar med ett swipe</p>
             </div>
@@ -118,12 +118,12 @@ const handler = async (req: Request): Promise<Response> => {
                 <tr>
                   <td align="center" style="padding: 0;">
                     <!--[if mso]>
-                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" style="height:48px;v-text-anchor:middle;width:280px;" arcsize="21%" stroke="f" fillcolor="#1a237e">
+                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" style="height:48px;v-text-anchor:middle;width:280px;" arcsize="21%" stroke="f" fillcolor="#1E3A8A">
                     <w:anchorlock/>
                     <center>
                     <![endif]-->
                     <a href="${confirmationUrl}" 
-                       style="background-color: #1a237e; border-radius: 5px; color: #ffffff; display: inline-block; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none; mso-hide: all;">
+                       style="background-color: #1E3A8A; border-radius: 5px; color: #ffffff; display: inline-block; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none; mso-hide: all;">
                       👉 Bekräfta min e-postadress
                     </a>
                     <!--[if mso]>
@@ -185,7 +185,7 @@ const handler = async (req: Request): Promise<Response> => {
           <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden;">
             
             <!-- Header -->
-            <div style="background-color: #1a237e; padding: 40px 30px; text-align: center;">
+            <div style="background-color: #1E3A8A; padding: 40px 30px; text-align: center;">
               <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Återställ ditt lösenord</h1>
               <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 18px;">Parium</p>
             </div>
@@ -200,20 +200,20 @@ const handler = async (req: Request): Promise<Response> => {
               <!-- Button -->
               <div style="text-align: center; margin: 30px 0;">
                 <a href="${confirmationUrl}" 
-                   style="display: inline-block; background-color: #1a237e; color: #ffffff; text-decoration: none; padding: 15px 30px; border-radius: 5px; font-size: 16px; font-weight: bold;">
+                   style="display: inline-block; background-color: #1E3A8A; color: #ffffff; text-decoration: none; padding: 15px 30px; border-radius: 5px; font-size: 16px; font-weight: bold;">
                   🔐 Återställ lösenord
                 </a>
               </div>
               
               <!-- Security notice -->
-              <div style="background-color: #e8eaf6; border: 1px solid #1a237e; border-radius: 5px; padding: 15px; margin: 20px 0;">
-                <p style="color: #1a237e; font-size: 14px; margin: 0; text-align: center; font-weight: bold;">
-                  ⚠️ Säkerhetsnotis
-                </p>
-                <p style="color: #1a237e; font-size: 14px; margin: 5px 0 0 0; text-align: center;">
-                  Denna länk är giltig i 1 timme. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.
-                </p>
-              </div>
+               <div style="background-color: #e8eaf6; border: 1px solid #1E3A8A; border-radius: 5px; padding: 15px; margin: 20px 0;">
+                 <p style="color: #1E3A8A; font-size: 14px; margin: 0; text-align: center; font-weight: bold;">
+                   ⚠️ Säkerhetsnotis
+                 </p>
+                 <p style="color: #1E3A8A; font-size: 14px; margin: 5px 0 0 0; text-align: center;">
+                   Denna länk är giltig i 1 timme. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.
+                 </p>
+               </div>
               
               <!-- Alternative link -->
               <div style="margin: 30px 0; padding: 20px; background-color: #f8f9fa; border-radius: 5px;">
