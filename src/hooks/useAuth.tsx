@@ -622,41 +622,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resetPassword = async (email: string) => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth?reset=true`
+      console.log(`Sending password reset for: ${email}`);
+      
+      // Use our custom edge function for sending reset email
+      const { data, error } = await supabase.functions.invoke('send-reset-password', {
+        body: { email }
       });
 
       if (error) {
+        console.error('Reset password error:', error);
         toast({
           title: "Fel vid lösenordsåterställning",
-          description: error.message,
+          description: error.message || "Kunde inte skicka återställningsmail. Försök igen.",
           variant: "destructive"
         });
         return { error };
       }
 
       toast({
-        title: "Återställningsmail skickat!",
-        description: "Kontrollera din e-post för instruktioner om lösenordsåterställning. Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.",
+        title: "📧 Återställningsmail skickat!",
+        description: "Kontrollera din e-post för instruktioner om lösenordsåterställning.",
         duration: 8000
       });
 
-      // Send custom reset email
-      try {
-        const resetUrl = `${window.location.origin}/auth?reset=true`;
-        await supabase.functions.invoke('send-confirmation-email', {
-          body: {
-            email,
-            confirmationUrl: resetUrl,
-            type: 'reset'
-          }
-        });
-      } catch (emailError) {
-        console.log('Custom email send failed, falling back to Supabase default');
-      }
-
-      return {};
-    } catch (error) {
+      return { success: true };
+    } catch (error: any) {
+      console.error('Reset password error:', error);
+      toast({
+        title: "Fel vid lösenordsåterställning",
+        description: "Kunde inte skicka återställningsmail. Försök igen.",
+        variant: "destructive"
+      });
       return { error };
     }
   };

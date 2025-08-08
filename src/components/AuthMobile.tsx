@@ -399,7 +399,7 @@ const AuthMobile = ({
                         <div className="mt-4 p-3 bg-muted/50 rounded-lg text-center">
                           <p className="text-sm mb-2">Glömt lösenordet?</p>
                           <Button
-                            variant="outline"
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground"
                             size="sm"
                             onClick={handleResetPassword}
                             disabled={loading}

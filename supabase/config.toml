@@ -1,9 +1,9 @@
 project_id = "rvtsfnaqlnggfkoqygbm"
 
-[functions.send-password-reset]
+[functions.send-confirmation-email]
 verify_jwt = false
 
-[functions.send-confirmation-email]
+[functions.send-reset-password]
 verify_jwt = false
 
 [functions.test-email]
@@ -28,6 +28,9 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.check-user-exists]
+verify_jwt = false
+
+[functions.send-reset-password]
 verify_jwt = false
 
 [auth]
