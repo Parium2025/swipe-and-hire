@@ -68,25 +68,7 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // 3. Kontrollera om utgången
-    if (new Date(confirmation.expires_at) < new Date()) {
-      // Ta bort utgången bekräftelse och användare
-      await supabase.auth.admin.deleteUser(confirmation.user_id);
-      await supabase
-        .from('email_confirmations')
-        .delete()
-        .eq('id', confirmation.id);
-
-      return new Response(JSON.stringify({ 
-        error: "Bekräftelselänken har gått ut. Du kan registrera dig igen med samma e-postadress." 
-      }), {
-        status: 400,
-        headers: {
-          "Content-Type": "application/json",
-          ...corsHeaders,
-        },
-      });
-    }
+    // Länkarna har ingen utgångstid - de fungerar alltid
 
     // 4. Bekräfta e-posten
     const { error: updateError } = await supabase.auth.admin.updateUserById(
