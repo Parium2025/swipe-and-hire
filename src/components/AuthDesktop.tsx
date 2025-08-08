@@ -611,7 +611,6 @@ const AuthDesktop = ({
                       <p className="text-sm mb-3 font-medium">📧 Återställningsmail skickat!</p>
                       <div className="text-xs text-muted-foreground bg-secondary/10 p-2 rounded border-l-4 border-secondary">
                         <p className="font-medium">💡 Tips:</p>
-                        <p className="mt-1">Kolla din skräppost om du inte ser mailet inom några minuter.</p>
                         <p>Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.</p>
                       </div>
                     </div>

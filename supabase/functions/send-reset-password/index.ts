@@ -99,10 +99,10 @@ const handler = async (req: Request): Promise<Response> => {
                     <w:anchorlock/>
                     <center>
                     <![endif]-->
-                    <a href="${resetUrl}" 
+                     <a href="${resetUrl}" 
                        style="background-color: #1E3A8A; border-radius: 5px; color: #ffffff; display: inline-block; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none; mso-hide: all;">
-                      🔐 Återställ lösenord
-                    </a>
+                       Återställ lösenord
+                     </a>
                     <!--[if mso]>
                     </center>
                     </v:roundrect>
@@ -143,6 +143,7 @@ const handler = async (req: Request): Promise<Response> => {
               </p>
               
               <p style="color: #999999; font-size: 12px; margin: 20px 0 0 0;">
+                Parium AB · Stockholm<br>
                 Parium – Framtidens jobbsök börjar här.
               </p>
             </div>
