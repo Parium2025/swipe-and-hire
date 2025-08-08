@@ -253,7 +253,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Registrering lyckades
       toast({
         title: "Registrering lyckad!",
-        description: "Kontrollera din e-post för att aktivera ditt konto. Gmail-användare: kolla även skräpposten!",
+        description: "Kontrollera din e-post för att aktivera ditt konto.",
         duration: 10000
       });
 
