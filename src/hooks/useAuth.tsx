@@ -375,7 +375,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               // Användaren finns och är bekräftad - detta är fel lösenord
               toast({
                 title: "Fel lösenord",
-                description: "Lösenordet stämmer inte. Har du glömt det? Tryck på 'Glömt lösenord' nedan.",
+                description: "Lösenordet stämmer inte. Har du glömt det? Tryck på 'Återställ lösenord' nedan.",
                 variant: "destructive",
                 duration: 8000
               });
@@ -424,7 +424,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Fallback om edge function misslyckas
             toast({
               title: "Inloggning misslyckades",
-              description: "Kontrollera din e-post och lösenord. Har du glömt lösenordet? Tryck på 'Glömt lösenord' nedan.",
+              description: "Kontrollera din e-post och lösenord. Har du glömt lösenordet? Tryck på 'Återställ lösenord' nedan.",
               variant: "destructive",
               duration: 8000
             });
