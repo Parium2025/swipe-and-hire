@@ -360,19 +360,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) {
         // Specialhantering för "Invalid login credentials"
         if (error.message === 'Invalid login credentials') {
-          // Försök hitta användaren genom att kolla om en profil finns med denna email
-          // Detta är mer pålitligt än admin API från frontend
-          
-          // Vi kommer alltid att visa "fel lösenord" meddelandet för befintliga konton
-          // eftersom vi inte kan säkert skilja mellan "fel lösenord" och "användare finns inte"
-          // från frontend på ett pålitligt sätt
-          
-          toast({
-            title: "Inloggning misslyckades",
-            description: "Kontrollera din e-post och lösenord. Har du glömt lösenordet? Tryck på 'Glömt lösenord' nedan.",
-            variant: "destructive",
-            duration: 8000
-          });
+          // Kolla om användaren faktiskt finns via vår edge function
+          try {
+            const { data: userCheck, error: checkError } = await supabase.functions.invoke('check-user-exists', {
+              body: { email }
+            });
+
+            if (checkError) {
+              console.error('Error checking user:', checkError);
+              throw checkError;
+            }
+
+            if (userCheck.userExists && userCheck.isConfirmed) {
+              // Användaren finns och är bekräftad - detta är fel lösenord
+              toast({
+                title: "Fel lösenord",
+                description: "Lösenordet stämmer inte. Har du glömt det? Tryck på 'Glömt lösenord' nedan.",
+                variant: "destructive",
+                duration: 8000
+              });
+            } else if (!userCheck.userExists) {
+              // Användaren finns inte alls - visa registrera-meddelande
+              toast({
+                title: "Vi hittar inget konto med den här e-postadressen",
+                description: "Vill du komma igång? Tryck på Registrera för att skapa ett konto direkt.",
+                variant: "default",
+                duration: 8000
+              });
+            } else {
+              // Användaren finns men är inte bekräftad
+              toast({
+                title: "Kontot är inte bekräftat",
+                description: "Du behöver bekräfta din e-post först. Kolla din inkorg eller begär en ny bekräftelselänk.",
+                variant: "default",
+                duration: 8000
+              });
+            }
+          } catch (checkError) {
+            // Fallback om edge function misslyckas
+            toast({
+              title: "Inloggning misslyckades",
+              description: "Kontrollera din e-post och lösenord. Har du glömt lösenordet? Tryck på 'Glömt lösenord' nedan.",
+              variant: "destructive",
+              duration: 8000
+            });
+          }
           
           return { 
             error: { 
