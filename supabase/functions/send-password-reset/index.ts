@@ -31,42 +31,91 @@ const handler = async (req: Request): Promise<Response> => {
       to: [user.email],
       subject: "Återställ ditt lösenord - Parium",
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #333; margin-bottom: 24px;">Återställ ditt lösenord</h1>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 20px; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5;">
           
-          <p style="color: #666; line-height: 1.6; margin-bottom: 24px;">
-            Hej! Vi har fått en begäran om att återställa lösenordet för ditt Parium-konto.
-          </p>
-          
-          <div style="text-align: center; margin: 32px 0;">
-            <a href="${reset_password_url}" 
-               style="background-color: #2563eb; color: white; padding: 12px 24px; 
-                      text-decoration: none; border-radius: 6px; display: inline-block;
-                      font-weight: 500;">
-              Återställ lösenord
-            </a>
+          <!-- Simple container -->
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden;">
+            
+            <!-- Header -->
+            <div style="background-color: #1E3A8A; padding: 40px 30px; text-align: center;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Återställ ditt lösenord</h1>
+              <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 18px;">Parium</p>
+            </div>
+            
+            <!-- Content -->
+            <div style="padding: 40px 30px;">
+              <p style="color: #333333; margin: 0 0 20px 0; font-size: 18px; line-height: 1.6; text-align: center;">
+                Vi har fått en begäran om att återställa lösenordet för ditt Parium-konto.<br>
+                Klicka på knappen nedan för att skapa ett nytt lösenord.
+              </p>
+              
+              <!-- Button with bulletproof mobile centering -->
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
+                <tr>
+                  <td align="center" style="padding: 0;">
+                    <!--[if mso]>
+                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" style="height:48px;v-text-anchor:middle;width:280px;" arcsize="21%" stroke="f" fillcolor="#1E3A8A">
+                    <w:anchorlock/>
+                    <center>
+                    <![endif]-->
+                    <a href="${reset_password_url}" 
+                       style="background-color: #1E3A8A; border-radius: 5px; color: #ffffff; display: inline-block; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none; mso-hide: all;">
+                      🔐 Återställ lösenord
+                    </a>
+                    <!--[if mso]>
+                    </center>
+                    </v:roundrect>
+                    <![endif]-->
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Security notice -->
+              <div style="background-color: #e8eaf6; border: 1px solid #1E3A8A; border-radius: 5px; padding: 15px; margin: 20px 0;">
+                <p style="color: #1E3A8A; font-size: 14px; margin: 0; text-align: center; font-weight: bold;">
+                  ⚠️ Säkerhetsnotis
+                </p>
+                <p style="color: #1E3A8A; font-size: 14px; margin: 5px 0 0 0; text-align: center;">
+                  Denna länk är giltig i 1 timme. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.
+                </p>
+              </div>
+              
+              <!-- Alternative link -->
+              <div style="margin: 30px 0; padding: 20px; background-color: #f8f9fa; border-radius: 5px;">
+                <p style="color: #666666; font-size: 14px; margin: 0 0 10px 0;">
+                  Fungerar inte knappen? Kopiera länken nedan:
+                </p>
+                <p style="color: #0066cc; font-size: 14px; word-break: break-all; margin: 0;">
+                  ${reset_password_url}
+                </p>
+              </div>
+            </div>
+            
+            <!-- Footer -->
+            <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e9ecef;">
+              <p style="color: #666666; font-size: 14px; margin: 0 0 10px 0;">
+                Fick du detta mail av misstag? Ignorera det bara.
+              </p>
+              <p style="color: #333333; font-size: 16px; margin: 0; font-weight: bold;">
+                Med vänliga hälsningar,<br>
+                Parium-teamet
+              </p>
+              
+              <p style="color: #999999; font-size: 12px; margin: 20px 0 0 0;">
+                Parium – Framtidens jobbsök börjar här.
+              </p>
+            </div>
+            
           </div>
           
-          <p style="color: #666; line-height: 1.6; margin-bottom: 16px;">
-            Om knappen inte fungerar kan du kopiera och klistra in denna länk i din webbläsare:
-          </p>
-          
-          <p style="background-color: #f3f4f6; padding: 12px; border-radius: 6px; 
-                    word-break: break-all; font-size: 14px; margin-bottom: 24px;">
-            ${reset_password_url}
-          </p>
-          
-          <p style="color: #666; line-height: 1.6; font-size: 14px;">
-            Om du inte begärde denna återställning kan du ignorera detta mail. 
-            Länken kommer att upphöra att gälla inom 24 timmar.
-          </p>
-          
-          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 32px 0;">
-          
-          <p style="color: #9ca3af; font-size: 12px; text-align: center;">
-            Detta mail kommer från Parium - din plattform för jobbmatchning
-          </p>
-        </div>
+        </body>
+        </html>
       `,
     });
 

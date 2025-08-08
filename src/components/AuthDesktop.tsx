@@ -45,6 +45,7 @@ const AuthDesktop = ({
   const [loading, setLoading] = useState(false);
   const [showResend, setShowResend] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
+  const [resetPasswordSent, setResetPasswordSent] = useState(false);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
@@ -150,6 +151,7 @@ const AuthDesktop = ({
     setLoading(true);
     setShowResend(false);
     setShowResetPassword(false);
+    setResetPasswordSent(false);
 
     try {
       if (isLogin) {
@@ -193,6 +195,23 @@ const AuthDesktop = ({
     if (!email) return;
     setLoading(true);
     await resendConfirmation(email);
+    setLoading(false);
+  };
+
+  const handleResetPassword = async () => {
+    if (!email) {
+      toast({
+        title: "E-post krävs",
+        description: "Ange din e-postadress först",
+        variant: "destructive"
+      });
+      return;
+    }
+    setLoading(true);
+    const result = await resetPassword(email);
+    if (!result.error) {
+      setResetPasswordSent(true);
+    }
     setLoading(false);
   };
 
@@ -573,17 +592,28 @@ const AuthDesktop = ({
                     </div>
                   )}
 
-                  {showResetPassword && (
-                    <div className="mt-6 p-4 bg-red-100/50 rounded-lg text-center">
-                      <p className="text-sm mb-2">Fel lösenord. Vill du återställa det?</p>
+                  {showResetPassword && !resetPasswordSent && (
+                    <div className="mt-6 p-4 bg-muted/50 rounded-lg text-center">
+                      <p className="text-sm mb-2">Glömt lösenordet?</p>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => navigate('/auth/reset-password')}
+                        onClick={handleResetPassword}
                         disabled={loading}
                       >
                         Återställ lösenord
                       </Button>
+                    </div>
+                  )}
+
+                  {resetPasswordSent && (
+                    <div className="mt-6 p-4 bg-muted/50 rounded-lg text-center">
+                      <p className="text-sm mb-3 font-medium">📧 Återställningsmail skickat!</p>
+                      <div className="text-xs text-muted-foreground bg-secondary/10 p-2 rounded border-l-4 border-secondary">
+                        <p className="font-medium">💡 Tips:</p>
+                        <p className="mt-1">Kolla din skräppost om du inte ser mailet inom några minuter.</p>
+                        <p>Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.</p>
+                      </div>
                     </div>
                   )}
                 </CardContent>
