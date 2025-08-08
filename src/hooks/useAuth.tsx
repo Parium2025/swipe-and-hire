@@ -358,31 +358,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
-        // Specialhantering för "Invalid login credentials" som kan betyda att användaren inte finns
+        // Specialhantering för "Invalid login credentials"
         if (error.message === 'Invalid login credentials') {
-          // Kontrollera om det är för att e-posten inte finns
-          const { data: existingProfiles } = await supabase
+          // Kontrollera om användaren faktiskt finns genom att kolla profiles
+          const { data: userProfile } = await supabase
             .from('profiles')
-            .select('user_id')
-            .limit(1);
+            .select('user_id, first_name')
+            .eq('user_id', 'dummy') // Vi kan inte direkt söka på email här
+            .single();
 
-          // Om vi kan komma åt profiles tabellen men användaren inte finns, 
-          // är det troligt att kontot inte existerar
-          if (existingProfiles !== null) {
+          // Eftersom vi inte kan söka direkt på email i profiles, försök admin list
+          try {
+            const { data: listData } = await supabase.auth.admin.listUsers();
+            const existingUser = listData?.users?.find((u: any) => u.email === email);
+            
+            if (existingUser && existingUser.email_confirmed_at) {
+              // Användaren finns och är bekräftad - detta är ett fel lösenord
+              toast({
+                title: "Fel lösenord",
+                description: "Lösenordet stämmer inte. Har du glömt det? Tryck på 'Glömt lösenord' nedan.",
+                variant: "destructive",
+                duration: 8000
+              });
+            } else {
+              // Användaren finns inte - visa registrera-meddelande
+              toast({
+                title: "Vi hittar inget konto med den här e-postadressen",
+                description: "Vill du komma igång? Tryck på Registrera för att skapa ett konto direkt.",
+                variant: "default",
+                duration: 8000
+              });
+            }
+          } catch (adminError) {
+            // Fallback - visa generellt meddelande
             toast({
-              title: "Vi hittar inget konto med den här e-postadressen",
-              description: "Vill du komma igång? Tryck på Registrera för att skapa ett konto direkt.",
-              variant: "default",
+              title: "Inloggningen misslyckades",
+              description: "Kontrollera din e-post och lösenord, eller tryck på 'Glömt lösenord' om du behöver återställa det.",
+              variant: "destructive",
               duration: 8000
             });
-            return { 
-              error: { 
-                ...error,
-                isUnregisteredEmail: true,
-                userFriendlyMessage: "E-post inte registrerad"
-              }
-            };
           }
+          
+          return { 
+            error: { 
+              ...error,
+              isUnregisteredEmail: true,
+              userFriendlyMessage: "Inloggning misslyckades"
+            }
+          };
         }
         
         toast({
