@@ -134,17 +134,11 @@ const handler = async (req: Request): Promise<Response> => {
             
             <!-- Footer -->
             <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e9ecef;">
-              <p style="color: #666666; font-size: 14px; margin: 0 0 10px 0;">
-                Fick du detta mail av misstag? Ignorera det bara.
-              </p>
               <p style="color: #333333; font-size: 16px; margin: 0; font-weight: bold;">
-                Med vänliga hälsningar,<br>
-                Parium-teamet
+                Parium AB · Stockholm
               </p>
-              
-              <p style="color: #999999; font-size: 12px; margin: 20px 0 0 0;">
-                Parium AB · Stockholm<br>
-                Parium – Framtidens jobbsök börjar här.
+              <p style="color: #666666; font-size: 14px; margin: 10px 0 0 0;">
+                Du får detta mail för att du begärde ett återställnings mail i Parium-appen.
               </p>
             </div>
             
