@@ -160,7 +160,7 @@ const AuthMobile = ({
         if (result.error) {
           if (result.error.code === 'email_not_confirmed') {
             setShowResend(true);
-          } else if (result.error.message === 'Invalid login credentials') {
+          } else if (result.error.showResetPassword) {
             setShowResetPassword(true);
           }
         }

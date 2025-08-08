@@ -379,6 +379,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 variant: "destructive",
                 duration: 8000
               });
+              
+              return { 
+                error: { 
+                  ...error,
+                  message: 'Invalid login credentials',
+                  showResetPassword: true
+                }
+              };
             } else if (!userCheck.userExists) {
               // Användaren finns inte alls - visa registrera-meddelande
               toast({
@@ -387,6 +395,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 variant: "default",
                 duration: 8000
               });
+              
+              return { 
+                error: { 
+                  ...error,
+                  message: 'User not found',
+                  showRegister: true
+                }
+              };
             } else {
               // Användaren finns men är inte bekräftad
               toast({
@@ -395,6 +411,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 variant: "default",
                 duration: 8000
               });
+              
+              return { 
+                error: { 
+                  ...error,
+                  code: 'email_not_confirmed',
+                  message: 'Email not confirmed'
+                }
+              };
             }
           } catch (checkError) {
             // Fallback om edge function misslyckas
