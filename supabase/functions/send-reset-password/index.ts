@@ -46,7 +46,7 @@ const handler = async (req: Request): Promise<Response> => {
       type: 'recovery',
       email: email,
       options: {
-        redirectTo: `${req.headers.get('origin')}/auth?reset=true`
+        redirectTo: `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true`
       }
     });
 
