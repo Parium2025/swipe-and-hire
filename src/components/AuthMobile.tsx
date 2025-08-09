@@ -413,10 +413,19 @@ const AuthMobile = ({
                       {resetPasswordSent && (
                         <div className="mt-4 p-3 bg-muted/50 rounded-lg text-center">
                           <p className="text-sm mb-3 font-medium">📧 Återställningsmail skickat!</p>
-                          <div className="text-xs text-muted-foreground bg-secondary/10 p-2 rounded border-l-4 border-secondary">
+                          <div className="text-xs text-muted-foreground bg-secondary/10 p-2 rounded border-l-4 border-secondary mb-3">
                             <p className="font-medium">💡 Tips:</p>
                             <p>Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.</p>
                           </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleResetPassword}
+                            disabled={resetLoading}
+                            className="text-xs"
+                          >
+                            {resetLoading ? 'Skickar...' : 'Skicka igen'}
+                          </Button>
                         </div>
                       )}
                     </form>
