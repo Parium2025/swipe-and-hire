@@ -59,8 +59,12 @@ const Index = () => {
   // Debug logging
   console.log('=== ONBOARDING DEBUG ===');
   console.log('User email:', user?.email);
+  console.log('User ID:', user?.id);
   console.log('User role:', userRole?.role);
-  console.log('Profile onboarding_completed:', profile?.onboarding_completed);
+  console.log('Profile object:', profile);
+  console.log('Profile onboarding_completed (raw):', profile?.onboarding_completed);
+  console.log('Profile onboarding_completed (type):', typeof profile?.onboarding_completed);
+  console.log('!profile?.onboarding_completed:', !profile?.onboarding_completed);
   console.log('Needs onboarding:', needsOnboarding);
   console.log('Should show WelcomeTunnel:', needsOnboarding && userRole?.role === 'job_seeker');
   console.log('========================');
