@@ -70,87 +70,114 @@ const handler = async (req: Request): Promise<Response> => {
     const correctedResetUrl = `https://rvtsfnaqlnggfkoqygbm.supabase.co/functions/v1/redirect-recovery?t=${encodedUrl}`;
 
     const emailResponse = await resend.emails.send({
-      from: "Parium Team <noreply@parium.se>",
+      from: "Parium Team <noreply@resend.dev>", // Använder verifierad Resend-domän
       to: [email],
-      subject: "Återställ ditt lösenord - Parium",
+      reply_to: "support@parium.se",
+      subject: "Lösenordsåterställning för ditt Parium-konto",
+      text: `Hej!
+
+Vi har fått en begäran om att återställa lösenordet för ditt Parium-konto.
+
+Klicka på länken nedan för att skapa ett nytt lösenord:
+${correctedResetUrl}
+
+Denna länk är giltig i 1 timme. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.
+
+Med vänliga hälsningar,
+Parium Team
+
+Parium AB, Stockholm
+support@parium.se`,
       html: `
         <!DOCTYPE html>
-        <html>
+        <html lang="sv">
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <meta name="color-scheme" content="light">
+          <meta name="supported-color-schemes" content="light">
+          <title>Lösenordsåterställning</title>
         </head>
-        <body style="margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #ffffff;">
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background-color: #f5f5f5; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
           
-          <!-- Simple container -->
-          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; overflow: hidden;">
-            
-            <!-- Header -->
-            <div style="background-color: #1E3A8A; padding: 40px 30px; text-align: center;">
-              <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Återställ ditt lösenord</h1>
-              <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 18px;">Parium</p>
-            </div>
-            
-            <!-- Content -->
-            <div style="padding: 40px 30px;">
-              <p style="color: #333333; margin: 0 0 20px 0; font-size: 18px; line-height: 1.6; text-align: center;">
-                Vi har fått en begäran om att återställa lösenordet för ditt Parium-konto.<br>
-                Klicka på knappen nedan för att skapa ett nytt lösenord.
-              </p>
-              
-              <!-- Button with bulletproof mobile centering -->
-              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
-                <tr>
-                  <td align="center" style="padding: 0;">
-                    <!--[if mso]>
-                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" style="height:48px;v-text-anchor:middle;width:280px;" arcsize="21%" stroke="f" fillcolor="#1E3A8A">
-                    <w:anchorlock/>
-                    <center>
-                    <![endif]-->
-                     <a href="${correctedResetUrl}" 
-                       style="background-color: #1E3A8A; border-radius: 5px; color: #ffffff; display: inline-block; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none; mso-hide: all;">
-                       Återställ lösenord
-                     </a>
-                    <!--[if mso]>
-                    </center>
-                    </v:roundrect>
-                    <![endif]-->
-                  </td>
-                </tr>
-              </table>
-              
-              <!-- Security notice -->
-              <div style="background-color: #e8eaf6; border: 1px solid #1E3A8A; border-radius: 5px; padding: 15px; margin: 20px 0;">
-                <p style="color: #1E3A8A; font-size: 14px; margin: 0; text-align: center; font-weight: bold;">
-                  ⚠️ Säkerhetsnotis
-                </p>
-                <p style="color: #1E3A8A; font-size: 14px; margin: 5px 0 0 0; text-align: center;">
-                  Denna länk är giltig i 1 timme. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.
-                </p>
-              </div>
-              
-              <!-- Alternative link -->
-              <div style="margin: 30px 0; padding: 20px; background-color: #f8f9fa; border-radius: 5px;">
-                <p style="color: #666666; font-size: 14px; margin: 0 0 10px 0;">
-                  Fungerar inte knappen? Kopiera länken nedan:
-                </p>
-                 <p style="color: #0066cc; font-size: 14px; word-break: break-all; margin: 0;">
-                   ${correctedResetUrl}
-                 </p>
-              </div>
-            </div>
-            
-            <!-- Footer -->
-            <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e9ecef;">
-              <p style="color: #333333; font-size: 16px; margin: 0; font-weight: bold;">
-                Parium AB · Stockholm
-              </p>
-              <p style="color: #666666; font-size: 14px; margin: 10px 0 0 0;">
-                Du får detta mail för att du begärde ett återställnings mail i Parium-appen.
-              </p>
-            </div>
-            
-          </div>
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 0; padding: 0;">
+            <tr>
+              <td align="center" style="padding: 20px 0;">
+                
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                  
+                  <!-- Header -->
+                  <tr>
+                    <td style="background-color: #1E3A8A; padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
+                      <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600; line-height: 1.2;">
+                        Lösenordsåterställning
+                      </h1>
+                      <p style="color: #ffffff; margin: 8px 0 0 0; font-size: 16px; opacity: 0.9;">
+                        Parium
+                      </p>
+                    </td>
+                  </tr>
+                  
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 40px 30px;">
+                      
+                      <p style="color: #333333; margin: 0 0 24px 0; font-size: 16px; line-height: 1.5;">
+                        Hej!
+                      </p>
+                      
+                      <p style="color: #333333; margin: 0 0 24px 0; font-size: 16px; line-height: 1.5;">
+                        Vi har fått en begäran om att återställa lösenordet för ditt Parium-konto. Klicka på knappen nedan för att skapa ett nytt lösenord.
+                      </p>
+                      
+                      <!-- CTA Button -->
+                      <div style="text-align: center; margin: 32px 0;">
+                        <a href="${correctedResetUrl}" 
+                           style="display: inline-block; background-color: #1E3A8A; color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 6px; font-size: 16px; font-weight: 600; text-align: center; min-width: 200px; line-height: 1.2;">
+                          Återställ lösenord
+                        </a>
+                      </div>
+                      
+                      <!-- Security Notice -->
+                      <div style="background-color: #f8f9fa; border-left: 4px solid #1E3A8A; padding: 16px; margin: 24px 0; border-radius: 4px;">
+                        <p style="color: #1E3A8A; font-size: 14px; margin: 0 0 8px 0; font-weight: 600;">
+                          Säkerhetsmeddelande
+                        </p>
+                        <p style="color: #666666; font-size: 14px; margin: 0; line-height: 1.4;">
+                          Denna länk är giltig i 1 timme. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.
+                        </p>
+                      </div>
+                      
+                      <!-- Alternative link -->
+                      <div style="margin: 24px 0; padding: 16px; background-color: #f8f9fa; border-radius: 4px;">
+                        <p style="color: #666666; font-size: 13px; margin: 0 0 8px 0;">
+                          Fungerar inte knappen? Kopiera och klistra in länken nedan i din webbläsare:
+                        </p>
+                        <p style="color: #0066cc; font-size: 13px; word-break: break-all; margin: 0; font-family: monospace;">
+                          ${correctedResetUrl}
+                        </p>
+                      </div>
+                      
+                    </td>
+                  </tr>
+                  
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background-color: #f8f9fa; padding: 24px 30px; text-align: center; border-radius: 0 0 8px 8px; border-top: 1px solid #e9ecef;">
+                      <p style="color: #333333; font-size: 14px; margin: 0 0 8px 0; font-weight: 600;">
+                        Parium AB
+                      </p>
+                      <p style="color: #666666; font-size: 13px; margin: 0;">
+                        Stockholm, Sverige • support@parium.se
+                      </p>
+                    </td>
+                  </tr>
+                  
+                </table>
+                
+              </td>
+            </tr>
+          </table>
           
         </body>
         </html>
