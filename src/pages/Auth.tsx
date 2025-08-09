@@ -109,45 +109,11 @@ const Auth = () => {
     
     setIsPasswordReset(isReset);
     
-    // Kontrollera om användaren finns i databasen innan navigation
-    const checkUserAndNavigate = async () => {
-      if (user && !isReset && confirmationStatus === 'none' && !confirmed) {
-        try {
-          // Kontrollera om användaren fortfarande finns i databasen
-          const response = await fetch(`https://rvtsfnaqlnggfkoqygbm.supabase.co/rest/v1/profiles?user_id=eq.${user.id}&select=user_id`, {
-            headers: {
-              'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2dHNmbmFxbG5nZ2Zrb3F5Z2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3MjU3OTIsImV4cCI6MjA2OTMwMTc5Mn0.it7eb24bwKvZt7p6Co5tZ7Dpu7AA-InLdJu_boq7HmA',
-              'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2dHNmbmFxbG5nZ2Zrb3F5Z2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3MjU3OTIsImV4cCI6MjA2OTMwMTc5Mn0.it7eb24bwKvZt7p6Co5tZ7Dpu7AA-InLdJu_boq7HmA'
-            }
-          });
-          
-          const profileData = await response.json();
-          
-          if (profileData && profileData.length === 0) {
-            console.log('User profile not found, logging out...');
-            // Användaren finns inte i profiltabellen, logga ut
-            await fetch(`https://rvtsfnaqlnggfkoqygbm.supabase.co/auth/v1/logout`, {
-              method: 'POST',
-              headers: {
-                'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2dHNmbmFxbG5nZ2Zrb3F5Z2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3MjU3OTIsImV4cCI6MjA2OTMwMTc5Mn0.it7eb24bwKvZt7p6Co5tZ7Dpu7AA-InLdJu_boq7HmA'
-              }
-            });
-            // Rensa lokalt
-            localStorage.clear();
-            sessionStorage.clear();
-            return; // Stoppa navigering
-          } else {
-            console.log('User is logged in, navigating to home');
-            navigate('/');
-          }
-        } catch (error) {
-          console.error('Error checking user profile:', error);
-          // Vid fel, visa auth-sidan ändå
-        }
-      }
-    };
-    
-    checkUserAndNavigate();
+    // If user is logged in, redirect to home immediately
+    if (user && !isReset && confirmationStatus === 'none' && !confirmed) {
+      console.log('User is logged in, redirecting to home');
+      navigate('/');
+    }
   }, [user, navigate, searchParams, confirmationStatus]);
 
   const handleEmailConfirmation = async (token: string) => {

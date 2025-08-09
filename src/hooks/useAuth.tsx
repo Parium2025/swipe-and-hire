@@ -454,6 +454,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: "Du är nu inloggad."
       });
 
+      // Navigate to home after successful login
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 500);
+
       return {};
     } catch (error) {
       return { error };
