@@ -1,0 +1,580 @@
+import { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Progress } from '@/components/ui/progress';
+import FileUpload from '@/components/FileUpload';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { 
+  Heart, 
+  Users, 
+  Briefcase, 
+  Star,
+  User, 
+  Camera, 
+  FileText, 
+  MapPin,
+  ArrowRight,
+  ArrowLeft,
+  Check,
+  Sparkles,
+  Target
+} from 'lucide-react';
+
+interface WelcomeTunnelProps {
+  onComplete: () => void;
+}
+
+const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
+  const { profile, updateProfile, user } = useAuth();
+  const { toast } = useToast();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Form data
+  const [formData, setFormData] = useState({
+    firstName: profile?.first_name || '',
+    lastName: profile?.last_name || '',
+    bio: profile?.bio || '',
+    location: profile?.location || '',
+    phone: profile?.phone || '',
+    profileImageUrl: profile?.profile_image_url || '',
+    cvUrl: '',
+    interests: [] as string[]
+  });
+
+  const totalSteps = 7; // Introduktion + 5 profil steg + slutskärm
+  const progress = (currentStep / (totalSteps - 1)) * 100;
+
+  const handleInputChange = (field: string, value: string | string[]) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleNext = () => {
+    if (currentStep < totalSteps - 1) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const uploadProfileImage = async (file: File) => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user?.id}/profile-image.${fileExt}`;
+
+      await supabase.storage
+        .from('job-applications')
+        .remove([fileName]);
+
+      const { error: uploadError } = await supabase.storage
+        .from('job-applications')
+        .upload(fileName, file, {
+          upsert: true
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('job-applications')
+        .getPublicUrl(fileName);
+
+      const imageUrl = `${publicUrl}?t=${Date.now()}`;
+      handleInputChange('profileImageUrl', imageUrl);
+      
+      toast({
+        title: "Profilbild uppladdad!",
+        description: "Din profilbild har uppdaterats."
+      });
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Fel vid uppladdning",
+        description: "Kunde inte ladda upp profilbilden.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.type.startsWith('image/')) {
+        uploadProfileImage(file);
+      } else {
+        toast({
+          title: "Fel filtyp",
+          description: "Vänligen välj en bildfil.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      await updateProfile({
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        bio: formData.bio,
+        location: formData.location,
+        phone: formData.phone,
+        profile_image_url: formData.profileImageUrl
+      });
+      
+      setCurrentStep(totalSteps - 1); // Go to completion step
+      
+      setTimeout(() => {
+        toast({
+          title: "Välkommen till Parium!",
+          description: "Din profil är nu skapad och du kan börja söka jobb."
+        });
+        onComplete();
+      }, 2000);
+    } catch (error) {
+      toast({
+        title: "Ett fel uppstod",
+        description: "Kunde inte skapa profilen. Försök igen.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const isStepValid = () => {
+    switch (currentStep) {
+      case 0: return true; // Intro
+      case 1: return formData.firstName.trim() && formData.lastName.trim();
+      case 2: return true; // Profile image is optional
+      case 3: return true; // CV is optional
+      case 4: return formData.bio.trim() && formData.location.trim();
+      case 5: return true; // Interests are optional
+      default: return false;
+    }
+  };
+
+  const toggleInterest = (interest: string) => {
+    const currentInterests = formData.interests;
+    if (currentInterests.includes(interest)) {
+      handleInputChange('interests', currentInterests.filter(i => i !== interest));
+    } else {
+      handleInputChange('interests', [...currentInterests, interest]);
+    }
+  };
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <div className="text-center space-y-8 py-8">
+            <div className="space-y-6">
+              <div className="relative">
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 rounded-full w-20 h-20 mx-auto flex items-center justify-center">
+                  <Heart className="h-10 w-10 text-white" />
+                </div>
+                <div className="absolute -top-2 -right-2 bg-yellow-400 p-1 rounded-full">
+                  <Sparkles className="h-4 w-4 text-yellow-800" />
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Välkommen till Parium!
+                </h1>
+                <p className="text-xl text-muted-foreground max-w-md mx-auto">
+                  Din resa mot drömjobbet börjar nu. Låt oss skapa din profil tillsammans.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto">
+              <div className="space-y-3">
+                <div className="bg-blue-100 p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                  <Users className="h-8 w-8 text-blue-600" />
+                </div>
+                <h3 className="font-semibold">Träffa arbetsgivare</h3>
+                <p className="text-sm text-muted-foreground">Hitta företag som passar dig</p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="bg-green-100 p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                  <Briefcase className="h-8 w-8 text-green-600" />
+                </div>
+                <h3 className="font-semibold">Swipa för jobb</h3>
+                <p className="text-sm text-muted-foreground">Enkelt sätt att hitta rätt match</p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="bg-purple-100 p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
+                  <Star className="h-8 w-8 text-purple-600" />
+                </div>
+                <h3 className="font-semibold">Få drömjobbet</h3>
+                <p className="text-sm text-muted-foreground">Vi hjälper dig hitta rätt</p>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 1:
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-8">
+              <div className="bg-blue-100 p-4 rounded-full w-fit mx-auto mb-4">
+                <User className="h-8 w-8 text-blue-600" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Låt oss lära känna dig</h2>
+              <p className="text-muted-foreground">Vad heter du?</p>
+            </div>
+            
+            <div className="space-y-4 max-w-md mx-auto">
+              <div>
+                <Label htmlFor="firstName">Förnamn</Label>
+                <Input
+                  id="firstName"
+                  value={formData.firstName}
+                  onChange={(e) => handleInputChange('firstName', e.target.value)}
+                  placeholder="Ditt förnamn"
+                  className="text-lg py-3"
+                />
+              </div>
+              <div>
+                <Label htmlFor="lastName">Efternamn</Label>
+                <Input
+                  id="lastName"
+                  value={formData.lastName}
+                  onChange={(e) => handleInputChange('lastName', e.target.value)}
+                  placeholder="Ditt efternamn"
+                  className="text-lg py-3"
+                />
+              </div>
+              <div>
+                <Label htmlFor="phone">Telefonnummer (valfritt)</Label>
+                <Input
+                  id="phone"
+                  value={formData.phone}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  placeholder="+46 70 123 45 67"
+                  className="text-lg py-3"
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-8">
+              <div className="bg-green-100 p-4 rounded-full w-fit mx-auto mb-4">
+                <Camera className="h-8 w-8 text-green-600" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Visa ditt ansikte</h2>
+              <p className="text-muted-foreground">En bra profilbild ökar dina chanser med 40%</p>
+            </div>
+
+            <div className="max-w-md mx-auto text-center">
+              <div className="mb-6">
+                <div className="relative inline-block">
+                  <Avatar className="h-32 w-32 border-4 border-white shadow-lg">
+                    <AvatarImage src={formData.profileImageUrl} />
+                    <AvatarFallback className="text-2xl bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+                      {formData.firstName[0]}{formData.lastName[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <label htmlFor="profile-image" className="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-3 cursor-pointer hover:bg-blue-700 transition-colors shadow-lg">
+                    <Camera className="h-5 w-5" />
+                  </label>
+                  <input
+                    id="profile-image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </div>
+                
+                {formData.profileImageUrl && (
+                  <Badge variant="secondary" className="mt-4 bg-green-100 text-green-800">
+                    <Check className="h-3 w-3 mr-1" />
+                    Perfekt! Bild uppladdad
+                  </Badge>
+                )}
+              </div>
+
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p>💡 Tips för bästa resultat:</p>
+                <ul className="text-left space-y-1 max-w-xs mx-auto">
+                  <li>• Använd en bild där ditt ansikte syns tydligt</li>
+                  <li>• Le och se vänlig ut</li>
+                  <li>• Välj professionell bakgrund</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-8">
+              <div className="bg-purple-100 p-4 rounded-full w-fit mx-auto mb-4">
+                <FileText className="h-8 w-8 text-purple-600" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Ditt CV</h2>
+              <p className="text-muted-foreground">Visa arbetsgivare vad du kan - detta ökar dina chanser</p>
+            </div>
+
+            <div className="max-w-md mx-auto">
+              {formData.cvUrl && (
+                <div className="text-center mb-6">
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-800 text-lg py-2 px-4">
+                    <Check className="h-4 w-4 mr-2" />
+                    CV uppladdat!
+                  </Badge>
+                </div>
+              )}
+
+              <FileUpload
+                onFileUploaded={(url) => handleInputChange('cvUrl', url)}
+                onFileRemoved={() => handleInputChange('cvUrl', '')}
+                acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
+                maxFileSize={10 * 1024 * 1024}
+                currentFile={formData.cvUrl ? { url: formData.cvUrl, name: 'CV' } : undefined}
+              />
+              
+              <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-700">
+                  <span className="font-semibold">Visste du att</span> profiler med CV får 3x fler förfrågningar från arbetsgivare?
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-8">
+              <div className="bg-orange-100 p-4 rounded-full w-fit mx-auto mb-4">
+                <MapPin className="h-8 w-8 text-orange-600" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Berätta om dig själv</h2>
+              <p className="text-muted-foreground">Gör dig intressant för arbetsgivare</p>
+            </div>
+
+            <div className="space-y-4 max-w-md mx-auto">
+              <div>
+                <Label htmlFor="location">Var bor du?</Label>
+                <Input
+                  id="location"
+                  value={formData.location}
+                  onChange={(e) => handleInputChange('location', e.target.value)}
+                  placeholder="t.ex. Stockholm, Göteborg"
+                  className="text-lg py-3"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="bio">Presentation</Label>
+                <Textarea
+                  id="bio"
+                  value={formData.bio}
+                  onChange={(e) => handleInputChange('bio', e.target.value)}
+                  placeholder="Beskriv dig själv kort - vad gör dig unik? Vilken typ av jobb söker du?"
+                  className="min-h-32 text-lg"
+                  rows={4}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {formData.bio.length}/500 tecken
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 5:
+        const interests = [
+          'Teknik', 'Design', 'Försäljning', 'Marknadsföring', 'Ekonomi', 'HR',
+          'Hälsovård', 'Utbildning', 'Bygg', 'Transport', 'Kreativt', 'Ledning'
+        ];
+
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-8">
+              <div className="bg-pink-100 p-4 rounded-full w-fit mx-auto mb-4">
+                <Target className="h-8 w-8 text-pink-600" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Vad intresserar dig?</h2>
+              <p className="text-muted-foreground">Välj områden som intresserar dig (valfritt)</p>
+            </div>
+
+            <div className="max-w-md mx-auto">
+              <div className="grid grid-cols-2 gap-3">
+                {interests.map((interest) => (
+                  <Button
+                    key={interest}
+                    variant={formData.interests.includes(interest) ? "default" : "outline"}
+                    onClick={() => toggleInterest(interest)}
+                    className="h-12 text-sm"
+                  >
+                    {formData.interests.includes(interest) && <Check className="h-4 w-4 mr-2" />}
+                    {interest}
+                  </Button>
+                ))}
+              </div>
+              
+              {formData.interests.length > 0 && (
+                <div className="mt-4 p-3 bg-green-50 rounded-lg">
+                  <p className="text-sm text-green-700">
+                    Vi kommer att visa jobb som matchar dina intressen: {formData.interests.join(', ')}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      case 6:
+        return (
+          <div className="text-center space-y-8 py-8">
+            <div className="space-y-6">
+              <div className="relative">
+                <div className="bg-gradient-to-r from-green-500 to-blue-600 p-6 rounded-full w-20 h-20 mx-auto flex items-center justify-center animate-pulse">
+                  <Check className="h-10 w-10 text-white" />
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                  Grattis {formData.firstName}!
+                </h1>
+                <p className="text-xl text-muted-foreground max-w-md mx-auto">
+                  Din profil är nu skapad och du kan börja din resa mot drömjobbet.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg max-w-md mx-auto">
+              <h3 className="font-semibold text-lg mb-2">Nästa steg:</h3>
+              <ul className="space-y-2 text-left text-sm">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  Börja swipa genom jobb som passar dig
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  Ansök på intressanta tjänster
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  Få matchningar med arbetsgivare
+                </li>
+              </ul>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen flex flex-col">
+        {/* Header with progress */}
+        {currentStep > 0 && currentStep < totalSteps - 1 && (
+          <div className="p-6">
+            <div className="max-w-2xl mx-auto">
+              <div className="flex items-center justify-between mb-4">
+                <img 
+                  src="/lovable-uploads/parium-logo-transparent.png" 
+                  alt="Parium" 
+                  className="h-8 w-auto"
+                />
+                <span className="text-muted-foreground text-sm">
+                  Steg {currentStep} av {totalSteps - 2}
+                </span>
+              </div>
+              <Progress value={progress} className="h-2" />
+            </div>
+          </div>
+        )}
+
+        {/* Main content */}
+        <div className="flex-1 flex items-center justify-center px-4 pb-6">
+          <Card className="w-full max-w-2xl bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+            <CardContent className="p-8">
+              {renderStep()}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Footer navigation */}
+        <div className="p-6">
+          <div className="max-w-2xl mx-auto flex justify-between">
+            <Button
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={currentStep === 0 || currentStep === totalSteps - 1}
+              className="bg-white/80"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Tillbaka
+            </Button>
+
+            {currentStep === 0 ? (
+              <Button
+                onClick={handleNext}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8"
+              >
+                Kom igång
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            ) : currentStep === totalSteps - 2 ? (
+              <Button
+                onClick={handleSubmit}
+                disabled={!isStepValid() || isSubmitting}
+                className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8"
+              >
+                {isSubmitting ? 'Skapar profil...' : 'Skapa profil'}
+                <Check className="h-4 w-4 ml-2" />
+              </Button>
+            ) : currentStep === totalSteps - 1 ? (
+              <Button
+                onClick={onComplete}
+                className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8"
+              >
+                Börja använda Parium
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            ) : (
+              <Button
+                onClick={handleNext}
+                disabled={!isStepValid()}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+              >
+                Nästa
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default WelcomeTunnel;

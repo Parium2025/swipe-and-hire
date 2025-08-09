@@ -9,7 +9,7 @@ import EmployerDashboard from '@/components/EmployerDashboard';
 import JobSwipe from '@/components/JobSwipe';
 import ProfileSetup from '@/components/ProfileSetup';
 import ProfileSelector from '@/components/ProfileSelector';
-import ProfileBuilder from '@/components/ProfileBuilder';
+import WelcomeTunnel from '@/components/WelcomeTunnel';
 import Profile from '@/pages/Profile';
 import SearchJobs from '@/pages/SearchJobs';
 import Subscription from '@/pages/Subscription';
@@ -56,9 +56,9 @@ const Index = () => {
   // Check if profile needs setup (basic info missing)
   const needsProfileSetup = !profile.bio && !profile.location && !profile.profile_image_url;
   
-  // For job seekers, show ProfileBuilder instead of ProfileSetup
+  // For job seekers, show WelcomeTunnel instead of ProfileSetup
   if (needsProfileSetup && userRole?.role === 'job_seeker') {
-    return <ProfileBuilder onProfileCompleted={() => window.location.reload()} />;
+    return <WelcomeTunnel onComplete={() => window.location.reload()} />;
   }
   
   // For employers, show old ProfileSetup
