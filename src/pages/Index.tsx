@@ -70,9 +70,20 @@ const Index = () => {
   console.log('========================');
   
   // For job seekers, show WelcomeTunnel if onboarding not completed
+  console.log('Checking IF condition:');
+  console.log('needsOnboarding:', needsOnboarding);
+  console.log('userRole?.role:', userRole?.role);
+  console.log('userRole?.role === "job_seeker":', userRole?.role === 'job_seeker');
+  console.log('Full condition result:', needsOnboarding && userRole?.role === 'job_seeker');
+  
   if (needsOnboarding && userRole?.role === 'job_seeker') {
-    console.log('Showing WelcomeTunnel for job seeker');
+    console.log('✅ SHOWING WelcomeTunnel for job seeker');
     return <WelcomeTunnel onComplete={() => window.location.reload()} />;
+  } else {
+    console.log('❌ NOT showing WelcomeTunnel. Reason:');
+    console.log('  - needsOnboarding:', needsOnboarding);
+    console.log('  - userRole?.role:', userRole?.role);
+    console.log('  - is job_seeker:', userRole?.role === 'job_seeker');
   }
   
   // For employers, check if profile needs setup (basic info missing)
