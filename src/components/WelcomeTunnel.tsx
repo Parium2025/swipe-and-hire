@@ -205,24 +205,24 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <div className="bg-blue-100 p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
                   <Users className="h-8 w-8 text-blue-600" />
                 </div>
-                <h3 className="font-semibold">Träffa arbetsgivare</h3>
-                <p className="text-sm text-muted-foreground">Hitta företag som passar dig</p>
+                <h3 className="font-semibold">Matcha med jobb</h3>
+                <p className="text-sm text-muted-foreground">som passar dig</p>
               </div>
 
               <div className="space-y-3">
                 <div className="bg-green-100 p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
                   <Briefcase className="h-8 w-8 text-green-600" />
                 </div>
-                <h3 className="font-semibold">Swipa för jobb</h3>
-                <p className="text-sm text-muted-foreground">Enkelt sätt att hitta rätt match</p>
+                <h3 className="font-semibold">Swipea, ansök och gå vidare</h3>
+                <p className="text-sm text-muted-foreground">på sekunder</p>
               </div>
 
               <div className="space-y-3">
                 <div className="bg-purple-100 p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
                   <Star className="h-8 w-8 text-purple-600" />
                 </div>
-                <h3 className="font-semibold">Få drömjobbet</h3>
-                <p className="text-sm text-muted-foreground">Vi hjälper dig hitta rätt</p>
+                <h3 className="font-semibold">Spara tid med smarta</h3>
+                <p className="text-sm text-muted-foreground">och effektiva verktyg</p>
               </div>
             </div>
           </div>
