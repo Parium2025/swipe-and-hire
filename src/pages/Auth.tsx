@@ -30,42 +30,69 @@ const Auth = () => {
     const isReset = searchParams.get('reset') === 'true';
     const confirmed = searchParams.get('confirmed');
     
-    // Hantera recovery tokens från Supabase auth
+    // Hantera recovery tokens från Supabase auth (olika format)
     const accessToken = searchParams.get('access_token');
     const refreshToken = searchParams.get('refresh_token');
     const tokenType = searchParams.get('type');
+    const supabaseToken = searchParams.get('token'); // Supabase recovery token format
     
     console.log('Auth useEffect - URL params:', { 
       isReset, 
       confirmed, 
       currentUrl: window.location.href,
       hasTokens: !!accessToken && !!refreshToken,
+      hasSupabaseToken: !!supabaseToken,
       tokenType
     });
     
     // Om vi har recovery tokens, hantera dem
-    if (accessToken && refreshToken && tokenType === 'recovery') {
+    if ((accessToken && refreshToken && tokenType === 'recovery') || (supabaseToken && tokenType === 'recovery')) {
       console.log('Recovery tokens detected, setting session...');
       
-      supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken
-      }).then(({ error }) => {
-        if (error) {
-          console.error('Error setting session:', error);
-        } else {
-          console.log('Session set successfully, redirecting to password reset');
-          // Rensa URL från tokens och visa password reset
-          const newUrl = new URL(window.location.href);
-          newUrl.searchParams.delete('access_token');
-          newUrl.searchParams.delete('refresh_token');
-          newUrl.searchParams.delete('type');
-          newUrl.searchParams.set('reset', 'true');
-          
-          window.history.replaceState({}, '', newUrl.toString());
-          setIsPasswordReset(true);
-        }
-      });
+      if (supabaseToken) {
+        // Hantera Supabase recovery token format
+        console.log('Using Supabase recovery token format');
+        supabase.auth.verifyOtp({
+          token_hash: supabaseToken,
+          type: 'recovery'
+        }).then(({ data, error }) => {
+          if (error) {
+            console.error('Error with recovery token:', error);
+          } else {
+            console.log('Recovery successful, redirecting to password reset');
+            // Rensa URL från tokens och visa password reset
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete('token');
+            newUrl.searchParams.delete('type');
+            newUrl.searchParams.delete('redirect_to');
+            newUrl.searchParams.set('reset', 'true');
+            
+            window.history.replaceState({}, '', newUrl.toString());
+            setIsPasswordReset(true);
+          }
+        });
+      } else {
+        // Hantera standard token format
+        supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
+        }).then(({ error }) => {
+          if (error) {
+            console.error('Error setting session:', error);
+          } else {
+            console.log('Session set successfully, redirecting to password reset');
+            // Rensa URL från tokens och visa password reset
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete('access_token');
+            newUrl.searchParams.delete('refresh_token');
+            newUrl.searchParams.delete('type');
+            newUrl.searchParams.set('reset', 'true');
+            
+            window.history.replaceState({}, '', newUrl.toString());
+            setIsPasswordReset(true);
+          }
+        });
+      }
       return;
     }
     
