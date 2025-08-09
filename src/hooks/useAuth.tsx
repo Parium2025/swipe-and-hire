@@ -38,6 +38,7 @@ interface Profile {
   video_url?: string;
   cv_url?: string;
   organization_id?: string;
+  onboarding_completed?: boolean;
 }
 
 interface AuthContextType {

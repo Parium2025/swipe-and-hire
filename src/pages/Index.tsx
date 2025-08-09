@@ -53,16 +53,16 @@ const Index = () => {
     return <ProfileSelector onProfileSelected={() => setShowProfileSelector(false)} />;
   }
 
-  // Check if profile needs setup (basic info missing)
-  const needsProfileSetup = !profile.bio && !profile.location && !profile.profile_image_url;
+  // Check if user needs to complete onboarding
+  const needsOnboarding = !profile?.onboarding_completed;
   
-  // For job seekers, show WelcomeTunnel instead of ProfileSetup
-  if (needsProfileSetup && userRole?.role === 'job_seeker') {
+  // For job seekers, show WelcomeTunnel if onboarding not completed
+  if (needsOnboarding && userRole?.role === 'job_seeker') {
     return <WelcomeTunnel onComplete={() => window.location.reload()} />;
   }
   
-  // For employers, show old ProfileSetup
-  if (needsProfileSetup && userRole?.role === 'employer') {
+  // For employers, show old ProfileSetup if basic info missing
+  if (needsOnboarding && userRole?.role === 'employer') {
     return <ProfileSetup />;
   }
 

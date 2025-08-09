@@ -130,7 +130,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         bio: formData.bio,
         location: formData.location,
         phone: formData.phone,
-        profile_image_url: formData.profileImageUrl
+        profile_image_url: formData.profileImageUrl,
+        onboarding_completed: true  // Mark onboarding as completed
       });
       
       setCurrentStep(totalSteps - 1); // Go to completion step
