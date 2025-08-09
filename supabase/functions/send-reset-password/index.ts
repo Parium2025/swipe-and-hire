@@ -59,11 +59,11 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('No reset URL generated');
     }
 
-    // Ersätt Supabase URL med vår app URL
-    const correctedResetUrl = resetUrl.replace(
-      'https://rvtsfnaqlnggfkoqygbm.supabase.co/auth/v1/verify',
-      'https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth'
-    );
+    // Skapa en enklare, kortare URL som är mer kompatibel med Yahoo
+    const urlParams = new URL(resetUrl);
+    const token = urlParams.searchParams.get('token');
+    
+    const correctedResetUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?token=${token}&type=recovery`;
 
     const emailResponse = await resend.emails.send({
       from: "Parium Team <noreply@parium.se>",
