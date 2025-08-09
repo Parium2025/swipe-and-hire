@@ -42,12 +42,10 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Sending password reset email to: ${email}`);
 
     // Generate reset password link through Supabase Auth
+    // Använd direkt URL istället för redirectTo för att undvika Site URL problem
     const { data, error } = await supabase.auth.admin.generateLink({
       type: 'recovery',
-      email: email,
-      options: {
-        redirectTo: `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true`
-      }
+      email: email
     });
 
     if (error) {
@@ -60,6 +58,12 @@ const handler = async (req: Request): Promise<Response> => {
     if (!resetUrl) {
       throw new Error('No reset URL generated');
     }
+
+    // Ersätt Supabase URL med vår app URL
+    const correctedResetUrl = resetUrl.replace(
+      'https://rvtsfnaqlnggfkoqygbm.supabase.co/auth/v1/verify',
+      'https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth'
+    );
 
     const emailResponse = await resend.emails.send({
       from: "Parium Team <noreply@parium.se>",
@@ -99,7 +103,7 @@ const handler = async (req: Request): Promise<Response> => {
                     <w:anchorlock/>
                     <center>
                     <![endif]-->
-                     <a href="${resetUrl}" 
+                     <a href="${correctedResetUrl}" 
                        style="background-color: #1E3A8A; border-radius: 5px; color: #ffffff; display: inline-block; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none; mso-hide: all;">
                        Återställ lösenord
                      </a>
@@ -126,9 +130,9 @@ const handler = async (req: Request): Promise<Response> => {
                 <p style="color: #666666; font-size: 14px; margin: 0 0 10px 0;">
                   Fungerar inte knappen? Kopiera länken nedan:
                 </p>
-                <p style="color: #0066cc; font-size: 14px; word-break: break-all; margin: 0;">
-                  ${resetUrl}
-                </p>
+                 <p style="color: #0066cc; font-size: 14px; word-break: break-all; margin: 0;">
+                   ${correctedResetUrl}
+                 </p>
               </div>
             </div>
             
