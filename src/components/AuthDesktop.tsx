@@ -217,7 +217,7 @@ const AuthDesktop = ({
 
   if (isPasswordReset) {
     return (
-      <div className="min-h-screen bg-gradient-parium flex items-center justify-center p-8">
+      <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-8">
         <Card className="w-full max-w-md bg-background/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-3xl">
           <CardHeader className="text-center">
             <img 
@@ -263,7 +263,7 @@ const AuthDesktop = ({
   }
 
   return (
-    <div className="relative min-h-screen bg-gradient-parium overflow-hidden">
+    <div className="relative min-h-[calc(100vh-4rem)] bg-gradient-parium overflow-hidden">
       {/* Modern animated mobile background */}
       <div className="absolute inset-0">
         <div 
@@ -286,7 +286,7 @@ const AuthDesktop = ({
         </ul>
       </div>
       
-      <div className="relative z-10 min-h-screen flex">
+      <div className="relative z-10 min-h-[calc(100vh-4rem)] flex">
         {/* Left side - Hero content */}
         <div className="w-1/2 flex flex-col justify-center px-12 text-primary-foreground">
           <div className="max-w-lg animate-fade-in">

@@ -217,7 +217,7 @@ const AuthMobile = ({
 
   if (isPasswordReset) {
     return (
-      <div className="min-h-screen bg-gradient-parium flex items-center justify-center p-4">
+      <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-4">
         <Card className="w-full max-w-sm bg-background/95 backdrop-blur-sm">
           <CardHeader className="text-center">
             <img 
@@ -260,7 +260,7 @@ const AuthMobile = ({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-parium flex flex-col relative">
+    <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex flex-col relative">
       {/* Static animated background - won't re-render */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
@@ -291,7 +291,7 @@ const AuthMobile = ({
         </div>
       </div>
 
-      <div className="relative z-10 flex flex-col min-h-screen">
+      <div className="relative z-10 flex flex-col min-h-[calc(100vh-4rem)]">
         {/* Header med logo och text */}
         <div className="flex-1 flex flex-col justify-center items-center px-6 pt-12 pb-6">
           <div className="text-center mb-8">

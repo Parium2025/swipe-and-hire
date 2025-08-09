@@ -208,7 +208,7 @@ const AuthTablet = ({
 
   if (isPasswordReset) {
     return (
-      <div className="min-h-screen bg-gradient-parium flex items-center justify-center p-6">
+      <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-6">
         <Card className="w-full max-w-lg bg-background/95 backdrop-blur-sm border border-white/10 shadow-2xl rounded-2xl">
           <CardHeader className="text-center pb-4">
             <img 
@@ -251,7 +251,7 @@ const AuthTablet = ({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-parium flex">
+    <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex">
       {/* Animated background elements */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
