@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
 import AnimatedIntro from '@/components/AnimatedIntro';
 import AuthMobile from '@/components/AuthMobile';
@@ -29,7 +30,44 @@ const Auth = () => {
     const isReset = searchParams.get('reset') === 'true';
     const confirmed = searchParams.get('confirmed');
     
-    console.log('Auth useEffect - URL params:', { isReset, confirmed, currentUrl: window.location.href });
+    // Hantera recovery tokens från Supabase auth
+    const accessToken = searchParams.get('access_token');
+    const refreshToken = searchParams.get('refresh_token');
+    const tokenType = searchParams.get('type');
+    
+    console.log('Auth useEffect - URL params:', { 
+      isReset, 
+      confirmed, 
+      currentUrl: window.location.href,
+      hasTokens: !!accessToken && !!refreshToken,
+      tokenType
+    });
+    
+    // Om vi har recovery tokens, hantera dem
+    if (accessToken && refreshToken && tokenType === 'recovery') {
+      console.log('Recovery tokens detected, setting session...');
+      
+      supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken
+      }).then(({ error }) => {
+        if (error) {
+          console.error('Error setting session:', error);
+        } else {
+          console.log('Session set successfully, redirecting to password reset');
+          // Rensa URL från tokens och visa password reset
+          const newUrl = new URL(window.location.href);
+          newUrl.searchParams.delete('access_token');
+          newUrl.searchParams.delete('refresh_token');
+          newUrl.searchParams.delete('type');
+          newUrl.searchParams.set('reset', 'true');
+          
+          window.history.replaceState({}, '', newUrl.toString());
+          setIsPasswordReset(true);
+        }
+      });
+      return;
+    }
     
     // Hantera bekräftelsestatusmeddelanden från redirect
     if (confirmed === 'success') {
