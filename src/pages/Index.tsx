@@ -61,8 +61,9 @@ const Index = () => {
     return <WelcomeTunnel onComplete={() => window.location.reload()} />;
   }
   
-  // For employers, show old ProfileSetup if basic info missing
-  if (needsOnboarding && userRole?.role === 'employer') {
+  // For employers, check if profile needs setup (basic info missing)
+  const needsProfileSetup = !profile.bio && !profile.location && !profile.profile_image_url;
+  if (needsProfileSetup && userRole?.role === 'employer') {
     return <ProfileSetup />;
   }
 
