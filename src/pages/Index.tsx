@@ -56,14 +56,25 @@ const Index = () => {
   // Check if user needs to complete onboarding
   const needsOnboarding = !profile?.onboarding_completed;
   
+  // Debug logging
+  console.log('=== ONBOARDING DEBUG ===');
+  console.log('User email:', user?.email);
+  console.log('User role:', userRole?.role);
+  console.log('Profile onboarding_completed:', profile?.onboarding_completed);
+  console.log('Needs onboarding:', needsOnboarding);
+  console.log('Should show WelcomeTunnel:', needsOnboarding && userRole?.role === 'job_seeker');
+  console.log('========================');
+  
   // For job seekers, show WelcomeTunnel if onboarding not completed
   if (needsOnboarding && userRole?.role === 'job_seeker') {
+    console.log('Showing WelcomeTunnel for job seeker');
     return <WelcomeTunnel onComplete={() => window.location.reload()} />;
   }
   
   // For employers, check if profile needs setup (basic info missing)
   const needsProfileSetup = !profile.bio && !profile.location && !profile.profile_image_url;
   if (needsProfileSetup && userRole?.role === 'employer') {
+    console.log('Showing ProfileSetup for employer');
     return <ProfileSetup />;
   }
 
