@@ -42,6 +42,7 @@ const AuthMobile = ({
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const [showResend, setShowResend] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetPasswordSent, setResetPasswordSent] = useState(false);
@@ -207,12 +208,12 @@ const AuthMobile = ({
       });
       return;
     }
-    setLoading(true);
+    setResetLoading(true);
     const result = await resetPassword(email);
     if (!result.error) {
       setResetPasswordSent(true);
     }
-    setLoading(false);
+    setResetLoading(false);
   };
 
   if (isPasswordReset) {
@@ -402,9 +403,9 @@ const AuthMobile = ({
                             className="bg-primary hover:bg-primary/90 text-primary-foreground"
                             size="sm"
                             onClick={handleResetPassword}
-                            disabled={loading}
+                            disabled={resetLoading}
                           >
-                            Återställ lösenord
+                            {resetLoading ? 'Skickar...' : 'Återställ lösenord'}
                           </Button>
                         </div>
                       )}

@@ -43,6 +43,7 @@ const AuthDesktop = ({
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const [showResend, setShowResend] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetPasswordSent, setResetPasswordSent] = useState(false);
@@ -207,12 +208,12 @@ const AuthDesktop = ({
       });
       return;
     }
-    setLoading(true);
+    setResetLoading(true);
     const result = await resetPassword(email);
     if (!result.error) {
       setResetPasswordSent(true);
     }
-    setLoading(false);
+    setResetLoading(false);
   };
 
   if (isPasswordReset) {
@@ -595,14 +596,14 @@ const AuthDesktop = ({
                   {showResetPassword && !resetPasswordSent && (
                     <div className="mt-6 p-4 bg-muted/50 rounded-lg text-center">
                       <p className="text-sm mb-2">Glömt lösenordet?</p>
-                      <Button
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                        size="sm"
-                        onClick={handleResetPassword}
-                        disabled={loading}
-                      >
-                        Återställ lösenord
-                      </Button>
+                       <Button
+                         className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                         size="sm"
+                         onClick={handleResetPassword}
+                         disabled={resetLoading}
+                       >
+                         {resetLoading ? 'Skickar...' : 'Återställ lösenord'}
+                       </Button>
                     </div>
                   )}
 
