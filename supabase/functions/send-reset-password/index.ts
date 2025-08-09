@@ -70,10 +70,9 @@ const handler = async (req: Request): Promise<Response> => {
     const correctedResetUrl = `https://rvtsfnaqlnggfkoqygbm.supabase.co/functions/v1/redirect-recovery?t=${encodedUrl}`;
 
     const emailResponse = await resend.emails.send({
-      from: "Parium Team <noreply@resend.dev>", // Använder verifierad Resend-domän
+      from: "Parium <noreply@resend.dev>", // Använder verifierad Resend-domän
       to: [email],
-      reply_to: "support@parium.se",
-      subject: "Lösenordsåterställning för ditt Parium-konto",
+      subject: "Återställ ditt lösenord - Parium",
       text: `Hej!
 
 Vi har fått en begäran om att återställa lösenordet för ditt Parium-konto.
