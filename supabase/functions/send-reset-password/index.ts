@@ -107,7 +107,7 @@ Parium AB, Stockholm`,
             <!-- CTA Button -->
             <div style="margin: 30px 0;">
               <a href="${correctedResetUrl}" 
-                 style="display: inline-block; background-color: #4a5568; color: #ffffff; text-decoration: none; padding: 15px 40px; border-radius: 8px; font-size: 16px; font-weight: 600;">
+                 style="display: inline-block; background-color: #1a237e; color: #ffffff; text-decoration: none; padding: 15px 40px; border-radius: 8px; font-size: 16px; font-weight: 600;">
                 Återställ lösenord
               </a>
             </div>
