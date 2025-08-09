@@ -132,7 +132,7 @@ support@parium.se`,
                       <!-- CTA Button -->
                       <div style="text-align: center; margin: 32px 0;">
                         <a href="${correctedResetUrl}" 
-                           style="display: inline-block; background-color: #1E3A8A; color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 6px; font-size: 16px; font-weight: 600; text-align: center; min-width: 200px; line-height: 1.2;">
+                           style="display: inline-block; background-color: #1E3A8A; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-size: 14px; font-weight: 600; text-align: center; max-width: 200px; line-height: 1.2;">
                           Återställ lösenord
                         </a>
                       </div>
