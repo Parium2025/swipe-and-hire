@@ -63,7 +63,11 @@ const handler = async (req: Request): Promise<Response> => {
     const urlParams = new URL(resetUrl);
     const token = urlParams.searchParams.get('token');
     
-    const correctedResetUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?token=${token}&type=recovery`;
+    const fullRecoveryUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?token=${token}&type=recovery`;
+    
+    // Skapa en kortare redirect-URL som fungerar med alla e-postklienter
+    const encodedUrl = btoa(fullRecoveryUrl);
+    const correctedResetUrl = `https://rvtsfnaqlnggfkoqygbm.supabase.co/functions/v1/redirect-recovery?t=${encodedUrl}`;
 
     const emailResponse = await resend.emails.send({
       from: "Parium Team <noreply@parium.se>",
