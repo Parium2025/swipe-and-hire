@@ -418,11 +418,10 @@ const AuthMobile = ({
                             <p>Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.</p>
                           </div>
                           <Button
-                            variant="outline"
                             size="sm"
                             onClick={handleResetPassword}
                             disabled={resetLoading}
-                            className="text-xs"
+                            className="bg-parium-navy hover:bg-parium-navy/90 text-white text-xs"
                           >
                             {resetLoading ? 'Skickar...' : 'Skicka igen'}
                           </Button>
