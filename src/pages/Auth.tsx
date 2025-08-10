@@ -292,41 +292,34 @@ const Auth = () => {
       if (raw) {
         try {
           const pending = JSON.parse(raw);
-          console.log('🕐 Checking token expiry in useEffect:', pending);
+          console.log('🕐 AUTO-TIMER: Kollar expiry automatiskt');
           
-          // Använd issued_at (när länken skapades) istället för stored_at (när den sparades i webbläsaren)
-          const issuedAt = pending.issued_at;
-          if (issuedAt) {
-            const timeDiff = Date.now() - parseInt(issuedAt);
-            const tenMinutes = 10 * 60 * 1000;
+          if (pending.issued_at) {
+            const issuedTime = parseInt(pending.issued_at);
+            const currentTime = Date.now();
+            const tenMinutesInMs = 10 * 60 * 1000;
+            const timeElapsed = currentTime - issuedTime;
             
-            console.log('⏱️ Token expiry check in useEffect:', {
-              issued_at: issuedAt,
-              current_time: Date.now(),
-              time_diff_ms: timeDiff,
-              time_diff_minutes: Math.floor(timeDiff / 1000 / 60),
-              ten_minutes_ms: tenMinutes,
-              is_expired: timeDiff > tenMinutes
+            console.log('⏰ AUTO-TIMER CHECK:', {
+              issued_at: pending.issued_at,
+              current_time: currentTime,
+              time_elapsed_ms: timeElapsed,
+              time_elapsed_minutes: Math.floor(timeElapsed / 1000 / 60),
+              ten_minutes_ms: tenMinutesInMs,
+              is_expired: timeElapsed > tenMinutesInMs
             });
             
-            if (timeDiff > tenMinutes) {
-              console.log('❌ Token har gått ut efter 10 minuter (useEffect), visar expired-skärm');
+            if (timeElapsed > tenMinutesInMs) {
+              console.log('❌ AUTO-TIMER: Token har gått ut - växlar till expired sida');
               sessionStorage.removeItem('parium-pending-recovery');
               setRecoveryStatus('expired');
               setIsPasswordReset(false);
               return;
             }
-            console.log('✅ Token är fortfarande giltig (useEffect)');
-          } else {
-            console.log('⚠️ Ingen issued_at timestamp hittad (useEffect), token anses ogiltig');
-            sessionStorage.removeItem('parium-pending-recovery');
-            setRecoveryStatus('invalid');
-            setIsPasswordReset(false);
+            console.log('✅ AUTO-TIMER: Token fortfarande giltig');
           }
         } catch (e) {
-          console.warn('Kunde inte kontrollera token expiry (useEffect):', e);
-          setRecoveryStatus('invalid');
-          setIsPasswordReset(false);
+          console.warn('AUTO-TIMER fel:', e);
         }
       }
     };
