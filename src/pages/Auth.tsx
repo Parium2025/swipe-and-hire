@@ -64,6 +64,15 @@ const Auth = () => {
       const isReset = searchParams.get('reset') === 'true';
       const confirmed = searchParams.get('confirmed');
       
+      // Kontrollera om länken är markerad som expired från redirect-funktionen
+      const isExpired = searchParams.get('expired') === 'true';
+      if (isReset && isExpired) {
+        console.log('❌ EXPIRED RESET-LÄNK från redirect - Visar expired direkt');
+        setIsPasswordReset(true);
+        setRecoveryStatus('expired');
+        return;
+      }
+
       // ENKEL LÖSNING: Om vi är på reset=true utan tokens i URL, så är länken gammal
       if (isReset && !searchParams.get('token') && !searchParams.get('token_hash') && !searchParams.get('access_token')) {
         console.log('❌ GAMMAL RESET-LÄNK - Visar expired direkt');
