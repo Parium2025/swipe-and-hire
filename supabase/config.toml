@@ -30,10 +30,10 @@ verify_jwt = false
 [functions.check-user-exists]
 verify_jwt = false
 
-[functions.send-reset-password]
+[functions.redirect-recovery]
 verify_jwt = false
 
-[functions.redirect-recovery]
+[functions.reset-redirect]
 verify_jwt = false
 
 [auth]
