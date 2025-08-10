@@ -14,9 +14,37 @@ import { CheckCircle, AlertCircle } from 'lucide-react';
 
 const Auth = () => {
   const [showIntro, setShowIntro] = useState(() => {
+    try {
+      const loc = typeof window !== 'undefined' ? window.location : null;
+      if (loc) {
+        const sp = new URLSearchParams(loc.search);
+        const hashStr = loc.hash && loc.hash.startsWith('#') ? loc.hash.slice(1) : '';
+        const hp = new URLSearchParams(hashStr);
+        const type = hp.get('type') || sp.get('type');
+        const hasAnyRecovery =
+          type === 'recovery' ||
+          !!(hp.get('token') || sp.get('token') || hp.get('token_hash') || sp.get('token_hash') || hp.get('access_token') || sp.get('access_token'));
+        if (hasAnyRecovery) return false;
+      }
+    } catch {}
     return !sessionStorage.getItem('parium-intro-seen');
   });
-  const [isPasswordReset, setIsPasswordReset] = useState(false);
+  const [isPasswordReset, setIsPasswordReset] = useState(() => {
+    try {
+      const loc = typeof window !== 'undefined' ? window.location : null;
+      if (!loc) return false;
+      const sp = new URLSearchParams(loc.search);
+      const hashStr = loc.hash && loc.hash.startsWith('#') ? loc.hash.slice(1) : '';
+      const hp = new URLSearchParams(hashStr);
+      const hasAccessPair = !!(hp.get('access_token') || sp.get('access_token')) && !!(hp.get('refresh_token') || sp.get('refresh_token'));
+      const hasTokenHash = !!(hp.get('token_hash') || sp.get('token_hash'));
+      const hasToken = !!(hp.get('token') || sp.get('token'));
+      const type = hp.get('type') || sp.get('type');
+      return hasAccessPair || hasTokenHash || hasToken || type === 'recovery' || sp.get('reset') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [confirmationStatus, setConfirmationStatus] = useState<'none' | 'success' | 'already-confirmed' | 'error'>('none');
@@ -87,79 +115,36 @@ const Auth = () => {
       return;
     }
     
-    // Om vi har recovery tokens, hantera dem (stöd för flera format)
+    // Om vi har recovery tokens, spara dem men verifiera inte ännu (engångslänk används först vid inlämning)
     const hasAccessPair = !!(accessToken && refreshToken);
     const hasTokenHash = !!tokenHashParam;
     const hasToken = !!tokenParam;
     if (hasAccessPair || hasTokenHash || hasToken) {
-      console.log('Recovery tokens detected, proceeding to verify/session...');
-
-      setShowIntro(false);
-
-      if (hasTokenHash || hasToken) {
-        // Verifiera token_hash eller token direkt
-        const verifyOptions: any = { type: 'recovery' };
-        if (hasTokenHash) verifyOptions.token_hash = tokenHashParam;
-        if (hasToken) verifyOptions.token = tokenParam;
-        supabase.auth.verifyOtp(verifyOptions).then(({ error }) => {
-          if (error) {
-            console.error('Error with recovery token:', error);
-
-            // Fallback: försök Supabase verify endpoint som sätter session och redirectar tillbaka till /auth
-            try {
-              const projectUrl = 'https://rvtsfnaqlnggfkoqygbm.supabase.co';
-              const paramName = hasTokenHash ? 'token_hash' : 'token';
-              const tokenValue = hasTokenHash ? tokenHashParam! : tokenParam!;
-              if (tokenValue) {
-                const redirectTo = `${window.location.origin}/auth?reset=true`;
-                const verifyUrl = `${projectUrl}/auth/v1/verify?type=recovery&${paramName}=${encodeURIComponent(tokenValue)}&redirect_to=${encodeURIComponent(redirectTo)}`;
-                console.log('Falling back to Supabase verify endpoint:', verifyUrl);
-                window.location.replace(verifyUrl);
-                return; // avbryt lokal felhantering, låt verify flödet ta över
-              }
-            } catch (e) {
-              console.warn('Verify fallback construction failed:', e);
-            }
-
-            const msg = (error as any)?.message?.toLowerCase() || '';
-            if (msg.includes('expired') || msg.includes('invalid') || msg.includes('session')) {
-              setRecoveryStatus('expired');
-            } else {
-              setRecoveryStatus('invalid');
-            }
-            setShowIntro(false);
-          } else {
-            const newUrl = new URL(window.location.href);
-            newUrl.searchParams.delete('token');
-            newUrl.searchParams.delete('token_hash');
-            newUrl.searchParams.delete('type');
-            newUrl.searchParams.delete('redirect_to');
-            newUrl.searchParams.set('reset', 'true');
-            window.history.replaceState({}, '', newUrl.toString());
-            setIsPasswordReset(true);
-          }
-        });
-      } else if (hasAccessPair) {
-        // Sätt session från access+refresh
-        supabase.auth.setSession({
-          access_token: accessToken!,
-          refresh_token: refreshToken!
-        }).then(({ error }) => {
-          if (error) {
-            console.error('Error setting session:', error);
-            setRecoveryStatus('expired');
-            setShowIntro(false);
-          } else {
-            const newUrl = new URL(window.location.href);
-            newUrl.searchParams.delete('access_token');
-            newUrl.searchParams.delete('refresh_token');
-            newUrl.searchParams.delete('type');
-            newUrl.searchParams.set('reset', 'true');
-            window.history.replaceState({}, '', newUrl.toString());
-            setIsPasswordReset(true);
-          }
-        });
+      try {
+        const payload = {
+          type: tokenType || 'recovery',
+          token: tokenParam || null,
+          token_hash: tokenHashParam || null,
+          access_token: accessToken || null,
+          refresh_token: refreshToken || null,
+          stored_at: Date.now()
+        };
+        sessionStorage.setItem('parium-pending-recovery', JSON.stringify(payload));
+      } catch (e) {
+        console.warn('Kunde inte spara återställningsdata:', e);
       }
+      // Städa URL och visa direkt reset-UI
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('token');
+      newUrl.searchParams.delete('token_hash');
+      newUrl.searchParams.delete('access_token');
+      newUrl.searchParams.delete('refresh_token');
+      newUrl.searchParams.delete('type');
+      newUrl.searchParams.delete('redirect_to');
+      newUrl.searchParams.set('reset', 'true');
+      window.history.replaceState({}, '', newUrl.toString());
+      setShowIntro(false);
+      setIsPasswordReset(true);
       return;
     }
     
@@ -251,11 +236,47 @@ const Auth = () => {
       alert('Lösenordet måste vara minst 6 tecken långt');
       return;
     }
-    
-    const result = await updatePassword(newPassword);
-    
-    if (!result.error) {
+
+    try {
+      // Säkerställ session först (förbruka länken först vid inlämning)
+      const { data: sessionData } = await supabase.auth.getSession();
+      let hasSession = !!sessionData.session;
+
+      if (!hasSession) {
+        const raw = sessionStorage.getItem('parium-pending-recovery');
+        if (raw) {
+          const pending = JSON.parse(raw);
+          if ((pending.token_hash || pending.token) && (pending.type === 'recovery' || !pending.type)) {
+            const verifyOptions: any = { type: 'recovery' };
+            if (pending.token_hash) verifyOptions.token_hash = pending.token_hash;
+            if (pending.token) verifyOptions.token = pending.token;
+            const { error } = await supabase.auth.verifyOtp(verifyOptions);
+            if (error) throw error;
+            hasSession = true;
+          } else if (pending.access_token && pending.refresh_token) {
+            const { error } = await supabase.auth.setSession({
+              access_token: pending.access_token,
+              refresh_token: pending.refresh_token,
+            });
+            if (error) throw error;
+            hasSession = true;
+          }
+        }
+      }
+
+      const result = await updatePassword(newPassword);
+      if (result.error) throw result.error;
+
+      sessionStorage.removeItem('parium-pending-recovery');
       navigate('/');
+    } catch (err: any) {
+      console.error('Återställning misslyckades:', err);
+      const msg = (err?.message || '').toLowerCase();
+      if (msg.includes('expired') || msg.includes('invalid') || msg.includes('session')) {
+        setRecoveryStatus('expired');
+      } else {
+        setRecoveryStatus('invalid');
+      }
     }
   };
 
