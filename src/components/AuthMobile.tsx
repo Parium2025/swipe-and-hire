@@ -221,11 +221,6 @@ const AuthMobile = ({
       <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-4">
         <Card className="w-full max-w-sm bg-background/95 backdrop-blur-sm">
           <CardHeader className="text-center">
-            <img 
-              src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
-              alt="Parium" 
-              className="h-12 w-auto mx-auto mb-4"
-            />
             <CardTitle>Nytt lösenord</CardTitle>
           </CardHeader>
           <CardContent>
