@@ -359,6 +359,10 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: boolean
       }
+      test_reset_flow: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       user_role:
