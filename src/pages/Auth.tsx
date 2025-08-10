@@ -111,7 +111,7 @@ const Auth = () => {
               const paramName = hasTokenHash ? 'token_hash' : 'token';
               const tokenValue = hasTokenHash ? tokenHashParam! : tokenParam!;
               if (tokenValue) {
-                const redirectTo = `${window.location.origin}/auth`;
+                const redirectTo = `${window.location.origin}/auth?reset=true`;
                 const verifyUrl = `${projectUrl}/auth/v1/verify?type=recovery&${paramName}=${encodeURIComponent(tokenValue)}&redirect_to=${encodeURIComponent(redirectTo)}`;
                 console.log('Falling back to Supabase verify endpoint:', verifyUrl);
                 window.location.replace(verifyUrl);

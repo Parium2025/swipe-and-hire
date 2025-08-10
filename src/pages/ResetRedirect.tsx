@@ -39,7 +39,8 @@ const ResetRedirect = () => {
       const chosenToken = tokenHash || token;
       const paramName = tokenHash ? 'token_hash' : 'token';
       if (chosenToken) {
-        const url = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?${paramName}=${encodeURIComponent(chosenToken)}&type=${encodeURIComponent(type)}`;
+        const origin = window.location.origin;
+        const url = `${origin}/auth?${paramName}=${encodeURIComponent(chosenToken)}&type=${encodeURIComponent(type)}`;
         window.location.replace(url);
       }
     }
@@ -51,7 +52,8 @@ const ResetRedirect = () => {
     const type = searchParams.get('type') || 'recovery';
     const chosenToken = tokenHash || token;
     const paramName = tokenHash ? 'token_hash' : 'token';
-    return `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?${paramName}=${chosenToken}&type=${type}`;
+    const origin = window.location.origin;
+    return `${origin}/auth?${paramName}=${chosenToken}&type=${type}`;
   };
 
   const copyUrlToClipboard = async () => {
