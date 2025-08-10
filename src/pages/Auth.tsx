@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
+import { useToast } from '@/hooks/use-toast';
 import AnimatedIntro from '@/components/AnimatedIntro';
 import AuthMobile from '@/components/AuthMobile';
 import AuthTablet from '@/components/AuthTablet';
@@ -58,6 +59,7 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const device = useDevice();
+  const { toast } = useToast();
 
   useEffect(() => {
     const handleAuthFlow = async () => {
@@ -460,12 +462,20 @@ const Auth = () => {
     console.log('🔄 Starting handlePasswordReset');
     
     if (newPassword !== confirmPassword) {
-      alert('Lösenorden matchar inte');
+      toast({
+        title: "Lösenorden matchar inte",
+        description: "Kontrollera att båda lösenorden är identiska",
+        variant: "destructive"
+      });
       return;
     }
     
     if (newPassword.length < 6) {
-      alert('Lösenordet måste vara minst 6 tecken långt');
+      toast({
+        title: "Lösenordet är för kort",
+        description: "Lösenordet måste vara minst 6 tecken långt",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -565,7 +575,11 @@ const Auth = () => {
           const issuedParam = searchParams.get('issued');
           if (issuedParam) {
             console.log('⚠️ Har bara issued parameter, inte riktiga tokens - kan inte uppdatera lösenord');
-            alert('Den här återställningslänken innehåller inte fullständiga tokens för lösenordsuppdatering. Vänligen begär en ny återställningslänk.');
+            toast({
+              title: "Saknar nödvändiga tokens",
+              description: "Vänligen begär en ny återställningslänk",
+              variant: "destructive"
+            });
             // Stanna kvar på reset-formuläret så användaren kan begära ny länk via "Tillbaka till inloggning"
             return;
           }
@@ -583,7 +597,11 @@ const Auth = () => {
       
       // Kolla om det är specifika lösenordsfel som användaren kan fixa
       if (msg.includes('different from') || msg.includes('same as') || msg.includes('should be different')) {
-        alert('Det nya lösenordet måste vara annorlunda än ditt nuvarande lösenord. Försök med ett annat lösenord.');
+        toast({
+          title: "Samma lösenord",
+          description: "Det nya lösenordet måste vara annorlunda än ditt nuvarande lösenord",
+          variant: "destructive"
+        });
         return; // Stanna kvar på formuläret så användaren kan försöka igen
       }
       
@@ -592,7 +610,11 @@ const Auth = () => {
         setRecoveryStatus('expired');
       } else {
         // Andra fel - visa generiskt felmeddelande men stanna på formuläret
-        alert(`Fel vid lösenordsuppdatering: ${err?.message || 'Okänt fel'}. Försök igen.`);
+        toast({
+          title: "Fel vid lösenordsuppdatering",
+          description: err?.message || 'Okänt fel. Försök igen.',
+          variant: "destructive"
+        });
       }
     }
   };
