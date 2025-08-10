@@ -36,8 +36,9 @@ const ResetRedirect = () => {
       const tokenHash = searchParams.get('token_hash');
       const token = searchParams.get('token');
       const chosenToken = tokenHash || token;
+      const paramName = tokenHash ? 'token_hash' : 'token';
       if (chosenToken) {
-        const verifyUrl = `https://rvtsfnaqlnggfkoqygbm.supabase.co/auth/v1/verify?type=recovery&token_hash=${encodeURIComponent(chosenToken)}&redirect_to=${encodeURIComponent('https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth')}`;
+        const verifyUrl = `https://rvtsfnaqlnggfkoqygbm.supabase.co/auth/v1/verify?type=recovery&${paramName}=${encodeURIComponent(chosenToken)}&redirect_to=${encodeURIComponent('https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth')}`;
         window.location.replace(verifyUrl);
       }
     }
