@@ -174,7 +174,7 @@ const Auth = () => {
         console.log('Showing success confirmation message');
       } else if (confirmed === 'already') {
         setConfirmationStatus('already-confirmed');
-        setConfirmationMessage('✅ Perfekt! Ditt konto är redan aktiverat och redo att användas.');
+        setConfirmationMessage('Ditt konto är redan aktiverat och redo att användas.');
         console.log('Showing already confirmed message');
       }
       
