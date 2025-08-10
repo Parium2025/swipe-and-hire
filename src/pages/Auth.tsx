@@ -132,15 +132,15 @@ const Auth = () => {
     const hasToken = !!tokenParam;
     if (hasAccessPair || hasTokenHash || hasToken) {
       try {
-        const payload = {
-          type: tokenType || 'recovery',
-          token: tokenParam || null,
-          token_hash: tokenHashParam || null,
-          access_token: accessToken || null,
-          refresh_token: refreshToken || null,
-          issued_at: issuedMs || null,
-          stored_at: Date.now()
-        };
+         const payload = {
+           type: tokenType || 'recovery',
+           token: tokenParam || null,
+           token_hash: tokenHashParam || null,
+           access_token: accessToken || null,
+           refresh_token: refreshToken || null,
+           issued_at: issuedMs || Date.now(),
+           stored_at: Date.now()
+         };
         sessionStorage.setItem('parium-pending-recovery', JSON.stringify(payload));
       } catch (e) {
         console.warn('Kunde inte spara återställningsdata:', e);
