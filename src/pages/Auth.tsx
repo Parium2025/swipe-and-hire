@@ -506,7 +506,32 @@ const Auth = () => {
           console.log('✅ Token is still valid');
         }
       } else {
-        console.log('⚠️ No pending recovery data found in sessionStorage');
+        // Kolla om vi har issued parameter utan sessionStorage (nya länkar)
+        const issuedParam = searchParams.get('issued');
+        if (issuedParam) {
+          const issuedTime = parseInt(issuedParam);
+          const currentTime = Date.now();
+          const tenMinutesInMs = 10 * 60 * 1000;
+          const timeElapsed = currentTime - issuedTime;
+          
+          console.log('🔍 Checking issued parameter for expiry:', {
+            issuedParam,
+            issuedTime,
+            currentTime,
+            timeElapsed,
+            tenMinutesInMs,
+            isExpired: timeElapsed > tenMinutesInMs
+          });
+          
+          if (timeElapsed > tenMinutesInMs) {
+            console.log('❌ Issued parameter shows token expired');
+            setRecoveryStatus('expired');
+            return;
+          }
+          console.log('✅ Issued parameter shows token is still valid');
+        } else {
+          console.log('⚠️ No pending recovery data and no issued parameter found');
+        }
       }
 
       console.log('🔍 Checking session...');
@@ -534,6 +559,15 @@ const Auth = () => {
             });
             if (error) throw error;
             hasSession = true;
+          }
+        } else {
+          // För nya länkar med bara issued parameter - vi kan inte uppdatera lösenord utan riktiga tokens
+          const issuedParam = searchParams.get('issued');
+          if (issuedParam) {
+            console.log('⚠️ Har bara issued parameter, inte riktiga tokens - kan inte uppdatera lösenord');
+            alert('Den här återställningslänken innehåller inte fullständiga tokens för lösenordsuppdatering. Vänligen begär en ny återställningslänk.');
+            setRecoveryStatus('expired');
+            return;
           }
         }
       }
