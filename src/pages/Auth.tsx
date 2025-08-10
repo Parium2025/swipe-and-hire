@@ -448,7 +448,7 @@ const Auth = () => {
       });
       console.log('📩 AUTH.TSX - RESET RESPONSE:', { error });
       if (error) throw error;
-      setResendMessage('Ny återställningslänk skickad! Kolla din e‑post.');
+      setResendMessage('Ny återställningslänk skickad! Kolla din e‑post. Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.');
     } catch (err: any) {
       console.error('Resend reset error:', err);
       setResendMessage('Kunde inte skicka länk. Kontrollera e‑postadressen och försök igen.');
