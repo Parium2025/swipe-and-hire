@@ -628,17 +628,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resetPassword = async (email: string) => {
     try {
-      console.log(`🔄 USING SUPABASE RESET för: ${email}`);
+      console.log(`🔄 SENDING RESET via EDGE FUNCTION för: ${email}`);
       
-      // Använd Supabase's egna resetPasswordForEmail med vår egna redirectTo
-      const issued = Date.now();
-      const redirectUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&issued=${issued}`;
-      
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: redirectUrl
+      // Använd vår egna edge function igen
+      const { data, error } = await supabase.functions.invoke('send-reset-password', {
+        body: { email }
       });
       
-      console.log('📩 SUPABASE RESET RESPONSE:', { error });
+      console.log('📩 EDGE FUNCTION RESPONSE:', { data, error });
 
       if (error) {
         console.error('Reset password error:', error);

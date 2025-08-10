@@ -41,11 +41,18 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sending password reset email to: ${email}`);
 
-    // Generate reset password link through Supabase Auth
-    // Använd direkt URL istället för redirectTo för att undvika Site URL problem
+    // Generera issued timestamp
+    const issued = Date.now();
+    
+    // Använd redirectTo för att få rätt tokens i URL:en
+    const redirectUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&issued=${issued}`;
+    
     const { data, error } = await supabase.auth.admin.generateLink({
       type: 'recovery',
-      email: email
+      email: email,
+      options: {
+        redirectTo: redirectUrl
+      }
     });
 
     if (error) {
@@ -59,29 +66,19 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('No reset URL generated');
     }
 
-    // För Yahoo Mail kompatibilitet - använd direkta URL:en istället för redirect
-    const urlParams = new URL(resetUrl);
-    const tokenHash = urlParams.searchParams.get('token_hash');
-    const token = urlParams.searchParams.get('token');
-    const type = urlParams.searchParams.get('type');
-    const chosenToken = tokenHash || token || '';
-    const paramName = tokenHash ? 'token_hash' : 'token';
-    const issued = Date.now();
+    console.log('🔍 GENERATED RESET URL:', resetUrl);
     
-    console.log('🔍 RESET URL DEBUG:', {
-      originalResetUrl: resetUrl,
-      tokenHash,
-      token,
-      type,
-      chosenToken,
-      paramName,
-      issued
-    });
+    // URL:en från Supabase innehåller redan alla tokens, vi behöver bara lägga till issued
+    let correctedResetUrl = resetUrl;
     
-    // Använd direkt auth URL med issued timestamp för att kontrollera ålder
-    const correctedResetUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&${paramName}=${chosenToken}&type=${type}&issued=${issued}`;
+    // Om URL:en redan har parametrar, lägg till issued med &, annars med ?
+    if (resetUrl.includes('?')) {
+      correctedResetUrl = `${resetUrl}&issued=${issued}`;
+    } else {
+      correctedResetUrl = `${resetUrl}?issued=${issued}`;
+    }
     
-    console.log('✅ FINAL RESET URL:', correctedResetUrl);
+    console.log('✅ FINAL RESET URL med issued:', correctedResetUrl);
 
     const emailResponse = await resend.emails.send({
       from: "Parium <noreply@parium.se>",
