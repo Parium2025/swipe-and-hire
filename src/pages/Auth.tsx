@@ -200,18 +200,41 @@ const Auth = () => {
       if (raw) {
         try {
           const pending = JSON.parse(raw);
-          const storedAt = pending.stored_at || pending.issued_at || Date.now();
-          const timeDiff = Date.now() - storedAt;
-          const tenMinutes = 10 * 60 * 1000;
+          console.log('🕐 Checking token expiry on page load:', pending);
           
-          if (timeDiff > tenMinutes) {
-            console.log('⏰ Token har gått ut efter 10 minuter, visar expired-skärm');
+          // Använd issued_at (när länken skapades) istället för stored_at (när den sparades i webbläsaren)
+          const issuedAt = pending.issued_at;
+          if (issuedAt) {
+            const timeDiff = Date.now() - parseInt(issuedAt);
+            const tenMinutes = 10 * 60 * 1000;
+            
+            console.log('⏱️ Token expiry check:', {
+              issued_at: issuedAt,
+              current_time: Date.now(),
+              time_diff_ms: timeDiff,
+              time_diff_minutes: Math.floor(timeDiff / 1000 / 60),
+              ten_minutes_ms: tenMinutes,
+              is_expired: timeDiff > tenMinutes
+            });
+            
+            if (timeDiff > tenMinutes) {
+              console.log('❌ Token har gått ut efter 10 minuter, visar expired-skärm');
+              sessionStorage.removeItem('parium-pending-recovery');
+              setRecoveryStatus('expired');
+              setIsPasswordReset(false);
+              return;
+            }
+            console.log('✅ Token är fortfarande giltig');
+          } else {
+            console.log('⚠️ Ingen issued_at timestamp hittad, token anses ogiltig');
             sessionStorage.removeItem('parium-pending-recovery');
-            setRecoveryStatus('expired');
+            setRecoveryStatus('invalid');
             setIsPasswordReset(false);
           }
         } catch (e) {
           console.warn('Kunde inte kontrollera token expiry:', e);
+          setRecoveryStatus('invalid');
+          setIsPasswordReset(false);
         }
       }
     };
