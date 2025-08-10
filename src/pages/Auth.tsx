@@ -301,13 +301,8 @@ const Auth = () => {
         if (raw) {
           const pending = JSON.parse(raw);
           
-          // Kolla om länken har gått ut (10 minuter)
-          const issuedAt = pending.issued_at;
-          if (issuedAt && Date.now() - issuedAt > 10 * 60 * 1000) {
-            sessionStorage.removeItem('parium-pending-recovery');
-            setRecoveryStatus('expired');
-            return;
-          }
+          // Ta bort 10-minuters kontroll - låt Supabase avgöra om token är giltig
+          // Detta gör att sparade tokens alltid fungerar om Supabase godkänner dem
           
           if ((pending.token_hash || pending.token) && (pending.type === 'recovery' || !pending.type)) {
             const verifyOptions: any = { type: 'recovery' };
