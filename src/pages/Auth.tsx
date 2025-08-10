@@ -93,13 +93,8 @@ const Auth = () => {
       const tokenHashParam = tokenHashParamHash || tokenHashParamQP || undefined;
       const issued = issuedHash || issuedQP || undefined;
       const issuedMs = issued ? parseInt(issued, 10) : undefined;
-      const TEN_MIN_MS = 10 * 60 * 1000;
-
-      if (issuedMs && Date.now() - issuedMs > TEN_MIN_MS) {
-        setRecoveryStatus('expired');
-        setShowIntro(false);
-        return;
-      }
+      // Ta bort 10-minuters kontroll - låt Supabase avgöra om token är giltig
+      // Detta gör att nya återställningslänkar alltid fungerar
       
       console.log('Auth useEffect - URL params:', { 
         isReset, 
