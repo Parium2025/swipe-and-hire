@@ -606,6 +606,12 @@ const Auth = () => {
   }
 
   
+  console.log('🔍 AUTH COMPONENT RENDERING - Debug info:', {
+    isPasswordReset,
+    currentUrl: window.location.href,
+    sessionStorage: sessionStorage.getItem('parium-pending-recovery')
+  });
+
   // RENDERINGSKONTROLL: Kolla expiry VARJE GÅNG komponenten renderas
   if (isPasswordReset) {
     console.log('🔍 RENDERINGSKONTROLL - Password reset sida renderas');
