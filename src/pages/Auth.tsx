@@ -308,8 +308,19 @@ const Auth = () => {
             const issuedTime = parseInt(pending.issued_at);
             const currentTime = Date.now();
             const tenMinutesInMs = 10 * 60 * 1000;
+            const timeElapsed = currentTime - issuedTime;
             
-            if (currentTime - issuedTime > tenMinutesInMs) {
+            console.log('Password reset token check:', {
+              issued_at: pending.issued_at,
+              issuedTime,
+              currentTime,
+              timeElapsed,
+              tenMinutesInMs,
+              isExpired: timeElapsed > tenMinutesInMs,
+              timeElapsedMinutes: Math.floor(timeElapsed / 1000 / 60)
+            });
+            
+            if (timeElapsed > tenMinutesInMs) {
               console.log('Token expired during password reset attempt');
               sessionStorage.removeItem('parium-pending-recovery');
               setRecoveryStatus('expired');
