@@ -64,39 +64,66 @@ const Auth = () => {
       const isReset = searchParams.get('reset') === 'true';
       const confirmed = searchParams.get('confirmed');
       
-      // Kontrollera om länken är markerad som expired från redirect-funktionen
-      const isExpired = searchParams.get('expired') === 'true';
-      if (isReset && isExpired) {
-        console.log('❌ EXPIRED RESET-LÄNK från redirect - Visar expired direkt');
+      console.log('🔍 AUTH FLOW DEBUG:', {
+        isReset,
+        url: window.location.href,
+        searchParams: Array.from(searchParams.entries()),
+        hasToken: !!searchParams.get('token'),
+        hasTokenHash: !!searchParams.get('token_hash'),
+        hasIssued: !!searchParams.get('issued'),
+        issuedValue: searchParams.get('issued')
+      });
+      
+      // FÖRSTA KONTROLLEN: Är det en reset-länk?
+      if (isReset) {
+        console.log('✅ Reset-länk detekterad');
         setIsPasswordReset(true);
-        setRecoveryStatus('expired');
-        return;
-      }
-
-      // Kontrollera issued timestamp för nya länkar
-      const issuedParam = searchParams.get('issued');
-      if (isReset && issuedParam) {
-        const issuedTime = parseInt(issuedParam);
-        const currentTime = Date.now();
-        const timeDiff = currentTime - issuedTime;
-        const tenMinutesInMs = 10 * 60 * 1000; // 10 minuter
         
-        console.log('🕐 TIME CHECK:', { issuedTime, currentTime, timeDiff, tenMinutesInMs });
-        
-        if (timeDiff > tenMinutesInMs) {
-          console.log('❌ RESET LINK EXPIRED baserat på issued timestamp');
-          setIsPasswordReset(true);
+        // ANDRA KONTROLLEN: Kontrollera expired parameter från redirect-funktionen
+        const isExpired = searchParams.get('expired') === 'true';
+        if (isExpired) {
+          console.log('❌ EXPIRED parameter funnen - Visar expired direkt');
           setRecoveryStatus('expired');
           return;
         }
-      }
 
-      // ENKEL LÖSNING: Om vi är på reset=true utan tokens i URL, så är länken gammal
-      if (isReset && !searchParams.get('token') && !searchParams.get('token_hash') && !searchParams.get('access_token')) {
-        console.log('❌ GAMMAL RESET-LÄNK - Visar expired direkt');
-        setIsPasswordReset(true); // KRITISKT: Sätt isPasswordReset till true så att expired-vyn visas
-        setRecoveryStatus('expired');
-        return;
+        // TREDJE KONTROLLEN: Kontrollera issued timestamp för nya länkar
+        const issuedParam = searchParams.get('issued');
+        if (issuedParam) {
+          const issuedTime = parseInt(issuedParam);
+          const currentTime = Date.now();
+          const timeDiff = currentTime - issuedTime;
+          const tenMinutesInMs = 10 * 60 * 1000; // 10 minuter
+          
+          console.log('🕐 TIME CHECK:', { 
+            issuedTime, 
+            currentTime, 
+            timeDiff, 
+            tenMinutesInMs,
+            isExpired: timeDiff > tenMinutesInMs
+          });
+          
+          if (timeDiff > tenMinutesInMs) {
+            console.log('❌ RESET LINK EXPIRED baserat på issued timestamp');
+            setRecoveryStatus('expired');
+            return;
+          } else {
+            console.log('✅ Reset-länk är giltig enligt timestamp');
+          }
+        }
+
+        // FJÄRDE KONTROLLEN: Gamla länkar utan tokens = expired
+        const hasTokens = searchParams.get('token') || 
+                         searchParams.get('token_hash') || 
+                         searchParams.get('access_token');
+        
+        if (!hasTokens && !issuedParam) {
+          console.log('❌ GAMMAL RESET-LÄNK utan tokens eller issued - Visar expired');
+          setRecoveryStatus('expired');
+          return;
+        }
+        
+        console.log('✅ Reset-länk verkar vara ok - fortsätter till formulär');
       }
       
       // Hantera recovery tokens från Supabase auth (olika format) + URL-hash
