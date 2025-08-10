@@ -9,6 +9,7 @@ import AuthTablet from '@/components/AuthTablet';
 import AuthDesktop from '@/components/AuthDesktop';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { CheckCircle, AlertCircle } from 'lucide-react';
 
 const Auth = () => {
@@ -20,6 +21,10 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [confirmationStatus, setConfirmationStatus] = useState<'none' | 'success' | 'already-confirmed' | 'error'>('none');
   const [confirmationMessage, setConfirmationMessage] = useState('');
+  const [recoveryStatus, setRecoveryStatus] = useState<'none' | 'expired' | 'invalid'>('none');
+  const [emailForReset, setEmailForReset] = useState('');
+  const [resending, setResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState('');
 
   const { user, updatePassword, confirmEmail } = useAuth();
   const [searchParams] = useSearchParams();
@@ -55,22 +60,28 @@ const Auth = () => {
         supabase.auth.verifyOtp({
           token_hash: supabaseToken,
           type: 'recovery'
-        }).then(({ data, error }) => {
-          if (error) {
-            console.error('Error with recovery token:', error);
-          } else {
-            console.log('Recovery successful, redirecting to password reset');
-            // Rensa URL från tokens och visa password reset
-            const newUrl = new URL(window.location.href);
-            newUrl.searchParams.delete('token');
-            newUrl.searchParams.delete('type');
-            newUrl.searchParams.delete('redirect_to');
-            newUrl.searchParams.set('reset', 'true');
-            
-            window.history.replaceState({}, '', newUrl.toString());
-            setIsPasswordReset(true);
-          }
-        });
+          }).then(({ data, error }) => {
+            if (error) {
+              console.error('Error with recovery token:', error);
+              const msg = (error as any)?.message?.toLowerCase() || '';
+              if (msg.includes('expired') || msg.includes('invalid') || msg.includes('session')) {
+                setRecoveryStatus('expired');
+              } else {
+                setRecoveryStatus('invalid');
+              }
+              setShowIntro(false);
+            } else {
+              console.log('Recovery successful, redirecting to password reset');
+              // Rensa URL från tokens och visa password reset
+              const newUrl = new URL(window.location.href);
+              newUrl.searchParams.delete('token');
+              newUrl.searchParams.delete('type');
+              newUrl.searchParams.delete('redirect_to');
+              newUrl.searchParams.set('reset', 'true');
+              window.history.replaceState({}, '', newUrl.toString());
+              setIsPasswordReset(true);
+            }
+          });
       } else {
         // Hantera standard token format
         supabase.auth.setSession({
@@ -79,6 +90,8 @@ const Auth = () => {
         }).then(({ error }) => {
           if (error) {
             console.error('Error setting session:', error);
+            setRecoveryStatus('expired');
+            setShowIntro(false);
           } else {
             console.log('Session set successfully, redirecting to password reset');
             // Rensa URL från tokens och visa password reset
@@ -152,6 +165,25 @@ const Auth = () => {
     navigate(newUrl, { replace: true });
   };
 
+  const handleResendReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResendMessage('');
+    setResending(true);
+    try {
+      if (!emailForReset) return;
+      const { error } = await supabase.functions.invoke('send-reset-password', {
+        body: { email: emailForReset }
+      });
+      if (error) throw error;
+      setResendMessage('Ny återställningslänk skickad! Kolla din e‑post.');
+    } catch (err: any) {
+      console.error('Resend reset error:', err);
+      setResendMessage('Kunde inte skicka länk. Kontrollera e‑postadressen och försök igen.');
+    } finally {
+      setResending(false);
+    }
+  };
+
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -171,6 +203,40 @@ const Auth = () => {
       navigate('/');
     }
   };
+
+  // Visa UI för utgången/ogiltig återställningslänk
+  if (recoveryStatus !== 'none') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-glow to-primary-dark flex items-center justify-center p-4">
+        <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
+          <CardContent className="p-8 text-center space-y-4">
+            <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
+            <h2 className="text-2xl font-bold text-primary-foreground">Återställningslänken har gått ut</h2>
+            <p className="text-primary-foreground/80">Skriv din e‑postadress så skickar vi en ny länk för att återställa ditt lösenord.</p>
+            <form onSubmit={handleResendReset} className="space-y-3">
+              <Input
+                type="email"
+                placeholder="din@epost.se"
+                value={emailForReset}
+                onChange={(e) => setEmailForReset(e.target.value)}
+                required
+                disabled={resending}
+              />
+              <Button type="submit" className="w-full" disabled={resending}>
+                {resending ? 'Skickar...' : 'Skicka ny länk'}
+              </Button>
+            </form>
+            {resendMessage && (
+              <p className="text-sm text-primary-foreground/80">{resendMessage}</p>
+            )}
+            <Button variant="outline" onClick={() => navigate('/auth')} className="w-full">
+              Tillbaka till inloggning
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (showIntro) {
     return (
