@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+// Removed Card import (no frame)
+// import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -181,23 +182,14 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         return (
           <div className="text-center space-y-8 py-8">
             <div className="space-y-6">
-                <div className="relative">
-                  <div
-                    className="p-6 rounded-full w-20 h-20 mx-auto flex items-center justify-center shadow-lg animate-enter"
-                    style={{ background: 'var(--gradient-primary)' }}
-                  >
-                    <Heart className="h-10 w-10 text-white" />
-                  </div>
-                  <div className="absolute -top-2 -right-2 bg-accent p-1 rounded-full">
-                    <Sparkles className="h-4 w-4 text-accent-foreground" />
-                  </div>
-                </div>
+                {/* Removed center icon for cleaner, minimal hero */}
+                <div className="h-2" />
               
               <div className="space-y-4">
-                <h1 className="text-4xl font-bold bg-clip-text text-transparent animate-fade-in" style={{ background: 'var(--gradient-primary)' }}>
+                <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground animate-fade-in">
                   Välkommen till Parium!
                 </h1>
-                <p className="text-xl text-muted-foreground max-w-md mx-auto animate-fade-in">
+                <p className="text-lg md:text-xl text-primary-foreground/90 max-w-md mx-auto animate-fade-in">
                   Framtiden börjar med ett swipe. Låt oss skapa din profil tillsammans.
                 </p>
               </div>
@@ -519,11 +511,9 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
         {/* Main content */}
         <div className="flex-1 flex items-center justify-center px-4 pb-6">
-          <Card className="w-full max-w-2xl bg-glass-surface backdrop-blur-lg border-white/20 shadow-xl">
-            <CardContent className="p-8">
-              {renderStep()}
-            </CardContent>
-          </Card>
+          <section className="w-full max-w-3xl px-6 py-10">
+            {renderStep()}
+          </section>
         </div>
 
         {/* Footer navigation */}
