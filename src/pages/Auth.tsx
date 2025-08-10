@@ -605,6 +605,74 @@ const Auth = () => {
     );
   }
 
+  
+  // RENDERINGSKONTROLL: Kolla expiry VARJE GÅNG komponenten renderas
+  if (isPasswordReset) {
+    console.log('🔍 RENDERINGSKONTROLL - Password reset sida renderas');
+    const raw = sessionStorage.getItem('parium-pending-recovery');
+    if (raw) {
+      try {
+        const pending = JSON.parse(raw);
+        console.log('📦 SessionStorage vid rendering:', pending);
+        
+        if (pending.issued_at) {
+          const issuedTime = parseInt(pending.issued_at);
+          const currentTime = Date.now();
+          const tenMinutesInMs = 10 * 60 * 1000;
+          const timeElapsed = currentTime - issuedTime;
+          
+          console.log('⏰ RENDERING EXPIRY-KONTROLL:', {
+            issued_at: pending.issued_at,
+            issuedTime,
+            currentTime,
+            timeElapsed,
+            tenMinutesInMs,
+            isExpired: timeElapsed > tenMinutesInMs,
+            timeElapsedMinutes: Math.floor(timeElapsed / 1000 / 60)
+          });
+          
+          if (timeElapsed > tenMinutesInMs) {
+            console.log('❌ TOKEN EXPIRED VID RENDERING - OMDIRIGERAR TILL EXPIRED');
+            sessionStorage.removeItem('parium-pending-recovery');
+            // Använd ett annat approach - sätt bara expired status direkt
+            return (
+              <div className="min-h-screen bg-gradient-parium flex items-center justify-center p-4">
+                <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
+                  <CardContent className="p-8 text-center space-y-4">
+                    <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
+                    <h2 className="text-2xl font-bold text-primary-foreground">Återställningslänken har gått ut</h2>
+                    <p className="text-primary-foreground/80">Länken har gått ut efter 10 minuter. Skriv din e‑postadress så skickar vi en ny länk för att återställa ditt lösenord.</p>
+                    <form onSubmit={handleResendReset} className="space-y-3">
+                      <Input
+                        type="email"
+                        placeholder="din@epost.se"
+                        value={emailForReset}
+                        onChange={(e) => setEmailForReset(e.target.value)}
+                        required
+                        disabled={resending}
+                      />
+                      <Button type="submit" className="w-full" disabled={resending}>
+                        {resending ? 'Skickar...' : 'Skicka ny länk'}
+                      </Button>
+                    </form>
+                    {resendMessage && (
+                      <p className="text-sm text-primary-foreground/80">{resendMessage}</p>
+                    )}
+                    <Button variant="outline" onClick={() => navigate('/')} className="w-full">
+                      Tillbaka till inloggning
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            );
+          }
+        }
+      } catch (e) {
+        console.warn('Fel vid renderingskontroll:', e);
+      }
+    }
+  }
+
   // Använd rätt komponent baserat på skärmstorlek
   if (device === 'mobile') {
     return (
