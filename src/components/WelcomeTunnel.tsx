@@ -181,45 +181,48 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         return (
           <div className="text-center space-y-8 py-8">
             <div className="space-y-6">
-              <div className="relative">
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 rounded-full w-20 h-20 mx-auto flex items-center justify-center">
-                  <Heart className="h-10 w-10 text-white" />
+                <div className="relative">
+                  <div
+                    className="p-6 rounded-full w-20 h-20 mx-auto flex items-center justify-center shadow-lg animate-enter"
+                    style={{ background: 'var(--gradient-primary)' }}
+                  >
+                    <Heart className="h-10 w-10 text-white" />
+                  </div>
+                  <div className="absolute -top-2 -right-2 bg-accent p-1 rounded-full">
+                    <Sparkles className="h-4 w-4 text-accent-foreground" />
+                  </div>
                 </div>
-                <div className="absolute -top-2 -right-2 bg-yellow-400 p-1 rounded-full">
-                  <Sparkles className="h-4 w-4 text-yellow-800" />
-                </div>
-              </div>
               
               <div className="space-y-4">
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-4xl font-bold bg-clip-text text-transparent animate-fade-in" style={{ background: 'var(--gradient-primary)' }}>
                   Välkommen till Parium!
                 </h1>
-                <p className="text-xl text-muted-foreground max-w-md mx-auto">
-                  Din resa mot drömjobbet börjar nu. Låt oss skapa din profil tillsammans.
+                <p className="text-xl text-muted-foreground max-w-md mx-auto animate-fade-in">
+                  Framtiden börjar med ett swipe. Låt oss skapa din profil tillsammans.
                 </p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto">
               <div className="space-y-3">
-                <div className="bg-blue-100 p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
-                  <Users className="h-8 w-8 text-blue-600" />
+                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-accent">
+                  <Users className="h-8 w-8 text-accent-foreground" />
                 </div>
                 <h3 className="font-semibold">Matcha med jobb</h3>
                 <p className="text-sm text-muted-foreground">som passar dig</p>
               </div>
 
               <div className="space-y-3">
-                <div className="bg-green-100 p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
-                  <Briefcase className="h-8 w-8 text-green-600" />
+                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-secondary">
+                  <Briefcase className="h-8 w-8 text-secondary-foreground" />
                 </div>
                 <h3 className="font-semibold">Swipea, ansök och gå vidare</h3>
                 <p className="text-sm text-muted-foreground">på sekunder</p>
               </div>
 
               <div className="space-y-3">
-                <div className="bg-purple-100 p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
-                  <Star className="h-8 w-8 text-purple-600" />
+                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-muted">
+                  <Star className="h-8 w-8 text-foreground" />
                 </div>
                 <h3 className="font-semibold">Spara tid med smarta</h3>
                 <p className="text-sm text-muted-foreground">och effektiva verktyg</p>
@@ -493,7 +496,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-parium-gradient">
       <div className="min-h-screen flex flex-col">
         {/* Header with progress */}
         {currentStep > 0 && currentStep < totalSteps - 1 && (
@@ -516,7 +519,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
         {/* Main content */}
         <div className="flex-1 flex items-center justify-center px-4 pb-6">
-          <Card className="w-full max-w-2xl bg-white/80 backdrop-blur-sm border-0 shadow-xl">
+          <Card className="w-full max-w-2xl bg-glass-surface backdrop-blur-lg border-white/20 shadow-xl">
             <CardContent className="p-8">
               {renderStep()}
             </CardContent>
@@ -530,7 +533,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               variant="outline"
               onClick={handlePrevious}
               disabled={currentStep === 0 || currentStep === totalSteps - 1}
-              className="bg-white/80"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Tillbaka
@@ -539,7 +541,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             {currentStep === 0 ? (
               <Button
                 onClick={handleNext}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8"
+                className="px-8"
               >
                 Kom igång
                 <ArrowRight className="h-4 w-4 ml-2" />

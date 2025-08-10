@@ -110,3 +110,9 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .bg-parium-gradient { background: var(--gradient-parium); }
+  .bg-primary-gradient { background: var(--gradient-primary); }
+  .bg-glass-surface { background: var(--gradient-glass); }
+}
