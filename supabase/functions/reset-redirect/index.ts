@@ -18,26 +18,36 @@ const handler = async (req: Request): Promise<Response> => {
     
     console.log('Reset redirect called with:', { token: !!token, type, issued });
 
+    // För GAMLA länkar utan issued parameter - betrakta som expired
+    if (!issued) {
+      console.log('❌ GAMMAL RESET LINK utan issued timestamp - Redirecting to expired page');
+      return new Response(null, {
+        status: 302,
+        headers: {
+          "Location": "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&expired=true",
+          ...corsHeaders,
+        },
+      });
+    }
+
     // Kontrollera om länken är över 10 minuter gammal (600000 ms)
-    if (issued) {
-      const issuedTime = parseInt(issued);
-      const currentTime = Date.now();
-      const timeDiff = currentTime - issuedTime;
-      const tenMinutesInMs = 10 * 60 * 1000; // 10 minuter
-      
-      console.log('Time check:', { issuedTime, currentTime, timeDiff, tenMinutesInMs });
-      
-      if (timeDiff > tenMinutesInMs) {
-        console.log('❌ RESET LINK EXPIRED - Redirecting to expired page');
-        // Redirect till expired sida
-        return new Response(null, {
-          status: 302,
-          headers: {
-            "Location": "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&expired=true",
-            ...corsHeaders,
-          },
-        });
-      }
+    const issuedTime = parseInt(issued);
+    const currentTime = Date.now();
+    const timeDiff = currentTime - issuedTime;
+    const tenMinutesInMs = 10 * 60 * 1000; // 10 minuter
+    
+    console.log('Time check:', { issuedTime, currentTime, timeDiff, tenMinutesInMs });
+    
+    if (timeDiff > tenMinutesInMs) {
+      console.log('❌ RESET LINK EXPIRED - Redirecting to expired page');
+      // Redirect till expired sida
+      return new Response(null, {
+        status: 302,
+        headers: {
+          "Location": "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&expired=true",
+          ...corsHeaders,
+        },
+      });
     }
 
     // Om länken är giltig, bygg den korrekta URL:en för återställning
