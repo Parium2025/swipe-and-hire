@@ -199,7 +199,7 @@ const AuthMobile = ({
     setLoading(false);
   };
 
-  const handleResetPassword = async () => {
+  const handleResetPasswordEmail = async () => {
     if (!email) {
       toast({
         title: "E-post krävs",
@@ -248,6 +248,15 @@ const AuthMobile = ({
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 'Sparar...' : 'Spara nytt lösenord'}
               </Button>
+               <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => navigate('/auth')}
+                  className="text-sm text-primary hover:underline"
+                >
+                  Tillbaka till inloggning
+                </button>
+              </div>
             </form>
           </CardContent>
         </Card>
@@ -387,21 +396,31 @@ const AuthMobile = ({
                           </Button>
                         </div>
                       </div>
-                      <Button type="submit" className="w-full bg-parium-navy hover:bg-parium-navy/90 text-white" disabled={loading}>
-                        {loading ? 'Loggar in...' : 'Logga in'}
-                      </Button>
-                      
-                      {showResetPassword && !resetPasswordSent && (
+                       <Button type="submit" className="w-full bg-parium-navy hover:bg-parium-navy/90 text-white" disabled={loading}>
+                         {loading ? 'Loggar in...' : 'Logga in'}
+                       </Button>
+                       
+                       <div className="text-center mt-3">
+                         <button
+                           type="button"
+                           onClick={() => setShowResetPassword(true)}
+                           className="text-sm text-primary hover:underline"
+                         >
+                           Glömt lösenordet?
+                         </button>
+                       </div>
+                       
+                       {showResetPassword && !resetPasswordSent && (
                         <div className="mt-4 p-3 bg-muted/50 rounded-lg text-center">
                           <p className="text-sm mb-2">Glömt lösenordet?</p>
-                          <Button
-                            className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                            size="sm"
-                            onClick={handleResetPassword}
-                            disabled={resetLoading}
-                          >
-                            {resetLoading ? 'Skickar...' : 'Återställ lösenord'}
-                          </Button>
+                           <Button
+                             className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                             size="sm"
+                             onClick={handleResetPasswordEmail}
+                             disabled={resetLoading}
+                           >
+                             {resetLoading ? 'Skickar...' : 'Återställ lösenord'}
+                           </Button>
                         </div>
                       )}
 
@@ -412,14 +431,14 @@ const AuthMobile = ({
                             <p className="font-medium">💡 Tips:</p>
                             <p>Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.</p>
                           </div>
-                          <Button
-                            size="sm"
-                            onClick={handleResetPassword}
-                            disabled={resetLoading}
-                            className="bg-parium-navy hover:bg-parium-navy/90 text-white text-xs"
-                          >
-                            {resetLoading ? 'Skickar...' : 'Skicka igen'}
-                          </Button>
+                           <Button
+                             size="sm"
+                             onClick={handleResetPasswordEmail}
+                             disabled={resetLoading}
+                             className="bg-parium-navy hover:bg-parium-navy/90 text-white text-xs"
+                           >
+                             {resetLoading ? 'Skickar...' : 'Skicka igen'}
+                           </Button>
                         </div>
                       )}
                     </form>
