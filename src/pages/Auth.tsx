@@ -94,6 +94,8 @@ const Auth = () => {
     if (hasAccessPair || hasTokenHash || hasToken) {
       console.log('Recovery tokens detected, proceeding to verify/session...');
 
+      setShowIntro(false);
+
       if (hasTokenHash || hasToken) {
         // Verifiera token_hash eller token direkt
         const verifyOptions: any = { type: 'recovery' };

@@ -31,15 +31,16 @@ const ResetRedirect = () => {
     setIsInAppBrowser(inApp);
     setIsMobile(mobile);
 
-    // Om inte in-app browser, redirecta via Supabase verify endpoint
+    // Om inte in-app browser, gå direkt till vår Auth-sida med token-parametrar
     if (!inApp) {
       const tokenHash = searchParams.get('token_hash');
       const token = searchParams.get('token');
+      const type = searchParams.get('type') || 'recovery';
       const chosenToken = tokenHash || token;
       const paramName = tokenHash ? 'token_hash' : 'token';
       if (chosenToken) {
-        const verifyUrl = `https://rvtsfnaqlnggfkoqygbm.supabase.co/auth/v1/verify?type=recovery&${paramName}=${encodeURIComponent(chosenToken)}&redirect_to=${encodeURIComponent('https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth')}`;
-        window.location.replace(verifyUrl);
+        const url = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?${paramName}=${encodeURIComponent(chosenToken)}&type=${encodeURIComponent(type)}`;
+        window.location.replace(url);
       }
     }
   }, [searchParams, navigate]);
