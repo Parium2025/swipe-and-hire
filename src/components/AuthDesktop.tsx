@@ -221,8 +221,7 @@ const AuthDesktop = ({
       <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-8">
         <Card className="w-full max-w-md bg-background/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-3xl">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Återställ lösenord</CardTitle>
-            <CardDescription>Ange ditt nya lösenord</CardDescription>
+            <CardTitle className="text-2xl">Nytt lösenord</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handlePasswordReset} className="space-y-6">
@@ -251,6 +250,15 @@ const AuthDesktop = ({
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 'Sparar...' : 'Spara nytt lösenord'}
               </Button>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => navigate('/auth')}
+                  className="text-sm text-primary hover:underline"
+                >
+                  Tillbaka till inloggning
+                </button>
+              </div>
             </form>
           </CardContent>
         </Card>
