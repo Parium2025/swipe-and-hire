@@ -24,7 +24,8 @@ const Auth = () => {
         const type = hp.get('type') || sp.get('type');
         const hasAnyRecovery =
           type === 'recovery' ||
-          !!(hp.get('token') || sp.get('token') || hp.get('token_hash') || sp.get('token_hash') || hp.get('access_token') || sp.get('access_token'));
+          !!(hp.get('token') || sp.get('token') || hp.get('token_hash') || sp.get('token_hash') || hp.get('access_token') || sp.get('access_token')) ||
+          !!(sp.get('reset') === 'true' && sp.get('issued')); // Lägg till stöd för issued parameter
         if (hasAnyRecovery) return false;
       }
     } catch {}
