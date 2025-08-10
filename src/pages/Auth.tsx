@@ -64,6 +64,13 @@ const Auth = () => {
       const isReset = searchParams.get('reset') === 'true';
       const confirmed = searchParams.get('confirmed');
       
+      // ENKEL LÖSNING: Om vi är på reset=true utan tokens i URL, så är länken gammal
+      if (isReset && !searchParams.get('token') && !searchParams.get('token_hash') && !searchParams.get('access_token')) {
+        console.log('❌ GAMMAL RESET-LÄNK - Visar expired direkt');
+        setRecoveryStatus('expired');
+        return;
+      }
+      
       // Hantera recovery tokens från Supabase auth (olika format) + URL-hash
       const accessTokenQP = searchParams.get('access_token');
       const refreshTokenQP = searchParams.get('refresh_token');
