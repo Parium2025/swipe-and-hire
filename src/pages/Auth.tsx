@@ -232,7 +232,7 @@ const Auth = () => {
       if (raw) {
         try {
           const pending = JSON.parse(raw);
-          console.log('🕐 Checking token expiry on page load:', pending);
+          console.log('🕐 Checking token expiry in useEffect:', pending);
           
           // Använd issued_at (när länken skapades) istället för stored_at (när den sparades i webbläsaren)
           const issuedAt = pending.issued_at;
@@ -240,7 +240,7 @@ const Auth = () => {
             const timeDiff = Date.now() - parseInt(issuedAt);
             const tenMinutes = 10 * 60 * 1000;
             
-            console.log('⏱️ Token expiry check:', {
+            console.log('⏱️ Token expiry check in useEffect:', {
               issued_at: issuedAt,
               current_time: Date.now(),
               time_diff_ms: timeDiff,
@@ -250,21 +250,21 @@ const Auth = () => {
             });
             
             if (timeDiff > tenMinutes) {
-              console.log('❌ Token har gått ut efter 10 minuter, visar expired-skärm');
+              console.log('❌ Token har gått ut efter 10 minuter (useEffect), visar expired-skärm');
               sessionStorage.removeItem('parium-pending-recovery');
               setRecoveryStatus('expired');
               setIsPasswordReset(false);
               return;
             }
-            console.log('✅ Token är fortfarande giltig');
+            console.log('✅ Token är fortfarande giltig (useEffect)');
           } else {
-            console.log('⚠️ Ingen issued_at timestamp hittad, token anses ogiltig');
+            console.log('⚠️ Ingen issued_at timestamp hittad (useEffect), token anses ogiltig');
             sessionStorage.removeItem('parium-pending-recovery');
             setRecoveryStatus('invalid');
             setIsPasswordReset(false);
           }
         } catch (e) {
-          console.warn('Kunde inte kontrollera token expiry:', e);
+          console.warn('Kunde inte kontrollera token expiry (useEffect):', e);
           setRecoveryStatus('invalid');
           setIsPasswordReset(false);
         }
