@@ -572,13 +572,24 @@ const Auth = () => {
             hasSession = true;
           }
         } else {
-          // För nya länkar med bara issued parameter - vi kan inte uppdatera lösenord utan riktiga tokens
+          // För nya länkar med bara issued parameter - kontrollera om de är giltiga först
           const issuedParam = searchParams.get('issued');
           if (issuedParam) {
-            console.log('⚠️ Har bara issued parameter, inte riktiga tokens - kan inte uppdatera lösenord');
-            // Automatiskt dirigera till "consumed" sidan så användaren kan begära ny länk
-            setRecoveryStatus('consumed');
-            return;
+            const issuedTime = parseInt(issuedParam);
+            const currentTime = Date.now();
+            const tenMinutesInMs = 10 * 60 * 1000;
+            const timeElapsed = currentTime - issuedTime;
+            
+            if (timeElapsed > tenMinutesInMs) {
+              console.log('❌ Issued parameter shows expired token on session check');
+              setRecoveryStatus('expired');
+              return;
+            } else {
+              console.log('⚠️ Har bara issued parameter, inte riktiga tokens - kan inte uppdatera lösenord');
+              // Automatiskt dirigera till "consumed" sidan så användaren kan begära ny länk
+              setRecoveryStatus('consumed');
+              return;
+            }
           }
         }
       }
