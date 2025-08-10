@@ -41,6 +41,8 @@ const Auth = () => {
     const tokenTypeQP = searchParams.get('type');
     const tokenParamQP = searchParams.get('token');
     const tokenHashParamQP = searchParams.get('token_hash');
+    const errorCodeQP = searchParams.get('error_code') || searchParams.get('error');
+    const errorDescQP = searchParams.get('error_description') || searchParams.get('error_message');
 
     const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
     const hashParams = new URLSearchParams(hash);
@@ -49,6 +51,8 @@ const Auth = () => {
     const tokenTypeHash = hashParams.get('type');
     const tokenParamHash = hashParams.get('token');
     const tokenHashParamHash = hashParams.get('token_hash');
+    const errorCodeHash = hashParams.get('error_code') || hashParams.get('error');
+    const errorDescHash = hashParams.get('error_description') || hashParams.get('error_message');
 
     // Slutliga värden (hash vinner över query)
     const accessToken = accessTokenHash || accessTokenQP || undefined;
@@ -63,8 +67,25 @@ const Auth = () => {
       currentUrl: window.location.href,
       hasTokens: !!accessToken && !!refreshToken,
       hasSupabaseToken: !!(tokenParam || tokenHashParam),
-      tokenType
+      tokenType,
     });
+
+    // Fånga fel från Supabase verify endpoint och fall utan tokens
+    const errorCode = errorCodeHash || errorCodeQP || undefined;
+    const errorDescription = errorDescHash || errorDescQP || undefined;
+    const hasError = !!(errorCode || errorDescription);
+    const noAnyRecoveryTokens = !(accessToken || refreshToken || tokenParam || tokenHashParam);
+
+    if (hasError || (tokenType === 'recovery' && noAnyRecoveryTokens)) {
+      const desc = (errorCode || errorDescription || '').toLowerCase();
+      if (desc.includes('expire') || desc.includes('invalid') || desc.includes('session')) {
+        setRecoveryStatus('expired');
+      } else {
+        setRecoveryStatus('invalid');
+      }
+      setShowIntro(false);
+      return;
+    }
     
     // Om vi har recovery tokens, hantera dem (stöd för flera format)
     const hasAccessPair = !!(accessToken && refreshToken);
@@ -138,11 +159,11 @@ const Auth = () => {
     
     // If user is logged in, redirect to home immediately (but not during recovery flow)
     const hasRecoveryParamsNow = isReset || !!accessToken || !!refreshToken || !!tokenParam || !!tokenHashParam || tokenType === 'recovery';
-    if (user && !hasRecoveryParamsNow && confirmationStatus === 'none' && !confirmed) {
+    if (user && !hasRecoveryParamsNow && confirmationStatus === 'none' && recoveryStatus === 'none' && !confirmed) {
       console.log('User is logged in, redirecting to home');
       navigate('/');
     }
-  }, [user, navigate, searchParams, confirmationStatus]);
+  }, [user, navigate, searchParams, confirmationStatus, recoveryStatus]);
 
   const handleEmailConfirmation = async (token: string) => {
     console.log('Starting email confirmation with token:', token);
