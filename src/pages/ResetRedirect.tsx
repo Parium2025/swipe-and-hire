@@ -31,8 +31,31 @@ const ResetRedirect = () => {
     setIsInAppBrowser(inApp);
     setIsMobile(mobile);
 
+    // Kontrollera om länken har gått ut (10 minuter)
+    const checkLinkExpiry = () => {
+      const issued = searchParams.get('issued');
+      if (issued) {
+        const issuedTime = parseInt(issued);
+        const currentTime = Date.now();
+        const tenMinutesInMs = 10 * 60 * 1000; // 10 minuter i millisekunder
+        
+        if (currentTime - issuedTime > tenMinutesInMs) {
+          // Länken har gått ut, redirecta till expired-sidan
+          const origin = window.location.origin;
+          window.location.replace(`${origin}/auth?recovery_status=expired`);
+          return true;
+        }
+      }
+      return false;
+    };
+
     // Om inte in-app browser, gå direkt till vår Auth-sida med token-parametrar
     if (!inApp) {
+      // Kontrollera först om länken har gått ut
+      if (checkLinkExpiry()) {
+        return; // Redirectar redan, avbryt
+      }
+      
       const tokenHash = searchParams.get('token_hash');
       const token = searchParams.get('token');
       const type = searchParams.get('type') || 'recovery';
@@ -56,6 +79,19 @@ const ResetRedirect = () => {
     const chosenToken = tokenHash || token;
     const paramName = tokenHash ? 'token_hash' : 'token';
     const origin = window.location.origin;
+    
+    // Kontrollera om länken har gått ut
+    if (issued) {
+      const issuedTime = parseInt(issued);
+      const currentTime = Date.now();
+      const tenMinutesInMs = 10 * 60 * 1000;
+      
+      if (currentTime - issuedTime > tenMinutesInMs) {
+        // Om länken har gått ut, redirecta till expired-sidan
+        return `${origin}/auth?recovery_status=expired`;
+      }
+    }
+    
     const issuedPart = issued ? `&issued=${issued}` : '';
     return `${origin}/auth?${paramName}=${chosenToken}&type=${type}${issuedPart}`;
   };

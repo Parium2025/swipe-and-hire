@@ -298,13 +298,24 @@ const Auth = () => {
       const { data: sessionData } = await supabase.auth.getSession();
       let hasSession = !!sessionData.session;
 
-      if (!hasSession) {
+        if (!hasSession) {
         const raw = sessionStorage.getItem('parium-pending-recovery');
         if (raw) {
           const pending = JSON.parse(raw);
           
-          // Ta bort 10-minuters kontroll - låt Supabase avgöra om token är giltig
-          // Detta gör att sparade tokens alltid fungerar om Supabase godkänner dem
+          // Kontrollera om token har gått ut baserat på issued timestamp
+          if (pending.issued_at) {
+            const issuedTime = parseInt(pending.issued_at);
+            const currentTime = Date.now();
+            const tenMinutesInMs = 10 * 60 * 1000;
+            
+            if (currentTime - issuedTime > tenMinutesInMs) {
+              console.log('Token expired during password reset attempt');
+              sessionStorage.removeItem('parium-pending-recovery');
+              setRecoveryStatus('expired');
+              return;
+            }
+          }
           
           if ((pending.token_hash || pending.token) && (pending.type === 'recovery' || !pending.type)) {
             const verifyOptions: any = { type: 'recovery' };
