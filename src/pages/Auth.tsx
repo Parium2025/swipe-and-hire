@@ -138,8 +138,32 @@ const Auth = () => {
           refreshToken: refreshToken ? 'exists' : 'missing'
         });
         
-        // Spara token-informationen utan att verifiera den först
-        // Vi verifierar först när användaren faktiskt försöker återställa lösenordet
+        // FÖRSTA KONTROLLEN: Kolla om token har gått ut baserat på issued timestamp INNAN vi sparar
+        console.log('🕐 Checking if token is expired before saving...');
+        if (issuedMs) {
+          const currentTime = Date.now();
+          const tenMinutesInMs = 10 * 60 * 1000;
+          const timeElapsed = currentTime - issuedMs;
+          
+          console.log('⏱️ Token expiry check på länkklick:', {
+            issued_at: issuedMs,
+            current_time: currentTime,
+            time_elapsed_ms: timeElapsed,
+            time_elapsed_minutes: Math.floor(timeElapsed / 1000 / 60),
+            ten_minutes_ms: tenMinutesInMs,
+            is_expired: timeElapsed > tenMinutesInMs
+          });
+          
+          if (timeElapsed > tenMinutesInMs) {
+            console.log('❌ Token är redan utgången när länken klickades');
+            setRecoveryStatus('expired');
+            setShowIntro(false);
+            return;
+          }
+          console.log('✅ Token är giltig när länken klickades');
+        }
+        
+        // Spara token-informationen om den är giltig
         const payload = {
           type: tokenType || 'recovery',
           token: tokenParam || null,
