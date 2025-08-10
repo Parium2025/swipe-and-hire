@@ -351,13 +351,13 @@ const Auth = () => {
   // Visa UI för utgången/ogiltig återställningslänk
   if (recoveryStatus !== 'none') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-glow to-primary-dark flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
+      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-glow to-primary-dark flex items-center justify-center p-4 animate-fade-in">
+        <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20 animate-scale-in">
           <CardContent className="p-8 text-center space-y-4">
-            <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
-            <h2 className="text-2xl font-bold text-primary-foreground">Återställningslänken har gått ut</h2>
-            <p className="text-primary-foreground/80">Skriv din e‑postadress så skickar vi en ny länk för att återställa ditt lösenord.</p>
-            <form onSubmit={handleResendReset} className="space-y-3">
+            <AlertCircle className="h-16 w-16 text-red-500 mx-auto animate-fade-in" style={{animationDelay: '0.2s'}} />
+            <h2 className="text-2xl font-bold text-primary-foreground animate-fade-in" style={{animationDelay: '0.3s'}}>Återställningslänken har gått ut</h2>
+            <p className="text-primary-foreground/80 animate-fade-in" style={{animationDelay: '0.4s'}}>Skriv din e‑postadress så skickar vi en ny länk för att återställa ditt lösenord.</p>
+            <form onSubmit={handleResendReset} className="space-y-3 animate-fade-in" style={{animationDelay: '0.5s'}}>
               <Input
                 type="email"
                 placeholder="din@epost.se"
@@ -365,15 +365,16 @@ const Auth = () => {
                 onChange={(e) => setEmailForReset(e.target.value)}
                 required
                 disabled={resending}
+                className="transition-all duration-300 focus:scale-105"
               />
-              <Button type="submit" className="w-full" disabled={resending}>
+              <Button type="submit" className="w-full transition-all duration-300 hover:scale-105" disabled={resending}>
                 {resending ? 'Skickar...' : 'Skicka ny länk'}
               </Button>
             </form>
             {resendMessage && (
-              <p className="text-sm text-primary-foreground/80">{resendMessage}</p>
+              <p className="text-sm text-primary-foreground/80 animate-fade-in">{resendMessage}</p>
             )}
-            <Button variant="outline" onClick={() => navigate('/')} className="w-full">
+            <Button variant="outline" onClick={() => navigate('/')} className="w-full transition-all duration-300 hover:scale-105">
               Tillbaka till inloggning
             </Button>
           </CardContent>
@@ -394,16 +395,16 @@ const Auth = () => {
   // Visa bekräftelsestatus om det finns en
   if (confirmationStatus !== 'none') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-glow to-primary-dark flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
+      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-glow to-primary-dark flex items-center justify-center p-4 animate-fade-in">
+        <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20 animate-scale-in">
           <CardContent className="p-8 text-center">
             {confirmationStatus === 'success' && (
               <>
-                <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-                <h2 className="text-2xl font-bold text-primary-foreground mb-4">
+                <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4 animate-fade-in" style={{animationDelay: '0.2s'}} />
+                <h2 className="text-2xl font-bold text-primary-foreground mb-4 animate-fade-in" style={{animationDelay: '0.3s'}}>
                   Konto aktiverat!
                 </h2>
-                <p className="text-primary-foreground/80 mb-6">
+                <p className="text-primary-foreground/80 mb-6 animate-fade-in" style={{animationDelay: '0.4s'}}>
                   {confirmationMessage}
                 </p>
                 <Button 
@@ -411,7 +412,8 @@ const Auth = () => {
                     setConfirmationStatus('none');
                     navigate('/auth', { replace: true });
                   }}
-                  className="w-full"
+                  className="w-full transition-all duration-300 hover:scale-105 animate-fade-in"
+                  style={{animationDelay: '0.5s'}}
                 >
                   Logga in
                 </Button>
@@ -420,11 +422,11 @@ const Auth = () => {
             
             {confirmationStatus === 'already-confirmed' && (
               <>
-                <CheckCircle className="h-16 w-16 text-blue-500 mx-auto mb-4" />
-                <h2 className="text-2xl font-bold text-primary-foreground mb-4">
+                <CheckCircle className="h-16 w-16 text-blue-500 mx-auto mb-4 animate-fade-in" style={{animationDelay: '0.2s'}} />
+                <h2 className="text-2xl font-bold text-primary-foreground mb-4 animate-fade-in" style={{animationDelay: '0.3s'}}>
                   Redan aktiverat
                 </h2>
-                <p className="text-primary-foreground/80 mb-6">
+                <p className="text-primary-foreground/80 mb-6 animate-fade-in" style={{animationDelay: '0.4s'}}>
                   {confirmationMessage}
                 </p>
                 <Button 
@@ -432,7 +434,8 @@ const Auth = () => {
                     setConfirmationStatus('none');
                     navigate('/auth', { replace: true });
                   }}
-                  className="w-full"
+                  className="w-full transition-all duration-300 hover:scale-105 animate-fade-in"
+                  style={{animationDelay: '0.5s'}}
                 >
                   Logga in
                 </Button>
@@ -441,11 +444,11 @@ const Auth = () => {
             
             {confirmationStatus === 'error' && (
               <>
-                <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-                <h2 className="text-2xl font-bold text-primary-foreground mb-4">
+                <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4 animate-fade-in" style={{animationDelay: '0.2s'}} />
+                <h2 className="text-2xl font-bold text-primary-foreground mb-4 animate-fade-in" style={{animationDelay: '0.3s'}}>
                   Ett fel inträffade
                 </h2>
-                <p className="text-primary-foreground/80 mb-6">
+                <p className="text-primary-foreground/80 mb-6 animate-fade-in" style={{animationDelay: '0.4s'}}>
                   {confirmationMessage}
                 </p>
                 <Button 
@@ -453,7 +456,8 @@ const Auth = () => {
                     setConfirmationStatus('none');
                     navigate('/auth', { replace: true });
                   }}
-                  className="w-full"
+                  className="w-full transition-all duration-300 hover:scale-105 animate-fade-in"
+                  style={{animationDelay: '0.5s'}}
                 >
                   Försök igen
                 </Button>
