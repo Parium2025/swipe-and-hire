@@ -128,7 +128,7 @@ const Auth = () => {
       const hasToken = !!tokenParam;
       
       if (hasAccessPair || hasTokenHash || hasToken) {
-        console.log('🔍 Kontrollerar återställningstoken:', {
+        console.log('🔍 Sparar återställningstoken för senare användning:', {
           hasAccessPair,
           hasTokenHash,
           hasToken,
@@ -138,65 +138,20 @@ const Auth = () => {
           refreshToken: refreshToken ? 'exists' : 'missing'
         });
         
-        try {
-          // Först kontrollera om token fortfarande är giltig genom att försöka verifiera den
-          let isValidToken = false;
-          
-          if (tokenHashParam || tokenParam) {
-            try {
-              console.log('🔐 Verifierar OTP token...');
-              const { error } = await supabase.auth.verifyOtp({
-                token_hash: tokenHashParam || undefined,
-                token: tokenParam || undefined,
-                type: 'recovery'
-              });
-              isValidToken = !error;
-              console.log('📝 OTP verification result:', { error, isValidToken });
-            } catch (e) {
-              console.log('❌ Token verification failed:', e);
-              isValidToken = false;
-            }
-          } else if (accessToken && refreshToken) {
-            try {
-              console.log('🔐 Sätter session med access/refresh tokens...');
-              const { error } = await supabase.auth.setSession({
-                access_token: accessToken,
-                refresh_token: refreshToken,
-              });
-              isValidToken = !error;
-              console.log('📝 Session verification result:', { error, isValidToken });
-            } catch (e) {
-              console.log('❌ Session verification failed:', e);
-              isValidToken = false;
-            }
-          }
-          
-          if (!isValidToken) {
-            console.log('⏰ Token är ogiltigt/utgånget, visar recovery-skärm');
-            // Token är utgången/ogiltigt, visa recovery-skärmen
-            setRecoveryStatus('expired');
-            setShowIntro(false);
-            return;
-          }
-          
-          console.log('✅ Token är giltigt, fortsätter till lösenordsåterställning');
-          
-           const payload = {
-             type: tokenType || 'recovery',
-             token: tokenParam || null,
-             token_hash: tokenHashParam || null,
-             access_token: accessToken || null,
-             refresh_token: refreshToken || null,
-             issued_at: issuedMs || Date.now(),
-             stored_at: Date.now()
-           };
-          sessionStorage.setItem('parium-pending-recovery', JSON.stringify(payload));
-        } catch (e) {
-          console.warn('Kunde inte verifiera återställningstoken:', e);
-          setRecoveryStatus('expired');
-          setShowIntro(false);
-          return;
-        }
+        // Spara token-informationen utan att verifiera den först
+        // Vi verifierar först när användaren faktiskt försöker återställa lösenordet
+        const payload = {
+          type: tokenType || 'recovery',
+          token: tokenParam || null,
+          token_hash: tokenHashParam || null,
+          access_token: accessToken || null,
+          refresh_token: refreshToken || null,
+          issued_at: issuedMs || Date.now(),
+          stored_at: Date.now()
+        };
+        
+        sessionStorage.setItem('parium-pending-recovery', JSON.stringify(payload));
+        console.log('✅ Token sparad, kommer till lösenordsåterställning');
         // Städa URL och visa direkt reset-UI
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.delete('token');
@@ -236,9 +191,39 @@ const Auth = () => {
     handleAuthFlow();
   }, [user, navigate, searchParams, confirmationStatus, recoveryStatus]);
 
-  // Borttagen auto-expire: vi litar på serverns tokenkontroll istället för lokal timer
-  // Detta säkerställer att användare kan återställa lösenordet även efter 10 min
-  // så länge Supabase-länken fortfarande är giltig.
+  // Auto-expire timer: kontrollera om lagrad token är äldre än 10 minuter
+  useEffect(() => {
+    if (!isPasswordReset) return;
+    
+    const checkTokenExpiry = () => {
+      const raw = sessionStorage.getItem('parium-pending-recovery');
+      if (raw) {
+        try {
+          const pending = JSON.parse(raw);
+          const storedAt = pending.stored_at || pending.issued_at || Date.now();
+          const timeDiff = Date.now() - storedAt;
+          const tenMinutes = 10 * 60 * 1000;
+          
+          if (timeDiff > tenMinutes) {
+            console.log('⏰ Token har gått ut efter 10 minuter, visar expired-skärm');
+            sessionStorage.removeItem('parium-pending-recovery');
+            setRecoveryStatus('expired');
+            setIsPasswordReset(false);
+          }
+        } catch (e) {
+          console.warn('Kunde inte kontrollera token expiry:', e);
+        }
+      }
+    };
+    
+    // Kontrollera direkt
+    checkTokenExpiry();
+    
+    // Kontrollera varje minut
+    const interval = setInterval(checkTokenExpiry, 60000);
+    
+    return () => clearInterval(interval);
+  }, [isPasswordReset]);
 
   const handleEmailConfirmation = async (token: string) => {
     console.log('Starting email confirmation with token:', token);
