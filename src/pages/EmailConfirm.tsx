@@ -98,7 +98,7 @@ const EmailConfirm = () => {
                 Redan aktiverat
               </h2>
               <p className="text-primary-foreground/80 mb-6">
-                {message}
+                Ditt konto är redan aktiverat och redo att användas.
               </p>
               <Button 
                 onClick={handleGoToLogin}
