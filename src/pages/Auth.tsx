@@ -638,7 +638,7 @@ const Auth = () => {
     const isConsumed = recoveryStatus === 'consumed';
     const title = isConsumed ? 'Återställningslänken är förbrukad' : 'Återställningslänken har gått ut';
     const description = isConsumed 
-      ? '⚠️ Återställningslänkar kan bara användas en gång av säkerhetsskäl. Begär en ny länk för att ändra ditt lösenord.'
+      ? 'Återställningslänkar kan bara användas en gång av säkerhetsskäl. Begär en ny länk för att ändra ditt lösenord.'
       : 'Skriv din e‑postadress så skickar vi en ny länk för att återställa ditt lösenord.';
     
     return (
@@ -664,7 +664,7 @@ const Auth = () => {
             {resendMessage && (
               <p className="text-sm text-primary-foreground/80">{resendMessage}</p>
             )}
-            <Button variant="outline" onClick={() => navigate('/')} className="w-full">
+            <Button onClick={() => navigate('/')} className="w-full">
               Tillbaka till inloggning
             </Button>
           </CardContent>
