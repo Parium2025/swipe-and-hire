@@ -59,7 +59,7 @@ const EmailConfirm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-parium-navy via-parium-blue to-parium-light flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-parium flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
         <CardContent className="p-8 text-center">
           {status === 'loading' && (
@@ -98,7 +98,7 @@ const EmailConfirm = () => {
                 Redan aktiverat
               </h2>
               <p className="text-primary-foreground/80 mb-6">
-                Perfekt! Ditt konto är redan aktiverat och redo att användas.
+                Ditt konto är redan aktiverat och redo att användas.
               </p>
               <Button 
                 onClick={handleGoToLogin}
