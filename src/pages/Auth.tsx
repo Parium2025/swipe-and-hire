@@ -51,7 +51,7 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [confirmationStatus, setConfirmationStatus] = useState<'none' | 'success' | 'already-confirmed' | 'error'>('none');
   const [confirmationMessage, setConfirmationMessage] = useState('');
-  const [recoveryStatus, setRecoveryStatus] = useState<'none' | 'expired' | 'invalid'>('none');
+  const [recoveryStatus, setRecoveryStatus] = useState<'none' | 'expired' | 'consumed' | 'invalid'>('none');
   const [emailForReset, setEmailForReset] = useState('');
   const [resending, setResending] = useState(false);
   const [resendMessage, setResendMessage] = useState('');
@@ -606,9 +606,26 @@ const Auth = () => {
         return; // Stanna kvar på formuläret så användaren kan försöka igen
       }
       
-      // Endast för riktiga expired/session-fel - växla till expired-sida
+      // För fel som kommer när länken redan är använd (one-time-use)
       if (msg.includes('expired') || msg.includes('invalid') || msg.includes('session')) {
-        setRecoveryStatus('expired');
+        // Kontrollera om det är en "consumed" länk (redan använd) vs verkligt utgången
+        const issuedParam = searchParams.get('issued');
+        if (issuedParam) {
+          const issuedTime = parseInt(issuedParam);
+          const currentTime = Date.now();
+          const timeElapsed = currentTime - issuedTime;
+          const tenMinutesInMs = 10 * 60 * 1000;
+          
+          if (timeElapsed <= tenMinutesInMs) {
+            // Länken är inte utgången men ger "expired" fel = förbrukad (använd en gång)
+            setRecoveryStatus('consumed');
+          } else {
+            // Länken är verkligen utgången
+            setRecoveryStatus('expired');
+          }
+        } else {
+          setRecoveryStatus('expired');
+        }
       } else {
         // Andra fel - visa generiskt felmeddelande men stanna på formuläret
         toast({
@@ -622,13 +639,19 @@ const Auth = () => {
 
   // Visa UI för utgången/ogiltig återställningslänk
   if (recoveryStatus !== 'none') {
+    const isConsumed = recoveryStatus === 'consumed';
+    const title = isConsumed ? 'Återställningslänken är förbrukad' : 'Återställningslänken har gått ut';
+    const description = isConsumed 
+      ? '⚠️ Återställningslänkar kan bara användas en gång av säkerhetsskäl. Begär en ny länk för att ändra ditt lösenord.'
+      : 'Skriv din e‑postadress så skickar vi en ny länk för att återställa ditt lösenord.';
+    
     return (
       <div className="min-h-screen bg-gradient-parium flex items-center justify-center p-4">
         <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
           <CardContent className="p-8 text-center space-y-4">
             <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
-            <h2 className="text-2xl font-bold text-primary-foreground">Återställningslänken har gått ut</h2>
-            <p className="text-primary-foreground/80">Skriv din e‑postadress så skickar vi en ny länk för att återställa ditt lösenord.</p>
+            <h2 className="text-2xl font-bold text-primary-foreground">{title}</h2>
+            <p className="text-primary-foreground/80">{description}</p>
             <form onSubmit={handleResendReset} className="space-y-3">
               <Input
                 type="email"
