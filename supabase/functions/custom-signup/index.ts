@@ -135,6 +135,19 @@ const handler = async (req: Request): Promise<Response> => {
       from: "Parium <noreply@parium.se>",
       to: [email],
       subject: "Bekräfta ditt konto – Parium",
+      reply_to: "support@parium.se",
+      headers: {
+        "List-Unsubscribe": "<mailto:support@parium.se?subject=unsubscribe>, <https://parium.se/unsubscribe>",
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click"
+      },
+      text: `Hej ${firstName}!
+
+Bekräfta ditt konto genom att klicka på länken:
+${confirmationUrl}
+
+Om du inte skapade ett konto kan du ignorera detta meddelande.
+
+Parium Team`,
       html: `
         <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
         <html xmlns="http://www.w3.org/1999/xhtml">
@@ -241,12 +254,7 @@ const handler = async (req: Request): Promise<Response> => {
           
         </body>
         </html>
-      `,
-      headers: {
-        'X-Priority': '1',
-        'X-MSMail-Priority': 'High',
-        'Importance': 'high'
-      }
+      `
     });
 
     console.log("Custom signup email sent:", emailResponse);

@@ -94,6 +94,17 @@ const handler = async (req: Request): Promise<Response> => {
       from: "Parium <noreply@parium.se>",
       to: [email],
       subject: "✨ Bekräfta ditt Parium-konto - Ny länk",
+      reply_to: "support@parium.se",
+      headers: {
+        "List-Unsubscribe": "<mailto:support@parium.se?subject=unsubscribe>, <https://parium.se/unsubscribe>",
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click"
+      },
+      text: `Hej!
+
+Här är din nya bekräftelselänk:
+${confirmationUrl}
+
+Parium`,
       html: `
         <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
         <html xmlns="http://www.w3.org/1999/xhtml">

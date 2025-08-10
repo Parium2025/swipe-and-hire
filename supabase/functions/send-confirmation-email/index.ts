@@ -248,10 +248,33 @@ const handler = async (req: Request): Promise<Response> => {
       `;
     }
 
+    const textContent = type === 'signup'
+      ? `Hej!
+
+Bekräfta din e-postadress genom att klicka på länken:
+${confirmationUrl}
+
+Parium`
+      : `Hej!
+
+Vi har fått en begäran om att återställa ditt lösenord.
+Klicka på länken nedan för att skapa ett nytt lösenord:
+${confirmationUrl}
+
+Om du inte begärde detta kan du ignorera mejlet.
+
+Parium`;
+
     const emailResponse = await resend.emails.send({
-      from: "Parium Team <noreply@parium.se>",
+      from: "Parium <noreply@parium.se>",
       to: [email],
       subject: subject,
+      reply_to: "support@parium.se",
+      headers: {
+        "List-Unsubscribe": "<mailto:support@parium.se?subject=unsubscribe>, <https://parium.se/unsubscribe>",
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click"
+      },
+      text: textContent,
       html: htmlContent,
     });
 
