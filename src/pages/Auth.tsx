@@ -576,12 +576,8 @@ const Auth = () => {
           const issuedParam = searchParams.get('issued');
           if (issuedParam) {
             console.log('⚠️ Har bara issued parameter, inte riktiga tokens - kan inte uppdatera lösenord');
-            toast({
-              title: "Saknar nödvändiga tokens",
-              description: "Vänligen begär en ny återställningslänk",
-              variant: "destructive"
-            });
-            // Stanna kvar på reset-formuläret så användaren kan begära ny länk via "Tillbaka till inloggning"
+            // Automatiskt dirigera till "consumed" sidan så användaren kan begära ny länk
+            setRecoveryStatus('consumed');
             return;
           }
         }
