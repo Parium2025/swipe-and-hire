@@ -430,9 +430,11 @@ const Auth = () => {
     setResending(true);
     try {
       if (!emailForReset) return;
+      console.log('🔄 AUTH.TSX - SENDING RESET från Auth.tsx för:', emailForReset);
       const { error } = await supabase.functions.invoke('send-reset-password', {
         body: { email: emailForReset }
       });
+      console.log('📩 AUTH.TSX - RESET RESPONSE:', { error });
       if (error) throw error;
       setResendMessage('Ny återställningslänk skickad! Kolla din e‑post.');
     } catch (err: any) {
