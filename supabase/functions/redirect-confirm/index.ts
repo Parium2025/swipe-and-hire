@@ -32,12 +32,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (confirmError || !confirmation) {
       console.log('Invalid token:', token);
-      return new Response(getErrorPage('Ogiltigt eller utgånget bekräftelsetoken.'), { 
-        status: 400,
-        headers: { 
-          'Content-Type': 'text/html; charset=utf-8',
-          'Cache-Control': 'no-cache'
-        }
+      // Redirect to React app to show a friendly error UI instead of rendering HTML here
+      return new Response(null, {
+        status: 302,
+        headers: {
+          'Location': 'https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?confirmed=error',
+        },
       });
     }
 
