@@ -93,8 +93,15 @@ const Auth = () => {
       const tokenHashParam = tokenHashParamHash || tokenHashParamQP || undefined;
       const issued = issuedHash || issuedQP || undefined;
       const issuedMs = issued ? parseInt(issued, 10) : undefined;
-      // Ta bort 10-minuters kontroll - låt Supabase avgöra om token är giltig
-      // Detta gör att nya återställningslänkar alltid fungerar
+      
+      console.log('🔍 DETALJERAD TOKEN-DEBUG:', {
+        issuedQP,
+        issuedHash,
+        issued,
+        issuedMs,
+        currentTime: Date.now(),
+        url: window.location.href
+      });
       
       console.log('Auth useEffect - URL params:', { 
         isReset, 
@@ -103,6 +110,7 @@ const Auth = () => {
         hasTokens: !!accessToken && !!refreshToken,
         hasSupabaseToken: !!(tokenParam || tokenHashParam),
         tokenType,
+        issuedMs
       });
 
       // Fånga fel från Supabase verify endpoint och fall utan tokens
