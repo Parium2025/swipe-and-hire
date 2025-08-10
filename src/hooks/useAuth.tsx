@@ -628,12 +628,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resetPassword = async (email: string) => {
     try {
-      console.log(`Sending password reset for: ${email}`);
+      console.log(`🔄 SENDING RESET PASSWORD REQUEST för: ${email}`);
       
       // Use our custom edge function for sending reset email
       const { data, error } = await supabase.functions.invoke('send-reset-password', {
         body: { email }
       });
+      
+      console.log('📩 RESET PASSWORD RESPONSE:', { data, error });
 
       if (error) {
         console.error('Reset password error:', error);
