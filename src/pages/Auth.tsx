@@ -128,41 +128,58 @@ const Auth = () => {
       const hasToken = !!tokenParam;
       
       if (hasAccessPair || hasTokenHash || hasToken) {
+        console.log('🔍 Kontrollerar återställningstoken:', {
+          hasAccessPair,
+          hasTokenHash,
+          hasToken,
+          tokenHashParam,
+          tokenParam,
+          accessToken: accessToken ? 'exists' : 'missing',
+          refreshToken: refreshToken ? 'exists' : 'missing'
+        });
+        
         try {
           // Först kontrollera om token fortfarande är giltig genom att försöka verifiera den
           let isValidToken = false;
           
           if (tokenHashParam || tokenParam) {
             try {
+              console.log('🔐 Verifierar OTP token...');
               const { error } = await supabase.auth.verifyOtp({
                 token_hash: tokenHashParam || undefined,
                 token: tokenParam || undefined,
                 type: 'recovery'
               });
               isValidToken = !error;
+              console.log('📝 OTP verification result:', { error, isValidToken });
             } catch (e) {
-              console.log('Token verification failed:', e);
+              console.log('❌ Token verification failed:', e);
               isValidToken = false;
             }
           } else if (accessToken && refreshToken) {
             try {
+              console.log('🔐 Sätter session med access/refresh tokens...');
               const { error } = await supabase.auth.setSession({
                 access_token: accessToken,
                 refresh_token: refreshToken,
               });
               isValidToken = !error;
+              console.log('📝 Session verification result:', { error, isValidToken });
             } catch (e) {
-              console.log('Session verification failed:', e);
+              console.log('❌ Session verification failed:', e);
               isValidToken = false;
             }
           }
           
           if (!isValidToken) {
+            console.log('⏰ Token är ogiltigt/utgånget, visar recovery-skärm');
             // Token är utgången/ogiltigt, visa recovery-skärmen
             setRecoveryStatus('expired');
             setShowIntro(false);
             return;
           }
+          
+          console.log('✅ Token är giltigt, fortsätter till lösenordsåterställning');
           
            const payload = {
              type: tokenType || 'recovery',
