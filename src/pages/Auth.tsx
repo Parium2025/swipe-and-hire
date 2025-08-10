@@ -39,7 +39,8 @@ const Auth = () => {
     const accessToken = searchParams.get('access_token');
     const refreshToken = searchParams.get('refresh_token');
     const tokenType = searchParams.get('type');
-    const supabaseToken = searchParams.get('token'); // Supabase recovery token format
+    const tokenHashParam = searchParams.get('token_hash');
+    const supabaseToken = searchParams.get('token') || tokenHashParam; // stöd för både token och token_hash
     
     console.log('Auth useEffect - URL params:', { 
       isReset, 

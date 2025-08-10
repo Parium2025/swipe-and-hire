@@ -61,7 +61,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // För Yahoo Mail kompatibilitet - använd direkta URL:en istället för redirect
     const urlParams = new URL(resetUrl);
-    const token = urlParams.searchParams.get('token');
+    const token = urlParams.searchParams.get('token') || urlParams.searchParams.get('token_hash');
     const type = urlParams.searchParams.get('type');
     
     // Använd den direkta Supabase recovery URL:en som är kortare och mer kompatibel
@@ -78,7 +78,7 @@ Vi har fått en begäran om att återställa lösenordet för ditt Parium-konto.
 Klicka på länken nedan för att skapa ett nytt lösenord:
 ${correctedResetUrl}
 
-Denna länk är giltig i 1 timme. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.
+Denna länk är giltig i 10 minuter. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.
 
 Med vänliga hälsningar,
 Parium Team
@@ -118,7 +118,7 @@ Parium AB, Stockholm`,
                 Säkerhetsmeddelande
               </p>
               <p style="color: #718096; font-size: 14px; margin: 0;">
-                Denna länk är giltig i 1 timme. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.
+                Denna länk är giltig i 10 minuter. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.
               </p>
             </div>
             
