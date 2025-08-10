@@ -104,6 +104,23 @@ const Auth = () => {
         supabase.auth.verifyOtp(verifyOptions).then(({ error }) => {
           if (error) {
             console.error('Error with recovery token:', error);
+
+            // Fallback: försök Supabase verify endpoint som sätter session och redirectar tillbaka till /auth
+            try {
+              const projectUrl = 'https://rvtsfnaqlnggfkoqygbm.supabase.co';
+              const paramName = hasTokenHash ? 'token_hash' : 'token';
+              const tokenValue = hasTokenHash ? tokenHashParam! : tokenParam!;
+              if (tokenValue) {
+                const redirectTo = `${window.location.origin}/auth`;
+                const verifyUrl = `${projectUrl}/auth/v1/verify?type=recovery&${paramName}=${encodeURIComponent(tokenValue)}&redirect_to=${encodeURIComponent(redirectTo)}`;
+                console.log('Falling back to Supabase verify endpoint:', verifyUrl);
+                window.location.replace(verifyUrl);
+                return; // avbryt lokal felhantering, låt verify flödet ta över
+              }
+            } catch (e) {
+              console.warn('Verify fallback construction failed:', e);
+            }
+
             const msg = (error as any)?.message?.toLowerCase() || '';
             if (msg.includes('expired') || msg.includes('invalid') || msg.includes('session')) {
               setRecoveryStatus('expired');
@@ -267,7 +284,7 @@ const Auth = () => {
             {resendMessage && (
               <p className="text-sm text-primary-foreground/80">{resendMessage}</p>
             )}
-            <Button variant="outline" onClick={() => navigate('/auth')} className="w-full">
+            <Button variant="outline" onClick={() => navigate('/')} className="w-full">
               Tillbaka till inloggning
             </Button>
           </CardContent>
