@@ -212,11 +212,6 @@ const AuthTablet = ({
       <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-6">
         <Card className="w-full max-w-lg bg-background/95 backdrop-blur-sm border border-white/10 shadow-2xl rounded-2xl">
           <CardHeader className="text-center pb-4">
-            <img 
-              src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
-              alt="Parium" 
-              className="h-14 w-auto mx-auto mb-4"
-            />
             <CardTitle className="text-xl">Nytt lösenord</CardTitle>
           </CardHeader>
           <CardContent>

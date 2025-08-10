@@ -221,11 +221,6 @@ const AuthDesktop = ({
       <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-8">
         <Card className="w-full max-w-md bg-background/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-3xl">
           <CardHeader className="text-center">
-            <img 
-              src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
-              alt="Parium" 
-              className="h-16 w-auto mx-auto mb-6"
-            />
             <CardTitle className="text-2xl">Återställ lösenord</CardTitle>
             <CardDescription>Ange ditt nya lösenord</CardDescription>
           </CardHeader>
