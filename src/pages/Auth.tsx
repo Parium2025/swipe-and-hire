@@ -262,6 +262,15 @@ const Auth = () => {
         const raw = sessionStorage.getItem('parium-pending-recovery');
         if (raw) {
           const pending = JSON.parse(raw);
+          
+          // Kolla om länken har gått ut (10 minuter)
+          const issuedAt = pending.issued_at;
+          if (issuedAt && Date.now() - issuedAt > 10 * 60 * 1000) {
+            sessionStorage.removeItem('parium-pending-recovery');
+            setRecoveryStatus('expired');
+            return;
+          }
+          
           if ((pending.token_hash || pending.token) && (pending.type === 'recovery' || !pending.type)) {
             const verifyOptions: any = { type: 'recovery' };
             if (pending.token_hash) verifyOptions.token_hash = pending.token_hash;
