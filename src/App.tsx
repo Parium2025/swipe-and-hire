@@ -12,6 +12,7 @@ import EmailVerification from "./pages/EmailVerification";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/hooks/useAuth";
 import { Header } from "@/components/Header";
+import AuthTokenBridge from "./components/AuthTokenBridge";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <div className="min-h-screen">
             <Header />
             <main className="pt-16">
+              <AuthTokenBridge />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
