@@ -35,12 +35,24 @@ const Auth = () => {
     const isReset = searchParams.get('reset') === 'true';
     const confirmed = searchParams.get('confirmed');
     
-    // Hantera recovery tokens från Supabase auth (olika format)
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-    const tokenType = searchParams.get('type');
-    const tokenHashParam = searchParams.get('token_hash');
-    const supabaseToken = searchParams.get('token') || tokenHashParam; // stöd för både token och token_hash
+    // Hantera recovery tokens från Supabase auth (olika format) + URL-hash
+    const accessTokenQP = searchParams.get('access_token');
+    const refreshTokenQP = searchParams.get('refresh_token');
+    const tokenTypeQP = searchParams.get('type');
+    const tokenHashParamQP = searchParams.get('token_hash');
+    const supabaseTokenQP = searchParams.get('token') || tokenHashParamQP; // stöd för både token och token_hash
+
+    const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
+    const hashParams = new URLSearchParams(hash);
+    const accessTokenHash = hashParams.get('access_token');
+    const refreshTokenHash = hashParams.get('refresh_token');
+    const tokenTypeHash = hashParams.get('type');
+
+    // Slutliga värden (hash vinner över query)
+    const accessToken = accessTokenHash || accessTokenQP || undefined;
+    const refreshToken = refreshTokenHash || refreshTokenQP || undefined;
+    const tokenType = tokenTypeHash || tokenTypeQP || undefined;
+    const supabaseToken = supabaseTokenQP || undefined;
     
     console.log('Auth useEffect - URL params:', { 
       isReset, 
