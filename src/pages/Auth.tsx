@@ -582,7 +582,7 @@ const Auth = () => {
       const msg = (err?.message || '').toLowerCase();
       
       // Kolla om det är specifika lösenordsfel som användaren kan fixa
-      if (msg.includes('different from') || msg.includes('same as')) {
+      if (msg.includes('different from') || msg.includes('same as') || msg.includes('should be different')) {
         alert('Det nya lösenordet måste vara annorlunda än ditt nuvarande lösenord. Försök med ett annat lösenord.');
         return; // Stanna kvar på formuläret så användaren kan försöka igen
       }
