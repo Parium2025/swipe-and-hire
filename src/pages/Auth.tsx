@@ -566,7 +566,7 @@ const Auth = () => {
           if (issuedParam) {
             console.log('⚠️ Har bara issued parameter, inte riktiga tokens - kan inte uppdatera lösenord');
             alert('Den här återställningslänken innehåller inte fullständiga tokens för lösenordsuppdatering. Vänligen begär en ny återställningslänk.');
-            setRecoveryStatus('expired');
+            // Stanna kvar på reset-formuläret så användaren kan begära ny länk via "Tillbaka till inloggning"
             return;
           }
         }
