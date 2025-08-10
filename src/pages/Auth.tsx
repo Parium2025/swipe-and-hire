@@ -283,6 +283,8 @@ const Auth = () => {
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('🔄 Starting handlePasswordReset');
+    
     if (newPassword !== confirmPassword) {
       alert('Lösenorden matchar inte');
       return;
@@ -294,14 +296,19 @@ const Auth = () => {
     }
 
     try {
+      console.log('🔍 Checking session...');
       // Säkerställ session först (förbruka länken först vid inlämning)
       const { data: sessionData } = await supabase.auth.getSession();
       let hasSession = !!sessionData.session;
+      console.log('📊 Has active session:', hasSession);
 
         if (!hasSession) {
+        console.log('🗂️ No active session, checking sessionStorage...');
         const raw = sessionStorage.getItem('parium-pending-recovery');
+        console.log('📦 SessionStorage data:', raw);
         if (raw) {
           const pending = JSON.parse(raw);
+          console.log('🔓 Parsed pending data:', pending);
           
           // Kontrollera om token har gått ut baserat på issued timestamp
           if (pending.issued_at) {
