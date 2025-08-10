@@ -36,11 +36,13 @@ const ResetRedirect = () => {
       const tokenHash = searchParams.get('token_hash');
       const token = searchParams.get('token');
       const type = searchParams.get('type') || 'recovery';
+      const issued = searchParams.get('issued');
       const chosenToken = tokenHash || token;
       const paramName = tokenHash ? 'token_hash' : 'token';
       if (chosenToken) {
         const origin = window.location.origin;
-        const url = `${origin}/auth?${paramName}=${encodeURIComponent(chosenToken)}&type=${encodeURIComponent(type)}`;
+        const issuedPart = issued ? `&issued=${encodeURIComponent(issued)}` : '';
+        const url = `${origin}/auth?${paramName}=${encodeURIComponent(chosenToken)}&type=${encodeURIComponent(type)}${issuedPart}`;
         window.location.replace(url);
       }
     }
@@ -50,10 +52,12 @@ const ResetRedirect = () => {
     const tokenHash = searchParams.get('token_hash');
     const token = searchParams.get('token');
     const type = searchParams.get('type') || 'recovery';
+    const issued = searchParams.get('issued');
     const chosenToken = tokenHash || token;
     const paramName = tokenHash ? 'token_hash' : 'token';
     const origin = window.location.origin;
-    return `${origin}/auth?${paramName}=${chosenToken}&type=${type}`;
+    const issuedPart = issued ? `&issued=${issued}` : '';
+    return `${origin}/auth?${paramName}=${chosenToken}&type=${type}${issuedPart}`;
   };
 
   const copyUrlToClipboard = async () => {

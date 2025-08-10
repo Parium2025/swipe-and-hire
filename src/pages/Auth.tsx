@@ -71,6 +71,7 @@ const Auth = () => {
     const tokenHashParamQP = searchParams.get('token_hash');
     const errorCodeQP = searchParams.get('error_code') || searchParams.get('error');
     const errorDescQP = searchParams.get('error_description') || searchParams.get('error_message');
+    const issuedQP = searchParams.get('issued');
 
     const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
     const hashParams = new URLSearchParams(hash);
@@ -81,6 +82,7 @@ const Auth = () => {
     const tokenHashParamHash = hashParams.get('token_hash');
     const errorCodeHash = hashParams.get('error_code') || hashParams.get('error');
     const errorDescHash = hashParams.get('error_description') || hashParams.get('error_message');
+    const issuedHash = hashParams.get('issued');
 
     // Slutliga värden (hash vinner över query)
     const accessToken = accessTokenHash || accessTokenQP || undefined;
@@ -88,6 +90,15 @@ const Auth = () => {
     const tokenType = tokenTypeHash || tokenTypeQP || undefined;
     const tokenParam = tokenParamHash || tokenParamQP || undefined;
     const tokenHashParam = tokenHashParamHash || tokenHashParamQP || undefined;
+    const issued = issuedHash || issuedQP || undefined;
+    const issuedMs = issued ? parseInt(issued, 10) : undefined;
+    const TEN_MIN_MS = 10 * 60 * 1000;
+
+    if (issuedMs && Date.now() - issuedMs > TEN_MIN_MS) {
+      setRecoveryStatus('expired');
+      setShowIntro(false);
+      return;
+    }
     
     console.log('Auth useEffect - URL params:', { 
       isReset, 
@@ -127,6 +138,7 @@ const Auth = () => {
           token_hash: tokenHashParam || null,
           access_token: accessToken || null,
           refresh_token: refreshToken || null,
+          issued_at: issuedMs || null,
           stored_at: Date.now()
         };
         sessionStorage.setItem('parium-pending-recovery', JSON.stringify(payload));
