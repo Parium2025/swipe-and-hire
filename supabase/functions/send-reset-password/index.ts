@@ -61,11 +61,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     // För Yahoo Mail kompatibilitet - använd direkta URL:en istället för redirect
     const urlParams = new URL(resetUrl);
-    const token = urlParams.searchParams.get('token') || urlParams.searchParams.get('token_hash');
+    const tokenHash = urlParams.searchParams.get('token_hash');
+    const token = urlParams.searchParams.get('token');
     const type = urlParams.searchParams.get('type');
+    const chosenToken = tokenHash || token || '';
+    const paramName = tokenHash ? 'token_hash' : 'token';
     
-    // Använd den direkta Supabase recovery URL:en som är kortare och mer kompatibel
-    const correctedResetUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?token=${token}&type=${type}`;
+    // Använd direkt URL till vår Auth-sida med korrekt paramnamn
+    const correctedResetUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?${paramName}=${chosenToken}&type=${type}`;
 
     const emailResponse = await resend.emails.send({
       from: "Parium <noreply@parium.se>", // Din verifierade domän
