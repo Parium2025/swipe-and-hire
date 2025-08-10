@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import EmailConfirm from "./pages/EmailConfirm";
 import EmailRedirect from "./pages/EmailRedirect";
+import ResetRedirect from "./pages/ResetRedirect";
 import EmailVerification from "./pages/EmailVerification";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/hooks/useAuth";
@@ -37,6 +38,7 @@ const App = () => (
                 <Route path="/settings" element={<Index />} />
                 <Route path="/billing" element={<Index />} />
                 <Route path="/payment" element={<Index />} />
+                <Route path="/reset-redirect" element={<ResetRedirect />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

@@ -66,9 +66,8 @@ const handler = async (req: Request): Promise<Response> => {
     const type = urlParams.searchParams.get('type');
     const chosenToken = tokenHash || token || '';
     const paramName = tokenHash ? 'token_hash' : 'token';
-    
-    // Använd direkt URL till vår Auth-sida med korrekt paramnamn
-    const correctedResetUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?${paramName}=${chosenToken}&type=${type}`;
+    // Använd redirect-sida som hanterar in-app browsers
+    const correctedResetUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/reset-redirect?${paramName}=${chosenToken}&type=${type}`;
 
     const emailResponse = await resend.emails.send({
       from: "Parium <noreply@parium.se>", // Din verifierade domän
