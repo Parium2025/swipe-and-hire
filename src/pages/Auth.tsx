@@ -60,125 +60,168 @@ const Auth = () => {
   const device = useDevice();
 
   useEffect(() => {
-    const isReset = searchParams.get('reset') === 'true';
-    const confirmed = searchParams.get('confirmed');
-    
-    // Hantera recovery tokens från Supabase auth (olika format) + URL-hash
-    const accessTokenQP = searchParams.get('access_token');
-    const refreshTokenQP = searchParams.get('refresh_token');
-    const tokenTypeQP = searchParams.get('type');
-    const tokenParamQP = searchParams.get('token');
-    const tokenHashParamQP = searchParams.get('token_hash');
-    const errorCodeQP = searchParams.get('error_code') || searchParams.get('error');
-    const errorDescQP = searchParams.get('error_description') || searchParams.get('error_message');
-    const issuedQP = searchParams.get('issued');
+    const handleAuthFlow = async () => {
+      const isReset = searchParams.get('reset') === 'true';
+      const confirmed = searchParams.get('confirmed');
+      
+      // Hantera recovery tokens från Supabase auth (olika format) + URL-hash
+      const accessTokenQP = searchParams.get('access_token');
+      const refreshTokenQP = searchParams.get('refresh_token');
+      const tokenTypeQP = searchParams.get('type');
+      const tokenParamQP = searchParams.get('token');
+      const tokenHashParamQP = searchParams.get('token_hash');
+      const errorCodeQP = searchParams.get('error_code') || searchParams.get('error');
+      const errorDescQP = searchParams.get('error_description') || searchParams.get('error_message');
+      const issuedQP = searchParams.get('issued');
 
-    const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
-    const hashParams = new URLSearchParams(hash);
-    const accessTokenHash = hashParams.get('access_token');
-    const refreshTokenHash = hashParams.get('refresh_token');
-    const tokenTypeHash = hashParams.get('type');
-    const tokenParamHash = hashParams.get('token');
-    const tokenHashParamHash = hashParams.get('token_hash');
-    const errorCodeHash = hashParams.get('error_code') || hashParams.get('error');
-    const errorDescHash = hashParams.get('error_description') || hashParams.get('error_message');
-    const issuedHash = hashParams.get('issued');
+      const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
+      const hashParams = new URLSearchParams(hash);
+      const accessTokenHash = hashParams.get('access_token');
+      const refreshTokenHash = hashParams.get('refresh_token');
+      const tokenTypeHash = hashParams.get('type');
+      const tokenParamHash = hashParams.get('token');
+      const tokenHashParamHash = hashParams.get('token_hash');
+      const errorCodeHash = hashParams.get('error_code') || hashParams.get('error');
+      const errorDescHash = hashParams.get('error_description') || hashParams.get('error_message');
+      const issuedHash = hashParams.get('issued');
 
-    // Slutliga värden (hash vinner över query)
-    const accessToken = accessTokenHash || accessTokenQP || undefined;
-    const refreshToken = refreshTokenHash || refreshTokenQP || undefined;
-    const tokenType = tokenTypeHash || tokenTypeQP || undefined;
-    const tokenParam = tokenParamHash || tokenParamQP || undefined;
-    const tokenHashParam = tokenHashParamHash || tokenHashParamQP || undefined;
-    const issued = issuedHash || issuedQP || undefined;
-    const issuedMs = issued ? parseInt(issued, 10) : undefined;
-    const TEN_MIN_MS = 10 * 60 * 1000;
+      // Slutliga värden (hash vinner över query)
+      const accessToken = accessTokenHash || accessTokenQP || undefined;
+      const refreshToken = refreshTokenHash || refreshTokenQP || undefined;
+      const tokenType = tokenTypeHash || tokenTypeQP || undefined;
+      const tokenParam = tokenParamHash || tokenParamQP || undefined;
+      const tokenHashParam = tokenHashParamHash || tokenHashParamQP || undefined;
+      const issued = issuedHash || issuedQP || undefined;
+      const issuedMs = issued ? parseInt(issued, 10) : undefined;
+      const TEN_MIN_MS = 10 * 60 * 1000;
 
-    if (issuedMs && Date.now() - issuedMs > TEN_MIN_MS) {
-      setRecoveryStatus('expired');
-      setShowIntro(false);
-      return;
-    }
-    
-    console.log('Auth useEffect - URL params:', { 
-      isReset, 
-      confirmed, 
-      currentUrl: window.location.href,
-      hasTokens: !!accessToken && !!refreshToken,
-      hasSupabaseToken: !!(tokenParam || tokenHashParam),
-      tokenType,
-    });
-
-    // Fånga fel från Supabase verify endpoint och fall utan tokens
-    const errorCode = errorCodeHash || errorCodeQP || undefined;
-    const errorDescription = errorDescHash || errorDescQP || undefined;
-    const hasError = !!(errorCode || errorDescription);
-    const noAnyRecoveryTokens = !(accessToken || refreshToken || tokenParam || tokenHashParam);
-
-    if (hasError || (tokenType === 'recovery' && noAnyRecoveryTokens)) {
-      const desc = (errorCode || errorDescription || '').toLowerCase();
-      if (desc.includes('expire') || desc.includes('invalid') || desc.includes('session')) {
+      if (issuedMs && Date.now() - issuedMs > TEN_MIN_MS) {
         setRecoveryStatus('expired');
-      } else {
-        setRecoveryStatus('invalid');
+        setShowIntro(false);
+        return;
       }
-      setShowIntro(false);
-      return;
-    }
-    
-    // Om vi har recovery tokens, spara dem men verifiera inte ännu (engångslänk används först vid inlämning)
-    const hasAccessPair = !!(accessToken && refreshToken);
-    const hasTokenHash = !!tokenHashParam;
-    const hasToken = !!tokenParam;
-    if (hasAccessPair || hasTokenHash || hasToken) {
-      try {
-         const payload = {
-           type: tokenType || 'recovery',
-           token: tokenParam || null,
-           token_hash: tokenHashParam || null,
-           access_token: accessToken || null,
-           refresh_token: refreshToken || null,
-           issued_at: issuedMs || Date.now(),
-           stored_at: Date.now()
-         };
-        sessionStorage.setItem('parium-pending-recovery', JSON.stringify(payload));
-      } catch (e) {
-        console.warn('Kunde inte spara återställningsdata:', e);
+      
+      console.log('Auth useEffect - URL params:', { 
+        isReset, 
+        confirmed, 
+        currentUrl: window.location.href,
+        hasTokens: !!accessToken && !!refreshToken,
+        hasSupabaseToken: !!(tokenParam || tokenHashParam),
+        tokenType,
+      });
+
+      // Fånga fel från Supabase verify endpoint och fall utan tokens
+      const errorCode = errorCodeHash || errorCodeQP || undefined;
+      const errorDescription = errorDescHash || errorDescQP || undefined;
+      const hasError = !!(errorCode || errorDescription);
+      const noAnyRecoveryTokens = !(accessToken || refreshToken || tokenParam || tokenHashParam);
+
+      if (hasError || (tokenType === 'recovery' && noAnyRecoveryTokens)) {
+        const desc = (errorCode || errorDescription || '').toLowerCase();
+        if (desc.includes('expire') || desc.includes('invalid') || desc.includes('session')) {
+          setRecoveryStatus('expired');
+        } else {
+          setRecoveryStatus('invalid');
+        }
+        setShowIntro(false);
+        return;
       }
-      // Städa URL och visa direkt reset-UI
-      const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete('token');
-      newUrl.searchParams.delete('token_hash');
-      newUrl.searchParams.delete('access_token');
-      newUrl.searchParams.delete('refresh_token');
-      newUrl.searchParams.delete('type');
-      newUrl.searchParams.delete('redirect_to');
-      newUrl.searchParams.set('reset', 'true');
-      window.history.replaceState({}, '', newUrl.toString());
-      setShowIntro(false);
-      setIsPasswordReset(true);
-      return;
-    }
-    
-    // Hantera bekräftelsestatusmeddelanden från redirect
-    if (confirmed === 'success') {
-      setConfirmationStatus('success');
-      setConfirmationMessage('🎉 Fantastiskt! Ditt konto har aktiverats och du kan nu logga in i Parium.');
-      console.log('Showing success confirmation message');
-    } else if (confirmed === 'already') {
-      setConfirmationStatus('already-confirmed');
-      setConfirmationMessage('✅ Perfekt! Ditt konto är redan aktiverat och redo att användas.');
-      console.log('Showing already confirmed message');
-    }
-    
-    setIsPasswordReset(isReset);
-    
-    // If user is logged in, redirect to home immediately (but not during recovery flow)
-    const hasRecoveryParamsNow = isReset || !!accessToken || !!refreshToken || !!tokenParam || !!tokenHashParam || tokenType === 'recovery';
-    if (user && !hasRecoveryParamsNow && confirmationStatus === 'none' && recoveryStatus === 'none' && !confirmed) {
-      console.log('User is logged in, redirecting to home');
-      navigate('/');
-    }
+      
+      // Om vi har recovery tokens, verifiera först om de är giltiga
+      const hasAccessPair = !!(accessToken && refreshToken);
+      const hasTokenHash = !!tokenHashParam;
+      const hasToken = !!tokenParam;
+      
+      if (hasAccessPair || hasTokenHash || hasToken) {
+        try {
+          // Först kontrollera om token fortfarande är giltig genom att försöka verifiera den
+          let isValidToken = false;
+          
+          if (tokenHashParam || tokenParam) {
+            try {
+              const { error } = await supabase.auth.verifyOtp({
+                token_hash: tokenHashParam || undefined,
+                token: tokenParam || undefined,
+                type: 'recovery'
+              });
+              isValidToken = !error;
+            } catch (e) {
+              console.log('Token verification failed:', e);
+              isValidToken = false;
+            }
+          } else if (accessToken && refreshToken) {
+            try {
+              const { error } = await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken,
+              });
+              isValidToken = !error;
+            } catch (e) {
+              console.log('Session verification failed:', e);
+              isValidToken = false;
+            }
+          }
+          
+          if (!isValidToken) {
+            // Token är utgången/ogiltigt, visa recovery-skärmen
+            setRecoveryStatus('expired');
+            setShowIntro(false);
+            return;
+          }
+          
+           const payload = {
+             type: tokenType || 'recovery',
+             token: tokenParam || null,
+             token_hash: tokenHashParam || null,
+             access_token: accessToken || null,
+             refresh_token: refreshToken || null,
+             issued_at: issuedMs || Date.now(),
+             stored_at: Date.now()
+           };
+          sessionStorage.setItem('parium-pending-recovery', JSON.stringify(payload));
+        } catch (e) {
+          console.warn('Kunde inte verifiera återställningstoken:', e);
+          setRecoveryStatus('expired');
+          setShowIntro(false);
+          return;
+        }
+        // Städa URL och visa direkt reset-UI
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete('token');
+        newUrl.searchParams.delete('token_hash');
+        newUrl.searchParams.delete('access_token');
+        newUrl.searchParams.delete('refresh_token');
+        newUrl.searchParams.delete('type');
+        newUrl.searchParams.delete('redirect_to');
+        newUrl.searchParams.set('reset', 'true');
+        window.history.replaceState({}, '', newUrl.toString());
+        setShowIntro(false);
+        setIsPasswordReset(true);
+        return;
+      }
+      
+      // Hantera bekräftelsestatusmeddelanden från redirect
+      if (confirmed === 'success') {
+        setConfirmationStatus('success');
+        setConfirmationMessage('🎉 Fantastiskt! Ditt konto har aktiverats och du kan nu logga in i Parium.');
+        console.log('Showing success confirmation message');
+      } else if (confirmed === 'already') {
+        setConfirmationStatus('already-confirmed');
+        setConfirmationMessage('✅ Perfekt! Ditt konto är redan aktiverat och redo att användas.');
+        console.log('Showing already confirmed message');
+      }
+      
+      setIsPasswordReset(isReset);
+      
+      // If user is logged in, redirect to home immediately (but not during recovery flow)
+      const hasRecoveryParamsNow = isReset || !!accessToken || !!refreshToken || !!tokenParam || !!tokenHashParam || tokenType === 'recovery';
+      if (user && !hasRecoveryParamsNow && confirmationStatus === 'none' && recoveryStatus === 'none' && !confirmed) {
+        console.log('User is logged in, redirecting to home');
+        navigate('/');
+      }
+    };
+
+    handleAuthFlow();
   }, [user, navigate, searchParams, confirmationStatus, recoveryStatus]);
 
   // Borttagen auto-expire: vi litar på serverns tokenkontroll istället för lokal timer
