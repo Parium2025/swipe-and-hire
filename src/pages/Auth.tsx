@@ -580,10 +580,19 @@ const Auth = () => {
     } catch (err: any) {
       console.error('Återställning misslyckades:', err);
       const msg = (err?.message || '').toLowerCase();
+      
+      // Kolla om det är specifika lösenordsfel som användaren kan fixa
+      if (msg.includes('different from') || msg.includes('same as')) {
+        alert('Det nya lösenordet måste vara annorlunda än ditt nuvarande lösenord. Försök med ett annat lösenord.');
+        return; // Stanna kvar på formuläret så användaren kan försöka igen
+      }
+      
+      // Endast för riktiga expired/session-fel - växla till expired-sida
       if (msg.includes('expired') || msg.includes('invalid') || msg.includes('session')) {
         setRecoveryStatus('expired');
       } else {
-        setRecoveryStatus('invalid');
+        // Andra fel - visa generiskt felmeddelande men stanna på formuläret
+        alert(`Fel vid lösenordsuppdatering: ${err?.message || 'Okänt fel'}. Försök igen.`);
       }
     }
   };
