@@ -334,9 +334,15 @@ const Auth = () => {
           setIsPasswordReset(false);
         }
       } else {
-        console.log('⚠️ Ingen sessionStorage data - sätter som expired');
-        setRecoveryStatus('expired');
-        setIsPasswordReset(false);
+        // Kolla om det finns issued parameter i URL istället för sessionStorage
+        const issuedParam = searchParams.get('issued');
+        if (issuedParam) {
+          console.log('✅ Ingen sessionStorage men finns issued parameter - tillåter reset');
+        } else {
+          console.log('⚠️ Ingen sessionStorage data och ingen issued parameter - sätter som expired');
+          setRecoveryStatus('expired');
+          setIsPasswordReset(false);
+        }
       }
     }
   }, [isPasswordReset]);
