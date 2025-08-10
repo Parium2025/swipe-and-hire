@@ -135,11 +135,6 @@ const handler = async (req: Request): Promise<Response> => {
       from: "Parium <noreply@parium.se>",
       to: [email],
       subject: "Bekräfta ditt konto – Parium",
-      reply_to: "support@parium.se",
-      headers: {
-        "List-Unsubscribe": "<mailto:support@parium.se?subject=unsubscribe>, <https://parium.se/unsubscribe>",
-        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click"
-      },
       text: `Hej ${firstName}!
 
 Bekräfta ditt konto genom att klicka på länken:

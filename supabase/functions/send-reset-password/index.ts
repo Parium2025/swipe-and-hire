@@ -71,14 +71,9 @@ const handler = async (req: Request): Promise<Response> => {
     const correctedResetUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/reset-redirect?${paramName}=${chosenToken}&type=${type}&issued=${issued}`;
 
     const emailResponse = await resend.emails.send({
-      from: "Parium <noreply@parium.se>", // Verifierad domän
+      from: "Parium <noreply@parium.se>",
       to: [email],
       subject: "Återställ ditt lösenord - Parium",
-      reply_to: "support@parium.se",
-      headers: {
-        "List-Unsubscribe": "<mailto:support@parium.se?subject=unsubscribe>, <https://parium.se/unsubscribe>",
-        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click"
-      },
       text: `Hej!
 
 Vi har fått en begäran om att återställa lösenordet för ditt Parium-konto.

@@ -269,11 +269,6 @@ Parium`;
       from: "Parium <noreply@parium.se>",
       to: [email],
       subject: subject,
-      reply_to: "support@parium.se",
-      headers: {
-        "List-Unsubscribe": "<mailto:support@parium.se?subject=unsubscribe>, <https://parium.se/unsubscribe>",
-        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click"
-      },
       text: textContent,
       html: htmlContent,
     });
