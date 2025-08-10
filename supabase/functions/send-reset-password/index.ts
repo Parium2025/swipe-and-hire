@@ -138,10 +138,7 @@ Parium AB, Stockholm`,
             <!-- Footer -->
             <div style="margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
               <p style="color: #4a5568; font-size: 14px; margin: 0 0 5px 0; font-weight: 600;">
-                Parium AB
-              </p>
-              <p style="color: #718096; font-size: 12px; margin: 0 0 8px 0;">
-                Stockholm, Sverige
+                Parium AB · Stockholm
               </p>
               <p style="color: #718096; font-size: 12px; margin: 0;">
                 Du får detta mail för att du begärde ett återställnings mail i Parium-appen.
