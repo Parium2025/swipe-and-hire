@@ -51,57 +51,55 @@ const Auth = () => {
       tokenType
     });
     
-    // Om vi har recovery tokens, hantera dem
-    if ((accessToken && refreshToken && tokenType === 'recovery') || (supabaseToken && tokenType === 'recovery')) {
-      console.log('Recovery tokens detected, setting session...');
-      
-      if (supabaseToken) {
-        // Hantera Supabase recovery token format
-        console.log('Using Supabase recovery token format');
+    // Om vi har recovery tokens, hantera dem (stöd för flera format)
+    const hasAccessPair = !!(accessToken && refreshToken);
+    const hasSupabaseRecovery = !!supabaseToken; // token_hash eller token
+    if (hasAccessPair || hasSupabaseRecovery) {
+      console.log('Recovery tokens detected, proceeding to verify/session...');
+
+      if (hasSupabaseRecovery) {
+        // Verifiera token_hash/token direkt
         supabase.auth.verifyOtp({
-          token_hash: supabaseToken,
+          token_hash: supabaseToken!,
           type: 'recovery'
-          }).then(({ data, error }) => {
-            if (error) {
-              console.error('Error with recovery token:', error);
-              const msg = (error as any)?.message?.toLowerCase() || '';
-              if (msg.includes('expired') || msg.includes('invalid') || msg.includes('session')) {
-                setRecoveryStatus('expired');
-              } else {
-                setRecoveryStatus('invalid');
-              }
-              setShowIntro(false);
+        }).then(({ error }) => {
+          if (error) {
+            console.error('Error with recovery token:', error);
+            const msg = (error as any)?.message?.toLowerCase() || '';
+            if (msg.includes('expired') || msg.includes('invalid') || msg.includes('session')) {
+              setRecoveryStatus('expired');
             } else {
-              console.log('Recovery successful, redirecting to password reset');
-              // Rensa URL från tokens och visa password reset
-              const newUrl = new URL(window.location.href);
-              newUrl.searchParams.delete('token');
-              newUrl.searchParams.delete('type');
-              newUrl.searchParams.delete('redirect_to');
-              newUrl.searchParams.set('reset', 'true');
-              window.history.replaceState({}, '', newUrl.toString());
-              setIsPasswordReset(true);
+              setRecoveryStatus('invalid');
             }
-          });
-      } else {
-        // Hantera standard token format
+            setShowIntro(false);
+          } else {
+            // Visa reset-form och rensa URL
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete('token');
+            newUrl.searchParams.delete('token_hash');
+            newUrl.searchParams.delete('type');
+            newUrl.searchParams.delete('redirect_to');
+            newUrl.searchParams.set('reset', 'true');
+            window.history.replaceState({}, '', newUrl.toString());
+            setIsPasswordReset(true);
+          }
+        });
+      } else if (hasAccessPair) {
+        // Sätt session från access+refresh
         supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken
+          access_token: accessToken!,
+          refresh_token: refreshToken!
         }).then(({ error }) => {
           if (error) {
             console.error('Error setting session:', error);
             setRecoveryStatus('expired');
             setShowIntro(false);
           } else {
-            console.log('Session set successfully, redirecting to password reset');
-            // Rensa URL från tokens och visa password reset
             const newUrl = new URL(window.location.href);
             newUrl.searchParams.delete('access_token');
             newUrl.searchParams.delete('refresh_token');
             newUrl.searchParams.delete('type');
             newUrl.searchParams.set('reset', 'true');
-            
             window.history.replaceState({}, '', newUrl.toString());
             setIsPasswordReset(true);
           }
@@ -123,8 +121,9 @@ const Auth = () => {
     
     setIsPasswordReset(isReset);
     
-    // If user is logged in, redirect to home immediately
-    if (user && !isReset && confirmationStatus === 'none' && !confirmed) {
+    // If user is logged in, redirect to home immediately (but not during recovery flow)
+    const hasRecoveryParamsNow = isReset || !!accessToken || !!refreshToken || !!supabaseToken || tokenType === 'recovery';
+    if (user && !hasRecoveryParamsNow && confirmationStatus === 'none' && !confirmed) {
       console.log('User is logged in, redirecting to home');
       navigate('/');
     }
