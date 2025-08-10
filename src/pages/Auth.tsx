@@ -223,6 +223,59 @@ const Auth = () => {
     handleAuthFlow();
   }, [user, navigate, searchParams, confirmationStatus, recoveryStatus]);
 
+  
+  // DIREKT EXPIRY-KONTROLL: Kolla OMEDELBART när isPasswordReset blir true
+  useEffect(() => {
+    if (isPasswordReset) {
+      console.log('🚨 PASSWORD RESET SIDA AKTIVERAD - Kollar expiry direkt');
+      const raw = sessionStorage.getItem('parium-pending-recovery');
+      if (raw) {
+        try {
+          const pending = JSON.parse(raw);
+          console.log('📦 SessionStorage data when password reset activated:', pending);
+          
+          if (pending.issued_at) {
+            const issuedTime = parseInt(pending.issued_at);
+            const currentTime = Date.now();
+            const tenMinutesInMs = 10 * 60 * 1000;
+            const timeElapsed = currentTime - issuedTime;
+            
+            console.log('⏰ DIREKT EXPIRY-KONTROLL:', {
+              issued_at: pending.issued_at,
+              issuedTime,
+              currentTime,
+              timeElapsed,
+              tenMinutesInMs,
+              isExpired: timeElapsed > tenMinutesInMs,
+              timeElapsedMinutes: Math.floor(timeElapsed / 1000 / 60)
+            });
+            
+            if (timeElapsed > tenMinutesInMs) {
+              console.log('❌ TOKEN EXPIRED PÅ PASSWORD RESET AKTIVERING!');
+              sessionStorage.removeItem('parium-pending-recovery');
+              setRecoveryStatus('expired');
+              setIsPasswordReset(false);
+              return;
+            }
+            console.log('✅ Token giltig när password reset aktiveras');
+          } else {
+            console.log('⚠️ Ingen issued_at i sessionStorage - sätter som expired');
+            setRecoveryStatus('expired');
+            setIsPasswordReset(false);
+          }
+        } catch (e) {
+          console.warn('Fel vid expiry-kontroll:', e);
+          setRecoveryStatus('expired');
+          setIsPasswordReset(false);
+        }
+      } else {
+        console.log('⚠️ Ingen sessionStorage data - sätter som expired');
+        setRecoveryStatus('expired');
+        setIsPasswordReset(false);
+      }
+    }
+  }, [isPasswordReset]);
+
   // Auto-expire timer: kontrollera om lagrad token är äldre än 10 minuter
   useEffect(() => {
     if (!isPasswordReset) return;
