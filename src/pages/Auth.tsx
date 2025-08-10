@@ -39,42 +39,46 @@ const Auth = () => {
     const accessTokenQP = searchParams.get('access_token');
     const refreshTokenQP = searchParams.get('refresh_token');
     const tokenTypeQP = searchParams.get('type');
+    const tokenParamQP = searchParams.get('token');
     const tokenHashParamQP = searchParams.get('token_hash');
-    const supabaseTokenQP = searchParams.get('token') || tokenHashParamQP; // stöd för både token och token_hash
 
     const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
     const hashParams = new URLSearchParams(hash);
     const accessTokenHash = hashParams.get('access_token');
     const refreshTokenHash = hashParams.get('refresh_token');
     const tokenTypeHash = hashParams.get('type');
+    const tokenParamHash = hashParams.get('token');
+    const tokenHashParamHash = hashParams.get('token_hash');
 
     // Slutliga värden (hash vinner över query)
     const accessToken = accessTokenHash || accessTokenQP || undefined;
     const refreshToken = refreshTokenHash || refreshTokenQP || undefined;
     const tokenType = tokenTypeHash || tokenTypeQP || undefined;
-    const supabaseToken = supabaseTokenQP || undefined;
+    const tokenParam = tokenParamHash || tokenParamQP || undefined;
+    const tokenHashParam = tokenHashParamHash || tokenHashParamQP || undefined;
     
     console.log('Auth useEffect - URL params:', { 
       isReset, 
       confirmed, 
       currentUrl: window.location.href,
       hasTokens: !!accessToken && !!refreshToken,
-      hasSupabaseToken: !!supabaseToken,
+      hasSupabaseToken: !!(tokenParam || tokenHashParam),
       tokenType
     });
     
     // Om vi har recovery tokens, hantera dem (stöd för flera format)
     const hasAccessPair = !!(accessToken && refreshToken);
-    const hasSupabaseRecovery = !!supabaseToken; // token_hash eller token
-    if (hasAccessPair || hasSupabaseRecovery) {
+    const hasTokenHash = !!tokenHashParam;
+    const hasToken = !!tokenParam;
+    if (hasAccessPair || hasTokenHash || hasToken) {
       console.log('Recovery tokens detected, proceeding to verify/session...');
 
-      if (hasSupabaseRecovery) {
-        // Verifiera token_hash/token direkt
-        supabase.auth.verifyOtp({
-          token_hash: supabaseToken!,
-          type: 'recovery'
-        }).then(({ error }) => {
+      if (hasTokenHash || hasToken) {
+        // Verifiera token_hash eller token direkt
+        const verifyOptions: any = { type: 'recovery' };
+        if (hasTokenHash) verifyOptions.token_hash = tokenHashParam;
+        if (hasToken) verifyOptions.token = tokenParam;
+        supabase.auth.verifyOtp(verifyOptions).then(({ error }) => {
           if (error) {
             console.error('Error with recovery token:', error);
             const msg = (error as any)?.message?.toLowerCase() || '';
@@ -85,7 +89,6 @@ const Auth = () => {
             }
             setShowIntro(false);
           } else {
-            // Visa reset-form och rensa URL
             const newUrl = new URL(window.location.href);
             newUrl.searchParams.delete('token');
             newUrl.searchParams.delete('token_hash');
@@ -134,7 +137,7 @@ const Auth = () => {
     setIsPasswordReset(isReset);
     
     // If user is logged in, redirect to home immediately (but not during recovery flow)
-    const hasRecoveryParamsNow = isReset || !!accessToken || !!refreshToken || !!supabaseToken || tokenType === 'recovery';
+    const hasRecoveryParamsNow = isReset || !!accessToken || !!refreshToken || !!tokenParam || !!tokenHashParam || tokenType === 'recovery';
     if (user && !hasRecoveryParamsNow && confirmationStatus === 'none' && !confirmed) {
       console.log('User is logged in, redirecting to home');
       navigate('/');
