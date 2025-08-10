@@ -73,6 +73,24 @@ const Auth = () => {
         return;
       }
 
+      // Kontrollera issued timestamp för nya länkar
+      const issuedParam = searchParams.get('issued');
+      if (isReset && issuedParam) {
+        const issuedTime = parseInt(issuedParam);
+        const currentTime = Date.now();
+        const timeDiff = currentTime - issuedTime;
+        const tenMinutesInMs = 10 * 60 * 1000; // 10 minuter
+        
+        console.log('🕐 TIME CHECK:', { issuedTime, currentTime, timeDiff, tenMinutesInMs });
+        
+        if (timeDiff > tenMinutesInMs) {
+          console.log('❌ RESET LINK EXPIRED baserat på issued timestamp');
+          setIsPasswordReset(true);
+          setRecoveryStatus('expired');
+          return;
+        }
+      }
+
       // ENKEL LÖSNING: Om vi är på reset=true utan tokens i URL, så är länken gammal
       if (isReset && !searchParams.get('token') && !searchParams.get('token_hash') && !searchParams.get('access_token')) {
         console.log('❌ GAMMAL RESET-LÄNK - Visar expired direkt');
