@@ -67,6 +67,7 @@ const Auth = () => {
       // ENKEL LÖSNING: Om vi är på reset=true utan tokens i URL, så är länken gammal
       if (isReset && !searchParams.get('token') && !searchParams.get('token_hash') && !searchParams.get('access_token')) {
         console.log('❌ GAMMAL RESET-LÄNK - Visar expired direkt');
+        setIsPasswordReset(true); // KRITISKT: Sätt isPasswordReset till true så att expired-vyn visas
         setRecoveryStatus('expired');
         return;
       }
