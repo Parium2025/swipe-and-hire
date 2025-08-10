@@ -169,31 +169,9 @@ const Auth = () => {
     }
   }, [user, navigate, searchParams, confirmationStatus, recoveryStatus]);
 
-  // Auto-expire UX: visa utgången-länk automatiskt efter 10 min på sidan
-  useEffect(() => {
-    const EXPIRY_MS = 10 * 60 * 1000; // 10 minuter
-    if (!isPasswordReset) return;
-    try {
-      const raw = sessionStorage.getItem('parium-pending-recovery');
-      if (!raw) return;
-      const pending = JSON.parse(raw);
-      const storedAt = typeof pending.stored_at === 'number' ? pending.stored_at : Date.now();
-      const elapsed = Date.now() - storedAt;
-      const remaining = EXPIRY_MS - elapsed;
-      if (remaining <= 0) {
-        sessionStorage.removeItem('parium-pending-recovery');
-        setRecoveryStatus('expired');
-        return;
-      }
-      const t = window.setTimeout(() => {
-        sessionStorage.removeItem('parium-pending-recovery');
-        setRecoveryStatus('expired');
-      }, remaining);
-      return () => window.clearTimeout(t);
-    } catch {
-      // ignore
-    }
-  }, [isPasswordReset]);
+  // Borttagen auto-expire: vi litar på serverns tokenkontroll istället för lokal timer
+  // Detta säkerställer att användare kan återställa lösenordet även efter 10 min
+  // så länge Supabase-länken fortfarande är giltig.
 
   const handleEmailConfirmation = async (token: string) => {
     console.log('Starting email confirmation with token:', token);
