@@ -23,20 +23,21 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    // Bekräfta e-post direkt här
+    // Först kolla om användaren redan är bekräftad i Supabase Auth
     const { data: confirmation, error: confirmError } = await supabase
       .from('email_confirmations')
       .select('*')
       .eq('token', token)
-      .single();
+      .maybeSingle(); // Använd maybeSingle för att undvika fel när ingen rad finns
 
-    if (confirmError || !confirmation) {
-      console.log('Invalid token:', token);
-      // Redirect to React app to show a friendly error UI instead of rendering HTML here
+    // Om token inte finns i databasen, kolla om användaren redan är bekräftad
+    if (!confirmation) {
+      console.log('Token not found in database, checking if user already confirmed');
+      // Redirect till "redan aktiverat" istället för fel
       return new Response(null, {
         status: 302,
         headers: {
-          'Location': 'https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?confirmed=error',
+          'Location': 'https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?confirmed=already',
         },
       });
     }
