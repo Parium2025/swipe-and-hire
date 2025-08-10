@@ -296,44 +296,55 @@ const Auth = () => {
     }
 
     try {
+      console.log('🔄 Starting handlePasswordReset');
+      
+      // FÖRSTA KONTROLLEN: Kolla om token har gått ut baserat på issued timestamp
+      console.log('🕐 Checking if reset token has expired...');
+      const raw = sessionStorage.getItem('parium-pending-recovery');
+      console.log('📦 SessionStorage data:', raw);
+      
+      if (raw) {
+        const pending = JSON.parse(raw);
+        console.log('🔓 Parsed pending data:', pending);
+        
+        if (pending.issued_at) {
+          const issuedTime = parseInt(pending.issued_at);
+          const currentTime = Date.now();
+          const tenMinutesInMs = 10 * 60 * 1000;
+          const timeElapsed = currentTime - issuedTime;
+          
+          console.log('🔍 Password reset token check:', {
+            issued_at: pending.issued_at,
+            issuedTime,
+            currentTime,
+            timeElapsed,
+            tenMinutesInMs,
+            isExpired: timeElapsed > tenMinutesInMs,
+            timeElapsedMinutes: Math.floor(timeElapsed / 1000 / 60)
+          });
+          
+          if (timeElapsed > tenMinutesInMs) {
+            console.log('❌ Token expired during password reset attempt');
+            sessionStorage.removeItem('parium-pending-recovery');
+            setRecoveryStatus('expired');
+            return;
+          }
+          console.log('✅ Token is still valid');
+        }
+      } else {
+        console.log('⚠️ No pending recovery data found in sessionStorage');
+      }
+
       console.log('🔍 Checking session...');
       // Säkerställ session först (förbruka länken först vid inlämning)
       const { data: sessionData } = await supabase.auth.getSession();
       let hasSession = !!sessionData.session;
       console.log('📊 Has active session:', hasSession);
 
-        if (!hasSession) {
-        console.log('🗂️ No active session, checking sessionStorage...');
-        const raw = sessionStorage.getItem('parium-pending-recovery');
-        console.log('📦 SessionStorage data:', raw);
+      if (!hasSession) {
+        console.log('🗂️ No active session, attempting to establish session...');
         if (raw) {
           const pending = JSON.parse(raw);
-          console.log('🔓 Parsed pending data:', pending);
-          
-          // Kontrollera om token har gått ut baserat på issued timestamp
-          if (pending.issued_at) {
-            const issuedTime = parseInt(pending.issued_at);
-            const currentTime = Date.now();
-            const tenMinutesInMs = 10 * 60 * 1000;
-            const timeElapsed = currentTime - issuedTime;
-            
-            console.log('Password reset token check:', {
-              issued_at: pending.issued_at,
-              issuedTime,
-              currentTime,
-              timeElapsed,
-              tenMinutesInMs,
-              isExpired: timeElapsed > tenMinutesInMs,
-              timeElapsedMinutes: Math.floor(timeElapsed / 1000 / 60)
-            });
-            
-            if (timeElapsed > tenMinutesInMs) {
-              console.log('Token expired during password reset attempt');
-              sessionStorage.removeItem('parium-pending-recovery');
-              setRecoveryStatus('expired');
-              return;
-            }
-          }
           
           if ((pending.token_hash || pending.token) && (pending.type === 'recovery' || !pending.type)) {
             const verifyOptions: any = { type: 'recovery' };
