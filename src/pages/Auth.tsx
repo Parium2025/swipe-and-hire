@@ -100,7 +100,8 @@ const Auth = () => {
             currentTime, 
             timeDiff, 
             tenMinutesInMs,
-            isExpired: timeDiff > tenMinutesInMs
+            isExpired: timeDiff > tenMinutesInMs,
+            minutesOld: Math.floor(timeDiff / 60000)
           });
           
           if (timeDiff > tenMinutesInMs) {
@@ -108,17 +109,19 @@ const Auth = () => {
             setRecoveryStatus('expired');
             return;
           } else {
-            console.log('✅ Reset-länk är giltig enligt timestamp');
+            console.log('✅ Reset-länk är giltig enligt timestamp - tillåter återställning');
+            // Länken är giltig - fortsätt till formulär även utan tokens
+            return; // Avsluta här och visa formuläret
           }
         }
 
-        // FJÄRDE KONTROLLEN: Gamla länkar utan tokens = expired  
+        // FJÄRDE KONTROLLEN: Gamla länkar utan tokens OCH utan issued = expired  
         const hasTokens = searchParams.get('token') || 
                          searchParams.get('token_hash') || 
                          searchParams.get('access_token');
         
         if (!hasTokens && !issuedParam) {
-          console.log('❌ GAMMAL RESET-LÄNK utan tokens eller issued - Visar expired');
+          console.log('❌ GAMMAL RESET-LÄNK utan tokens och utan issued - Visar expired');
           setRecoveryStatus('expired');
           return;
         }
