@@ -87,7 +87,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw upsertError;
     }
 
-    const confirmationUrl = `${req.headers.get('origin')}/auth?confirm=${newToken}`;
+    const confirmationUrl = `https://rvtsfnaqlnggfkoqygbm.supabase.co/functions/v1/redirect-confirm?token=${newToken}`;
     
     // 5. Skicka nytt bekräftelsemejl
     const emailResponse = await resend.emails.send({
@@ -178,7 +178,7 @@ const handler = async (req: Request): Promise<Response> => {
                       </table>
                       
                       <p style="margin: 32px 0 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #9CA3AF; text-align: center;">
-                        ⏰ Denna länk är giltig i 5 minuter
+                        🔓 Länken fungerar alltid – även om kontot redan är aktiverat får du rätt information.
                       </p>
                       
                     </td>
