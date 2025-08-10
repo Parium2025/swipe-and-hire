@@ -67,8 +67,21 @@ const handler = async (req: Request): Promise<Response> => {
     const chosenToken = tokenHash || token || '';
     const paramName = tokenHash ? 'token_hash' : 'token';
     const issued = Date.now();
+    
+    console.log('🔍 RESET URL DEBUG:', {
+      originalResetUrl: resetUrl,
+      tokenHash,
+      token,
+      type,
+      chosenToken,
+      paramName,
+      issued
+    });
+    
     // Använd direkt auth URL med issued timestamp för att kontrollera ålder
     const correctedResetUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&${paramName}=${chosenToken}&type=${type}&issued=${issued}`;
+    
+    console.log('✅ FINAL RESET URL:', correctedResetUrl);
 
     const emailResponse = await resend.emails.send({
       from: "Parium <noreply@parium.se>",
