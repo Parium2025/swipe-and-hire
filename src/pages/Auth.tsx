@@ -112,7 +112,7 @@ const Auth = () => {
           }
         }
 
-        // FJÄRDE KONTROLLEN: Gamla länkar utan tokens = expired
+        // FJÄRDE KONTROLLEN: Gamla länkar utan tokens = expired  
         const hasTokens = searchParams.get('token') || 
                          searchParams.get('token_hash') || 
                          searchParams.get('access_token');
@@ -121,6 +121,16 @@ const Auth = () => {
           console.log('❌ GAMMAL RESET-LÄNK utan tokens eller issued - Visar expired');
           setRecoveryStatus('expired');
           return;
+        }
+        
+        // TEMPORÄR TEST: Simulera gammal länk för test
+        if (issuedParam && !hasTokens) {
+          const testAge = Date.now() - parseInt(issuedParam);
+          if (testAge > 5000) { // 5 sekunder för test
+            console.log('🧪 TEST: Simulerar expired länk efter 5 sekunder');
+            setRecoveryStatus('expired');
+            return;
+          }
         }
         
         console.log('✅ Reset-länk verkar vara ok - fortsätter till formulär');
