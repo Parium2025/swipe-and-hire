@@ -176,9 +176,9 @@ const WelcomeTunnel = ({
                 <h1 className="md:text-9xl lg:text-[12rem] font-bold text-white animate-fade-in leading-tight text-4xl">Välkommen till Parium👋</h1>
                 
                 <div className="space-y-1">
-                  <p className="text-xl md:text-2xl text-white max-w-lg mx-auto animate-fade-in leading-relaxed drop-shadow-sm font-semibold">
-                    Framtiden börjar med ett swipe
-                  </p>
+                  <p className="text-xl md:text-2xl text-white max-w-lg mx-auto animate-fade-in leading-relaxed drop-shadow-sm font-semibold">Framtiden börjar med ett swipe
+
+                </p>
                   <p className="text-lg md:text-xl text-white max-w-md mx-auto drop-shadow-sm font-semibold">Låt oss skapa din profil tillsammans.</p>
                 </div>
               </div>
