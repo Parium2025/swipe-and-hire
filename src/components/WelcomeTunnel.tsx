@@ -550,7 +550,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         </div>
 
         {/* Footer navigation */}
-        <div className="px-6 py-1">
+        <div className="px-6 -mt-4">
           <div className="max-w-4xl mx-auto flex justify-center items-center px-8">
             {currentStep > 0 && currentStep !== totalSteps - 1 && (
               <Button
