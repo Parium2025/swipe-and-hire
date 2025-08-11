@@ -185,18 +185,14 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <div className="h-2" />
               
               <div className="space-y-6">
-                <div className="relative">
-                  <h1 className="text-4xl md:text-6xl font-bold text-white animate-fade-in leading-tight">
-                    Välkommen till Parium 👋
-                  </h1>
-                  <div className="absolute -inset-4 bg-gradient-to-r from-white/5 to-white/10 rounded-2xl blur-xl -z-10 animate-pulse"></div>
-                </div>
+                <h1 className="text-4xl md:text-6xl font-bold text-white animate-fade-in leading-tight">
+                  Välkommen till Parium 👋
+                </h1>
                 
-                <div className="space-y-3">
+                <div className="space-y-1">
                   <p className="text-xl md:text-2xl text-white font-medium max-w-lg mx-auto animate-fade-in leading-relaxed">
                     Framtiden börjar med ett swipe
                   </p>
-                  <div className="w-16 h-1 bg-gradient-to-r from-accent to-secondary mx-auto rounded-full"></div>
                   <p className="text-lg md:text-xl text-white/90 max-w-md mx-auto font-light">
                     Låt oss skapa din profil tillsammans.
                   </p>
