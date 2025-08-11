@@ -179,9 +179,7 @@ const WelcomeTunnel = ({
                   <p className="md:text-2xl text-white max-w-lg mx-auto animate-fade-in leading-relaxed drop-shadow-sm font-semibold text-lg">
                     Framtiden börjar med ett swipe
                   </p>
-                  <p className="md:text-xl text-white max-w-md mx-auto drop-shadow-sm font-semibold text-lg">
-                    Låt oss skapa din profil tillsammans.
-                  </p>
+                  <p className="md:text-xl text-white max-w-md mx-auto drop-shadow-sm font-semibold text-lg">Låt oss skapa din profil tillsammans</p>
                 </div>
               </div>
             </div>
