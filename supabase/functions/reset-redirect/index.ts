@@ -50,6 +50,35 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
+    // Kontrollera om token redan är använd genom att testa den mot Supabase
+    if (token && type === 'recovery') {
+      console.log('🔍 Testing token validity with Supabase...');
+      
+      try {
+        // Testa token mot Supabase för att se om den är giltig
+        const testResponse = await fetch(`https://rvtsfnaqlnggfkoqygbm.supabase.co/auth/v1/verify?token=${token}&type=${type}&redirect_to=about:blank`, {
+          method: 'GET',
+          headers: {
+            'User-Agent': 'Supabase-Token-Validator/1.0'
+          }
+        });
+        
+        // Om vi får 400 eller liknande, är token troligen redan använd eller ogiltig
+        if (!testResponse.ok && testResponse.status >= 400) {
+          console.log('❌ TOKEN ALREADY USED OR INVALID - Redirecting to used page');
+          return new Response(null, {
+            status: 302,
+            headers: {
+              "Location": "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&used=true",
+              ...corsHeaders,
+            },
+          });
+        }
+      } catch (error) {
+        console.log('⚠️ Could not validate token, proceeding anyway:', error);
+      }
+    }
+
     // Om länken är giltig, bygg den korrekta URL:en för återställning
     let redirectUrl = "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true";
     
