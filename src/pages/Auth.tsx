@@ -251,8 +251,22 @@ const Auth = () => {
           }
         }
         
-        // ANDRA KONTROLLEN: Testa om token redan är använd genom att försöka använda den
-        const testTokenUsage = async () => {
+        // Spara token-informationen
+        const payload = {
+          type: tokenType || 'recovery',
+          token: tokenParam || null,
+          token_hash: tokenHashParam || null,
+          access_token: accessToken || null,
+          refresh_token: refreshToken || null,
+          issued_at: issuedMs || Date.now(),
+          stored_at: Date.now()
+        };
+        
+        sessionStorage.setItem('parium-pending-recovery', JSON.stringify(payload));
+        console.log('✅ Token sparad, kommer till lösenordsåterställning');
+        
+        // Kontrollera asynkront om token redan är använd
+        setTimeout(async () => {
           try {
             if (hasAccessPair) {
               console.log('🔄 Testing access token pair...');
@@ -296,26 +310,9 @@ const Auth = () => {
             console.log('❌ Token test error:', testError.message);
             setRecoveryStatus('used');
             setShowIntro(false);
-            return;
           }
-        };
+        }, 100);
         
-        // Kör token-test asynkront
-        testTokenUsage();
-        
-        // Spara token-informationen om den är giltig
-        const payload = {
-          type: tokenType || 'recovery',
-          token: tokenParam || null,
-          token_hash: tokenHashParam || null,
-          access_token: accessToken || null,
-          refresh_token: refreshToken || null,
-          issued_at: issuedMs || Date.now(),
-          stored_at: Date.now()
-        };
-        
-        sessionStorage.setItem('parium-pending-recovery', JSON.stringify(payload));
-        console.log('✅ Token sparad, kommer till lösenordsåterställning');
         // Städa URL och visa direkt reset-UI
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.delete('token');
