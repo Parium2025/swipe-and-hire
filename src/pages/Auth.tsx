@@ -227,24 +227,14 @@ const Auth = () => {
           refreshToken: refreshToken ? 'exists' : 'missing'
         });
         
-        // FÖRSTA KONTROLLEN: Kolla om token har gått ut baserat på issued timestamp INNAN vi sparar
-        console.log('🕐 Checking if token is expired before saving...');
+        // Kontrollera om länken har gått ut (endast tidsgräns för nu)
         if (issuedMs) {
           const currentTime = Date.now();
           const tenMinutesInMs = 10 * 60 * 1000;
           const timeElapsed = currentTime - issuedMs;
           
-          console.log('⏱️ Token expiry check på länkklick:', {
-            issued_at: issuedMs,
-            current_time: currentTime,
-            time_elapsed_ms: timeElapsed,
-            time_elapsed_minutes: Math.floor(timeElapsed / 1000 / 60),
-            ten_minutes_ms: tenMinutesInMs,
-            is_expired: timeElapsed > tenMinutesInMs
-          });
-          
           if (timeElapsed > tenMinutesInMs) {
-            console.log('❌ Token är redan utgången när länken klickades (TUNNEL 2 - TIME EXPIRED)');
+            console.log('❌ Reset link expired');
             setRecoveryStatus('expired');
             setShowIntro(false);
             return;
@@ -263,16 +253,14 @@ const Auth = () => {
         };
         
         sessionStorage.setItem('parium-pending-recovery', JSON.stringify(payload));
-        console.log('✅ Token sparad, kommer till lösenordsåterställning');
         
-        // Städa URL och visa direkt reset-UI
+        // Städa URL
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.delete('token');
         newUrl.searchParams.delete('token_hash');
         newUrl.searchParams.delete('access_token');
         newUrl.searchParams.delete('refresh_token');
         newUrl.searchParams.delete('type');
-        newUrl.searchParams.delete('redirect_to');
         newUrl.searchParams.set('reset', 'true');
         window.history.replaceState({}, '', newUrl.toString());
         setShowIntro(false);
