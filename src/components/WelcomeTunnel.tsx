@@ -173,7 +173,8 @@ const WelcomeTunnel = ({
                 <div className="h-2" />
               
               <div className="space-y-6">
-                <h1 className="md:text-9xl lg:text-[12rem] font-bold text-white animate-fade-in leading-tight text-4xl">Välkommen till   Parium👋</h1>
+                <h1 className="md:text-9xl lg:text-[12rem] font-bold text-white animate-fade-in leading-tight text-4xl">Välkommen till   
+Parium👋</h1>
                 
                 <div className="space-y-1">
                   <p className="md:text-2xl text-white max-w-lg mx-auto animate-fade-in leading-relaxed drop-shadow-sm font-semibold text-lg">Framtiden börjar med ett swipe
