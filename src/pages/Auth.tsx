@@ -251,7 +251,54 @@ const Auth = () => {
           }
         }
         
-        // Spara token-informationen
+        // ANDRA KONTROLLEN: Testa direkt om token redan är använd
+        console.log('🔍 Testing if token is already used...');
+        try {
+          if (hasAccessPair) {
+            console.log('🔄 Testing access token pair for validity...');
+            const { error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken
+            });
+            
+            if (error) {
+              console.log('❌ Access token pair is invalid/used:', error.message);
+              const errorMsg = error.message.toLowerCase();
+              if (errorMsg.includes('expired') || errorMsg.includes('invalid') || 
+                  errorMsg.includes('session')) {
+                console.log('❌ TUNNEL 1 - Token already used/consumed');
+                setRecoveryStatus('used');
+                setShowIntro(false);
+                return;
+              }
+            }
+          } else if (hasTokenHash || hasToken) {
+            console.log('🔄 Testing OTP token for validity...');
+            // Vi använder ett försök att hämta användaren istället för verifyOtp
+            const { data, error } = await supabase.auth.getUser(tokenHashParam || tokenParam || '');
+            
+            if (error || !data.user) {
+              console.log('❌ OTP token test failed:', error?.message || 'No user found');
+              const errorMsg = error?.message?.toLowerCase() || '';
+              if (errorMsg.includes('invalid') || errorMsg.includes('expired') || 
+                  errorMsg.includes('used') || errorMsg.includes('consumed') || !data.user) {
+                console.log('❌ TUNNEL 1 - Token already used/consumed');
+                setRecoveryStatus('used');
+                setShowIntro(false);
+                return;
+              }
+            } else {
+              console.log('✅ Token is valid - proceeding with password reset');
+            }
+          }
+        } catch (testError: any) {
+          console.log('❌ Token validation error:', testError.message);
+          console.log('❌ TUNNEL 1 - Treating as used token due to error');
+          setRecoveryStatus('used');
+          setShowIntro(false);
+          return;
+        }
+        // Om vi kommer hit är token giltig - spara den
         const payload = {
           type: tokenType || 'recovery',
           token: tokenParam || null,
@@ -263,55 +310,7 @@ const Auth = () => {
         };
         
         sessionStorage.setItem('parium-pending-recovery', JSON.stringify(payload));
-        console.log('✅ Token sparad, kommer till lösenordsåterställning');
-        
-        // Kontrollera asynkront om token redan är använd
-        setTimeout(async () => {
-          try {
-            if (hasAccessPair) {
-              console.log('🔄 Testing access token pair...');
-              const { error } = await supabase.auth.setSession({
-                access_token: accessToken,
-                refresh_token: refreshToken
-              });
-              
-              if (error) {
-                console.log('❌ Access token pair failed:', error.message);
-                if (error.message.toLowerCase().includes('expired') || 
-                    error.message.toLowerCase().includes('invalid')) {
-                  console.log('❌ Token already used - setting status to used (TUNNEL 1)');
-                  setRecoveryStatus('used');
-                  setShowIntro(false);
-                  return;
-                }
-              }
-            } else if (hasTokenHash || hasToken) {
-              console.log('🔄 Testing OTP token...');
-              const { error } = await supabase.auth.verifyOtp({
-                token_hash: tokenHashParam || tokenParam || '',
-                type: 'recovery'
-              });
-              
-              if (error) {
-                console.log('❌ OTP verification failed:', error.message);
-                const errorMsg = error.message.toLowerCase();
-                if (errorMsg.includes('expired') || errorMsg.includes('invalid') || 
-                    errorMsg.includes('used') || errorMsg.includes('consumed')) {
-                  console.log('❌ Token already used - setting status to used (TUNNEL 1)');
-                  setRecoveryStatus('used');
-                  setShowIntro(false);
-                  return;
-                }
-              } else {
-                console.log('✅ OTP token is valid and has been consumed');
-              }
-            }
-          } catch (testError: any) {
-            console.log('❌ Token test error:', testError.message);
-            setRecoveryStatus('used');
-            setShowIntro(false);
-          }
-        }, 100);
+        console.log('✅ Token sparad och validerad, kommer till lösenordsåterställning');
         
         // Städa URL och visa direkt reset-UI
         const newUrl = new URL(window.location.href);
