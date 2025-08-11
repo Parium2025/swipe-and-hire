@@ -44,12 +44,16 @@ const handler = async (req: Request): Promise<Response> => {
     // Generera issued timestamp
     const issued = Date.now();
     
-    // FÖRBÄTTRAT MOBIL-KOMPATIBELT FLÖDE: Använd direkt Supabase länk
+    // FÖRBÄTTRAT MOBIL-KOMPATIBELT FLÖDE: Använd vår egen redirect-funktion
+    const redirectUrl = `https://rvtsfnaqlnggfkoqygbm.supabase.co/functions/v1/reset-redirect?issued=${issued}`;
+    
+    console.log('🔗 Using mobile-compatible redirectTo:', redirectUrl);
+    
     const { data, error } = await supabase.auth.admin.generateLink({
       type: 'recovery',
       email: email,
       options: {
-        redirectTo: "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true"
+        redirectTo: redirectUrl
       }
     });
 
@@ -58,20 +62,14 @@ const handler = async (req: Request): Promise<Response> => {
       throw error;
     }
 
-    let resetUrl = data.properties?.action_link;
-    
+    const resetUrl = data.properties?.action_link;
+
     if (!resetUrl) {
       throw new Error('No reset URL generated');
     }
 
     console.log('🔍 SUPABASE GENERATED RESET URL:', resetUrl);
-    
-    // Lägg till issued parameter till URL:en för tidskontroll
-    const urlObj = new URL(resetUrl);
-    urlObj.searchParams.set('issued', issued.toString());
-    resetUrl = urlObj.toString();
-    
-    console.log('✅ FINAL RESET URL (with issued timestamp):', resetUrl);
+    console.log('✅ FINAL RESET URL (using Supabase tokens):', resetUrl);
 
     const emailResponse = await resend.emails.send({
       from: "Parium <noreply@parium.se>",

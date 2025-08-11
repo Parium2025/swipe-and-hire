@@ -22,7 +22,14 @@ const handler = async (req: Request): Promise<Response> => {
     const type = url.searchParams.get('type');
     const issued = url.searchParams.get('issued');
     
-    console.log('Reset redirect called with:', { token: !!token, type, issued });
+    console.log('🔍 RESET-REDIRECT FUNKTIONEN KALLAD!');
+    console.log('Reset redirect called with:', { 
+      token: !!token, 
+      type, 
+      issued,
+      fullUrl: req.url,
+      allParams: Object.fromEntries(url.searchParams.entries())
+    });
 
     // För GAMLA länkar utan issued parameter - betrakta som expired
     if (!issued) {
