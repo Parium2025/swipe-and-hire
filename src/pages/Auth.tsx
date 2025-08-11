@@ -241,18 +241,57 @@ const Auth = () => {
           refreshToken: refreshToken ? 'exists' : 'missing'
         });
         
-        // Kontrollera om länken har gått ut (endast tidsgräns för nu)
+        // Kontrollera om länken har gått ut (tidsgräns)
         if (issuedMs) {
           const currentTime = Date.now();
           const tenMinutesInMs = 10 * 60 * 1000;
           const timeElapsed = currentTime - issuedMs;
           
           if (timeElapsed > tenMinutesInMs) {
-            console.log('❌ Reset link expired');
+            console.log('❌ TUNNEL 2 - Reset link expired (time)');
             setRecoveryStatus('expired');
             setShowIntro(false);
             return;
           }
+        }
+        
+        // Testa om token redan är använd genom att försöka använda den
+        console.log('🔍 Testing token validity...');
+        try {
+          if (hasAccessPair) {
+            const { error: sessionError } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken
+            });
+            
+            if (sessionError) {
+              console.log('❌ TUNNEL 1 - Access token already used/invalid:', sessionError.message);
+              setRecoveryStatus('used');
+              setShowIntro(false);
+              return;
+            }
+          } else if (hasTokenHash || hasToken) {
+            // Testa med verifyOtp utan att konsumera token
+            const testToken = tokenHashParam || tokenParam || '';
+            const { error: otpError } = await supabase.auth.verifyOtp({
+              token_hash: testToken,
+              type: 'recovery'
+            });
+            
+            if (otpError) {
+              console.log('❌ TUNNEL 1 - OTP token already used/invalid:', otpError.message);
+              setRecoveryStatus('used');
+              setShowIntro(false);
+              return;
+            }
+            
+            console.log('⚠️ Token was consumed during test - this is expected');
+          }
+        } catch (testError: any) {
+          console.log('❌ TUNNEL 1 - Token test failed:', testError.message);
+          setRecoveryStatus('used');
+          setShowIntro(false);
+          return;
         }
         
         // Spara token-informationen
