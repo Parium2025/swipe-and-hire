@@ -186,10 +186,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               
               <div className="space-y-4">
                 <h1 className="text-4xl md:text-5xl font-bold text-white animate-fade-in">
-                  Välkommen till Parium!
+                  Välkommen till Parium 👋
                 </h1>
                 <p className="text-lg md:text-xl text-white/90 max-w-md mx-auto animate-fade-in">
-                  Framtiden börjar med ett swipe. Låt oss skapa din profil tillsammans.
+                  Framtiden börjar med ett swipe
+                </p>
+                <p className="text-base md:text-lg text-white/85 max-w-sm mx-auto">
+                  Låt oss skapa din profil tillsammans.
                 </p>
               </div>
             </div>
@@ -197,26 +200,23 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto">
               <div className="space-y-3">
                 <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                  <Users className="h-8 w-8 text-white" />
+                  <Sparkles className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="font-semibold text-white">Matcha med jobb</h3>
-                <p className="text-sm text-white/70">som passar dig</p>
+                <h3 className="font-semibold text-white">Nästa generation av jobbsök är här</h3>
               </div>
 
               <div className="space-y-3">
                 <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                  <Briefcase className="h-8 w-8 text-white" />
+                  <Target className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="font-semibold text-white">Swipea, ansök och gå vidare</h3>
-                <p className="text-sm text-white/70">på sekunder</p>
+                <h3 className="font-semibold text-white">Hitta rätt. Snabbt. Enkelt.</h3>
               </div>
 
               <div className="space-y-3">
                 <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                  <Star className="h-8 w-8 text-white" />
+                  <Heart className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="font-semibold text-white">Spara tid med smarta</h3>
-                <p className="text-sm text-white/70">och effektiva verktyg</p>
+                <h3 className="font-semibold text-white">Jobbmatchning på ett helt nytt sätt</h3>
               </div>
             </div>
           </div>
