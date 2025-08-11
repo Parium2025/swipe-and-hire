@@ -488,30 +488,29 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary via-primary/90 to-secondary bg-[length:400%_400%] animate-gradient relative overflow-hidden font-sans">
-      {/* Enhanced animated floating bubbles */}
+    <div className="min-h-screen bg-background relative overflow-hidden font-sans">
+      {/* Clean background for consistency with main app */}
       <div className="fixed inset-0 pointer-events-none z-0">
+        {/* Subtle decorative elements using brand colors */}
+        <div className="absolute top-20 left-10 w-4 h-4 bg-primary/10 rounded-full animate-bounce" style={{ animationDuration: '2s' }}></div>
+        <div className="absolute top-32 left-16 w-2 h-2 bg-secondary/15 rounded-full animate-bounce" style={{ animationDuration: '2.5s' }}></div>
+        <div className="absolute top-24 left-20 w-3 h-3 bg-primary/8 rounded-full animate-bounce" style={{ animationDuration: '3s' }}></div>
         
-        {/* Floating animated elements */}
-        <div className="absolute top-20 left-10 w-4 h-4 bg-white/20 rounded-full animate-bounce" style={{ animationDuration: '2s' }}></div>
-        <div className="absolute top-32 left-16 w-2 h-2 bg-white/30 rounded-full animate-bounce" style={{ animationDuration: '2.5s' }}></div>
-        <div className="absolute top-24 left-20 w-3 h-3 bg-white/15 rounded-full animate-bounce" style={{ animationDuration: '3s' }}></div>
+        <div className="absolute bottom-40 right-20 w-5 h-5 bg-secondary/12 rounded-full animate-bounce" style={{ animationDuration: '2.2s' }}></div>
+        <div className="absolute bottom-32 right-16 w-3 h-3 bg-primary/10 rounded-full animate-bounce" style={{ animationDuration: '2.8s' }}></div>
+        <div className="absolute bottom-36 right-24 w-2 h-2 bg-secondary/15 rounded-full animate-bounce" style={{ animationDuration: '2.3s' }}></div>
         
-        <div className="absolute bottom-40 right-20 w-5 h-5 bg-white/25 rounded-full animate-bounce" style={{ animationDuration: '2.2s' }}></div>
-        <div className="absolute bottom-32 right-16 w-3 h-3 bg-white/20 rounded-full animate-bounce" style={{ animationDuration: '2.8s' }}></div>
-        <div className="absolute bottom-36 right-24 w-2 h-2 bg-white/30 rounded-full animate-bounce" style={{ animationDuration: '2.3s' }}></div>
+        {/* Pulsing lights with brand colors */}
+        <div className="absolute top-10 right-10 w-3 h-3 bg-primary/15 rounded-full animate-pulse" style={{ animationDuration: '1.5s' }}></div>
+        <div className="absolute top-16 right-20 w-2 h-2 bg-secondary/12 rounded-full animate-pulse" style={{ animationDuration: '2s' }}></div>
+        <div className="absolute top-12 left-8 w-3 h-3 bg-primary/18 rounded-full animate-pulse" style={{ animationDuration: '1.8s' }}></div>
         
-        {/* Pulsing lights */}
-        <div className="absolute top-10 right-10 w-3 h-3 bg-white/30 rounded-full animate-pulse" style={{ animationDuration: '1.5s' }}></div>
-        <div className="absolute top-16 right-20 w-2 h-2 bg-white/25 rounded-full animate-pulse" style={{ animationDuration: '2s' }}></div>
-        <div className="absolute top-12 left-8 w-3 h-3 bg-white/35 rounded-full animate-pulse" style={{ animationDuration: '1.8s' }}></div>
-        
-        {/* Small stars */}
-        <div className="absolute top-1/4 left-1/3 w-1 h-1 bg-white/50 rounded-full animate-pulse" style={{ animationDuration: '3s' }}>
-          <div className="absolute inset-0 bg-white/30 rounded-full animate-ping" style={{ animationDuration: '3s' }}></div>
+        {/* Small stars with brand colors */}
+        <div className="absolute top-1/4 left-1/3 w-1 h-1 bg-secondary/20 rounded-full animate-pulse" style={{ animationDuration: '3s' }}>
+          <div className="absolute inset-0 bg-primary/15 rounded-full animate-ping" style={{ animationDuration: '3s' }}></div>
         </div>
-        <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-white/50 rounded-full animate-pulse" style={{ animationDuration: '2.5s' }}>
-          <div className="absolute inset-0 bg-white/30 rounded-full animate-ping" style={{ animationDuration: '2.5s' }}></div>
+        <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-primary/20 rounded-full animate-pulse" style={{ animationDuration: '2.5s' }}>
+          <div className="absolute inset-0 bg-secondary/15 rounded-full animate-ping" style={{ animationDuration: '2.5s' }}></div>
         </div>
       </div>
       <div className="min-h-screen flex flex-col relative z-10">
@@ -536,8 +535,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
         {/* Main content with white text overlay */}
         <div className="flex-1 flex items-center justify-center px-4 pb-6">
-          <section className="w-full max-w-3xl px-6 py-10 text-white font-inter">
-            <div className="[&_h1]:font-bold [&_h1]:tracking-tight [&_h2]:font-semibold [&_h2]:tracking-tight [&_h2]:text-white [&_h3]:text-white [&_p]:text-white/85 [&_label]:text-white [&_label]:font-medium [&_.text-muted-foreground]:text-white/75">
+          <section className="w-full max-w-3xl px-6 py-10 text-foreground font-inter">
+            <div className="[&_h1]:font-bold [&_h1]:tracking-tight [&_h2]:font-semibold [&_h2]:tracking-tight [&_h2]:text-foreground [&_h3]:text-foreground [&_p]:text-muted-foreground [&_label]:text-foreground [&_label]:font-medium [&_.text-muted-foreground]:text-muted-foreground">
               {renderStep()}
             </div>
           </section>
