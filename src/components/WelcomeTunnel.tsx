@@ -179,7 +179,6 @@ const WelcomeTunnel = ({
                   <p className="text-xl md:text-2xl text-white max-w-lg mx-auto animate-fade-in leading-relaxed drop-shadow-sm font-semibold">Framtiden börjar med ett swipe
 
                 </p>
-                  <p className="text-lg md:text-xl text-white max-w-md mx-auto drop-shadow-sm font-semibold">Låt oss skapa din profil tillsammans.</p>
                 </div>
               </div>
             </div>
@@ -211,6 +210,10 @@ const WelcomeTunnel = ({
                 </div>
                 <h3 className="font-semibold text-white text-center">Jobbmatchning på ett helt nytt sätt</h3>
               </div>
+            </div>
+
+            <div className="text-center mt-8">
+              <p className="text-lg md:text-xl text-white max-w-md mx-auto drop-shadow-sm font-semibold">Låt oss skapa din profil tillsammans.</p>
             </div>
           </div>;
       case 1:
