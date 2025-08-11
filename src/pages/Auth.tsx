@@ -195,9 +195,16 @@ const Auth = () => {
 
       if (hasError || (tokenType === 'recovery' && noAnyRecoveryTokens)) {
         const desc = (errorCode || errorDescription || '').toLowerCase();
+        console.log('🔍 AUTH ERROR DETECTED:', { errorCode, errorDescription, desc });
+        
         if (desc.includes('expire') || desc.includes('invalid') || desc.includes('session')) {
+          console.log('❌ Setting recovery status to expired due to error');
           setRecoveryStatus('expired');
+        } else if (desc.includes('used') || desc.includes('consumed') || desc.includes('already')) {
+          console.log('❌ Setting recovery status to used due to error');
+          setRecoveryStatus('used');
         } else {
+          console.log('❌ Setting recovery status to invalid due to unknown error');
           setRecoveryStatus('invalid');
         }
         setShowIntro(false);

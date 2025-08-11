@@ -56,46 +56,8 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Kontrollera om token redan har använts genom att testa den
-    try {
-      if (token) {
-        console.log('🔍 Testing token validity...');
-        
-        // Försök att hämta användarens session med token utan att konsumera den
-        const { data, error } = await supabase.auth.getUser(token);
-        
-        console.log('Token test result:', { data: !!data.user, error: error?.message });
-        
-        // Om vi får en specifik feltyp betyder det att token är använd/invalid
-        if (error) {
-          const errorMsg = error.message.toLowerCase();
-          console.log('❌ TOKEN ERROR - Message:', errorMsg);
-          
-          if (errorMsg.includes('invalid') || errorMsg.includes('expired') || errorMsg.includes('used') || errorMsg.includes('consumed')) {
-            console.log('❌ TOKEN ALREADY USED - Redirecting to used page');
-            return new Response(null, {
-              status: 302,
-              headers: {
-                "Location": "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&used=true",
-                ...corsHeaders,
-              },
-            });
-          }
-        }
-      }
-    } catch (testError: any) {
-      console.log('Token test error:', testError.message);
-      // Om vi får ett oväntat fel, behandla som använd token
-      return new Response(null, {
-        status: 302,
-        headers: {
-          "Location": "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&used=true",
-          ...corsHeaders,
-        },
-      });
-    }
-
-    // Om länken är giltig, bygg den korrekta URL:en för återställning
+    // Om länken är giltig enligt tid, skicka vidare till auth sidan
+    // Auth sidan kommer själv hantera om token är använd eller inte
     let redirectUrl = "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true";
     
     if (token) {
