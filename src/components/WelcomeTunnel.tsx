@@ -546,7 +546,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
         {/* Footer navigation */}
         <div className="p-6">
-          <div className="max-w-2xl mx-auto flex justify-between">
+          <div className="max-w-4xl mx-auto flex justify-between items-center px-8">
             {currentStep > 0 && currentStep !== totalSteps - 1 && (
               <Button
                 variant="outline"
