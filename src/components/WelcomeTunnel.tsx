@@ -185,7 +185,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <div className="h-2" />
               
               <div className="space-y-6">
-                <h1 className="text-4xl md:text-6xl font-bold text-white animate-fade-in leading-tight">
+                <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white animate-fade-in leading-tight">
                   Välkommen till Parium👋
                 </h1>
                 
