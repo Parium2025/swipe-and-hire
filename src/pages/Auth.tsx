@@ -244,7 +244,7 @@ const Auth = () => {
           });
           
           if (timeElapsed > tenMinutesInMs) {
-            console.log('❌ Token är redan utgången när länken klickades (TUNNEL 2)');
+            console.log('❌ Token är redan utgången när länken klickades (TUNNEL 2 - TIME EXPIRED)');
             setRecoveryStatus('expired');
             setShowIntro(false);
             return;
