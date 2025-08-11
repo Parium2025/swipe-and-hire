@@ -213,7 +213,7 @@ const WelcomeTunnel = ({
             </div>
 
             <div className="text-center mt-8">
-              <p className="text-lg md:text-xl text-white max-w-md mx-auto drop-shadow-sm font-semibold">Låt oss skapa din profil tillsammans.</p>
+              <p className="text-lg md:text-xl text-white max-w-md mx-auto drop-shadow-sm font-semibold">Låt oss skapa din profil tillsammans</p>
             </div>
           </div>;
       case 1:
