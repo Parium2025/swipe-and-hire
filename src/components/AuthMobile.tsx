@@ -311,10 +311,10 @@ const AuthMobile = ({
               </div>
             </div>
             
-            <h1 className="text-3xl font-bold text-primary-foreground mb-2">
+            <h1 className="text-2xl font-semibold text-primary-foreground mb-2">
               Välkommen till Parium
             </h1>
-            <p className="text-primary-foreground/80 text-lg mb-8">
+            <p className="text-primary-foreground/90 text-base mb-8">
               Framtiden börjar med ett swipe
             </p>
           </div>
