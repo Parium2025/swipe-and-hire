@@ -44,10 +44,10 @@ const handler = async (req: Request): Promise<Response> => {
     // Generera issued timestamp
     const issued = Date.now();
     
-    // FÖRSTA METODEN: Prova med generateLink och custom redirectTo
-    const redirectUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&issued=${issued}`;
+    // FÖRBÄTTRAT MOBIL-KOMPATIBELT FLÖDE: Använd vår egen redirect-funktion
+    const redirectUrl = `https://rvtsfnaqlnggfkoqygbm.supabase.co/functions/v1/reset-redirect?issued=${issued}`;
     
-    console.log('🔗 Using redirectTo:', redirectUrl);
+    console.log('🔗 Using mobile-compatible redirectTo:', redirectUrl);
     
     const { data, error } = await supabase.auth.admin.generateLink({
       type: 'recovery',
