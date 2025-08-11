@@ -179,7 +179,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     switch (currentStep) {
       case 0:
         return (
-          <div className="text-center space-y-1 py-1">
+          <div className="text-center space-y-0">
             <div className="space-y-6">
                 {/* Removed center icon for cleaner, minimal hero */}
                 <div className="h-2" />
