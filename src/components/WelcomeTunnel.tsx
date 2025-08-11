@@ -546,11 +546,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
         {/* Footer navigation */}
         <div className="p-6">
-          <div className="max-w-4xl mx-auto flex justify-between items-center px-8">
+          <div className="max-w-4xl mx-auto flex justify-center items-center px-8">
             {currentStep > 0 && currentStep !== totalSteps - 1 && (
               <Button
                 variant="outline"
                 onClick={handlePrevious}
+                className="absolute left-8"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Tillbaka
@@ -560,7 +561,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             {currentStep === 0 ? (
               <Button
                 onClick={handleNext}
-                className="px-8"
+                size="lg"
+                className="px-12 py-3 text-lg"
               >
                 Kom igång
                 <ArrowRight className="h-4 w-4 ml-2" />
