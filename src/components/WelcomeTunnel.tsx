@@ -488,7 +488,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-primary via-primary/95 to-primary-dark relative overflow-hidden font-sans">
       {/* Clean background for consistency with main app */}
       <div className="fixed inset-0 pointer-events-none z-0">
         {/* Subtle decorative elements using brand colors */}
@@ -535,8 +535,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
         {/* Main content with white text overlay */}
         <div className="flex-1 flex items-center justify-center px-4 pb-6">
-          <section className="w-full max-w-3xl px-6 py-10 text-foreground font-inter">
-            <div className="[&_h1]:font-bold [&_h1]:tracking-tight [&_h2]:font-semibold [&_h2]:tracking-tight [&_h2]:text-foreground [&_h3]:text-foreground [&_p]:text-muted-foreground [&_label]:text-foreground [&_label]:font-medium [&_.text-muted-foreground]:text-muted-foreground">
+          <section className="w-full max-w-3xl px-6 py-10 text-white font-inter">
+            <div className="[&_h1]:font-bold [&_h1]:tracking-tight [&_h2]:font-semibold [&_h2]:tracking-tight [&_h2]:text-white [&_h3]:text-white [&_p]:text-white/85 [&_label]:text-white [&_label]:font-medium [&_.text-muted-foreground]:text-white/75">
               {renderStep()}
             </div>
           </section>
