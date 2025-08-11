@@ -488,10 +488,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-parium relative overflow-hidden">
-      {/* Animated floating bubbles */}
+    <div className="min-h-screen bg-gradient-to-br from-primary via-primary/90 to-secondary bg-[length:400%_400%] animate-[gradient_15s_ease_infinite] relative overflow-hidden font-sans">
+      {/* Enhanced animated floating bubbles */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/85 to-secondary/90"></div>
         
         {/* Floating animated elements */}
         <div className="absolute top-20 left-10 w-4 h-4 bg-white/20 rounded-full animate-bounce" style={{ animationDuration: '2s' }}></div>
@@ -537,8 +537,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
         {/* Main content with white text overlay */}
         <div className="flex-1 flex items-center justify-center px-4 pb-6">
-          <section className="w-full max-w-3xl px-6 py-10 text-white">
-            <div className="[&_h2]:text-white [&_h3]:text-white [&_p]:text-white/80 [&_label]:text-white [&_.text-muted-foreground]:text-white/70">
+          <section className="w-full max-w-3xl px-6 py-10 text-white font-inter">
+            <div className="[&_h1]:font-bold [&_h1]:tracking-tight [&_h2]:font-semibold [&_h2]:tracking-tight [&_h2]:text-white [&_h3]:text-white [&_p]:text-white/85 [&_label]:text-white [&_label]:font-medium [&_.text-muted-foreground]:text-white/75">
               {renderStep()}
             </div>
           </section>
