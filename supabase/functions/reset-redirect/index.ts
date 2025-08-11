@@ -60,15 +60,19 @@ const handler = async (req: Request): Promise<Response> => {
     try {
       if (token) {
         console.log('🔍 Testing token validity...');
-        const { error } = await supabase.auth.verifyOtp({
-          token_hash: token,
-          type: 'recovery'
-        });
         
-        // Om token redan är använd får vi ett specifikt felmeddelande
+        // Försök att hämta användarens session med token utan att konsumera den
+        const { data, error } = await supabase.auth.getUser(token);
+        
+        console.log('Token test result:', { data: !!data.user, error: error?.message });
+        
+        // Om vi får en specifik feltyp betyder det att token är använd/invalid
         if (error) {
-          console.log('❌ TOKEN ALREADY USED - Error:', error.message);
-          if (error.message.includes('expired') || error.message.includes('invalid') || error.message.includes('used')) {
+          const errorMsg = error.message.toLowerCase();
+          console.log('❌ TOKEN ERROR - Message:', errorMsg);
+          
+          if (errorMsg.includes('invalid') || errorMsg.includes('expired') || errorMsg.includes('used') || errorMsg.includes('consumed')) {
+            console.log('❌ TOKEN ALREADY USED - Redirecting to used page');
             return new Response(null, {
               status: 302,
               headers: {
@@ -81,7 +85,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
     } catch (testError: any) {
       console.log('Token test error:', testError.message);
-      // Om vi inte kan testa token, behandla som använd
+      // Om vi får ett oväntat fel, behandla som använd token
       return new Response(null, {
         status: 302,
         headers: {
