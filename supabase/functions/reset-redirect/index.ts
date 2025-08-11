@@ -1,9 +1,15 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+);
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -45,6 +51,41 @@ const handler = async (req: Request): Promise<Response> => {
         status: 302,
         headers: {
           "Location": "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&expired=true",
+          ...corsHeaders,
+        },
+      });
+    }
+
+    // Kontrollera om token redan har använts genom att testa den
+    try {
+      if (token) {
+        console.log('🔍 Testing token validity...');
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: token,
+          type: 'recovery'
+        });
+        
+        // Om token redan är använd får vi ett specifikt felmeddelande
+        if (error) {
+          console.log('❌ TOKEN ALREADY USED - Error:', error.message);
+          if (error.message.includes('expired') || error.message.includes('invalid') || error.message.includes('used')) {
+            return new Response(null, {
+              status: 302,
+              headers: {
+                "Location": "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&used=true",
+                ...corsHeaders,
+              },
+            });
+          }
+        }
+      }
+    } catch (testError: any) {
+      console.log('Token test error:', testError.message);
+      // Om vi inte kan testa token, behandla som använd
+      return new Response(null, {
+        status: 302,
+        headers: {
+          "Location": "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&used=true",
           ...corsHeaders,
         },
       });

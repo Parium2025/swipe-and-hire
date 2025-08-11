@@ -51,7 +51,7 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [confirmationStatus, setConfirmationStatus] = useState<'none' | 'success' | 'already-confirmed' | 'error'>('none');
   const [confirmationMessage, setConfirmationMessage] = useState('');
-  const [recoveryStatus, setRecoveryStatus] = useState<'none' | 'expired' | 'consumed' | 'invalid'>('none');
+  const [recoveryStatus, setRecoveryStatus] = useState<'none' | 'expired' | 'consumed' | 'invalid' | 'used'>('none');
   const [emailForReset, setEmailForReset] = useState('');
   const [resending, setResending] = useState(false);
   const [resendMessage, setResendMessage] = useState('');
@@ -84,9 +84,15 @@ const Auth = () => {
         
         // ANDRA KONTROLLEN: Kontrollera expired parameter från redirect-funktionen
         const isExpired = searchParams.get('expired') === 'true';
+        const isUsed = searchParams.get('used') === 'true';
         if (isExpired) {
           console.log('❌ EXPIRED parameter funnen - Visar expired direkt');
           setRecoveryStatus('expired');
+          return;
+        }
+        if (isUsed) {
+          console.log('❌ USED parameter funnen - Visar used direkt');
+          setRecoveryStatus('used');
           return;
         }
 
@@ -647,10 +653,20 @@ const Auth = () => {
   // Visa UI för utgången/ogiltig återställningslänk
   if (recoveryStatus !== 'none') {
     const isConsumed = recoveryStatus === 'consumed';
-    const title = isConsumed ? 'Återställningslänken är förbrukad' : 'Återställningslänken har gått ut';
-    const description = isConsumed 
-      ? 'Återställningslänkar kan bara användas en gång av säkerhetsskäl. Begär en ny länk för att ändra ditt lösenord.'
-      : 'Skriv din e‑postadress så skickar vi en ny länk för att återställa ditt lösenord.';
+    const isUsed = recoveryStatus === 'used';
+    const isExpired = recoveryStatus === 'expired';
+    
+    let title, description;
+    if (isUsed) {
+      title = 'Återställningslänken är redan använd';
+      description = 'Du kan bara byta lösenord en gång med denna länk av säkerhetsskäl. Begär en ny länk för att ändra ditt lösenord igen.';
+    } else if (isConsumed) {
+      title = 'Återställningslänken är förbrukad';
+      description = 'Återställningslänkar kan bara användas en gång av säkerhetsskäl. Begär en ny länk för att ändra ditt lösenord.';
+    } else {
+      title = 'Återställningslänken har gått ut';
+      description = 'Skriv din e‑postadress så skickar vi en ny länk för att återställa ditt lösenord.';
+    }
     
     return (
       <div className="min-h-screen bg-gradient-parium flex items-center justify-center p-4">
