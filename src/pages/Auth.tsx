@@ -278,12 +278,6 @@ const Auth = () => {
           stored_at: Date.now()
         };
 
-        // Markera token som "sedd" första gången den laddas
-        if (!usedTokens.includes(tokenIdentifier)) {
-          usedTokens.push(tokenIdentifier);
-          localStorage.setItem(usedTokensKey, JSON.stringify(usedTokens));
-          console.log('✅ Token marked as visited in localStorage');
-        }
         
         sessionStorage.setItem('parium-pending-recovery', JSON.stringify(payload));
         
