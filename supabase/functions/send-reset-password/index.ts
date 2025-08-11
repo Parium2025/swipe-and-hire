@@ -44,16 +44,12 @@ const handler = async (req: Request): Promise<Response> => {
     // Generera issued timestamp
     const issued = Date.now();
     
-    // FÖRBÄTTRAT MOBIL-KOMPATIBELT FLÖDE: Använd vår egen redirect-funktion
-    const redirectUrl = `https://rvtsfnaqlnggfkoqygbm.supabase.co/functions/v1/reset-redirect?issued=${issued}`;
-    
-    console.log('🔗 Using mobile-compatible redirectTo:', redirectUrl);
-    
+    // FÖRBÄTTRAT MOBIL-KOMPATIBELT FLÖDE: Använd direkt Supabase länk
     const { data, error } = await supabase.auth.admin.generateLink({
       type: 'recovery',
       email: email,
       options: {
-        redirectTo: redirectUrl
+        redirectTo: "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true"
       }
     });
 
@@ -62,18 +58,20 @@ const handler = async (req: Request): Promise<Response> => {
       throw error;
     }
 
-    const resetUrl = data.properties?.action_link;
-
+    let resetUrl = data.properties?.action_link;
+    
     if (!resetUrl) {
       throw new Error('No reset URL generated');
     }
 
     console.log('🔍 SUPABASE GENERATED RESET URL:', resetUrl);
     
-    // Använd Supabase's genererade URL direkt - den ska innehålla alla nödvändiga tokens
-    const correctedResetUrl = resetUrl;
+    // Lägg till issued parameter till URL:en för tidskontroll
+    const urlObj = new URL(resetUrl);
+    urlObj.searchParams.set('issued', issued.toString());
+    resetUrl = urlObj.toString();
     
-    console.log('✅ FINAL RESET URL (using Supabase tokens):', correctedResetUrl);
+    console.log('✅ FINAL RESET URL (with issued timestamp):', resetUrl);
 
     const emailResponse = await resend.emails.send({
       from: "Parium <noreply@parium.se>",
@@ -84,7 +82,7 @@ const handler = async (req: Request): Promise<Response> => {
 Vi har fått en begäran om att återställa lösenordet för ditt Parium-konto.
 
 Klicka på länken nedan för att skapa ett nytt lösenord:
-${correctedResetUrl}
+${resetUrl}
 
 Denna länk är giltig i 10 minuter. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.
 
@@ -114,7 +112,7 @@ Parium AB, Stockholm`,
             
             <!-- CTA Button -->
             <div style="margin: 30px 0;">
-              <a href="${correctedResetUrl}" 
+              <a href="${resetUrl}" 
                  style="display: inline-block; background-color: #1a237e; color: #ffffff; text-decoration: none; padding: 15px 40px; border-radius: 8px; font-size: 16px; font-weight: 600;">
                 Återställ lösenord
               </a>
@@ -136,7 +134,7 @@ Parium AB, Stockholm`,
                 Fungerar inte knappen? Kopiera länken nedan:
               </p>
               <p style="color: #4299e1; font-size: 12px; word-break: break-all; margin: 0;">
-                ${correctedResetUrl}
+                ${resetUrl}
               </p>
             </div>
             
