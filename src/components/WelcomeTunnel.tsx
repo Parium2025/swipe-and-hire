@@ -539,8 +539,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
         {/* Main content with white text overlay */}
         <div className="flex-1 flex items-center justify-center px-4 pb-6">
-          <section className="w-full max-w-3xl px-6 py-10 text-white font-inter">
-            <div className="[&_h1]:font-bold [&_h1]:tracking-tight [&_h2]:font-semibold [&_h2]:tracking-tight [&_h2]:text-white [&_h3]:text-white [&_p]:text-white/85 [&_label]:text-white [&_label]:font-medium [&_.text-muted-foreground]:text-white/75">
+          <section className="w-full max-w-3xl px-6 py-10">
+            <div className="[&_h1]:text-2xl [&_h1]:font-semibold [&_h1]:text-primary-foreground [&_h1]:mb-2 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:text-primary-foreground [&_h2]:mb-2 [&_h3]:text-primary-foreground [&_h3]:font-medium [&_p]:text-primary-foreground/90 [&_p]:text-base [&_label]:text-primary-foreground [&_label]:font-medium [&_.text-muted-foreground]:text-primary-foreground/75 [&_button]:font-medium">
               {renderStep()}
             </div>
           </section>
