@@ -488,10 +488,9 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary via-primary/90 to-secondary bg-[length:400%_400%] animate-[gradient_15s_ease_infinite] relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-primary via-primary/90 to-secondary bg-[length:400%_400%] animate-gradient relative overflow-hidden font-sans">
       {/* Enhanced animated floating bubbles */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/85 to-secondary/90"></div>
         
         {/* Floating animated elements */}
         <div className="absolute top-20 left-10 w-4 h-4 bg-white/20 rounded-full animate-bounce" style={{ animationDuration: '2s' }}></div>
