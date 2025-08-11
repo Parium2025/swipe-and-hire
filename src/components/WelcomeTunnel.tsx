@@ -201,25 +201,25 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto">
-              <div className="space-y-3">
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                  <Sparkles className="h-8 w-8 text-white" />
+              <div className="space-y-3 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white/5 p-4 rounded-xl cursor-pointer" style={{ animationDelay: '0.2s' }}>
+                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
+                  <Sparkles className="h-8 w-8 text-white transition-transform duration-300 hover:rotate-12" />
                 </div>
-                <h3 className="font-semibold text-white">Nästa generation av jobbsök är här</h3>
+                <h3 className="font-semibold text-white text-center">Nästa generation av jobbsök är här</h3>
               </div>
 
-              <div className="space-y-3">
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                  <Target className="h-8 w-8 text-white" />
+              <div className="space-y-3 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white/5 p-4 rounded-xl cursor-pointer" style={{ animationDelay: '0.4s' }}>
+                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
+                  <Target className="h-8 w-8 text-white transition-transform duration-300 hover:rotate-12" />
                 </div>
-                <h3 className="font-semibold text-white">Hitta rätt. Snabbt. Enkelt.</h3>
+                <h3 className="font-semibold text-white text-center">Hitta rätt. Snabbt. Enkelt.</h3>
               </div>
 
-              <div className="space-y-3">
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                  <Heart className="h-8 w-8 text-white" />
+              <div className="space-y-3 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white/5 p-4 rounded-xl cursor-pointer" style={{ animationDelay: '0.6s' }}>
+                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
+                  <Heart className="h-8 w-8 text-white transition-transform duration-300 hover:rotate-12" />
                 </div>
-                <h3 className="font-semibold text-white">Jobbmatchning på ett helt nytt sätt</h3>
+                <h3 className="font-semibold text-white text-center">Jobbmatchning på ett helt nytt sätt</h3>
               </div>
             </div>
           </div>
