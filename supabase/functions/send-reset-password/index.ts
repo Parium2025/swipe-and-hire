@@ -44,16 +44,12 @@ const handler = async (req: Request): Promise<Response> => {
     // Generera issued timestamp
     const issued = Date.now();
     
-    // FÖRBÄTTRAT MOBIL-KOMPATIBELT FLÖDE: Använd vår egen redirect-funktion
-    const redirectUrl = `https://rvtsfnaqlnggfkoqygbm.supabase.co/functions/v1/reset-redirect?issued=${issued}`;
-    
-    console.log('🔗 Using mobile-compatible redirectTo:', redirectUrl);
-    
+    // Använd Supabase's direkt länk för bättre kompatibilitet
     const { data, error } = await supabase.auth.admin.generateLink({
       type: 'recovery',
       email: email,
       options: {
-        redirectTo: redirectUrl
+        redirectTo: `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&issued=${issued}`
       }
     });
 
@@ -69,7 +65,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log('🔍 SUPABASE GENERATED RESET URL:', resetUrl);
-    console.log('✅ FINAL RESET URL (using Supabase tokens):', resetUrl);
+    console.log('✅ FINAL RESET URL (direct to auth):', resetUrl);
 
     const emailResponse = await resend.emails.send({
       from: "Parium <noreply@parium.se>",
