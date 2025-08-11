@@ -173,7 +173,7 @@ const WelcomeTunnel = ({
                 <div className="h-2" />
               
               <div className="space-y-6">
-                <h1 className="md:text-9xl lg:text-[12rem] font-bold text-white animate-fade-in leading-tight text-4xl">Välkommen till  Parium</h1>
+                <h1 className="md:text-9xl lg:text-[12rem] text-white animate-fade-in leading-tight text-4xl font-bold">Välkommen till  Parium</h1>
                 
                 <div className="space-y-1">
                   <p className="text-xl md:text-2xl text-white max-w-lg mx-auto animate-fade-in leading-relaxed drop-shadow-sm font-semibold">Framtiden börjar med ett swipe
@@ -190,7 +190,7 @@ const WelcomeTunnel = ({
                 <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
                   <Sparkles className="h-8 w-8 text-white transition-transform duration-300 hover:rotate-12" />
                 </div>
-                <h3 className="font-semibold text-white text-center">Nästa generation av jobbsök är här</h3>
+                <h3 className="text-white text-center font-semibold">Nästa generation av jobbsök är här</h3>
               </div>
 
               <div className="space-y-3 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white/5 p-4 rounded-xl cursor-pointer" style={{
@@ -199,7 +199,7 @@ const WelcomeTunnel = ({
                 <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
                   <Target className="h-8 w-8 text-white transition-transform duration-300 hover:rotate-12" />
                 </div>
-                <h3 className="font-semibold text-white text-center">Hitta rätt. Snabbt. Enkelt.</h3>
+                <h3 className="text-white text-center font-semibold">Hitta rätt. Snabbt. Enkelt.</h3>
               </div>
 
               <div className="space-y-3 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white/5 p-4 rounded-xl cursor-pointer" style={{
@@ -208,7 +208,7 @@ const WelcomeTunnel = ({
                 <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
                   <Heart className="h-8 w-8 text-white transition-transform duration-300 hover:rotate-12" />
                 </div>
-                <h3 className="font-semibold text-white text-center">Jobbmatchning på ett helt nytt sätt</h3>
+                <h3 className="text-white text-center font-semibold">Jobbmatchning på ett helt nytt sätt</h3>
               </div>
             </div>
 
