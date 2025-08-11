@@ -244,13 +244,64 @@ const Auth = () => {
           });
           
           if (timeElapsed > tenMinutesInMs) {
-            console.log('❌ Token är redan utgången när länken klickades');
+            console.log('❌ Token är redan utgången när länken klickades (TUNNEL 2)');
             setRecoveryStatus('expired');
             setShowIntro(false);
             return;
           }
-          console.log('✅ Token är giltig när länken klickades');
         }
+        
+        // ANDRA KONTROLLEN: Testa om token redan är använd genom att försöka använda den
+        const testTokenUsage = async () => {
+          try {
+            if (hasAccessPair) {
+              console.log('🔄 Testing access token pair...');
+              const { error } = await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken
+              });
+              
+              if (error) {
+                console.log('❌ Access token pair failed:', error.message);
+                if (error.message.toLowerCase().includes('expired') || 
+                    error.message.toLowerCase().includes('invalid')) {
+                  console.log('❌ Token already used - setting status to used (TUNNEL 1)');
+                  setRecoveryStatus('used');
+                  setShowIntro(false);
+                  return;
+                }
+              }
+            } else if (hasTokenHash || hasToken) {
+              console.log('🔄 Testing OTP token...');
+              const { error } = await supabase.auth.verifyOtp({
+                token_hash: tokenHashParam || tokenParam || '',
+                type: 'recovery'
+              });
+              
+              if (error) {
+                console.log('❌ OTP verification failed:', error.message);
+                const errorMsg = error.message.toLowerCase();
+                if (errorMsg.includes('expired') || errorMsg.includes('invalid') || 
+                    errorMsg.includes('used') || errorMsg.includes('consumed')) {
+                  console.log('❌ Token already used - setting status to used (TUNNEL 1)');
+                  setRecoveryStatus('used');
+                  setShowIntro(false);
+                  return;
+                }
+              } else {
+                console.log('✅ OTP token is valid and has been consumed');
+              }
+            }
+          } catch (testError: any) {
+            console.log('❌ Token test error:', testError.message);
+            setRecoveryStatus('used');
+            setShowIntro(false);
+            return;
+          }
+        };
+        
+        // Kör token-test asynkront
+        testTokenUsage();
         
         // Spara token-informationen om den är giltig
         const payload = {
