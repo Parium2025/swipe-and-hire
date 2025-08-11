@@ -567,10 +567,11 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <Button
                 onClick={handleNext}
                 size="lg"
-                className="px-12 py-3 text-lg"
+                className="px-12 py-3 text-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl animate-pulse hover:animate-none relative overflow-hidden group"
               >
-                Kom igång
-                <ArrowRight className="h-4 w-4 ml-2" />
+                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <span className="relative z-10">Kom igång</span>
+                <ArrowRight className="h-4 w-4 ml-2 transition-transform duration-300 group-hover:translate-x-1 relative z-10" />
               </Button>
             ) : currentStep === totalSteps - 2 ? (
               <Button
