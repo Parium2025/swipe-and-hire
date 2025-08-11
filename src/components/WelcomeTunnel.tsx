@@ -179,7 +179,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     switch (currentStep) {
       case 0:
         return (
-          <div className="text-center space-y-8 py-8">
+          <div className="text-center space-y-0">
             <div className="space-y-6">
                 {/* Removed center icon for cleaner, minimal hero */}
                 <div className="h-2" />
@@ -550,7 +550,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         </div>
 
         {/* Footer navigation */}
-        <div className="px-6 -mt-4">
+        <div className="p-6">
           <div className="max-w-4xl mx-auto flex justify-center items-center px-8">
             {currentStep > 0 && currentStep !== totalSteps - 1 && (
               <Button
