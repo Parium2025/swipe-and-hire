@@ -255,40 +255,13 @@ const Auth = () => {
           }
         }
         
-        // Testa om token redan är använd genom att försöka använda den
-        console.log('🔍 Testing token validity...');
-        try {
-          if (hasAccessPair) {
-            const { error: sessionError } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken
-            });
-            
-            if (sessionError) {
-              console.log('❌ TUNNEL 1 - Access token already used/invalid:', sessionError.message);
-              setRecoveryStatus('used');
-              setShowIntro(false);
-              return;
-            }
-          } else if (hasTokenHash || hasToken) {
-            // Testa med verifyOtp utan att konsumera token
-            const testToken = tokenHashParam || tokenParam || '';
-            const { error: otpError } = await supabase.auth.verifyOtp({
-              token_hash: testToken,
-              type: 'recovery'
-            });
-            
-            if (otpError) {
-              console.log('❌ TUNNEL 1 - OTP token already used/invalid:', otpError.message);
-              setRecoveryStatus('used');
-              setShowIntro(false);
-              return;
-            }
-            
-            console.log('⚠️ Token was consumed during test - this is expected');
-          }
-        } catch (testError: any) {
-          console.log('❌ TUNNEL 1 - Token test failed:', testError.message);
+        // Kolla om denna specifika token redan har använts
+        const tokenIdentifier = tokenHashParam || tokenParam || accessToken || 'unknown';
+        const usedTokensKey = 'parium-used-reset-tokens';
+        const usedTokens = JSON.parse(localStorage.getItem(usedTokensKey) || '[]');
+        
+        if (usedTokens.includes(tokenIdentifier)) {
+          console.log('❌ TUNNEL 1 - Token already used (found in localStorage)');
           setRecoveryStatus('used');
           setShowIntro(false);
           return;
@@ -650,6 +623,20 @@ const Auth = () => {
 
       const result = await updatePassword(newPassword);
       if (result.error) throw result.error;
+
+      // Markera token som använd i localStorage  
+      const rawData = sessionStorage.getItem('parium-pending-recovery');
+      if (rawData) {
+        const pending = JSON.parse(rawData);
+        const tokenIdentifier = pending.token_hash || pending.token || pending.access_token || 'unknown';
+        const usedTokensKey = 'parium-used-reset-tokens';
+        const usedTokens = JSON.parse(localStorage.getItem(usedTokensKey) || '[]');
+        if (!usedTokens.includes(tokenIdentifier)) {
+          usedTokens.push(tokenIdentifier);
+          localStorage.setItem(usedTokensKey, JSON.stringify(usedTokens));
+          console.log('✅ Token marked as used in localStorage');
+        }
+      }
 
       sessionStorage.removeItem('parium-pending-recovery');
       navigate('/');
