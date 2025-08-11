@@ -567,7 +567,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <Button
                 onClick={handleNext}
                 size="lg"
-                className="px-12 py-3 text-lg hover:scale-110 transition-transform duration-200 hover:shadow-2xl -mt-8"
+                className="px-12 py-3 text-lg hover:scale-110 transition-transform duration-200 hover:shadow-2xl -mt-16"
               >
                 Kom igång
                 <ArrowRight className="h-4 w-4 ml-2 transition-transform duration-200 hover:translate-x-1" />
