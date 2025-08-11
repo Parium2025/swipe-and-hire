@@ -197,11 +197,25 @@ const Auth = () => {
         const desc = (errorCode || errorDescription || '').toLowerCase();
         console.log('🔍 AUTH ERROR DETECTED:', { errorCode, errorDescription, desc });
         
-        if (desc.includes('expire') || desc.includes('invalid') || desc.includes('session')) {
-          console.log('❌ Setting recovery status to expired due to error');
-          setRecoveryStatus('expired');
-        } else if (desc.includes('used') || desc.includes('consumed') || desc.includes('already')) {
-          console.log('❌ Setting recovery status to used due to error');
+        // Kolla först tidsgräns
+        if (issuedMs) {
+          const currentTime = Date.now();
+          const tenMinutesInMs = 10 * 60 * 1000;
+          const timeElapsed = currentTime - issuedMs;
+          
+          if (timeElapsed > tenMinutesInMs) {
+            console.log('❌ TUNNEL 2 - Link expired (time)');
+            setRecoveryStatus('expired');
+            setShowIntro(false);
+            return;
+          }
+        }
+        
+        // Om tiden är OK men vi har fel = token redan använd
+        if (desc.includes('expire') || desc.includes('invalid') || desc.includes('session') || 
+            desc.includes('used') || desc.includes('consumed') || desc.includes('already') ||
+            desc.includes('not found') || desc.includes('token')) {
+          console.log('❌ TUNNEL 1 - Token already used');
           setRecoveryStatus('used');
         } else {
           console.log('❌ Setting recovery status to invalid due to unknown error');
