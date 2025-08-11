@@ -255,18 +255,6 @@ const Auth = () => {
           }
         }
         
-        // Kolla om denna specifika token redan har använts
-        const tokenIdentifier = tokenHashParam || tokenParam || accessToken || 'unknown';
-        const usedTokensKey = 'parium-used-reset-tokens';
-        const usedTokens = JSON.parse(localStorage.getItem(usedTokensKey) || '[]');
-        
-        if (usedTokens.includes(tokenIdentifier)) {
-          console.log('❌ TUNNEL 1 - Token already used (found in localStorage)');
-          setRecoveryStatus('used');
-          setShowIntro(false);
-          return;
-        }
-        
         // Spara token-informationen
         const payload = {
           type: tokenType || 'recovery',
@@ -625,19 +613,6 @@ const Auth = () => {
       const result = await updatePassword(newPassword);
       if (result.error) throw result.error;
 
-      // Markera token som använd i localStorage  
-      const rawData = sessionStorage.getItem('parium-pending-recovery');
-      if (rawData) {
-        const pending = JSON.parse(rawData);
-        const tokenIdentifier = pending.token_hash || pending.token || pending.access_token || 'unknown';
-        const usedTokensKey = 'parium-used-reset-tokens';
-        const usedTokens = JSON.parse(localStorage.getItem(usedTokensKey) || '[]');
-        if (!usedTokens.includes(tokenIdentifier)) {
-          usedTokens.push(tokenIdentifier);
-          localStorage.setItem(usedTokensKey, JSON.stringify(usedTokens));
-          console.log('✅ Token marked as used in localStorage');
-        }
-      }
 
       sessionStorage.removeItem('parium-pending-recovery');
       navigate('/');
