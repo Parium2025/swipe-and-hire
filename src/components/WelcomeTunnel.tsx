@@ -491,7 +491,7 @@ const WelcomeTunnel = ({
                 Tillbaka
               </Button>}
 
-            {currentStep === 0 ? <Button onClick={handleNext} size="lg" className="px-12 py-3 text-lg hover:scale-110 transition-transform duration-200 hover:shadow-2xl -mt-24">
+            {currentStep === 0 ? <Button onClick={handleNext} size="lg" className="px-12 py-3 text-lg hover:scale-110 transition-transform duration-200 hover:shadow-2xl">
                 Kom igång
                 <ArrowRight className="h-4 w-4 ml-2 transition-transform duration-200 hover:translate-x-1" />
               </Button> : currentStep === totalSteps - 2 ? <Button onClick={handleSubmit} disabled={!isStepValid() || isSubmitting} className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-8">
