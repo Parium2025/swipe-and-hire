@@ -274,7 +274,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             
             <div className="space-y-4 max-w-md mx-auto">
               <div>
-                <Label htmlFor="firstName">Förnamn</Label>
+                <Label htmlFor="firstName" className="text-white">Förnamn</Label>
                 <Input 
                   id="firstName" 
                   value={formData.firstName} 
@@ -284,7 +284,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 />
               </div>
               <div>
-                <Label htmlFor="lastName">Efternamn</Label>
+                <Label htmlFor="lastName" className="text-white">Efternamn</Label>
                 <Input 
                   id="lastName" 
                   value={formData.lastName} 
@@ -294,7 +294,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 />
               </div>
               <div>
-                <Label htmlFor="phone">
+                <Label htmlFor="phone" className="text-white">
                   <Phone className="h-4 w-4 inline mr-2" />
                   Telefonnummer
                 </Label>
