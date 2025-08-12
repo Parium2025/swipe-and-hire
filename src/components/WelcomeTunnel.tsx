@@ -704,7 +704,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <Button
                 variant="outline"
                 onClick={handlePrevious}
-                className="flex-1 py-3 bg-white/10 border-white/20 text-white hover:bg-white/20"
+                className="py-3 bg-white/10 border-white/20 text-white hover:bg-white/20 text-sm px-4"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Tillbaka
@@ -715,7 +715,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <Button
                 onClick={handleSubmit}
                 disabled={!isStepValid() || isSubmitting}
-                className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold"
+                className="flex-1 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold text-lg"
               >
                 {isSubmitting ? (
                   <>
@@ -733,7 +733,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <Button
                 onClick={handleNext}
                 disabled={!isStepValid()}
-                className="px-8 py-2 bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg mx-auto"
+                className="flex-1 py-4 bg-primary hover:bg-primary/90 text-white font-semibold text-lg rounded-lg"
               >
                 {currentStep === 0 ? 'Kom igång' : 'Nästa'}
                 <ArrowRight className="h-4 w-4 ml-2" />
