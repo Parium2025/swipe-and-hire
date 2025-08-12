@@ -36,14 +36,15 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   });
   const [phoneError, setPhoneError] = useState('');
 
-  // Smart phone validation for Swedish numbers
+  // Smart phone validation for Swedish numbers - requires complete number
   const validatePhoneNumber = (phoneNumber: string) => {
-    if (!phoneNumber.trim()) return { isValid: true, error: '' };
+    if (!phoneNumber.trim()) return { isValid: false, error: 'Telefonnummer är obligatoriskt' };
     
     const cleaned = phoneNumber.replace(/[^\d+]/g, '');
     let isSwedish = false;
     let digitsOnly = '';
     
+    // Check different Swedish number formats
     if (cleaned.startsWith('+46')) {
       isSwedish = true;
       digitsOnly = cleaned.substring(3);
@@ -54,9 +55,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       isSwedish = true;
       digitsOnly = cleaned.substring(1);
     } else if (cleaned.match(/^\d+$/)) {
-      if (cleaned.length >= 9 && cleaned.length <= 11) {
+      // If it's just numbers, check if it could be a Swedish mobile (9 digits)
+      if (cleaned.length === 9) {
         isSwedish = true;
-        digitsOnly = cleaned.startsWith('0') ? cleaned.substring(1) : cleaned;
+        digitsOnly = cleaned;
       }
     }
     
@@ -64,12 +66,25 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       if (digitsOnly.length !== 9) {
         return {
           isValid: false,
-          error: `Svenska telefonnummer ska ha 10 siffror (du har ${digitsOnly.length + 1})`
+          error: `Svenska telefonnummer ska ha 10 siffror (du har ${digitsOnly.length + (cleaned.startsWith('+46') ? 3 : cleaned.startsWith('0046') ? 4 : 1)})`
         };
       }
+      
+      // Check if it starts with valid Swedish mobile prefixes (7, 70-76)
+      if (!digitsOnly.startsWith('7')) {
+        return {
+          isValid: false,
+          error: 'Ange ett giltigt svenskt mobilnummer (börjar med 07)'
+        };
+      }
+      
+      return { isValid: true, error: '' };
     }
     
-    return { isValid: true, error: '' };
+    return {
+      isValid: false,
+      error: 'Ange ett giltigt svenskt telefonnummer (ex: 070-123 45 67 eller +46 70 123 45 67)'
+    };
   };
 
   const handlePhoneChange = (value: string) => {
