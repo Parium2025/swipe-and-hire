@@ -22,6 +22,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
 
   // Form data
   const [formData, setFormData] = useState({
@@ -141,6 +143,9 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   };
 
   const uploadProfileMedia = async (file: File) => {
+    const isVideo = file.type.startsWith('video/');
+    if (isVideo) setIsUploadingVideo(true);
+    
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user?.id}/profile-media.${fileExt}`;
@@ -174,10 +179,14 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         description: "Kunde inte ladda upp filen.",
         variant: "destructive"
       });
+    } finally {
+      if (isVideo) setIsUploadingVideo(false);
     }
   };
 
   const uploadCoverImage = async (file: File) => {
+    setIsUploadingCover(true);
+    
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user?.id}/cover-image.${fileExt}`;
@@ -209,6 +218,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         description: "Kunde inte ladda upp cover-bilden.",
         variant: "destructive"
       });
+    } finally {
+      setIsUploadingCover(false);
     }
   };
 
@@ -468,8 +479,16 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Label htmlFor="profileMedia" className="text-white cursor-pointer hover:text-white/80 transition-colors">
                   Klicka för att välja en bild eller video (max 30 sek)
                 </Label>
-                <Input type="file" id="profileMedia" accept="image/*,video/*" className="hidden" onChange={handleMediaChange} />
-                {formData.profileImageUrl && (
+                <Input type="file" id="profileMedia" accept="image/*,video/*" className="hidden" onChange={handleMediaChange} disabled={isUploadingVideo} />
+                
+                {isUploadingVideo && (
+                  <Badge variant="secondary" className="bg-blue-500/20 text-blue-100 animate-pulse">
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-100 mr-2"></div>
+                    Laddar upp video...
+                  </Badge>
+                )}
+                
+                {formData.profileImageUrl && !isUploadingVideo && (
                   <Badge variant="secondary" className="bg-white/20 text-white">
                     <Check className="h-3 w-3 mr-1" />
                     {formData.profileMediaType === 'video' ? 'Video' : 'Bild'} uppladdad!
@@ -487,12 +506,28 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     variant="outline" 
                     size="sm"
                     onClick={() => document.getElementById('coverImage')?.click()}
-                    className="bg-white/20 border-white/30 text-white hover:bg-white/30"
+                    disabled={isUploadingCover}
+                    className="bg-white/20 border-white/30 text-white hover:bg-white/30 disabled:opacity-50"
                   >
-                    {formData.coverImageUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
+                    {isUploadingCover ? (
+                      <>
+                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
+                        Laddar upp...
+                      </>
+                    ) : (
+                      formData.coverImageUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'
+                    )}
                   </Button>
-                  <Input type="file" id="coverImage" accept="image/*" className="hidden" onChange={handleCoverChange} />
-                  {formData.coverImageUrl && (
+                  <Input type="file" id="coverImage" accept="image/*" className="hidden" onChange={handleCoverChange} disabled={isUploadingCover} />
+                  
+                  {isUploadingCover && (
+                    <Badge variant="secondary" className="bg-blue-500/20 text-blue-100 text-xs animate-pulse">
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-100 mr-1"></div>
+                      Laddar upp cover-bild...
+                    </Badge>
+                  )}
+                  
+                  {formData.coverImageUrl && !isUploadingCover && (
                     <Badge variant="secondary" className="bg-white/20 text-white text-xs">
                       <Check className="h-3 w-3 mr-1" />
                       Cover-bild uppladdad!
