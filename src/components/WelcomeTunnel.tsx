@@ -516,7 +516,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <Button
                 onClick={handleNext}
                 disabled={!isStepValid()}
-                className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold"
+                className="px-8 py-2 bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg mx-auto"
               >
                 {currentStep === 0 ? 'Kom igång' : 'Nästa'}
                 <ArrowRight className="h-4 w-4 ml-2" />
