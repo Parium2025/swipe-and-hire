@@ -254,8 +254,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
                 <User className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-2xl font-bold mb-2">Låt oss lära känna dig</h2>
-              <p className="text-muted-foreground">Vad heter du?</p>
+              <h2 className="text-2xl font-bold mb-2 text-white">Låt oss lära känna dig</h2>
             </div>
             
             <div className="space-y-4 max-w-md mx-auto">
