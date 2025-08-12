@@ -32,6 +32,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     phone: profile?.phone || '',
     profileImageUrl: profile?.profile_image_url || '',
     profileMediaType: 'image', // 'image' or 'video'
+    coverImageUrl: '', // Cover image for videos
     cvUrl: '',
     interests: [] as string[]
   });
@@ -176,6 +177,41 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     }
   };
 
+  const uploadCoverImage = async (file: File) => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user?.id}/cover-image.${fileExt}`;
+      
+      await supabase.storage.from('job-applications').remove([fileName]);
+      
+      const { error: uploadError } = await supabase.storage
+        .from('job-applications')
+        .upload(fileName, file, { upsert: true });
+      
+      if (uploadError) throw uploadError;
+      
+      const { data: { publicUrl } } = supabase.storage
+        .from('job-applications')
+        .getPublicUrl(fileName);
+      
+      const coverUrl = `${publicUrl}?t=${Date.now()}`;
+      
+      handleInputChange('coverImageUrl', coverUrl);
+      
+      toast({
+        title: "Cover-bild uppladdad!",
+        description: "Din cover-bild för videon har uppdaterats."
+      });
+    } catch (error) {
+      console.error('Cover upload error:', error);
+      toast({
+        title: "Fel vid uppladdning",
+        description: "Kunde inte ladda upp cover-bilden.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -207,6 +243,21 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         toast({
           title: "Fel filtyp",
           description: "Vänligen välj en bild- eller videofil.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.type.startsWith('image/')) {
+        uploadCoverImage(file);
+      } else {
+        toast({
+          title: "Fel filtyp",
+          description: "Cover-bilden måste vara en bildfil.",
           variant: "destructive"
         });
       }
@@ -380,14 +431,21 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <div className="relative">
                 {formData.profileImageUrl && formData.profileMediaType === 'video' ? (
                   <div className="w-32 h-32 cursor-pointer border-4 border-white/20 hover:border-white/40 transition-all rounded-full overflow-hidden" onClick={() => document.getElementById('profileMedia')?.click()}>
-                    <video 
-                      src={formData.profileImageUrl} 
-                      className="w-full h-full object-cover"
-                      muted
-                      loop
-                      autoPlay
-                      playsInline
-                    />
+                    {formData.coverImageUrl ? (
+                      <img 
+                        src={formData.coverImageUrl} 
+                        alt="Video cover"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <video 
+                        src={formData.profileImageUrl} 
+                        className="w-full h-full object-cover"
+                        loop
+                        autoPlay
+                        playsInline
+                      />
+                    )}
                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                       <Play className="h-8 w-8 text-white" />
                     </div>
@@ -418,6 +476,30 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   </Badge>
                 )}
               </div>
+
+              {/* Cover image upload for videos */}
+              {formData.profileMediaType === 'video' && formData.profileImageUrl && (
+                <div className="space-y-2 text-center mt-4 p-4 bg-white/10 rounded-lg backdrop-blur-sm">
+                  <Label htmlFor="coverImage" className="text-white text-sm">
+                    Cover-bild för video (valfritt)
+                  </Label>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => document.getElementById('coverImage')?.click()}
+                    className="bg-white/20 border-white/30 text-white hover:bg-white/30"
+                  >
+                    {formData.coverImageUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
+                  </Button>
+                  <Input type="file" id="coverImage" accept="image/*" className="hidden" onChange={handleCoverChange} />
+                  {formData.coverImageUrl && (
+                    <Badge variant="secondary" className="bg-white/20 text-white text-xs">
+                      <Check className="h-3 w-3 mr-1" />
+                      Cover-bild uppladdad!
+                    </Badge>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         );
