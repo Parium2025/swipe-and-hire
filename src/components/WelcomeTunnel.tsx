@@ -346,24 +346,32 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
                 <Camera className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-2xl font-bold mb-2">Profilbild</h2>
-              <p className="text-muted-foreground">Ladda upp en bild så att andra kan känna igen dig</p>
+              <h2 className="text-2xl font-bold mb-2 text-white">Profilbild</h2>
+              <p className="text-white/80">Ladda upp en bild så att andra kan känna igen dig</p>
             </div>
 
             <div className="flex flex-col items-center space-y-4">
-              <Avatar className="w-32 h-32">
-                {formData.profileImageUrl ? (
-                  <AvatarImage src={formData.profileImageUrl} alt="Profile picture" />
-                ) : (
-                  <AvatarFallback>{formData.firstName?.[0]}{formData.lastName?.[0]}</AvatarFallback>
-                )}
-              </Avatar>
+              <div className="relative">
+                <Avatar className="w-32 h-32 cursor-pointer border-4 border-white/20 hover:border-white/40 transition-all" onClick={() => document.getElementById('profileImage')?.click()}>
+                  {formData.profileImageUrl ? (
+                    <AvatarImage src={formData.profileImageUrl} alt="Profile picture" />
+                  ) : (
+                    <AvatarFallback className="text-2xl bg-white/20 text-white">{formData.firstName?.[0]}{formData.lastName?.[0]}</AvatarFallback>
+                  )}
+                </Avatar>
+                <div className="absolute bottom-0 right-0 bg-primary text-white rounded-full p-2 cursor-pointer shadow-lg hover:bg-primary/80 transition-colors" onClick={() => document.getElementById('profileImage')?.click()}>
+                  <Camera className="h-4 w-4" />
+                </div>
+              </div>
 
               <div className="space-y-2 text-center">
-                <Label htmlFor="profileImage">Välj en bild att ladda upp</Label>
+                <Label htmlFor="profileImage" className="text-white cursor-pointer hover:text-white/80 transition-colors">Klicka för att välja en bild</Label>
                 <Input type="file" id="profileImage" accept="image/*" className="hidden" onChange={handleImageChange} />
                 {formData.profileImageUrl && (
-                  <Badge variant="secondary">Bild uppladdad!</Badge>
+                  <Badge variant="secondary" className="bg-white/20 text-white">
+                    <Check className="h-3 w-3 mr-1" />
+                    Bild uppladdad!
+                  </Badge>
                 )}
               </div>
             </div>
