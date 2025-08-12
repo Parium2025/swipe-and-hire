@@ -41,45 +41,66 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     if (!phoneNumber.trim()) return { isValid: false, error: 'Telefonnummer är obligatoriskt' };
     
     const cleaned = phoneNumber.replace(/[^\d+]/g, '');
-    let isSwedish = false;
-    let digitsOnly = '';
-    let totalDigits = 0;
     
     // Check different Swedish number formats
     if (cleaned.startsWith('+46')) {
-      isSwedish = true;
-      digitsOnly = cleaned.substring(3);
-      totalDigits = digitsOnly.length + 3; // +46 + digits
-    } else if (cleaned.startsWith('0046')) {
-      isSwedish = true;
-      digitsOnly = cleaned.substring(4);
-      totalDigits = digitsOnly.length + 4; // 0046 + digits
-    } else if (cleaned.startsWith('0')) {
-      isSwedish = true;
-      digitsOnly = cleaned.substring(1);
-      totalDigits = digitsOnly.length + 1; // 0 + digits
-    } else if (cleaned.match(/^\d+$/)) {
-      // If it's just numbers, check if it could be a Swedish mobile (9 digits)
-      if (cleaned.length === 9) {
-        isSwedish = true;
-        digitsOnly = cleaned;
-        totalDigits = cleaned.length;
-      }
-    }
-    
-    if (isSwedish) {
-      if (digitsOnly.length !== 9) {
+      const digitsAfterPrefix = cleaned.substring(3);
+      
+      // Need exactly 9 digits after +46 (total 12 characters: +46xxxxxxxxx)
+      if (digitsAfterPrefix.length !== 9) {
         return {
           isValid: false,
-          error: `Svenska telefonnummer ska ha 10 siffror (du har ${totalDigits})`
+          error: `+46-nummer behöver 9 siffror efter +46 (du har ${digitsAfterPrefix.length})`
         };
       }
       
       // Check if it starts with valid Swedish mobile prefixes (70-76)
-      if (!digitsOnly.match(/^7[0-6]/)) {
+      if (!digitsAfterPrefix.match(/^7[0-6]/)) {
+        return {
+          isValid: false,
+          error: 'Ange ett giltigt svenskt mobilnummer (ex: +46 70, +46 73, +46 76)'
+        };
+      }
+      
+      return { isValid: true, error: '' };
+      
+    } else if (cleaned.startsWith('0046')) {
+      const digitsAfterPrefix = cleaned.substring(4);
+      
+      if (digitsAfterPrefix.length !== 9) {
+        return {
+          isValid: false,
+          error: `0046-nummer behöver 9 siffror efter 0046 (du har ${digitsAfterPrefix.length})`
+        };
+      }
+      
+      if (!digitsAfterPrefix.match(/^7[0-6]/)) {
+        return {
+          isValid: false,
+          error: 'Ange ett giltigt svenskt mobilnummer (ex: 0046 70, 0046 73)'
+        };
+      }
+      
+      return { isValid: true, error: '' };
+      
+    } else if (cleaned.startsWith('0') && cleaned.length === 10) {
+      const digitsAfterZero = cleaned.substring(1);
+      
+      if (!digitsAfterZero.match(/^7[0-6]/)) {
         return {
           isValid: false,
           error: 'Ange ett giltigt svenskt mobilnummer (ex: 070, 073, 076)'
+        };
+      }
+      
+      return { isValid: true, error: '' };
+      
+    } else if (cleaned.match(/^\d{9}$/)) {
+      // Just 9 digits, check if it's a valid mobile number
+      if (!cleaned.match(/^7[0-6]/)) {
+        return {
+          isValid: false,
+          error: 'Mobilnummer måste börja med 70-76'
         };
       }
       
