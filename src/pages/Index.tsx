@@ -66,11 +66,11 @@ const Index = () => {
   console.log('Profile onboarding_completed (type):', typeof profile?.onboarding_completed);
   console.log('!profile?.onboarding_completed:', !profile?.onboarding_completed);
   console.log('Needs onboarding:', needsOnboarding);
-  console.log('Should show WelcomeTunnel:', needsOnboarding && userRole?.role === 'job_seeker');
+  console.log('Should show WelcomeTunnel:', needsOnboarding && (profile as any)?.role === 'job_seeker');
   console.log('========================');
   
   // For job seekers, show WelcomeTunnel if onboarding not completed
-  if (needsOnboarding && (profile as any).role === 'job_seeker') {
+  if (needsOnboarding && (profile as any)?.role === 'job_seeker') {
     return <WelcomeTunnel onComplete={() => window.location.reload()} />;
   }
   
