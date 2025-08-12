@@ -44,12 +44,13 @@ const WelcomeTunnel = ({
 
   // Smart phone validation for Swedish numbers
   const validatePhoneNumber = (phoneNumber: string) => {
-    if (!phoneNumber.trim()) return { isValid: true, error: '' };
-    
+    if (!phoneNumber.trim()) return {
+      isValid: true,
+      error: ''
+    };
     const cleaned = phoneNumber.replace(/[^\d+]/g, '');
     let isSwedish = false;
     let digitsOnly = '';
-    
     if (cleaned.startsWith('+46')) {
       isSwedish = true;
       digitsOnly = cleaned.substring(3);
@@ -65,7 +66,6 @@ const WelcomeTunnel = ({
         digitsOnly = cleaned.startsWith('0') ? cleaned.substring(1) : cleaned;
       }
     }
-    
     if (isSwedish) {
       if (digitsOnly.length !== 9) {
         return {
@@ -74,16 +74,16 @@ const WelcomeTunnel = ({
         };
       }
     }
-    
-    return { isValid: true, error: '' };
+    return {
+      isValid: true,
+      error: ''
+    };
   };
-
   const handlePhoneChange = (value: string) => {
     handleInputChange('phone', value);
     const validation = validatePhoneNumber(value);
     setPhoneError(validation.error);
   };
-
   const totalSteps = 7; // Introduktion + 5 profil steg + slutskärm
   const progress = currentStep / (totalSteps - 1) * 100;
   const handleInputChange = (field: string, value: string | string[]) => {
@@ -282,7 +282,7 @@ const WelcomeTunnel = ({
               <div>
                 <Label htmlFor="phone">Telefonnummer</Label>
                 <Input id="phone" type="tel" required value={formData.phone} onChange={e => handlePhoneChange(e.target.value)} placeholder="+46 70 123 45 67" className="text-lg py-3" />
-                {phoneError && (<p className="text-destructive text-xs mt-1">{phoneError}</p>)}
+                {phoneError && <p className="text-destructive text-xs mt-1">{phoneError}</p>}
             </div>
             </div>
           </div>;
