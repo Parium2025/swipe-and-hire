@@ -43,22 +43,27 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     const cleaned = phoneNumber.replace(/[^\d+]/g, '');
     let isSwedish = false;
     let digitsOnly = '';
+    let totalDigits = 0;
     
     // Check different Swedish number formats
     if (cleaned.startsWith('+46')) {
       isSwedish = true;
       digitsOnly = cleaned.substring(3);
+      totalDigits = digitsOnly.length + 3; // +46 + digits
     } else if (cleaned.startsWith('0046')) {
       isSwedish = true;
       digitsOnly = cleaned.substring(4);
+      totalDigits = digitsOnly.length + 4; // 0046 + digits
     } else if (cleaned.startsWith('0')) {
       isSwedish = true;
       digitsOnly = cleaned.substring(1);
+      totalDigits = digitsOnly.length + 1; // 0 + digits
     } else if (cleaned.match(/^\d+$/)) {
       // If it's just numbers, check if it could be a Swedish mobile (9 digits)
       if (cleaned.length === 9) {
         isSwedish = true;
         digitsOnly = cleaned;
+        totalDigits = cleaned.length;
       }
     }
     
@@ -66,15 +71,15 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       if (digitsOnly.length !== 9) {
         return {
           isValid: false,
-          error: `Svenska telefonnummer ska ha 10 siffror (du har ${digitsOnly.length + (cleaned.startsWith('+46') ? 3 : cleaned.startsWith('0046') ? 4 : 1)})`
+          error: `Svenska telefonnummer ska ha 10 siffror (du har ${totalDigits})`
         };
       }
       
-      // Check if it starts with valid Swedish mobile prefixes (7, 70-76)
-      if (!digitsOnly.startsWith('7')) {
+      // Check if it starts with valid Swedish mobile prefixes (70-76)
+      if (!digitsOnly.match(/^7[0-6]/)) {
         return {
           isValid: false,
-          error: 'Ange ett giltigt svenskt mobilnummer (börjar med 07)'
+          error: 'Ange ett giltigt svenskt mobilnummer (ex: 070, 073, 076)'
         };
       }
       
