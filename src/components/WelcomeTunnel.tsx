@@ -525,6 +525,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };
