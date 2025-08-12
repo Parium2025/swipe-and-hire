@@ -468,7 +468,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             <span className="text-sm text-white font-medium">Steg {currentStep} av {totalSteps - 2}</span>
             <span className="text-sm text-white font-medium">{Math.round(progress)}%</span>
           </div>
-          <Progress value={progress} className="h-2 bg-white/20" />
+          <div className="relative h-2 w-full overflow-hidden rounded-full bg-primary/30">
+            <div 
+              className="h-full bg-white transition-all duration-300" 
+              style={{ width: `${progress}%` }}
+            />
+          </div>
         </div>
       )}
 
