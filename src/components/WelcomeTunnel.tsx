@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import phoneWithPariumLogo from '@/assets/phone-with-parium-logo.jpg';
 import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone, Play, Video } from 'lucide-react';
+import ProfileVideo from '@/components/ProfileVideo';
 
 interface WelcomeTunnelProps {
   onComplete: () => void;
@@ -441,26 +442,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
                 {formData.profileImageUrl && formData.profileMediaType === 'video' ? (
-                  <div className="w-32 h-32 cursor-pointer border-4 border-white/20 hover:border-white/40 transition-all rounded-full overflow-hidden" onClick={() => document.getElementById('profileMedia')?.click()}>
-                    {formData.coverImageUrl ? (
-                      <img 
-                        src={formData.coverImageUrl} 
-                        alt="Video cover"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <video 
-                        src={formData.profileImageUrl} 
-                        className="w-full h-full object-cover"
-                        loop
-                        autoPlay
-                        playsInline
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                      <Play className="h-8 w-8 text-white" />
-                    </div>
-                  </div>
+                  <ProfileVideo
+                    videoUrl={formData.profileImageUrl}
+                    coverImageUrl={formData.coverImageUrl}
+                    alt="Profile video"
+                    className="w-32 h-32 cursor-pointer border-4 border-white/20 hover:border-white/40 transition-all rounded-full overflow-hidden"
+                  />
                 ) : (
                   <Avatar className="w-32 h-32 cursor-pointer border-4 border-white/20 hover:border-white/40 transition-all" onClick={() => document.getElementById('profileMedia')?.click()}>
                     {formData.profileImageUrl ? (
