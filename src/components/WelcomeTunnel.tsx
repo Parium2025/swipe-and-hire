@@ -11,7 +11,7 @@ import FileUpload from '@/components/FileUpload';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import phoneWithPariumLogo from '@/assets/phone-with-parium-logo.jpg';
-import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone } from 'lucide-react';
+import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone, Play, Video } from 'lucide-react';
 
 interface WelcomeTunnelProps {
   onComplete: () => void;
@@ -31,6 +31,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     location: profile?.location || '',
     phone: profile?.phone || '',
     profileImageUrl: profile?.profile_image_url || '',
+    profileMediaType: 'image', // 'image' or 'video'
     cvUrl: '',
     interests: [] as string[]
   });
@@ -138,10 +139,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     }
   };
 
-  const uploadProfileImage = async (file: File) => {
+  const uploadProfileMedia = async (file: File) => {
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}/profile-image.${fileExt}`;
+      const fileName = `${user?.id}/profile-media.${fileExt}`;
       
       await supabase.storage.from('job-applications').remove([fileName]);
       
@@ -155,32 +156,57 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         .from('job-applications')
         .getPublicUrl(fileName);
       
-      const imageUrl = `${publicUrl}?t=${Date.now()}`;
-      handleInputChange('profileImageUrl', imageUrl);
+      const mediaUrl = `${publicUrl}?t=${Date.now()}`;
+      const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
+      
+      handleInputChange('profileImageUrl', mediaUrl);
+      handleInputChange('profileMediaType', mediaType);
       
       toast({
-        title: "Profilbild uppladdad!",
-        description: "Din profilbild har uppdaterats."
+        title: `Profil${mediaType === 'video' ? 'video' : 'bild'} uppladdad!`,
+        description: `Din profil${mediaType === 'video' ? 'video' : 'bild'} har uppdaterats.`
       });
     } catch (error) {
       console.error('Upload error:', error);
       toast({
         title: "Fel vid uppladdning",
-        description: "Kunde inte ladda upp profilbilden.",
+        description: "Kunde inte ladda upp filen.",
         variant: "destructive"
       });
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.type.startsWith('image/')) {
-        uploadProfileImage(file);
+      // Accept both images and videos
+      if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+        // Check video duration if it's a video
+        if (file.type.startsWith('video/')) {
+          const video = document.createElement('video');
+          video.preload = 'metadata';
+          
+          video.onloadedmetadata = () => {
+            window.URL.revokeObjectURL(video.src);
+            if (video.duration <= 30) { // Max 30 seconds
+              uploadProfileMedia(file);
+            } else {
+              toast({
+                title: "Video för lång",
+                description: "Videon får vara max 30 sekunder lång.",
+                variant: "destructive"
+              });
+            }
+          };
+          
+          video.src = URL.createObjectURL(file);
+        } else {
+          uploadProfileMedia(file);
+        }
       } else {
         toast({
           title: "Fel filtyp",
-          description: "Vänligen välj en bildfil.",
+          description: "Vänligen välj en bild- eller videofil.",
           variant: "destructive"
         });
       }
@@ -352,25 +378,43 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
-                <Avatar className="w-32 h-32 cursor-pointer border-4 border-white/20 hover:border-white/40 transition-all" onClick={() => document.getElementById('profileImage')?.click()}>
-                  {formData.profileImageUrl ? (
-                    <AvatarImage src={formData.profileImageUrl} alt="Profile picture" />
-                  ) : (
-                    <AvatarFallback className="text-2xl bg-white/20 text-white">{formData.firstName?.[0]}{formData.lastName?.[0]}</AvatarFallback>
-                  )}
-                </Avatar>
-                <div className="absolute bottom-0 right-0 bg-primary text-white rounded-full p-2 cursor-pointer shadow-lg hover:bg-primary/80 transition-colors" onClick={() => document.getElementById('profileImage')?.click()}>
-                  <Camera className="h-4 w-4" />
+                {formData.profileImageUrl && formData.profileMediaType === 'video' ? (
+                  <div className="w-32 h-32 cursor-pointer border-4 border-white/20 hover:border-white/40 transition-all rounded-full overflow-hidden" onClick={() => document.getElementById('profileMedia')?.click()}>
+                    <video 
+                      src={formData.profileImageUrl} 
+                      className="w-full h-full object-cover"
+                      muted
+                      loop
+                      autoPlay
+                      playsInline
+                    />
+                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                      <Play className="h-8 w-8 text-white" />
+                    </div>
+                  </div>
+                ) : (
+                  <Avatar className="w-32 h-32 cursor-pointer border-4 border-white/20 hover:border-white/40 transition-all" onClick={() => document.getElementById('profileMedia')?.click()}>
+                    {formData.profileImageUrl ? (
+                      <AvatarImage src={formData.profileImageUrl} alt="Profile picture" />
+                    ) : (
+                      <AvatarFallback className="text-2xl bg-white/20 text-white">{formData.firstName?.[0]}{formData.lastName?.[0]}</AvatarFallback>
+                    )}
+                  </Avatar>
+                )}
+                <div className="absolute bottom-0 right-0 bg-primary text-white rounded-full p-2 cursor-pointer shadow-lg hover:bg-primary/80 transition-colors" onClick={() => document.getElementById('profileMedia')?.click()}>
+                  {formData.profileMediaType === 'video' ? <Video className="h-4 w-4" /> : <Camera className="h-4 w-4" />}
                 </div>
               </div>
 
               <div className="space-y-2 text-center">
-                <Label htmlFor="profileImage" className="text-white cursor-pointer hover:text-white/80 transition-colors">Klicka för att välja en bild</Label>
-                <Input type="file" id="profileImage" accept="image/*" className="hidden" onChange={handleImageChange} />
+                <Label htmlFor="profileMedia" className="text-white cursor-pointer hover:text-white/80 transition-colors">
+                  Klicka för att välja en bild eller video (max 30 sek)
+                </Label>
+                <Input type="file" id="profileMedia" accept="image/*,video/*" className="hidden" onChange={handleMediaChange} />
                 {formData.profileImageUrl && (
                   <Badge variant="secondary" className="bg-white/20 text-white">
                     <Check className="h-3 w-3 mr-1" />
-                    Bild uppladdad!
+                    {formData.profileMediaType === 'video' ? 'Video' : 'Bild'} uppladdad!
                   </Badge>
                 )}
               </div>
