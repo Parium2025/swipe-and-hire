@@ -343,7 +343,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             </div>
 
             <div className="flex flex-col items-center space-y-4">
-              <FileUpload onChange={(url) => handleInputChange('cvUrl', url)} />
+              <FileUpload onFileUploaded={(url) => handleInputChange('cvUrl', url)} onFileRemoved={() => handleInputChange('cvUrl', '')} acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']} maxFileSize={10 * 1024 * 1024} currentFile={formData.cvUrl ? { url: formData.cvUrl, name: 'CV' } : undefined} />
               {formData.cvUrl && (
                 <Badge variant="secondary">CV uppladdat!</Badge>
               )}
