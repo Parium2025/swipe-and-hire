@@ -40,6 +40,50 @@ const WelcomeTunnel = ({
     cvUrl: '',
     interests: [] as string[]
   });
+  const [phoneError, setPhoneError] = useState('');
+
+  // Smart phone validation for Swedish numbers
+  const validatePhoneNumber = (phoneNumber: string) => {
+    if (!phoneNumber.trim()) return { isValid: true, error: '' };
+    
+    const cleaned = phoneNumber.replace(/[^\d+]/g, '');
+    let isSwedish = false;
+    let digitsOnly = '';
+    
+    if (cleaned.startsWith('+46')) {
+      isSwedish = true;
+      digitsOnly = cleaned.substring(3);
+    } else if (cleaned.startsWith('0046')) {
+      isSwedish = true;
+      digitsOnly = cleaned.substring(4);
+    } else if (cleaned.startsWith('0')) {
+      isSwedish = true;
+      digitsOnly = cleaned.substring(1);
+    } else if (cleaned.match(/^\d+$/)) {
+      if (cleaned.length >= 9 && cleaned.length <= 11) {
+        isSwedish = true;
+        digitsOnly = cleaned.startsWith('0') ? cleaned.substring(1) : cleaned;
+      }
+    }
+    
+    if (isSwedish) {
+      if (digitsOnly.length !== 9) {
+        return {
+          isValid: false,
+          error: `Svenska telefonnummer ska ha 10 siffror (du har ${digitsOnly.length + 1})`
+        };
+      }
+    }
+    
+    return { isValid: true, error: '' };
+  };
+
+  const handlePhoneChange = (value: string) => {
+    handleInputChange('phone', value);
+    const validation = validatePhoneNumber(value);
+    setPhoneError(validation.error);
+  };
+
   const totalSteps = 7; // Introduktion + 5 profil steg + slutskärm
   const progress = currentStep / (totalSteps - 1) * 100;
   const handleInputChange = (field: string, value: string | string[]) => {
@@ -140,7 +184,7 @@ const WelcomeTunnel = ({
         return true;
       // Intro
       case 1:
-        return formData.firstName.trim() && formData.lastName.trim() && formData.phone.trim();
+        return !!(formData.firstName.trim() && formData.lastName.trim() && formData.phone.trim() && validatePhoneNumber(formData.phone).isValid);
       case 2:
         return true;
       // Profile image is optional
@@ -237,8 +281,9 @@ const WelcomeTunnel = ({
               </div>
               <div>
                 <Label htmlFor="phone">Telefonnummer</Label>
-                <Input id="phone" type="tel" required value={formData.phone} onChange={e => handleInputChange('phone', e.target.value)} placeholder="+46 70 123 45 67" className="text-lg py-3" />
-              </div>
+                <Input id="phone" type="tel" required value={formData.phone} onChange={e => handlePhoneChange(e.target.value)} placeholder="+46 70 123 45 67" className="text-lg py-3" />
+                {phoneError && (<p className="text-destructive text-xs mt-1">{phoneError}</p>)}
+            </div>
             </div>
           </div>;
       case 2:
