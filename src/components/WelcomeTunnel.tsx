@@ -213,9 +213,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <h1 className="text-4xl font-bold text-white animate-fade-in leading-tight">Välkommen till Parium</h1>
                 
                 <div className="space-y-1">
-                  <div className="border-2 border-blue-500 border-dashed rounded-lg p-4 max-w-lg mx-auto">
-                    <p className="text-xl md:text-2xl text-white animate-fade-in leading-relaxed drop-shadow-sm font-semibold">Framtiden börjar med ett swipe</p>
-                  </div>
+                  <p className="text-xl md:text-2xl text-white animate-fade-in leading-relaxed drop-shadow-sm font-semibold">Framtiden börjar med ett swipe</p>
                 </div>
               </div>
             </div>
@@ -232,9 +230,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
                   <Target className="h-8 w-8 text-white transition-transform duration-300 hover:rotate-12" />
                 </div>
-                <div className="border-2 border-blue-500 border-dashed rounded-lg p-4">
-                  <h3 className="text-white text-center font-semibold">Hitta rätt. Snabbt. Enkelt.</h3>
-                </div>
+                <h3 className="text-white text-center font-semibold">Hitta rätt. Snabbt. Enkelt.</h3>
               </div>
 
               <div className="space-y-3 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white/5 p-4 rounded-xl cursor-pointer" style={{animationDelay: '0.6s'}}>
