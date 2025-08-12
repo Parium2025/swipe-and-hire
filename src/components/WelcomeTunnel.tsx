@@ -11,7 +11,7 @@ import FileUpload from '@/components/FileUpload';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import phoneWithPariumLogo from '@/assets/phone-with-parium-logo.jpg';
-import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target } from 'lucide-react';
+import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone } from 'lucide-react';
 
 interface WelcomeTunnelProps {
   onComplete: () => void;
@@ -279,15 +279,18 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 />
               </div>
               <div>
-                <Label htmlFor="phone">Telefonnummer</Label>
+                <Label htmlFor="phone">
+                  <Phone className="h-4 w-4 inline mr-2" />
+                  Telefonnummer
+                </Label>
                 <Input 
                   id="phone" 
                   type="tel" 
                   required
                   value={formData.phone} 
                   onChange={(e) => handlePhoneChange(e.target.value)} 
-                  placeholder="+46 70 123 45 67" 
-                  className="text-lg py-3" 
+                  className="mt-1" 
+                  placeholder="070-123 45 67" 
                 />
                 {phoneError && <p className="text-destructive text-xs mt-1">{phoneError}</p>}
               </div>
