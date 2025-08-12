@@ -40,7 +40,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const validatePhoneNumber = (phoneNumber: string) => {
     if (!phoneNumber.trim()) return { isValid: true, error: '' };
     
-    const cleaned = phoneNumber.replace(/[^\\d+]/g, '');
+    const cleaned = phoneNumber.replace(/[^\d+]/g, '');
     let isSwedish = false;
     let digitsOnly = '';
     
@@ -53,7 +53,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     } else if (cleaned.startsWith('0')) {
       isSwedish = true;
       digitsOnly = cleaned.substring(1);
-    } else if (cleaned.match(/^\\d+$/)) {
+    } else if (cleaned.match(/^\d+$/)) {
       if (cleaned.length >= 9 && cleaned.length <= 11) {
         isSwedish = true;
         digitsOnly = cleaned.startsWith('0') ? cleaned.substring(1) : cleaned;
