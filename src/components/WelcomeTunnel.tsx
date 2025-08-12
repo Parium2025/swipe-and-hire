@@ -140,7 +140,7 @@ const WelcomeTunnel = ({
         return true;
       // Intro
       case 1:
-        return formData.firstName.trim() && formData.lastName.trim();
+        return formData.firstName.trim() && formData.lastName.trim() && formData.phone.trim();
       case 2:
         return true;
       // Profile image is optional
@@ -236,8 +236,8 @@ const WelcomeTunnel = ({
                 <Input id="lastName" value={formData.lastName} onChange={e => handleInputChange('lastName', e.target.value)} placeholder="Ditt efternamn" className="text-lg py-3" />
               </div>
               <div>
-                <Label htmlFor="phone">Telefonnummer (valfritt)</Label>
-                <Input id="phone" value={formData.phone} onChange={e => handleInputChange('phone', e.target.value)} placeholder="+46 70 123 45 67" className="text-lg py-3" />
+                <Label htmlFor="phone">Telefonnummer</Label>
+                <Input id="phone" type="tel" required value={formData.phone} onChange={e => handleInputChange('phone', e.target.value)} placeholder="+46 70 123 45 67" className="text-lg py-3" />
               </div>
             </div>
           </div>;
