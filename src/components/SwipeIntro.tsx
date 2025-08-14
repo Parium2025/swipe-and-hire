@@ -30,7 +30,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
               {/* Touch point - fingertryck inuti skärmen */}
               <div className="relative">
                 <div className="w-3 h-3 bg-primary-foreground/90 rounded-full shadow-lg" 
-                     style={{ animation: 'swipeTouchInside 3s ease-in-out infinite' }}>
+                     style={{ animation: 'swipeTouchInside 4s cubic-bezier(0.4, 0, 0.2, 1) infinite' }}>
                   {/* Inner glow */}
                   <div className="absolute inset-0 bg-primary-foreground/50 rounded-full animate-ping"></div>
                 </div>
@@ -38,7 +38,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
                 {/* Swipe trail - rörelse-spår inuti skärmen */}
                 <div className="absolute top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2 
                                 w-12 h-0.5 bg-gradient-to-l from-transparent via-primary-foreground/70 to-transparent rounded-full"
-                     style={{ animation: 'swipeTrailInside 3s ease-in-out infinite' }}>
+                     style={{ animation: 'swipeTrailInside 4s cubic-bezier(0.4, 0, 0.2, 1) infinite' }}>
                 </div>
               </div>
             </div>
