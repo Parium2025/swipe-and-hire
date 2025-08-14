@@ -260,14 +260,14 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
       >
-        <div className="text-center max-w-lg mx-auto px-4">
+        <div className="text-center max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto px-6">
           {/* Title */}
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary-foreground mb-4 animate-fade-in leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-primary-foreground mb-4 animate-fade-in leading-tight break-words">
             {slides[currentSlide].title}
           </h1>
           
           {/* Subtitle */}
-          <p className="text-lg md:text-xl text-primary-foreground/90 mb-12 animate-fade-in leading-relaxed">{slides[currentSlide].subtitle}</p>
+          <p className="text-base sm:text-lg md:text-xl text-primary-foreground/90 mb-12 animate-fade-in leading-relaxed">{slides[currentSlide].subtitle}</p>
 
           {/* Slide Content */}
           <div className="mb-12 animate-scale-in">
