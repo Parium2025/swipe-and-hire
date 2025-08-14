@@ -26,7 +26,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
               <ArrowRight className="h-4 w-4 text-primary-foreground animate-pulse" />
             </div>
             {/* Animerad swipe-gest - förbättrad version */}
-            <div className="absolute top-1/2 left-1/4 transform -translate-y-1/2">
+            <div className="absolute top-1/2 right-1/4 transform -translate-y-1/2">
               {/* Touch point - fingertryck */}
               <div className="w-4 h-4 bg-primary-foreground/80 rounded-full shadow-lg" 
                    style={{ animation: 'swipeTouch 3s ease-in-out infinite' }}>
@@ -43,7 +43,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
           </div>
           <div className="text-center">
             <p className="text-primary-foreground/70 text-sm mb-4">
-              {device === 'mobile' || device === 'tablet' ? 'Swipa höger för att fortsätta' : 'Tryck på pilen eller använd piltangenterna'}
+              {device === 'mobile' || device === 'tablet' ? 'Swipa vänster för att fortsätta' : 'Tryck på pilen eller använd piltangenterna'}
             </p>
           </div>
         </div>
