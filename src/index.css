@@ -254,15 +254,15 @@ All colors MUST be HSL.
 
 @keyframes swipeTrailInside {
   0% {
-    transform: translateX(25px) scaleX(0);
-    opacity: 0;
-  }
-  15% {
     transform: translateX(20px) scaleX(0);
     opacity: 0;
   }
+  15% {
+    transform: translateX(18px) scaleX(0);
+    opacity: 0;
+  }
   35% {
-    transform: translateX(12px) scaleX(0.6);
+    transform: translateX(10px) scaleX(0.6);
     opacity: 0.7;
   }
   60% {
@@ -270,11 +270,11 @@ All colors MUST be HSL.
     opacity: 1;
   }
   85% {
-    transform: translateX(-12px) scaleX(0.7);
+    transform: translateX(-10px) scaleX(0.7);
     opacity: 0.8;
   }
   100% {
-    transform: translateX(-20px) scaleX(0.2);
+    transform: translateX(-18px) scaleX(0.2);
     opacity: 0.3;
   }
 }
