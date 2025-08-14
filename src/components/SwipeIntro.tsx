@@ -25,19 +25,21 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             <div className="absolute -bottom-2 -right-2 bg-primary rounded-full p-2">
               <ArrowRight className="h-4 w-4 text-primary-foreground animate-pulse" />
             </div>
-            {/* Animerad swipe-gest - förbättrad version */}
-            <div className="absolute top-1/2 right-1/4 transform -translate-y-1/2">
-              {/* Touch point - fingertryck */}
-              <div className="w-4 h-4 bg-primary-foreground/80 rounded-full shadow-lg" 
-                   style={{ animation: 'swipeTouch 3s ease-in-out infinite' }}>
-                {/* Inner glow */}
-                <div className="absolute inset-0 bg-primary-foreground/40 rounded-full animate-ping"></div>
-              </div>
-              
-              {/* Swipe trail - rörelse-spår */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2 
-                              w-16 h-0.5 bg-gradient-to-r from-transparent via-primary-foreground/60 to-transparent rounded-full"
-                   style={{ animation: 'swipeTrail 3s ease-in-out infinite' }}>
+            {/* Animerad swipe-gest - innanför mobil-skärmen */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              {/* Touch point - fingertryck inuti skärmen */}
+              <div className="relative">
+                <div className="w-3 h-3 bg-primary-foreground/90 rounded-full shadow-lg" 
+                     style={{ animation: 'swipeTouchInside 3s ease-in-out infinite' }}>
+                  {/* Inner glow */}
+                  <div className="absolute inset-0 bg-primary-foreground/50 rounded-full animate-ping"></div>
+                </div>
+                
+                {/* Swipe trail - rörelse-spår inuti skärmen */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2 
+                                w-12 h-0.5 bg-gradient-to-l from-transparent via-primary-foreground/70 to-transparent rounded-full"
+                     style={{ animation: 'swipeTrailInside 3s ease-in-out infinite' }}>
+                </div>
               </div>
             </div>
           </div>
