@@ -25,12 +25,20 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             <div className="absolute -bottom-2 -right-2 bg-primary rounded-full p-2">
               <ArrowRight className="h-4 w-4 text-primary-foreground animate-pulse" />
             </div>
-            {/* Animerad hand som swipar */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <Hand className="h-8 w-8 text-primary-foreground/60 animate-bounce" style={{ 
-                transform: 'rotate(-15deg)',
-                animation: 'swipeGesture 2s ease-in-out infinite'
-              }} />
+            {/* Animerad swipe-gest - förbättrad version */}
+            <div className="absolute top-1/2 left-1/4 transform -translate-y-1/2">
+              {/* Touch point - fingertryck */}
+              <div className="w-4 h-4 bg-primary-foreground/80 rounded-full shadow-lg" 
+                   style={{ animation: 'swipeTouch 3s ease-in-out infinite' }}>
+                {/* Inner glow */}
+                <div className="absolute inset-0 bg-primary-foreground/40 rounded-full animate-ping"></div>
+              </div>
+              
+              {/* Swipe trail - rörelse-spår */}
+              <div className="absolute top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2 
+                              w-16 h-0.5 bg-gradient-to-r from-transparent via-primary-foreground/60 to-transparent rounded-full"
+                   style={{ animation: 'swipeTrail 3s ease-in-out infinite' }}>
+              </div>
             </div>
           </div>
           <div className="text-center">
