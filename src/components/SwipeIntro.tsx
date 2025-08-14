@@ -294,7 +294,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             <div className="text-center">
               <p className="text-primary-foreground/50 text-sm mb-4">
                 {device === 'mobile' || device === 'tablet' 
-                  ? 'Swipa för att fortsätta' 
+                  ? 'Nästa generation av jobbsök är här' 
                   : 'Klicka eller använd piltangenterna'
                 }
               </p>
