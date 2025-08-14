@@ -21,7 +21,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       content: (
         <div className="flex flex-col items-center space-y-6">
           <div className="relative">
-            <Smartphone className="h-24 w-24 text-primary-foreground/80" />
+            <Smartphone className="h-32 w-32 text-primary-foreground/80" />
             <div className="absolute -bottom-2 -right-2 bg-primary rounded-full p-2">
               <ArrowRight className="h-4 w-4 text-primary-foreground animate-pulse" />
             </div>
