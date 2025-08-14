@@ -142,12 +142,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(currentSlide + 1);
     } else {
-      // På sista steget, gå tillbaka till första för att visa progress-dot korrekt
-      setCurrentSlide(0);
-      // Sedan kalla onComplete efter en kort fördröjning
-      setTimeout(() => {
-        onComplete();
-      }, 300);
+      onComplete();
     }
   };
 
