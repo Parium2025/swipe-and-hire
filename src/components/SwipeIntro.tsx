@@ -169,19 +169,18 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (device === 'desktop') {
-      setStartX(e.clientX);
-      setIsDragging(true);
-    }
+    setStartX(e.clientX);
+    setIsDragging(true);
+    e.preventDefault();
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || device !== 'desktop') return;
+    if (!isDragging) return;
     e.preventDefault();
   };
 
   const handleMouseUp = (e: React.MouseEvent) => {
-    if (!isDragging || device !== 'desktop') return;
+    if (!isDragging) return;
     
     const endX = e.clientX;
     const diffX = startX - endX;
@@ -195,6 +194,12 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
     }
     
     setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    if (isDragging) {
+      setIsDragging(false);
+    }
   };
 
   useEffect(() => {
@@ -231,6 +236,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
       >
         <div className="text-center max-w-md mx-auto">
           {/* Title */}
