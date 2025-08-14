@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import phoneWithPariumLogo from '@/assets/phone-with-parium-logo.jpg';
 import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone, Play, Video } from 'lucide-react';
 import ProfileVideo from '@/components/ProfileVideo';
+import SwipeIntro from '@/components/SwipeIntro';
 
 interface WelcomeTunnelProps {
   onComplete: () => void;
@@ -21,7 +22,7 @@ interface WelcomeTunnelProps {
 const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const { profile, updateProfile, user } = useAuth();
   const { toast } = useToast();
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(-1); // Start with SwipeIntro (-1)
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
@@ -329,6 +330,11 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       handleInputChange('interests', [...currentInterests, interest]);
     }
   };
+
+  // Render SwipeIntro fullscreen
+  if (currentStep === -1) {
+    return <SwipeIntro onComplete={() => setCurrentStep(0)} />;
+  }
 
   const renderStep = () => {
     switch (currentStep) {
