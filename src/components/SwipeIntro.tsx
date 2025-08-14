@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Heart, ArrowRight, Play, Smartphone, Video, Sparkles } from 'lucide-react';
+import { Heart, ArrowRight, Play, Smartphone, Video, Sparkles, Hand } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
 
 interface SwipeIntroProps {
@@ -24,6 +24,13 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             <Smartphone className="h-32 w-32 text-primary-foreground/80" />
             <div className="absolute -bottom-2 -right-2 bg-primary rounded-full p-2">
               <ArrowRight className="h-4 w-4 text-primary-foreground animate-pulse" />
+            </div>
+            {/* Animerad hand som swipar */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <Hand className="h-8 w-8 text-primary-foreground/60 animate-bounce" style={{ 
+                transform: 'rotate(-15deg)',
+                animation: 'swipeGesture 2s ease-in-out infinite'
+              }} />
             </div>
           </div>
           <div className="text-center">

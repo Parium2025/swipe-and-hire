@@ -227,3 +227,19 @@ All colors MUST be HSL.
     border-radius: 50%;
   }
 }
+
+/* Swipe gesture animation */
+@keyframes swipeGesture {
+  0% {
+    transform: translateX(-10px) rotate(-15deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateX(10px) rotate(-15deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-10px) rotate(-15deg);
+    opacity: 0.6;
+  }
+}
