@@ -10,7 +10,9 @@ interface SwipeIntroProps {
 const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [startX, setStartX] = useState(0);
+  const [currentX, setCurrentX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const device = useDevice();
 
@@ -164,12 +166,31 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setStartX(e.touches[0].clientX);
+    setCurrentX(e.touches[0].clientX);
     setIsDragging(true);
+    setDragOffset(0);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging) return;
     e.preventDefault();
+    
+    const newX = e.touches[0].clientX;
+    const diffX = newX - startX;
+    
+    // Begränsa drag-avstånd med elastisk effekt
+    const maxDrag = 100;
+    const elasticFactor = 0.3;
+    let constrainedDiff = diffX;
+    
+    if (Math.abs(diffX) > maxDrag) {
+      const excess = Math.abs(diffX) - maxDrag;
+      const elasticOffset = excess * elasticFactor;
+      constrainedDiff = diffX > 0 ? maxDrag + elasticOffset : -maxDrag - elasticOffset;
+    }
+    
+    setCurrentX(newX);
+    setDragOffset(constrainedDiff);
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
@@ -178,7 +199,8 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
     const endX = e.changedTouches[0].clientX;
     const diffX = startX - endX;
     
-    if (Math.abs(diffX) > 50) {
+    // Kräv större rörelse för att aktivera slide-byte
+    if (Math.abs(diffX) > 80) {
       if (diffX > 0) {
         nextSlide();
       } else {
@@ -186,18 +208,39 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       }
     }
     
+    // Återställ position med animation
     setIsDragging(false);
+    setDragOffset(0);
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setStartX(e.clientX);
+    setCurrentX(e.clientX);
     setIsDragging(true);
+    setDragOffset(0);
     e.preventDefault();
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
     e.preventDefault();
+    
+    const newX = e.clientX;
+    const diffX = newX - startX;
+    
+    // Samma elastiska effekt för mus
+    const maxDrag = 100;
+    const elasticFactor = 0.3;
+    let constrainedDiff = diffX;
+    
+    if (Math.abs(diffX) > maxDrag) {
+      const excess = Math.abs(diffX) - maxDrag;
+      const elasticOffset = excess * elasticFactor;
+      constrainedDiff = diffX > 0 ? maxDrag + elasticOffset : -maxDrag - elasticOffset;
+    }
+    
+    setCurrentX(newX);
+    setDragOffset(constrainedDiff);
   };
 
   const handleMouseUp = (e: React.MouseEvent) => {
@@ -206,7 +249,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
     const endX = e.clientX;
     const diffX = startX - endX;
     
-    if (Math.abs(diffX) > 50) {
+    if (Math.abs(diffX) > 80) {
       if (diffX > 0) {
         nextSlide();
       } else {
@@ -214,12 +257,15 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       }
     }
     
+    // Återställ position med animation
     setIsDragging(false);
+    setDragOffset(0);
   };
 
   const handleMouseLeave = () => {
     if (isDragging) {
       setIsDragging(false);
+      setDragOffset(0);
     }
   };
 
@@ -281,7 +327,13 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
       >
-        <div className="text-center max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto px-6">
+        <div 
+          className="text-center max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto px-6 transition-transform duration-300"
+          style={{
+            transform: `translateX(${dragOffset}px)`,
+            transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+        >
           {/* Title */}
           <h1 className={`font-bold text-primary-foreground mb-4 animate-fade-in leading-tight ${
             currentSlide === 0 
