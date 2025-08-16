@@ -64,6 +64,32 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       )
     },
     {
+      title: "Snabbare än att skriva ett CV",
+      subtitle: "Ladda upp en kort profilvideo – låt jobben hitta dig",
+      content: (
+        <div className="flex flex-col items-center space-y-6">
+          <div className="relative">
+            <div className="w-32 h-32 bg-gradient-to-br from-primary to-secondary rounded-full border-4 border-primary-foreground/20 flex items-center justify-center">
+              <Video className="h-12 w-12 text-primary-foreground" />
+            </div>
+            <div className="absolute -top-2 -right-2 bg-primary-foreground rounded-full p-2">
+              <Play className="h-4 w-4 text-primary animate-pulse" />
+            </div>
+          </div>
+          <div className="text-center max-w-xs">
+            <div className="flex items-center justify-center space-x-2 mb-4">
+              <Sparkles className="h-5 w-5 text-yellow-400" />
+              <span className="text-primary-foreground/80 text-sm">30 sekunder = 1000 ord</span>
+              <Sparkles className="h-5 w-5 text-yellow-400" />
+            </div>
+            <p className="text-primary-foreground/60 text-xs">
+              Visa din personlighet och få jobb att komma till dig
+            </p>
+          </div>
+        </div>
+      )
+    },
+    {
       title: "Jobbmatchning på ett helt nytt sätt",
       subtitle: "Swipa, Matcha, Börja",
       content: (
@@ -88,32 +114,6 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             <div className="absolute -bottom-4 -right-4 bg-green-500 rounded-full p-3 animate-bounce">
               <Heart className="h-5 w-5 text-primary-foreground fill-primary-foreground" />
             </div>
-          </div>
-        </div>
-      )
-    },
-    {
-      title: "Snabbare än att skriva ett CV",
-      subtitle: "Ladda upp en kort profilvideo – låt jobben hitta dig",
-      content: (
-        <div className="flex flex-col items-center space-y-6">
-          <div className="relative">
-            <div className="w-32 h-32 bg-gradient-to-br from-primary to-secondary rounded-full border-4 border-primary-foreground/20 flex items-center justify-center">
-              <Video className="h-12 w-12 text-primary-foreground" />
-            </div>
-            <div className="absolute -top-2 -right-2 bg-primary-foreground rounded-full p-2">
-              <Play className="h-4 w-4 text-primary animate-pulse" />
-            </div>
-          </div>
-          <div className="text-center max-w-xs">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <Sparkles className="h-5 w-5 text-yellow-400" />
-              <span className="text-primary-foreground/80 text-sm">30 sekunder = 1000 ord</span>
-              <Sparkles className="h-5 w-5 text-yellow-400" />
-            </div>
-            <p className="text-primary-foreground/60 text-xs">
-              Visa din personlighet och få jobb att komma till dig
-            </p>
           </div>
         </div>
       )
