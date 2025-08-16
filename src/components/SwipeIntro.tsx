@@ -21,21 +21,31 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       content: (
         <div className="flex flex-col items-center space-y-6">
           <div className="relative">
-            <div className="w-40 h-64 rounded-[2rem] border-2 border-primary-foreground/60 p-3 bg-transparent/10">
-              <div className="relative w-full h-full rounded-[1.5rem] bg-transparent/5 border border-primary-foreground/30 overflow-hidden">
-                {/* Animerad swipe-gest - innanför mobil-skärmen */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                  {/* Touch point - fingertryck inuti skärmen */}
-                  <div className="relative">
-                    <div className="w-3 h-3 bg-primary-foreground/90 rounded-full shadow-lg" style={{ animation: 'swipeTouchInside 4s linear infinite' }}>
-                      {/* Inner glow */}
-                      <div className="absolute inset-0 bg-primary-foreground/50 rounded-full animate-ping"></div>
+            <div className="w-40 h-64 rounded-[2rem] border-4 border-primary-foreground/60 p-4 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
+              <div className="relative w-full h-full rounded-[1.2rem] bg-gradient-to-b from-primary/20 to-primary/40 overflow-hidden flex items-center justify-center">
+                {/* Swipe indikator */}
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="text-primary-foreground/80 text-xs font-semibold">SWIPA VÄNSTER</div>
+                  
+                  {/* Animerad swipe-gest */}
+                  <div className="relative w-16 h-8 flex items-center">
+                    {/* Hand-ikon som swiper */}
+                    <div className="absolute" style={{ animation: 'swipeLeft 2s ease-in-out infinite' }}>
+                      <Hand className="h-6 w-6 text-primary-foreground rotate-90" />
                     </div>
-                    {/* Swipe trail - rörelse-spår inuti skärmen */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                      <div className="w-12 h-0.5 bg-gradient-to-l from-transparent via-primary-foreground/70 to-transparent rounded-full" style={{ animation: 'swipeTrailInside 4s linear infinite' }}></div>
+                    
+                    {/* Swipe-spår */}
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full h-0.5 bg-gradient-to-l from-primary-foreground/70 via-primary-foreground/40 to-transparent rounded-full opacity-60"></div>
+                    </div>
+                    
+                    {/* Pil som följer */}
+                    <div className="absolute right-0" style={{ animation: 'arrowLeft 2s ease-in-out infinite 0.3s' }}>
+                      <ArrowRight className="h-4 w-4 text-primary-foreground rotate-180" />
                     </div>
                   </div>
+                  
+                  <div className="text-primary-foreground/60 text-xs">→ FORTSÄTT</div>
                 </div>
               </div>
             </div>

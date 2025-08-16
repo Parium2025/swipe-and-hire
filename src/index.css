@@ -228,34 +228,35 @@ All colors MUST be HSL.
   }
 }
 
-/* Swipe-animationer innanför mobil-skärmen */
-@keyframes swipeTouchInside {
+/* Swipe-animationer */
+@keyframes swipeLeft {
   0% {
-    transform: translateX(25px);
-    opacity: 0.7;
-  }
-  25% {
-    transform: translateX(15px);
-    opacity: 1;
-  }
-  50% {
-    transform: translateX(0);
-    opacity: 0.9;
-  }
-  75% {
-    transform: translateX(-15px);
+    transform: translateX(20px);
     opacity: 0.8;
   }
+  50% {
+    transform: translateX(-20px);
+    opacity: 1;
+  }
   100% {
-    transform: translateX(-25px);
-    opacity: 0.5;
+    transform: translateX(-40px);
+    opacity: 0.3;
   }
 }
 
-@keyframes swipeTrailInside {
-  0% { transform: translateX(25px); opacity: 1; }
-  25% { transform: translateX(15px); opacity: 1; }
-  50% { transform: translateX(0); opacity: 1; }
-  75% { transform: translateX(-15px); opacity: 1; }
-  100% { transform: translateX(-25px); opacity: 1; }
+@keyframes arrowLeft {
+  0% {
+    transform: translateX(10px);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
 }
