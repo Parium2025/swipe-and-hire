@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.09c4e68617a9467e89b13cf832371d49',
+  appId: 'app.lovable.swipeandhire',
   appName: 'swipe-and-hire',
   webDir: 'dist',
   server: {
