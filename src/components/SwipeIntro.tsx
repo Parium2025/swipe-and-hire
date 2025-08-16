@@ -23,64 +23,38 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       content: (
         <div className="flex flex-col items-center space-y-6">
           <div className="relative">
-            {/* Stor, dramatisk telefon med 3D-effekt */}
-            <div className="relative transform-gpu hover:scale-105 transition-transform duration-500">
-              {/* 3D skugga */}
-              <div className="absolute top-2 left-2 w-40 h-72 rounded-[2rem] bg-black/20 blur-xl"></div>
-              
-              {/* Telefon med gradient border */}
-              <div className="relative w-40 h-72 rounded-[2rem] border-4 border-gradient-to-r from-primary-foreground/80 via-secondary/60 to-primary-foreground/80 p-4 bg-gradient-to-b from-primary-foreground/15 to-primary-foreground/5 backdrop-blur-lg shadow-2xl">
-                {/* Skärm med glow effekt */}
-                <div className="relative w-full h-full rounded-[1.5rem] bg-gradient-to-br from-primary/30 via-primary/20 to-secondary/30 overflow-hidden flex items-center justify-center shadow-inner">
-                  {/* Ambient glow */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-secondary/20 via-transparent to-primary/20 animate-pulse"></div>
-                  
-                  {/* Premium swipe animation */}
-                  <div className="relative z-10 flex flex-col items-center space-y-4">
-                    {/* Hand med glow */}
-                    <div className="relative w-16 h-8 flex items-center">
-                      <div className="absolute" style={{ animation: 'swipeLeft 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite' }}>
-                        <div className="relative">
-                          <Hand className="h-6 w-6 text-primary-foreground rotate-90 drop-shadow-lg" />
-                          <div className="absolute inset-0 bg-primary-foreground/30 rounded-full blur-sm animate-pulse"></div>
-                        </div>
-                      </div>
-                      
-                      {/* Premium trail med färggradient */}
-                      <div className="absolute inset-0 flex items-center">
-                        <div className="w-full h-1 bg-gradient-to-l from-secondary/80 via-primary-foreground/60 to-transparent rounded-full shadow-lg" style={{ filter: 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.5))' }}></div>
-                      </div>
-                      
-                      {/* Pil med trail */}
-                      <div className="absolute right-0" style={{ animation: 'arrowLeft 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite 0.4s' }}>
-                        <ArrowRight className="h-5 w-5 text-secondary rotate-180 drop-shadow-lg" />
-                      </div>
+            <div className="w-32 h-52 rounded-[1.5rem] border-4 border-primary-foreground/60 p-3 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
+              <div className="relative w-full h-full rounded-[1rem] bg-gradient-to-b from-primary/20 to-primary/40 overflow-hidden flex items-center justify-center">
+                {/* Ren animerad swipe-gest utan text */}
+                <div className="flex flex-col items-center space-y-3">
+                  {/* Animerad swipe-gest */}
+                  <div className="relative w-12 h-6 flex items-center">
+                    {/* Hand-ikon som swiper */}
+                    <div className="absolute" style={{ animation: 'swipeLeft 2s ease-in-out infinite' }}>
+                      <Hand className="h-4 w-4 text-primary-foreground rotate-90" />
                     </div>
                     
-                    {/* Pulsande Parium logo/symbol */}
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-secondary to-primary flex items-center justify-center animate-pulse">
-                      <div className="w-4 h-4 rounded-full bg-primary-foreground"></div>
+                    {/* Swipe-spår */}
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full h-0.5 bg-gradient-to-l from-primary-foreground/70 via-primary-foreground/40 to-transparent rounded-full opacity-60"></div>
+                    </div>
+                    
+                    {/* Pil som följer */}
+                    <div className="absolute right-0" style={{ animation: 'arrowLeft 2s ease-in-out infinite 0.3s' }}>
+                      <ArrowRight className="h-3 w-3 text-primary-foreground rotate-180" />
                     </div>
                   </div>
                 </div>
               </div>
-              
-              {/* Floating action button med glow */}
-              <div className="absolute -bottom-3 -right-3 bg-gradient-to-r from-secondary to-primary rounded-full p-3 shadow-2xl animate-bounce">
-                <ArrowRight className="h-6 w-6 text-primary-foreground" />
-                <div className="absolute inset-0 rounded-full bg-secondary/30 animate-ping"></div>
-              </div>
             </div>
-            
-            {/* Kraftfull instruktionstext */}
-            <div className="text-center mt-8">
-              <p className="text-primary-foreground/90 text-lg font-bold mb-2 tracking-wide">
-                {device === 'mobile' || device === 'tablet' ? 'SWIPA VÄNSTER' : 'KLICKA ELLER TRYCK →'}
-              </p>
-              <p className="text-primary-foreground/60 text-sm font-medium">
-                för att fortsätta din resa
-              </p>
+            <div className="absolute -bottom-2 -right-2 bg-primary rounded-full p-2">
+              <ArrowRight className="h-4 w-4 text-primary-foreground animate-pulse" />
             </div>
+          </div>
+          <div className="text-center">
+            <p className="text-primary-foreground/70 text-sm mb-4">
+              {device === 'mobile' || device === 'tablet' ? 'Swipa vänster för att fortsätta' : 'Tryck på pilen eller använd piltangenterna'}
+            </p>
           </div>
         </div>
       )
@@ -356,20 +330,20 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
           }}
         >
-          {/* Hero Title med gradient */}
-          <h1 className={`font-black text-transparent bg-clip-text bg-gradient-to-r from-primary-foreground via-secondary to-primary-foreground mb-6 animate-fade-in leading-tight tracking-tight ${
+          {/* Title */}
+          <h1 className={`font-bold text-primary-foreground mb-4 animate-fade-in leading-tight ${
             currentSlide === 0 
-              ? 'text-5xl md:text-7xl lg:text-8xl' 
-              : 'text-3xl sm:text-4xl md:text-5xl lg:text-6xl break-words'
+              ? 'text-4xl md:text-5xl' 
+              : 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl break-words'
           }`}>
             {slides[currentSlide].title}
           </h1>
           
-          {/* Kraftfull subtitle */}
-          <p className={`text-primary-foreground/95 mb-16 animate-fade-in leading-relaxed font-semibold tracking-wide ${
+          {/* Subtitle */}
+          <p className={`text-primary-foreground/90 mb-12 animate-fade-in leading-relaxed ${
             currentSlide === 0 
-              ? 'text-2xl md:text-3xl' 
-              : 'text-lg sm:text-xl md:text-2xl'
+              ? 'text-xl' 
+              : 'text-base sm:text-lg md:text-xl'
           }`}>{slides[currentSlide].subtitle}</p>
 
           {/* Slide Content */}
