@@ -25,10 +25,8 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
           <div className="relative">
             <div className="w-32 h-52 rounded-[1.5rem] border-4 border-primary-foreground/60 p-3 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
               <div className="relative w-full h-full rounded-[1rem] bg-gradient-to-b from-primary/20 to-primary/40 overflow-hidden flex items-center justify-center">
-                {/* Swipe indikator */}
+                {/* Ren animerad swipe-gest utan text */}
                 <div className="flex flex-col items-center space-y-3">
-                  <div className="text-primary-foreground/80 text-[10px] font-semibold">SWIPA VÄNSTER</div>
-                  
                   {/* Animerad swipe-gest */}
                   <div className="relative w-12 h-6 flex items-center">
                     {/* Hand-ikon som swiper */}
@@ -46,8 +44,6 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
                       <ArrowRight className="h-3 w-3 text-primary-foreground rotate-180" />
                     </div>
                   </div>
-                  
-                  <div className="text-primary-foreground/60 text-[10px]">→ FORTSÄTT</div>
                 </div>
               </div>
             </div>
