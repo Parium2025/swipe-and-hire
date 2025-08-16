@@ -108,6 +108,20 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  /* Remove iOS safe area padding */
+  html, body, #root {
+    padding-top: 0 !important;
+    padding-top: env(safe-area-inset-top, 0) !important;
+  }
+
+  /* Make sure the app extends to the full screen */
+  .min-h-screen {
+    min-height: 100vh !important;
+    min-height: calc(100vh - env(safe-area-inset-top, 0)) !important;
   }
 }
 
