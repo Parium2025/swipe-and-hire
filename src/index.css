@@ -253,24 +253,9 @@ All colors MUST be HSL.
 }
 
 @keyframes swipeTrailInside {
-  0% {
-    transform: translateY(-50%) translateX(25px);
-    opacity: 1;
-  }
-  25% {
-    transform: translateY(-50%) translateX(15px);
-    opacity: 1;
-  }
-  50% {
-    transform: translateY(-50%) translateX(0);
-    opacity: 1;
-  }
-  75% {
-    transform: translateY(-50%) translateX(-15px);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-50%) translateX(-25px);
-    opacity: 1;
-  }
+  0% { transform: translateX(25px); opacity: 1; }
+  25% { transform: translateX(15px); opacity: 1; }
+  50% { transform: translateX(0); opacity: 1; }
+  75% { transform: translateX(-15px); opacity: 1; }
+  100% { transform: translateX(-25px); opacity: 1; }
 }

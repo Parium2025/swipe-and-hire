@@ -21,25 +21,26 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       content: (
         <div className="flex flex-col items-center space-y-6">
           <div className="relative">
-            <Smartphone className="h-32 w-32 text-primary-foreground/80" />
-            <div className="absolute -bottom-2 -right-2 bg-primary rounded-full p-2">
-              <ArrowRight className="h-4 w-4 text-primary-foreground animate-pulse" />
-            </div>
-            {/* Animerad swipe-gest - innanför mobil-skärmen */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              {/* Touch point - fingertryck inuti skärmen */}
-              <div className="relative">
-                <div className="w-3 h-3 bg-primary-foreground/90 rounded-full shadow-lg" 
-                     style={{ animation: 'swipeTouchInside 4s linear infinite' }}>
-                  {/* Inner glow */}
-                  <div className="absolute inset-0 bg-primary-foreground/50 rounded-full animate-ping"></div>
-                </div>
-                
-                {/* Swipe trail - rörelse-spår inuti skärmen */}
-                <div className="absolute top-1/2 left-0 w-12 h-0.5 bg-gradient-to-l from-transparent via-primary-foreground/70 to-transparent rounded-full"
-                     style={{ animation: 'swipeTrailInside 4s linear infinite' }}>
+            <div className="w-40 h-64 rounded-[2rem] border-2 border-primary-foreground/60 p-3 bg-transparent/10">
+              <div className="relative w-full h-full rounded-[1.5rem] bg-transparent/5 border border-primary-foreground/30 overflow-hidden">
+                {/* Animerad swipe-gest - innanför mobil-skärmen */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                  {/* Touch point - fingertryck inuti skärmen */}
+                  <div className="relative">
+                    <div className="w-3 h-3 bg-primary-foreground/90 rounded-full shadow-lg" style={{ animation: 'swipeTouchInside 4s linear infinite' }}>
+                      {/* Inner glow */}
+                      <div className="absolute inset-0 bg-primary-foreground/50 rounded-full animate-ping"></div>
+                    </div>
+                    {/* Swipe trail - rörelse-spår inuti skärmen */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                      <div className="w-12 h-0.5 bg-gradient-to-l from-transparent via-primary-foreground/70 to-transparent rounded-full" style={{ animation: 'swipeTrailInside 4s linear infinite' }}></div>
+                    </div>
+                  </div>
                 </div>
               </div>
+            </div>
+            <div className="absolute -bottom-2 -right-2 bg-primary rounded-full p-2">
+              <ArrowRight className="h-4 w-4 text-primary-foreground animate-pulse" />
             </div>
           </div>
           <div className="text-center">
