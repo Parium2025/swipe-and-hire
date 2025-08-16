@@ -7,14 +7,11 @@ export const useStatusBar = () => {
     const setupStatusBar = async () => {
       if (Capacitor.isNativePlatform()) {
         try {
-          // Sätt statusbarens stil till mörk text på ljus bakgrund
-          await StatusBar.setStyle({ style: Style.Dark });
-          
-          // Sätt statusbarens bakgrundsfärg till Parium navy blue
-          await StatusBar.setBackgroundColor({ color: '#1a365d' });
-          
-          // Gör så statusbaren inte överlappar innehållet
-          await StatusBar.setOverlaysWebView({ overlay: false });
+          // Använd ljus text, transparent bakgrund och låt statusbaren överlappa webview
+          await StatusBar.setStyle({ style: Style.Light });
+          // iOS behandlar bakgrunden som transparent när overlay = true
+          try { await StatusBar.setBackgroundColor({ color: '#00000000' }); } catch {}
+          await StatusBar.setOverlaysWebView({ overlay: true });
         } catch (error) {
           console.log('StatusBar configuration failed:', error);
         }

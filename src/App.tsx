@@ -14,12 +14,15 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { Header } from "@/components/Header";
 import AuthTokenBridge from "./components/AuthTokenBridge";
 import { useStatusBar } from "@/hooks/useStatusBar";
+import { useDevice } from "@/hooks/use-device";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   // Konfigurera statusbaren för mobila appar
   useStatusBar();
+  const device = useDevice();
+  const showHeader = device !== 'mobile';
 
   return (
   <QueryClientProvider client={queryClient}>
@@ -29,8 +32,8 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <div className="min-h-screen">
-            <Header />
-            <main className="pt-16">
+            {showHeader && <Header />}
+            <main className={showHeader ? "pt-16" : ""}>
               <AuthTokenBridge />
               <Routes>
                 <Route path="/" element={<Index />} />
