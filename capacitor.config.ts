@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.parium.swipehire',
+  appId: 'com.fredrikandits.swipehire',
   appName: 'swipe-and-hire',
   webDir: 'dist',
   server: {
