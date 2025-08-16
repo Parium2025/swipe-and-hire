@@ -21,17 +21,17 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       content: (
         <div className="flex flex-col items-center space-y-6">
           <div className="relative">
-            <div className="w-40 h-64 rounded-[2rem] border-4 border-primary-foreground/60 p-4 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
-              <div className="relative w-full h-full rounded-[1.2rem] bg-gradient-to-b from-primary/20 to-primary/40 overflow-hidden flex items-center justify-center">
+            <div className="w-32 h-52 rounded-[1.5rem] border-4 border-primary-foreground/60 p-3 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
+              <div className="relative w-full h-full rounded-[1rem] bg-gradient-to-b from-primary/20 to-primary/40 overflow-hidden flex items-center justify-center">
                 {/* Swipe indikator */}
-                <div className="flex flex-col items-center space-y-4">
-                  <div className="text-primary-foreground/80 text-xs font-semibold">SWIPA VÄNSTER</div>
+                <div className="flex flex-col items-center space-y-3">
+                  <div className="text-primary-foreground/80 text-[10px] font-semibold">SWIPA VÄNSTER</div>
                   
                   {/* Animerad swipe-gest */}
-                  <div className="relative w-16 h-8 flex items-center">
+                  <div className="relative w-12 h-6 flex items-center">
                     {/* Hand-ikon som swiper */}
                     <div className="absolute" style={{ animation: 'swipeLeft 2s ease-in-out infinite' }}>
-                      <Hand className="h-6 w-6 text-primary-foreground rotate-90" />
+                      <Hand className="h-4 w-4 text-primary-foreground rotate-90" />
                     </div>
                     
                     {/* Swipe-spår */}
@@ -41,11 +41,11 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
                     
                     {/* Pil som följer */}
                     <div className="absolute right-0" style={{ animation: 'arrowLeft 2s ease-in-out infinite 0.3s' }}>
-                      <ArrowRight className="h-4 w-4 text-primary-foreground rotate-180" />
+                      <ArrowRight className="h-3 w-3 text-primary-foreground rotate-180" />
                     </div>
                   </div>
                   
-                  <div className="text-primary-foreground/60 text-xs">→ FORTSÄTT</div>
+                  <div className="text-primary-foreground/60 text-[10px]">→ FORTSÄTT</div>
                 </div>
               </div>
             </div>
