@@ -10,8 +10,8 @@ const config: CapacitorConfig = {
     },
     StatusBar: {
       style: 'dark',
-      backgroundColor: '#1a365d', // Parium navy blue
-      overlaysWebView: false
+      backgroundColor: '#1a365d',
+      overlaysWebView: true
     }
   }
 };
