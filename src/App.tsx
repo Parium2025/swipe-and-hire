@@ -13,10 +13,15 @@ import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/hooks/useAuth";
 import { Header } from "@/components/Header";
 import AuthTokenBridge from "./components/AuthTokenBridge";
+import { useStatusBar } from "@/hooks/useStatusBar";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  // Konfigurera statusbaren för mobila appar
+  useStatusBar();
+
+  return (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
@@ -50,6 +55,7 @@ const App = () => (
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
