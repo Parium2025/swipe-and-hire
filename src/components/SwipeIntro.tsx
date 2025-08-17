@@ -59,8 +59,8 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       )
     },
     {
-      title: "Ladda upp en kort profilvideo eller en bild på dig",
-      subtitle: "Snabbare än att skriva ett CV – låt jobben hitta dig",
+      title: "Skapa en profil",
+      subtitle: "Ladda upp en kort profilvideo eller en bild på dig",
       content: (
         <div className="flex flex-col items-center space-y-6">
           <div className="relative">
@@ -331,7 +331,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
         >
           {/* Title */}
           <h1 className={`font-bold text-primary-foreground mb-4 animate-fade-in leading-tight ${
-            currentSlide === 0 
+            currentSlide === 0 || currentSlide === 1
               ? 'text-4xl md:text-5xl' 
               : 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl break-words'
           }`}>
