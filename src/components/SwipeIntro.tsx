@@ -350,45 +350,36 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             {slides[currentSlide].content}
           </div>
 
-          {/* Progress Dots */}
-          <div className="flex justify-center space-x-3 mb-8">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentSlide(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                  index === currentSlide 
-                    ? 'bg-primary-foreground scale-125' 
-                    : 'bg-primary-foreground/30 hover:bg-primary-foreground/50'
-                }`}
-              />
-            ))}
           </div>
 
-          {/* Navigation Hint */}
-          {currentSlide < slides.length - 1 && (
-            <div className="text-center">
-              <p className="text-primary-foreground/50 text-sm mb-4">
-                {device === 'mobile' || device === 'tablet' 
-                  ? 'Nästa generation av jobbsök är här' 
-                  : 'Klicka eller använd piltangenterna'
-                }
-              </p>
-              {device === 'desktop' && (
-                <Button
-                  onClick={nextSlide}
-                  variant="outline"
-                  size="lg"
-                  className="bg-primary-foreground/10 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20 hover:scale-105 transition-all duration-200"
-                >
-                  Nästa
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+          {/* Bottom footer (consistent across slides) */}
+          <div className="absolute bottom-6 left-0 right-0">
+            <div className="flex flex-col items-center gap-3">
+              {/* Dots */}
+              <div className="flex justify-center space-x-3">
+                {slides.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      index === currentSlide
+                        ? 'bg-primary-foreground scale-125'
+                        : 'bg-primary-foreground/30 hover:bg-primary-foreground/50'
+                    }`}
+                  />
+                ))}
+              </div>
+              {/* Helper text under dots */}
+              {currentSlide < slides.length - 1 && (
+                <p className="text-primary-foreground/50 text-sm">
+                  {device === 'mobile' || device === 'tablet'
+                    ? 'Nästa generation av jobbsök är här'
+                    : 'Klicka eller använd piltangenterna'}
+                </p>
               )}
             </div>
-          )}
+          </div>
         </div>
-      </div>
     </div>
   );
 };
