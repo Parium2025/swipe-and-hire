@@ -29,17 +29,9 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
                 <div className="flex flex-col items-center space-y-3">
                   {/* Animerad swipe-gest */}
                   <div className="relative w-16 h-8 flex items-center">
-                    {/* Enkel pekfinger som 👆 emojin */}
-                    <div className="absolute" style={{ animation: 'swipeLeft 2s ease-in-out infinite' }}>
-                      <div className="relative">
-                        {/* Längre pekfinger */}
-                        <div className="w-3 h-10 bg-primary-foreground/80 rounded-full relative">
-                          {/* Fingertopp - lite bredare */}
-                          <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-primary-foreground/90 rounded-full"></div>
-                          {/* Fingerled - subtil detalj */}
-                          <div className="absolute top-6 left-0 right-0 h-0.5 bg-primary-foreground/60 rounded-full"></div>
-                        </div>
-                      </div>
+                    {/* Enkel emoji-finger som swiper */}
+                    <div className="absolute text-2xl" style={{ animation: 'swipeLeft 2s ease-in-out infinite' }}>
+                      👆
                     </div>
                     
                     {/* Swipe-spår */}
