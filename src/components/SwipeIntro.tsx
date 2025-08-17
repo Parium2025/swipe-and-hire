@@ -365,28 +365,28 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             ))}
           </div>
 
-          {/* Navigation Hint - Fixed positioning */}
-          <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 text-center">
-            {currentSlide < slides.length - 1 && (
+          {/* Navigation Hint */}
+          {currentSlide < slides.length - 1 && (
+            <div className="text-center">
               <p className="text-primary-foreground/50 text-sm mb-4">
                 {device === 'mobile' || device === 'tablet' 
                   ? 'Nästa generation av jobbsök är här' 
                   : 'Klicka eller använd piltangenterna'
                 }
               </p>
-            )}
-            {device === 'desktop' && currentSlide < slides.length - 1 && (
-              <Button
-                onClick={nextSlide}
-                variant="outline"
-                size="lg"
-                className="bg-primary-foreground/10 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20 hover:scale-105 transition-all duration-200"
-              >
-                Nästa
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            )}
-          </div>
+              {device === 'desktop' && (
+                <Button
+                  onClick={nextSlide}
+                  variant="outline"
+                  size="lg"
+                  className="bg-primary-foreground/10 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20 hover:scale-105 transition-all duration-200"
+                >
+                  Nästa
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
