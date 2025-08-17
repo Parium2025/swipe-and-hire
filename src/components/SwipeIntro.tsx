@@ -31,7 +31,6 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
                   <div className="relative w-16 h-8 flex items-center">
                     {/* Hand-ikon som swiper */}
                     <div className="absolute text-primary-foreground" style={{ animation: 'swipeLeft 2s ease-in-out infinite' }}>
-                      <Hand size={24} className="rotate-90" />
                     </div>
                     
                     {/* Swipe-spår */}
