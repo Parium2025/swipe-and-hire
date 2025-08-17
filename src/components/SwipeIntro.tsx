@@ -59,8 +59,8 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       )
     },
     {
-      title: "Snabbare än att skriva ett CV",
-      subtitle: "Ladda upp en kort profilvideo – låt jobben hitta dig",
+      title: "Ladda upp en kort profilvideo eller en bild på dig",
+      subtitle: "Snabbare än att skriva ett CV – låt jobben hitta dig",
       content: (
         <div className="flex flex-col items-center space-y-6">
           <div className="relative">
