@@ -30,7 +30,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
                   {/* Animerad swipe-gest */}
                   <div className="relative w-16 h-8 flex items-center">
                     {/* Enkel emoji-finger som swiper */}
-                    <div className="absolute text-2xl" style={{ animation: 'swipeLeft 2s ease-in-out infinite' }}>
+                    <div className="absolute text-2xl text-primary-foreground" style={{ animation: 'swipeLeft 2s ease-in-out infinite' }}>
                       👆
                     </div>
                     
