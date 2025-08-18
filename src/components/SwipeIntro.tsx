@@ -109,74 +109,80 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
           {/* Phone mockup design */}
           <div className="relative">
             <div className="w-56 h-96 bg-slate-900 rounded-[2rem] p-1.5 shadow-2xl">
-              {/* Phone screen - Modern job card */}
-              <div className="w-full h-full rounded-[1.5rem] overflow-hidden relative bg-gradient-to-br from-primary-foreground via-primary-foreground to-primary-foreground/95">
-                {/* Background pattern */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/10"></div>
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-accent/20 to-transparent rounded-full blur-3xl"></div>
-                <div className="absolute bottom-0 left-0 w-40 h-40 bg-gradient-to-tr from-primary/10 to-transparent rounded-full blur-3xl"></div>
-
-                {/* Job card content */}
-                <div className="relative w-full h-full p-8 flex flex-col">
-                  {/* Header with company and match */}
-                  <div className="flex items-start justify-between mb-8">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg">
-                        <span className="text-white font-bold text-2xl">T</span>
+              {/* Phone screen - Professional job card */}
+              <div className="w-full h-full rounded-[1.5rem] overflow-hidden relative bg-white">
+                {/* Header section */}
+                <div className="bg-gradient-to-r from-slate-50 to-gray-50 p-6 border-b border-gray-100">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-sm">
+                        <span className="text-white font-semibold text-lg">T</span>
                       </div>
                       <div>
-                        <h4 className="text-primary font-bold text-xl mb-1">Techno AB</h4>
-                        <p className="text-primary/60 text-sm">Tech • Startup</p>
+                        <h4 className="text-gray-900 font-semibold text-sm">Techno AB</h4>
+                        <p className="text-gray-500 text-xs">Stockholm, Sverige</p>
                       </div>
                     </div>
-                    <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg">
+                    <div className="bg-emerald-100 text-emerald-700 text-xs font-medium px-3 py-1.5 rounded-full">
                       94% match
                     </div>
                   </div>
+                </div>
 
+                {/* Main content */}
+                <div className="p-6 flex-1">
                   {/* Job title */}
                   <div className="mb-6">
-                    <h3 className="text-primary font-bold text-3xl mb-2 leading-tight">UX Designer</h3>
-                    <div className="flex items-center space-x-4 text-primary/70">
-                      <span className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                        <span className="text-sm">Stockholm</span>
+                    <h3 className="text-gray-900 font-bold text-2xl mb-2 leading-tight">UX Designer</h3>
+                    <div className="flex items-center space-x-4 text-gray-600 text-sm">
+                      <span className="flex items-center space-x-1">
+                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
+                        <span>Heltid</span>
                       </span>
-                      <span className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        <span className="text-sm">Remote OK</span>
+                      <span className="flex items-center space-x-1">
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                        <span>Remote</span>
                       </span>
                     </div>
                   </div>
 
-                  {/* Salary highlight */}
-                  <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-4 mb-6 border border-primary/20">
+                  {/* Salary */}
+                  <div className="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-100">
                     <div className="text-center">
-                      <p className="text-primary/60 text-sm mb-1">Månadslön</p>
-                      <p className="text-primary font-bold text-2xl">52,000 kr</p>
+                      <p className="text-gray-500 text-xs font-medium mb-1">Månadslön</p>
+                      <p className="text-gray-900 font-bold text-xl">52,000 kr</p>
                     </div>
                   </div>
 
                   {/* Skills */}
-                  <div className="mb-8">
-                    <p className="text-primary/70 text-sm mb-3 font-medium">Nyckelkompetenser</p>
+                  <div className="mb-6">
+                    <p className="text-gray-700 text-sm font-medium mb-3">Nyckelkompetenser</p>
                     <div className="flex flex-wrap gap-2">
-                      <span className="px-3 py-2 bg-gradient-to-r from-primary/20 to-secondary/20 text-primary text-sm rounded-xl border border-primary/30 font-medium">Figma</span>
-                      <span className="px-3 py-2 bg-gradient-to-r from-primary/20 to-secondary/20 text-primary text-sm rounded-xl border border-primary/30 font-medium">Adobe XD</span>
-                      <span className="px-3 py-2 bg-gradient-to-r from-primary/20 to-secondary/20 text-primary text-sm rounded-xl border border-primary/30 font-medium">Design System</span>
+                      <span className="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-lg border border-indigo-100">Figma</span>
+                      <span className="px-3 py-1.5 bg-purple-50 text-purple-700 text-xs font-medium rounded-lg border border-purple-100">Adobe XD</span>
+                      <span className="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-lg border border-blue-100">Prototyping</span>
                     </div>
                   </div>
 
-                  {/* Action buttons */}
-                  <div className="flex justify-center space-x-6 mt-auto">
-                    <button className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center shadow-xl hover:scale-105 transition-transform">
-                      <span className="text-white text-2xl font-bold">✕</span>
+                  {/* Description snippet */}
+                  <div className="mb-6">
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      Vi söker en kreativ UX Designer som vill vara med och forma framtidens digitala upplevelser...
+                    </p>
+                  </div>
+                </div>
+
+                {/* Action buttons */}
+                <div className="absolute bottom-6 left-0 right-0 px-6">
+                  <div className="flex justify-center space-x-4">
+                    <button className="w-14 h-14 bg-white border-2 border-red-200 rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
+                      <span className="text-red-500 text-xl">✕</span>
                     </button>
-                    <button className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center shadow-xl animate-pulse hover:scale-105 transition-transform">
-                      <Heart className="h-9 w-9 text-white fill-white" />
+                    <button className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                      <Heart className="h-7 w-7 text-white fill-white" />
                     </button>
-                    <button className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-xl hover:scale-105 transition-transform">
-                      <span className="text-white text-2xl font-bold">★</span>
+                    <button className="w-14 h-14 bg-white border-2 border-blue-200 rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
+                      <span className="text-blue-500 text-xl">★</span>
                     </button>
                   </div>
                 </div>
