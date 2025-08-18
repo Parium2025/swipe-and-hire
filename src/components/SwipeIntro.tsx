@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Heart, ArrowRight, Play, Smartphone, Video, Sparkles, Hand } from 'lucide-react';
+import { Heart, ArrowRight, Play, Camera, Video, Sparkles, Hand } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
 
 interface SwipeIntroProps {
@@ -84,9 +84,9 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             {/* Image option */}
             <div className="relative">
               <div className="w-28 h-28 rounded-full border-4 border-primary-foreground/20 p-2 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
-                <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
-                  <Smartphone className="h-8 w-8 text-primary-foreground" />
-                </div>
+              <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
+                <Camera className="h-8 w-8 text-primary-foreground" />
+              </div>
               </div>
               <div className="absolute -top-1 -right-1 bg-primary-foreground rounded-full p-1.5 shadow-lg">
                 <Sparkles className="h-3 w-3 text-primary animate-pulse" />
