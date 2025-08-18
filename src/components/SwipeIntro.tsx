@@ -106,59 +106,92 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       subtitle: "Swipa, Matcha, Börja",
       content: (
         <div className="flex flex-col items-center space-y-8">
+          {/* Phone mockup design */}
           <div className="relative">
-            {/* Modern card stack design */}
-            <div className="relative w-64 h-80">
-              {/* Background cards */}
-              <div className="absolute top-2 left-2 w-full h-full bg-primary-foreground/10 rounded-2xl border border-primary-foreground/20 backdrop-blur-sm transform rotate-3"></div>
-              <div className="absolute top-1 left-1 w-full h-full bg-primary-foreground/15 rounded-2xl border border-primary-foreground/30 backdrop-blur-sm transform rotate-1"></div>
-              
-              {/* Main card */}
-              <div className="relative w-full h-full bg-primary-foreground/95 rounded-2xl border border-primary-foreground/40 backdrop-blur-sm shadow-2xl p-6">
-                <div className="h-full flex flex-col justify-between">
-                  {/* Card header */}
-                  <div className="text-center space-y-3">
-                    <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-dark rounded-xl mx-auto flex items-center justify-center shadow-lg">
-                      <span className="text-2xl font-bold text-primary-foreground">P</span>
-                    </div>
-                    <div>
-                      <h3 className="text-primary font-bold text-xl mb-1">Frontend Developer</h3>
-                      <p className="text-primary/70 text-sm font-medium">Parium AB</p>
-                      <p className="text-primary/60 text-sm">Stockholm • 45,000 kr/mån</p>
+            <div className="w-56 h-96 bg-slate-900 rounded-[2rem] p-1.5 shadow-2xl">
+              {/* Phone screen */}
+              <div className="w-full h-full bg-gradient-to-b from-primary to-primary-dark rounded-[1.5rem] overflow-hidden relative">
+                {/* Status bar */}
+                <div className="flex justify-between items-center px-6 py-2 text-xs text-primary-foreground/80">
+                  <span>9:41</span>
+                  <div className="flex space-x-1">
+                    <div className="w-4 h-2 bg-primary-foreground/60 rounded-sm"></div>
+                    <div className="w-4 h-2 bg-primary-foreground/60 rounded-sm"></div>
+                    <div className="w-4 h-2 bg-primary-foreground rounded-sm"></div>
+                  </div>
+                </div>
+
+                {/* App header */}
+                <div className="px-6 py-3 text-center border-b border-primary-foreground/10">
+                  <h3 className="text-primary-foreground font-bold text-lg">Parium</h3>
+                </div>
+
+                {/* Job card stack */}
+                <div className="relative p-4 h-full">
+                  {/* Background cards */}
+                  <div className="absolute top-8 left-6 right-6 bottom-20 bg-primary-foreground/5 rounded-2xl transform rotate-2 scale-95"></div>
+                  <div className="absolute top-6 left-5 right-5 bottom-18 bg-primary-foreground/10 rounded-2xl transform -rotate-1 scale-97"></div>
+                  
+                  {/* Main job card */}
+                  <div className="relative bg-primary-foreground rounded-2xl p-6 h-72 shadow-xl">
+                    <div className="flex flex-col h-full">
+                      {/* Company logo */}
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4">
+                        <span className="text-white font-bold text-lg">T</span>
+                      </div>
+
+                      {/* Job details */}
+                      <div className="flex-1">
+                        <h4 className="text-primary font-bold text-lg mb-1">UX Designer</h4>
+                        <p className="text-primary/70 text-sm mb-1">Techno AB</p>
+                        <p className="text-primary/60 text-xs mb-4">Stockholm • Remote OK</p>
+                        <p className="text-primary/90 text-sm mb-4">52,000 kr/mån</p>
+                        
+                        {/* Quick info */}
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2 text-xs text-primary/70">
+                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span>Heltid</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded">Figma</span>
+                            <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded">Adobe XD</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Match percentage */}
+                      <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                        94%
+                      </div>
                     </div>
                   </div>
 
-                  {/* Skills tags */}
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    <span className="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full border border-primary/20">React</span>
-                    <span className="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full border border-primary/20">TypeScript</span>
-                    <span className="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full border border-primary/20">Tailwind</span>
-                  </div>
-
-                  {/* Action buttons */}
-                  <div className="flex justify-center space-x-6">
-                    <div className="w-14 h-14 bg-red-500 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform cursor-pointer">
-                      <span className="text-white text-2xl font-bold">✕</span>
+                  {/* Swipe action buttons */}
+                  <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-8">
+                    <div className="w-14 h-14 bg-white border-4 border-red-500 rounded-full flex items-center justify-center shadow-lg">
+                      <span className="text-red-500 text-xl font-bold">✕</span>
                     </div>
-                    <div className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg animate-pulse hover:scale-110 transition-transform cursor-pointer">
+                    <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
                       <Heart className="h-7 w-7 text-white fill-white" />
+                    </div>
+                    <div className="w-14 h-14 bg-white border-4 border-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                      <span className="text-blue-500 text-xl">★</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            
-            {/* Floating match indicator */}
-            <div className="absolute -top-4 -right-4 bg-green-500 rounded-full p-3 animate-bounce shadow-xl">
-              <Heart className="h-6 w-6 text-white fill-white" />
+
+            {/* Floating elements */}
+            <div className="absolute -top-2 -right-2 bg-green-500 rounded-full p-2 animate-bounce">
+              <Heart className="h-4 w-4 text-white fill-white" />
             </div>
-            
-            {/* Swipe indicators */}
-            <div className="absolute top-1/2 -left-8 transform -translate-y-1/2 text-red-500 opacity-60">
-              <ArrowRight className="h-6 w-6 rotate-180" />
+            <div className="absolute top-1/2 -left-6 text-red-500 opacity-70 animate-pulse">
+              <ArrowRight className="h-5 w-5 rotate-180" />
             </div>
-            <div className="absolute top-1/2 -right-8 transform -translate-y-1/2 text-green-500 opacity-60">
-              <ArrowRight className="h-6 w-6" />
+            <div className="absolute top-1/2 -right-6 text-green-500 opacity-70 animate-pulse">
+              <ArrowRight className="h-5 w-5" />
             </div>
           </div>
         </div>
