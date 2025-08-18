@@ -64,10 +64,14 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       content: (
         <div className="flex flex-col items-center space-y-6">
           <div className="relative">
-            <div className="w-32 h-32 bg-gradient-to-br from-primary to-secondary rounded-full border-4 border-primary-foreground/20 flex items-center justify-center">
-              <Video className="h-12 w-12 text-primary-foreground" />
+            {/* Modern container with glass effect like the phone */}
+            <div className="w-32 h-32 rounded-full border-4 border-primary-foreground/20 p-3 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
+              <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
+                <Video className="h-12 w-12 text-primary-foreground" />
+              </div>
             </div>
-            <div className="absolute -top-2 -right-2 bg-primary-foreground rounded-full p-2">
+            {/* Animated play button like the mobile's arrow */}
+            <div className="absolute -top-2 -right-2 bg-primary-foreground rounded-full p-2 shadow-lg">
               <Play className="h-4 w-4 text-primary animate-pulse" />
             </div>
           </div>
