@@ -63,7 +63,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       subtitle: "Ladda upp en kort profilvideo eller en bild – visa vem du är på riktigt",
       content: (
         <div className="flex flex-col items-center space-y-6">
-          <div className="flex flex-col items-center space-y-4">
+          <div className="flex items-center space-x-8">
             {/* Video option */}
             <div className="relative">
               <div className="w-28 h-28 rounded-full border-4 border-primary-foreground/20 p-2 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
