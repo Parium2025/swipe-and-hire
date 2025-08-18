@@ -105,72 +105,93 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       title: "Jobbsök i ett swipe",
       subtitle: "Swipa, Matcha, Börja",
       content: (
-        <div className="flex flex-col items-center space-y-6">
-          <div className="relative w-72 h-80">
-            {/* Floating job cards with swipe animation */}
-            <div className="absolute inset-0">
-              {/* Background card (far back) */}
-              <div className="absolute top-8 left-4 w-64 h-72 bg-primary-foreground/5 rounded-3xl transform rotate-6 scale-90 blur-sm"></div>
-              
-              {/* Middle card */}
-              <div className="absolute top-4 left-2 w-64 h-72 bg-primary-foreground/15 rounded-3xl transform rotate-3 scale-95 backdrop-blur-sm border border-primary-foreground/20"></div>
-              
-              {/* Front card (animated) */}
-              <div className="absolute top-0 left-0 w-64 h-72 bg-primary-foreground rounded-3xl shadow-2xl transform transition-all duration-700 hover:-translate-x-2 hover:rotate-2">
-                <div className="p-6 h-full flex flex-col">
-                  {/* Header with company */}
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                      <span className="text-white font-bold text-lg">S</span>
-                    </div>
-                    <div>
-                      <h4 className="text-primary font-bold text-lg leading-tight">Spotify AB</h4>
-                      <p className="text-primary/60 text-sm">Stockholm</p>
-                    </div>
+        <div className="flex flex-col items-center space-y-8">
+          {/* Phone mockup design */}
+          <div className="relative">
+            <div className="w-56 h-96 bg-slate-900 rounded-[2rem] p-1.5 shadow-2xl">
+              {/* Phone screen */}
+              <div className="w-full h-full bg-gradient-to-b from-primary to-primary-dark rounded-[1.5rem] overflow-hidden relative">
+                {/* Status bar */}
+                <div className="flex justify-between items-center px-6 py-2 text-xs text-primary-foreground/80">
+                  <span>9:41</span>
+                  <div className="flex space-x-1">
+                    <div className="w-4 h-2 bg-primary-foreground/60 rounded-sm"></div>
+                    <div className="w-4 h-2 bg-primary-foreground/60 rounded-sm"></div>
+                    <div className="w-4 h-2 bg-primary-foreground rounded-sm"></div>
                   </div>
+                </div>
 
-                  {/* Job title */}
-                  <h3 className="text-primary font-bold text-xl mb-2">Product Designer</h3>
+                {/* App header */}
+                <div className="px-6 py-3 text-center border-b border-primary-foreground/10">
+                  <h3 className="text-primary-foreground font-bold text-lg">Parium</h3>
+                </div>
+
+                {/* Job card stack */}
+                <div className="relative p-4 h-full">
+                  {/* Background cards */}
+                  <div className="absolute top-8 left-6 right-6 bottom-20 bg-primary-foreground/5 rounded-2xl transform rotate-2 scale-95"></div>
+                  <div className="absolute top-6 left-5 right-5 bottom-18 bg-primary-foreground/10 rounded-2xl transform -rotate-1 scale-97"></div>
                   
-                  {/* Salary */}
-                  <p className="text-primary/80 text-lg font-semibold mb-4">58,000 kr/mån</p>
-                  
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    <span className="px-3 py-1.5 bg-primary/10 text-primary text-sm rounded-full border border-primary/20">Design Systems</span>
-                    <span className="px-3 py-1.5 bg-primary/10 text-primary text-sm rounded-full border border-primary/20">Figma</span>
-                    <span className="px-3 py-1.5 bg-primary/10 text-primary text-sm rounded-full border border-primary/20">Remote</span>
-                  </div>
+                  {/* Main job card */}
+                  <div className="relative bg-primary-foreground rounded-2xl p-6 h-72 shadow-xl">
+                    <div className="flex flex-col h-full">
+                      {/* Company logo */}
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4">
+                        <span className="text-white font-bold text-lg">T</span>
+                      </div>
 
-                  {/* Match indicator */}
-                  <div className="mt-auto flex justify-between items-center">
-                    <div className="bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-sm font-bold border border-green-300">
-                      97% match
+                      {/* Job details */}
+                      <div className="flex-1">
+                        <h4 className="text-primary font-bold text-lg mb-1">UX Designer</h4>
+                        <p className="text-primary/70 text-sm mb-1">Techno AB</p>
+                        <p className="text-primary/60 text-xs mb-4">Stockholm • Remote OK</p>
+                        <p className="text-primary/90 text-sm mb-4">52,000 kr/mån</p>
+                        
+                        {/* Quick info */}
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2 text-xs text-primary/70">
+                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span>Heltid</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded">Figma</span>
+                            <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded">Adobe XD</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Match percentage */}
+                      <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                        94%
+                      </div>
                     </div>
-                    <Heart className="h-6 w-6 text-red-500 animate-pulse" />
+                  </div>
+
+                  {/* Swipe action buttons */}
+                  <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-8">
+                    <div className="w-14 h-14 bg-white border-4 border-red-500 rounded-full flex items-center justify-center shadow-lg">
+                      <span className="text-red-500 text-xl font-bold">✕</span>
+                    </div>
+                    <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                      <Heart className="h-7 w-7 text-white fill-white" />
+                    </div>
+                    <div className="w-14 h-14 bg-white border-4 border-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                      <span className="text-blue-500 text-xl">★</span>
+                    </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Swipe direction indicators */}
-              <div className="absolute top-1/2 -left-12 transform -translate-y-1/2">
-                <div className="flex items-center space-x-2 text-red-400 opacity-70">
-                  <ArrowRight className="h-5 w-5 rotate-180 animate-pulse" />
-                  <span className="text-sm font-medium">Nej</span>
-                </div>
-              </div>
-              
-              <div className="absolute top-1/2 -right-12 transform -translate-y-1/2">
-                <div className="flex items-center space-x-2 text-green-400 opacity-70">
-                  <span className="text-sm font-medium">Ja</span>
-                  <ArrowRight className="h-5 w-5 animate-pulse" />
-                </div>
-              </div>
-
-              {/* Floating like icon */}
-              <div className="absolute -top-3 -right-3 bg-green-500 rounded-full p-2.5 animate-bounce shadow-xl">
-                <Heart className="h-5 w-5 text-white fill-white" />
-              </div>
+            {/* Floating elements */}
+            <div className="absolute -top-2 -right-2 bg-green-500 rounded-full p-2 animate-bounce">
+              <Heart className="h-4 w-4 text-white fill-white" />
+            </div>
+            <div className="absolute top-1/2 -left-6 text-red-500 opacity-70 animate-pulse">
+              <ArrowRight className="h-5 w-5 rotate-180" />
+            </div>
+            <div className="absolute top-1/2 -right-6 text-green-500 opacity-70 animate-pulse">
+              <ArrowRight className="h-5 w-5" />
             </div>
           </div>
         </div>
