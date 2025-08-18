@@ -102,7 +102,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       )
     },
     {
-      title: "Jobbsök i ett swip",
+      title: "Jobbsök i ett swipe",
       subtitle: "Swipa, Matcha, Börja",
       content: (
         <div className="flex flex-col items-center space-y-8">
