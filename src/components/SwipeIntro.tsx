@@ -60,7 +60,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
     },
     {
       title: "Skapa en profil",
-      subtitle: "Ladda upp en kort profilvideo eller en bild på dig",
+      subtitle: "Ladda upp en kort profilvideo eller en bild – visa vem du är på riktigt",
       content: (
         <div className="flex flex-col items-center space-y-6">
           <div className="relative">
@@ -72,13 +72,8 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             </div>
           </div>
           <div className="text-center max-w-xs">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <Sparkles className="h-5 w-5 text-yellow-400" />
-              <span className="text-primary-foreground/80 text-sm">30 sekunder = 1000 ord</span>
-              <Sparkles className="h-5 w-5 text-yellow-400" />
-            </div>
-            <p className="text-primary-foreground/60 text-xs">
-              Visa din personlighet och få jobb att komma till dig
+            <p className="text-primary-foreground/80 text-sm">
+              Din personlighet säger mer än ett CV.
             </p>
           </div>
         </div>
