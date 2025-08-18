@@ -329,7 +329,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       </div>
 
       {/* Content Container */}
-      <div className="relative z-10 h-screen flex flex-col justify-between pt-20 p-8 cursor-grab active:cursor-grabbing select-none"
+      <div className="relative z-10 h-screen flex flex-col justify-start pt-20 pb-24 p-8 cursor-grab active:cursor-grabbing select-none"
         ref={containerRef}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -352,14 +352,14 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
           </h1>
           
           {/* Subtitle */}
-          <p className="text-primary-foreground/90 mb-12 animate-fade-in leading-relaxed text-xl">
+          <p className="text-primary-foreground/90 mb-8 md:mb-10 animate-fade-in leading-relaxed text-xl">
             {slides[currentSlide].subtitle}
           </p>
-        </div>
 
-        {/* Slide Content - Positioned to push toward bottom */}
-        <div className={`text-center animate-scale-in ${currentSlide === 1 ? 'mb-4' : 'mb-12'}`}>
-          {slides[currentSlide].content}
+          {/* Slide Content */}
+          <div className={`animate-scale-in ${currentSlide === 1 ? 'mt-8' : 'mt-0'}`}>
+            {slides[currentSlide].content}
+          </div>
         </div>
 
           {/* Bottom footer (consistent across slides) */}
