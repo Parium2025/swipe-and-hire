@@ -63,16 +63,34 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       subtitle: "Ladda upp en kort profilvideo eller en bild – visa vem du är på riktigt",
       content: (
         <div className="flex flex-col items-center space-y-6">
-          <div className="relative">
-            {/* Modern container with glass effect like the phone */}
-            <div className="w-32 h-32 rounded-full border-4 border-primary-foreground/20 p-3 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
-              <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
-                <Video className="h-12 w-12 text-primary-foreground" />
+          <div className="flex items-center space-x-8">
+            {/* Video option */}
+            <div className="relative">
+              <div className="w-28 h-28 rounded-full border-4 border-primary-foreground/20 p-2 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
+                <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
+                  <Video className="h-8 w-8 text-primary-foreground" />
+                </div>
+              </div>
+              <div className="absolute -top-1 -right-1 bg-primary-foreground rounded-full p-1.5 shadow-lg">
+                <Play className="h-3 w-3 text-primary animate-pulse" />
               </div>
             </div>
-            {/* Animated play button like the mobile's arrow */}
-            <div className="absolute -top-2 -right-2 bg-primary-foreground rounded-full p-2 shadow-lg">
-              <Play className="h-4 w-4 text-primary animate-pulse" />
+
+            {/* "eller" text */}
+            <div className="text-primary-foreground/60 text-sm font-medium">
+              eller
+            </div>
+
+            {/* Image option */}
+            <div className="relative">
+              <div className="w-28 h-28 rounded-full border-4 border-primary-foreground/20 p-2 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
+                <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
+                  <Smartphone className="h-8 w-8 text-primary-foreground" />
+                </div>
+              </div>
+              <div className="absolute -top-1 -right-1 bg-primary-foreground rounded-full p-1.5 shadow-lg">
+                <Sparkles className="h-3 w-3 text-primary animate-pulse" />
+              </div>
             </div>
           </div>
           <div className="text-center max-w-xs">
