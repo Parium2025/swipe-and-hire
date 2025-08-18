@@ -329,7 +329,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       </div>
 
       {/* Content Container */}
-      <div className="relative z-10 h-screen flex items-center justify-center p-8 cursor-grab active:cursor-grabbing select-none"
+      <div className="relative z-10 h-screen flex items-start justify-center pt-20 p-8 cursor-grab active:cursor-grabbing select-none"
         ref={containerRef}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -357,7 +357,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
           </p>
 
           {/* Slide Content */}
-          <div className="mb-12 animate-scale-in">
+          <div className={`animate-scale-in ${currentSlide === 1 ? 'mb-20' : 'mb-12'}`}>
             {slides[currentSlide].content}
           </div>
 
