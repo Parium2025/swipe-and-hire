@@ -307,7 +307,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       </div>
 
       {/* Content Container */}
-      <div className="relative z-10 h-screen flex items-center justify-center p-8 cursor-grab active:cursor-grabbing select-none"
+      <div className="relative z-10 h-screen flex items-start justify-center pt-20 p-8 cursor-grab active:cursor-grabbing select-none"
         ref={containerRef}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -324,7 +324,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
           }}
         >
-          {/* Title */}
+          {/* Title - Fixed top position */}
           <h1 className="font-bold text-primary-foreground mb-4 animate-fade-in leading-tight text-4xl md:text-5xl">
             {slides[currentSlide].title}
           </h1>
