@@ -318,24 +318,28 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
         onMouseLeave={handleMouseLeave}
       >
         <div 
-          className="text-center max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto px-6 transition-transform duration-300"
+          className="text-center max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto px-6 transition-transform duration-300 flex flex-col justify-start h-full pt-24"
           style={{
             transform: `translateX(${dragOffset}px)`,
             transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
           }}
         >
-          {/* Title */}
-          <h1 className="font-bold text-primary-foreground mb-4 animate-fade-in leading-tight text-4xl md:text-5xl">
-            {slides[currentSlide].title}
-          </h1>
+          {/* Title - Fixed position */}
+          <div className="mb-4">
+            <h1 className="font-bold text-primary-foreground animate-fade-in leading-tight text-4xl md:text-5xl">
+              {slides[currentSlide].title}
+            </h1>
+          </div>
           
-          {/* Subtitle */}
-          <p className="text-primary-foreground/90 mb-12 animate-fade-in leading-relaxed text-xl">
-            {slides[currentSlide].subtitle}
-          </p>
+          {/* Subtitle - Fixed position */}
+          <div className="mb-12">
+            <p className="text-primary-foreground/90 animate-fade-in leading-relaxed text-xl">
+              {slides[currentSlide].subtitle}
+            </p>
+          </div>
 
-          {/* Slide Content */}
-          <div className="mb-12 animate-scale-in">
+          {/* Slide Content - Flexible space */}
+          <div className="flex-1 flex items-center justify-center animate-scale-in">
             {slides[currentSlide].content}
           </div>
 
