@@ -357,7 +357,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
           </p>
 
           {/* Slide Content */}
-          <div className={`animate-scale-in ${currentSlide === 1 ? 'mt-8' : 'mt-0'}`}>
+          <div className={`animate-scale-in ${currentSlide === 1 ? 'mt-16' : 'mt-0'}`}>
             {slides[currentSlide].content}
           </div>
         </div>
