@@ -102,29 +102,63 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       )
     },
     {
-      title: "Jobbmatchning på ett helt nytt sätt",
+      title: "Jobbsök i ett swip",
       subtitle: "Swipa, Matcha, Börja",
       content: (
-        <div className="flex flex-col items-center space-y-6">
+        <div className="flex flex-col items-center space-y-8">
           <div className="relative">
-            <div className="w-48 h-80 bg-white/10 rounded-3xl border border-white/20 p-4 backdrop-blur-sm">
-              <div className="bg-gradient-to-br from-primary to-secondary rounded-2xl h-full flex flex-col justify-between p-4">
-                <div className="text-center">
-                  <h3 className="text-primary-foreground font-bold text-lg mb-2">Frontend Developer</h3>
-                  <p className="text-primary-foreground/80 text-sm">Stockholm • 45,000 kr/mån</p>
-                </div>
-                <div className="flex justify-center space-x-4">
-                  <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
-                    <span className="text-primary-foreground text-xl">✕</span>
+            {/* Modern card stack design */}
+            <div className="relative w-64 h-80">
+              {/* Background cards */}
+              <div className="absolute top-2 left-2 w-full h-full bg-primary-foreground/10 rounded-2xl border border-primary-foreground/20 backdrop-blur-sm transform rotate-3"></div>
+              <div className="absolute top-1 left-1 w-full h-full bg-primary-foreground/15 rounded-2xl border border-primary-foreground/30 backdrop-blur-sm transform rotate-1"></div>
+              
+              {/* Main card */}
+              <div className="relative w-full h-full bg-primary-foreground/95 rounded-2xl border border-primary-foreground/40 backdrop-blur-sm shadow-2xl p-6">
+                <div className="h-full flex flex-col justify-between">
+                  {/* Card header */}
+                  <div className="text-center space-y-3">
+                    <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-dark rounded-xl mx-auto flex items-center justify-center shadow-lg">
+                      <span className="text-2xl font-bold text-primary-foreground">P</span>
+                    </div>
+                    <div>
+                      <h3 className="text-primary font-bold text-xl mb-1">Frontend Developer</h3>
+                      <p className="text-primary/70 text-sm font-medium">Parium AB</p>
+                      <p className="text-primary/60 text-sm">Stockholm • 45,000 kr/mån</p>
+                    </div>
                   </div>
-                  <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center animate-pulse">
-                    <Heart className="h-6 w-6 text-primary-foreground fill-primary-foreground" />
+
+                  {/* Skills tags */}
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    <span className="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full border border-primary/20">React</span>
+                    <span className="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full border border-primary/20">TypeScript</span>
+                    <span className="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full border border-primary/20">Tailwind</span>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex justify-center space-x-6">
+                    <div className="w-14 h-14 bg-red-500 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform cursor-pointer">
+                      <span className="text-white text-2xl font-bold">✕</span>
+                    </div>
+                    <div className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg animate-pulse hover:scale-110 transition-transform cursor-pointer">
+                      <Heart className="h-7 w-7 text-white fill-white" />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="absolute -bottom-4 -right-4 bg-green-500 rounded-full p-3 animate-bounce">
-              <Heart className="h-5 w-5 text-primary-foreground fill-primary-foreground" />
+            
+            {/* Floating match indicator */}
+            <div className="absolute -top-4 -right-4 bg-green-500 rounded-full p-3 animate-bounce shadow-xl">
+              <Heart className="h-6 w-6 text-white fill-white" />
+            </div>
+            
+            {/* Swipe indicators */}
+            <div className="absolute top-1/2 -left-8 transform -translate-y-1/2 text-red-500 opacity-60">
+              <ArrowRight className="h-6 w-6 rotate-180" />
+            </div>
+            <div className="absolute top-1/2 -right-8 transform -translate-y-1/2 text-green-500 opacity-60">
+              <ArrowRight className="h-6 w-6" />
             </div>
           </div>
         </div>
