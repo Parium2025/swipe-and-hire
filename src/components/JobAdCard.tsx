@@ -74,24 +74,23 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
               </div>
 
               {/* Info kort */}
-              <div className="absolute bottom-12 left-2 right-2">
-                <div className="bg-white/95 backdrop-blur-md rounded-xl p-2.5 shadow-xl border border-white/20">
-                  <div className="space-y-1">
-                    <h3 className="text-sm font-bold text-gray-900 leading-tight">{title}</h3>
-                    <div className="flex items-center text-gray-600 text-[10px] space-x-1">
-                      <span className="font-medium">{company}</span>
-                      <span className="w-0.5 h-0.5 rounded-full bg-gray-400" />
-                      <span>{location}</span>
+              <div className="absolute bottom-8 left-1.5 right-1.5">
+                <div className="bg-white/95 backdrop-blur-md rounded-lg p-3 shadow-xl border border-white/20">
+                  <div className="text-center space-y-1.5">
+                    <h3 className="text-xs font-bold text-gray-900 leading-tight">{title}</h3>
+                    <div className="text-gray-600 text-[9px] space-y-0.5">
+                      <div className="font-medium">{company}</div>
+                      <div>{location}</div>
                     </div>
                   </div>
 
                   {/* Tags */}
                   {tags.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {tags.slice(0, 3).map((tag) => (
+                    <div className="mt-2 flex flex-wrap gap-1 justify-center">
+                      {tags.slice(0, 2).map((tag) => (
                         <span
                           key={tag}
-                          className="px-1.5 py-0.5 bg-blue-50 text-blue-700 text-[8px] font-medium rounded border border-blue-200"
+                          className="px-2 py-0.5 bg-blue-50 text-blue-700 text-[8px] font-medium rounded-full"
                         >
                           {tag}
                         </span>
@@ -101,9 +100,9 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
 
                   {/* Lön */}
                   {salary && (
-                    <div className="mt-2 flex items-center justify-between">
-                      <span className="text-[9px] text-gray-600">Månadslön</span>
-                      <span className="text-sm font-bold text-gray-900">{salary}</span>
+                    <div className="mt-3 text-center">
+                      <div className="text-[8px] text-gray-500 mb-0.5">Månadslön</div>
+                      <div className="text-sm font-bold text-gray-900">{salary}</div>
                     </div>
                   )}
                 </div>
