@@ -50,7 +50,7 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
             {/* Jobbannons innehåll */}
             <div className="absolute inset-0">
               {/* Bakgrundsbild/gradient */}
-              <div className="h-3/5 w-full relative overflow-hidden">
+              <div className="h-full w-full relative overflow-hidden">
                 {imageUrl ? (
                   <img
                     loading="lazy"
@@ -60,7 +60,7 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
                   />
                 ) : (
                   <>
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600" />
+                    <div className="absolute inset-0 bg-primary-gradient" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
                   </>
                 )}
