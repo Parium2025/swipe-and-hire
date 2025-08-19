@@ -120,7 +120,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       )
     },
     {
-      title: "Nu kör vi",
+      title: "Nu kör vi!",
       subtitle: "Framtiden väntar",
       content: (
         <div className="flex flex-col items-center space-y-8">
@@ -139,7 +139,6 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-bold text-lg px-10 py-5 rounded-full shadow-xl hover:scale-105 transition-all duration-200"
           >
             Skapa min profil nu
-            <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </div>
       )
