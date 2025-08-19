@@ -19,47 +19,6 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
 
   const slides = [
     {
-      title: "Välkommen till Parium",
-      subtitle: "Framtiden börjar med ett swipe",
-      content: (
-        <div className="flex flex-col items-center space-y-6">
-          <div className="relative">
-            <div className="w-32 h-52 rounded-[1.5rem] border-4 border-primary-foreground/60 p-3 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
-              <div className="relative w-full h-full rounded-[1rem] bg-gradient-to-b from-primary/20 to-primary/40 overflow-hidden flex items-center justify-center">
-                {/* Ren animerad swipe-gest utan text */}
-                <div className="flex flex-col items-center space-y-3">
-                  {/* Animerad swipe-gest */}
-                  <div className="relative w-16 h-8 flex items-center">
-                    {/* Hand-ikon som swiper */}
-                    <div className="absolute text-primary-foreground" style={{ animation: 'swipeLeft 2s ease-in-out infinite' }}>
-                    </div>
-                    
-                    {/* Swipe-spår */}
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full h-0.5 bg-gradient-to-l from-primary-foreground/70 via-primary-foreground/40 to-transparent rounded-full opacity-60"></div>
-                    </div>
-                    
-                    {/* Pil som följer */}
-                    <div className="absolute right-0" style={{ animation: 'arrowLeft 2s ease-in-out infinite 0.3s' }}>
-                      <ArrowRight className="h-3 w-3 text-primary-foreground rotate-180" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="absolute -bottom-2 -right-2 bg-primary rounded-full p-2">
-              <ArrowRight className="h-4 w-4 text-primary-foreground animate-pulse" />
-            </div>
-          </div>
-          <div className="text-center">
-            <p className="text-primary-foreground/70 text-sm mb-4">
-              {device === 'mobile' || device === 'tablet' ? 'Swipa vänster för att fortsätta' : 'Tryck på pilen eller använd piltangenterna'}
-            </p>
-          </div>
-        </div>
-      )
-    },
-    {
       title: "Skapa en profil",
       subtitle: "Ladda upp en kort profilvideo eller en bild – visa vem du är på riktigt",
       content: (
@@ -99,6 +58,23 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
               Din personlighet säger mer än ett CV.
             </p>
           </div>
+        </div>
+      )
+    },
+    {
+      title: "Jobbsök i ett swipe",
+      subtitle: "Swipa, Matcha, Börja",
+      content: (
+        <div className="flex flex-col items-center space-y-8">
+          <JobAdCard
+            imageUrl="/src/assets/office-building.jpg"
+            title="UX Designer"
+            company="Techno AB"
+            location="Stockholm • Hybrid"
+            tags={["Figma", "Adobe XD", "Design System"]}
+            salary="52,000 kr"
+            matchScore={94}
+          />
         </div>
       )
     },
