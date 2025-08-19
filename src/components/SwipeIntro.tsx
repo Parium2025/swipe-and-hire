@@ -110,7 +110,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
           <JobAdCard
             title="UX Designer"
             company="Techno AB"
-            location="Stockholm • Remote OK"
+            location="Stockholm • Hybrid"
             tags={["Figma", "Adobe XD", "Design System"]}
             salary="52,000 kr"
             matchScore={94}
