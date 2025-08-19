@@ -103,23 +103,6 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       )
     },
     {
-      title: "Jobbsök i ett swipe",
-      subtitle: "Swipa, Matcha, Börja",
-      content: (
-        <div className="flex flex-col items-center space-y-8">
-          <JobAdCard
-            imageUrl="/src/assets/office-building.jpg"
-            title="UX Designer"
-            company="Techno AB"
-            location="Stockholm • Hybrid"
-            tags={["Figma", "Adobe XD", "Design System"]}
-            salary="52,000 kr"
-            matchScore={94}
-          />
-        </div>
-      )
-    },
-    {
       title: "Ta steget - starta direkt!",
       subtitle: "",
       content: (
