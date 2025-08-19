@@ -369,13 +369,14 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
                 ))}
               </div>
               {/* Helper text under dots */}
-              {currentSlide < slides.length - 1 && (
-                <p className="text-primary-foreground/50 text-sm">
-                  {device === 'mobile' || device === 'tablet'
-                    ? 'Nästa generation av jobbsök är här'
-                    : 'Klicka eller använd piltangenterna'}
-                </p>
-              )}
+              <p className="text-primary-foreground/50 text-sm">
+                {currentSlide < slides.length - 1 
+                  ? (device === 'mobile' || device === 'tablet'
+                      ? 'Nästa generation av jobbsök är här'
+                      : 'Klicka eller använd piltangenterna')
+                  : 'Nästa generation av jobbsök är här'
+                }
+              </p>
             </div>
           </div>
         </div>
