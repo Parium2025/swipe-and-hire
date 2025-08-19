@@ -51,11 +51,11 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
 
           {/* Textinnehåll - centrerat */}
           <div className="absolute inset-0 flex flex-col justify-center items-center p-2 text-white text-center">
-            <h3 className="text-xs font-extrabold leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)]">
+            <h3 className="text-sm font-extrabold leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)]">
               {title}
             </h3>
-            <div className="mt-1 text-white/95 text-[10px] drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">{company}</div>
-            <div className="text-white/80 text-[9px] drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]">{location}</div>
+            <div className="mt-1 text-white/95 text-xs drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">{company}</div>
+            <div className="text-white/80 text-[11px] drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]">{location}</div>
           </div>
 
           {/* Handlingsknappar */}
