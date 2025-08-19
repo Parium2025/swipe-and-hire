@@ -139,8 +139,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   };
 
   const handlePrevious = () => {
-    if (currentStep > 0) {
+    if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+    } else if (currentStep === 1) {
+      setCurrentStep(-1); // Go back to SwipeIntro instead of the removed welcome slide
     }
   };
 
@@ -333,7 +335,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
   // Render SwipeIntro fullscreen
   if (currentStep === -1) {
-    return <SwipeIntro onComplete={() => setCurrentStep(0)} />;
+    return <SwipeIntro onComplete={() => setCurrentStep(1)} />;
   }
 
   const renderStep = () => {
