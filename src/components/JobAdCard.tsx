@@ -59,20 +59,20 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
           </div>
 
           {/* Handlingsknappar */}
-          <div className="absolute bottom-1.5 left-0 right-0 px-2 flex items-center justify-between">
+          <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center gap-3">
             <button
               aria-label="Nej tack"
               onClick={onNope}
-              className="w-6 h-6 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors"
+              className="w-8 h-8 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors"
             >
-              <X className="h-3 w-3 text-white" />
+              <X className="h-4 w-4 text-white" />
             </button>
             <button
               aria-label="Gilla jobbet"
               onClick={onLike}
-              className="w-6 h-6 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors"
+              className="w-8 h-8 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors"
             >
-              <Heart className="h-3 w-3 text-white fill-white" />
+              <Heart className="h-4 w-4 text-white fill-white" />
             </button>
           </div>
         </div>
