@@ -22,7 +22,7 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
   imageAlt,
   title = "Frontend Developer",
   company = "Clarity",
-  location = "Stockholm • Heltid",
+  location = "Stockholm • Hybrid",
   onLike,
   onNope,
   onSave,
