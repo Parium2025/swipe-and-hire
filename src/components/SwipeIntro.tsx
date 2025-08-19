@@ -124,6 +124,15 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       subtitle: "Framtiden väntar",
       content: (
         <div className="flex flex-col items-center space-y-8">
+          {/* Stiliserad nedåtpil */}
+          <div className="flex flex-col items-center space-y-2">
+            <div className="w-0.5 h-8 bg-gradient-to-b from-primary-foreground/40 to-primary-foreground/20"></div>
+            <div className="relative">
+              <div className="w-3 h-3 border-r-2 border-b-2 border-primary-foreground/60 rotate-45 animate-pulse"></div>
+              <div className="absolute inset-0 w-3 h-3 border-r-2 border-b-2 border-primary-foreground/30 rotate-45 scale-150"></div>
+            </div>
+          </div>
+          
           <Button 
             onClick={onComplete}
             size="lg"
