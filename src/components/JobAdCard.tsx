@@ -31,110 +31,88 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
   onRewind,
 }) => {
   return (
-    <section aria-label="Jobbannonskort" className="relative w-full max-w-xs mx-auto">
-      {/* Telefon mockup */}
-      <div className="relative">
-        <div className="w-48 h-80 bg-slate-900 rounded-[2rem] p-1.5 shadow-2xl mx-auto">
-          {/* Telefon skärm */}
-          <div className="w-full h-full rounded-[1.5rem] overflow-hidden relative bg-white">
-            
-            {/* Status bar */}
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20">
-              <div className="flex items-center space-x-1 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-full">
-                <span className="w-1 h-1 rounded-full bg-white" />
-                <span className="w-1 h-1 rounded-full bg-white/40" />
-                <span className="w-1 h-1 rounded-full bg-white/40" />
+    <section aria-label="Jobbannonskort" className="relative w-80 h-96 mx-auto">
+      <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl">
+        {/* Bakgrundsbild/gradient */}
+        <div className="absolute inset-0">
+          {imageUrl ? (
+            <img
+              loading="lazy"
+              src={imageUrl}
+              alt={imageAlt || `${title} hos ${company}`}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" />
+          )}
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+        </div>
+
+        {/* Match badge */}
+        {typeof matchScore === 'number' && (
+          <div className="absolute top-4 right-4 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+            {matchScore}% match
+          </div>
+        )}
+
+        {/* Content */}
+        <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
+          {/* Tags */}
+          {tags.length > 0 && (
+            <div className="mb-4">
+              <div className="flex flex-wrap gap-2">
+                {tags.slice(0, 3).map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-full border border-white/30"
+                  >
+                    {tag}
+                  </span>
+                ))}
               </div>
             </div>
+          )}
 
-            {/* Jobbannons innehåll */}
-            <div className="absolute inset-0">
-              {/* Bakgrundsbild/gradient */}
-              <div className="h-full w-full relative overflow-hidden">
-                {imageUrl ? (
-                  <img
-                    loading="lazy"
-                    src={imageUrl}
-                    alt={imageAlt || `${title} hos ${company}`}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <>
-                    <div className="absolute inset-0 bg-primary-gradient" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-                  </>
-                )}
-                
-                {/* Match badge */}
-                {typeof matchScore === 'number' && (
-                  <div className="absolute top-3 right-2 bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-lg">
-                    {matchScore}% match
-                  </div>
-                )}
-              </div>
+          {/* Job title */}
+          <h3 className="text-2xl font-bold mb-2 leading-tight">{title}</h3>
 
-              {/* Info kort */}
-              <div className="absolute bottom-8 left-1.5 right-1.5">
-                <div className="bg-white/95 backdrop-blur-md rounded-lg p-3 shadow-xl border border-white/20">
-                  <div className="text-center space-y-1.5">
-                    <h3 className="text-xs font-bold text-gray-900 leading-tight">{title}</h3>
-                    <div className="text-gray-600 text-[9px] space-y-0.5">
-                      <div className="font-medium">{company}</div>
-                      <div>{location}</div>
-                    </div>
-                  </div>
+          {/* Company and location */}
+          <div className="flex items-center text-white/90 text-sm mb-1">
+            <span className="font-medium">{company}</span>
+          </div>
+          <div className="text-white/80 text-sm mb-4">{location}</div>
 
-                  {/* Tags */}
-                  {tags.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1 justify-center">
-                      {tags.slice(0, 2).map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2 py-0.5 bg-blue-50 text-blue-700 text-[8px] font-medium rounded-full"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Lön */}
-                  {salary && (
-                    <div className="mt-3 text-center">
-                      <div className="text-[8px] text-gray-500 mb-0.5">Månadslön</div>
-                      <div className="text-sm font-bold text-gray-900">{salary}</div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Swipe knappar */}
-              <div className="absolute bottom-3 left-0 right-0">
-                <div className="flex items-center justify-center space-x-2">
-                  <button
-                    aria-label="Nej tack"
-                    onClick={onNope}
-                    className="w-8 h-8 rounded-full bg-white shadow-lg border border-red-200 flex items-center justify-center hover:scale-105 transition-transform"
-                  >
-                    <X className="h-3.5 w-3.5 text-red-500 stroke-[2.5]" />
-                  </button>
-                  <button
-                    aria-label="Gilla jobbet"
-                    onClick={onLike}
-                    className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 shadow-xl flex items-center justify-center hover:scale-105 transition-transform"
-                  >
-                    <Heart className="h-4 w-4 text-white fill-white" />
-                  </button>
-                  <button
-                    aria-label="Superlike"
-                    onClick={onSuperLike}
-                    className="w-8 h-8 rounded-full bg-white shadow-lg border border-blue-200 flex items-center justify-center hover:scale-105 transition-transform"
-                  >
-                    <Star className="h-3.5 w-3.5 text-blue-500 fill-current" />
-                  </button>
-                </div>
-              </div>
+          {/* Salary */}
+          {salary && (
+            <div className="mb-6">
+              <div className="text-xl font-bold">{salary}</div>
             </div>
+          )}
+
+          {/* Action buttons */}
+          <div className="flex items-center justify-center space-x-4">
+            <button
+              aria-label="Nej tack"
+              onClick={onNope}
+              className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:scale-105 transition-transform hover:bg-red-500/20"
+            >
+              <X className="h-5 w-5 text-white stroke-[2]" />
+            </button>
+            <button
+              aria-label="Gilla jobbet"
+              onClick={onLike}
+              className="w-14 h-14 rounded-full bg-emerald-500 shadow-xl flex items-center justify-center hover:scale-105 transition-transform hover:bg-emerald-600"
+            >
+              <Heart className="h-6 w-6 text-white fill-white" />
+            </button>
+            <button
+              aria-label="Superlike"
+              onClick={onSuperLike}
+              className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center hover:scale-105 transition-transform hover:bg-blue-500/20"
+            >
+              <Star className="h-5 w-5 text-white fill-current" />
+            </button>
           </div>
         </div>
       </div>
