@@ -34,7 +34,7 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
     <section aria-label="Jobbannonskort" className="relative w-full max-w-xs mx-auto">
       {/* Telefon mockup */}
       <div className="relative">
-        <div className="w-64 h-[500px] bg-slate-900 rounded-[2.5rem] p-2 shadow-2xl mx-auto">
+        <div className="w-48 h-80 bg-slate-900 rounded-[2rem] p-1.5 shadow-2xl mx-auto">
           {/* Telefon skärm */}
           <div className="w-full h-full rounded-[2rem] overflow-hidden relative bg-white">
             
