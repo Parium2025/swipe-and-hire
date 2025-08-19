@@ -444,7 +444,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Camera className="h-8 w-8 text-white" />
               </div>
               <h2 className="text-2xl font-bold mb-2 text-white">Profilbild</h2>
-              <p className="text-white">Visa vem du är – ladda upp en bild eller kort video och gör ditt första intryck minnesvärt.</p>
+              <p className="text-white">Ladda upp en kort profilvideo eller en bild och gör ditt första intryck minnesvärt.</p>
             </div>
 
             <div className="flex flex-col items-center space-y-4">
