@@ -138,7 +138,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             size="lg"
             className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-bold text-lg px-10 py-5 rounded-full shadow-xl hover:scale-105 transition-all duration-200"
           >
-            Skapa min profil nu
+            Skapa min profil
           </Button>
         </div>
       )
