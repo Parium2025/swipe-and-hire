@@ -108,6 +108,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       content: (
         <div className="flex flex-col items-center space-y-8">
           <JobAdCard
+            imageUrl="/src/assets/office-building.jpg"
             title="UX Designer"
             company="Techno AB"
             location="Stockholm • Hybrid"
