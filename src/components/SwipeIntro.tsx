@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Heart, ArrowRight, Play, Camera, Video, Sparkles, Hand } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
+import JobAdCard from '@/components/JobAdCard';
 
 interface SwipeIntroProps {
   onComplete: () => void;
@@ -106,91 +107,14 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       subtitle: "Swipa, Matcha, Börja",
       content: (
         <div className="flex flex-col items-center space-y-8">
-          {/* Phone mockup design */}
-          <div className="relative">
-            <div className="w-56 h-96 bg-slate-900 rounded-[2rem] p-1.5 shadow-2xl">
-              {/* Phone screen - Tinder-like job card */}
-              <div className="w-full h-full rounded-[1.5rem] overflow-hidden relative">
-                {/* Background (image/gradient) */}
-                <div className="absolute inset-0 bg-gradient-to-b from-primary/30 via-primary/20 to-primary/40" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary))/0.15,transparent_60%)]" />
-
-                {/* Top status dots (Tinder-like) */}
-                <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10">
-                  <div className="flex items-center space-x-1.5 bg-primary-foreground/60 border border-primary/20 backdrop-blur-md px-3 py-1 rounded-full">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
-                  </div>
-                </div>
-
-                {/* Small like badge */}
-                <div className="absolute top-4 right-4 z-10">
-                  <div className="w-7 h-7 rounded-full bg-emerald-500 shadow-md flex items-center justify-center">
-                    <Heart className="w-3.5 h-3.5 text-white fill-white" />
-                  </div>
-                </div>
-
-                {/* Bottom content overlay */}
-                <div className="absolute bottom-24 left-4 right-4 z-10">
-                  <div className="bg-primary-foreground/80 border border-primary/20 backdrop-blur-md rounded-2xl p-4 shadow-lg">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h4 className="text-primary text-xl font-bold leading-tight">UX Designer</h4>
-                        <div className="mt-1 flex items-center text-primary/70 text-xs space-x-3">
-                          <span>Techno AB</span>
-                          <span className="w-1 h-1 rounded-full bg-primary/40" />
-                          <span>Stockholm</span>
-                          <span className="w-1 h-1 rounded-full bg-primary/40" />
-                          <span>Remote OK</span>
-                        </div>
-                      </div>
-                      <div className="bg-emerald-500/15 text-emerald-700 text-[10px] font-semibold px-2 py-1 rounded-full border border-emerald-500/20">94% match</div>
-                    </div>
-
-                    {/* Chips */}
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <span className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-primary/10 text-primary border border-primary/20">Figma</span>
-                      <span className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-primary/10 text-primary border border-primary/20">Adobe XD</span>
-                      <span className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-primary/10 text-primary border border-primary/20">Design System</span>
-                    </div>
-
-                    {/* Salary row */}
-                    <div className="mt-3 flex items-center justify-between">
-                      <span className="text-primary/60 text-xs">Månadslön</span>
-                      <span className="text-primary font-semibold">52,000 kr</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bottom action buttons */}
-                <div className="absolute bottom-5 left-0 right-0 z-10">
-                  <div className="flex items-center justify-center space-x-4">
-                    <button className="w-14 h-14 rounded-full bg-primary-foreground shadow-lg border-2 border-red-200 flex items-center justify-center hover:scale-105 transition-transform">
-                      <span className="text-red-500 text-xl font-bold">✕</span>
-                    </button>
-                    <button className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 shadow-xl flex items-center justify-center hover:scale-105 transition-transform">
-                      <Heart className="h-7 w-7 text-white fill-white" />
-                    </button>
-                    <button className="w-14 h-14 rounded-full bg-primary-foreground shadow-lg border-2 border-blue-200 flex items-center justify-center hover:scale-105 transition-transform">
-                      <span className="text-blue-500 text-xl font-bold">★</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Floating elements */}
-            <div className="absolute -top-2 -right-2 bg-green-500 rounded-full p-2 animate-bounce">
-              <Heart className="h-4 w-4 text-white fill-white" />
-            </div>
-            <div className="absolute top-1/2 -left-6 text-red-500 opacity-70 animate-pulse">
-              <ArrowRight className="h-5 w-5 rotate-180" />
-            </div>
-            <div className="absolute top-1/2 -right-6 text-green-500 opacity-70 animate-pulse">
-              <ArrowRight className="h-5 w-5" />
-            </div>
-          </div>
+          <JobAdCard
+            title="UX Designer"
+            company="Techno AB"
+            location="Stockholm • Remote OK"
+            tags={["Figma", "Adobe XD", "Design System"]}
+            salary="52,000 kr"
+            matchScore={94}
+          />
         </div>
       )
     },
