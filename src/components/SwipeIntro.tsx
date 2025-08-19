@@ -124,13 +124,6 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       subtitle: "Framtiden väntar",
       content: (
         <div className="flex flex-col items-center space-y-8">
-          <div className="relative">
-            <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2">
-              <div className="bg-primary-foreground rounded-xl p-3 shadow-lg">
-                <div className="text-xs text-primary font-semibold">Match!</div>
-              </div>
-            </div>
-          </div>
           <Button 
             onClick={onComplete}
             size="lg"
