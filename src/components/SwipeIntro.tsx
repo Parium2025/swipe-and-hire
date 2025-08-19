@@ -166,6 +166,9 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    // Inaktivera swipe på sista sliden
+    if (currentSlide === slides.length - 1) return;
+    
     setStartX(e.touches[0].clientX);
     setCurrentX(e.touches[0].clientX);
     setIsDragging(true);
@@ -215,6 +218,9 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    // Inaktivera swipe på sista sliden
+    if (currentSlide === slides.length - 1) return;
+    
     setStartX(e.clientX);
     setCurrentX(e.clientX);
     setIsDragging(true);
