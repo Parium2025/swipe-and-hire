@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, X } from 'lucide-react';
+import { Heart, X, Bookmark } from 'lucide-react';
 
 interface JobAdCardProps {
   imageUrl?: string;
@@ -12,6 +12,7 @@ interface JobAdCardProps {
   salary?: string; // kept for API compatibility
   onLike?: () => void;
   onNope?: () => void;
+  onSave?: () => void;
   onSuperLike?: () => void; // kept for API compatibility
   onRewind?: () => void; // kept for API compatibility
 }
@@ -24,6 +25,7 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
   location = "Stockholm • Heltid",
   onLike,
   onNope,
+  onSave,
 }) => {
   return (
     <section aria-label="Jobbannonskort" className="relative w-[140px] h-[280px] mx-auto">
@@ -59,20 +61,27 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
           </div>
 
           {/* Handlingsknappar */}
-          <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center gap-3">
+          <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center gap-2">
             <button
               aria-label="Nej tack"
               onClick={onNope}
-              className="w-8 h-8 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors"
+              className="w-7 h-7 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors"
             >
-              <X className="h-4 w-4 text-white" />
+              <X className="h-3.5 w-3.5 text-white" />
+            </button>
+            <button
+              aria-label="Spara jobb"
+              onClick={onSave}
+              className="w-7 h-7 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors"
+            >
+              <Bookmark className="h-3.5 w-3.5 text-white" />
             </button>
             <button
               aria-label="Gilla jobbet"
               onClick={onLike}
-              className="w-8 h-8 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors"
+              className="w-7 h-7 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors"
             >
-              <Heart className="h-4 w-4 text-white fill-white" />
+              <Heart className="h-3.5 w-3.5 text-white fill-white" />
             </button>
           </div>
         </div>
