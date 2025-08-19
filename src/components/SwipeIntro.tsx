@@ -120,15 +120,11 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       )
     },
     {
-      title: "Låt oss börja din resa idag",
-      subtitle: "Gratis att testa. Snabbt att starta.",
+      title: "Nu kör vi",
+      subtitle: "Framtiden väntar",
       content: (
         <div className="flex flex-col items-center space-y-8">
           <div className="relative">
-            <div className="relative">
-              <Heart className="h-20 w-20 text-red-500 fill-red-500 animate-pulse" />
-              <div className="absolute inset-0 rounded-full border-4 border-red-500/30 animate-ping" />
-            </div>
             <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2">
               <div className="bg-primary-foreground rounded-xl p-3 shadow-lg">
                 <div className="text-xs text-primary font-semibold">Match!</div>
@@ -143,9 +139,6 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             Skapa min profil nu
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
-          <p className="text-primary-foreground/60 text-xs text-center max-w-xs">
-            Ingen bindningstid • Avsluta när som helst • 100% säkert
-          </p>
         </div>
       )
     }
