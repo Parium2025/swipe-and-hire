@@ -1,5 +1,6 @@
 import React from 'react';
 import { Heart, X, Bookmark } from 'lucide-react';
+import officeBuilding from '@/assets/office-building.jpg';
 
 interface JobAdCardProps {
   imageUrl?: string;
@@ -18,7 +19,7 @@ interface JobAdCardProps {
 }
 
 const JobAdCard: React.FC<JobAdCardProps> = ({
-  imageUrl = "/src/assets/office-building.jpg",
+  imageUrl = officeBuilding,
   imageAlt,
   title = "Frontend Developer",
   company = "Clarity",

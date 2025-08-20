@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Heart, ArrowRight, Play, Camera, Video, Sparkles, Hand } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
 import JobAdCard from '@/components/JobAdCard';
+import officeBuilding from '@/assets/office-building.jpg';
 
 interface SwipeIntroProps {
   onComplete: () => void;
@@ -108,7 +109,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       content: (
         <div className="flex flex-col items-center space-y-8">
           <JobAdCard
-            imageUrl="/src/assets/office-building.jpg"
+            imageUrl={officeBuilding}
             title="UX Designer"
             company="Techno AB"
             location="Stockholm • Hybrid"
