@@ -460,20 +460,36 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 {phoneError && <p className="text-destructive text-xs mt-1">{phoneError}</p>}
               </div>
               <div>
-                <Label htmlFor="employmentStatus" className="text-white">Vad gör du i dagsläget?</Label>
+                <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget?</Label>
                 <Select value={formData.employmentStatus} onValueChange={(value) => handleInputChange('employmentStatus', value)}>
-                  <SelectTrigger className="text-lg py-3 bg-background/80 border-input hover:bg-background/90 transition-colors">
-                    <SelectValue placeholder="Välj din nuvarande situation" />
+                  <SelectTrigger className="h-12 text-base bg-background/90 border-input/50 hover:bg-background/95 transition-colors focus:ring-2 focus:ring-primary/20 focus:border-primary/50">
+                    <SelectValue placeholder="Välj din nuvarande situation" className="text-muted-foreground" />
                   </SelectTrigger>
-                  <SelectContent className="bg-background border border-border shadow-lg">
-                    <SelectItem value="tillsvidareanställning" className="py-3 text-base hover:bg-accent/50 cursor-pointer">Tillsvidareanställning (fast jobb)</SelectItem>
-                    <SelectItem value="visstidsanställning" className="py-3 text-base hover:bg-accent/50 cursor-pointer">Visstidsanställning (projekt/vikariat/säsong)</SelectItem>
-                    <SelectItem value="deltid" className="py-3 text-base hover:bg-accent/50 cursor-pointer">Deltid</SelectItem>
-                    <SelectItem value="heltid" className="py-3 text-base hover:bg-accent/50 cursor-pointer">Heltid</SelectItem>
-                    <SelectItem value="timanställning" className="py-3 text-base hover:bg-accent/50 cursor-pointer">Timanställning</SelectItem>
-                    <SelectItem value="provanställning" className="py-3 text-base hover:bg-accent/50 cursor-pointer">Provanställning</SelectItem>
-                    <SelectItem value="bemanningsanställning" className="py-3 text-base hover:bg-accent/50 cursor-pointer">Bemanningsanställning (via konsult-/bemanningsföretag)</SelectItem>
-                    <SelectItem value="intermittent" className="py-3 text-base hover:bg-accent/50 cursor-pointer">Intermittent anställning ("behovsanställning")</SelectItem>
+                  <SelectContent className="bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg max-h-[50vh] overflow-y-auto">
+                    <SelectItem value="tillsvidareanställning" className="h-12 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Tillsvidareanställning (fast jobb)
+                    </SelectItem>
+                    <SelectItem value="visstidsanställning" className="h-12 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Visstidsanställning (projekt/vikariat/säsong)
+                    </SelectItem>
+                    <SelectItem value="deltid" className="h-12 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Deltid
+                    </SelectItem>
+                    <SelectItem value="heltid" className="h-12 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Heltid
+                    </SelectItem>
+                    <SelectItem value="timanställning" className="h-12 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Timanställning
+                    </SelectItem>
+                    <SelectItem value="provanställning" className="h-12 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Provanställning
+                    </SelectItem>
+                    <SelectItem value="bemanningsanställning" className="h-12 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Bemanningsanställning (via konsult/bemanningsföretag)
+                    </SelectItem>
+                    <SelectItem value="intermittent" className="h-12 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Intermittent anställning ("behovsanställning")
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
