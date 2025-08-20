@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import FileUpload from '@/components/FileUpload';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -34,6 +35,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     bio: profile?.bio || '',
     location: profile?.location || '',
     phone: profile?.phone || '',
+    age: '',
+    employmentStatus: '',
     profileImageUrl: profile?.profile_image_url || '',
     profileMediaType: 'image', // 'image' or 'video'
     coverImageUrl: '', // Cover image for videos
@@ -315,7 +318,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const isStepValid = () => {
     switch (currentStep) {
       case 0: return true; // Intro
-      case 1: return !!(formData.firstName.trim() && formData.lastName.trim() && formData.phone.trim() && validatePhoneNumber(formData.phone).isValid);
+      case 1: return !!(formData.firstName.trim() && formData.lastName.trim() && formData.phone.trim() && formData.age.trim() && formData.employmentStatus.trim() && validatePhoneNumber(formData.phone).isValid);
       case 2: return true; // Profile image is optional
       case 3: return true; // CV is optional
       case 4: return formData.bio.trim() && formData.location.trim();
@@ -417,6 +420,19 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 />
               </div>
               <div>
+                <Label htmlFor="age" className="text-white">Ålder</Label>
+                <Input 
+                  id="age" 
+                  type="number"
+                  value={formData.age} 
+                  onChange={(e) => handleInputChange('age', e.target.value)} 
+                  placeholder="Din ålder" 
+                  className="text-lg py-3" 
+                  min="16"
+                  max="99"
+                />
+              </div>
+              <div>
                 <Label htmlFor="phone" className="text-white">
                   <Phone className="h-4 w-4 inline mr-2" />
                   Telefonnummer
@@ -431,6 +447,24 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   placeholder="070-123 45 67" 
                 />
                 {phoneError && <p className="text-destructive text-xs mt-1">{phoneError}</p>}
+              </div>
+              <div>
+                <Label htmlFor="employmentStatus" className="text-white">Vad gör du i dagsläget?</Label>
+                <Select value={formData.employmentStatus} onValueChange={(value) => handleInputChange('employmentStatus', value)}>
+                  <SelectTrigger className="text-lg py-3">
+                    <SelectValue placeholder="Välj din nuvarande situation" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tillsvidareanställning">Tillsvidareanställning (fast jobb)</SelectItem>
+                    <SelectItem value="visstidsanställning">Visstidsanställning (projekt/vikariat/säsong)</SelectItem>
+                    <SelectItem value="deltid">Deltid</SelectItem>
+                    <SelectItem value="heltid">Heltid</SelectItem>
+                    <SelectItem value="timanställning">Timanställning</SelectItem>
+                    <SelectItem value="provanställning">Provanställning</SelectItem>
+                    <SelectItem value="bemanningsanställning">Bemanningsanställning (via konsult-/bemanningsföretag)</SelectItem>
+                    <SelectItem value="intermittent">Intermittent anställning ("behovsanställning")</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>
