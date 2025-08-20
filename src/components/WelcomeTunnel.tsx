@@ -466,13 +466,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Select 
                   value={formData.employmentStatus} 
                   onValueChange={(value) => handleInputChange('employmentStatus', value)}
-                  onOpenChange={(open) => {
-                    if (open) {
-                      document.body.style.overflow = 'hidden';
-                    } else {
-                      document.body.style.overflow = '';
-                    }
-                  }}
                 >
                   <SelectTrigger className="text-lg py-3 border border-input bg-background">
                     <SelectValue placeholder="Välj din nuvarande situation" className="text-muted-foreground" />
@@ -510,13 +503,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Select 
                   value={formData.workingHours} 
                   onValueChange={(value) => handleInputChange('workingHours', value)}
-                  onOpenChange={(open) => {
-                    if (open) {
-                      document.body.style.overflow = 'hidden';
-                    } else {
-                      document.body.style.overflow = '';
-                    }
-                  }}
                 >
                   <SelectTrigger className="text-lg py-3 border border-input bg-background">
                     <SelectValue placeholder="Välj arbetstid/omfattning" className="text-muted-foreground" />
@@ -539,13 +525,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Select 
                   value={formData.availability} 
                   onValueChange={(value) => handleInputChange('availability', value)}
-                  onOpenChange={(open) => {
-                    if (open) {
-                      document.body.style.overflow = 'hidden';
-                    } else {
-                      document.body.style.overflow = '';
-                    }
-                  }}
                 >
                   <SelectTrigger className="text-lg py-3 border border-input bg-background">
                     <SelectValue placeholder="Välj din tillgänglighet" className="text-muted-foreground" />
