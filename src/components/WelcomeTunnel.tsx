@@ -470,7 +470,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   <SelectTrigger className="text-lg py-3 border border-input bg-background">
                     <SelectValue placeholder="Välj din nuvarande situation" className="text-muted-foreground" />
                   </SelectTrigger>
-                  <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg max-h-[50vh] overflow-y-auto">
+                  <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg">
                     <SelectItem value="tillsvidareanställning" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
                       Fast anställning
                     </SelectItem>
@@ -507,7 +507,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   <SelectTrigger className="text-lg py-3 border border-input bg-background">
                     <SelectValue placeholder="Välj arbetstid/omfattning" className="text-muted-foreground" />
                   </SelectTrigger>
-                  <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg max-h-[50vh] overflow-y-auto">
+                  <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg">
                     <SelectItem value="heltid" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
                       Heltid
                     </SelectItem>
@@ -529,7 +529,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   <SelectTrigger className="text-lg py-3 border border-input bg-background">
                     <SelectValue placeholder="Välj din tillgänglighet" className="text-muted-foreground" />
                   </SelectTrigger>
-                  <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg max-h-[50vh] overflow-y-auto">
+                  <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg">
                     <SelectItem value="omgaende" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
                       Omgående
                     </SelectItem>
