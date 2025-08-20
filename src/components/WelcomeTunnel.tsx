@@ -467,10 +467,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   </SelectTrigger>
                   <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg max-h-[50vh] overflow-y-auto">
                     <SelectItem value="tillsvidareanställning" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Tillsvidareanställning (fast jobb)
+                      Fast anställning
                     </SelectItem>
                     <SelectItem value="visstidsanställning" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Visstidsanställning (projekt/vikariat)
+                      Visstidsanställning
                     </SelectItem>
                     <SelectItem value="provanställning" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
                       Provanställning
@@ -479,7 +479,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                       Interim anställning
                     </SelectItem>
                     <SelectItem value="bemanningsanställning" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Bemanningsanställning (konsult)
+                      Konsultanställning
                     </SelectItem>
                     <SelectItem value="egenforetagare" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
                       Egenföretagare / Frilans
