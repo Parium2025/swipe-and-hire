@@ -36,6 +36,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     location: profile?.location || '',
     phone: profile?.phone || '',
     age: '',
+    homeLocation: '',
     employmentStatus: '',
     profileImageUrl: profile?.profile_image_url || '',
     profileMediaType: 'image', // 'image' or 'video'
@@ -318,7 +319,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const isStepValid = () => {
     switch (currentStep) {
       case 0: return true; // Intro
-      case 1: return !!(formData.firstName.trim() && formData.lastName.trim() && formData.phone.trim() && formData.age.trim() && formData.employmentStatus.trim() && validatePhoneNumber(formData.phone).isValid);
+      case 1: return !!(formData.firstName.trim() && formData.lastName.trim() && formData.phone.trim() && formData.age.trim() && formData.homeLocation.trim() && formData.employmentStatus.trim() && validatePhoneNumber(formData.phone).isValid);
       case 2: return true; // Profile image is optional
       case 3: return true; // CV is optional
       case 4: return formData.bio.trim() && formData.location.trim();
@@ -433,6 +434,16 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 />
               </div>
               <div>
+                <Label htmlFor="homeLocation" className="text-white">Var bor du?</Label>
+                <Input 
+                  id="homeLocation" 
+                  value={formData.homeLocation} 
+                  onChange={(e) => handleInputChange('homeLocation', e.target.value)} 
+                  placeholder="Din bostadsort" 
+                  className="text-lg py-3" 
+                />
+              </div>
+              <div>
                 <Label htmlFor="phone" className="text-white">
                   <Phone className="h-4 w-4 inline mr-2" />
                   Telefonnummer
@@ -451,18 +462,18 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <div>
                 <Label htmlFor="employmentStatus" className="text-white">Vad gör du i dagsläget?</Label>
                 <Select value={formData.employmentStatus} onValueChange={(value) => handleInputChange('employmentStatus', value)}>
-                  <SelectTrigger className="text-lg py-3">
+                  <SelectTrigger className="text-lg py-3 bg-background/80 border-input hover:bg-background/90 transition-colors">
                     <SelectValue placeholder="Välj din nuvarande situation" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="tillsvidareanställning">Tillsvidareanställning (fast jobb)</SelectItem>
-                    <SelectItem value="visstidsanställning">Visstidsanställning (projekt/vikariat/säsong)</SelectItem>
-                    <SelectItem value="deltid">Deltid</SelectItem>
-                    <SelectItem value="heltid">Heltid</SelectItem>
-                    <SelectItem value="timanställning">Timanställning</SelectItem>
-                    <SelectItem value="provanställning">Provanställning</SelectItem>
-                    <SelectItem value="bemanningsanställning">Bemanningsanställning (via konsult-/bemanningsföretag)</SelectItem>
-                    <SelectItem value="intermittent">Intermittent anställning ("behovsanställning")</SelectItem>
+                  <SelectContent className="bg-background border border-border shadow-lg">
+                    <SelectItem value="tillsvidareanställning" className="py-3 text-base hover:bg-accent/50 cursor-pointer">Tillsvidareanställning (fast jobb)</SelectItem>
+                    <SelectItem value="visstidsanställning" className="py-3 text-base hover:bg-accent/50 cursor-pointer">Visstidsanställning (projekt/vikariat/säsong)</SelectItem>
+                    <SelectItem value="deltid" className="py-3 text-base hover:bg-accent/50 cursor-pointer">Deltid</SelectItem>
+                    <SelectItem value="heltid" className="py-3 text-base hover:bg-accent/50 cursor-pointer">Heltid</SelectItem>
+                    <SelectItem value="timanställning" className="py-3 text-base hover:bg-accent/50 cursor-pointer">Timanställning</SelectItem>
+                    <SelectItem value="provanställning" className="py-3 text-base hover:bg-accent/50 cursor-pointer">Provanställning</SelectItem>
+                    <SelectItem value="bemanningsanställning" className="py-3 text-base hover:bg-accent/50 cursor-pointer">Bemanningsanställning (via konsult-/bemanningsföretag)</SelectItem>
+                    <SelectItem value="intermittent" className="py-3 text-base hover:bg-accent/50 cursor-pointer">Intermittent anställning ("behovsanställning")</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
