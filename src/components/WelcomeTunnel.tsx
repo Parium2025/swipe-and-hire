@@ -472,26 +472,20 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     <SelectItem value="visstidsanställning" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
                       Visstidsanställning (projekt/vikariat)
                     </SelectItem>
-                    <SelectItem value="deltid" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Deltid
-                    </SelectItem>
-                    <SelectItem value="heltid" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Heltid
-                    </SelectItem>
-                    <SelectItem value="timanställning" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Timanställning
-                    </SelectItem>
                     <SelectItem value="provanställning" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
                       Provanställning
+                    </SelectItem>
+                    <SelectItem value="interim" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Interim anställning
                     </SelectItem>
                     <SelectItem value="bemanningsanställning" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
                       Bemanningsanställning (konsult)
                     </SelectItem>
-                    <SelectItem value="intermittent" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Intermittent anställning
-                    </SelectItem>
                     <SelectItem value="egenforetagare" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Egenföretagare
+                      Egenföretagare / Frilans
+                    </SelectItem>
+                    <SelectItem value="arbetssokande" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Arbetssökande
                     </SelectItem>
                     <SelectItem value="annat" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
                       Annat
