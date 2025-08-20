@@ -38,6 +38,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     age: '',
     homeLocation: '',
     employmentStatus: '',
+    workingHours: '', // Arbetstid/Omfattning
+    availability: '', // Tillgänglighet
     profileImageUrl: profile?.profile_image_url || '',
     profileMediaType: 'image', // 'image' or 'video'
     coverImageUrl: '', // Cover image for videos
@@ -319,7 +321,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const isStepValid = () => {
     switch (currentStep) {
       case 0: return true; // Intro
-      case 1: return !!(formData.firstName.trim() && formData.lastName.trim() && formData.phone.trim() && formData.age.trim() && formData.homeLocation.trim() && formData.employmentStatus.trim() && validatePhoneNumber(formData.phone).isValid);
+      case 1: return !!(formData.firstName.trim() && formData.lastName.trim() && formData.phone.trim() && formData.age.trim() && formData.homeLocation.trim() && formData.employmentStatus.trim() && formData.workingHours.trim() && formData.availability.trim() && validatePhoneNumber(formData.phone).isValid);
       case 2: return true; // Profile image is optional
       case 3: return true; // CV is optional
       case 4: return formData.bio.trim() && formData.location.trim();
@@ -489,6 +491,47 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     </SelectItem>
                     <SelectItem value="annat" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
                       Annat
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="workingHours" className="text-white text-sm font-medium">Hur mycket jobbar du idag?</Label>
+                <Select value={formData.workingHours} onValueChange={(value) => handleInputChange('workingHours', value)}>
+                  <SelectTrigger className="text-lg py-3 border border-input bg-background">
+                    <SelectValue placeholder="Välj arbetstid/omfattning" className="text-muted-foreground" />
+                  </SelectTrigger>
+                  <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg max-h-[50vh] overflow-y-auto">
+                    <SelectItem value="heltid" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Heltid
+                    </SelectItem>
+                    <SelectItem value="deltid" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Deltid
+                    </SelectItem>
+                    <SelectItem value="varierande" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Varierande / Flexibelt
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="availability" className="text-white text-sm font-medium">När kan du börja nytt jobb?</Label>
+                <Select value={formData.availability} onValueChange={(value) => handleInputChange('availability', value)}>
+                  <SelectTrigger className="text-lg py-3 border border-input bg-background">
+                    <SelectValue placeholder="Välj din tillgänglighet" className="text-muted-foreground" />
+                  </SelectTrigger>
+                  <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg max-h-[50vh] overflow-y-auto">
+                    <SelectItem value="omgaende" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Omgående
+                    </SelectItem>
+                    <SelectItem value="inom-1-manad" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Inom 1 månad
+                    </SelectItem>
+                    <SelectItem value="inom-3-manader" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Inom 3 månader
+                    </SelectItem>
+                    <SelectItem value="osaker" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Osäker
                     </SelectItem>
                   </SelectContent>
                 </Select>
