@@ -479,7 +479,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                       Interim anställning
                     </SelectItem>
                     <SelectItem value="bemanningsanställning" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Konsultanställning
+                      Bemanningsanställning
                     </SelectItem>
                     <SelectItem value="egenforetagare" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
                       Egenföretagare / Frilans
