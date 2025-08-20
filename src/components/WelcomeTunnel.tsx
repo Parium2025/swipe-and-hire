@@ -463,7 +463,17 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               </div>
               <div>
                 <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget?</Label>
-                <Select value={formData.employmentStatus} onValueChange={(value) => handleInputChange('employmentStatus', value)}>
+                <Select 
+                  value={formData.employmentStatus} 
+                  onValueChange={(value) => handleInputChange('employmentStatus', value)}
+                  onOpenChange={(open) => {
+                    if (open) {
+                      document.body.style.overflow = 'hidden';
+                    } else {
+                      document.body.style.overflow = '';
+                    }
+                  }}
+                >
                   <SelectTrigger className="text-lg py-3 border border-input bg-background">
                     <SelectValue placeholder="Välj din nuvarande situation" className="text-muted-foreground" />
                   </SelectTrigger>
@@ -497,7 +507,17 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               </div>
               <div>
                 <Label htmlFor="workingHours" className="text-white text-sm font-medium">Hur mycket jobbar du idag?</Label>
-                <Select value={formData.workingHours} onValueChange={(value) => handleInputChange('workingHours', value)}>
+                <Select 
+                  value={formData.workingHours} 
+                  onValueChange={(value) => handleInputChange('workingHours', value)}
+                  onOpenChange={(open) => {
+                    if (open) {
+                      document.body.style.overflow = 'hidden';
+                    } else {
+                      document.body.style.overflow = '';
+                    }
+                  }}
+                >
                   <SelectTrigger className="text-lg py-3 border border-input bg-background">
                     <SelectValue placeholder="Välj arbetstid/omfattning" className="text-muted-foreground" />
                   </SelectTrigger>
@@ -516,7 +536,17 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               </div>
               <div>
                 <Label htmlFor="availability" className="text-white text-sm font-medium">När kan du börja nytt jobb?</Label>
-                <Select value={formData.availability} onValueChange={(value) => handleInputChange('availability', value)}>
+                <Select 
+                  value={formData.availability} 
+                  onValueChange={(value) => handleInputChange('availability', value)}
+                  onOpenChange={(open) => {
+                    if (open) {
+                      document.body.style.overflow = 'hidden';
+                    } else {
+                      document.body.style.overflow = '';
+                    }
+                  }}
+                >
                   <SelectTrigger className="text-lg py-3 border border-input bg-background">
                     <SelectValue placeholder="Välj din tillgänglighet" className="text-muted-foreground" />
                   </SelectTrigger>
