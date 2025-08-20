@@ -462,7 +462,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <div>
                 <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget?</Label>
                 <Select value={formData.employmentStatus} onValueChange={(value) => handleInputChange('employmentStatus', value)}>
-                  <SelectTrigger className="h-12 text-base bg-background/90 hover:bg-background/95 transition-colors focus:ring-2 focus:ring-primary/20">
+                  <SelectTrigger className="text-lg py-3 border border-input bg-background">
                     <SelectValue placeholder="Välj din nuvarande situation" className="text-muted-foreground" />
                   </SelectTrigger>
                   <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg max-h-[50vh] overflow-y-auto">
