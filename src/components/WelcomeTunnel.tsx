@@ -465,30 +465,30 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   <SelectTrigger className="h-12 text-base bg-background/90 border-input/50 hover:bg-background/95 transition-colors focus:ring-2 focus:ring-primary/20 focus:border-primary/50">
                     <SelectValue placeholder="Välj din nuvarande situation" className="text-muted-foreground" />
                   </SelectTrigger>
-                  <SelectContent className="bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg max-h-[50vh] overflow-y-auto">
-                    <SelectItem value="tillsvidareanställning" className="h-12 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                  <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg max-h-[50vh] overflow-y-auto">
+                    <SelectItem value="tillsvidareanställning" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
                       Tillsvidareanställning (fast jobb)
                     </SelectItem>
-                    <SelectItem value="visstidsanställning" className="h-12 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Visstidsanställning (projekt/vikariat/säsong)
+                    <SelectItem value="visstidsanställning" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Visstidsanställning (projekt/vikariat)
                     </SelectItem>
-                    <SelectItem value="deltid" className="h-12 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                    <SelectItem value="deltid" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
                       Deltid
                     </SelectItem>
-                    <SelectItem value="heltid" className="h-12 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                    <SelectItem value="heltid" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
                       Heltid
                     </SelectItem>
-                    <SelectItem value="timanställning" className="h-12 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                    <SelectItem value="timanställning" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
                       Timanställning
                     </SelectItem>
-                    <SelectItem value="provanställning" className="h-12 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                    <SelectItem value="provanställning" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
                       Provanställning
                     </SelectItem>
-                    <SelectItem value="bemanningsanställning" className="h-12 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Bemanningsanställning (via konsult/bemanningsföretag)
+                    <SelectItem value="bemanningsanställning" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Bemanningsanställning (konsult)
                     </SelectItem>
-                    <SelectItem value="intermittent" className="h-12 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Intermittent anställning ("behovsanställning")
+                    <SelectItem value="intermittent" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Behovsanställning
                     </SelectItem>
                   </SelectContent>
                 </Select>
