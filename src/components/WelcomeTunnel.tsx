@@ -488,7 +488,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                       Bemanningsanställning (konsult)
                     </SelectItem>
                     <SelectItem value="intermittent" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Behovsanställning
+                      Intermittent anställning
+                    </SelectItem>
+                    <SelectItem value="egenforetagare" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Egenföretagare
+                    </SelectItem>
+                    <SelectItem value="annat" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                      Annat
                     </SelectItem>
                   </SelectContent>
                 </Select>
