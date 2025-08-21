@@ -578,11 +578,40 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
-                <Camera className="h-8 w-8 text-white" />
+              <h2 className="text-2xl font-bold mb-4 text-white">Profilbild</h2>
+              <p className="text-white mb-6">Ladda upp en kort profilvideo eller en bild och gör ditt första intryck minnesvärt.</p>
+              
+              {/* Video and Camera Icons */}
+              <div className="flex items-center justify-center space-x-4 mb-4">
+                {/* Video option */}
+                <div className="relative">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-white/20 p-2 bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-sm">
+                    <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
+                      <Video className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+                    </div>
+                  </div>
+                  <div className="absolute -top-1 -right-1 bg-white rounded-full p-1.5 shadow-lg">
+                    <Play className="h-3 w-3 text-primary animate-pulse" />
+                  </div>
+                </div>
+
+                {/* "eller" text */}
+                <div className="text-white/80 text-sm font-medium flex-shrink-0">
+                  eller
+                </div>
+
+                {/* Image option */}
+                <div className="relative">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-white/20 p-2 bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-sm">
+                    <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
+                      <Camera className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+                    </div>
+                  </div>
+                  <div className="absolute -top-1 -right-1 bg-white rounded-full p-1.5 shadow-lg">
+                    <Camera className="h-2 w-2 text-primary" />
+                  </div>
+                </div>
               </div>
-              <h2 className="text-2xl font-bold mb-2 text-white">Profilbild</h2>
-              <p className="text-white">Ladda upp en kort profilvideo eller en bild och gör ditt första intryck minnesvärt.</p>
             </div>
 
             <div className="flex flex-col items-center space-y-4">
