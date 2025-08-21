@@ -668,14 +668,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     disabled={isUploadingCover}
                     className="bg-white/20 border-white/30 text-white hover:bg-white/30 disabled:opacity-50"
                   >
-                    {isUploadingCover ? (
-                      <>
-                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
-                        Laddar upp...
-                      </>
-                    ) : (
-                      formData.coverImageUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'
-                    )}
+                    {formData.coverImageUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
                   </Button>
                   <Input type="file" id="coverImage" accept="image/*" className="hidden" onChange={handleCoverChange} disabled={isUploadingCover} />
                   
