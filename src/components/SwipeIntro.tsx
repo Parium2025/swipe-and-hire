@@ -64,8 +64,8 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       title: "Skapa en profil",
       subtitle: "Ladda upp en kort profilvideo eller en bild",
       content: (
-        <div className="flex flex-col items-center space-y-6">
-          <div className="flex items-center justify-center space-x-6">
+        <div className="flex flex-col items-center justify-center space-y-6 w-full">
+          <div className="flex items-center justify-center space-x-4 min-w-full">
             {/* Video option */}
             <div className="relative">
               <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-primary-foreground/20 p-2 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
@@ -79,7 +79,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             </div>
 
             {/* "eller" text */}
-            <div className="text-primary-foreground/60 text-sm font-medium">
+            <div className="text-primary-foreground/60 text-sm font-medium flex-shrink-0">
               eller
             </div>
 
@@ -330,7 +330,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
         onMouseLeave={handleMouseLeave}
       >
         <div 
-          className="text-center max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto px-6 transition-transform duration-300"
+          className="text-center max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto px-4 transition-transform duration-300"
           style={{
             transform: `translateX(${dragOffset}px)`,
             transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
