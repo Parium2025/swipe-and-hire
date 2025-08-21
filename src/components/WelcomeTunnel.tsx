@@ -471,7 +471,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   onValueChange={(value) => handleInputChange('employmentStatus', value)}
                 >
                   <SelectTrigger className="focus:ring-0 focus:ring-offset-0 focus:border-input">
-                    <SelectValue placeholder="Välj din nuvarande situation" className="text-muted-foreground" />
+                    <SelectValue placeholder="Välj din nuvarande situation" />
                   </SelectTrigger>
                   <SelectContent className="fixed z-[9999] w-full min-w-[var(--radix-select-trigger-width)] max-h-[40vh] overflow-y-auto bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg">
                     <SelectItem value="tillsvidareanställning" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
@@ -510,7 +510,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     onValueChange={(value) => handleInputChange('workingHours', value)}
                   >
                     <SelectTrigger className="focus:ring-0 focus:ring-offset-0 focus:border-input">
-                      <SelectValue placeholder="Välj arbetstid/omfattning" className="text-muted-foreground" />
+                      <SelectValue placeholder="Välj arbetstid/omfattning" />
                     </SelectTrigger>
                     <SelectContent className="fixed z-[9999] w-full min-w-[var(--radix-select-trigger-width)] max-h-[40vh] overflow-y-auto bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg">
                       <SelectItem value="heltid" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
@@ -535,7 +535,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     onValueChange={(value) => handleInputChange('availability', value)}
                   >
                     <SelectTrigger className="focus:ring-0 focus:ring-offset-0 focus:border-input">
-                      <SelectValue placeholder="Välj din tillgänglighet" className="text-muted-foreground" />
+                      <SelectValue placeholder="Välj din tillgänglighet" />
                     </SelectTrigger>
                     <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] max-h-[200px] overflow-y-auto bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg z-50">
                       <SelectItem value="omgaende" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
