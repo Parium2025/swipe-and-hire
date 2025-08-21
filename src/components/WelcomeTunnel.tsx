@@ -705,8 +705,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
                 <FileText className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-2xl font-bold mb-2">CV (valfritt)</h2>
-              <p className="text-muted-foreground">Ladda upp ditt CV för att visa din erfarenhet</p>
+              <h2 className="text-2xl font-bold mb-2 text-white">CV (valfritt)</h2>
+              <p className="text-white">Ladda upp ditt CV för att visa din erfarenhet</p>
             </div>
 
             <div className="flex flex-col items-center space-y-4">
@@ -725,8 +725,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
                 <Briefcase className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-2xl font-bold mb-2">Din profil</h2>
-              <p className="text-muted-foreground">Berätta lite om dig själv</p>
+              <h2 className="text-2xl font-bold mb-2 text-white">Din profil</h2>
+              <p className="text-white">Berätta lite om dig själv</p>
             </div>
 
             <div className="space-y-4 max-w-md mx-auto">
