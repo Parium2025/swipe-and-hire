@@ -153,17 +153,17 @@ const FileUpload: React.FC<FileUploadProps> = ({
     >
       <input {...getInputProps()} />
       <div className="space-y-2">
-        <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+        <Upload className="h-8 w-8 mx-auto text-foreground" />
         {uploading ? (
           <p className="text-sm text-muted-foreground">Laddar upp...</p>
         ) : (
           <>
-            <p className="text-sm font-medium">
+            <p className="text-sm font-medium text-foreground">
               {isDragActive
                 ? 'Släpp filen här...'
                 : 'Dra och släpp en fil här, eller klicka för att välja'}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-foreground">
               {getAcceptedTypesText()} (max {Math.round(maxFileSize / 1024 / 1024)}MB)
             </p>
           </>
