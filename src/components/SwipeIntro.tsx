@@ -292,6 +292,20 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
         
+        {/* Animated background circles */}
+        <ul className="circles">
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+        </ul>
+        
         {/* Soft fade at bottom to prevent hard edges */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary-dark via-primary-dark/80 to-transparent"></div>
         
