@@ -721,7 +721,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 {formData.profileImageUrl && (
                   <button
                     onClick={deleteProfileMedia}
-                    className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 shadow-lg transition-colors"
+                    className="absolute -top-2 -right-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -781,7 +781,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                       </Badge>
                       <button
                         onClick={deleteCoverImage}
-                        className="bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-lg transition-colors"
+                        className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-1.5 shadow-lg transition-colors"
                       >
                         <Trash2 className="h-3 w-3" />
                       </button>
