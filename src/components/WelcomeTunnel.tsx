@@ -648,7 +648,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 )}
                 
                 {formData.profileImageUrl && !isUploadingVideo && (
-                  <Badge variant="secondary" className="bg-white/20 text-white mt-8">
+                  <Badge variant="secondary" className="bg-white/20 text-white mt-12">
                     <Check className="h-3 w-3 mr-1" />
                     {formData.profileMediaType === 'video' ? 'Video' : 'Bild'} uppladdad!
                   </Badge>
