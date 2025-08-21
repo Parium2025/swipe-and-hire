@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import FileUpload from '@/components/FileUpload';
+import ImageEditor from '@/components/ImageEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import phoneWithPariumLogo from '@/assets/phone-with-parium-logo.jpg';
@@ -27,6 +28,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
+  
+  // Image editor states
+  const [imageEditorOpen, setImageEditorOpen] = useState(false);
+  const [coverEditorOpen, setCoverEditorOpen] = useState(false);
+  const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
+  const [pendingCoverSrc, setPendingCoverSrc] = useState<string>('');
 
   // Form data
   const [formData, setFormData] = useState({
@@ -231,53 +238,118 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
   const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // Accept both images and videos
-      if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
-        // Check video duration if it's a video
-        if (file.type.startsWith('video/')) {
-          const video = document.createElement('video');
-          video.preload = 'metadata';
-          
-          video.onloadedmetadata = () => {
-            window.URL.revokeObjectURL(video.src);
-            if (video.duration <= 30) { // Max 30 seconds
-              uploadProfileMedia(file);
-            } else {
-              toast({
-                title: "Video för lång",
-                description: "Videon får vara max 30 sekunder lång.",
-                variant: "destructive"
-              });
-            }
-          };
-          
-          video.src = URL.createObjectURL(file);
-        } else {
+    if (!file) return;
+
+    if (file.type.startsWith('video/')) {
+      // Handle video upload (existing logic)
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      
+      video.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(video.src);
+        if (video.duration <= 30) { // Max 30 seconds
           uploadProfileMedia(file);
+        } else {
+          toast({
+            title: "Video för lång",
+            description: "Videon får vara max 30 sekunder lång.",
+            variant: "destructive"
+          });
         }
-      } else {
-        toast({
-          title: "Fel filtyp",
-          description: "Vänligen välj en bild- eller videofil.",
-          variant: "destructive"
-        });
-      }
+      };
+      
+      video.src = URL.createObjectURL(file);
+    } else if (file.type.startsWith('image/')) {
+      // Handle image - open editor
+      const imageUrl = URL.createObjectURL(file);
+      setPendingImageSrc(imageUrl);
+      setImageEditorOpen(true);
     }
   };
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.type.startsWith('image/')) {
-        uploadCoverImage(file);
-      } else {
-        toast({
-          title: "Fel filtyp",
-          description: "Cover-bilden måste vara en bildfil.",
-          variant: "destructive"
-        });
-      }
+    if (!file || !file.type.startsWith('image/')) return;
+
+    const imageUrl = URL.createObjectURL(file);
+    setPendingCoverSrc(imageUrl);
+    setCoverEditorOpen(true);
+  };
+
+  const handleProfileImageSave = async (editedBlob: Blob) => {
+    try {
+      setIsUploadingVideo(true);
+      
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) throw new Error('User not authenticated');
+
+      const fileExt = 'png';
+      const fileName = `${user.data.user.id}/${Date.now()}-profile.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('job-applications')
+        .upload(fileName, editedBlob);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('job-applications')
+        .getPublicUrl(fileName);
+
+      const imageUrl = `${publicUrl}?t=${Date.now()}`;
+      
+      handleInputChange('profileImageUrl', imageUrl);
+      handleInputChange('profileMediaType', 'image');
+      
+      setImageEditorOpen(false);
+      setPendingImageSrc('');
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Fel vid uppladdning",
+        description: "Kunde inte ladda upp bilden.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploadingVideo(false);
+    }
+  };
+
+  const handleCoverImageSave = async (editedBlob: Blob) => {
+    try {
+      setIsUploadingCover(true);
+      
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) throw new Error('User not authenticated');
+
+      const fileExt = 'png';
+      const fileName = `${user.data.user.id}/${Date.now()}-cover.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('job-applications')
+        .upload(fileName, editedBlob);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('job-applications')
+        .getPublicUrl(fileName);
+
+      const coverUrl = `${publicUrl}?t=${Date.now()}`;
+      
+      handleInputChange('coverImageUrl', coverUrl);
+      
+      setCoverEditorOpen(false);
+      setPendingCoverSrc('');
+    } catch (error) {
+      console.error('Cover upload error:', error);
+      toast({
+        title: "Fel vid uppladdning",
+        description: "Kunde inte ladda upp cover-bilden.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploadingCover(false);
     }
   };
 
@@ -888,6 +960,30 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         </div>
       )}
       </div>
+      
+      {/* Image Editors */}
+      <ImageEditor
+        isOpen={imageEditorOpen}
+        onClose={() => {
+          setImageEditorOpen(false);
+          setPendingImageSrc('');
+        }}
+        imageSrc={pendingImageSrc}
+        onSave={handleProfileImageSave}
+        isCircular={true}
+      />
+      
+      <ImageEditor
+        isOpen={coverEditorOpen}
+        onClose={() => {
+          setCoverEditorOpen(false);
+          setPendingCoverSrc('');
+        }}
+        imageSrc={pendingCoverSrc}
+        onSave={handleCoverImageSave}
+        isCircular={false}
+        aspectRatio={16/9}
+      />
     </div>
   );
 };
