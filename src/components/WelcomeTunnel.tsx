@@ -470,7 +470,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   value={formData.employmentStatus} 
                   onValueChange={(value) => handleInputChange('employmentStatus', value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="focus:ring-0 focus:ring-offset-0 focus:border-input">
                     <SelectValue placeholder="Välj din nuvarande situation" className="text-muted-foreground" />
                   </SelectTrigger>
                   <SelectContent className="fixed z-[9999] w-full min-w-[var(--radix-select-trigger-width)] max-h-[40vh] overflow-y-auto bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg">
@@ -509,7 +509,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     value={formData.workingHours} 
                     onValueChange={(value) => handleInputChange('workingHours', value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="focus:ring-0 focus:ring-offset-0 focus:border-input">
                       <SelectValue placeholder="Välj arbetstid/omfattning" className="text-muted-foreground" />
                     </SelectTrigger>
                     <SelectContent className="fixed z-[9999] w-full min-w-[var(--radix-select-trigger-width)] max-h-[40vh] overflow-y-auto bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg">
