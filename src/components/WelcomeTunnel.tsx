@@ -459,7 +459,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   required
                   value={formData.phone} 
                   onChange={(e) => handlePhoneChange(e.target.value)} 
-                  className="mt-1" 
+                  className="" 
                   placeholder="070-123 45 67" 
                 />
                 {phoneError && <p className="text-destructive text-xs mt-1">{phoneError}</p>}
