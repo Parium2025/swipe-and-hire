@@ -217,11 +217,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       const coverUrl = `${publicUrl}?t=${Date.now()}`;
       
       handleInputChange('coverImageUrl', coverUrl);
-      
-      toast({
-        title: "Cover-bild uppladdad!",
-        description: "Din cover-bild för videon har uppdaterats."
-      });
     } catch (error) {
       console.error('Cover upload error:', error);
       toast({
