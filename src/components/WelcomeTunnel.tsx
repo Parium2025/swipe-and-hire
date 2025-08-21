@@ -416,7 +416,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   value={formData.firstName} 
                   onChange={(e) => handleInputChange('firstName', e.target.value)} 
                   placeholder="Ditt förnamn" 
-                  className="text-sm" 
+                  className="text-base" 
                 />
               </div>
               <div>
@@ -426,7 +426,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   value={formData.lastName} 
                   onChange={(e) => handleInputChange('lastName', e.target.value)} 
                   placeholder="Ditt efternamn" 
-                  className="text-sm" 
+                  className="text-base" 
                 />
               </div>
               <div>
@@ -439,7 +439,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   placeholder="Din ålder" 
                   min="16"
                   max="99"
-                  className="text-sm" 
+                  className="text-base" 
                 />
               </div>
               <div>
@@ -449,7 +449,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   value={formData.homeLocation} 
                   onChange={(e) => handleInputChange('homeLocation', e.target.value)} 
                   placeholder="Din bostadsort" 
-                  className="text-sm" 
+                  className="text-base" 
                 />
               </div>
               <div>
@@ -463,7 +463,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   required
                   value={formData.phone} 
                   onChange={(e) => handlePhoneChange(e.target.value)} 
-                  className="text-sm" 
+                  className="text-base" 
                   placeholder="070-123 45 67" 
                 />
                 {phoneError && <p className="text-destructive text-xs mt-1">{phoneError}</p>}
@@ -474,7 +474,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   value={formData.employmentStatus} 
                   onValueChange={(value) => handleInputChange('employmentStatus', value)}
                 >
-                  <SelectTrigger className="focus:ring-0 focus:ring-offset-0 focus:border-input">
+                  <SelectTrigger className="text-base focus:ring-0 focus:ring-offset-0 focus:border-input">
                     <SelectValue placeholder="Välj din nuvarande situation" />
                   </SelectTrigger>
                   <SelectContent className="fixed z-[9999] w-full min-w-[var(--radix-select-trigger-width)] max-h-[40vh] overflow-y-auto bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg">
@@ -513,7 +513,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     value={formData.workingHours} 
                     onValueChange={(value) => handleInputChange('workingHours', value)}
                   >
-                    <SelectTrigger className="focus:ring-0 focus:ring-offset-0 focus:border-input">
+                    <SelectTrigger className="text-base focus:ring-0 focus:ring-offset-0 focus:border-input">
                       <SelectValue placeholder="Välj arbetstid/omfattning" />
                     </SelectTrigger>
                     <SelectContent className="fixed z-[9999] w-full min-w-[var(--radix-select-trigger-width)] max-h-[40vh] overflow-y-auto bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg">
@@ -538,7 +538,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     value={formData.availability} 
                     onValueChange={(value) => handleInputChange('availability', value)}
                   >
-                    <SelectTrigger className="focus:ring-0 focus:ring-offset-0 focus:border-input">
+                    <SelectTrigger className="text-base focus:ring-0 focus:ring-offset-0 focus:border-input">
                       <SelectValue placeholder="Välj din tillgänglighet" />
                     </SelectTrigger>
                     <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] max-h-[200px] overflow-y-auto bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg z-50">
@@ -696,7 +696,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Label htmlFor="bio">Om mig</Label>
                 <Textarea
                   id="bio"
-                  className="text-sm"
+                  className="text-base" 
                   value={formData.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
                 />
@@ -706,7 +706,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Input
                   id="location"
                   placeholder="Var bor du?"
-                  className="text-sm"
+                  className="text-base"
                   onChange={(e) => handleInputChange('location', e.target.value)}
                 />
               </div>
