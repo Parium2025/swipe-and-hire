@@ -13,7 +13,7 @@ import ImageEditor from '@/components/ImageEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import phoneWithPariumLogo from '@/assets/phone-with-parium-logo.jpg';
-import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone, Play, Video } from 'lucide-react';
+import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone, Play, Video, Trash2 } from 'lucide-react';
 import ProfileVideo from '@/components/ProfileVideo';
 import SwipeIntro from '@/components/SwipeIntro';
 
@@ -351,6 +351,23 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     } finally {
       setIsUploadingCover(false);
     }
+  };
+
+  const deleteProfileMedia = () => {
+    handleInputChange('profileImageUrl', '');
+    handleInputChange('profileMediaType', 'image');
+    toast({
+      title: "Media borttagen",
+      description: "Din profilbild/video har tagits bort."
+    });
+  };
+
+  const deleteCoverImage = () => {
+    handleInputChange('coverImageUrl', '');
+    toast({
+      title: "Cover-bild borttagen", 
+      description: "Din cover-bild har tagits bort."
+    });
   };
 
   const handleSubmit = async () => {
@@ -699,6 +716,16 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     )}
                   </Avatar>
                 )}
+                
+                {/* Delete icon for profile media */}
+                {formData.profileImageUrl && (
+                  <button
+                    onClick={deleteProfileMedia}
+                    className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 shadow-lg transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
               </div>
 
               <div className="space-y-2 text-center">
@@ -724,7 +751,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
               {/* Cover image upload for videos */}
               {formData.profileMediaType === 'video' && formData.profileImageUrl && (
-                <div className="space-y-2 text-center mt-4 p-4 bg-white/10 rounded-lg backdrop-blur-sm">
+                <div className="space-y-2 text-center mt-4 p-4 bg-white/10 rounded-lg backdrop-blur-sm relative">
                   <Label htmlFor="coverImage" className="text-white text-sm">
                     Cover-bild för video (valfritt)
                   </Label>
@@ -747,10 +774,18 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   )}
                   
                   {formData.coverImageUrl && !isUploadingCover && (
-                    <Badge variant="secondary" className="bg-white/20 text-white text-xs">
-                      <Check className="h-3 w-3 mr-1" />
-                      Cover-bild uppladdad!
-                    </Badge>
+                    <div className="flex items-center justify-center gap-2">
+                      <Badge variant="secondary" className="bg-white/20 text-white text-xs">
+                        <Check className="h-3 w-3 mr-1" />
+                        Cover-bild uppladdad!
+                      </Badge>
+                      <button
+                        onClick={deleteCoverImage}
+                        className="bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-lg transition-colors"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
                   )}
                 </div>
               )}
