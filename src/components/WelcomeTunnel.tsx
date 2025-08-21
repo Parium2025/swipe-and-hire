@@ -331,7 +331,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         const availabilityValid = !formData.employmentStatus || formData.availability.trim();
         return requiredFields && phoneValid && workingHoursValid && availabilityValid;
       case 2: return true; // Profile image is optional
-      case 3: return true; // CV is optional
+      case 3: return !!formData.cvUrl.trim(); // CV is now required
       case 4: return formData.bio.trim() && formData.location.trim();
       case 5: return true; // Interests are optional
       default: return false;
@@ -705,7 +705,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
                 <FileText className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-2xl font-bold mb-2 text-white">CV (valfritt)</h2>
+              <h2 className="text-2xl font-bold mb-2 text-white">CV</h2>
               <p className="text-white">Ladda upp ditt CV för att visa din erfarenhet</p>
             </div>
 
