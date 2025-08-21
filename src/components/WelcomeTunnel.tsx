@@ -534,7 +534,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     value={formData.availability} 
                     onValueChange={(value) => handleInputChange('availability', value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="focus:ring-0 focus:ring-offset-0 focus:border-input">
                       <SelectValue placeholder="Välj din tillgänglighet" className="text-muted-foreground" />
                     </SelectTrigger>
                     <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] max-h-[200px] overflow-y-auto bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg z-50">
