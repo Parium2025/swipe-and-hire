@@ -321,7 +321,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const isStepValid = () => {
     switch (currentStep) {
       case 0: return true; // Intro
-      case 1: return !!(formData.firstName.trim() && formData.lastName.trim() && formData.phone.trim() && formData.age.trim() && formData.homeLocation.trim() && formData.employmentStatus.trim() && formData.workingHours.trim() && formData.availability.trim() && validatePhoneNumber(formData.phone).isValid);
+      case 1: 
+        const requiredFields = !!(formData.firstName.trim() && formData.lastName.trim() && formData.phone.trim() && formData.age.trim() && formData.homeLocation.trim() && formData.employmentStatus.trim() && formData.availability.trim());
+        const phoneValid = validatePhoneNumber(formData.phone).isValid;
+        // Only require workingHours if NOT arbetssokande
+        const workingHoursValid = formData.employmentStatus === 'arbetssokande' || formData.workingHours.trim();
+        return requiredFields && phoneValid && workingHoursValid;
       case 2: return true; // Profile image is optional
       case 3: return true; // CV is optional
       case 4: return formData.bio.trim() && formData.location.trim();
@@ -498,28 +503,31 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label htmlFor="workingHours" className="text-white text-sm font-medium">Hur mycket jobbar du idag?</Label>
-                <Select 
-                  value={formData.workingHours} 
-                  onValueChange={(value) => handleInputChange('workingHours', value)}
-                >
-                  <SelectTrigger className="text-lg py-3 border border-input bg-background">
-                    <SelectValue placeholder="Välj arbetstid/omfattning" className="text-muted-foreground" />
-                  </SelectTrigger>
-                  <SelectContent className="fixed z-[9999] w-full min-w-[var(--radix-select-trigger-width)] max-h-[40vh] overflow-y-auto bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg">
-                    <SelectItem value="heltid" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Heltid
-                    </SelectItem>
-                    <SelectItem value="deltid" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Deltid
-                    </SelectItem>
-                    <SelectItem value="varierande" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Varierande / Flexibelt
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Visa endast arbetstid-frågan om personen INTE är arbetssökande */}
+              {formData.employmentStatus !== 'arbetssokande' && (
+                <div>
+                  <Label htmlFor="workingHours" className="text-white text-sm font-medium">Hur mycket jobbar du idag?</Label>
+                  <Select 
+                    value={formData.workingHours} 
+                    onValueChange={(value) => handleInputChange('workingHours', value)}
+                  >
+                    <SelectTrigger className="text-lg py-3 border border-input bg-background">
+                      <SelectValue placeholder="Välj arbetstid/omfattning" className="text-muted-foreground" />
+                    </SelectTrigger>
+                    <SelectContent className="fixed z-[9999] w-full min-w-[var(--radix-select-trigger-width)] max-h-[40vh] overflow-y-auto bg-background/95 backdrop-blur-sm border border-border/50 shadow-xl rounded-lg">
+                      <SelectItem value="heltid" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                        Heltid
+                      </SelectItem>
+                      <SelectItem value="deltid" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                        Deltid
+                      </SelectItem>
+                      <SelectItem value="varierande" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
+                        Varierande / Flexibelt
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div>
                 <Label htmlFor="availability" className="text-white text-sm font-medium">När kan du börja nytt jobb?</Label>
                 <Select 
