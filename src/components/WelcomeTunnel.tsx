@@ -416,6 +416,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   value={formData.firstName} 
                   onChange={(e) => handleInputChange('firstName', e.target.value)} 
                   placeholder="Ditt förnamn" 
+                  className="text-sm" 
                 />
               </div>
               <div>
@@ -425,6 +426,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   value={formData.lastName} 
                   onChange={(e) => handleInputChange('lastName', e.target.value)} 
                   placeholder="Ditt efternamn" 
+                  className="text-sm" 
                 />
               </div>
               <div>
@@ -437,6 +439,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   placeholder="Din ålder" 
                   min="16"
                   max="99"
+                  className="text-sm" 
                 />
               </div>
               <div>
@@ -446,6 +449,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   value={formData.homeLocation} 
                   onChange={(e) => handleInputChange('homeLocation', e.target.value)} 
                   placeholder="Din bostadsort" 
+                  className="text-sm" 
                 />
               </div>
               <div>
@@ -459,7 +463,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   required
                   value={formData.phone} 
                   onChange={(e) => handlePhoneChange(e.target.value)} 
-                  className="" 
+                  className="text-sm" 
                   placeholder="070-123 45 67" 
                 />
                 {phoneError && <p className="text-destructive text-xs mt-1">{phoneError}</p>}
@@ -692,7 +696,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Label htmlFor="bio">Om mig</Label>
                 <Textarea
                   id="bio"
-                  placeholder="Berätta lite om dig själv"
+                  className="text-sm"
                   value={formData.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
                 />
@@ -702,8 +706,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Input
                   id="location"
                   placeholder="Var bor du?"
-                  
-                  value={formData.location}
+                  className="text-sm"
                   onChange={(e) => handleInputChange('location', e.target.value)}
                 />
               </div>
