@@ -65,10 +65,10 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       subtitle: "Ladda upp en kort profilvideo eller en bild",
       content: (
         <div className="flex flex-col items-center space-y-6">
-          <div className="flex items-center space-x-8">
+          <div className="flex items-center justify-center space-x-6">
             {/* Video option */}
             <div className="relative">
-              <div className="w-28 h-28 rounded-full border-4 border-primary-foreground/20 p-2 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-primary-foreground/20 p-2 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
                 <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
                   <Video className="h-8 w-8 text-primary-foreground" />
                 </div>
@@ -85,7 +85,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
 
             {/* Image option */}
             <div className="relative">
-              <div className="w-28 h-28 rounded-full border-4 border-primary-foreground/20 p-2 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-primary-foreground/20 p-2 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
               <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
                 <Camera className="h-8 w-8 text-primary-foreground" />
               </div>

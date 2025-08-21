@@ -772,7 +772,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-parium flex flex-col relative">
+    <div className="min-h-screen bg-gradient-parium flex flex-col relative overflow-x-hidden">
       {/* Static animated background - identical to AuthMobile */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
