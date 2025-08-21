@@ -632,9 +632,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     )}
                   </Avatar>
                 )}
-                <div className="absolute bottom-0 right-0 bg-primary text-white rounded-full p-2 cursor-pointer shadow-lg hover:bg-primary/80 transition-colors" onClick={() => document.getElementById('profileMedia')?.click()}>
-                  {formData.profileMediaType === 'video' ? <Video className="h-4 w-4" /> : <Camera className="h-4 w-4" />}
-                </div>
               </div>
 
               <div className="space-y-2 text-center">
