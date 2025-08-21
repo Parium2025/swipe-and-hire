@@ -32,6 +32,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const [formData, setFormData] = useState({
     firstName: profile?.first_name || '',
     lastName: profile?.last_name || '',
+    email: user?.email || '',
     bio: profile?.bio || '',
     location: profile?.location || '',
     phone: profile?.phone || '',
@@ -322,7 +323,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     switch (currentStep) {
       case 0: return true; // Intro
       case 1: 
-        const requiredFields = !!(formData.firstName.trim() && formData.lastName.trim() && formData.phone.trim() && formData.age.trim() && formData.homeLocation.trim() && formData.employmentStatus.trim());
+        const requiredFields = !!(formData.firstName.trim() && formData.lastName.trim() && formData.email.trim() && formData.phone.trim() && formData.age.trim() && formData.homeLocation.trim() && formData.employmentStatus.trim());
         const phoneValid = validatePhoneNumber(formData.phone).isValid;
         // Only require workingHours if NOT arbetssokande AND employment status is selected
         const workingHoursValid = formData.employmentStatus === 'arbetssokande' || !formData.employmentStatus || formData.workingHours.trim();
@@ -426,6 +427,17 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   value={formData.lastName} 
                   onChange={(e) => handleInputChange('lastName', e.target.value)} 
                   placeholder="Ditt efternamn" 
+                  className="text-base" 
+                />
+              </div>
+              <div>
+                <Label htmlFor="email" className="text-white">E-post</Label>
+                <Input 
+                  id="email" 
+                  type="email"
+                  value={formData.email} 
+                  onChange={(e) => handleInputChange('email', e.target.value)} 
+                  placeholder="Din e-postadress" 
                   className="text-base" 
                 />
               </div>
