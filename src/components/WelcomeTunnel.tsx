@@ -843,7 +843,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
             <div className="space-y-4 max-w-md mx-auto">
               <div>
-                <Label htmlFor="bio">Om mig</Label>
+                <Label htmlFor="bio" className="text-white">Om mig</Label>
                 <Textarea
                   id="bio"
                   className="text-base" 
@@ -852,7 +852,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 />
               </div>
               <div>
-                <Label htmlFor="location">Plats</Label>
+                <Label htmlFor="location" className="text-white">Plats</Label>
                 <Input
                   id="location"
                   placeholder="Var bor du?"
@@ -871,8 +871,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
                 <Star className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-2xl font-bold mb-2">Intressen (valfritt)</h2>
-              <p className="text-muted-foreground">Välj några intressen som matchar dina mål</p>
+              <h2 className="text-2xl font-bold mb-2 text-white">Intressen (valfritt)</h2>
+              <p className="text-white">Välj några intressen som matchar dina mål</p>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-md mx-auto">

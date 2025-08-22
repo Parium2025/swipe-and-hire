@@ -125,7 +125,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {getFileIcon(currentFile.name)}
-            <span className="text-sm font-medium truncate max-w-[200px]">
+            <span className="text-sm font-medium truncate max-w-[200px] text-white">
               {currentFile.name}
             </span>
           </div>
@@ -153,17 +153,17 @@ const FileUpload: React.FC<FileUploadProps> = ({
     >
       <input {...getInputProps()} />
       <div className="space-y-2">
-        <Upload className="h-8 w-8 mx-auto text-foreground" />
+        <Upload className="h-8 w-8 mx-auto text-white" />
         {uploading ? (
-          <p className="text-sm text-muted-foreground">Laddar upp...</p>
+          <p className="text-sm text-white">Laddar upp...</p>
         ) : (
           <>
-            <p className="text-sm font-medium text-foreground">
+            <p className="text-sm font-medium text-white">
               {isDragActive
                 ? 'Släpp filen här...'
                 : 'Dra och släpp en fil här, eller klicka för att välja'}
             </p>
-            <p className="text-xs text-foreground">
+            <p className="text-xs text-white">
               {getAcceptedTypesText()} (max {Math.round(maxFileSize / 1024 / 1024)}MB)
             </p>
           </>
