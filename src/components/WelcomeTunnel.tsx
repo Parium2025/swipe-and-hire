@@ -424,7 +424,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         return requiredFields && phoneValid && workingHoursValid && availabilityValid;
       case 2: return true; // Profile image is optional
       case 3: return !!formData.cvUrl.trim(); // CV is now required
-      case 4: return formData.bio.trim();
+      case 4: return true; // Bio is optional
       case 5: return true; // Interests are optional
       default: return false;
     }
@@ -838,12 +838,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Briefcase className="h-8 w-8 text-white" />
               </div>
               <h2 className="text-2xl font-bold mb-2 text-white">Din profil</h2>
-              <p className="text-white">Berätta lite om dig själv</p>
+              <p className="text-white">Är det något du vill tillägga?</p>
             </div>
 
             <div className="space-y-4 max-w-md mx-auto">
               <div>
-                <Label htmlFor="bio" className="text-white">Om mig</Label>
+                <Label htmlFor="bio" className="text-white">Om mig (Frivilligt)</Label>
                 <Textarea
                   id="bio"
                   className="text-base" 
