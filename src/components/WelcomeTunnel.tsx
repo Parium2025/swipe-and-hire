@@ -542,6 +542,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   className="text-base custom-date-input" 
                   max={new Date().toISOString().split('T')[0]}
                   min="1920-01-01"
+                  placeholder="åååå-mm-dd"
                 />
               </div>
               <div>
