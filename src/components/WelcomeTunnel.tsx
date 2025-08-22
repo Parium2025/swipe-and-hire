@@ -535,6 +535,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   className="text-base" 
                   max={new Date().toISOString().split('T')[0]}
                   min="1920-01-01"
+                  lang="sv-SE"
                 />
               </div>
               <div>
