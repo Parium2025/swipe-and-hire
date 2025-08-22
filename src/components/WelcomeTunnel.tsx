@@ -13,7 +13,7 @@ import ImageEditor from '@/components/ImageEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import phoneWithPariumLogo from '@/assets/phone-with-parium-logo.jpg';
-import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone, Play, Video, Trash2, Rocket } from 'lucide-react';
+import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone, Play, Video, Trash2 } from 'lucide-react';
 import ProfileVideo from '@/components/ProfileVideo';
 import SwipeIntro from '@/components/SwipeIntro';
 
@@ -140,7 +140,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     setPhoneError(validation.error);
   };
 
-  const totalSteps = 6; // Introduktion + 4 profil steg + slutskärm
+  const totalSteps = 7; // Introduktion + 5 profil steg + slutskärm
   const progress = currentStep / (totalSteps - 1) * 100;
 
   const handleInputChange = (field: string, value: string | string[]) => {
@@ -393,10 +393,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       
       setCurrentStep(totalSteps - 1); // Go to completion step
 
-      toast({
-        title: "Välkommen till Parium!",
-        description: "Din profil är nu skapad och du kan börja söka jobb."
-      });
+      setTimeout(() => {
+        toast({
+          title: "Välkommen till Parium!",
+          description: "Din profil är nu skapad och du kan börja söka jobb."
+        });
+        onComplete();
+      }, 2000);
     } catch (error) {
       toast({
         title: "Ett fel uppstod",
@@ -422,6 +425,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       case 2: return true; // Profile image is optional
       case 3: return !!formData.cvUrl.trim(); // CV is now required
       case 4: return true; // Bio is optional
+      case 5: return true; // Interests are optional
       default: return false;
     }
   };
@@ -853,61 +857,43 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
       case 5:
         return (
-          <div className="text-center space-y-8 py-8">
-            {/* Animated rocket with floating effect */}
-            <div className="relative mb-8">
-              <div className="flex items-center justify-center mb-6">
-                <div className="relative">
-                  {/* Rocket container with glow effect */}
-                  <div className="bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 p-6 rounded-full shadow-2xl animate-bounce relative overflow-hidden">
-                    {/* Gradient overlay for extra shine */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent rounded-full"></div>
-                    <Rocket className="h-16 w-16 text-white relative z-10 transform rotate-45" />
-                  </div>
-                  
-                  {/* Glow rings */}
-                  <div className="absolute inset-0 rounded-full border-4 border-blue-300/30 animate-ping"></div>
-                  <div className="absolute inset-0 rounded-full border-2 border-blue-200/40 animate-pulse" style={{animationDuration: '2s'}}></div>
-                  
-                  {/* Floating particles */}
-                  <div className="absolute -top-2 -left-2 w-2 h-2 bg-yellow-300 rounded-full animate-bounce" style={{animationDelay: '0.2s', animationDuration: '1.5s'}}></div>
-                  <div className="absolute -top-1 -right-3 w-3 h-3 bg-orange-300 rounded-full animate-bounce" style={{animationDelay: '0.5s', animationDuration: '1.8s'}}></div>
-                  <div className="absolute -bottom-2 -left-3 w-2 h-2 bg-pink-300 rounded-full animate-bounce" style={{animationDelay: '0.8s', animationDuration: '2s'}}></div>
-                  <div className="absolute -bottom-1 -right-2 w-2 h-2 bg-purple-300 rounded-full animate-bounce" style={{animationDelay: '1s', animationDuration: '1.6s'}}></div>
-                </div>
+          <div className="space-y-6">
+            <div className="text-center mb-8">
+              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
+                <Star className="h-8 w-8 text-white" />
               </div>
+              <h2 className="text-2xl font-bold mb-2 text-white">Intressen (valfritt)</h2>
+              <p className="text-white">Välj några intressen som matchar dina mål</p>
             </div>
 
-            {/* Main text content */}
-            <div className="space-y-6">
-              <h1 className="text-4xl font-bold text-white animate-fade-in leading-tight">
-                Profilen är klar!
-              </h1>
-              
-              <p className="text-xl text-white/90 animate-fade-in leading-relaxed max-w-md mx-auto" style={{animationDelay: '0.3s'}}>
-                Nu är du redo att upptäcka dina jobbmöjligheter.
-              </p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-md mx-auto">
+              {['Frontend', 'Backend', 'Design', 'Marknadsföring', 'Sälj', 'HR'].map(interest => (
+                <Button
+                  key={interest}
+                  variant={formData.interests.includes(interest) ? 'default' : 'outline'}
+                  className="w-full"
+                  onClick={() => toggleInterest(interest)}
+                >
+                  {interest}
+                </Button>
+              ))}
             </div>
-
-            {/* Action button */}
-            <div className="pt-6 animate-fade-in" style={{animationDelay: '0.6s'}}>
-              <Button
-                onClick={onComplete}
-                className="py-4 px-8 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold text-lg rounded-full shadow-2xl hover:scale-105 transition-all duration-300 min-w-[200px]"
-              >
-                Börja swipa
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-            </div>
-
-            {/* Decorative elements */}
-            <div className="absolute top-10 left-10 w-3 h-3 bg-yellow-300/60 rounded-full animate-pulse" style={{animationDuration: '2s'}}></div>
-            <div className="absolute top-20 right-16 w-2 h-2 bg-pink-300/60 rounded-full animate-pulse" style={{animationDuration: '2.5s'}}></div>
-            <div className="absolute bottom-20 left-16 w-4 h-4 bg-blue-300/60 rounded-full animate-pulse" style={{animationDuration: '1.8s'}}></div>
-            <div className="absolute bottom-16 right-12 w-3 h-3 bg-purple-300/60 rounded-full animate-pulse" style={{animationDuration: '2.2s'}}></div>
           </div>
         );
 
+      case 6:
+        return (
+          <div className="text-center space-y-6">
+            <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
+              <Check className="h-8 w-8 text-white" />
+            </div>
+            <h2 className="text-3xl font-bold text-white">Profil skapad!</h2>
+            <p className="text-lg text-white/80">
+              Välkommen till Parium! Din profil är nu skapad och du kan börja söka jobb.
+            </p>
+            <img src={phoneWithPariumLogo} alt="Parium på en mobiltelefon" className="max-w-sm mx-auto rounded-xl shadow-lg" />
+          </div>
+        );
       
       default:
         return null;
