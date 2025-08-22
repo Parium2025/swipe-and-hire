@@ -536,6 +536,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   max={new Date().toISOString().split('T')[0]}
                   min="1920-01-01"
                   lang="sv-SE"
+                  placeholder="Dagens datum"
                 />
               </div>
               <div>
