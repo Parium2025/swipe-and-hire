@@ -357,6 +357,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const deleteProfileMedia = () => {
     handleInputChange('profileImageUrl', '');
     handleInputChange('profileMediaType', 'image');
+    
+    // Reset the file input to allow new uploads
+    const fileInput = document.getElementById('profileMedia') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    
     toast({
       title: "Media borttagen",
       description: "Din profilbild/video har tagits bort."
