@@ -883,15 +883,106 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
       case 6:
         return (
-          <div className="text-center space-y-6">
-            <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
-              <Check className="h-8 w-8 text-white" />
+          <div className="text-center space-y-6 relative overflow-hidden">
+            {/* Animated Stars Background */}
+            <div className="absolute inset-0 pointer-events-none">
+              {[...Array(20)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    animationDelay: `${Math.random() * 2}s`,
+                    animationDuration: `${2 + Math.random() * 2}s`
+                  }}
+                />
+              ))}
             </div>
-            <h2 className="text-3xl font-bold text-white">Profil skapad!</h2>
-            <p className="text-lg text-white/80">
-              Välkommen till Parium! Din profil är nu skapad och du kan börja söka jobb.
-            </p>
-            <img src={phoneWithPariumLogo} alt="Parium på en mobiltelefon" className="max-w-sm mx-auto rounded-xl shadow-lg" />
+
+            {/* Main Rocket Container */}
+            <div className="relative py-8">
+              {/* Rocket Animation */}
+              <div className="relative mx-auto w-32 h-32 animate-bounce" style={{ animationDuration: '3s' }}>
+                {/* Rocket Trail/Flame */}
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-8">
+                  <div className="w-8 h-16 bg-gradient-to-t from-orange-400 via-yellow-300 to-transparent rounded-full animate-pulse opacity-80"></div>
+                  <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-4 h-12 bg-gradient-to-t from-red-400 via-orange-300 to-transparent rounded-full animate-pulse"></div>
+                </div>
+                
+                {/* Rocket Body */}
+                <div className="relative z-10">
+                  <div className="text-8xl animate-pulse" style={{ animationDuration: '1.5s' }}>🚀</div>
+                </div>
+
+                {/* Sparkle Effects */}
+                <div className="absolute inset-0 pointer-events-none">
+                  {[...Array(8)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="absolute text-yellow-300 animate-ping"
+                      style={{
+                        left: `${20 + Math.random() * 60}%`,
+                        top: `${20 + Math.random() * 60}%`,
+                        animationDelay: `${Math.random() * 2}s`,
+                        animationDuration: `${1 + Math.random()}s`
+                      }}
+                    >
+                      ✨
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Success Content */}
+              <div className="space-y-6 mt-8">
+                <div className="space-y-2">
+                  <h2 className="text-4xl font-bold text-white animate-fade-in" style={{ animationDelay: '0.5s' }}>
+                    Profilen är klar!
+                  </h2>
+                  <p className="text-xl text-white/90 animate-fade-in font-medium" style={{ animationDelay: '0.8s' }}>
+                    Nu är du redo att upptäcka dina jobbmöjligheter
+                  </p>
+                </div>
+
+                {/* Floating Achievement Badges */}
+                <div className="flex justify-center space-x-4 animate-fade-in" style={{ animationDelay: '1s' }}>
+                  <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                    <span className="text-white font-medium">✅ Profil komplett</span>
+                  </div>
+                  <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                    <span className="text-white font-medium">🎯 Redo att matcha</span>
+                  </div>
+                </div>
+
+                {/* Launch Button */}
+                <div className="animate-fade-in" style={{ animationDelay: '1.2s' }}>
+                  <Button
+                    onClick={onComplete}
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-4 px-8 rounded-full text-lg shadow-2xl hover:scale-105 transition-all duration-300 hover:shadow-purple-500/25"
+                  >
+                    <span className="mr-2">🚀</span>
+                    Börja swipa
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Floating Particles */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              {[...Array(15)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute w-2 h-2 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full animate-bounce opacity-60"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    animationDelay: `${Math.random() * 3}s`,
+                    animationDuration: `${2 + Math.random() * 2}s`
+                  }}
+                />
+              ))}
+            </div>
           </div>
         );
       
