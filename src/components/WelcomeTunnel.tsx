@@ -424,7 +424,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         return requiredFields && phoneValid && workingHoursValid && availabilityValid;
       case 2: return true; // Profile image is optional
       case 3: return !!formData.cvUrl.trim(); // CV is now required
-      case 4: return formData.bio.trim() && formData.location.trim();
+      case 4: return formData.bio.trim();
       case 5: return true; // Interests are optional
       default: return false;
     }
@@ -849,15 +849,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   className="text-base" 
                   value={formData.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="location" className="text-white">Plats</Label>
-                <Input
-                  id="location"
-                  placeholder="Var bor du?"
-                  className="text-base"
-                  onChange={(e) => handleInputChange('location', e.target.value)}
                 />
               </div>
             </div>
