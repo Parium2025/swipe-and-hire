@@ -971,9 +971,9 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
           <div className="flex gap-4">
             {currentStep > 0 && (
               <Button
-                variant="outline"
+                variant="ghost"
                 onClick={handlePrevious}
-                className="py-3 bg-white/10 border-white/20 text-white hover:bg-white/20 hover:scale-105 transition-transform duration-200 text-sm px-4"
+                className="py-3 text-white hover:bg-white/10 hover:scale-105 transition-transform duration-200 text-sm px-4"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Tillbaka
