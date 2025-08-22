@@ -54,6 +54,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     cvUrl: '',
     interests: [] as string[]
   });
+  const [inputType, setInputType] = useState('text');
   const [phoneError, setPhoneError] = useState('');
 
   // Smart phone validation for Swedish numbers - requires complete number
@@ -529,13 +530,19 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Label htmlFor="birthDate" className="text-white">Födelsedatum</Label>
                 <Input 
                   id="birthDate" 
-                  type="date"
+                  type={inputType}
                   value={formData.birthDate} 
                   onChange={(e) => handleInputChange('birthDate', e.target.value)} 
-                  className="text-base" 
+                  onFocus={() => setInputType('date')}
+                  onBlur={() => {
+                    if (!formData.birthDate) {
+                      setInputType('text');
+                    }
+                  }}
+                  className="text-base custom-date-input" 
                   max={new Date().toISOString().split('T')[0]}
                   min="1920-01-01"
-                  lang="sv-SE"
+                  placeholder="Dagens datum"
                 />
               </div>
               <div>

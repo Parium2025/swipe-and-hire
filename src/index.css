@@ -125,34 +125,17 @@ All colors MUST be HSL.
     min-height: calc(100vh - env(safe-area-inset-top, 0)) !important;
   }
 
-  /* Custom styling for date input placeholder */
-  input[type="date"]::-webkit-datetime-edit-text,
-  input[type="date"]::-webkit-datetime-edit-month-field,
-  input[type="date"]::-webkit-datetime-edit-day-field,
-  input[type="date"]::-webkit-datetime-edit-year-field {
-    color: transparent;
-  }
-
-  input[type="date"]::-webkit-datetime-edit {
-    position: relative;
-  }
-
-  input[type="date"]:not(:focus):not([value])::-webkit-datetime-edit::before {
-    content: "Dagens datum";
+  /* Custom date input styling */
+  .custom-date-input::placeholder {
     color: rgb(156 163 175);
-    position: absolute;
-    left: 0;
   }
-
-  input[type="date"]:focus::-webkit-datetime-edit-text,
-  input[type="date"]:focus::-webkit-datetime-edit-month-field,
-  input[type="date"]:focus::-webkit-datetime-edit-day-field,
-  input[type="date"]:focus::-webkit-datetime-edit-year-field,
-  input[type="date"][value]::-webkit-datetime-edit-text,
-  input[type="date"][value]::-webkit-datetime-edit-month-field,
-  input[type="date"][value]::-webkit-datetime-edit-day-field,
-  input[type="date"][value]::-webkit-datetime-edit-year-field {
-    color: inherit;
+  
+  .custom-date-input::-webkit-input-placeholder {
+    color: rgb(156 163 175);
+  }
+  
+  .custom-date-input::-moz-placeholder {
+    color: rgb(156 163 175);
   }
 }
 
