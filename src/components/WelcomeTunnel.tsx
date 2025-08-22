@@ -393,13 +393,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       
       setCurrentStep(totalSteps - 1); // Go to completion step
 
-      setTimeout(() => {
-        toast({
-          title: "Välkommen till Parium!",
-          description: "Din profil är nu skapad och du kan börja söka jobb."
-        });
-        onComplete();
-      }, 2000);
+      // Show success toast immediately
+      toast({
+        title: "Välkommen till Parium!",
+        description: "Din profil är nu skapad och du kan börja söka jobb."
+      });
+      
+      // Don't auto-complete - let user enjoy the rocket animation and click the button
     } catch (error) {
       toast({
         title: "Ett fel uppstod",
