@@ -13,7 +13,11 @@ import ImageEditor from '@/components/ImageEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import phoneWithPariumLogo from '@/assets/phone-with-parium-logo.jpg';
-import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone, Play, Video, Trash2 } from 'lucide-react';
+import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone, Play, Video, Trash2, CalendarIcon } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import ProfileVideo from '@/components/ProfileVideo';
 import SwipeIntro from '@/components/SwipeIntro';
 
@@ -43,7 +47,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     bio: profile?.bio || '',
     location: profile?.location || '',
     phone: profile?.phone || '',
-    age: '',
+    birthDate: undefined as Date | undefined,
     homeLocation: '',
     employmentStatus: '',
     workingHours: '', // Arbetstid/Omfattning
@@ -142,7 +146,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const totalSteps = 7; // Introduktion + 5 profil steg + slutskärm
   const progress = currentStep / (totalSteps - 1) * 100;
 
-  const handleInputChange = (field: string, value: string | string[]) => {
+  const handleInputChange = (field: string, value: string | string[] | Date | undefined) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -407,7 +411,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     switch (currentStep) {
       case 0: return true; // Intro
       case 1: 
-        const requiredFields = !!(formData.firstName.trim() && formData.lastName.trim() && formData.email.trim() && formData.phone.trim() && formData.age.trim() && formData.homeLocation.trim() && formData.employmentStatus.trim());
+        const requiredFields = !!(formData.firstName.trim() && formData.lastName.trim() && formData.email.trim() && formData.phone.trim() && formData.birthDate && formData.homeLocation.trim() && formData.employmentStatus.trim());
         const phoneValid = validatePhoneNumber(formData.phone).isValid;
         // Only require workingHours if NOT arbetssokande AND employment status is selected
         const workingHoursValid = formData.employmentStatus === 'arbetssokande' || !formData.employmentStatus || formData.workingHours.trim();
@@ -526,17 +530,33 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 />
               </div>
               <div>
-                <Label htmlFor="age" className="text-white">Ålder</Label>
-                <Input 
-                  id="age" 
-                  type="number"
-                  value={formData.age} 
-                  onChange={(e) => handleInputChange('age', e.target.value)} 
-                  placeholder="Din ålder" 
-                  min="16"
-                  max="99"
-                  className="text-base" 
-                />
+                <Label className="text-white">Födelsedatum</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal bg-white/10 border-white/20 text-white hover:bg-white/20",
+                        !formData.birthDate && "text-white/60"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.birthDate ? format(formData.birthDate, "PPP") : <span>Välj födelsedatum</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.birthDate}
+                      onSelect={(date) => handleInputChange('birthDate', date)}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               <div>
                 <Label htmlFor="homeLocation" className="text-white">Var bor du?</Label>
