@@ -843,7 +843,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
             <div className="space-y-4 max-w-md mx-auto">
               <div>
-                <Label htmlFor="bio" className="text-white">Om mig (Frivilligt)</Label>
+                <Label htmlFor="bio" className="text-white">Frivilligt</Label>
                 <Textarea
                   id="bio"
                   className="text-base" 
