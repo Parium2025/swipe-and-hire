@@ -875,25 +875,25 @@ const SearchJobs = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {jobCategories.map((category) => (
               <DropdownMenu key={category.value}>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant={selectedCategory === category.value ? "default" : "outline"}
                     size="lg"
-                    className={`h-20 flex flex-col items-center gap-2 transition-all duration-200 hover:scale-105 ${
+                    className={`h-auto min-h-[80px] sm:h-20 flex flex-col items-center gap-1 sm:gap-2 p-3 sm:p-4 transition-all duration-200 hover:scale-105 ${
                       selectedCategory === category.value 
                         ? 'shadow-lg border-primary' 
                         : 'hover:shadow-md hover:border-primary/50'
                     }`}
                   >
-                    <span className="text-2xl">{category.icon}</span>
+                    <span className="text-xl sm:text-2xl">{category.icon}</span>
                     <div className="flex items-center gap-1">
-                      <span className="text-sm font-medium text-center leading-tight">
+                      <span className="text-xs sm:text-sm font-medium text-center leading-tight px-1">
                         {category.label}
                       </span>
-                      <ChevronDown className="h-3 w-3" />
+                      <ChevronDown className="h-3 w-3 flex-shrink-0" />
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
