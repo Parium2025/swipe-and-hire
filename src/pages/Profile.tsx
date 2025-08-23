@@ -15,10 +15,13 @@ import FileUpload from '@/components/FileUpload';
 import ProfileVideo from '@/components/ProfileVideo';
 import ImageEditor from '@/components/ImageEditor';
 import PostalCodeSelector from '@/components/PostalCodeSelector';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Profile = () => {
   const { profile, userRole, updateProfile, user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
@@ -36,7 +39,7 @@ const Profile = () => {
   const [firstName, setFirstName] = useState(profile?.first_name || '');
   const [lastName, setLastName] = useState(profile?.last_name || '');
   const [bio, setBio] = useState(profile?.bio || '');
-  const [location, setLocation] = useState(profile?.location || '');
+  const [userLocation, setUserLocation] = useState(profile?.location || '');
   const [postalCode, setPostalCode] = useState('');
   const [phone, setPhone] = useState(profile?.phone || '');
   const [birthDate, setBirthDate] = useState(profile?.birth_date || '');
@@ -60,7 +63,7 @@ const Profile = () => {
         firstName: profile.first_name || '',
         lastName: profile.last_name || '',
         bio: profile.bio || '',
-        location: profile.location || '',
+        userLocation: profile.location || '',
         postalCode: (profile as any)?.postal_code || '',
         phone: profile.phone || '',
         birthDate: profile.birth_date || '',
@@ -76,7 +79,7 @@ const Profile = () => {
       setFirstName(values.firstName);
       setLastName(values.lastName);
       setBio(values.bio);
-      setLocation(values.location);
+      setUserLocation(values.userLocation);
       setPostalCode(values.postalCode);
       setPhone(values.phone);
       setBirthDate(values.birthDate);
@@ -102,7 +105,7 @@ const Profile = () => {
       firstName,
       lastName,
       bio,
-      location,
+      userLocation,
       postalCode,
       phone,
       birthDate,
@@ -121,7 +124,7 @@ const Profile = () => {
 
     setHasUnsavedChanges(hasChanges);
     return hasChanges;
-  }, [originalValues, firstName, lastName, bio, location, postalCode, phone, birthDate, 
+  }, [originalValues, firstName, lastName, bio, userLocation, postalCode, phone, birthDate, 
       profileImageUrl, cvUrl, companyName, orgNumber, employmentStatus, workingHours, availability]);
 
   // Check for changes whenever form values change
@@ -139,9 +142,53 @@ const Profile = () => {
       }
     };
 
+    // Block navigation within the app
+    const unblock = () => {
+      if (hasUnsavedChanges) {
+        return window.confirm('Du har osparade ändringar. Är du säker på att du vill lämna sidan utan att spara?');
+      }
+      return true;
+    };
+
+    // Override navigation
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+
+    history.pushState = function(...args) {
+      if (hasUnsavedChanges && !window.confirm('Du har osparade ändringar. Är du säker på att du vill lämna sidan utan att spara?')) {
+        return;
+      }
+      return originalPushState.apply(history, args);
+    };
+
+    history.replaceState = function(...args) {
+      if (hasUnsavedChanges && !window.confirm('Du har osparade ändringar. Är du säker på att du vill lämna sidan utan att spara?')) {
+        return;
+      }
+      return originalReplaceState.apply(history, args);
+    };
+
+    // Handle back button
+    const handlePopState = (e: PopStateEvent) => {
+      if (hasUnsavedChanges) {
+        if (!window.confirm('Du har osparade ändringar. Är du säker på att du vill lämna sidan utan att spara?')) {
+          e.preventDefault();
+          history.pushState(null, '', location.pathname);
+          return;
+        }
+      }
+    };
+
     window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasUnsavedChanges]);
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopState);
+      history.pushState = originalPushState;
+      history.replaceState = originalReplaceState;
+    };
+  }, [hasUnsavedChanges, location.pathname]);
 
   const isEmployer = userRole?.role === 'employer';
 
@@ -440,7 +487,7 @@ const Profile = () => {
         first_name: firstName.trim() || null,
         last_name: lastName.trim() || null,
         bio: bio.trim() || null,
-        location: location.trim() || null,
+        location: userLocation.trim() || null,
         postal_code: postalCode.trim() || null,
         phone: phone.trim() || null,
         birth_date: birthDate || null,
@@ -464,7 +511,7 @@ const Profile = () => {
           firstName: firstName,
           lastName: lastName,
           bio: bio,
-          location: location,
+          location: userLocation,
           postalCode: postalCode,
           phone: phone,
           birthDate: birthDate,
@@ -766,7 +813,7 @@ const Profile = () => {
                     <PostalCodeSelector
                       postalCodeValue={postalCode}
                       onPostalCodeChange={setPostalCode}
-                      onLocationChange={setLocation}
+                      onLocationChange={setUserLocation}
                     />
                   </div>
                 </div>
