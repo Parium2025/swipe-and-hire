@@ -91,7 +91,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
               </div>
               </div>
               <div className="absolute -top-1 -right-1 bg-primary-foreground rounded-full p-1.5 shadow-lg">
-                <Sparkles className="h-3 w-3 text-primary animate-pulse" />
+                <Camera className="h-3 w-3 text-primary animate-pulse" />
               </div>
             </div>
           </div>
