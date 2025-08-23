@@ -430,7 +430,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     switch (currentStep) {
       case 0: return true; // Intro
       case 1: 
-        const requiredFields = !!(formData.firstName.trim() && formData.lastName.trim() && formData.email.trim() && formData.phone.trim() && formData.birthDate.trim() && formData.employmentStatus.trim());
+        const requiredFields = !!(formData.firstName.trim() && formData.lastName.trim() && formData.email.trim() && formData.phone.trim() && formData.birthDate.trim() && formData.location.trim() && formData.employmentStatus.trim());
         const phoneValid = validatePhoneNumber(formData.phone).isValid;
         // Only require workingHours if NOT arbetssokande AND employment status is selected
         const workingHoursValid = formData.employmentStatus === 'arbetssokande' || !formData.employmentStatus || formData.workingHours.trim();
@@ -582,6 +582,16 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   placeholder="070-123 45 67" 
                 />
                 {phoneError && <p className="text-destructive text-xs mt-1">{phoneError}</p>}
+              </div>
+              <div>
+                <Label htmlFor="location" className="text-white">Var bor du</Label>
+                <Input 
+                  id="location" 
+                  value={formData.location} 
+                  onChange={(e) => handleInputChange('location', e.target.value)} 
+                  placeholder="Din ort eller region" 
+                  className="text-base" 
+                />
               </div>
               <div>
                 <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget?</Label>
