@@ -897,27 +897,34 @@ const SearchJobs = () => {
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64 max-h-96 overflow-y-auto bg-popover border shadow-lg">
+                <DropdownMenuContent 
+                  className="w-64 max-h-80 overflow-y-auto bg-popover/95 backdrop-blur-sm border shadow-xl z-50"
+                  side="bottom"
+                  align="start"
+                  sideOffset={4}
+                >
                   <DropdownMenuItem
                     onClick={() => handleQuickCategory(category.value)}
-                    className="font-medium text-primary cursor-pointer"
+                    className="font-medium text-primary cursor-pointer hover:bg-muted/80"
                   >
                     {category.icon} Alla inom {category.label}
                   </DropdownMenuItem>
                   <Separator className="my-1" />
-                  {category.subcategories.map((subcategory) => (
-                    <DropdownMenuItem
-                      key={subcategory}
-                      onClick={() => {
-                        setSelectedCategory(category.value);
-                        setSelectedSubcategory(subcategory);
-                        setSearchTerm('');
-                      }}
-                      className="text-sm cursor-pointer"
-                    >
-                      {subcategory}
-                    </DropdownMenuItem>
-                  ))}
+                  <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+                    {category.subcategories.map((subcategory) => (
+                      <DropdownMenuItem
+                        key={subcategory}
+                        onClick={() => {
+                          setSelectedCategory(category.value);
+                          setSelectedSubcategory(subcategory);
+                          setSearchTerm('');
+                        }}
+                        className="text-sm cursor-pointer hover:bg-muted/60 py-2"
+                      >
+                        {subcategory}
+                      </DropdownMenuItem>
+                    ))}
+                  </div>
                 </DropdownMenuContent>
               </DropdownMenu>
             ))}
