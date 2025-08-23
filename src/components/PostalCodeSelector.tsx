@@ -107,7 +107,7 @@ const PostalCodeSelector = ({
 
       {/* Resultat-ruta */}
       {foundLocation && isValid && !isLoading && (
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20 p-4">
+        <Card className="bg-primary/10 backdrop-blur-sm border-white/20 p-4">
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
               <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
