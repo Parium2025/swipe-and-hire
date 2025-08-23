@@ -10,14 +10,24 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { User, MapPin, Building, Camera, Mail, Phone, Calendar, Briefcase, Clock, FileText, Video, Play } from 'lucide-react';
+import { User, MapPin, Building, Camera, Mail, Phone, Calendar, Briefcase, Clock, FileText, Video, Play, Check, Trash2 } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
 import ProfileVideo from '@/components/ProfileVideo';
+import ImageEditor from '@/components/ImageEditor';
 
 const Profile = () => {
   const { profile, userRole, updateProfile, user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  
+  // Image editor states
+  const [imageEditorOpen, setImageEditorOpen] = useState(false);
+  const [coverEditorOpen, setCoverEditorOpen] = useState(false);
+  const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
+  const [pendingCoverSrc, setPendingCoverSrc] = useState<string>('');
+  const [coverImageUrl, setCoverImageUrl] = useState('');
   
   // Basic form fields
   const [firstName, setFirstName] = useState(profile?.first_name || '');
@@ -78,32 +88,27 @@ const Profile = () => {
   const age = calculateAge(birthDate);
 
 
-  const uploadProfileImage = async (file: File) => {
+  const uploadProfileMedia = async (file: File) => {
+    const isVideo = file.type.startsWith('video/');
+    if (isVideo) setIsUploadingVideo(true);
+    
     try {
-      const isVideo = file.type.startsWith('video/');
-      console.log('Uploading file:', file.name, 'isVideo:', isVideo);
-      
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}/profile-${isVideo ? 'video' : 'image'}.${fileExt}`;
-
-      await supabase.storage
-        .from('job-applications')
-        .remove([fileName]);
-
+      const fileName = `${user?.id}/profile-media.${fileExt}`;
+      
+      await supabase.storage.from('job-applications').remove([fileName]);
+      
       const { error: uploadError } = await supabase.storage
         .from('job-applications')
-        .upload(fileName, file, {
-          upsert: true
-        });
-
+        .upload(fileName, file, { upsert: true });
+      
       if (uploadError) throw uploadError;
-
+      
       const { data: { publicUrl } } = supabase.storage
         .from('job-applications')
         .getPublicUrl(fileName);
-
+      
       const mediaUrl = `${publicUrl}?t=${Date.now()}`;
-      console.log('Media uploaded to:', mediaUrl);
       
       // Update the profile with the correct fields based on file type
       const updates: any = {};
@@ -118,7 +123,6 @@ const Profile = () => {
         updates.video_url = null; // Clear video when uploading image
       }
 
-      console.log('Updating profile with:', updates);
       await updateProfile(updates);
       
       toast({
@@ -132,22 +136,226 @@ const Profile = () => {
         description: "Kunde inte ladda upp filen.",
         variant: "destructive"
       });
+    } finally {
+      if (isVideo) setIsUploadingVideo(false);
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
-        uploadProfileImage(file);
-      } else {
-        toast({
-          title: "Fel filtyp",
-          description: "Vänligen välj en bild- eller videofil.",
-          variant: "destructive"
-        });
+  const uploadCoverImage = async (file: File) => {
+    setIsUploadingCover(true);
+    
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user?.id}/cover-image.${fileExt}`;
+      
+      await supabase.storage.from('job-applications').remove([fileName]);
+      
+      const { error: uploadError } = await supabase.storage
+        .from('job-applications')
+        .upload(fileName, file, { upsert: true });
+      
+      if (uploadError) throw uploadError;
+      
+      const { data: { publicUrl } } = supabase.storage
+        .from('job-applications')
+        .getPublicUrl(fileName);
+      
+      const coverUrl = `${publicUrl}?t=${Date.now()}`;
+      
+      setCoverImageUrl(coverUrl);
+      
+      // Update profile with cover image - use the profile_image_url for video covers
+      if (profile?.video_url) {
+        await updateProfile({ profile_image_url: coverUrl });
       }
+      
+      toast({
+        title: "Cover-bild uppladdad!",
+        description: "Din cover-bild har uppdaterats."
+      });
+    } catch (error) {
+      console.error('Cover upload error:', error);
+      toast({
+        title: "Fel vid uppladdning",
+        description: "Kunde inte ladda upp cover-bilden.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploadingCover(false);
     }
+  };
+
+  const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type.startsWith('video/')) {
+      // Handle video upload with duration check
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      
+      video.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(video.src);
+        if (video.duration <= 30) { // Max 30 seconds
+          uploadProfileMedia(file);
+        } else {
+          toast({
+            title: "Video för lång",
+            description: "Videon får vara max 30 sekunder lång.",
+            variant: "destructive"
+          });
+        }
+      };
+      
+      video.src = URL.createObjectURL(file);
+    } else if (file.type.startsWith('image/')) {
+      // Handle image - open editor
+      const imageUrl = URL.createObjectURL(file);
+      setPendingImageSrc(imageUrl);
+      setImageEditorOpen(true);
+    }
+  };
+
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type.startsWith('image/')) {
+      const imageUrl = URL.createObjectURL(file);
+      setPendingCoverSrc(imageUrl);
+      setCoverEditorOpen(true);
+    }
+  };
+
+  const handleProfileImageSave = async (editedBlob: Blob) => {
+    try {
+      setIsUploadingVideo(true);
+      
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) throw new Error('User not authenticated');
+
+      const fileName = `${user.data.user.id}/profile-image.jpg`;
+      
+      await supabase.storage.from('job-applications').remove([fileName]);
+      
+      const { error: uploadError } = await supabase.storage
+        .from('job-applications')
+        .upload(fileName, editedBlob, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('job-applications')
+        .getPublicUrl(fileName);
+
+      const imageUrl = `${publicUrl}?t=${Date.now()}`;
+      
+      await updateProfile({ 
+        profile_image_url: imageUrl,
+        video_url: null // Clear video when uploading image
+      });
+      
+      setImageEditorOpen(false);
+      setPendingImageSrc('');
+      
+      toast({
+        title: "Profilbild uppladdad!",
+        description: "Din profilbild har uppdaterats."
+      });
+    } catch (error) {
+      console.error('Profile image upload error:', error);
+      toast({
+        title: "Fel vid uppladdning",
+        description: "Kunde inte ladda upp profilbilden.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploadingVideo(false);
+    }
+  };
+
+  const handleCoverImageSave = async (editedBlob: Blob) => {
+    try {
+      setIsUploadingCover(true);
+      
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) throw new Error('User not authenticated');
+
+      const fileName = `${user.data.user.id}/cover-image.jpg`;
+      
+      await supabase.storage.from('job-applications').remove([fileName]);
+      
+      const { error: uploadError } = await supabase.storage
+        .from('job-applications')
+        .upload(fileName, editedBlob, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('job-applications')
+        .getPublicUrl(fileName);
+
+      const coverUrl = `${publicUrl}?t=${Date.now()}`;
+      
+      setCoverImageUrl(coverUrl);
+      
+      // Update profile with cover image - use the profile_image_url for video covers
+      if (profile?.video_url) {
+        await updateProfile({ profile_image_url: coverUrl });
+      }
+      
+      setCoverEditorOpen(false);
+      setPendingCoverSrc('');
+      
+      toast({
+        title: "Cover-bild uppladdad!",
+        description: "Din cover-bild har uppdaterats."
+      });
+    } catch (error) {
+      console.error('Cover upload error:', error);
+      toast({
+        title: "Fel vid uppladdning",
+        description: "Kunde inte ladda upp cover-bilden.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploadingCover(false);
+    }
+  };
+
+  const deleteProfileMedia = () => {
+    setProfileImageUrl('');
+    
+    // Reset the file input to allow new uploads
+    const fileInput = document.getElementById('profile-image') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    
+    // Update profile to clear both image and video
+    updateProfile({
+      profile_image_url: null,
+      video_url: null
+    });
+    
+    toast({
+      title: "Media borttagen",
+      description: "Din profilbild/video har tagits bort."
+    });
+  };
+
+  const deleteCoverImage = () => {
+    setCoverImageUrl('');
+    
+    // If there's a video, clear the profile_image_url (cover image)
+    if (profile?.video_url) {
+      updateProfile({ profile_image_url: null });
+    }
+    
+    toast({
+      title: "Cover-bild borttagen", 
+      description: "Din cover-bild har tagits bort."
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -266,20 +474,97 @@ const Profile = () => {
                   </AvatarFallback>
                 </Avatar>
               )}
+
+              {/* Delete icon for profile media */}
+              {(profile?.video_url || profileImageUrl) && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteProfileMedia();
+                  }}
+                  className="absolute -top-2 -right-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
+
               <input
                 id="profile-image"
                 type="file"
                 accept="image/*,video/*"
-                onChange={handleImageChange}
+                onChange={handleMediaChange}
                 className="hidden"
+                disabled={isUploadingVideo}
               />
             </div>
-            <Label 
-              htmlFor="profile-image" 
-              className="text-white/70 cursor-pointer hover:text-white transition-colors text-center text-sm"
-            >
-              Klicka för att välja en bild eller video (max 30 sek)
-            </Label>
+
+            <div className="space-y-2 text-center">
+              <Label 
+                htmlFor="profile-image" 
+                className="text-white/70 cursor-pointer hover:text-white transition-colors text-center text-sm"
+              >
+                Klicka för att välja en bild eller video (max 30 sek)
+              </Label>
+              
+              {isUploadingVideo && (
+                <Badge variant="secondary" className="bg-blue-500/20 text-blue-100 animate-pulse">
+                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-100 mr-2"></div>
+                  Laddar upp video...
+                </Badge>
+              )}
+              
+              {(profile?.video_url || profileImageUrl) && !isUploadingVideo && (
+                <Badge variant="secondary" className="bg-white/20 text-white">
+                  <Check className="h-3 w-3 mr-1" />
+                  {profile?.video_url ? 'Video' : 'Bild'} uppladdad!
+                </Badge>
+              )}
+            </div>
+
+            {/* Cover image upload for videos */}
+            {profile?.video_url && (
+              <div className="flex flex-col items-center space-y-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => document.getElementById('cover-image')?.click()}
+                  disabled={isUploadingCover}
+                  className="bg-white/20 border-white/30 text-white hover:bg-white/30 disabled:opacity-50"
+                >
+                  {profile?.profile_image_url ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
+                </Button>
+                <Input 
+                  type="file" 
+                  id="cover-image" 
+                  accept="image/*" 
+                  className="hidden" 
+                  onChange={handleCoverChange} 
+                  disabled={isUploadingCover} 
+                />
+                
+                {isUploadingCover && (
+                  <Badge variant="secondary" className="bg-blue-500/20 text-blue-100 text-xs animate-pulse">
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-100 mr-1"></div>
+                    Laddar upp cover-bild...
+                  </Badge>
+                )}
+                
+                {profile?.profile_image_url && !isUploadingCover && (
+                  <div className="flex items-center justify-center gap-2">
+                    <Badge variant="secondary" className="bg-white/20 text-white text-xs">
+                      <Check className="h-3 w-3 mr-1" />
+                      Cover-bild uppladdad!
+                    </Badge>
+                    <button
+                      onClick={deleteCoverImage}
+                      className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-1.5 shadow-lg transition-colors"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -533,6 +818,27 @@ const Profile = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Image Editors */}
+      <ImageEditor
+        isOpen={imageEditorOpen}
+        onClose={() => {
+          setImageEditorOpen(false);
+          setPendingImageSrc('');
+        }}
+        imageSrc={pendingImageSrc}
+        onSave={handleProfileImageSave}
+      />
+
+      <ImageEditor
+        isOpen={coverEditorOpen}
+        onClose={() => {
+          setCoverEditorOpen(false);
+          setPendingCoverSrc('');
+        }}
+        imageSrc={pendingCoverSrc}
+        onSave={handleCoverImageSave}
+      />
     </div>
   );
 };
