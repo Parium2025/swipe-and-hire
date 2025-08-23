@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 
 interface ImageEditorProps {
@@ -225,6 +225,9 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           <DialogTitle className="text-center">
             Anpassa din {isCircular ? 'profilbild' : 'bild'}
           </DialogTitle>
+          <DialogDescription className="text-center">
+            Dra och zooma för att anpassa bilden perfekt
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4">

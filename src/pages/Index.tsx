@@ -99,6 +99,13 @@ const Index = () => {
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
 
   if (isSidebarRoute) {
+    console.log('=== SIDEBAR ROUTE DEBUG ===');
+    console.log('Current pathname:', location.pathname);
+    console.log('Profile data available:', !!profile);
+    console.log('User data available:', !!user);
+    console.log('Should render sidebar layout');
+    console.log('=============================');
+    
     const renderSidebarContent = () => {
       switch (location.pathname) {
         case '/profile':

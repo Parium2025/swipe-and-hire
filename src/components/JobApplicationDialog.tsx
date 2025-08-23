@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import FileUpload from './FileUpload';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -254,9 +254,9 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
             <Building2 className="h-5 w-5" />
             Ansök till {job.title}
           </DialogTitle>
-          <p className="text-sm text-muted-foreground">
+          <DialogDescription>
             {companyName}
-          </p>
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
