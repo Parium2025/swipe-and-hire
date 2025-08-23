@@ -108,7 +108,8 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: var(--gradient-parium);
     padding-top: 0 !important;
     margin-top: 0 !important;
   }
