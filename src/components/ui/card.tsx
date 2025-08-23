@@ -8,7 +8,7 @@ const cardVariants = cva(
     variants: {
       variant: {
         default: "bg-card text-card-foreground",
-        parium: "bg-primary/20 text-foreground border-primary/30 backdrop-blur-sm",
+        parium: "bg-primary/90 text-primary-foreground border-primary/30 backdrop-blur-sm",
       },
     },
     defaultVariants: {
