@@ -44,7 +44,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     location: profile?.location || '',
     phone: profile?.phone || '',
     birthDate: '',
-    homeLocation: '',
     employmentStatus: '',
     workingHours: '', // Arbetstid/Omfattning
     availability: '', // Tillgänglighet
@@ -399,7 +398,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         location: formData.location,
         phone: formData.phone,
         birth_date: formData.birthDate || null,
-        home_location: formData.homeLocation,
         employment_status: formData.employmentStatus,
         working_hours: formData.workingHours,
         availability: formData.availability,
@@ -432,7 +430,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     switch (currentStep) {
       case 0: return true; // Intro
       case 1: 
-        const requiredFields = !!(formData.firstName.trim() && formData.lastName.trim() && formData.email.trim() && formData.phone.trim() && formData.birthDate.trim() && formData.homeLocation.trim() && formData.employmentStatus.trim());
+        const requiredFields = !!(formData.firstName.trim() && formData.lastName.trim() && formData.email.trim() && formData.phone.trim() && formData.birthDate.trim() && formData.employmentStatus.trim());
         const phoneValid = validatePhoneNumber(formData.phone).isValid;
         // Only require workingHours if NOT arbetssokande AND employment status is selected
         const workingHoursValid = formData.employmentStatus === 'arbetssokande' || !formData.employmentStatus || formData.workingHours.trim();
@@ -567,16 +565,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   max={new Date().toISOString().split('T')[0]}
                   min="1920-01-01"
                   placeholder="åååå-mm-dd"
-                />
-              </div>
-              <div>
-                <Label htmlFor="homeLocation" className="text-white">Var bor du?</Label>
-                <Input 
-                  id="homeLocation" 
-                  value={formData.homeLocation} 
-                  onChange={(e) => handleInputChange('homeLocation', e.target.value)} 
-                  placeholder="Din bostadsort" 
-                  className="text-base" 
                 />
               </div>
               <div>

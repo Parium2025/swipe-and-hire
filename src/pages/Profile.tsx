@@ -29,7 +29,6 @@ const Profile = () => {
   const [cvUrl, setCvUrl] = useState((profile as any)?.cv_url || '');
   
   // Extended profile fields that we'll need to add to database
-  const [homeLocation, setHomeLocation] = useState('');
   const [employmentStatus, setEmploymentStatus] = useState('');
   const [workingHours, setWorkingHours] = useState('');
   const [availability, setAvailability] = useState('');
@@ -57,7 +56,6 @@ const Profile = () => {
       setEmploymentStatus((profile as any)?.employment_status || '');
       setWorkingHours((profile as any)?.working_hours || '');
       setAvailability((profile as any)?.availability || '');
-      setHomeLocation((profile as any)?.home_location || '');
     }
   }, [profile]);
 
@@ -149,7 +147,6 @@ const Profile = () => {
         employment_status: employmentStatus || null,
         working_hours: workingHours || null,
         availability: availability || null,
-        home_location: homeLocation.trim() || null,
       };
 
       if (isEmployer) {
@@ -329,20 +326,6 @@ const Profile = () => {
                         className="pl-10"
                       />
                     </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="homeLocation" className="text-white">Var bor du?</Label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="homeLocation"
-                      placeholder="Din bostadsort"
-                      value={homeLocation}
-                      onChange={(e) => setHomeLocation(e.target.value)}
-                      className="pl-10"
-                    />
                   </div>
                 </div>
               </div>
