@@ -58,6 +58,7 @@ const Profile = () => {
       setLastName(profile.last_name || '');
       setBio(profile.bio || '');
       setLocation(profile.location || '');
+      setPostalCode((profile as any)?.postal_code || '');
       setPhone(profile.phone || '');
       setBirthDate(profile.birth_date || '');
       setProfileImageUrl(profile.profile_image_url || '');
@@ -370,6 +371,7 @@ const Profile = () => {
         last_name: lastName.trim() || null,
         bio: bio.trim() || null,
         location: location.trim() || null,
+        postal_code: postalCode.trim() || null,
         phone: phone.trim() || null,
         birth_date: birthDate || null,
         profile_image_url: profileImageUrl || null,
