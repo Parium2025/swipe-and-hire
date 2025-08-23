@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { User, MapPin, Building, Camera, Mail, Phone, Calendar, Briefcase, Clock, FileText } from 'lucide-react';
+import { User, MapPin, Building, Camera, Mail, Phone, Calendar, Briefcase, Clock, FileText, Video, Play } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
 import ProfileVideo from '@/components/ProfileVideo';
 
@@ -207,31 +207,65 @@ const Profile = () => {
         {/* Profile Image/Video Card */}
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white">
-              <Camera className="h-5 w-5" />
-              {profile?.video_url ? 'Profilvideo' : 'Profilbild'}
+            <CardTitle className="text-white text-center">
+              Profilbild/Profilvideo
             </CardTitle>
+            <CardDescription className="text-white/70 text-center">
+              Ladda upp en kort profilvideo eller en bild och gör ditt första intryck minnesvärt.
+            </CardDescription>
+            
+            {/* Video and Camera Icons */}
+            <div className="flex items-center justify-center space-x-4">
+              {/* Video option */}
+              <div className="relative">
+                <div className="w-16 h-16 rounded-full border-4 border-white/20 p-2 bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-sm">
+                  <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
+                    <Video className="h-5 w-5 text-white" />
+                  </div>
+                </div>
+                <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
+                  <Play className="h-2 w-2 text-primary animate-pulse" />
+                </div>
+              </div>
+
+              {/* "eller" text */}
+              <div className="text-white/80 text-sm font-medium flex-shrink-0">
+                eller
+              </div>
+
+              {/* Image option */}
+              <div className="relative">
+                <div className="w-16 h-16 rounded-full border-4 border-white/20 p-2 bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-sm">
+                  <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
+                    <Camera className="h-5 w-5 text-white" />
+                  </div>
+                </div>
+                <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
+                  <Camera className="h-2 w-2 text-primary" />
+                </div>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="flex flex-col items-center space-y-4">
-            <div className="relative">
+            <div 
+              className="relative cursor-pointer" 
+              onClick={() => document.getElementById('profile-image')?.click()}
+            >
               {profile?.video_url ? (
                 <ProfileVideo
                   videoUrl={profile.video_url}
                   coverImageUrl={profile.profile_image_url || undefined}
                   alt="Profile video"
-                  className="w-32 h-32 cursor-pointer border-4 border-white/20 hover:border-white/40 transition-all rounded-full overflow-hidden"
+                  className="w-32 h-32 border-4 border-white/20 hover:border-white/40 transition-all rounded-full overflow-hidden"
                 />
               ) : (
-                <Avatar className="h-32 w-32">
+                <Avatar className="h-32 w-32 border-4 border-white/20 hover:border-white/40 transition-all">
                   <AvatarImage src={profileImageUrl} />
                   <AvatarFallback className="text-2xl bg-white/20 text-white">
                     {profile?.first_name?.[0]}{profile?.last_name?.[0]}
                   </AvatarFallback>
                 </Avatar>
               )}
-              <label htmlFor="profile-image" className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-2 cursor-pointer hover:bg-primary/90 transition-colors">
-                <Camera className="h-4 w-4" />
-              </label>
               <input
                 id="profile-image"
                 type="file"
@@ -240,9 +274,12 @@ const Profile = () => {
                 className="hidden"
               />
             </div>
-            <p className="text-sm text-white/70 text-center">
-              Klicka på kameraikon för att ändra din {profile?.video_url ? 'profilvideo' : 'profilbild'}
-            </p>
+            <Label 
+              htmlFor="profile-image" 
+              className="text-white/70 cursor-pointer hover:text-white transition-colors text-center text-sm"
+            >
+              Klicka för att välja en bild eller video (max 30 sek)
+            </Label>
           </CardContent>
         </Card>
 
