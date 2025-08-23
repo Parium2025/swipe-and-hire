@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { filterCities, findCityByPostalCode, formatPostalCode, isValidPostalCodeFormat } from '@/lib/swedishCities';
+import { filterCities, findCityByPostalCode, formatPostalCode, isValidPostalCodeFormat, swedishCities } from '@/lib/swedishCities';
 import { MapPin } from 'lucide-react';
 
 interface CitySelectorProps {
@@ -19,81 +19,164 @@ const CitySelector = ({
   onPostalCodeChange,
   className = ""
 }: CitySelectorProps) => {
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showCitySuggestions, setShowCitySuggestions] = useState(false);
+  const [showPostalSuggestions, setShowPostalSuggestions] = useState(false);
   const [filteredCities, setFilteredCities] = useState<Array<{name: string; postalCodes: string[]}>>([]);
-  const [activeIndex, setActiveIndex] = useState(-1);
+  const [filteredPostalCodes, setFilteredPostalCodes] = useState<string[]>([]);
+  const [suggestedCity, setSuggestedCity] = useState<string>('');
+  const [activeCityIndex, setActiveCityIndex] = useState(-1);
+  const [activePostalIndex, setActivePostalIndex] = useState(-1);
   const cityInputRef = useRef<HTMLInputElement>(null);
-  const suggestionsRef = useRef<HTMLDivElement>(null);
+  const postalInputRef = useRef<HTMLInputElement>(null);
+  const citySuggestionsRef = useRef<HTMLDivElement>(null);
+  const postalSuggestionsRef = useRef<HTMLDivElement>(null);
 
+  // Hantera stad-input och visa postnummer för den staden
   useEffect(() => {
     if (cityValue.trim()) {
       const cities = filterCities(cityValue);
       setFilteredCities(cities);
-      setShowSuggestions(cities.length > 0);
+      
+      // Om en specifik stad är matchad exakt, visa dess postnummer
+      const exactMatch = cities.find(city => 
+        city.name.toLowerCase() === cityValue.toLowerCase()
+      );
+      
+      if (exactMatch) {
+        setFilteredPostalCodes(exactMatch.postalCodes);
+        setShowPostalSuggestions(true);
+        setShowCitySuggestions(false);
+      } else {
+        setShowCitySuggestions(cities.length > 0);
+        setShowPostalSuggestions(false);
+      }
     } else {
       setFilteredCities([]);
-      setShowSuggestions(false);
+      setShowCitySuggestions(false);
+      setShowPostalSuggestions(false);
     }
-    setActiveIndex(-1);
+    setActiveCityIndex(-1);
   }, [cityValue]);
+
+  // Hantera postnummer-input och hitta matchande stad
+  useEffect(() => {
+    if (postalCodeValue.trim().length >= 3) {
+      const foundCity = findCityByPostalCode(postalCodeValue);
+      if (foundCity && foundCity !== cityValue) {
+        setSuggestedCity(foundCity);
+      } else {
+        setSuggestedCity('');
+      }
+    } else {
+      setSuggestedCity('');
+    }
+  }, [postalCodeValue, cityValue]);
 
   const handleCitySelect = (cityName: string) => {
     onCityChange(cityName);
-    setShowSuggestions(false);
-    setActiveIndex(-1);
+    setShowCitySuggestions(false);
+    setActiveCityIndex(-1);
+    
+    // Hitta den valda stadens postnummer och visa dem
+    const selectedCity = swedishCities.find(city => city.name === cityName);
+    if (selectedCity) {
+      setFilteredPostalCodes(selectedCity.postalCodes);
+      setShowPostalSuggestions(true);
+    }
+  };
+
+  const handlePostalCodeSelect = (postalCode: string) => {
+    onPostalCodeChange(postalCode);
+    setShowPostalSuggestions(false);
+    setActivePostalIndex(-1);
+  };
+
+  const handleCitySuggestionAccept = () => {
+    if (suggestedCity) {
+      onCityChange(suggestedCity);
+      setSuggestedCity('');
+    }
   };
 
   const handlePostalCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const formatted = formatPostalCode(value);
     onPostalCodeChange(formatted);
-
-    // Om postnummer är komplett, försök hitta staden
-    if (isValidPostalCodeFormat(formatted)) {
-      const foundCity = findCityByPostalCode(formatted);
-      if (foundCity) {
-        onCityChange(foundCity);
-      }
-    }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!showSuggestions) return;
+  const handleCityKeyDown = (e: React.KeyboardEvent) => {
+    if (!showCitySuggestions) return;
 
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        setActiveIndex(prev => 
+        setActiveCityIndex(prev => 
           prev < filteredCities.length - 1 ? prev + 1 : prev
         );
         break;
       case 'ArrowUp':
         e.preventDefault();
-        setActiveIndex(prev => prev > 0 ? prev - 1 : -1);
+        setActiveCityIndex(prev => prev > 0 ? prev - 1 : -1);
         break;
       case 'Enter':
         e.preventDefault();
-        if (activeIndex >= 0 && activeIndex < filteredCities.length) {
-          handleCitySelect(filteredCities[activeIndex].name);
+        if (activeCityIndex >= 0 && activeCityIndex < filteredCities.length) {
+          handleCitySelect(filteredCities[activeCityIndex].name);
         }
         break;
       case 'Escape':
-        setShowSuggestions(false);
-        setActiveIndex(-1);
+        setShowCitySuggestions(false);
+        setActiveCityIndex(-1);
         break;
     }
   };
 
-  // Stäng dropdown när man klickar utanför
+  const handlePostalKeyDown = (e: React.KeyboardEvent) => {
+    if (!showPostalSuggestions) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setActivePostalIndex(prev => 
+          prev < filteredPostalCodes.length - 1 ? prev + 1 : prev
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setActivePostalIndex(prev => prev > 0 ? prev - 1 : -1);
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (activePostalIndex >= 0 && activePostalIndex < filteredPostalCodes.length) {
+          handlePostalCodeSelect(filteredPostalCodes[activePostalIndex]);
+        }
+        break;
+      case 'Escape':
+        setShowPostalSuggestions(false);
+        setActivePostalIndex(-1);
+        break;
+    }
+  };
+
+  // Stäng dropdowns när man klickar utanför
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         cityInputRef.current && 
         !cityInputRef.current.contains(event.target as Node) &&
-        suggestionsRef.current && 
-        !suggestionsRef.current.contains(event.target as Node)
+        citySuggestionsRef.current && 
+        !citySuggestionsRef.current.contains(event.target as Node)
       ) {
-        setShowSuggestions(false);
+        setShowCitySuggestions(false);
+      }
+      
+      if (
+        postalInputRef.current && 
+        !postalInputRef.current.contains(event.target as Node) &&
+        postalSuggestionsRef.current && 
+        !postalSuggestionsRef.current.contains(event.target as Node)
+      ) {
+        setShowPostalSuggestions(false);
       }
     };
 
@@ -113,7 +196,7 @@ const CitySelector = ({
             id="city"
             value={cityValue}
             onChange={(e) => onCityChange(e.target.value)}
-            onKeyDown={handleKeyDown}
+            onKeyDown={handleCityKeyDown}
             placeholder="Börja skriv din stad..."
             className="pl-10 text-base"
             autoComplete="off"
@@ -121,16 +204,16 @@ const CitySelector = ({
         </div>
         
         {/* Stadsförslag dropdown */}
-        {showSuggestions && filteredCities.length > 0 && (
+        {showCitySuggestions && filteredCities.length > 0 && (
           <div 
-            ref={suggestionsRef}
+            ref={citySuggestionsRef}
             className="absolute z-50 w-full mt-1 bg-white/95 backdrop-blur-sm border border-white/20 rounded-lg shadow-lg max-h-48 overflow-y-auto"
           >
             {filteredCities.map((city, index) => (
               <div
                 key={city.name}
                 className={`px-4 py-2 cursor-pointer transition-colors ${
-                  index === activeIndex 
+                  index === activeCityIndex 
                     ? 'bg-primary/20 text-primary-foreground' 
                     : 'hover:bg-white/20 text-gray-800'
                 }`}
@@ -138,8 +221,7 @@ const CitySelector = ({
               >
                 <div className="font-medium">{city.name}</div>
                 <div className="text-xs text-gray-600">
-                  Postnummer: {city.postalCodes.slice(0, 3).join(', ')}
-                  {city.postalCodes.length > 3 && '...'}
+                  Klicka för att se postnummer
                 </div>
               </div>
             ))}
@@ -148,18 +230,61 @@ const CitySelector = ({
       </div>
 
       {/* Postnummer fält */}
-      <div>
+      <div className="relative">
         <Label htmlFor="postalCode" className="text-white">
           Postnummer <span className="text-sm text-white/70">(valfritt)</span>
         </Label>
         <Input
+          ref={postalInputRef}
           id="postalCode"
           value={postalCodeValue}
           onChange={handlePostalCodeChange}
+          onKeyDown={handlePostalKeyDown}
           placeholder="XXX XX"
           className="text-base"
           maxLength={6}
+          autoComplete="off"
         />
+        
+        {/* Postnummer-förslag för vald stad */}
+        {showPostalSuggestions && filteredPostalCodes.length > 0 && (
+          <div 
+            ref={postalSuggestionsRef}
+            className="absolute z-50 w-full mt-1 bg-white/95 backdrop-blur-sm border border-white/20 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+          >
+            <div className="px-4 py-2 text-xs text-gray-600 border-b border-white/20">
+              Postnummer för {cityValue}:
+            </div>
+            {filteredPostalCodes.map((postalCode, index) => (
+              <div
+                key={postalCode}
+                className={`px-4 py-2 cursor-pointer transition-colors ${
+                  index === activePostalIndex 
+                    ? 'bg-primary/20 text-primary-foreground' 
+                    : 'hover:bg-white/20 text-gray-800'
+                }`}
+                onClick={() => handlePostalCodeSelect(postalCode)}
+              >
+                <div className="font-medium">{postalCode}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {/* Stad-förslag baserat på postnummer */}
+        {suggestedCity && (
+          <div className="absolute z-50 w-full mt-1 bg-white/95 backdrop-blur-sm border border-white/20 rounded-lg shadow-lg">
+            <div
+              className="px-4 py-2 cursor-pointer transition-colors hover:bg-white/20 text-gray-800"
+              onClick={handleCitySuggestionAccept}
+            >
+              <div className="text-xs text-gray-600">Förslag baserat på postnummer:</div>
+              <div className="font-medium">{suggestedCity}</div>
+              <div className="text-xs text-gray-500">Klicka för att välja</div>
+            </div>
+          </div>
+        )}
+        
         {postalCodeValue && !isValidPostalCodeFormat(postalCodeValue) && postalCodeValue.replace(/\D/g, '').length >= 5 && (
           <p className="text-xs text-red-300 mt-1">
             Postnummer ska vara i formatet XXX XX (t.ex. 123 45)
