@@ -36,10 +36,13 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   };
 
   const handleCancelLeave = () => {
-    // Navigate back to profile when canceling
-    navigate('/profile');
     setShowUnsavedDialog(false);
     setPendingNavigation(null);
+    
+    // Add a small delay to create smooth transition back to profile
+    setTimeout(() => {
+      navigate('/profile');
+    }, 150);
   };
 
   return (
