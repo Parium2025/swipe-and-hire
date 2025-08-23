@@ -157,6 +157,19 @@ const Profile = () => {
 
   const isEmployer = userRole?.role === 'employer';
 
+  // Hjälpfunktioner
+  const countWords = (text: string) => {
+    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+  };
+
+  const handleBioChange = (value: string) => {
+    const wordCount = countWords(value);
+    if (wordCount <= 100) {
+      setBio(value);
+      setHasUnsavedChanges(true);
+    }
+  };
+
   // Calculate age from birth date
   const calculateAge = (birthDate: string) => {
     if (!birthDate) return null;
@@ -798,9 +811,14 @@ const Profile = () => {
                   id="bio"
                   placeholder={isEmployer ? "Berätta om ditt företag..." : "Berätta kort om dig själv..."}
                   value={bio}
-                  onChange={(e) => setBio(e.target.value)}
+                  onChange={(e) => handleBioChange(e.target.value)}
                   rows={4}
                 />
+                <div className="flex justify-end">
+                  <span className="text-xs text-white/70">
+                    {countWords(bio)}/100 ord
+                  </span>
+                </div>
               </div>
 
               {/* Job Seeker Specific Information */}
