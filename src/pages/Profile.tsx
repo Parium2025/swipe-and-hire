@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,8 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [originalValues, setOriginalValues] = useState<any>({});
   
   // Image editor states
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
@@ -54,24 +56,92 @@ const Profile = () => {
   // Load profile data when profile changes
   useEffect(() => {
     if (profile) {
-      setFirstName(profile.first_name || '');
-      setLastName(profile.last_name || '');
-      setBio(profile.bio || '');
-      setLocation(profile.location || '');
-      setPostalCode((profile as any)?.postal_code || '');
-      setPhone(profile.phone || '');
-      setBirthDate(profile.birth_date || '');
-      setProfileImageUrl(profile.profile_image_url || '');
-      setCvUrl((profile as any)?.cv_url || '');
-      setCompanyName(profile.company_name || '');
-      setOrgNumber(profile.org_number || '');
-      
-      // Load extended fields if they exist
-      setEmploymentStatus((profile as any)?.employment_status || '');
-      setWorkingHours((profile as any)?.working_hours || '');
-      setAvailability((profile as any)?.availability || '');
+      const values = {
+        firstName: profile.first_name || '',
+        lastName: profile.last_name || '',
+        bio: profile.bio || '',
+        location: profile.location || '',
+        postalCode: (profile as any)?.postal_code || '',
+        phone: profile.phone || '',
+        birthDate: profile.birth_date || '',
+        profileImageUrl: profile.profile_image_url || '',
+        cvUrl: (profile as any)?.cv_url || '',
+        companyName: profile.company_name || '',
+        orgNumber: profile.org_number || '',
+        employmentStatus: (profile as any)?.employment_status || '',
+        workingHours: (profile as any)?.working_hours || '',
+        availability: (profile as any)?.availability || '',
+      };
+
+      setFirstName(values.firstName);
+      setLastName(values.lastName);
+      setBio(values.bio);
+      setLocation(values.location);
+      setPostalCode(values.postalCode);
+      setPhone(values.phone);
+      setBirthDate(values.birthDate);
+      setProfileImageUrl(values.profileImageUrl);
+      setCvUrl(values.cvUrl);
+      setCompanyName(values.companyName);
+      setOrgNumber(values.orgNumber);
+      setEmploymentStatus(values.employmentStatus);
+      setWorkingHours(values.workingHours);
+      setAvailability(values.availability);
+
+      // Store original values for comparison
+      setOriginalValues(values);
+      setHasUnsavedChanges(false);
     }
   }, [profile]);
+
+  // Check for unsaved changes
+  const checkForChanges = useCallback(() => {
+    if (!originalValues.firstName) return false; // Not loaded yet
+    
+    const currentValues = {
+      firstName,
+      lastName,
+      bio,
+      location,
+      postalCode,
+      phone,
+      birthDate,
+      profileImageUrl,
+      cvUrl,
+      companyName,
+      orgNumber,
+      employmentStatus,
+      workingHours,
+      availability,
+    };
+
+    const hasChanges = Object.keys(currentValues).some(
+      key => currentValues[key] !== originalValues[key]
+    );
+
+    setHasUnsavedChanges(hasChanges);
+    return hasChanges;
+  }, [originalValues, firstName, lastName, bio, location, postalCode, phone, birthDate, 
+      profileImageUrl, cvUrl, companyName, orgNumber, employmentStatus, workingHours, availability]);
+
+  // Check for changes whenever form values change
+  useEffect(() => {
+    checkForChanges();
+  }, [checkForChanges]);
+
+  // Prevent leaving page with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = 'Du har osparade ändringar. Är du säker på att du vill lämna sidan?';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   const isEmployer = userRole?.role === 'employer';
 
@@ -389,6 +459,26 @@ const Profile = () => {
       const result = await updateProfile(updates);
       
       if (!result.error) {
+        // Update original values after successful save
+        const newOriginalValues = {
+          firstName: firstName,
+          lastName: lastName,
+          bio: bio,
+          location: location,
+          postalCode: postalCode,
+          phone: phone,
+          birthDate: birthDate,
+          profileImageUrl: profileImageUrl,
+          cvUrl: cvUrl,
+          companyName: companyName,
+          orgNumber: orgNumber,
+          employmentStatus: employmentStatus,
+          workingHours: workingHours,
+          availability: availability,
+        };
+        setOriginalValues(newOriginalValues);
+        setHasUnsavedChanges(false);
+        
         toast({
           title: "Profil uppdaterad!",
           description: "Dina ändringar har sparats."
