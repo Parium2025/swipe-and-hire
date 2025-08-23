@@ -45,13 +45,11 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   };
 
   const handleCancelLeave = () => {
-    console.log('Cancel button clicked - closing dialog and staying on current page');
+    console.log('Cancel button clicked - navigating back to profile where unsaved changes exist');
     setShowUnsavedDialog(false);
     setPendingNavigation(null);
-    // Forcefully return to last safe path (usually /profile) in case any navigation happened
-    if (location.pathname !== lastSafePathRef.current) {
-      navigate(lastSafePathRef.current, { replace: true });
-    }
+    // Always navigate back to profile when canceling, as that's where unsaved changes are
+    navigate('/profile', { replace: true });
   };
 
   return (
