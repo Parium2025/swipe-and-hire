@@ -19,10 +19,6 @@ import PostalCodeSelector from '@/components/PostalCodeSelector';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Profile = () => {
-  console.log('=== PROFILE COMPONENT DEBUG ===');
-  console.log('Profile component is rendering');
-  console.log('=====================================');
-  
   const { profile, userRole, updateProfile, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
