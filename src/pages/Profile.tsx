@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { User, MapPin, Building, Camera, Mail, Phone, Calendar, Briefcase, Clock, Heart, FileText } from 'lucide-react';
+import { User, MapPin, Building, Camera, Mail, Phone, Calendar, Briefcase, Clock, FileText } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
 
 const Profile = () => {
@@ -33,7 +33,7 @@ const Profile = () => {
   const [employmentStatus, setEmploymentStatus] = useState('');
   const [workingHours, setWorkingHours] = useState('');
   const [availability, setAvailability] = useState('');
-  const [interests, setInterests] = useState<string[]>([]);
+  
   
   // Employer-specific fields
   const [companyName, setCompanyName] = useState(profile?.company_name || '');
@@ -57,7 +57,7 @@ const Profile = () => {
       setEmploymentStatus((profile as any)?.employment_status || '');
       setWorkingHours((profile as any)?.working_hours || '');
       setAvailability((profile as any)?.availability || '');
-      setInterests((profile as any)?.interests || []);
+      
       setHomeLocation((profile as any)?.home_location || '');
     }
   }, [profile]);
@@ -79,16 +79,6 @@ const Profile = () => {
 
   const age = calculateAge(birthDate);
 
-  // Interest options (same as in WelcomeTunnel)
-  const availableInterests = ['Frontend', 'Backend', 'Design', 'Marknadsföring', 'Sälj', 'HR'];
-
-  const toggleInterest = (interest: string) => {
-    setInterests(prev => 
-      prev.includes(interest) 
-        ? prev.filter(i => i !== interest)
-        : [...prev, interest]
-    );
-  };
 
   const uploadProfileImage = async (file: File) => {
     try {
@@ -160,7 +150,6 @@ const Profile = () => {
         employment_status: employmentStatus || null,
         working_hours: workingHours || null,
         availability: availability || null,
-        interests: interests.length > 0 ? JSON.stringify(interests) : null,
         home_location: homeLocation.trim() || null,
       };
 
@@ -415,27 +404,6 @@ const Profile = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-4 pt-4 border-t">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Heart className="h-4 w-4" />
-                      <Label className="text-base font-medium">Intressen</Label>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                      {availableInterests.map(interest => (
-                        <Button
-                          key={interest}
-                          type="button"
-                          variant={interests.includes(interest) ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => toggleInterest(interest)}
-                          className="justify-start"
-                        >
-                          {interest}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
 
                   <div className="space-y-4 pt-4 border-t">
                     <div className="flex items-center gap-2 mb-2">
