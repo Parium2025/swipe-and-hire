@@ -315,7 +315,7 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="location" className="text-white">Plats</Label>
+                    <Label htmlFor="location" className="text-white">Var bor du</Label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
