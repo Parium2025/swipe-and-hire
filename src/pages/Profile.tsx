@@ -739,16 +739,12 @@ const Profile = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="birthDate" className="text-white">Födelsedatum</Label>
-                    <div className="relative">
-                      <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="birthDate"
-                        type="date"
-                        value={birthDate}
-                        onChange={(e) => setBirthDate(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
+                    <Input
+                      id="birthDate"
+                      type="date"
+                      value={birthDate}
+                      onChange={(e) => setBirthDate(e.target.value)}
+                    />
                     {age !== null && (
                       <p className="text-sm text-white">Ålder: {age} år</p>
                     )}
