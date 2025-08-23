@@ -992,7 +992,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               </Button>
             )}
             
-            {currentStep === totalSteps - 2 ? (
+            {currentStep === 4 ? (
               <Button
                 onClick={handleSubmit}
                 disabled={!isStepValid() || isSubmitting}
@@ -1010,7 +1010,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   </>
                 )}
               </Button>
-            ) : (
+            ) : currentStep < 4 ? (
               <Button
                 onClick={handleNext}
                 disabled={!isStepValid()}
@@ -1019,7 +1019,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 {currentStep === 0 ? 'Kom igång' : 'Nästa'}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
-            )}
+            ) : null}
           </div>
         </div>
       )}
