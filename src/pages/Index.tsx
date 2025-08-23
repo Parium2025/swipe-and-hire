@@ -116,10 +116,10 @@ const Index = () => {
 
     return (
       <SidebarProvider>
-        <div className="min-h-screen flex w-full">
+        <div className="min-h-screen flex w-full bg-parium-gradient">
           <AppSidebar />
           <div className="flex-1 flex flex-col">
-            <header className="sticky top-0 z-40 h-16 flex items-center justify-between border-b bg-white/10 backdrop-blur-sm px-6">
+            <header className="sticky top-0 z-40 h-16 flex items-center justify-between border-b border-white/20 bg-white/10 backdrop-blur-sm px-6">
               <div className="flex items-center gap-4">
                 <SidebarTrigger className="text-white hover:bg-white/20" />
                 <div>
