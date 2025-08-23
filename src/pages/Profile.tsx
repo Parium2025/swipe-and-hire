@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,10 +23,10 @@ const Profile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+  const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const [loading, setLoading] = useState(false);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [originalValues, setOriginalValues] = useState<any>({});
   
   // Image editor states

@@ -11,6 +11,7 @@ import ResetRedirect from "./pages/ResetRedirect";
 import EmailVerification from "./pages/EmailVerification";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/hooks/useAuth";
+import { UnsavedChangesProvider } from "@/hooks/useUnsavedChanges";
 import { Header } from "@/components/Header";
 import AuthTokenBridge from "./components/AuthTokenBridge";
 import { useStatusBar } from "@/hooks/useStatusBar";
@@ -27,7 +28,8 @@ const App = () => {
   return (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
+      <UnsavedChangesProvider>
+        <TooltipProvider>
         <Toaster />
         <Sonner />
         <BrowserRouter>
@@ -88,6 +90,7 @@ const App = () => {
           </div>
         </BrowserRouter>
       </TooltipProvider>
+      </UnsavedChangesProvider>
     </AuthProvider>
   </QueryClientProvider>
   );

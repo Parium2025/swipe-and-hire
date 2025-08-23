@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import {
   User,
   CreditCard,
@@ -50,6 +51,8 @@ export function AppSidebar() {
   const collapsed = state === 'collapsed';
   const { profile, userRole, signOut } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { checkBeforeNavigation } = useUnsavedChanges();
   const currentPath = location.pathname;
 
   const isActive = (path: string) => currentPath === path;
@@ -57,6 +60,13 @@ export function AppSidebar() {
     isActive ? 'bg-muted text-primary font-medium' : 'hover:bg-muted/50';
 
   const isEmployer = userRole?.role === 'employer';
+
+  const handleNavigation = (url: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    if (checkBeforeNavigation()) {
+      navigate(url);
+    }
+  };
 
   return (
     <Sidebar
@@ -103,6 +113,7 @@ export function AppSidebar() {
                         end 
                         className={getNavCls}
                         title={collapsed ? item.title : undefined}
+                        onClick={(e) => handleNavigation(item.url, e)}
                       >
                         <item.icon className="h-4 w-4" />
                         {!collapsed && <span>{item.title}</span>}
@@ -131,6 +142,7 @@ export function AppSidebar() {
                         end 
                         className={getNavCls}
                         title={collapsed ? item.title : undefined}
+                        onClick={(e) => handleNavigation(item.url, e)}
                       >
                         <item.icon className="h-4 w-4" />
                         {!collapsed && <span>{item.title}</span>}
@@ -159,6 +171,7 @@ export function AppSidebar() {
                         end 
                         className={getNavCls}
                         title={collapsed ? item.title : undefined}
+                        onClick={(e) => handleNavigation(item.url, e)}
                       >
                         <item.icon className="h-4 w-4" />
                         {!collapsed && <span>{item.title}</span>}
