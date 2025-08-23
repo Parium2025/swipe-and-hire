@@ -36,13 +36,10 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   };
 
   const handleCancelLeave = () => {
+    console.log('Cancel button clicked - closing dialog and staying on current page');
     setShowUnsavedDialog(false);
     setPendingNavigation(null);
-    
-    // Add a small delay to create smooth transition back to profile
-    setTimeout(() => {
-      navigate('/profile');
-    }, 150);
+    // Don't navigate since we want to stay on the current page with unsaved changes
   };
 
   return (
