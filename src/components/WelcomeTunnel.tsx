@@ -16,7 +16,7 @@ import phoneWithPariumLogo from '@/assets/phone-with-parium-logo.jpg';
 import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone, Play, Video, Trash2 } from 'lucide-react';
 import ProfileVideo from '@/components/ProfileVideo';
 import SwipeIntro from '@/components/SwipeIntro';
-import CitySelector from '@/components/CitySelector';
+import PostalCodeSelector from '@/components/PostalCodeSelector';
 
 interface WelcomeTunnelProps {
   onComplete: () => void;
@@ -43,7 +43,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     email: user?.email || '',
     bio: profile?.bio || '',
     location: profile?.location || '',
-    postalCode: '', // Nytt postnummer-fält
     phone: profile?.phone || '',
     birthDate: '',
     employmentStatus: '',
@@ -57,6 +56,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   });
   const [inputType, setInputType] = useState('text');
   const [phoneError, setPhoneError] = useState('');
+  const [postalCode, setPostalCode] = useState('');
 
   // Smart phone validation for Swedish numbers - requires complete number
   const validatePhoneNumber = (phoneNumber: string) => {
@@ -585,14 +585,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   placeholder="070-123 45 67" 
                 />
                 {phoneError && <p className="text-destructive text-xs mt-1">{phoneError}</p>}
-              </div>
-               <CitySelector
-                 cityValue={formData.location}
-                 postalCodeValue={formData.postalCode}
-                 onCityChange={(city) => handleInputChange('location', city)}
-                 onPostalCodeChange={(postalCode) => handleInputChange('postalCode', postalCode)}
+               </div>
+               <PostalCodeSelector
+                 postalCodeValue={postalCode}
+                 onPostalCodeChange={setPostalCode}
+                 onLocationChange={(location) => handleInputChange('location', location)}
                />
-              <div>
+               <div>
                 <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget?</Label>
                 <Select 
                   value={formData.employmentStatus} 
