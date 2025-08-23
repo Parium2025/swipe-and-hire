@@ -87,7 +87,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className={`${collapsed ? 'w-14' : 'w-64'} sticky top-0 h-screen overflow-y-auto bg-gradient-to-br from-primary via-primary/95 to-primary-dark`}
+      className={`${collapsed ? 'w-14' : 'w-64'} sticky top-0 h-screen overflow-y-auto bg-transparent`}
       collapsible="icon"
     >
       <SidebarContent className="p-4">
