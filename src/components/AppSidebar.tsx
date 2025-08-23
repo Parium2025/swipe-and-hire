@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
@@ -47,7 +47,7 @@ const supportItems = [
 ];
 
 export function AppSidebar() {
-  const { state } = useSidebar();
+  const { state, setOpenMobile, isMobile } = useSidebar();
   const collapsed = state === 'collapsed';
   const { profile, userRole, signOut } = useAuth();
   const location = useLocation();
@@ -60,6 +60,15 @@ export function AppSidebar() {
     isActive ? 'bg-muted text-primary font-medium' : 'hover:bg-muted/50';
 
   const isEmployer = userRole?.role === 'employer';
+
+  // Close mobile sidebar when user cancels unsaved dialog
+  useEffect(() => {
+    const closeOnCancel = () => {
+      if (isMobile) setOpenMobile(false);
+    };
+    window.addEventListener('unsaved-cancel', closeOnCancel as EventListener);
+    return () => window.removeEventListener('unsaved-cancel', closeOnCancel as EventListener);
+  }, [isMobile, setOpenMobile]);
 
   const handleNavigation = (url: string, e: React.MouseEvent) => {
     console.log('handleNavigation called for:', url);
