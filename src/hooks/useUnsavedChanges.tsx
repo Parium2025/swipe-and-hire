@@ -12,6 +12,7 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const checkBeforeNavigation = (): boolean => {
+    console.log('checkBeforeNavigation called, hasUnsavedChanges:', hasUnsavedChanges);
     if (hasUnsavedChanges) {
       return window.confirm('Du har osparade ändringar. Är du säker på att du vill lämna sidan utan att spara?');
     }

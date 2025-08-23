@@ -98,7 +98,6 @@ const Profile = () => {
     }
   }, [profile]);
 
-  // Check for unsaved changes
   const checkForChanges = useCallback(() => {
     if (!originalValues.firstName) return false; // Not loaded yet
     
@@ -123,6 +122,13 @@ const Profile = () => {
       key => currentValues[key] !== originalValues[key]
     );
 
+    console.log('Checking for changes:', { 
+      currentValues, 
+      originalValues, 
+      hasChanges,
+      userLocation,
+      originalLocation: originalValues.userLocation
+    });
     setHasUnsavedChanges(hasChanges);
     return hasChanges;
   }, [originalValues, firstName, lastName, bio, userLocation, postalCode, phone, birthDate, 

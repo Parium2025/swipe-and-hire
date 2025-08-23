@@ -62,9 +62,13 @@ export function AppSidebar() {
   const isEmployer = userRole?.role === 'employer';
 
   const handleNavigation = (url: string, e: React.MouseEvent) => {
+    console.log('handleNavigation called for:', url);
     e.preventDefault();
     if (checkBeforeNavigation()) {
+      console.log('Navigation allowed, navigating to:', url);
       navigate(url);
+    } else {
+      console.log('Navigation blocked by user');
     }
   };
 
