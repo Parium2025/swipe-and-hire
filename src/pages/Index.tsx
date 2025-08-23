@@ -118,8 +118,8 @@ const Index = () => {
       <SidebarProvider>
         <div className="min-h-screen flex w-full">
           <AppSidebar />
-          <div className="flex-1">
-            <header className="h-16 flex items-center justify-between border-b bg-white/10 backdrop-blur-sm px-6">
+          <div className="flex-1 flex flex-col">
+            <header className="sticky top-0 z-40 h-16 flex items-center justify-between border-b bg-white/10 backdrop-blur-sm px-6">
               <div className="flex items-center gap-4">
                 <SidebarTrigger className="text-white hover:bg-white/20" />
                 <div>
@@ -139,7 +139,7 @@ const Index = () => {
               </div>
             </header>
             
-            <main className="p-6">
+            <main className="flex-1 overflow-y-auto p-6">
               {renderSidebarContent()}
             </main>
           </div>

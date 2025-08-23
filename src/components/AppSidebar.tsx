@@ -83,7 +83,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className={collapsed ? 'w-14' : 'w-64'}
+      className={`${collapsed ? 'w-14' : 'w-64'} sticky top-0 h-screen overflow-y-auto`}
       collapsible="icon"
     >
       <SidebarContent className="p-4">
