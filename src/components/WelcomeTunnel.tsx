@@ -1004,21 +1004,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             
             {currentStep === 4 ? (
               <Button
-                onClick={handleSubmit}
-                disabled={!isStepValid() || isSubmitting}
-                className="flex-1 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg"
+                onClick={handleNext}
+                disabled={!isStepValid()}
+                className="flex-1 py-4 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-lg focus:outline-none focus:ring-0"
               >
-                {isSubmitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Skapar profil...
-                  </>
-                ) : (
-                  <>
-                    Skapa profil
-                    <Check className="h-4 w-4 ml-2" />
-                  </>
-                )}
+                Nästa
+                <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             ) : currentStep < 4 ? (
               <Button
