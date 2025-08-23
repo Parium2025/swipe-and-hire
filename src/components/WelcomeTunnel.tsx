@@ -887,7 +887,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="px-12 py-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 hover:scale-105 transition-all duration-300 text-white font-bold text-xl rounded-2xl shadow-2xl"
+                className="px-12 py-6 bg-primary hover:bg-primary/90 hover:scale-105 transition-all duration-300 text-white font-bold text-xl rounded-2xl shadow-2xl"
               >
                 {isSubmitting ? (
                   <>
