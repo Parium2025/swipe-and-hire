@@ -107,16 +107,26 @@ const Index = () => {
     console.log('=============================');
     
     const renderSidebarContent = () => {
+      console.log('=== RENDER SIDEBAR CONTENT ===');
+      console.log('Current pathname:', location.pathname);
+      console.log('About to render content for:', location.pathname);
+      console.log('===============================');
+      
       switch (location.pathname) {
         case '/profile':
+          console.log('Rendering Profile component');
           return <Profile />;
         case '/search-jobs':
+          console.log('Rendering SearchJobs component');
           return <SearchJobs />;
         case '/subscription':
+          console.log('Rendering Subscription component');
           return <Subscription />;
         case '/support':
+          console.log('Rendering Support component');
           return <Support />;
         default:
+          console.log('Rendering default Profile component');
           return <Profile />;
       }
     };
