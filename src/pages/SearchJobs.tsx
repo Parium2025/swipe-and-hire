@@ -902,6 +902,8 @@ const SearchJobs = () => {
                   side="bottom"
                   align="start"
                   sideOffset={4}
+                  avoidCollisions={false}
+                  collisionPadding={0}
                 >
                   <DropdownMenuItem
                     onClick={() => handleQuickCategory(category.value)}
