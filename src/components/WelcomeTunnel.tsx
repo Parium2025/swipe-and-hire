@@ -838,7 +838,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Briefcase className="h-8 w-8 text-white" />
               </div>
               <h2 className="text-2xl font-bold mb-2 text-white">Din profil</h2>
-              <p className="text-white">Är det något du vill tillägga?</p>
+              <p className="text-white">Ge en kortare beskrivning om dig själv?</p>
             </div>
 
             <div className="space-y-4 max-w-md mx-auto">
