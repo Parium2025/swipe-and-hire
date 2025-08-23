@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { createContext, useContext, useState, ReactNode, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 
 interface UnsavedChangesContextType {
@@ -15,6 +15,15 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const lastSafePathRef = useRef<string>(location.pathname);
+
+  // Track the last safe path (where the user currently is) to return on cancel
+  useEffect(() => {
+    if (!showUnsavedDialog) {
+      lastSafePathRef.current = location.pathname;
+    }
+  }, [location.pathname, showUnsavedDialog]);
 
   const checkBeforeNavigation = (targetUrl: string): boolean => {
     console.log('checkBeforeNavigation called, hasUnsavedChanges:', hasUnsavedChanges);
@@ -39,7 +48,10 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
     console.log('Cancel button clicked - closing dialog and staying on current page');
     setShowUnsavedDialog(false);
     setPendingNavigation(null);
-    // Don't navigate since we want to stay on the current page with unsaved changes
+    // Forcefully return to last safe path (usually /profile) in case any navigation happened
+    if (location.pathname !== lastSafePathRef.current) {
+      navigate(lastSafePathRef.current, { replace: true });
+    }
   };
 
   return (
