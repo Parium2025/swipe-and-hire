@@ -116,24 +116,10 @@ const Index = () => {
 
     return (
       <SidebarProvider>
-        <div className="min-h-screen flex w-full relative bg-parium-gradient overflow-hidden">
-          {/* Animated background circles */}
-          <ul className="circles">
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-          </ul>
-          
+        <div className="min-h-screen flex w-full">
           <AppSidebar />
-          <div className="flex-1 flex flex-col relative z-10">
-            <header className="sticky top-0 z-40 h-16 flex items-center justify-between border-b border-white/20 bg-white/10 backdrop-blur-sm px-6">
+          <div className="flex-1 flex flex-col">
+            <header className="sticky top-0 z-40 h-16 flex items-center justify-between border-b bg-white/10 backdrop-blur-sm px-6">
               <div className="flex items-center gap-4">
                 <SidebarTrigger className="text-white hover:bg-white/20" />
                 <div>
@@ -153,7 +139,7 @@ const Index = () => {
               </div>
             </header>
             
-            <main className="flex-1 overflow-y-auto p-6 relative z-10">
+            <main className="flex-1 overflow-y-auto p-6">
               {renderSidebarContent()}
             </main>
           </div>
@@ -165,22 +151,8 @@ const Index = () => {
   // Show employer dashboard for employers
   if (userRole?.role === 'employer') {
     return (
-      <div className="min-h-screen relative bg-parium-gradient overflow-hidden">
-        {/* Animated background circles */}
-        <ul className="circles">
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-        </ul>
-        
-        <header className="border-b border-white/20 bg-white/10 backdrop-blur-sm relative z-10">
+      <div className="min-h-screen">
+        <header className="border-b border-white/20 bg-white/10 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold text-white">Parium</h1>
@@ -210,7 +182,7 @@ const Index = () => {
           </div>
         </header>
         
-        <main className="max-w-7xl mx-auto px-4 py-8 relative z-10">
+        <main className="max-w-7xl mx-auto px-4 py-8">
           <EmployerDashboard />
         </main>
       </div>
@@ -219,22 +191,8 @@ const Index = () => {
 
   // Show job seeker swipe view for job seekers
   return (
-    <div className="min-h-screen relative bg-parium-gradient overflow-hidden">
-      {/* Animated background circles */}
-      <ul className="circles">
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-      </ul>
-      
-      <header className="border-b border-white/20 bg-white/10 backdrop-blur-sm relative z-10">
+    <div className="min-h-screen">
+      <header className="border-b border-white/20 bg-white/10 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-white">Parium</h1>
@@ -264,7 +222,7 @@ const Index = () => {
         </div>
       </header>
       
-      <main className="py-8 relative z-10">
+      <main className="py-8">
         <JobSwipe />
       </main>
     </div>
