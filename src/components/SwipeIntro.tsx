@@ -18,6 +18,12 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const device = useDevice();
 
+  // Preload phone background image to avoid flicker/delay
+  useEffect(() => {
+    const img = new Image();
+    img.src = officeBuilding;
+  }, []);
+
   const slides = [
     {
       title: "Välkommen till Parium",
@@ -288,6 +294,8 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
 
   return (
     <div className="min-h-screen bg-gradient-parium relative overflow-hidden">
+      {/* Keep image in DOM to ensure it's always cached */}
+      <img src={officeBuilding} alt="" className="hidden" aria-hidden="true" />
       {/* Static animated background - matched to mobile auth */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
