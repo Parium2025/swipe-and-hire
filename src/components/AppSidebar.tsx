@@ -76,6 +76,10 @@ export function AppSidebar() {
     if (checkBeforeNavigation(url)) {
       console.log('Navigation allowed, navigating to:', url);
       navigate(url);
+      // Close sidebar after successful navigation
+      if (isMobile) {
+        setOpenMobile(false);
+      }
     } else {
       console.log('Navigation blocked, dialog will show');
     }
