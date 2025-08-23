@@ -57,7 +57,6 @@ const Profile = () => {
       setEmploymentStatus((profile as any)?.employment_status || '');
       setWorkingHours((profile as any)?.working_hours || '');
       setAvailability((profile as any)?.availability || '');
-      
       setHomeLocation((profile as any)?.home_location || '');
     }
   }, [profile]);
@@ -330,6 +329,20 @@ const Profile = () => {
                         className="pl-10"
                       />
                     </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="homeLocation" className="text-white">Var bor du?</Label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="homeLocation"
+                      placeholder="Din bostadsort"
+                      value={homeLocation}
+                      onChange={(e) => setHomeLocation(e.target.value)}
+                      className="pl-10"
+                    />
                   </div>
                 </div>
               </div>

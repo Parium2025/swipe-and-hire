@@ -399,6 +399,11 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         location: formData.location,
         phone: formData.phone,
         birth_date: formData.birthDate || null,
+        home_location: formData.homeLocation,
+        employment_status: formData.employmentStatus,
+        working_hours: formData.workingHours,
+        availability: formData.availability,
+        cv_url: formData.cvUrl,
         profile_image_url: formData.profileImageUrl,
         onboarding_completed: true // Mark onboarding as completed
       });
