@@ -402,7 +402,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         working_hours: formData.workingHours,
         availability: formData.availability,
         cv_url: formData.cvUrl,
-        profile_image_url: formData.profileImageUrl,
+        profile_image_url: formData.profileMediaType === 'image' ? formData.profileImageUrl : formData.coverImageUrl,
+        video_url: formData.profileMediaType === 'video' ? formData.profileImageUrl : null,
         onboarding_completed: true // Mark onboarding as completed
       });
       

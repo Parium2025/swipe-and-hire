@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { User, MapPin, Building, Camera, Mail, Phone, Calendar, Briefcase, Clock, FileText } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
+import ProfileVideo from '@/components/ProfileVideo';
 
 const Profile = () => {
   const { profile, userRole, updateProfile, user } = useAuth();
@@ -79,8 +80,9 @@ const Profile = () => {
 
   const uploadProfileImage = async (file: File) => {
     try {
+      const isVideo = file.type.startsWith('video/');
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}/profile-image.${fileExt}`;
+      const fileName = `${user?.id}/profile-${isVideo ? 'video' : 'image'}.${fileExt}`;
 
       await supabase.storage
         .from('job-applications')
@@ -98,18 +100,32 @@ const Profile = () => {
         .from('job-applications')
         .getPublicUrl(fileName);
 
-      const imageUrl = `${publicUrl}?t=${Date.now()}`;
-      setProfileImageUrl(imageUrl);
+      const mediaUrl = `${publicUrl}?t=${Date.now()}`;
+      
+      // Update the profile with the correct fields based on file type
+      const updates: any = {};
+      if (isVideo) {
+        updates.video_url = mediaUrl;
+        // Keep existing profile_image_url if it exists (as cover image)
+        if (!profile?.profile_image_url) {
+          updates.profile_image_url = null;
+        }
+      } else {
+        updates.profile_image_url = mediaUrl;
+        updates.video_url = null; // Clear video when uploading image
+      }
+
+      await updateProfile(updates);
       
       toast({
-        title: "Profilbild uppladdad!",
-        description: "Din profilbild har uppdaterats."
+        title: `Profil${isVideo ? 'video' : 'bild'} uppladdad!`,
+        description: `Din profil${isVideo ? 'video' : 'bild'} har uppdaterats.`
       });
     } catch (error) {
       console.error('Upload error:', error);
       toast({
         title: "Fel vid uppladdning",
-        description: "Kunde inte ladda upp profilbilden.",
+        description: "Kunde inte ladda upp filen.",
         variant: "destructive"
       });
     }
@@ -118,12 +134,12 @@ const Profile = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.type.startsWith('image/')) {
+      if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
         uploadProfileImage(file);
       } else {
         toast({
           title: "Fel filtyp",
-          description: "Vänligen välj en bildfil.",
+          description: "Vänligen välj en bild- eller videofil.",
           variant: "destructive"
         });
       }
@@ -184,35 +200,44 @@ const Profile = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Profile Image Card */}
+        {/* Profile Image/Video Card */}
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white">
               <Camera className="h-5 w-5" />
-              Profilbild
+              {profile?.video_url ? 'Profilvideo' : 'Profilbild'}
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center space-y-4">
             <div className="relative">
-              <Avatar className="h-32 w-32">
-                <AvatarImage src={profileImageUrl} />
-                <AvatarFallback className="text-2xl bg-white/20 text-white">
-                  {profile?.first_name?.[0]}{profile?.last_name?.[0]}
-                </AvatarFallback>
-              </Avatar>
+              {profile?.video_url ? (
+                <ProfileVideo
+                  videoUrl={profile.video_url}
+                  coverImageUrl={profile.profile_image_url || undefined}
+                  alt="Profile video"
+                  className="w-32 h-32 cursor-pointer border-4 border-white/20 hover:border-white/40 transition-all rounded-full overflow-hidden"
+                />
+              ) : (
+                <Avatar className="h-32 w-32">
+                  <AvatarImage src={profileImageUrl} />
+                  <AvatarFallback className="text-2xl bg-white/20 text-white">
+                    {profile?.first_name?.[0]}{profile?.last_name?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+              )}
               <label htmlFor="profile-image" className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-2 cursor-pointer hover:bg-primary/90 transition-colors">
                 <Camera className="h-4 w-4" />
               </label>
               <input
                 id="profile-image"
                 type="file"
-                accept="image/*"
+                accept="image/*,video/*"
                 onChange={handleImageChange}
                 className="hidden"
               />
             </div>
             <p className="text-sm text-white/70 text-center">
-              Klicka på kameraikon för att ändra din profilbild
+              Klicka på kameraikon för att ändra din {profile?.video_url ? 'profilvideo' : 'profilbild'}
             </p>
           </CardContent>
         </Card>
