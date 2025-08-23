@@ -111,17 +111,13 @@ export function AppSidebar() {
               <SidebarMenu>
                 {profileItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink 
-                        to={item.url} 
-                        end 
-                        className={getNavCls}
-                        title={collapsed ? item.title : undefined}
-                        onClick={(e) => handleNavigation(item.url, e)}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        {!collapsed && <span>{item.title}</span>}
-                      </NavLink>
+                    <SidebarMenuButton 
+                      onClick={(e) => handleNavigation(item.url, e)}
+                      className={isActive(item.url) ? 'bg-muted text-primary font-medium' : 'hover:bg-muted/50'}
+                      title={collapsed ? item.title : undefined}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {!collapsed && <span>{item.title}</span>}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
@@ -140,17 +136,13 @@ export function AppSidebar() {
               <SidebarMenu>
                 {businessItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink 
-                        to={item.url} 
-                        end 
-                        className={getNavCls}
-                        title={collapsed ? item.title : undefined}
-                        onClick={(e) => handleNavigation(item.url, e)}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        {!collapsed && <span>{item.title}</span>}
-                      </NavLink>
+                    <SidebarMenuButton 
+                      onClick={(e) => handleNavigation(item.url, e)}
+                      className={isActive(item.url) ? 'bg-muted text-primary font-medium' : 'hover:bg-muted/50'}
+                      title={collapsed ? item.title : undefined}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {!collapsed && <span>{item.title}</span>}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
@@ -169,17 +161,13 @@ export function AppSidebar() {
               <SidebarMenu>
                 {supportItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink 
-                        to={item.url} 
-                        end 
-                        className={getNavCls}
-                        title={collapsed ? item.title : undefined}
-                        onClick={(e) => handleNavigation(item.url, e)}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        {!collapsed && <span>{item.title}</span>}
-                      </NavLink>
+                    <SidebarMenuButton 
+                      onClick={(e) => handleNavigation(item.url, e)}
+                      className={isActive(item.url) ? 'bg-muted text-primary font-medium' : 'hover:bg-muted/50'}
+                      title={collapsed ? item.title : undefined}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {!collapsed && <span>{item.title}</span>}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
