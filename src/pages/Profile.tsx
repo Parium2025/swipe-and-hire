@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,9 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { User, MapPin, Building, Camera, Mail, Phone } from 'lucide-react';
+import { User, MapPin, Building, Camera, Mail, Phone, Calendar, Briefcase, Clock, Heart, FileText } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
 
 const Profile = () => {
@@ -16,16 +18,54 @@ const Profile = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   
-  // Form fields
+  // Basic form fields
+  const [firstName, setFirstName] = useState(profile?.first_name || '');
+  const [lastName, setLastName] = useState(profile?.last_name || '');
   const [bio, setBio] = useState(profile?.bio || '');
   const [location, setLocation] = useState(profile?.location || '');
   const [phone, setPhone] = useState(profile?.phone || '');
-  const [companyName, setCompanyName] = useState(profile?.company_name || '');
-  const [orgNumber, setOrgNumber] = useState(profile?.org_number || '');
+  const [birthDate, setBirthDate] = useState(profile?.birth_date || '');
   const [profileImageUrl, setProfileImageUrl] = useState(profile?.profile_image_url || '');
   const [cvUrl, setCvUrl] = useState((profile as any)?.cv_url || '');
+  
+  // Extended profile fields that we'll need to add to database
+  const [homeLocation, setHomeLocation] = useState('');
+  const [employmentStatus, setEmploymentStatus] = useState('');
+  const [workingHours, setWorkingHours] = useState('');
+  const [availability, setAvailability] = useState('');
+  const [interests, setInterests] = useState<string[]>([]);
+  
+  // Employer-specific fields
+  const [companyName, setCompanyName] = useState(profile?.company_name || '');
+  const [orgNumber, setOrgNumber] = useState(profile?.org_number || '');
 
   const isEmployer = userRole?.role === 'employer';
+
+  // Calculate age from birth date
+  const calculateAge = (birthDate: string) => {
+    if (!birthDate) return null;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const age = calculateAge(birthDate);
+
+  // Interest options (same as in WelcomeTunnel)
+  const availableInterests = ['Frontend', 'Backend', 'Design', 'Marknadsföring', 'Sälj', 'HR'];
+
+  const toggleInterest = (interest: string) => {
+    setInterests(prev => 
+      prev.includes(interest) 
+        ? prev.filter(i => i !== interest)
+        : [...prev, interest]
+    );
+  };
 
   const uploadProfileImage = async (file: File) => {
     try {
@@ -177,37 +217,108 @@ const Profile = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Basic Info */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>E-post</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              {/* Personal Information */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <User className="h-4 w-4" />
+                  <Label className="text-base font-medium">Personlig information</Label>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">Förnamn</Label>
                     <Input
-                      value={user?.email || ''}
-                      disabled
-                      className="pl-10"
+                      id="firstName"
+                      placeholder="Förnamn"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Efternamn</Label>
+                    <Input
+                      id="lastName"
+                      placeholder="Efternamn"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
                     />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Telefon</Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="+46 70 123 45 67"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="pl-10"
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="birthDate">Födelsedatum</Label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="birthDate"
+                        type="date"
+                        value={birthDate}
+                        onChange={(e) => setBirthDate(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                    {age !== null && (
+                      <p className="text-sm text-muted-foreground">Ålder: {age} år</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Telefon</Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="+46 70 123 45 67"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
+              {/* Contact Information */}
+              <div className="space-y-4 pt-4 border-t">
+                <div className="flex items-center gap-2 mb-2">
+                  <Mail className="h-4 w-4" />
+                  <Label className="text-base font-medium">Kontaktinformation</Label>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>E-post</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        value={user?.email || ''}
+                        disabled
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="location">Plats</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="location"
+                        placeholder="Stockholm, Sverige"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bio */}
+              <div className="space-y-2 pt-4 border-t">
                 <Label htmlFor="bio">Presentation</Label>
                 <Textarea
                   id="bio"
@@ -218,64 +329,100 @@ const Profile = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="location">Plats</Label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="location"
-                    placeholder="Stockholm, Sverige"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              {/* Employer-specific fields */}
-              {isEmployer && (
-                <div className="space-y-4 pt-4 border-t">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Building className="h-4 w-4" />
-                    <Label className="text-base font-medium">Företagsinformation</Label>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="companyName">Företagsnamn</Label>
-                      <Input
-                        id="companyName"
-                        placeholder="Mitt Företag AB"
-                        value={companyName}
-                        onChange={(e) => setCompanyName(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="orgNumber">Organisationsnummer</Label>
-                      <Input
-                        id="orgNumber"
-                        placeholder="556123-4567"
-                        value={orgNumber}
-                        onChange={(e) => setOrgNumber(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* CV Upload for job seekers */}
+              {/* Job Seeker Specific Information */}
               {!isEmployer && (
-                <div className="space-y-4 pt-4 border-t">
-                  <Label className="text-base font-medium">CV och dokument</Label>
-                  <FileUpload
-                    onFileUploaded={(url, fileName) => setCvUrl(url)}
-                    onFileRemoved={() => setCvUrl('')}
-                    currentFile={cvUrl ? { url: cvUrl, name: 'CV.pdf' } : undefined}
-                    acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
-                    maxFileSize={5 * 1024 * 1024}
-                  />
-                </div>
+                <>
+                  <div className="space-y-4 pt-4 border-t">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Briefcase className="h-4 w-4" />
+                      <Label className="text-base font-medium">Anställningsinformation</Label>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="employmentStatus">Anställningsstatus</Label>
+                        <Select value={employmentStatus} onValueChange={setEmploymentStatus}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Välj status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="anställd">Anställd</SelectItem>
+                            <SelectItem value="arbetssokande">Arbetssökande</SelectItem>
+                            <SelectItem value="student">Student</SelectItem>
+                            <SelectItem value="konsult">Konsult</SelectItem>
+                            <SelectItem value="egen_foretagare">Egen företagare</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="workingHours">Arbetstid</Label>
+                        <Select value={workingHours} onValueChange={setWorkingHours}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Välj arbetstid" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="heltid">Heltid</SelectItem>
+                            <SelectItem value="deltid">Deltid</SelectItem>
+                            <SelectItem value="konsultbasis">Konsultbasis</SelectItem>
+                            <SelectItem value="praktik">Praktik</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="availability">Tillgänglighet</Label>
+                      <Select value={availability} onValueChange={setAvailability}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Välj tillgänglighet" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="omgaende">Omgående</SelectItem>
+                          <SelectItem value="inom_2_veckor">Inom 2 veckor</SelectItem>
+                          <SelectItem value="inom_1_manad">Inom 1 månad</SelectItem>
+                          <SelectItem value="enligt_overenskommelse">Enligt överenskommelse</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 pt-4 border-t">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Heart className="h-4 w-4" />
+                      <Label className="text-base font-medium">Intressen</Label>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {availableInterests.map(interest => (
+                        <Button
+                          key={interest}
+                          type="button"
+                          variant={interests.includes(interest) ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => toggleInterest(interest)}
+                          className="justify-start"
+                        >
+                          {interest}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 pt-4 border-t">
+                    <div className="flex items-center gap-2 mb-2">
+                      <FileText className="h-4 w-4" />
+                      <Label className="text-base font-medium">CV och dokument</Label>
+                    </div>
+                    <FileUpload
+                      onFileUploaded={(url, fileName) => setCvUrl(url)}
+                      onFileRemoved={() => setCvUrl('')}
+                      currentFile={cvUrl ? { url: cvUrl, name: 'CV.pdf' } : undefined}
+                      acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
+                      maxFileSize={5 * 1024 * 1024}
+                    />
+                  </div>
+                </>
               )}
 
               <Button 
