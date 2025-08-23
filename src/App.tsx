@@ -28,11 +28,11 @@ const App = () => {
   return (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <UnsavedChangesProvider>
-        <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+      <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <UnsavedChangesProvider>
           <div className="min-h-screen bg-gradient-parium">
             {/* Static animated background - identical to WelcomeTunnel */}
             <div className="fixed inset-0 pointer-events-none z-0">
@@ -88,9 +88,9 @@ const App = () => {
               </main>
             </div>
           </div>
-        </BrowserRouter>
+        </UnsavedChangesProvider>
+      </BrowserRouter>
       </TooltipProvider>
-      </UnsavedChangesProvider>
     </AuthProvider>
   </QueryClientProvider>
   );
