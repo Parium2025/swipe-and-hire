@@ -47,7 +47,7 @@ All colors MUST be HSL.
     /* Parium Brand Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(215 100% 12%), hsl(200 100% 60%));
     --gradient-parium: linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(200 100% 98%));
+    --gradient-subtle: linear-gradient(180deg, hsl(210 40% 98%), hsl(200 100% 98%));
     --gradient-glass: linear-gradient(135deg, hsla(0 0% 100% / 0.1), hsla(0 0% 100% / 0.05));
 
     /* Sidebar colors */
@@ -109,7 +109,7 @@ All colors MUST be HSL.
 
   body {
     @apply text-foreground;
-    background: var(--gradient-parium);
+    background: linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%) !important;
     padding-top: 0 !important;
     margin-top: 0 !important;
   }
@@ -144,9 +144,15 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
-  .bg-parium-gradient { background: var(--gradient-parium); }
-  .bg-primary-gradient { background: var(--gradient-primary); }
-  .bg-glass-surface { background: var(--gradient-glass); }
+  .bg-parium-gradient { 
+    background: linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%);
+  }
+  .bg-primary-gradient { 
+    background: linear-gradient(135deg, hsl(215 100% 12%), hsl(200 100% 60%));
+  }
+  .bg-glass-surface { 
+    background: linear-gradient(135deg, hsla(0 0% 100% / 0.1), hsla(0 0% 100% / 0.05));
+  }
 }
 
 /* Animated circles for Auth and WelcomeTunnel backgrounds */
