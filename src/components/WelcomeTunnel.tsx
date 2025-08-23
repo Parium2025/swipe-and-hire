@@ -398,6 +398,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         bio: formData.bio,
         location: formData.location,
         phone: formData.phone,
+        birth_date: formData.birthDate || null,
         profile_image_url: formData.profileImageUrl,
         onboarding_completed: true // Mark onboarding as completed
       });

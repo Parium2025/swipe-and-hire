@@ -34,6 +34,7 @@ interface Profile {
   org_number?: string;
   bio?: string;
   location?: string;
+  birth_date?: string;
   profile_image_url?: string;
   video_url?: string;
   cv_url?: string;
