@@ -139,7 +139,7 @@ const Profile = () => {
     checkForChanges();
   }, [checkForChanges]);
 
-  // Prevent leaving page with unsaved changes
+  // Prevent leaving page with unsaved changes (browser/tab close)
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {
@@ -149,53 +149,11 @@ const Profile = () => {
       }
     };
 
-    // Block navigation within the app
-    const unblock = () => {
-      if (hasUnsavedChanges) {
-        return window.confirm('Du har osparade ändringar. Är du säker på att du vill lämna sidan utan att spara?');
-      }
-      return true;
-    };
-
-    // Override navigation
-    const originalPushState = history.pushState;
-    const originalReplaceState = history.replaceState;
-
-    history.pushState = function(...args) {
-      if (hasUnsavedChanges && !window.confirm('Du har osparade ändringar. Är du säker på att du vill lämna sidan utan att spara?')) {
-        return;
-      }
-      return originalPushState.apply(history, args);
-    };
-
-    history.replaceState = function(...args) {
-      if (hasUnsavedChanges && !window.confirm('Du har osparade ändringar. Är du säker på att du vill lämna sidan utan att spara?')) {
-        return;
-      }
-      return originalReplaceState.apply(history, args);
-    };
-
-    // Handle back button
-    const handlePopState = (e: PopStateEvent) => {
-      if (hasUnsavedChanges) {
-        if (!window.confirm('Du har osparade ändringar. Är du säker på att du vill lämna sidan utan att spara?')) {
-          e.preventDefault();
-          history.pushState(null, '', location.pathname);
-          return;
-        }
-      }
-    };
-
     window.addEventListener('beforeunload', handleBeforeUnload);
-    window.addEventListener('popstate', handlePopState);
-
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      window.removeEventListener('popstate', handlePopState);
-      history.pushState = originalPushState;
-      history.replaceState = originalReplaceState;
     };
-  }, [hasUnsavedChanges, location.pathname]);
+  }, [hasUnsavedChanges]);
 
   const isEmployer = userRole?.role === 'employer';
 
