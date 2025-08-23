@@ -52,6 +52,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     profileMediaType: 'image', // 'image' or 'video'
     coverImageUrl: '', // Cover image for videos
     cvUrl: '',
+    cvFileName: '',
     interests: [] as string[]
   });
   const [inputType, setInputType] = useState('text');
@@ -833,7 +834,19 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             </div>
 
             <div className="flex flex-col items-center space-y-4">
-              <FileUpload onFileUploaded={(url) => handleInputChange('cvUrl', url)} onFileRemoved={() => handleInputChange('cvUrl', '')} acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']} maxFileSize={10 * 1024 * 1024} currentFile={formData.cvUrl ? { url: formData.cvUrl, name: 'CV' } : undefined} />
+              <FileUpload 
+                onFileUploaded={(url, fileName) => {
+                  handleInputChange('cvUrl', url);
+                  handleInputChange('cvFileName', fileName);
+                }} 
+                onFileRemoved={() => {
+                  handleInputChange('cvUrl', '');
+                  handleInputChange('cvFileName', '');
+                }} 
+                acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']} 
+                maxFileSize={10 * 1024 * 1024} 
+                currentFile={formData.cvUrl ? { url: formData.cvUrl, name: formData.cvFileName || 'CV' } : undefined} 
+              />
               {formData.cvUrl && (
                 <Badge variant="secondary" className="bg-white/20 text-white">
                   <Check className="h-3 w-3 mr-1" />
