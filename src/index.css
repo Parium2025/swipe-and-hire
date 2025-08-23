@@ -10,11 +10,11 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Parium Brand Colors - från logotypen */
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 215 100% 12%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 215 100% 12% / 0.1;
+    --card-foreground: 210 40% 98%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
