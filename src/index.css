@@ -51,13 +51,13 @@ All colors MUST be HSL.
     --gradient-glass: linear-gradient(135deg, hsla(0 0% 100% / 0.1), hsla(0 0% 100% / 0.05));
 
     /* Sidebar colors */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 215 100% 12%;
-    --sidebar-primary: 215 100% 12%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 200 100% 95%;
-    --sidebar-accent-foreground: 215 100% 12%;
-    --sidebar-border: 220 13% 91%;
+    --sidebar-background: 215 100% 12% / 0.25; /* translucent parium navy */
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 200 100% 60%;
+    --sidebar-primary-foreground: 215 100% 12%;
+    --sidebar-accent: 215 100% 12% / 0.15;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 215 100% 12% / 0.3;
     --sidebar-ring: 200 100% 60%;
   }
 
@@ -119,6 +119,9 @@ All colors MUST be HSL.
     padding-top: 0 !important;
     padding-top: env(safe-area-inset-top, 0) !important;
   }
+
+  /* Ensure gradient applies at all levels */
+  html, #root { background: var(--gradient-parium); }
 
   /* Make sure the app extends to the full screen */
   .min-h-screen {
