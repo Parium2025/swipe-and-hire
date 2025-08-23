@@ -16,6 +16,7 @@ import phoneWithPariumLogo from '@/assets/phone-with-parium-logo.jpg';
 import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone, Play, Video, Trash2 } from 'lucide-react';
 import ProfileVideo from '@/components/ProfileVideo';
 import SwipeIntro from '@/components/SwipeIntro';
+import CitySelector from '@/components/CitySelector';
 
 interface WelcomeTunnelProps {
   onComplete: () => void;
@@ -42,6 +43,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     email: user?.email || '',
     bio: profile?.bio || '',
     location: profile?.location || '',
+    postalCode: '', // Nytt postnummer-fält
     phone: profile?.phone || '',
     birthDate: '',
     employmentStatus: '',
@@ -584,16 +586,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 />
                 {phoneError && <p className="text-destructive text-xs mt-1">{phoneError}</p>}
               </div>
-              <div>
-                <Label htmlFor="location" className="text-white">Var bor du</Label>
-                <Input 
-                  id="location" 
-                  value={formData.location} 
-                  onChange={(e) => handleInputChange('location', e.target.value)} 
-                  placeholder="Din ort eller region" 
-                  className="text-base" 
-                />
-              </div>
+               <CitySelector
+                 cityValue={formData.location}
+                 postalCodeValue={formData.postalCode}
+                 onCityChange={(city) => handleInputChange('location', city)}
+                 onPostalCodeChange={(postalCode) => handleInputChange('postalCode', postalCode)}
+               />
               <div>
                 <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget?</Label>
                 <Select 
