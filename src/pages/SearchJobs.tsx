@@ -859,7 +859,7 @@ const SearchJobs = () => {
       {/* Hero Section */}
       <div className="text-center space-y-4 py-8">
         <h1 className="text-4xl font-extrabold text-white">
-          Hitta ditt drömjobb
+          Hitta ditt nästa steg
         </h1>
         <p className="text-xl text-white/90 max-w-2xl mx-auto">
           Enkel, smart och snabb jobbsökning. Välj kategori eller sök fritt - vi hjälper dig hitta rätt.
