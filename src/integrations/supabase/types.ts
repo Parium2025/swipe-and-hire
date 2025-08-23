@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
@@ -235,6 +235,7 @@ export type Database = {
       profiles: {
         Row: {
           bio: string | null
+          birth_date: string | null
           company_name: string | null
           created_at: string
           cv_url: string | null
@@ -254,6 +255,7 @@ export type Database = {
         }
         Insert: {
           bio?: string | null
+          birth_date?: string | null
           company_name?: string | null
           created_at?: string
           cv_url?: string | null
@@ -273,6 +275,7 @@ export type Database = {
         }
         Update: {
           bio?: string | null
+          birth_date?: string | null
           company_name?: string | null
           created_at?: string
           cv_url?: string | null
@@ -343,6 +346,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_age: {
+        Args: { birth_date: string }
+        Returns: number
+      }
       cleanup_expired_confirmations: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -352,7 +359,7 @@ export type Database = {
         Returns: string
       }
       get_user_role: {
-        Args: { user_uuid: string; org_uuid?: string }
+        Args: { org_uuid?: string; user_uuid: string }
         Returns: string
       }
       is_super_admin: {
