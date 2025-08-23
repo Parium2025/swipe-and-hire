@@ -525,7 +525,7 @@ const Profile = () => {
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="text-center">
         <h1 className="text-3xl font-bold text-white">Min Profil</h1>
-        <p className="text-white/70">
+        <p className="text-white">
           Hantera din profilinformation och inställningar
         </p>
       </div>
@@ -537,7 +537,7 @@ const Profile = () => {
             <CardTitle className="text-white text-center">
               Profilbild/Profilvideo
             </CardTitle>
-            <CardDescription className="text-white/70 text-center">
+            <CardDescription className="text-white text-center">
               Ladda upp en kort profilvideo eller en bild och gör ditt första intryck minnesvärt.
             </CardDescription>
             
@@ -701,7 +701,7 @@ const Profile = () => {
               <User className="h-5 w-5" />
               Profilinformation
             </CardTitle>
-            <CardDescription className="text-white/70">
+            <CardDescription className="text-white">
               Uppdatera din personliga information
             </CardDescription>
           </CardHeader>
@@ -750,7 +750,7 @@ const Profile = () => {
                       />
                     </div>
                     {age !== null && (
-                      <p className="text-sm text-white/70">Ålder: {age} år</p>
+                      <p className="text-sm text-white">Ålder: {age} år</p>
                     )}
                   </div>
 
