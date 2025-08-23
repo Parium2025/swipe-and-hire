@@ -125,9 +125,14 @@ const FileUpload: React.FC<FileUploadProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {getFileIcon(currentFile.name)}
-            <span className="text-sm font-medium truncate max-w-[200px] text-white">
+            <a
+              href={currentFile.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium truncate max-w-[200px] text-white hover:text-primary underline cursor-pointer"
+            >
               {currentFile.name}
-            </span>
+            </a>
           </div>
           <Button
             variant="ghost"

@@ -760,7 +760,7 @@ const Profile = () => {
                   <div className="space-y-4 pt-4 border-t border-white/20">
                     <div className="flex items-center gap-2 mb-2">
                       <FileText className="h-4 w-4 text-white" />
-                      <Label className="text-base font-medium text-white">CV och dokument</Label>
+                      <Label className="text-base font-medium text-white">CV</Label>
                     </div>
                     <FileUpload
                       onFileUploaded={(url, fileName) => setCvUrl(url)}
