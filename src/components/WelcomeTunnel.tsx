@@ -56,7 +56,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   });
   const [inputType, setInputType] = useState('text');
   const [phoneError, setPhoneError] = useState('');
-  const [postalCode, setPostalCode] = useState('');
+  const [postalCode, setPostalCode] = useState((profile as any)?.postal_code || '');
 
   // Smart phone validation for Swedish numbers - requires complete number
   const validatePhoneNumber = (phoneNumber: string) => {
@@ -398,6 +398,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         last_name: formData.lastName,
         bio: formData.bio,
         location: formData.location,
+        postal_code: postalCode,
         phone: formData.phone,
         birth_date: formData.birthDate || null,
         employment_status: formData.employmentStatus,
@@ -407,7 +408,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         profile_image_url: formData.profileMediaType === 'image' ? formData.profileImageUrl : formData.coverImageUrl,
         video_url: formData.profileMediaType === 'video' ? formData.profileImageUrl : null,
         onboarding_completed: true // Mark onboarding as completed
-      });
+      } as any);
       
       setCurrentStep(totalSteps - 1); // Go to completion step
 
