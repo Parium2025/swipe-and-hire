@@ -181,17 +181,17 @@ const Profile = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Min Profil</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-3xl font-bold text-white">Min Profil</h1>
+        <p className="text-white/70">
           Hantera din profilinformation och inställningar
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Profile Image Card */}
-        <Card>
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-white">
               <Camera className="h-5 w-5" />
               Profilbild
             </CardTitle>
@@ -200,7 +200,7 @@ const Profile = () => {
             <div className="relative">
               <Avatar className="h-32 w-32">
                 <AvatarImage src={profileImageUrl} />
-                <AvatarFallback className="text-2xl">
+                <AvatarFallback className="text-2xl bg-white/20 text-white">
                   {profile?.first_name?.[0]}{profile?.last_name?.[0]}
                 </AvatarFallback>
               </Avatar>
@@ -215,20 +215,20 @@ const Profile = () => {
                 className="hidden"
               />
             </div>
-            <p className="text-sm text-muted-foreground text-center">
+            <p className="text-sm text-white/70 text-center">
               Klicka på kameraikon för att ändra din profilbild
             </p>
           </CardContent>
         </Card>
 
         {/* Profile Information */}
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-white">
               <User className="h-5 w-5" />
               Profilinformation
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-white/70">
               Uppdatera din personliga information
             </CardDescription>
           </CardHeader>
@@ -237,13 +237,13 @@ const Profile = () => {
               {/* Personal Information */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <User className="h-4 w-4" />
-                  <Label className="text-base font-medium">Personlig information</Label>
+                  <User className="h-4 w-4 text-white" />
+                  <Label className="text-base font-medium text-white">Personlig information</Label>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">Förnamn</Label>
+                    <Label htmlFor="firstName" className="text-white">Förnamn</Label>
                     <Input
                       id="firstName"
                       placeholder="Förnamn"
@@ -253,7 +253,7 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Efternamn</Label>
+                    <Label htmlFor="lastName" className="text-white">Efternamn</Label>
                     <Input
                       id="lastName"
                       placeholder="Efternamn"
@@ -265,7 +265,7 @@ const Profile = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="birthDate">Födelsedatum</Label>
+                    <Label htmlFor="birthDate" className="text-white">Födelsedatum</Label>
                     <div className="relative">
                       <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -277,12 +277,12 @@ const Profile = () => {
                       />
                     </div>
                     {age !== null && (
-                      <p className="text-sm text-muted-foreground">Ålder: {age} år</p>
+                      <p className="text-sm text-white/70">Ålder: {age} år</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Telefon</Label>
+                    <Label htmlFor="phone" className="text-white">Telefon</Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -299,15 +299,15 @@ const Profile = () => {
               </div>
 
               {/* Contact Information */}
-              <div className="space-y-4 pt-4 border-t">
+              <div className="space-y-4 pt-4 border-t border-white/20">
                 <div className="flex items-center gap-2 mb-2">
-                  <Mail className="h-4 w-4" />
-                  <Label className="text-base font-medium">Kontaktinformation</Label>
+                  <Mail className="h-4 w-4 text-white" />
+                  <Label className="text-base font-medium text-white">Kontaktinformation</Label>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>E-post</Label>
+                    <Label className="text-white">E-post</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -319,7 +319,7 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="location">Plats</Label>
+                    <Label htmlFor="location" className="text-white">Plats</Label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -335,8 +335,8 @@ const Profile = () => {
               </div>
 
               {/* Bio */}
-              <div className="space-y-2 pt-4 border-t">
-                <Label htmlFor="bio">Presentation</Label>
+              <div className="space-y-2 pt-4 border-t border-white/20">
+                <Label htmlFor="bio" className="text-white">Presentation</Label>
                 <Textarea
                   id="bio"
                   placeholder={isEmployer ? "Berätta om ditt företag..." : "Berätta kort om dig själv..."}
@@ -349,15 +349,15 @@ const Profile = () => {
               {/* Job Seeker Specific Information */}
               {!isEmployer && (
                 <>
-                  <div className="space-y-4 pt-4 border-t">
+                  <div className="space-y-4 pt-4 border-t border-white/20">
                     <div className="flex items-center gap-2 mb-2">
-                      <Briefcase className="h-4 w-4" />
-                      <Label className="text-base font-medium">Anställningsinformation</Label>
+                      <Briefcase className="h-4 w-4 text-white" />
+                      <Label className="text-base font-medium text-white">Anställningsinformation</Label>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="employmentStatus">Anställningsstatus</Label>
+                        <Label htmlFor="employmentStatus" className="text-white">Anställningsstatus</Label>
                         <Select value={employmentStatus} onValueChange={setEmploymentStatus}>
                           <SelectTrigger>
                             <SelectValue placeholder="Välj status" />
@@ -373,7 +373,7 @@ const Profile = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="workingHours">Arbetstid</Label>
+                        <Label htmlFor="workingHours" className="text-white">Arbetstid</Label>
                         <Select value={workingHours} onValueChange={setWorkingHours}>
                           <SelectTrigger>
                             <SelectValue placeholder="Välj arbetstid" />
@@ -389,7 +389,7 @@ const Profile = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="availability">Tillgänglighet</Label>
+                      <Label htmlFor="availability" className="text-white">Tillgänglighet</Label>
                       <Select value={availability} onValueChange={setAvailability}>
                         <SelectTrigger>
                           <SelectValue placeholder="Välj tillgänglighet" />
@@ -404,11 +404,10 @@ const Profile = () => {
                     </div>
                   </div>
 
-
-                  <div className="space-y-4 pt-4 border-t">
+                  <div className="space-y-4 pt-4 border-t border-white/20">
                     <div className="flex items-center gap-2 mb-2">
-                      <FileText className="h-4 w-4" />
-                      <Label className="text-base font-medium">CV och dokument</Label>
+                      <FileText className="h-4 w-4 text-white" />
+                      <Label className="text-base font-medium text-white">CV och dokument</Label>
                     </div>
                     <FileUpload
                       onFileUploaded={(url, fileName) => setCvUrl(url)}
@@ -423,15 +422,15 @@ const Profile = () => {
 
               {/* Employer-specific fields */}
               {isEmployer && (
-                <div className="space-y-4 pt-4 border-t">
+                <div className="space-y-4 pt-4 border-t border-white/20">
                   <div className="flex items-center gap-2 mb-2">
-                    <Building className="h-4 w-4" />
-                    <Label className="text-base font-medium">Företagsinformation</Label>
+                    <Building className="h-4 w-4 text-white" />
+                    <Label className="text-base font-medium text-white">Företagsinformation</Label>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="companyName">Företagsnamn</Label>
+                      <Label htmlFor="companyName" className="text-white">Företagsnamn</Label>
                       <Input
                         id="companyName"
                         placeholder="Mitt Företag AB"
@@ -441,7 +440,7 @@ const Profile = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="orgNumber">Organisationsnummer</Label>
+                      <Label htmlFor="orgNumber" className="text-white">Organisationsnummer</Label>
                       <Input
                         id="orgNumber"
                         placeholder="556123-4567"

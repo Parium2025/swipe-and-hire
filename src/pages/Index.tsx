@@ -36,9 +36,9 @@ const Index = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl">Laddar...</h2>
+          <h2 className="text-xl text-white">Laddar...</h2>
         </div>
       </div>
     );
@@ -106,12 +106,12 @@ const Index = () => {
         <div className="min-h-screen flex w-full">
           <AppSidebar />
           <div className="flex-1">
-            <header className="h-16 flex items-center justify-between border-b bg-background px-6">
+            <header className="h-16 flex items-center justify-between border-b bg-white/10 backdrop-blur-sm px-6">
               <div className="flex items-center gap-4">
-                <SidebarTrigger />
+                <SidebarTrigger className="text-white hover:bg-white/20" />
                 <div>
-                  <h1 className="text-xl font-bold">Parium</h1>
-                  <p className="text-sm text-muted-foreground">
+                  <h1 className="text-xl font-bold text-white">Parium</h1>
+                  <p className="text-sm text-white/70">
                     {userRole?.role === 'employer' ? 'Arbetsgivare' : 'Jobbsökare'}: {profile.first_name} {profile.last_name}
                   </p>
                 </div>
@@ -128,6 +128,7 @@ const Index = () => {
                     disabled={switching}
                     variant="outline"
                     size="sm"
+                    className="border-white/20 text-white hover:bg-white/20"
                   >
                     <ArrowRightLeft className="mr-2 h-4 w-4" />
                     {switching ? 'Byter...' : `Byt till ${userRole?.role === 'employer' ? 'jobbsökare' : 'arbetsgivare'}`}
@@ -148,12 +149,12 @@ const Index = () => {
   // Show employer dashboard for employers
   if (userRole?.role === 'employer') {
     return (
-      <div className="min-h-screen bg-background">
-        <header className="border-b bg-background">
+      <div className="min-h-screen">
+        <header className="border-b border-white/20 bg-white/10 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold">Parium</h1>
-              <p className="text-sm text-muted-foreground">
+              <h1 className="text-2xl font-bold text-white">Parium</h1>
+              <p className="text-sm text-white/70">
                 Arbetsgivare: {profile.first_name} {profile.last_name}
               </p>
             </div>
@@ -162,6 +163,7 @@ const Index = () => {
                 onClick={() => navigate('/profile')}
                 variant="outline"
                 size="sm"
+                className="border-white/20 text-white hover:bg-white/20"
               >
                 Min Profil
               </Button>
@@ -175,12 +177,13 @@ const Index = () => {
                   disabled={switching}
                   variant="outline"
                   size="sm"
+                  className="border-white/20 text-white hover:bg-white/20"
                 >
                   <ArrowRightLeft className="mr-2 h-4 w-4" />
                   {switching ? 'Byter...' : 'Byt till jobbsökare'}
                 </Button>
               )}
-              <Button onClick={signOut} variant="outline">
+              <Button onClick={signOut} variant="outline" className="border-white/20 text-white hover:bg-white/20">
                 Logga ut
               </Button>
             </div>
@@ -196,12 +199,12 @@ const Index = () => {
 
   // Show job seeker swipe view for job seekers
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-background">
+    <div className="min-h-screen">
+      <header className="border-b border-white/20 bg-white/10 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold">Parium</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="text-2xl font-bold text-white">Parium</h1>
+            <p className="text-sm text-white/70">
               Jobbsökare: {profile.first_name} {profile.last_name}
             </p>
           </div>
@@ -210,6 +213,7 @@ const Index = () => {
               onClick={() => navigate('/profile')}
               variant="outline"
               size="sm"
+              className="border-white/20 text-white hover:bg-white/20"
             >
               Min Profil
             </Button>
@@ -223,12 +227,13 @@ const Index = () => {
                 disabled={switching}
                 variant="outline"
                 size="sm"
+                className="border-white/20 text-white hover:bg-white/20"
               >
                 <ArrowRightLeft className="mr-2 h-4 w-4" />
                 {switching ? 'Byter...' : 'Byt till arbetsgivare'}
               </Button>
             )}
-            <Button onClick={signOut} variant="outline">
+            <Button onClick={signOut} variant="outline" className="border-white/20 text-white hover:bg-white/20">
               Logga ut
             </Button>
           </div>
