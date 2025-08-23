@@ -81,6 +81,8 @@ const Profile = () => {
   const uploadProfileImage = async (file: File) => {
     try {
       const isVideo = file.type.startsWith('video/');
+      console.log('Uploading file:', file.name, 'isVideo:', isVideo);
+      
       const fileExt = file.name.split('.').pop();
       const fileName = `${user?.id}/profile-${isVideo ? 'video' : 'image'}.${fileExt}`;
 
@@ -101,13 +103,14 @@ const Profile = () => {
         .getPublicUrl(fileName);
 
       const mediaUrl = `${publicUrl}?t=${Date.now()}`;
+      console.log('Media uploaded to:', mediaUrl);
       
       // Update the profile with the correct fields based on file type
       const updates: any = {};
       if (isVideo) {
         updates.video_url = mediaUrl;
         // Keep existing profile_image_url if it exists (as cover image)
-        if (!profile?.profile_image_url) {
+        if (!profile?.profile_image_url || profile.profile_image_url.includes('.MP4') || profile.profile_image_url.includes('.mp4')) {
           updates.profile_image_url = null;
         }
       } else {
@@ -115,6 +118,7 @@ const Profile = () => {
         updates.video_url = null; // Clear video when uploading image
       }
 
+      console.log('Updating profile with:', updates);
       await updateProfile(updates);
       
       toast({
