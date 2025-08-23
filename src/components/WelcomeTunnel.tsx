@@ -875,26 +875,29 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
       case 5:
         return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
-                <Star className="h-8 w-8 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold mb-2 text-white">Intressen (valfritt)</h2>
-              <p className="text-white">Välj några intressen som matchar dina mål</p>
+          <div className="text-center space-y-8">
+            <div className="bg-white/20 backdrop-blur-sm p-6 rounded-full w-fit mx-auto mb-6">
+              <Check className="h-12 w-12 text-white" />
             </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-md mx-auto">
-              {['Frontend', 'Backend', 'Design', 'Marknadsföring', 'Sälj', 'HR'].map(interest => (
-                <Button
-                  key={interest}
-                  variant={formData.interests.includes(interest) ? 'default' : 'outline'}
-                  className="w-full"
-                  onClick={() => toggleInterest(interest)}
-                >
-                  {interest}
-                </Button>
-              ))}
+            <div className="space-y-4">
+              <h2 className="text-4xl font-bold text-white">Profilen är klar</h2>
+              <p className="text-xl text-white/90">Är du redo?</p>
+            </div>
+            <div className="pt-8">
+              <Button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="px-12 py-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 hover:scale-105 transition-all duration-300 text-white font-bold text-xl rounded-2xl shadow-2xl"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                    Laddar...
+                  </>
+                ) : (
+                  'Börja swipa'
+                )}
+              </Button>
             </div>
           </div>
         );
