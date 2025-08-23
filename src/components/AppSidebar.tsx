@@ -64,11 +64,11 @@ export function AppSidebar() {
   const handleNavigation = (url: string, e: React.MouseEvent) => {
     console.log('handleNavigation called for:', url);
     e.preventDefault();
-    if (checkBeforeNavigation()) {
+    if (checkBeforeNavigation(url)) {
       console.log('Navigation allowed, navigating to:', url);
       navigate(url);
     } else {
-      console.log('Navigation blocked by user');
+      console.log('Navigation blocked, dialog will show');
     }
   };
 
