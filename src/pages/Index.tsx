@@ -14,12 +14,14 @@ import Profile from '@/pages/Profile';
 import SearchJobs from '@/pages/SearchJobs';
 import Subscription from '@/pages/Subscription';
 import Support from '@/pages/Support';
+import DeveloperControls from '@/components/DeveloperControls';
 import { ArrowRightLeft } from 'lucide-react';
 
 const Index = () => {
   const { user, profile, userRole, signOut, loading, switchRole } = useAuth();
   const [switching, setSwitching] = useState(false);
   const [showProfileSelector, setShowProfileSelector] = useState(false);
+  const [developerView, setDeveloperView] = useState<string>('dashboard');
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -67,7 +69,18 @@ const Index = () => {
   console.log('!profile?.onboarding_completed:', !profile?.onboarding_completed);
   console.log('Needs onboarding:', needsOnboarding);
   console.log('Should show WelcomeTunnel:', needsOnboarding && (profile as any)?.role === 'job_seeker');
+  console.log('Developer view:', developerView);
   console.log('========================');
+  
+  // Developer overrides for admin user
+  if (user?.email === 'fredrikandits@hotmail.com') {
+    if (developerView === 'welcome_tunnel') {
+      return <WelcomeTunnel onComplete={() => setDeveloperView('dashboard')} />;
+    }
+    if (developerView === 'profile_setup') {
+      return <ProfileSetup />;
+    }
+  }
   
   // For job seekers, show WelcomeTunnel if onboarding not completed
   if (needsOnboarding && (profile as any)?.role === 'job_seeker') {
@@ -118,21 +131,10 @@ const Index = () => {
               </div>
               <div className="flex items-center gap-3">
                 {user.email === 'fredrikandits@hotmail.com' && (
-                  <Button 
-                    onClick={async () => {
-                      setSwitching(true);
-                      await switchRole(userRole?.role === 'employer' ? 'job_seeker' : 'employer');
-                      setSwitching(false);
-                      navigate('/');
-                    }}
-                    disabled={switching}
-                    variant="outline"
-                    size="sm"
-                    className="border-white/20 text-white hover:bg-white/20"
-                  >
-                    <ArrowRightLeft className="mr-2 h-4 w-4" />
-                    {switching ? 'Byter...' : `Byt till ${userRole?.role === 'employer' ? 'jobbsökare' : 'arbetsgivare'}`}
-                  </Button>
+                  <DeveloperControls 
+                    onViewChange={setDeveloperView}
+                    currentView={developerView}
+                  />
                 )}
               </div>
             </header>
@@ -168,20 +170,10 @@ const Index = () => {
                 Min Profil
               </Button>
               {user.email === 'fredrikandits@hotmail.com' && (
-                <Button 
-                  onClick={async () => {
-                    setSwitching(true);
-                    await switchRole('job_seeker');
-                    setSwitching(false);
-                  }}
-                  disabled={switching}
-                  variant="outline"
-                  size="sm"
-                  className="border-white/20 text-white hover:bg-white/20"
-                >
-                  <ArrowRightLeft className="mr-2 h-4 w-4" />
-                  {switching ? 'Byter...' : 'Byt till jobbsökare'}
-                </Button>
+                <DeveloperControls 
+                  onViewChange={setDeveloperView}
+                  currentView={developerView}
+                />
               )}
               <Button onClick={signOut} variant="outline" className="border-white/20 text-white hover:bg-white/20">
                 Logga ut
@@ -218,20 +210,10 @@ const Index = () => {
               Min Profil
             </Button>
             {user.email === 'fredrikandits@hotmail.com' && (
-              <Button 
-                onClick={async () => {
-                  setSwitching(true);
-                  await switchRole('employer');
-                  setSwitching(false);
-                }}
-                disabled={switching}
-                variant="outline"
-                size="sm"
-                className="border-white/20 text-white hover:bg-white/20"
-              >
-                <ArrowRightLeft className="mr-2 h-4 w-4" />
-                {switching ? 'Byter...' : 'Byt till arbetsgivare'}
-              </Button>
+              <DeveloperControls 
+                onViewChange={setDeveloperView}
+                currentView={developerView}
+              />
             )}
             <Button onClick={signOut} variant="outline" className="border-white/20 text-white hover:bg-white/20">
               Logga ut
