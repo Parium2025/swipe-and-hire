@@ -867,7 +867,7 @@ const SearchJobs = () => {
       </div>
 
       {/* Smart Category Grid */}
-      <Card variant="parium" className="border-0 shadow-lg bg-gradient-to-br from-background to-muted/30">
+      <Card className="border-0 shadow-lg bg-gradient-to-br from-background to-muted/30">
         <CardHeader className="text-center pb-6">
           <CardTitle className="text-2xl">Välj yrkesområde</CardTitle>
           <CardDescription className="text-lg">
@@ -935,7 +935,7 @@ const SearchJobs = () => {
       </Card>
 
       {/* Advanced Search - Collapsible */}
-      <Card variant="parium" className="border-primary/20">
+      <Card className="border-primary/20">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Filter className="h-5 w-5" />
@@ -1175,7 +1175,7 @@ const SearchJobs = () => {
             </div>
           </div>
         ) : jobs.length === 0 ? (
-          <Card variant="parium" className="text-center py-16">
+          <Card className="text-center py-16">
             <CardContent>
               <div className="space-y-4">
                 <div className="text-6xl">🔍</div>
@@ -1223,7 +1223,7 @@ const SearchJobs = () => {
             {/* Job Cards */}
             <div className="grid gap-6">
               {jobs.map((job) => (
-                <Card variant="parium" key={job.id} className="group hover:shadow-xl transition-all duration-300 border-l-4 border-l-transparent hover:border-l-primary">
+                <Card key={job.id} className="group hover:shadow-xl transition-all duration-300 border-l-4 border-l-transparent hover:border-l-primary">
                   <CardContent className="p-8">
                     <div className="flex justify-between items-start">
                       <div className="flex-1 space-y-4">
