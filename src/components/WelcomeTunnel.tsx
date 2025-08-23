@@ -143,7 +143,18 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const totalSteps = 7; // Introduktion + 5 profil steg + slutskärm
   const progress = currentStep / (totalSteps - 1) * 100;
 
+  const countWords = (text: string) => {
+    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+  };
+
   const handleInputChange = (field: string, value: string | string[]) => {
+    if (field === 'bio' && typeof value === 'string') {
+      const wordCount = countWords(value);
+      if (wordCount <= 100) {
+        setFormData(prev => ({ ...prev, [field]: value }));
+      }
+      return;
+    }
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -849,7 +860,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   className="text-base" 
                   value={formData.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
+                  placeholder="Berätta kort om dig själv..."
                 />
+                <div className="flex justify-end mt-1">
+                  <span className="text-xs text-white/70">
+                    {countWords(formData.bio)}/100 ord
+                  </span>
+                </div>
               </div>
             </div>
           </div>
