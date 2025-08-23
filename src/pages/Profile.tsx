@@ -360,48 +360,56 @@ const Profile = () => {
                         <Label htmlFor="employmentStatus" className="text-white">Anställningsstatus</Label>
                         <Select value={employmentStatus} onValueChange={setEmploymentStatus}>
                           <SelectTrigger>
-                            <SelectValue placeholder="Välj status" />
+                            <SelectValue placeholder="Välj din nuvarande situation" />
                           </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="anställd">Anställd</SelectItem>
+                          <SelectContent className="bg-white z-50">
+                            <SelectItem value="tillsvidareanställning">Fast anställning</SelectItem>
+                            <SelectItem value="visstidsanställning">Visstidsanställning</SelectItem>
+                            <SelectItem value="provanställning">Provanställning</SelectItem>
+                            <SelectItem value="interim">Interim anställning</SelectItem>
+                            <SelectItem value="bemanningsanställning">Bemanningsanställning</SelectItem>
+                            <SelectItem value="egenforetagare">Egenföretagare / Frilans</SelectItem>
                             <SelectItem value="arbetssokande">Arbetssökande</SelectItem>
-                            <SelectItem value="student">Student</SelectItem>
-                            <SelectItem value="konsult">Konsult</SelectItem>
-                            <SelectItem value="egen_foretagare">Egen företagare</SelectItem>
+                            <SelectItem value="annat">Annat</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
 
+                      {/* Visa arbetstid endast om användaren har valt något OCH det inte är arbetssökande */}
+                      {employmentStatus && employmentStatus !== 'arbetssokande' && (
+                        <div className="space-y-2">
+                          <Label htmlFor="workingHours" className="text-white">Hur mycket jobbar du idag?</Label>
+                          <Select value={workingHours} onValueChange={setWorkingHours}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Välj arbetstid/omfattning" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white z-50">
+                              <SelectItem value="heltid">Heltid</SelectItem>
+                              <SelectItem value="deltid">Deltid</SelectItem>
+                              <SelectItem value="varierande">Varierande / Flexibelt</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Visa tillgänglighet endast om användaren har valt något i anställningsstatus */}
+                    {employmentStatus && (
                       <div className="space-y-2">
-                        <Label htmlFor="workingHours" className="text-white">Arbetstid</Label>
-                        <Select value={workingHours} onValueChange={setWorkingHours}>
+                        <Label htmlFor="availability" className="text-white">När kan du börja nytt jobb?</Label>
+                        <Select value={availability} onValueChange={setAvailability}>
                           <SelectTrigger>
-                            <SelectValue placeholder="Välj arbetstid" />
+                            <SelectValue placeholder="Välj din tillgänglighet" />
                           </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="heltid">Heltid</SelectItem>
-                            <SelectItem value="deltid">Deltid</SelectItem>
-                            <SelectItem value="konsultbasis">Konsultbasis</SelectItem>
-                            <SelectItem value="praktik">Praktik</SelectItem>
+                          <SelectContent className="bg-white z-50">
+                            <SelectItem value="omgaende">Omgående</SelectItem>
+                            <SelectItem value="inom-1-manad">Inom 1 månad</SelectItem>
+                            <SelectItem value="inom-3-manader">Inom 3 månader</SelectItem>
+                            <SelectItem value="osaker">Osäker</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="availability" className="text-white">Tillgänglighet</Label>
-                      <Select value={availability} onValueChange={setAvailability}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Välj tillgänglighet" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="omgaende">Omgående</SelectItem>
-                          <SelectItem value="inom_2_veckor">Inom 2 veckor</SelectItem>
-                          <SelectItem value="inom_1_manad">Inom 1 månad</SelectItem>
-                          <SelectItem value="enligt_overenskommelse">Enligt överenskommelse</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    )}
                   </div>
 
                   <div className="space-y-4 pt-4 border-t border-white/20">
