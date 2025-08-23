@@ -251,6 +251,7 @@ export type Database = {
           org_number: string | null
           organization_id: string | null
           phone: string | null
+          postal_code: string | null
           profile_image_url: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
@@ -276,6 +277,7 @@ export type Database = {
           org_number?: string | null
           organization_id?: string | null
           phone?: string | null
+          postal_code?: string | null
           profile_image_url?: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at?: string
@@ -301,6 +303,7 @@ export type Database = {
           org_number?: string | null
           organization_id?: string | null
           phone?: string | null
+          postal_code?: string | null
           profile_image_url?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
