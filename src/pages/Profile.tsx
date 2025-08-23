@@ -14,6 +14,7 @@ import { User, MapPin, Building, Camera, Mail, Phone, Calendar, Briefcase, Clock
 import FileUpload from '@/components/FileUpload';
 import ProfileVideo from '@/components/ProfileVideo';
 import ImageEditor from '@/components/ImageEditor';
+import PostalCodeSelector from '@/components/PostalCodeSelector';
 
 const Profile = () => {
   const { profile, userRole, updateProfile, user } = useAuth();
@@ -34,6 +35,7 @@ const Profile = () => {
   const [lastName, setLastName] = useState(profile?.last_name || '');
   const [bio, setBio] = useState(profile?.bio || '');
   const [location, setLocation] = useState(profile?.location || '');
+  const [postalCode, setPostalCode] = useState('');
   const [phone, setPhone] = useState(profile?.phone || '');
   const [birthDate, setBirthDate] = useState(profile?.birth_date || '');
   const [profileImageUrl, setProfileImageUrl] = useState(profile?.profile_image_url || '');
@@ -666,17 +668,11 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="location" className="text-white">Var bor du</Label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="location"
-                        placeholder="Stockholm, Sverige"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
+                    <PostalCodeSelector
+                      postalCodeValue={postalCode}
+                      onPostalCodeChange={setPostalCode}
+                      onLocationChange={setLocation}
+                    />
                   </div>
                 </div>
               </div>
