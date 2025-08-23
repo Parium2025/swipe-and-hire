@@ -39,6 +39,29 @@ const Profile = () => {
   const [companyName, setCompanyName] = useState(profile?.company_name || '');
   const [orgNumber, setOrgNumber] = useState(profile?.org_number || '');
 
+  // Load profile data when profile changes
+  useEffect(() => {
+    if (profile) {
+      setFirstName(profile.first_name || '');
+      setLastName(profile.last_name || '');
+      setBio(profile.bio || '');
+      setLocation(profile.location || '');
+      setPhone(profile.phone || '');
+      setBirthDate(profile.birth_date || '');
+      setProfileImageUrl(profile.profile_image_url || '');
+      setCvUrl((profile as any)?.cv_url || '');
+      setCompanyName(profile.company_name || '');
+      setOrgNumber(profile.org_number || '');
+      
+      // Load extended fields if they exist
+      setEmploymentStatus((profile as any)?.employment_status || '');
+      setWorkingHours((profile as any)?.working_hours || '');
+      setAvailability((profile as any)?.availability || '');
+      setInterests((profile as any)?.interests || []);
+      setHomeLocation((profile as any)?.home_location || '');
+    }
+  }, [profile]);
+
   const isEmployer = userRole?.role === 'employer';
 
   // Calculate age from birth date
@@ -126,19 +149,24 @@ const Profile = () => {
 
     try {
       const updates: any = {
+        first_name: firstName.trim() || null,
+        last_name: lastName.trim() || null,
         bio: bio.trim() || null,
         location: location.trim() || null,
         phone: phone.trim() || null,
+        birth_date: birthDate || null,
         profile_image_url: profileImageUrl || null,
+        cv_url: cvUrl || null,
+        employment_status: employmentStatus || null,
+        working_hours: workingHours || null,
+        availability: availability || null,
+        interests: interests.length > 0 ? JSON.stringify(interests) : null,
+        home_location: homeLocation.trim() || null,
       };
 
       if (isEmployer) {
         updates.company_name = companyName.trim() || null;
         updates.org_number = orgNumber.trim() || null;
-      }
-
-      if (cvUrl) {
-        updates.cv_url = cvUrl;
       }
 
       const result = await updateProfile(updates);
@@ -423,6 +451,38 @@ const Profile = () => {
                     />
                   </div>
                 </>
+              )}
+
+              {/* Employer-specific fields */}
+              {isEmployer && (
+                <div className="space-y-4 pt-4 border-t">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Building className="h-4 w-4" />
+                    <Label className="text-base font-medium">Företagsinformation</Label>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="companyName">Företagsnamn</Label>
+                      <Input
+                        id="companyName"
+                        placeholder="Mitt Företag AB"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="orgNumber">Organisationsnummer</Label>
+                      <Input
+                        id="orgNumber"
+                        placeholder="556123-4567"
+                        value={orgNumber}
+                        onChange={(e) => setOrgNumber(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
               )}
 
               <Button 

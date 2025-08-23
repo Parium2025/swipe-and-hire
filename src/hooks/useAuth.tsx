@@ -38,6 +38,11 @@ interface Profile {
   profile_image_url?: string;
   video_url?: string;
   cv_url?: string;
+  employment_status?: string;
+  working_hours?: string;
+  availability?: string;
+  interests?: string | string[];
+  home_location?: string;
   organization_id?: string;
   onboarding_completed?: boolean;
 }
@@ -153,7 +158,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await signOut();
         return;
       } else {
-        setProfile(profileData);
+        // Convert JSONB interests to string array
+        const processedProfile = {
+          ...profileData,
+          interests: profileData.interests 
+            ? (Array.isArray(profileData.interests) 
+                ? profileData.interests 
+                : typeof profileData.interests === 'string' 
+                  ? JSON.parse(profileData.interests) 
+                  : [])
+            : []
+        };
+        setProfile(processedProfile);
       }
 
       // Fetch user role

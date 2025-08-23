@@ -234,13 +234,17 @@ export type Database = {
       }
       profiles: {
         Row: {
+          availability: string | null
           bio: string | null
           birth_date: string | null
           company_name: string | null
           created_at: string
           cv_url: string | null
+          employment_status: string | null
           first_name: string | null
+          home_location: string | null
           id: string
+          interests: Json | null
           last_name: string | null
           location: string | null
           onboarding_completed: boolean
@@ -252,15 +256,20 @@ export type Database = {
           updated_at: string
           user_id: string
           video_url: string | null
+          working_hours: string | null
         }
         Insert: {
+          availability?: string | null
           bio?: string | null
           birth_date?: string | null
           company_name?: string | null
           created_at?: string
           cv_url?: string | null
+          employment_status?: string | null
           first_name?: string | null
+          home_location?: string | null
           id?: string
+          interests?: Json | null
           last_name?: string | null
           location?: string | null
           onboarding_completed?: boolean
@@ -272,15 +281,20 @@ export type Database = {
           updated_at?: string
           user_id: string
           video_url?: string | null
+          working_hours?: string | null
         }
         Update: {
+          availability?: string | null
           bio?: string | null
           birth_date?: string | null
           company_name?: string | null
           created_at?: string
           cv_url?: string | null
+          employment_status?: string | null
           first_name?: string | null
+          home_location?: string | null
           id?: string
+          interests?: Json | null
           last_name?: string | null
           location?: string | null
           onboarding_completed?: boolean
@@ -292,6 +306,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           video_url?: string | null
+          working_hours?: string | null
         }
         Relationships: [
           {
