@@ -659,16 +659,15 @@ const Profile = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="text-white">E-post</Label>
-                    <div className="relative">
+                    <div className="relative group">
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
-                      <div
-                        role="textbox"
-                        aria-readonly="true"
-                        tabIndex={0}
-                        className="flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-base md:text-sm text-foreground whitespace-nowrap overflow-x-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/40"
-                        title={user?.email || ''}
-                      >
-                        {user?.email || ''}
+                      <div className="flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm text-foreground min-w-0">
+                        <span 
+                          className="truncate hover:overflow-visible hover:whitespace-normal hover:break-all transition-all duration-200" 
+                          title={user?.email || ''}
+                        >
+                          {user?.email || ''}
+                        </span>
                       </div>
                     </div>
                   </div>
