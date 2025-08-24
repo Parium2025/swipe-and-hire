@@ -857,7 +857,7 @@ const SearchJobs = () => {
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Hero Section */}
-      <div className="text-center space-y-4 py-8">
+      <div className="text-center space-y-4 py-8 min-h-[120px]">
         <h1 className="text-4xl font-extrabold text-white">
           Hitta ditt nästa steg
         </h1>
