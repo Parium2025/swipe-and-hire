@@ -707,6 +707,15 @@ const SearchJobs = () => {
     setSearchTerm('');
   };
 
+  const handleSelectAllInCategory = (categoryValue: string) => {
+    const category = jobCategories.find(cat => cat.value === categoryValue);
+    if (category) {
+      setSelectedCategory(categoryValue);
+      setSelectedSubcategories(category.subcategories); // Select all subcategories
+      setSearchTerm('');
+    }
+  };
+
   const toggleSubcategory = (category: string, subcategory: string) => {
     setSelectedCategory(category);
     
@@ -961,10 +970,10 @@ const SearchJobs = () => {
                   avoidCollisions={false}
                 >
                   <DropdownMenuItem
-                    onClick={() => handleQuickCategory(category.value)}
+                    onClick={() => handleSelectAllInCategory(category.value)}
                     className="font-medium cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 text-white"
                   >
-                    {category.icon} Allt inom {category.label}
+                    Allt inom {category.label}
                   </DropdownMenuItem>
                   <Separator className="my-1 bg-slate-600/30" />
                   <div className="max-h-60 overflow-y-auto scrollbar-thin">
