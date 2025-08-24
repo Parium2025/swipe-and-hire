@@ -857,11 +857,11 @@ const SearchJobs = () => {
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Hero Section */}
-      <div className="text-center space-y-4 py-8 min-h-[120px] flex flex-col justify-center items-center">
-        <h1 className="text-4xl font-extrabold text-white flex-shrink-0">
+      <div className="text-center space-y-4 py-8">
+        <h1 className="text-4xl font-extrabold text-white">
           Hitta ditt nästa steg
         </h1>
-        <p className="text-xl text-white/90 max-w-2xl mx-auto leading-relaxed tracking-normal antialiased min-h-[72px] flex-shrink-0">
+        <p className="text-xl text-white/90 max-w-2xl mx-auto">
           Enkel, smart och snabb jobbsökning. Välj kategori eller sök fritt - vi hjälper dig hitta rätt.
         </p>
       </div>
@@ -902,6 +902,8 @@ const SearchJobs = () => {
                   side="bottom"
                   align="center"
                   sideOffset={4}
+                  avoidCollisions={false}
+                  collisionPadding={0}
                 >
                   <DropdownMenuItem
                     onClick={() => handleQuickCategory(category.value)}
@@ -1202,7 +1204,10 @@ const SearchJobs = () => {
             {/* Results Header */}
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold">
-                Hitta ditt nästa steg
+                {selectedCategory !== 'all-categories' 
+                  ? `${jobCategories.find(cat => cat.value === selectedCategory)?.label} Jobb`
+                  : 'Alla Jobb'
+                }
               </h2>
               <Select value="newest" onValueChange={() => {}}>
                 <SelectTrigger className="w-48">
