@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Search, MapPin, Clock, Building, Filter, Heart, ExternalLink, X, ChevronDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-
+import { useIsMobile } from '@/hooks/use-mobile';
 interface Job {
   id: string;
   title: string;
@@ -31,6 +31,8 @@ const SearchJobs = () => {
   const [selectedCategory, setSelectedCategory] = useState('all-categories');
   const [selectedSubcategory, setSelectedSubcategory] = useState('');
   const [selectedEmploymentType, setSelectedEmploymentType] = useState('all-types');
+  const isMobile = useIsMobile();
+  const dropdownAlignOffset = isMobile ? -40 : -16;
 
   // Job categories with subcategories - based on AF structure
   const jobCategories = [
@@ -901,7 +903,7 @@ const SearchJobs = () => {
                   className="w-64 max-h-80 overflow-y-auto bg-slate-700/90 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
                   side="bottom"
                   align="center"
-                  alignOffset={-12}
+                  alignOffset={dropdownAlignOffset}
                   sideOffset={4}
                   avoidCollisions={true}
                   collisionPadding={8}
