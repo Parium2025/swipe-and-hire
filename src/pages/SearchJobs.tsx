@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Search, MapPin, Clock, Building, Filter, Heart, ExternalLink, X, ChevronDown } from 'lucide-react';
+import { Search, MapPin, Clock, Building, Filter, Heart, ExternalLink, X, ChevronDown, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
 interface Job {
@@ -29,7 +29,7 @@ const SearchJobs = () => {
   const [jobTitleSearch, setJobTitleSearch] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('all-locations');
   const [selectedCategory, setSelectedCategory] = useState('all-categories');
-  const [selectedSubcategory, setSelectedSubcategory] = useState('');
+  const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
   const [selectedEmploymentType, setSelectedEmploymentType] = useState('all-types');
   const isMobile = useIsMobile();
   const dropdownAlignOffset = 0;
@@ -641,8 +641,12 @@ const SearchJobs = () => {
       }
 
       // Apply subcategory filter (more specific than category)
-      if (selectedSubcategory) {
-        query = query.ilike('title', `%${selectedSubcategory}%`);
+      if (selectedSubcategories.length > 0) {
+        // Create OR conditions for all selected subcategories
+        const subcategoryConditions = selectedSubcategories.map(subcategory => 
+          `title.ilike.%${subcategory}%`
+        ).join(',');
+        query = query.or(subcategoryConditions);
       } else if (selectedCategory && selectedCategory !== 'all-categories') {
         // Apply category filter only if no subcategory is selected
         const category = jobCategories.find(cat => cat.value === selectedCategory);
@@ -682,7 +686,7 @@ const SearchJobs = () => {
 
   useEffect(() => {
     fetchJobs();
-  }, [searchTerm, jobTitleSearch, selectedLocation, selectedCategory, selectedSubcategory, selectedEmploymentType]);
+  }, [searchTerm, jobTitleSearch, selectedLocation, selectedCategory, selectedSubcategories, selectedEmploymentType]);
 
   const formatSalary = (min?: number, max?: number) => {
     if (min && max) {
@@ -697,7 +701,21 @@ const SearchJobs = () => {
 
   const handleQuickCategory = (category: string) => {
     setSelectedCategory(category);
-    setSelectedSubcategory(''); // Clear subcategory when selecting main category
+    setSelectedSubcategories([]); // Clear subcategories when selecting main category
+    setSearchTerm('');
+  };
+
+  const toggleSubcategory = (category: string, subcategory: string) => {
+    setSelectedCategory(category);
+    
+    const isCurrentlySelected = selectedSubcategories.includes(subcategory);
+    if (isCurrentlySelected) {
+      // Remove from selection
+      setSelectedSubcategories(prev => prev.filter(s => s !== subcategory));
+    } else {
+      // Add to selection
+      setSelectedSubcategories(prev => [...prev, subcategory]);
+    }
     setSearchTerm('');
   };
 
@@ -818,7 +836,7 @@ const SearchJobs = () => {
     if (matchingRole) {
       setSelectedCategory(matchingRole.category.value);
       if (matchingRole.subcategory) {
-        setSelectedSubcategory(matchingRole.subcategory);
+        setSelectedSubcategories([matchingRole.subcategory]);
       }
       setJobTitleSearch(''); // Clear the search since we're now using category filters
     }
@@ -918,14 +936,13 @@ const SearchJobs = () => {
                     {category.subcategories.map((subcategory) => (
                       <DropdownMenuItem
                         key={subcategory}
-                        onClick={() => {
-                          setSelectedCategory(category.value);
-                          setSelectedSubcategory(subcategory);
-                          setSearchTerm('');
-                        }}
-                        className="text-sm cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white"
+                        onClick={() => toggleSubcategory(category.value, subcategory)}
+                        className="text-sm cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white flex items-center justify-between"
                       >
-                        {subcategory}
+                        <span>{subcategory}</span>
+                        {selectedSubcategories.includes(subcategory) && (
+                          <Check className="h-4 w-4 text-green-400" />
+                        )}
                       </DropdownMenuItem>
                     ))}
                   </div>
@@ -1098,7 +1115,7 @@ const SearchJobs = () => {
           </div>
 
           {/* Active Filters Display */}
-          {(selectedCategory !== 'all-categories' || selectedSubcategory) && (
+          {(selectedCategory !== 'all-categories' || selectedSubcategories.length > 0) && (
             <div className="pt-4 border-t">
               <div className="flex items-center gap-2 mb-3">
                 <Filter className="h-4 w-4 text-primary" />
@@ -1112,7 +1129,7 @@ const SearchJobs = () => {
                     <button 
                       onClick={() => {
                         setSelectedCategory('all-categories');
-                        setSelectedSubcategory('');
+                        setSelectedSubcategories([]);
                       }}
                       className="ml-1 hover:bg-accent rounded p-1"
                     >
@@ -1120,18 +1137,18 @@ const SearchJobs = () => {
                     </button>
                   </Badge>
                 )}
-                {selectedSubcategory && (
-                  <Badge variant="secondary" className="gap-2">
+                {selectedSubcategories.map((subcategory) => (
+                  <Badge key={subcategory} variant="secondary" className="gap-2">
                     <span>🎯</span>
-                    <span>{selectedSubcategory}</span>
+                    <span>{subcategory}</span>
                     <button 
-                      onClick={() => setSelectedSubcategory('')}
+                      onClick={() => setSelectedSubcategories(prev => prev.filter(s => s !== subcategory))}
                       className="ml-1 hover:bg-secondary-foreground/20 rounded p-1"
                     >
                       <X className="h-3 w-3" />
                     </button>
                   </Badge>
-                )}
+                ))}
               </div>
             </div>
           )}
@@ -1142,7 +1159,7 @@ const SearchJobs = () => {
               <p className="text-lg font-medium">
                 <span className="text-primary">{jobs.length}</span> jobb hittades
               </p>
-              {(searchTerm || jobTitleSearch || selectedLocation !== 'all-locations' || selectedCategory !== 'all-categories' || selectedSubcategory || selectedEmploymentType !== 'all-types') && (
+              {(searchTerm || jobTitleSearch || selectedLocation !== 'all-locations' || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentType !== 'all-types') && (
                 <Badge variant="secondary" className="text-sm">
                   Filter aktiva
                 </Badge>
@@ -1155,7 +1172,7 @@ const SearchJobs = () => {
                 setJobTitleSearch('');
                 setSelectedLocation('all-locations');
                 setSelectedCategory('all-categories');
-                setSelectedSubcategory('');
+                setSelectedSubcategories([]);
                 setSelectedEmploymentType('all-types');
               }}
               className="flex items-center gap-2"
@@ -1192,7 +1209,7 @@ const SearchJobs = () => {
                     setJobTitleSearch('');
                     setSelectedLocation('all-locations');
                     setSelectedCategory('all-categories');
-                    setSelectedSubcategory('');
+                    setSelectedSubcategories([]);
                     setSelectedEmploymentType('all-types');
                   }}
                 >
