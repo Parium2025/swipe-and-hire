@@ -1204,10 +1204,7 @@ const SearchJobs = () => {
             {/* Results Header */}
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold">
-                {selectedCategory !== 'all-categories' 
-                  ? `${jobCategories.find(cat => cat.value === selectedCategory)?.label} Jobb`
-                  : 'Alla Jobb'
-                }
+                Hitta ditt nästa steg
               </h2>
               <Select value="newest" onValueChange={() => {}}>
                 <SelectTrigger className="w-48">
