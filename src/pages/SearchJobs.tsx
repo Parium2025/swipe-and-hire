@@ -909,7 +909,7 @@ const SearchJobs = () => {
                     onClick={() => handleQuickCategory(category.value)}
                     className="font-medium cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 text-white"
                   >
-                    {category.icon} Alla inom {category.label}
+                    {category.icon} Allt inom {category.label}
                   </DropdownMenuItem>
                   <Separator className="my-1 bg-slate-600/30" />
                   <div className="max-h-60 overflow-y-auto scrollbar-thin">
