@@ -711,7 +711,19 @@ const SearchJobs = () => {
     const category = jobCategories.find(cat => cat.value === categoryValue);
     if (category) {
       setSelectedCategory(categoryValue);
-      setSelectedSubcategories(category.subcategories); // Select all subcategories
+      
+      // Check if all subcategories are already selected
+      const allSelected = category.subcategories.every(sub => selectedSubcategories.includes(sub));
+      
+      if (allSelected) {
+        // If all are selected, deselect all
+        setSelectedSubcategories([]);
+        setSelectedCategory('all-categories');
+      } else {
+        // If not all are selected, select all
+        setSelectedSubcategories(category.subcategories);
+      }
+      
       setSearchTerm('');
     }
   };
