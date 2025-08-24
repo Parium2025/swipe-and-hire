@@ -607,8 +607,36 @@ const SearchJobs = () => {
   ];
 
   const locations = [
-    'Stockholm', 'Göteborg', 'Malmö', 'Uppsala', 'Västerås', 'Örebro', 
-    'Linköping', 'Helsingborg', 'Jönköping', 'Norrköping', 'Lund', 'Umeå'
+    'Ale', 'Alingsås', 'Almhult', 'Aneby', 'Arboga', 'Arjeplog', 'Arvidsjaur', 'Arvika', 'Askersund', 'Avesta', 'Bengtsfors', 
+    'Berg', 'Bjurholm', 'Bjuv', 'Boden', 'Bollnäs', 'Borgholm', 'Borlänge', 'Borås', 'Botkyrka', 'Boxholm', 'Bromölla', 
+    'Bräcke', 'Burlöv', 'Båstad', 'Dals-Ed', 'Danderyd', 'Degerfors', 'Dorotea', 'Eda', 'Ekerö', 'Eksjö', 'Emmaboda', 
+    'Enköping', 'Eskilstuna', 'Eslöv', 'Essunga', 'Fagersta', 'Falkenberg', 'Falköping', 'Falun', 'Filipstad', 'Finspång', 
+    'Flen', 'Forshaga', 'Färgelanda', 'Gagnef', 'Gislaved', 'Gnesta', 'Gnosjö', 'Gotland', 'Grums', 'Grästorp', 'Gullspång', 
+    'Gällivare', 'Gävle', 'Göteborg', 'Götene', 'Habo', 'Hagfors', 'Hallsberg', 'Hallstahammar', 'Halmstad', 'Hammarö', 
+    'Haninge', 'Haparanda', 'Hara', 'Härjedalen', 'Härryda', 'Hässleholm', 'Höganäs', 'Högsby', 'Hörby', 'Höör', 
+    'Heby', 'Hedemora', 'Helsingborg', 'Herrljunga', 'Hjo', 'Hofors', 'Huddinge', 'Hudiksvall', 'Hultsfred', 'Hylte', 
+    'Håbo', 'Hällefors', 'Härnosand', 'Härnösand', 'Hässleholm', 'Höganäs', 'Hörby', 'Höör', 'Jokkmokk', 'Järfälla', 
+    'Jönköping', 'Kalix', 'Kalmar', 'Karlsborg', 'Karlshamn', 'Karlskoga', 'Karlskrona', 'Karlstad', 'Katrineholm', 
+    'Kil', 'Kinda', 'Kiruna', 'Klippan', 'Knivsta', 'Kramfors', 'Kristianstad', 'Kristinehamn', 'Krokom', 'Kumla', 
+    'Kungsbacka', 'Kungsör', 'Kungälv', 'Kävlinge', 'Köping', 'Laholm', 'Landskrona', 'Laxå', 'Lekeberg', 'Leksand', 
+    'Lessebo', 'Lidingö', 'Lidköping', 'Lilla Edet', 'Lindesberg', 'Linköping', 'Ljungby', 'Ljusdal', 'Ljusnarsberg', 
+    'Lomma', 'Ludvika', 'Luleå', 'Lund', 'Lycksele', 'Lysekil', 'Malmö', 'Malung-Sälen', 'Malå', 'Mariestad', 
+    'Markaryd', 'Markusson', 'Mellerud', 'Mjölby', 'Mora', 'Motala', 'Mullsjö', 'Munkedal', 'Munkfors', 'Mölndal', 
+    'Mölnlycke', 'Mörbylånga', 'Nacka', 'Nässjö', 'Nedansjö', 'Nordanstig', 'Nordmaling', 'Norrköping', 'Norrtälje', 
+    'Norsjö', 'Nybro', 'Nykvarn', 'Nyköping', 'Nynäshamn', 'Närke', 'Ockelbo', 'Olofström', 'Orsa', 'Orust', 'Osby', 
+    'Oskarshamn', 'Ovanåker', 'Oxelösund', 'Pajala', 'Partille', 'Perstorp', 'Piteå', 'Ragunda', 'Ronneby', 'Rättvik', 
+    'Sala', 'Salem', 'Sandviken', 'Sigtuna', 'Simrishamn', 'Sjöbo', 'Skara', 'Skattefors', 'Skellefteå', 'Skinnskatteberg', 
+    'Skövde', 'Smedjebacken', 'Sollefteå', 'Sollentuna', 'Solna', 'Sorsele', 'Sotenäs', 'Staffanstorp', 'Stenungsund', 
+    'Stockholm', 'Storfors', 'Storuman', 'Strängnäs', 'Strömstad', 'Strömsund', 'Sundbyberg', 'Sundsvall', 'Sunne', 
+    'Surahammar', 'Svalöv', 'Svedala', 'Svenljunga', 'Säffle', 'Säter', 'Sävsjö', 'Söderhamn', 'Söderköping', 'Södertälje', 
+    'Sölvesborg', 'Tanum', 'Tibro', 'Tidaholm', 'Tingsryd', 'Tjörn', 'Tomelilla', 'Torsby', 'Torsås', 'Tranemo', 
+    'Tranås', 'Trelleborg', 'Trollhättan', 'Trosa', 'Tyresö', 'Täby', 'Töreboda', 'Uddevalla', 'Ulricehamn', 'Umeå', 
+    'Upplands-Bro', 'Upplands Väsby', 'Uppsala', 'Uppvidinge', 'Vadstena', 'Vaggeryd', 'Valdemarsvik', 'Vallentuna', 
+    'Vansbro', 'Vara', 'Varberg', 'Vaxholm', 'Vellinge', 'Vetlanda', 'Vilhelmina', 'Vimmerby', 'Vindeln', 'Vingåker', 
+    'Vårgårda', 'Vänersborg', 'Vännäs', 'Värmdö', 'Värnamo', 'Västerås', 'Västervik', 'Växjö', 'Ydre', 'Ystad', 
+    'Åmål', 'Ånge', 'Åre', 'Årjäng', 'Åsele', 'Åstorp', 'Åtvidaberg', 'Älmhult', 'Älvdalen', 'Älvkarleby', 'Älvsbyn', 
+    'Ängelholm', 'Öckerö', 'Ödeshög', 'Örebro', 'Örkelljunga', 'Örnsköldsvik', 'Östersund', 'Österåker', 'Östhammar', 
+    'Östra Göinge', 'Överkalix', 'Övertorneå'
   ];
 
   const employmentTypes = [
