@@ -1272,8 +1272,8 @@ const SearchJobs = () => {
                   <DropdownMenuContent 
                     className="w-80 max-h-80 overflow-hidden bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
                     side="bottom"
-                    align="start"
-                    alignOffset={-28}
+                    align="center"
+                    alignOffset={0}
                     sideOffset={6}
                     avoidCollisions={false}
                   >
@@ -1282,7 +1282,7 @@ const SearchJobs = () => {
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
                         <Input
-                          placeholder="Sök stad eller kommun..."
+                          placeholder="Sök stad..."
                           value={locationSearchTerm}
                           onChange={(e) => setLocationSearchTerm(e.target.value)}
                           className="pl-10 bg-slate-600/50 border-slate-500/50 text-white placeholder:text-white/50"
