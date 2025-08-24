@@ -910,8 +910,8 @@ const SearchJobs = () => {
                   >
                     {/* Selection indicator */}
                     {category.subcategories.some(sub => selectedSubcategories.includes(sub)) && (
-                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-white rounded-full flex items-center justify-center">
+                        <div className="w-2 h-2 bg-slate-700 rounded-full"></div>
                       </div>
                     )}
                     <span className="text-xl sm:text-2xl">{category.icon}</span>
@@ -947,7 +947,7 @@ const SearchJobs = () => {
                       >
                         <span>{subcategory}</span>
                         {selectedSubcategories.includes(subcategory) && (
-                          <Check className="h-4 w-4 text-green-400" />
+                          <Check className="h-4 w-4 text-white" />
                         )}
                       </DropdownMenuItem>
                     ))}
