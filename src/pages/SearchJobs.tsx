@@ -1276,6 +1276,7 @@ const SearchJobs = () => {
                     alignOffset={0}
                     sideOffset={6}
                     avoidCollisions={false}
+                    onCloseAutoFocus={(e) => e.preventDefault()}
                   >
                     {/* Search input */}
                     <div className="p-2 border-b border-slate-600/30">
@@ -1285,6 +1286,9 @@ const SearchJobs = () => {
                           placeholder="Sök stad..."
                           value={locationSearchTerm}
                           onChange={(e) => setLocationSearchTerm(e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
                           className="pl-10 bg-slate-600/50 border-slate-500/50 text-white placeholder:text-white/50"
                         />
                       </div>
