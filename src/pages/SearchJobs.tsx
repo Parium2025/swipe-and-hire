@@ -38,7 +38,7 @@ const SearchJobs = () => {
   const jobCategories = [
     { 
       value: 'administration', 
-      label: 'Administration, Ekonomi, Juridik', 
+      label: 'Administration, Ekonomi, Juridik',
       icon: '📊',
       keywords: ['administration', 'ekonomi', 'redovisning', 'controller', 'assistent', 'sekreterare', 'koordinator', 'projektledare', 'juridik', 'advokat'],
       subcategories: [
@@ -83,7 +83,7 @@ const SearchJobs = () => {
     },
     { 
       value: 'construction', 
-      label: 'Bygg Och Anläggning', 
+      label: 'Bygg och Anläggning', 
       icon: '🏗️',
       keywords: ['bygg', 'snickare', 'elektriker', 'anläggning', 'murare', 'målare', 'byggledare', 'platschef', 'vvs'],
       subcategories: [
@@ -113,7 +113,7 @@ const SearchJobs = () => {
     },
     { 
       value: 'management', 
-      label: 'Chefer Och Verksamhetsledare', 
+      label: 'Chefer och Verksamhetsledare', 
       icon: '👔',
       keywords: ['chef', 'ledare', 'verksamhet', 'director', 'manager', 'vd', 'platschef', 'avdelningschef'],
       subcategories: [
@@ -244,7 +244,7 @@ const SearchJobs = () => {
     },
     { 
       value: 'healthcare', 
-      label: 'Hälso- Och Sjukvård', 
+      label: 'Hälso- och Sjukvård', 
       icon: '🏥',
       keywords: ['sjuksköterska', 'läkare', 'vård', 'omsorg', 'tandläkare', 'fysioterapeut', 'undersköterska', 'vårdbiträde'],
       subcategories: [
@@ -400,7 +400,7 @@ const SearchJobs = () => {
     },
     { 
       value: 'beauty', 
-      label: 'Kropps- Och Skönhetsvård', 
+      label: 'Kropps- och Skönhetsvård', 
       icon: '💄',
       keywords: ['frisör', 'skönhet', 'massage', 'naglar', 'kosmetolog', 'fotvård', 'hudterapeut'],
       subcategories: [
@@ -518,7 +518,7 @@ const SearchJobs = () => {
     },
     { 
       value: 'cleaning', 
-      label: 'Sanering Och Renhållning', 
+      label: 'Sanering och Renhållning', 
       icon: '🧹',
       keywords: ['städ', 'rengöring', 'sanering', 'renhållning', 'lokalvård', 'skorstensfejare'],
       subcategories: [
