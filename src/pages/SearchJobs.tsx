@@ -38,7 +38,7 @@ const SearchJobs = () => {
   const jobCategories = [
     { 
       value: 'administration', 
-      label: 'Administration, ekonomi, juridik', 
+      label: 'Administration, Ekonomi, Juridik', 
       icon: '📊',
       keywords: ['administration', 'ekonomi', 'redovisning', 'controller', 'assistent', 'sekreterare', 'koordinator', 'projektledare', 'juridik', 'advokat'],
       subcategories: [
@@ -83,7 +83,7 @@ const SearchJobs = () => {
     },
     { 
       value: 'construction', 
-      label: 'Bygg och anläggning', 
+      label: 'Bygg Och Anläggning', 
       icon: '🏗️',
       keywords: ['bygg', 'snickare', 'elektriker', 'anläggning', 'murare', 'målare', 'byggledare', 'platschef', 'vvs'],
       subcategories: [
@@ -113,7 +113,7 @@ const SearchJobs = () => {
     },
     { 
       value: 'management', 
-      label: 'Chefer och verksamhetsledare', 
+      label: 'Chefer Och Verksamhetsledare', 
       icon: '👔',
       keywords: ['chef', 'ledare', 'verksamhet', 'director', 'manager', 'vd', 'platschef', 'avdelningschef'],
       subcategories: [
@@ -172,7 +172,7 @@ const SearchJobs = () => {
     },
     { 
       value: 'sales', 
-      label: 'Försäljning, inköp, marknadsföring', 
+      label: 'Försäljning, Inköp, Marknadsföring', 
       icon: '📈',
       keywords: ['försäljning', 'sales', 'säljare', 'account', 'marketing', 'marknadsföring', 'reklam', 'kommunikation', 'pr', 'inköp'],
       subcategories: [
@@ -226,7 +226,7 @@ const SearchJobs = () => {
     },
     { 
       value: 'restaurant', 
-      label: 'Hotell, restaurang, storhushåll', 
+      label: 'Hotell, Restaurang, Storhushåll', 
       icon: '🍽️',
       keywords: ['kock', 'servitör', 'hotell', 'restaurang', 'storhushåll', 'bagare', 'konditor', 'hovmästare'],
       subcategories: [
@@ -244,7 +244,7 @@ const SearchJobs = () => {
     },
     { 
       value: 'healthcare', 
-      label: 'Hälso- och sjukvård', 
+      label: 'Hälso- Och Sjukvård', 
       icon: '🏥',
       keywords: ['sjuksköterska', 'läkare', 'vård', 'omsorg', 'tandläkare', 'fysioterapeut', 'undersköterska', 'vårdbiträde'],
       subcategories: [
@@ -295,7 +295,7 @@ const SearchJobs = () => {
     },
     { 
       value: 'industry', 
-      label: 'Industriell tillverkning', 
+      label: 'Industriell Tillverkning', 
       icon: '🏭',
       keywords: ['industri', 'tillverkning', 'produktion', 'maskinoperatör', 'kvalitet', 'process', 'tekniker'],
       subcategories: [
@@ -349,7 +349,7 @@ const SearchJobs = () => {
     },
     { 
       value: 'installation', 
-      label: 'Installation, drift, underhåll', 
+      label: 'Installation, Drift, Underhåll', 
       icon: '⚙️',
       keywords: ['installation', 'drift', 'underhåll', 'reparatör', 'tekniker', 'service', 'elektriker', 'fastighet'],
       subcategories: [
@@ -400,7 +400,7 @@ const SearchJobs = () => {
     },
     { 
       value: 'beauty', 
-      label: 'Kropps- och skönhetsvård', 
+      label: 'Kropps- Och Skönhetsvård', 
       icon: '💄',
       keywords: ['frisör', 'skönhet', 'massage', 'naglar', 'kosmetolog', 'fotvård', 'hudterapeut'],
       subcategories: [
@@ -413,7 +413,7 @@ const SearchJobs = () => {
     },
     { 
       value: 'creative', 
-      label: 'Kultur, media, design', 
+      label: 'Kultur, Media, Design', 
       icon: '🎨',
       keywords: ['design', 'grafisk', 'kreativ', 'media', 'journalist', 'fotograf', 'video', 'kultur', 'konstnär', 'bibliotek'],
       subcategories: [
@@ -441,7 +441,7 @@ const SearchJobs = () => {
     },
     { 
       value: 'military', 
-      label: 'Militärt arbete', 
+      label: 'Militärt Arbete', 
       icon: '🎖️',
       keywords: ['militär', 'försvar', 'soldat', 'officer', 'specialistofficerare'],
       subcategories: [
@@ -474,7 +474,7 @@ const SearchJobs = () => {
     },
     { 
       value: 'science', 
-      label: 'Naturvetenskapligt arbete', 
+      label: 'Naturvetenskapligt Arbete', 
       icon: '🔬',
       keywords: ['forskning', 'vetenskap', 'laboratorium', 'kemi', 'biologi', 'fysik', 'matematik'],
       subcategories: [
@@ -492,7 +492,7 @@ const SearchJobs = () => {
     },
     { 
       value: 'education', 
-      label: 'Pedagogiskt arbete', 
+      label: 'Pedagogiskt Arbete', 
       icon: '📚',
       keywords: ['lärare', 'utbildning', 'skola', 'universitet', 'förskola', 'pedagog', 'barnskötare', 'fritidsledare'],
       subcategories: [
@@ -518,7 +518,7 @@ const SearchJobs = () => {
     },
     { 
       value: 'cleaning', 
-      label: 'Sanering och renhållning', 
+      label: 'Sanering Och Renhållning', 
       icon: '🧹',
       keywords: ['städ', 'rengöring', 'sanering', 'renhållning', 'lokalvård', 'skorstensfejare'],
       subcategories: [
@@ -534,7 +534,7 @@ const SearchJobs = () => {
     },
     { 
       value: 'social', 
-      label: 'Socialt arbete', 
+      label: 'Socialt Arbete', 
       icon: '🤝',
       keywords: ['social', 'socialtjänst', 'stöd', 'hjälp', 'omsorg', 'kurator', 'behandling'],
       subcategories: [
@@ -575,7 +575,7 @@ const SearchJobs = () => {
     },
     { 
       value: 'technical', 
-      label: 'Tekniskt arbete', 
+      label: 'Tekniskt Arbete', 
       icon: '🔧',
       keywords: ['ingenjör', 'tekniker', 'konstruktör', 'design', 'utveckling', 'arkitekt', 'civilingenjör'],
       subcategories: [
