@@ -857,11 +857,11 @@ const SearchJobs = () => {
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Hero Section */}
-      <div className="text-center space-y-4 py-8 min-h-[120px]">
-        <h1 className="text-4xl font-extrabold text-white">
+      <div className="text-center space-y-4 py-8 min-h-[120px] flex flex-col justify-center items-center">
+        <h1 className="text-4xl font-extrabold text-white flex-shrink-0">
           Hitta ditt nästa steg
         </h1>
-        <p className="text-xl text-white/90 max-w-2xl mx-auto leading-relaxed tracking-normal antialiased min-h-[72px]">
+        <p className="text-xl text-white/90 max-w-2xl mx-auto leading-relaxed tracking-normal antialiased min-h-[72px] flex-shrink-0">
           Enkel, smart och snabb jobbsökning. Välj kategori eller sök fritt - vi hjälper dig hitta rätt.
         </p>
       </div>
@@ -898,13 +898,10 @@ const SearchJobs = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
-                  className="w-64 max-h-80 overflow-y-auto bg-card border-border shadow-xl rounded-lg text-foreground fixed z-[9999]"
+                  className="w-64 max-h-80 overflow-y-auto bg-card border-border shadow-xl z-50 rounded-lg text-foreground"
                   side="bottom"
                   align="center"
                   sideOffset={4}
-                  avoidCollisions={false}
-                  collisionPadding={0}
-                  forceMount
                 >
                   <DropdownMenuItem
                     onClick={() => handleQuickCategory(category.value)}
