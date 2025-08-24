@@ -32,7 +32,7 @@ const SearchJobs = () => {
   const [selectedSubcategory, setSelectedSubcategory] = useState('');
   const [selectedEmploymentType, setSelectedEmploymentType] = useState('all-types');
   const isMobile = useIsMobile();
-  const dropdownAlignOffset = isMobile ? -40 : -16;
+  const dropdownAlignOffset = 0;
 
   // Job categories with subcategories - based on AF structure
   const jobCategories = [
@@ -904,9 +904,8 @@ const SearchJobs = () => {
                   side="bottom"
                   align="center"
                   alignOffset={dropdownAlignOffset}
-                  sideOffset={4}
-                  avoidCollisions={true}
-                  collisionPadding={8}
+                  sideOffset={6}
+                  avoidCollisions={false}
                 >
                   <DropdownMenuItem
                     onClick={() => handleQuickCategory(category.value)}
