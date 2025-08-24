@@ -861,7 +861,7 @@ const SearchJobs = () => {
         <h1 className="text-4xl font-extrabold text-white">
           Hitta ditt nästa steg
         </h1>
-        <p className="text-xl text-white/90 max-w-2xl mx-auto">
+        <p className="text-xl text-white/90 max-w-2xl mx-auto leading-relaxed tracking-normal antialiased min-h-[72px]">
           Enkel, smart och snabb jobbsökning. Välj kategori eller sök fritt - vi hjälper dig hitta rätt.
         </p>
       </div>
