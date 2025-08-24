@@ -959,39 +959,145 @@ const SearchJobs = () => {
         </CardContent>
       </Card>
 
-      {/* Advanced Search - Collapsible */}
+      {/* Advanced Search - Modern & Integrated */}
       <Card className="bg-white/10 backdrop-blur-sm border-white/20">
         <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-lg text-white">
-            <Filter className="h-5 w-5" />
-            Avancerad sökning
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-lg text-white">
+              <Filter className="h-5 w-5" />
+              Avancerad sökning
+            </CardTitle>
+            {(searchTerm || jobTitleSearch || selectedLocation !== 'all-locations' || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentType !== 'all-types') && (
+              <Button
+                variant="ghost" 
+                size="sm"
+                onClick={() => {
+                  setSearchTerm('');
+                  setJobTitleSearch('');
+                  setSelectedLocation('all-locations');
+                  setSelectedCategory('all-categories');
+                  setSelectedSubcategories([]);
+                  setSelectedEmploymentType('all-types');
+                }}
+                className="text-white/70 hover:text-white hover:bg-white/10"
+              >
+                <X className="h-4 w-4 mr-1" />
+                Rensa alla
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
+          
+          {/* Active Filters Summary */}
+          {(selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || searchTerm || jobTitleSearch) && (
+            <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-sm font-medium text-white">Aktiva filter:</span>
+                <Badge variant="secondary" className="text-xs">
+                  {[
+                    selectedCategory !== 'all-categories' ? 1 : 0,
+                    selectedSubcategories.length,
+                    searchTerm ? 1 : 0,
+                    jobTitleSearch ? 1 : 0,
+                    selectedLocation !== 'all-locations' ? 1 : 0,
+                    selectedEmploymentType !== 'all-types' ? 1 : 0
+                  ].reduce((a, b) => a + b, 0)} aktiva
+                </Badge>
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
+                {selectedCategory !== 'all-categories' && (
+                  <Badge variant="default" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30">
+                    <span>{jobCategories.find(cat => cat.value === selectedCategory)?.icon}</span>
+                    <span className="text-xs">{jobCategories.find(cat => cat.value === selectedCategory)?.label}</span>
+                    <button 
+                      onClick={() => {
+                        setSelectedCategory('all-categories');
+                        setSelectedSubcategories([]);
+                      }}
+                      className="ml-1 hover:bg-white/20 rounded p-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+                
+                {selectedSubcategories.map((subcategory) => (
+                  <Badge key={subcategory} variant="secondary" className="gap-2 bg-white/10 hover:bg-white/20 text-white border-white/20">
+                    <span className="text-xs">🎯</span>
+                    <span className="text-xs">{subcategory}</span>
+                    <button 
+                      onClick={() => setSelectedSubcategories(prev => prev.filter(s => s !== subcategory))}
+                      className="ml-1 hover:bg-white/20 rounded p-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+                
+                {searchTerm && (
+                  <Badge variant="outline" className="gap-2 text-white border-white/30">
+                    <Search className="h-3 w-3" />
+                    <span className="text-xs">"{searchTerm}"</span>
+                    <button onClick={() => setSearchTerm('')} className="ml-1 hover:bg-white/20 rounded p-0.5">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+                
+                {jobTitleSearch && (
+                  <Badge variant="outline" className="gap-2 text-white border-white/30">
+                    <span className="text-xs">🎯</span>
+                    <span className="text-xs">"{jobTitleSearch}"</span>
+                    <button onClick={() => setJobTitleSearch('')} className="ml-1 hover:bg-white/20 rounded p-0.5">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Search Fields Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            
             {/* General Search Term */}
             <div className="space-y-3">
-              <Label htmlFor="search" className="text-base font-medium text-white">Sök på företag eller beskrivning</Label>
+              <Label htmlFor="search" className="text-base font-medium text-white flex items-center gap-2">
+                <Search className="h-4 w-4" />
+                Sök företag/beskrivning
+              </Label>
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/70" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/50" />
                 <Input
                   id="search"
                   placeholder="T.ex. 'Volvo' eller 'hemarbete'"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-12 h-12 text-base bg-white/10 backdrop-blur-sm border-white/30 text-white placeholder:text-white/70"
+                  className="pl-12 h-12 text-base bg-white/5 backdrop-blur-sm border-white/20 text-white placeholder:text-white/50 hover:bg-white/10 focus:bg-white/10 transition-colors"
                 />
+                {searchTerm && (
+                  <button 
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* Job Title Search with Autocomplete */}
+            {/* Job Title Search with Smart Integration */}
             <div className="space-y-3 relative">
-              <Label htmlFor="jobTitleSearch" className="text-base font-medium text-white">Specifik jobbtitel</Label>
+              <Label htmlFor="jobTitleSearch" className="text-base font-medium text-white flex items-center gap-2">
+                🎯 Specifik roll
+              </Label>
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/70" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/50" />
                 <Input
                   id="jobTitleSearch"
-                  placeholder="T.ex. 'renhållning' eller 'lastbils'"
+                  placeholder="T.ex. 'sjuksköterska' eller 'snickare'"
                   value={jobTitleSearch}
                   onChange={(e) => {
                     setJobTitleSearch(e.target.value);
@@ -999,19 +1105,27 @@ const SearchJobs = () => {
                   }}
                   onFocus={() => setShowSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                  className="pl-12 h-12 text-base bg-white/10 backdrop-blur-sm border-white/30 text-white placeholder:text-white/70"
+                  className="pl-12 h-12 text-base bg-white/5 backdrop-blur-sm border-white/20 text-white placeholder:text-white/50 hover:bg-white/10 focus:bg-white/10 transition-colors"
                 />
+                {jobTitleSearch && (
+                  <button 
+                    onClick={() => setJobTitleSearch('')}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
                 
-                {/* Autocomplete Suggestions Dropdown */}
+                {/* Enhanced Autocomplete */}
                 {showSuggestions && jobTitleSuggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto text-foreground">
-                    <div className="p-2 border-b border-border text-xs text-muted-foreground font-medium">
-                      💡 Klicka för att välja jobbtitel
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-slate-700/95 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto">
+                    <div className="p-2 border-b border-white/10 text-xs text-white/70 font-medium">
+                      💡 Förslag baserat på din sökning
                     </div>
                     {jobTitleSuggestions.map((suggestion, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between p-3 hover:bg-accent cursor-pointer border-b border-border last:border-b-0"
+                        className="flex items-center justify-between p-3 hover:bg-white/10 cursor-pointer border-b border-white/5 last:border-b-0 transition-colors"
                         onClick={() => {
                           setJobTitleSearch(suggestion.title);
                           setShowSuggestions(false);
@@ -1021,76 +1135,64 @@ const SearchJobs = () => {
                           <span className="text-lg">{suggestion.category.icon}</span>
                           <div>
                             <div className="font-medium text-sm text-white">{suggestion.title}</div>
-                            <div className="text-xs text-primary-foreground/70">
+                            <div className="text-xs text-white/60">
                               {suggestion.category.label}
                             </div>
                           </div>
                         </div>
-                        <div className="text-xs text-white">Välj →</div>
+                        <div className="text-xs text-white/50">Välj →</div>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
               
-              {/* Role Match Indicator */}
+              {/* Smart Role Match */}
               {matchingRole && jobTitleSearch && (
-                <div className="mt-3 p-4 bg-primary/10 border border-primary/20 rounded-lg">
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-primary font-medium">🎯 Rollmatch:</span>
-                    <span className="text-muted-foreground">
-                      {matchingRole.matchType === 'subcategory' ? 'Exakt roll hittad' : 'Kategori match'}
-                    </span>
+                <div className="mt-3 p-3 bg-white/10 border border-white/20 rounded-lg">
+                  <div className="flex items-center gap-2 text-sm mb-2">
+                    <span className="text-white font-medium">🎯 Smart match:</span>
+                    <Badge variant="secondary" className="text-xs">
+                      {matchingRole.matchType === 'subcategory' ? 'Exakt roll' : 'Kategori'}
+                    </Badge>
                   </div>
-                  <div className="mt-2 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">{matchingRole.category.icon}</span>
-                      <span className="font-medium text-primary">{matchingRole.category.label}</span>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg">{matchingRole.category.icon}</span>
+                    <span className="font-medium text-white text-sm">{matchingRole.category.label}</span>
+                  </div>
+                  {matchingRole.subcategory && (
+                    <div className="ml-6 text-sm text-white/70 mb-2">
+                      → {matchingRole.subcategory}
                     </div>
-                    {matchingRole.subcategory && (
-                      <div className="ml-6 text-sm text-muted-foreground">
-                        → {matchingRole.subcategory}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex gap-2 mt-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-8 text-xs"
-                      onClick={handleAutoApplyRole}
-                    >
-                      🔄 Använd som filter
-                    </Button>
-                    {matchingRole.matchType === 'keyword' && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-8 text-xs"
-                        onClick={() => {
-                          setSelectedCategory(matchingRole.category.value);
-                          setJobTitleSearch('');
-                        }}
-                      >
-                        📂 Visa hela kategorin
-                      </Button>
-                    )}
-                  </div>
+                  )}
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 text-xs text-white hover:bg-white/10"
+                    onClick={handleAutoApplyRole}
+                  >
+                    🔄 Använd som filter
+                  </Button>
                 </div>
               )}
             </div>
 
-            {/* Location - Enhanced */}
+            {/* Location */}
             <div className="space-y-3">
-              <Label className="text-base font-medium text-white">Välj plats</Label>
-              <Select value={selectedLocation} onValueChange={(value) => setSelectedLocation(value === 'all-locations' ? '' : value)}>
-                <SelectTrigger className="h-12 bg-white/10 backdrop-blur-sm border-white/30 text-white">
+              <Label className="text-base font-medium text-white flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                Plats
+              </Label>
+              <Select value={selectedLocation} onValueChange={(value) => setSelectedLocation(value === 'all-locations' ? 'all-locations' : value)}>
+                <SelectTrigger className="h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors">
                   <SelectValue placeholder="Alla platser i Sverige" />
                 </SelectTrigger>
-                <SelectContent className="bg-card text-foreground border-border">
-                  <SelectItem value="all-locations" className="hover:bg-accent">🇸🇪 Alla platser</SelectItem>
+                <SelectContent className="bg-slate-700/95 backdrop-blur-md text-white border-white/20">
+                  <SelectItem value="all-locations" className="hover:bg-white/10 focus:bg-white/10">
+                    🇸🇪 Alla platser
+                  </SelectItem>
                   {locations.map((location) => (
-                    <SelectItem key={location} value={location} className="hover:bg-accent">
+                    <SelectItem key={location} value={location} className="hover:bg-white/10 focus:bg-white/10">
                       📍 {location}
                     </SelectItem>
                   ))}
@@ -1098,17 +1200,22 @@ const SearchJobs = () => {
               </Select>
             </div>
 
-            {/* Employment Type - Enhanced */}
+            {/* Employment Type */}
             <div className="space-y-3">
-              <Label className="text-base font-medium text-white">Anställningsform</Label>
-              <Select value={selectedEmploymentType} onValueChange={(value) => setSelectedEmploymentType(value === 'all-types' ? '' : value)}>
-                <SelectTrigger className="h-12 bg-white/10 backdrop-blur-sm border-white/30 text-white">
+              <Label className="text-base font-medium text-white flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                Anställning
+              </Label>
+              <Select value={selectedEmploymentType} onValueChange={(value) => setSelectedEmploymentType(value === 'all-types' ? 'all-types' : value)}>
+                <SelectTrigger className="h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors">
                   <SelectValue placeholder="Alla anställningsformer" />
                 </SelectTrigger>
-                <SelectContent className="bg-card text-foreground border-border">
-                  <SelectItem value="all-types" className="hover:bg-accent">💼 Alla typer</SelectItem>
+                <SelectContent className="bg-slate-700/95 backdrop-blur-md text-white border-white/20">
+                  <SelectItem value="all-types" className="hover:bg-white/10 focus:bg-white/10">
+                    💼 Alla typer
+                  </SelectItem>
                   {employmentTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value} className="hover:bg-accent">
+                    <SelectItem key={type.value} value={type.value} className="hover:bg-white/10 focus:bg-white/10">
                       {type.value === 'Heltid' ? '🕘' : 
                        type.value === 'Deltid' ? '🕐' : 
                        type.value === 'Konsult' ? '💻' : 
@@ -1120,78 +1227,41 @@ const SearchJobs = () => {
             </div>
           </div>
 
-          {/* Active Filters Display */}
-          {(selectedCategory !== 'all-categories' || selectedSubcategories.length > 0) && (
-            <div className="pt-4 border-t">
-              <div className="flex items-center gap-2 mb-3">
-                <Filter className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-primary">Aktiva filter:</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {selectedCategory !== 'all-categories' && (
-                  <Badge variant="default" className="gap-2">
-                    <span>{jobCategories.find(cat => cat.value === selectedCategory)?.icon}</span>
-                    <span>{jobCategories.find(cat => cat.value === selectedCategory)?.label}</span>
-                    <button 
-                      onClick={() => {
-                        setSelectedCategory('all-categories');
-                        setSelectedSubcategories([]);
-                      }}
-                      className="ml-1 hover:bg-accent rounded p-1"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                )}
-                {selectedSubcategories.map((subcategory) => (
-                  <Badge key={subcategory} variant="secondary" className="gap-2">
-                    <span>🎯</span>
-                    <span>{subcategory}</span>
-                    <button 
-                      onClick={() => setSelectedSubcategories(prev => prev.filter(s => s !== subcategory))}
-                      className="ml-1 hover:bg-secondary-foreground/20 rounded p-1"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Search Actions */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t">
+          {/* Results Summary */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-white/10">
             <div className="flex items-center gap-4">
-              <p className="text-lg font-medium">
-                <span className="text-primary">{jobs.length}</span> jobb hittades
-              </p>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold text-white">{jobs.length}</span>
+                <span className="text-white/70">jobb hittades</span>
+              </div>
               {(searchTerm || jobTitleSearch || selectedLocation !== 'all-locations' || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentType !== 'all-types') && (
-                <Badge variant="secondary" className="text-sm">
-                  Filter aktiva
+                <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                  🔍 Filtrerade resultat
                 </Badge>
               )}
             </div>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setSearchTerm('');
-                setJobTitleSearch('');
-                setSelectedLocation('all-locations');
-                setSelectedCategory('all-categories');
-                setSelectedSubcategories([]);
-                setSelectedEmploymentType('all-types');
-              }}
-              className="flex items-center gap-2"
-            >
-              <X className="h-4 w-4" />
-              Rensa alla filter
-            </Button>
+            
+            {jobs.length > 0 && (
+              <Button
+                variant="outline"
+                className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                onClick={() => {
+                  // Scroll to results or trigger some action
+                  const resultsSection = document.querySelector('[data-results]');
+                  if (resultsSection) {
+                    resultsSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+              >
+                Se alla jobb →
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
 
       {/* Results Section */}
-      <div className="space-y-6">
+      <div className="space-y-6" data-results>
         {loading ? (
           <div className="text-center py-16">
             <div className="inline-flex items-center gap-3">
