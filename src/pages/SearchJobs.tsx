@@ -40,7 +40,7 @@ const SearchJobs = () => {
     { 
       value: 'administration', 
       label: 'Administration, Ekonomi, Juridik',
-      icon: '📊',
+      icon: '',
       keywords: ['administration', 'ekonomi', 'redovisning', 'controller', 'assistent', 'sekreterare', 'koordinator', 'projektledare', 'juridik', 'advokat'],
       subcategories: [
         'Advokater',
@@ -85,7 +85,7 @@ const SearchJobs = () => {
     { 
       value: 'construction', 
       label: 'Bygg och Anläggning', 
-      icon: '🏗️',
+      icon: '',
       keywords: ['bygg', 'snickare', 'elektriker', 'anläggning', 'murare', 'målare', 'byggledare', 'platschef', 'vvs'],
       subcategories: [
         'Anläggningsarbetare',
@@ -115,7 +115,7 @@ const SearchJobs = () => {
     { 
       value: 'management', 
       label: 'Chefer och Verksamhetsledare', 
-      icon: '👔',
+      icon: '',
       keywords: ['chef', 'ledare', 'verksamhet', 'director', 'manager', 'vd', 'platschef', 'avdelningschef'],
       subcategories: [
         'Chefer inom arkitekt- och ingenjörsverksamhet',
@@ -154,7 +154,7 @@ const SearchJobs = () => {
     { 
       value: 'it', 
       label: 'Data/IT', 
-      icon: '💻',
+      icon: '',
       keywords: ['utvecklare', 'programmerare', 'IT', 'data', 'systemadministratör', 'webb', 'mjukvara', 'frontend', 'backend', 'fullstack', 'devops', 'cybersäkerhet'],
       subcategories: [
         'Drifttekniker, IT',
@@ -174,7 +174,7 @@ const SearchJobs = () => {
     { 
       value: 'sales', 
       label: 'Försäljning, Inköp, Marknadsföring', 
-      icon: '📈',
+      icon: '',
       keywords: ['försäljning', 'sales', 'säljare', 'account', 'marketing', 'marknadsföring', 'reklam', 'kommunikation', 'pr', 'inköp'],
       subcategories: [
         'Apotekstekniker',
@@ -208,7 +208,7 @@ const SearchJobs = () => {
     { 
       value: 'crafts', 
       label: 'Hantverkyrken', 
-      icon: '🔨',
+      icon: '',
       keywords: ['hantverk', 'smed', 'keramiker', 'snickare', 'träarbete', 'metallarbete', 'bagare', 'konditor'],
       subcategories: [
         'Bagare och konditorer',
@@ -228,7 +228,7 @@ const SearchJobs = () => {
     { 
       value: 'restaurant', 
       label: 'Hotell, Restaurang, Storhushåll', 
-      icon: '🍽️',
+      icon: '',
       keywords: ['kock', 'servitör', 'hotell', 'restaurang', 'storhushåll', 'bagare', 'konditor', 'hovmästare'],
       subcategories: [
         'Bartenders',
@@ -246,7 +246,7 @@ const SearchJobs = () => {
     { 
       value: 'healthcare', 
       label: 'Hälso- och Sjukvård', 
-      icon: '🏥',
+      icon: '',
       keywords: ['sjuksköterska', 'läkare', 'vård', 'omsorg', 'tandläkare', 'fysioterapeut', 'undersköterska', 'vårdbiträde'],
       subcategories: [
         'AT-läkare',
@@ -297,7 +297,7 @@ const SearchJobs = () => {
     { 
       value: 'industry', 
       label: 'Industriell Tillverkning', 
-      icon: '🏭',
+      icon: '',
       keywords: ['industri', 'tillverkning', 'produktion', 'maskinoperatör', 'kvalitet', 'process', 'tekniker'],
       subcategories: [
         'Arbetsledare inom tillverkning',
@@ -351,7 +351,7 @@ const SearchJobs = () => {
     { 
       value: 'installation', 
       label: 'Installation, Drift, Underhåll', 
-      icon: '⚙️',
+      icon: '',
       keywords: ['installation', 'drift', 'underhåll', 'reparatör', 'tekniker', 'service', 'elektriker', 'fastighet'],
       subcategories: [
         'Distributionselektriker',
@@ -373,7 +373,7 @@ const SearchJobs = () => {
     { 
       value: 'logistics', 
       label: 'Transport', 
-      icon: '🚛',
+      icon: '',
       keywords: ['lager', 'logistik', 'transport', 'distribution', 'chaufför', 'lastbil', 'gaffeltruck', 'leverans'],
       subcategories: [
         'Arbetsledare inom lager och terminal',
@@ -402,7 +402,7 @@ const SearchJobs = () => {
     { 
       value: 'beauty', 
       label: 'Kropps- och Skönhetsvård', 
-      icon: '💄',
+      icon: '',
       keywords: ['frisör', 'skönhet', 'massage', 'naglar', 'kosmetolog', 'fotvård', 'hudterapeut'],
       subcategories: [
         'Fotterapeuter',
@@ -415,7 +415,7 @@ const SearchJobs = () => {
     { 
       value: 'creative', 
       label: 'Kultur, Media, Design', 
-      icon: '🎨',
+      icon: '',
       keywords: ['design', 'grafisk', 'kreativ', 'media', 'journalist', 'fotograf', 'video', 'kultur', 'konstnär', 'bibliotek'],
       subcategories: [
         'Bibliotekarier och arkivarier',
@@ -443,7 +443,7 @@ const SearchJobs = () => {
     { 
       value: 'military', 
       label: 'Militärt Arbete', 
-      icon: '🎖️',
+      icon: '',
       keywords: ['militär', 'försvar', 'soldat', 'officer', 'specialistofficerare'],
       subcategories: [
         'Officerare',
@@ -454,7 +454,7 @@ const SearchJobs = () => {
     { 
       value: 'agriculture', 
       label: 'Naturbruk', 
-      icon: '🌾',
+      icon: '',
       keywords: ['lantbruk', 'jordbruk', 'skog', 'djur', 'trädgård', 'fiske', 'skogsarbete'],
       subcategories: [
         'Bärplockare och plantörer m.fl.',
@@ -476,7 +476,7 @@ const SearchJobs = () => {
     { 
       value: 'science', 
       label: 'Naturvetenskapligt Arbete', 
-      icon: '🔬',
+      icon: '',
       keywords: ['forskning', 'vetenskap', 'laboratorium', 'kemi', 'biologi', 'fysik', 'matematik'],
       subcategories: [
         'Cell- och molekylärbiologer m.fl.',
@@ -494,7 +494,7 @@ const SearchJobs = () => {
     { 
       value: 'education', 
       label: 'Pedagogiskt Arbete', 
-      icon: '📚',
+      icon: '',
       keywords: ['lärare', 'utbildning', 'skola', 'universitet', 'förskola', 'pedagog', 'barnskötare', 'fritidsledare'],
       subcategories: [
         'Doktorander',
@@ -520,7 +520,7 @@ const SearchJobs = () => {
     { 
       value: 'cleaning', 
       label: 'Sanering och Renhållning', 
-      icon: '🧹',
+      icon: '',
       keywords: ['städ', 'rengöring', 'sanering', 'renhållning', 'lokalvård', 'skorstensfejare'],
       subcategories: [
         'Bilrekonditionerare, fönsterputsare m.fl.',
@@ -536,7 +536,7 @@ const SearchJobs = () => {
     { 
       value: 'social', 
       label: 'Socialt Arbete', 
-      icon: '🤝',
+      icon: '',
       keywords: ['social', 'socialtjänst', 'stöd', 'hjälp', 'omsorg', 'kurator', 'behandling'],
       subcategories: [
         'Barnskötare',
@@ -559,7 +559,7 @@ const SearchJobs = () => {
     { 
       value: 'security', 
       label: 'Säkerhetsarbete', 
-      icon: '🛡️',
+      icon: '',
       keywords: ['säkerhet', 'vakt', 'polis', 'brandman', 'ordning', 'bevakning'],
       subcategories: [
         'Arbetsmiljöingenjörer, yrkes- och miljöhygieniker',
@@ -577,7 +577,7 @@ const SearchJobs = () => {
     { 
       value: 'technical', 
       label: 'Tekniskt Arbete', 
-      icon: '🔧',
+      icon: '',
       keywords: ['ingenjör', 'tekniker', 'konstruktör', 'design', 'utveckling', 'arkitekt', 'civilingenjör'],
       subcategories: [
         'Arkitekter m.fl.',
@@ -1037,8 +1037,7 @@ const SearchJobs = () => {
               
               <div className="flex flex-wrap gap-2">
                 {selectedCategory !== 'all-categories' && (
-                  <Badge variant="default" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30">
-                    <span>{jobCategories.find(cat => cat.value === selectedCategory)?.icon}</span>
+                <Badge variant="default" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30">
                     <span className="text-xs">{jobCategories.find(cat => cat.value === selectedCategory)?.label}</span>
                     <button 
                       onClick={() => {
@@ -1054,7 +1053,6 @@ const SearchJobs = () => {
                 
                 {selectedSubcategories.map((subcategory) => (
                   <Badge key={subcategory} variant="secondary" className="gap-2 bg-white/10 hover:bg-white/20 text-white border-white/20">
-                    <span className="text-xs">🎯</span>
                     <span className="text-xs">{subcategory}</span>
                     <button 
                       onClick={() => setSelectedSubcategories(prev => prev.filter(s => s !== subcategory))}
@@ -1077,7 +1075,6 @@ const SearchJobs = () => {
                 
                 {jobTitleSearch && (
                   <Badge variant="outline" className="gap-2 text-white border-white/30">
-                    <span className="text-xs">🎯</span>
                     <span className="text-xs">"{jobTitleSearch}"</span>
                     <button onClick={() => setJobTitleSearch('')} className="ml-1 hover:bg-white/20 rounded p-0.5">
                       <X className="h-3 w-3" />
@@ -1120,7 +1117,7 @@ const SearchJobs = () => {
             {/* Job Title Search with Smart Integration */}
             <div className="space-y-3 relative">
               <Label htmlFor="jobTitleSearch" className="text-base font-medium text-white flex items-center gap-2">
-                🎯 Specifik roll
+                Specifik roll
               </Label>
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/50" />
@@ -1149,7 +1146,7 @@ const SearchJobs = () => {
                 {showSuggestions && jobTitleSuggestions.length > 0 && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-slate-700/95 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto">
                     <div className="p-2 border-b border-white/10 text-xs text-white/70 font-medium">
-                      💡 Förslag baserat på din sökning
+                      Förslag baserat på din sökning
                     </div>
                     {jobTitleSuggestions.map((suggestion, index) => (
                       <div
@@ -1161,7 +1158,6 @@ const SearchJobs = () => {
                         }}
                       >
                         <div className="flex items-center gap-3">
-                          <span className="text-lg">{suggestion.category.icon}</span>
                           <div>
                             <div className="font-medium text-sm text-white">{suggestion.title}</div>
                             <div className="text-xs text-white/60">
@@ -1180,13 +1176,12 @@ const SearchJobs = () => {
               {matchingRole && jobTitleSearch && (
                 <div className="mt-3 p-3 bg-white/10 border border-white/20 rounded-lg">
                   <div className="flex items-center gap-2 text-sm mb-2">
-                    <span className="text-white font-medium">🎯 Smart match:</span>
+                    <span className="text-white font-medium">Smart match:</span>
                     <Badge variant="secondary" className="text-xs">
                       {matchingRole.matchType === 'subcategory' ? 'Exakt roll' : 'Kategori'}
                     </Badge>
                   </div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-lg">{matchingRole.category.icon}</span>
                     <span className="font-medium text-white text-sm">{matchingRole.category.label}</span>
                   </div>
                   {matchingRole.subcategory && (
@@ -1200,7 +1195,7 @@ const SearchJobs = () => {
                     className="h-7 text-xs text-white hover:bg-white/10"
                     onClick={handleAutoApplyRole}
                   >
-                    🔄 Använd som filter
+                    Använd som filter
                   </Button>
                 </div>
               )}
@@ -1218,11 +1213,11 @@ const SearchJobs = () => {
                 </SelectTrigger>
                 <SelectContent className="bg-slate-700/95 backdrop-blur-md text-white border-white/20">
                   <SelectItem value="all-locations" className="hover:bg-white/10 focus:bg-white/10">
-                    🇸🇪 Alla platser
+                    Alla platser
                   </SelectItem>
                   {locations.map((location) => (
                     <SelectItem key={location} value={location} className="hover:bg-white/10 focus:bg-white/10">
-                      📍 {location}
+                      {location}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -1241,14 +1236,11 @@ const SearchJobs = () => {
                 </SelectTrigger>
                 <SelectContent className="bg-slate-700/95 backdrop-blur-md text-white border-white/20">
                   <SelectItem value="all-types" className="hover:bg-white/10 focus:bg-white/10">
-                    💼 Alla typer
+                    Alla typer
                   </SelectItem>
                   {employmentTypes.map((type) => (
                     <SelectItem key={type.value} value={type.value} className="hover:bg-white/10 focus:bg-white/10">
-                      {type.value === 'Heltid' ? '🕘' : 
-                       type.value === 'Deltid' ? '🕐' : 
-                       type.value === 'Konsult' ? '💻' : 
-                       type.value === 'Praktik' ? '🎓' : '⏰'} {type.label}
+                      {type.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -1265,7 +1257,7 @@ const SearchJobs = () => {
               </div>
               {(searchTerm || jobTitleSearch || selectedLocation !== 'all-locations' || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentType !== 'all-types') && (
                 <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                  🔍 Filtrerade resultat
+                  Filtrerade resultat
                 </Badge>
               )}
             </div>
@@ -1302,7 +1294,6 @@ const SearchJobs = () => {
           <Card className="text-center py-16">
             <CardContent>
               <div className="space-y-4">
-                <div className="text-6xl">🔍</div>
                 <h3 className="text-xl font-semibold">Inga jobb hittades</h3>
                 <p className="text-muted-foreground max-w-md mx-auto">
                   Inga jobb matchade dina sökkriterier. Prova att ändra dina filter eller sökord.
@@ -1376,7 +1367,6 @@ const SearchJobs = () => {
                           {/* Category Badge */}
                           {selectedCategory !== 'all-categories' && (
                             <Badge className="bg-primary/10 text-primary border-primary/20">
-                              {jobCategories.find(cat => cat.value === selectedCategory)?.icon} {' '}
                               {jobCategories.find(cat => cat.value === selectedCategory)?.label}
                             </Badge>
                           )}
@@ -1394,10 +1384,10 @@ const SearchJobs = () => {
                         <div className="flex items-center justify-between pt-4 border-t">
                           <div className="flex items-center gap-4">
                             <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50 text-base px-3 py-1">
-                              💰 {formatSalary(job.salary_min, job.salary_max)}
+                              {formatSalary(job.salary_min, job.salary_max)}
                             </Badge>
                             <span className="text-sm text-muted-foreground">
-                              📅 {new Date(job.created_at).toLocaleDateString('sv-SE', {
+                              {new Date(job.created_at).toLocaleDateString('sv-SE', {
                                 day: 'numeric',
                                 month: 'long'
                               })}
