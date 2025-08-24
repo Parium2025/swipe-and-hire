@@ -903,7 +903,7 @@ const SearchJobs = () => {
                   className="w-64 max-h-80 overflow-y-auto bg-slate-700/90 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
                   side="bottom"
                   align="center"
-                  alignOffset={dropdownAlignOffset}
+                  alignOffset={0}
                   sideOffset={6}
                   avoidCollisions={false}
                 >
