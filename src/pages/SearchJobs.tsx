@@ -1374,7 +1374,7 @@ const SearchJobs = () => {
                   className="bg-slate-700/95 backdrop-blur-md text-white border-white/20"
                   side="bottom"
                   align="start"
-                  alignOffset={-28}
+                  alignOffset={-20}
                   avoidCollisions={false}
                 >
                   <SelectItem value="all-types" className="hover:bg-white/10 focus:bg-white/10">
