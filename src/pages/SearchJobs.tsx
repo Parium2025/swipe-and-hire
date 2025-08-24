@@ -898,12 +898,13 @@ const SearchJobs = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
-                  className="w-64 max-h-80 overflow-y-auto bg-card border-border shadow-xl z-50 rounded-lg text-foreground"
+                  className="w-64 max-h-80 overflow-y-auto bg-card border-border shadow-xl rounded-lg text-foreground fixed z-[9999]"
                   side="bottom"
                   align="center"
                   sideOffset={4}
                   avoidCollisions={false}
                   collisionPadding={0}
+                  forceMount
                 >
                   <DropdownMenuItem
                     onClick={() => handleQuickCategory(category.value)}
