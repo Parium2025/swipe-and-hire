@@ -1295,8 +1295,9 @@ const SearchJobs = () => {
                     className="w-80 max-h-80 overflow-hidden bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
                     side="bottom"
                     align="start"
+                    alignOffset={-28}
+                    sideOffset={6}
                     avoidCollisions={false}
-                    sideOffset={4}
                   >
                     {/* Search input */}
                     <div className="p-2 border-b border-slate-600/30">
