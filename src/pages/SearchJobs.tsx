@@ -10,6 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Search, MapPin, Clock, Building, Filter, Heart, ExternalLink, X, ChevronDown, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { createSmartSearchConditions, expandSearchTerms } from '@/lib/smartSearch';
 interface Job {
   id: string;
   title: string;
@@ -630,9 +631,10 @@ const SearchJobs = () => {
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
-      // Apply search filters
+      // Apply search filters with smart synonyms
       if (searchTerm) {
-        query = query.or(`company_name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
+        const smartSearchConditions = createSmartSearchConditions(searchTerm);
+        query = query.or(smartSearchConditions);
       }
 
       // Apply job title search
@@ -842,23 +844,50 @@ const SearchJobs = () => {
     }
   };
 
-  // Get suggestions for job title autocomplete
+  // Get suggestions for job title autocomplete with smart synonyms
   const getJobTitleSuggestions = (searchTerm: string) => {
     if (!searchTerm.trim() || searchTerm.length < 2) return [];
     
     const searchLower = searchTerm.toLowerCase().trim();
+    const expandedTerms = expandSearchTerms(searchTerm);
     const suggestions: Array<{title: string, category: any}> = [];
     
-    // Collect all subcategories that match the search term
+    // Collect all subcategories that match the search term or its synonyms
     jobCategories.forEach(category => {
       category.subcategories.forEach(subcategory => {
-        if (subcategory.toLowerCase().includes(searchLower)) {
+        const subcategoryLower = subcategory.toLowerCase();
+        
+        // Check if the subcategory matches the original search term or any synonym
+        const matches = expandedTerms.some(term => 
+          subcategoryLower.includes(term) || term.includes(subcategoryLower)
+        );
+        
+        if (matches || subcategoryLower.includes(searchLower)) {
           suggestions.push({
             title: subcategory,
             category: category
           });
         }
       });
+      
+      // Also check category keywords for matches
+      if (category.keywords) {
+        const keywordMatches = expandedTerms.some(term => 
+          category.keywords.some(keyword => keyword.toLowerCase().includes(term))
+        );
+        
+        if (keywordMatches) {
+          // Add a few representative subcategories from this category
+          category.subcategories.slice(0, 3).forEach(subcategory => {
+            if (!suggestions.some(s => s.title === subcategory)) {
+              suggestions.push({
+                title: subcategory,
+                category: category
+              });
+            }
+          });
+        }
+      }
     });
     
     // Sort by relevance (exact start match first, then contains)
