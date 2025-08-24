@@ -898,7 +898,7 @@ const SearchJobs = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
-                  className="w-64 max-h-80 overflow-y-auto bg-slate-700/90 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
+                  className="w-64 max-h-80 overflow-y-auto bg-blue-400/90 backdrop-blur-md border-blue-300/30 shadow-xl z-50 rounded-lg text-white"
                   side="bottom"
                   align="center"
                   sideOffset={4}
@@ -907,11 +907,11 @@ const SearchJobs = () => {
                 >
                   <DropdownMenuItem
                     onClick={() => handleQuickCategory(category.value)}
-                    className="font-medium cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 text-white"
+                    className="font-medium cursor-pointer hover:bg-blue-500/70 focus:bg-blue-500/70 text-white"
                   >
                     {category.icon} Alla inom {category.label}
                   </DropdownMenuItem>
-                  <Separator className="my-1 bg-slate-600/30" />
+                  <Separator className="my-1 bg-blue-300/30" />
                   <div className="max-h-60 overflow-y-auto scrollbar-thin">
                     {category.subcategories.map((subcategory) => (
                       <DropdownMenuItem
@@ -921,7 +921,7 @@ const SearchJobs = () => {
                           setSelectedSubcategory(subcategory);
                           setSearchTerm('');
                         }}
-                        className="text-sm cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white"
+                        className="text-sm cursor-pointer hover:bg-blue-500/70 focus:bg-blue-500/70 py-2 text-white"
                       >
                         {subcategory}
                       </DropdownMenuItem>
