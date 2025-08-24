@@ -902,12 +902,18 @@ const SearchJobs = () => {
                   <Button
                     variant="ghost"
                     size="lg"
-                    className={`h-auto min-h-[80px] sm:h-20 flex flex-col items-center gap-1 sm:gap-2 p-3 sm:p-4 transition-all duration-200 hover:scale-105 bg-white/10 backdrop-blur-sm border border-white/30 text-white hover:bg-white/20 ${
+                    className={`relative h-auto min-h-[80px] sm:h-20 flex flex-col items-center gap-1 sm:gap-2 p-3 sm:p-4 transition-all duration-200 hover:scale-105 bg-white/10 backdrop-blur-sm border border-white/30 text-white hover:bg-white/20 ${
                       selectedCategory === category.value 
                         ? 'shadow-lg border-white/50 bg-white/20' 
                         : 'hover:shadow-md hover:border-white/50'
                     }`}
                   >
+                    {/* Selection indicator */}
+                    {category.subcategories.some(sub => selectedSubcategories.includes(sub)) && (
+                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
+                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      </div>
+                    )}
                     <span className="text-xl sm:text-2xl">{category.icon}</span>
                     <div className="flex items-center gap-1">
                       <span className="text-xs sm:text-sm font-medium text-center leading-tight px-1">
