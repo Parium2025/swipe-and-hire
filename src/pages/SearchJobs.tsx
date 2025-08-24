@@ -867,10 +867,10 @@ const SearchJobs = () => {
       </div>
 
       {/* Smart Category Grid */}
-      <Card className="border-0 shadow-lg bg-gradient-to-br from-background to-muted/30">
+      <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-lg">
         <CardHeader className="text-center pb-6">
-          <CardTitle className="text-2xl">Välj yrkesområde</CardTitle>
-          <CardDescription className="text-lg">
+          <CardTitle className="text-2xl text-white">Välj yrkesområde</CardTitle>
+          <CardDescription className="text-lg text-white">
             Klicka på ett område för att se alla lediga jobb
           </CardDescription>
         </CardHeader>
@@ -935,9 +935,9 @@ const SearchJobs = () => {
       </Card>
 
       {/* Advanced Search - Collapsible */}
-      <Card className="border-primary/20">
+      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
         <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-lg">
+          <CardTitle className="flex items-center gap-2 text-lg text-white">
             <Filter className="h-5 w-5" />
             Avancerad sökning
           </CardTitle>
@@ -946,7 +946,7 @@ const SearchJobs = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* General Search Term */}
             <div className="space-y-3">
-              <Label htmlFor="search" className="text-base font-medium">Sök på företag eller beskrivning</Label>
+              <Label htmlFor="search" className="text-base font-medium text-white">Sök på företag eller beskrivning</Label>
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
@@ -961,7 +961,7 @@ const SearchJobs = () => {
 
             {/* Job Title Search with Autocomplete */}
             <div className="space-y-3 relative">
-              <Label htmlFor="jobTitleSearch" className="text-base font-medium">Specifik jobbtitel</Label>
+              <Label htmlFor="jobTitleSearch" className="text-base font-medium text-white">Specifik jobbtitel</Label>
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
@@ -1057,7 +1057,7 @@ const SearchJobs = () => {
 
             {/* Location - Enhanced */}
             <div className="space-y-3">
-              <Label className="text-base font-medium">Välj plats</Label>
+              <Label className="text-base font-medium text-white">Välj plats</Label>
               <Select value={selectedLocation} onValueChange={(value) => setSelectedLocation(value === 'all-locations' ? '' : value)}>
                 <SelectTrigger className="h-12">
                   <SelectValue placeholder="Alla platser i Sverige" />
@@ -1075,7 +1075,7 @@ const SearchJobs = () => {
 
             {/* Employment Type - Enhanced */}
             <div className="space-y-3">
-              <Label className="text-base font-medium">Anställningsform</Label>
+              <Label className="text-base font-medium text-white">Anställningsform</Label>
               <Select value={selectedEmploymentType} onValueChange={(value) => setSelectedEmploymentType(value === 'all-types' ? '' : value)}>
                 <SelectTrigger className="h-12">
                   <SelectValue placeholder="Alla anställningsformer" />
