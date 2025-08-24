@@ -898,7 +898,7 @@ const SearchJobs = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
-                  className="w-64 max-h-80 overflow-y-auto bg-primary border-primary/20 shadow-xl z-50 rounded-lg text-white"
+                  className="w-64 max-h-80 overflow-y-auto bg-card border-border shadow-xl z-50 rounded-lg text-foreground"
                   side="bottom"
                   align="center"
                   sideOffset={4}
@@ -907,11 +907,11 @@ const SearchJobs = () => {
                 >
                   <DropdownMenuItem
                     onClick={() => handleQuickCategory(category.value)}
-                    className="font-medium cursor-pointer hover:bg-primary-foreground/20 text-white"
+                    className="font-medium cursor-pointer hover:bg-accent text-foreground"
                   >
                     {category.icon} Alla inom {category.label}
                   </DropdownMenuItem>
-                  <Separator className="my-1 bg-primary-foreground/20" />
+                  <Separator className="my-1 bg-border" />
                   <div className="max-h-60 overflow-y-auto scrollbar-thin">
                     {category.subcategories.map((subcategory) => (
                       <DropdownMenuItem
@@ -921,7 +921,7 @@ const SearchJobs = () => {
                           setSelectedSubcategory(subcategory);
                           setSearchTerm('');
                         }}
-                        className="text-sm cursor-pointer hover:bg-primary-foreground/20 py-2 text-white"
+                        className="text-sm cursor-pointer hover:bg-accent py-2 text-foreground"
                       >
                         {subcategory}
                       </DropdownMenuItem>
@@ -979,14 +979,14 @@ const SearchJobs = () => {
                 
                 {/* Autocomplete Suggestions Dropdown */}
                 {showSuggestions && jobTitleSuggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-primary border border-primary/20 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto text-white">
-                    <div className="p-2 border-b border-primary-foreground/20 text-xs text-primary-foreground/70 font-medium">
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto text-foreground">
+                    <div className="p-2 border-b border-border text-xs text-muted-foreground font-medium">
                       💡 Klicka för att välja jobbtitel
                     </div>
                     {jobTitleSuggestions.map((suggestion, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between p-3 hover:bg-primary-foreground/20 cursor-pointer border-b border-primary-foreground/20 last:border-b-0"
+                        className="flex items-center justify-between p-3 hover:bg-accent cursor-pointer border-b border-border last:border-b-0"
                         onClick={() => {
                           setJobTitleSearch(suggestion.title);
                           setShowSuggestions(false);
@@ -1062,10 +1062,10 @@ const SearchJobs = () => {
                 <SelectTrigger className="h-12 bg-white/10 backdrop-blur-sm border-white/30 text-white">
                   <SelectValue placeholder="Alla platser i Sverige" />
                 </SelectTrigger>
-                <SelectContent className="bg-primary text-white border-primary/20">
-                  <SelectItem value="all-locations" className="hover:bg-primary-foreground/20">🇸🇪 Alla platser</SelectItem>
+                <SelectContent className="bg-card text-foreground border-border">
+                  <SelectItem value="all-locations" className="hover:bg-accent">🇸🇪 Alla platser</SelectItem>
                   {locations.map((location) => (
-                    <SelectItem key={location} value={location} className="hover:bg-primary-foreground/20">
+                    <SelectItem key={location} value={location} className="hover:bg-accent">
                       📍 {location}
                     </SelectItem>
                   ))}
@@ -1080,10 +1080,10 @@ const SearchJobs = () => {
                 <SelectTrigger className="h-12 bg-white/10 backdrop-blur-sm border-white/30 text-white">
                   <SelectValue placeholder="Alla anställningsformer" />
                 </SelectTrigger>
-                <SelectContent className="bg-primary text-white border-primary/20">
-                  <SelectItem value="all-types" className="hover:bg-primary-foreground/20">💼 Alla typer</SelectItem>
+                <SelectContent className="bg-card text-foreground border-border">
+                  <SelectItem value="all-types" className="hover:bg-accent">💼 Alla typer</SelectItem>
                   {employmentTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value} className="hover:bg-primary-foreground/20">
+                    <SelectItem key={type.value} value={type.value} className="hover:bg-accent">
                       {type.value === 'Heltid' ? '🕘' : 
                        type.value === 'Deltid' ? '🕐' : 
                        type.value === 'Konsult' ? '💻' : 
@@ -1112,7 +1112,7 @@ const SearchJobs = () => {
                         setSelectedCategory('all-categories');
                         setSelectedSubcategory('');
                       }}
-                      className="ml-1 hover:bg-primary-foreground/20 rounded p-1"
+                      className="ml-1 hover:bg-accent rounded p-1"
                     >
                       <X className="h-3 w-3" />
                     </button>
