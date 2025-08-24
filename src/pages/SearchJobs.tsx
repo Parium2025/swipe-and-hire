@@ -29,6 +29,8 @@ const SearchJobs = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [jobTitleSearch, setJobTitleSearch] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('all-locations');
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
+  const [locationSearchTerm, setLocationSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all-categories');
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
   const [selectedEmploymentType, setSelectedEmploymentType] = useState('all-types');
@@ -688,8 +690,12 @@ const SearchJobs = () => {
         }
       }
 
-      if (selectedLocation && selectedLocation !== 'all-locations') {
-        query = query.ilike('location', `%${selectedLocation}%`);
+      if (selectedLocations.length > 0) {
+        // Create OR conditions for all selected locations
+        const locationConditions = selectedLocations.map(location => 
+          `location.ilike.%${location}%`
+        ).join(',');
+        query = query.or(locationConditions);
       }
 
       if (selectedEmploymentType && selectedEmploymentType !== 'all-types') {
@@ -716,7 +722,7 @@ const SearchJobs = () => {
 
   useEffect(() => {
     fetchJobs();
-  }, [searchTerm, jobTitleSearch, selectedLocation, selectedCategory, selectedSubcategories, selectedEmploymentType]);
+  }, [searchTerm, jobTitleSearch, selectedLocations, selectedCategory, selectedSubcategories, selectedEmploymentType]);
 
   const formatSalary = (min?: number, max?: number) => {
     if (min && max) {
@@ -1049,14 +1055,14 @@ const SearchJobs = () => {
               <Button
                 variant="ghost" 
                 size="sm"
-                onClick={() => {
-                  setSearchTerm('');
-                  setJobTitleSearch('');
-                  setSelectedLocation('all-locations');
-                  setSelectedCategory('all-categories');
-                  setSelectedSubcategories([]);
-                  setSelectedEmploymentType('all-types');
-                }}
+                  onClick={() => {
+                    setSearchTerm('');
+                    setJobTitleSearch('');
+                    setSelectedLocations([]);
+                    setSelectedCategory('all-categories');
+                    setSelectedSubcategories([]);
+                    setSelectedEmploymentType('all-types');
+                  }}
                 className="text-white/70 hover:text-white hover:bg-white/10"
               >
                 <X className="h-4 w-4 mr-1" />
@@ -1068,7 +1074,7 @@ const SearchJobs = () => {
         <CardContent className="space-y-6">
           
           {/* Active Filters Summary */}
-          {(selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || searchTerm || jobTitleSearch) && (
+          {(selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || searchTerm || jobTitleSearch || selectedLocations.length > 0) && (
             <div className="bg-white/5 rounded-lg p-4 border border-white/10">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-sm font-medium text-white">Aktiva filter:</span>
@@ -1078,12 +1084,23 @@ const SearchJobs = () => {
                     selectedSubcategories.length,
                     searchTerm ? 1 : 0,
                     jobTitleSearch ? 1 : 0,
-                    selectedLocation !== 'all-locations' ? 1 : 0,
+                    selectedLocations.length,
                     selectedEmploymentType !== 'all-types' ? 1 : 0
                   ].reduce((a, b) => a + b, 0)} aktiva
                 </Badge>
               </div>
-              
+                
+                {selectedLocations.map((location) => (
+                  <Badge key={location} variant="secondary" className="gap-2 bg-white/10 hover:bg-white/20 text-white border-white/20">
+                    <span className="text-xs">{location}</span>
+                    <button 
+                      onClick={() => setSelectedLocations(prev => prev.filter(l => l !== location))}
+                      className="ml-1 hover:bg-white/20 rounded p-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
               <div className="flex flex-wrap gap-2">
                 {selectedCategory !== 'all-categories' && (
                 <Badge variant="default" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30">
@@ -1250,27 +1267,112 @@ const SearchJobs = () => {
               )}
             </div>
 
-            {/* Location */}
+            {/* Multi-Select Location */}
             <div className="space-y-3">
               <Label className="text-base font-medium text-white flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                Plats
+                Plats ({selectedLocations.length > 0 ? selectedLocations.length : 'alla'})
               </Label>
-              <Select value={selectedLocation} onValueChange={(value) => setSelectedLocation(value === 'all-locations' ? 'all-locations' : value)}>
-                <SelectTrigger className="h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors">
-                  <SelectValue placeholder="Alla platser i Sverige" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-700/95 backdrop-blur-md text-white border-white/20">
-                  <SelectItem value="all-locations" className="hover:bg-white/10 focus:bg-white/10">
-                    Alla platser
-                  </SelectItem>
-                  {locations.map((location) => (
-                    <SelectItem key={location} value={location} className="hover:bg-white/10 focus:bg-white/10">
+              <div className="relative">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                    >
+                      <span className="truncate">
+                        {selectedLocations.length === 0 
+                          ? 'Alla platser i Sverige'
+                          : selectedLocations.length === 1 
+                          ? selectedLocations[0]
+                          : `${selectedLocations.length} orter valda`
+                        }
+                      </span>
+                      <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent 
+                    className="w-80 max-h-80 overflow-hidden bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
+                    side="bottom"
+                    align="start"
+                  >
+                    {/* Search input */}
+                    <div className="p-2 border-b border-slate-600/30">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
+                        <Input
+                          placeholder="Sök stad eller kommun..."
+                          value={locationSearchTerm}
+                          onChange={(e) => setLocationSearchTerm(e.target.value)}
+                          className="pl-10 bg-slate-600/50 border-slate-500/50 text-white placeholder:text-white/50"
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Clear all button */}
+                    {selectedLocations.length > 0 && (
+                      <DropdownMenuItem
+                        onClick={() => setSelectedLocations([])}
+                        className="font-medium cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 text-red-300 border-b border-slate-600/30"
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Rensa alla ({selectedLocations.length})
+                      </DropdownMenuItem>
+                    )}
+                    
+                    {/* Location list */}
+                    <div className="max-h-60 overflow-y-auto">
+                      {locations
+                        .filter(location => 
+                          location.toLowerCase().includes(locationSearchTerm.toLowerCase())
+                        )
+                        .map((location) => (
+                          <DropdownMenuItem
+                            key={location}
+                            onClick={() => {
+                              const isSelected = selectedLocations.includes(location);
+                              if (isSelected) {
+                                setSelectedLocations(prev => prev.filter(l => l !== location));
+                              } else {
+                                setSelectedLocations(prev => [...prev, location]);
+                              }
+                            }}
+                            className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white flex items-center justify-between"
+                          >
+                            <span>{location}</span>
+                            {selectedLocations.includes(location) && (
+                              <Check className="h-4 w-4 text-white" />
+                            )}
+                          </DropdownMenuItem>
+                        ))}
+                      
+                      {locations.filter(location => 
+                        location.toLowerCase().includes(locationSearchTerm.toLowerCase())
+                      ).length === 0 && (
+                        <div className="p-4 text-center text-white/50">
+                          Ingen stad hittades för "{locationSearchTerm}"
+                        </div>
+                      )}
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              
+              {/* Selected locations preview */}
+              {selectedLocations.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {selectedLocations.slice(0, 3).map((location) => (
+                    <Badge key={location} variant="secondary" className="text-xs bg-white/10 text-white border-white/20">
                       {location}
-                    </SelectItem>
+                    </Badge>
                   ))}
-                </SelectContent>
-              </Select>
+                  {selectedLocations.length > 3 && (
+                    <Badge variant="secondary" className="text-xs bg-white/10 text-white border-white/20">
+                      +{selectedLocations.length - 3} till
+                    </Badge>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Employment Type */}
@@ -1304,7 +1406,7 @@ const SearchJobs = () => {
                 <span className="text-2xl font-bold text-white">{jobs.length}</span>
                 <span className="text-white/70">jobb hittades</span>
               </div>
-              {(searchTerm || jobTitleSearch || selectedLocation !== 'all-locations' || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentType !== 'all-types') && (
+              {(searchTerm || jobTitleSearch || selectedLocations.length > 0 || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentType !== 'all-types') && (
                 <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
                   Filtrerade resultat
                 </Badge>
@@ -1352,7 +1454,7 @@ const SearchJobs = () => {
                   onClick={() => {
                     setSearchTerm('');
                     setJobTitleSearch('');
-                    setSelectedLocation('all-locations');
+                    setSelectedLocations([]);
                     setSelectedCategory('all-categories');
                     setSelectedSubcategories([]);
                     setSelectedEmploymentType('all-types');
