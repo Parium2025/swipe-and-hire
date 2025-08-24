@@ -50,8 +50,8 @@ All colors MUST be HSL.
     --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(200 100% 98%));
     --gradient-glass: linear-gradient(135deg, hsla(0 0% 100% / 0.1), hsla(0 0% 100% / 0.05));
 
-    /* Sidebar colors - glasmorfism effekt */
-    --sidebar-background: 0 0% 100% / 0.1;
+    /* Sidebar colors - samma som parium gradient */
+    --sidebar-background: 215 100% 8%;
     --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 0 0% 100%;
     --sidebar-primary-foreground: 215 100% 12%;
