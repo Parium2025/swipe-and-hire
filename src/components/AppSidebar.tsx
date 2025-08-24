@@ -87,25 +87,25 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className={`${collapsed ? 'w-14' : 'w-64'} sticky top-0 h-screen overflow-y-auto bg-white/10 backdrop-blur-sm border-white/20`}
+      className={`${collapsed ? 'w-14' : 'w-64'} sticky top-0 h-screen overflow-y-auto`}
       collapsible="icon"
     >
       <SidebarContent className="p-4">
         {/* User Profile Section */}
         {!collapsed && (
           <div className="mb-6">
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-sidebar-accent">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={profile?.profile_image_url || ''} />
-                <AvatarFallback className="bg-white/20 text-white">
+                <AvatarFallback>
                   {profile?.first_name?.[0]}{profile?.last_name?.[0]}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate text-white">
+                <p className="text-sm font-medium truncate">
                   {profile?.first_name} {profile?.last_name}
                 </p>
-                <p className="text-xs text-white/70 truncate">
+                <p className="text-xs text-sidebar-foreground/70 truncate">
                   {userRole?.role === 'employer' ? 'Arbetsgivare' : 'Jobbsökare'}
                 </p>
               </div>
@@ -117,7 +117,7 @@ export function AppSidebar() {
         <div className="space-y-4">
           {/* Profile Section */}
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-white">
+            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider">
               {collapsed ? <User className="h-4 w-4" /> : 'Profil'}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -126,7 +126,7 @@ export function AppSidebar() {
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
                       onClick={(e) => handleNavigation(item.url, e)}
-                      className={isActive(item.url) ? 'bg-white/20 text-white font-medium' : 'hover:bg-white/20 text-white'}
+                      className={isActive(item.url) ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent'}
                       title={collapsed ? item.title : undefined}
                     >
                       <item.icon className="h-4 w-4" />
@@ -138,11 +138,11 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          <Separator className="bg-white/20" />
+          <Separator />
 
           {/* Business Section */}
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-white">
+            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider">
               {collapsed ? <Building className="h-4 w-4" /> : 'Företag'}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -151,7 +151,7 @@ export function AppSidebar() {
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
                       onClick={(e) => handleNavigation(item.url, e)}
-                      className={isActive(item.url) ? 'bg-white/20 text-white font-medium' : 'hover:bg-white/20 text-white'}
+                      className={isActive(item.url) ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent'}
                       title={collapsed ? item.title : undefined}
                     >
                       <item.icon className="h-4 w-4" />
@@ -163,11 +163,11 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          <Separator className="bg-white/20" />
+          <Separator />
 
           {/* Support Section */}
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-white">
+            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider">
               {collapsed ? <MessageCircle className="h-4 w-4" /> : 'Support'}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -176,7 +176,7 @@ export function AppSidebar() {
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
                       onClick={(e) => handleNavigation(item.url, e)}
-                      className={isActive(item.url) ? 'bg-white/20 text-white font-medium' : 'hover:bg-white/20 text-white'}
+                      className={isActive(item.url) ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent'}
                       title={collapsed ? item.title : undefined}
                     >
                       <item.icon className="h-4 w-4" />
@@ -194,7 +194,7 @@ export function AppSidebar() {
           <Button 
             onClick={signOut}
             variant="ghost" 
-            className="w-full justify-start text-white hover:bg-white/20 hover:text-white"
+            className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             title={collapsed ? 'Logga ut' : undefined}
           >
             <LogOut className="h-4 w-4" />
