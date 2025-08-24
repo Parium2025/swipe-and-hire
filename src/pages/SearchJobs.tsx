@@ -900,7 +900,7 @@ const SearchJobs = () => {
                 <DropdownMenuContent 
                   className="w-64 max-h-80 overflow-y-auto bg-primary border-primary/20 shadow-xl z-50 rounded-lg text-white"
                   side="bottom"
-                  align="start"
+                  align="center"
                   sideOffset={4}
                   avoidCollisions={false}
                   collisionPadding={0}
