@@ -898,7 +898,7 @@ const SearchJobs = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
-                  className="w-64 max-h-80 overflow-y-auto bg-background border shadow-xl z-50 rounded-lg"
+                  className="w-64 max-h-80 overflow-y-auto bg-primary border-primary/20 shadow-xl z-50 rounded-lg text-white"
                   side="bottom"
                   align="start"
                   sideOffset={4}
@@ -907,11 +907,11 @@ const SearchJobs = () => {
                 >
                   <DropdownMenuItem
                     onClick={() => handleQuickCategory(category.value)}
-                    className="font-medium cursor-pointer hover:bg-muted"
+                    className="font-medium cursor-pointer hover:bg-primary-foreground/20 text-white"
                   >
                     {category.icon} Alla inom {category.label}
                   </DropdownMenuItem>
-                  <Separator className="my-1" />
+                  <Separator className="my-1 bg-primary-foreground/20" />
                   <div className="max-h-60 overflow-y-auto scrollbar-thin">
                     {category.subcategories.map((subcategory) => (
                       <DropdownMenuItem
@@ -921,7 +921,7 @@ const SearchJobs = () => {
                           setSelectedSubcategory(subcategory);
                           setSearchTerm('');
                         }}
-                        className="text-sm cursor-pointer hover:bg-muted py-2"
+                        className="text-sm cursor-pointer hover:bg-primary-foreground/20 py-2 text-white"
                       >
                         {subcategory}
                       </DropdownMenuItem>
@@ -979,14 +979,14 @@ const SearchJobs = () => {
                 
                 {/* Autocomplete Suggestions Dropdown */}
                 {showSuggestions && jobTitleSuggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
-                    <div className="p-2 border-b text-xs text-muted-foreground font-medium">
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-primary border border-primary/20 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto text-white">
+                    <div className="p-2 border-b border-primary-foreground/20 text-xs text-primary-foreground/70 font-medium">
                       💡 Klicka för att välja jobbtitel
                     </div>
                     {jobTitleSuggestions.map((suggestion, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between p-3 hover:bg-muted cursor-pointer border-b border-border/50 last:border-b-0"
+                        className="flex items-center justify-between p-3 hover:bg-primary-foreground/20 cursor-pointer border-b border-primary-foreground/20 last:border-b-0"
                         onClick={() => {
                           setJobTitleSearch(suggestion.title);
                           setShowSuggestions(false);
@@ -995,13 +995,13 @@ const SearchJobs = () => {
                         <div className="flex items-center gap-3">
                           <span className="text-lg">{suggestion.category.icon}</span>
                           <div>
-                            <div className="font-medium text-sm">{suggestion.title}</div>
-                            <div className="text-xs text-muted-foreground">
+                            <div className="font-medium text-sm text-white">{suggestion.title}</div>
+                            <div className="text-xs text-primary-foreground/70">
                               {suggestion.category.label}
                             </div>
                           </div>
                         </div>
-                        <div className="text-xs text-primary">Välj →</div>
+                        <div className="text-xs text-white">Välj →</div>
                       </div>
                     ))}
                   </div>
@@ -1062,10 +1062,10 @@ const SearchJobs = () => {
                 <SelectTrigger className="h-12 bg-white/10 backdrop-blur-sm border-white/30 text-white">
                   <SelectValue placeholder="Alla platser i Sverige" />
                 </SelectTrigger>
-                <SelectContent className="bg-background">
-                  <SelectItem value="all-locations">🇸🇪 Alla platser</SelectItem>
+                <SelectContent className="bg-primary text-white border-primary/20">
+                  <SelectItem value="all-locations" className="hover:bg-primary-foreground/20">🇸🇪 Alla platser</SelectItem>
                   {locations.map((location) => (
-                    <SelectItem key={location} value={location}>
+                    <SelectItem key={location} value={location} className="hover:bg-primary-foreground/20">
                       📍 {location}
                     </SelectItem>
                   ))}
@@ -1080,10 +1080,10 @@ const SearchJobs = () => {
                 <SelectTrigger className="h-12 bg-white/10 backdrop-blur-sm border-white/30 text-white">
                   <SelectValue placeholder="Alla anställningsformer" />
                 </SelectTrigger>
-                <SelectContent className="bg-background">
-                  <SelectItem value="all-types">💼 Alla typer</SelectItem>
+                <SelectContent className="bg-primary text-white border-primary/20">
+                  <SelectItem value="all-types" className="hover:bg-primary-foreground/20">💼 Alla typer</SelectItem>
                   {employmentTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
+                    <SelectItem key={type.value} value={type.value} className="hover:bg-primary-foreground/20">
                       {type.value === 'Heltid' ? '🕘' : 
                        type.value === 'Deltid' ? '🕐' : 
                        type.value === 'Konsult' ? '💻' : 
