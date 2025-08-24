@@ -1370,7 +1370,11 @@ const SearchJobs = () => {
                 <SelectTrigger className="h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors">
                   <SelectValue placeholder="Alla anställningsformer" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-700/95 backdrop-blur-md text-white border-white/20">
+                <SelectContent 
+                  className="bg-slate-700/95 backdrop-blur-md text-white border-white/20"
+                  side="bottom"
+                  avoidCollisions={false}
+                >
                   <SelectItem value="all-types" className="hover:bg-white/10 focus:bg-white/10">
                     Alla typer
                   </SelectItem>
