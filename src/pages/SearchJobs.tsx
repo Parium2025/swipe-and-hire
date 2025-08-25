@@ -948,6 +948,61 @@ const SearchJobs = () => {
         </p>
       </div>
 
+      {/* Main Search Bar */}
+      <div className="max-w-2xl mx-auto">
+        <div className="relative">
+          <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 h-6 w-6 text-white/50" />
+          <Input
+            placeholder="Sök jobb, företag eller yrke..."
+            value={jobTitleSearch}
+            onChange={(e) => {
+              setJobTitleSearch(e.target.value);
+              setShowSuggestions(true);
+            }}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            className="pl-16 pr-6 h-16 text-lg bg-white/10 backdrop-blur-sm border-white/30 text-white placeholder:text-white/60 hover:bg-white/15 focus:bg-white/15 transition-colors rounded-xl shadow-lg"
+          />
+          {jobTitleSearch && (
+            <button 
+              onClick={() => setJobTitleSearch('')}
+              className="absolute right-6 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
+          
+          {/* Autocomplete Suggestions */}
+          {showSuggestions && jobTitleSuggestions.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-md border border-white/20 rounded-xl shadow-2xl z-50 max-h-80 overflow-y-auto">
+              <div className="p-3 border-b border-gray-200 text-sm text-gray-600 font-medium">
+                Förslag baserat på din sökning
+              </div>
+              {jobTitleSuggestions.map((suggestion, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
+                  onClick={() => {
+                    setJobTitleSearch(suggestion.title);
+                    setShowSuggestions(false);
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <div className="font-medium text-gray-900">{suggestion.title}</div>
+                      <div className="text-sm text-gray-600">
+                        {suggestion.category.label}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-400">Välj →</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Smart Category Grid */}
       <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-lg">
         <CardHeader className="text-center pb-6">
