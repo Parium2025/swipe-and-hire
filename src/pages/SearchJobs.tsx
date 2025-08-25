@@ -29,8 +29,8 @@ const SearchJobs = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('all-locations');
+  const [selectedCategory, setSelectedCategory] = useState('all-categories');
   const [jobStats, setJobStats] = useState<JobStats>({ total_jobs: 0, total_positions: 0 });
 
   // Simplified job categories
@@ -105,11 +105,11 @@ const SearchJobs = () => {
         query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
       }
 
-      if (selectedLocation) {
+      if (selectedLocation && selectedLocation !== 'all-locations') {
         query = query.ilike('location', `%${selectedLocation}%`);
       }
 
-      if (selectedCategory) {
+      if (selectedCategory && selectedCategory !== 'all-categories') {
         query = query.eq('category', selectedCategory);
       }
 
@@ -207,11 +207,11 @@ const SearchJobs = () => {
                 <SelectTrigger className="h-12 bg-white/10 border-white/20 text-white">
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
-                    <span>{selectedLocation || 'Ort'}</span>
+                    <span>{selectedLocation === 'all-locations' ? 'Ort' : selectedLocation || 'Ort'}</span>
                   </div>
                 </SelectTrigger>
                 <SelectContent className="bg-slate-700 border-slate-500 text-white">
-                  <SelectItem value="">Alla orter</SelectItem>
+                  <SelectItem value="all-locations">Alla orter</SelectItem>
                   {locations.map((location) => (
                     <SelectItem key={location} value={location}>
                       {location}
@@ -224,11 +224,11 @@ const SearchJobs = () => {
                 <SelectTrigger className="h-12 bg-white/10 border-white/20 text-white">
                   <div className="flex items-center gap-2">
                     <Building className="h-4 w-4" />
-                    <span>{selectedCategory ? jobCategories.find(cat => cat.value === selectedCategory)?.label : 'Yrke'}</span>
+                    <span>{selectedCategory === 'all-categories' ? 'Yrke' : selectedCategory ? jobCategories.find(cat => cat.value === selectedCategory)?.label : 'Yrke'}</span>
                   </div>
                 </SelectTrigger>
                 <SelectContent className="bg-slate-700 border-slate-500 text-white">
-                  <SelectItem value="">Alla yrken</SelectItem>
+                  <SelectItem value="all-categories">Alla yrken</SelectItem>
                   {jobCategories.map((category) => (
                     <SelectItem key={category.value} value={category.value}>
                       {category.label}
