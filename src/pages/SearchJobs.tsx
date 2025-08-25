@@ -11,6 +11,7 @@ import { Search, MapPin, Clock, Building, Filter, Heart, ExternalLink, X, Chevro
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { createSmartSearchConditions, expandSearchTerms } from '@/lib/smartSearch';
+import { swedishCities } from '@/lib/swedishCities';
 interface Job {
   id: string;
   title: string;
@@ -674,6 +675,9 @@ const SearchJobs = () => {
           `location.ilike.%${location}%`
         ).join(',');
         query = query.or(locationConditions);
+      } else if (selectedLocation && selectedLocation !== 'all-locations') {
+        // Apply single location filter from dropdown
+        query = query.ilike('location', `%${selectedLocation}%`);
       }
 
       if (selectedEmploymentType && selectedEmploymentType !== 'all-types') {
@@ -999,6 +1003,78 @@ const SearchJobs = () => {
                 </div>
               ))}
             </div>
+          )}
+        </div>
+      </div>
+
+      {/* Filter Bar - Ort and Yrke filters */}
+      <div className="max-w-4xl mx-auto">
+        <div className="flex flex-wrap items-center gap-3 justify-center">
+          {/* Location Filter */}
+          <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+            <SelectTrigger className="w-auto min-w-[140px] h-12 bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/15 transition-colors rounded-lg">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                <SelectValue placeholder="Ort" />
+              </div>
+              <ChevronDown className="h-4 w-4 opacity-50" />
+            </SelectTrigger>
+            <SelectContent className="max-h-80 bg-white border border-gray-200 shadow-lg">
+              <SelectItem value="all-locations" className="font-medium">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  Alla orter
+                </div>
+              </SelectItem>
+              <Separator className="my-1" />
+              {swedishCities.map((city) => (
+                <SelectItem key={city.name} value={city.name} className="pl-8">
+                  {city.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Job Category Filter */}
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-auto min-w-[140px] h-12 bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/15 transition-colors rounded-lg">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                <SelectValue placeholder="Yrke" />
+              </div>
+              <ChevronDown className="h-4 w-4 opacity-50" />
+            </SelectTrigger>
+            <SelectContent className="max-h-80 bg-white border border-gray-200 shadow-lg">
+              <SelectItem value="all-categories" className="font-medium">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  Alla yrken
+                </div>
+              </SelectItem>
+              <Separator className="my-1" />
+              {jobCategories.map((category) => (
+                <SelectItem key={category.value} value={category.value} className="pl-8">
+                  {category.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Clear Filters Button */}
+          {(selectedLocation !== 'all-locations' || selectedCategory !== 'all-categories' || jobTitleSearch) && (
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setSelectedLocation('all-locations');
+                setSelectedCategory('all-categories');
+                setJobTitleSearch('');
+                setSelectedSubcategories([]);
+              }}
+              className="h-12 px-4 bg-white/10 backdrop-blur-sm border border-white/30 text-white hover:bg-white/15 transition-colors rounded-lg"
+            >
+              <X className="h-4 w-4 mr-2" />
+              Rensa filter
+            </Button>
           )}
         </div>
       </div>
