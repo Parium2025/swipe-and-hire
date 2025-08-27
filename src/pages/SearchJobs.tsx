@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,27 +40,6 @@ const SearchJobs = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const isMobile = useIsMobile();
   const dropdownAlignOffset = 0;
-
-  // Portal positioning for search suggestions
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const [suggestionRect, setSuggestionRect] = useState({ left: 0, top: 0, width: 0, height: 0 });
-
-  useEffect(() => {
-    if (!showSuggestions) return;
-    const update = () => {
-      const el = inputRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      setSuggestionRect({ left: rect.left, top: rect.bottom, width: rect.width, height: rect.height });
-    };
-    update();
-    window.addEventListener('resize', update);
-    window.addEventListener('scroll', update, true);
-    return () => {
-      window.removeEventListener('resize', update);
-      window.removeEventListener('scroll', update, true);
-    };
-  }, [showSuggestions]);
   // Job categories with subcategories - based on AF structure
   const jobCategories = [
     { 
@@ -1114,7 +1092,6 @@ const SearchJobs = () => {
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/50" />
                 <Input
                   id="search"
-                  ref={inputRef}
                   placeholder="sök på jobb eller företag"
                   value={searchTerm}
                   onChange={(e) => {
@@ -1135,81 +1112,78 @@ const SearchJobs = () => {
                 )}
                 
                 {/* Enhanced Autocomplete with Companies */}
-                {showSuggestions && (jobTitleSuggestions.length > 0 || companySuggestions.length > 0) && inputRef.current &&
-                  createPortal(
-                    <div
-                      className="bg-slate-700/95 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-[100000] overflow-hidden"
-                      style={{ position: 'fixed', left: suggestionRect.left, top: suggestionRect.top + 6, width: suggestionRect.width }}
-                    >
-                      {/* Company Suggestions */}
-                      {companySuggestions.length > 0 && (
-                        <div>
-                          <div className="p-2 border-b border-white/10 text-xs text-white/70 font-medium flex items-center gap-2">
-                            <Building className="h-4 w-4" />
-                            Företag
-                          </div>
-                          {companySuggestions.map((company, index) => (
-                            <div
-                              key={`company-${index}`]
-                              className="flex items-center justify-between p-3 hover:bg-white/10 cursor-pointer border-b border-white/5 transition-colors"
-                              onClick={() => {
-                                setSearchTerm(company.name);
-                                setSelectedCompany(company.name);
-                                setShowSuggestions(false);
-                              }}
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="w-5 h-5 shrink-0 flex items-center justify-center">
-                                  <Building className="h-4 w-4 text-white/50" />
-                                </div>
-                                <div>
-                                  <div className="font-medium text-sm text-white">{company.name}</div>
-                                  <div className="text-xs text-white/60">
-                                    {company.jobCount} {company.jobCount === 1 ? 'jobb' : 'jobb'}
-                                  </div>
+                {showSuggestions && (jobTitleSuggestions.length > 0 || companySuggestions.length > 0) && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-slate-700/95 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-[999999] overflow-hidden">
+                    
+                    {/* Company Suggestions */}
+                    {companySuggestions.length > 0 && (
+                      <div>
+                        <div className="p-2 border-b border-white/10 text-xs text-white/70 font-medium flex items-center gap-2">
+                          <Building className="h-4 w-4" />
+                          Företag
+                        </div>
+                        {companySuggestions.map((company, index) => (
+                          <div
+                            key={`company-${index}`}
+                            className="flex items-center justify-between p-3 hover:bg-white/10 cursor-pointer border-b border-white/5 transition-colors"
+                            onClick={() => {
+                              setSearchTerm(company.name);
+                              setSelectedCompany(company.name);
+                              setShowSuggestions(false);
+                            }}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-5 h-5 shrink-0 flex items-center justify-center">
+                                <Building className="h-4 w-4 text-white/50" />
+                              </div>
+                              <div>
+                                <div className="font-medium text-sm text-white">{company.name}</div>
+                                <div className="text-xs text-white/60">
+                                  {company.jobCount} {company.jobCount === 1 ? 'jobb' : 'jobb'}
                                 </div>
                               </div>
-                              <div className="text-xs text-white/50">Välj →</div>
                             </div>
-                          ))}
-                        </div>
-                      )}
-                      {/* Job Title Suggestions */}
-                      {jobTitleSuggestions.length > 0 && (
-                        <div>
-                          <div className="p-2 border-b border-white/10 text-xs text-white/70 font-medium flex items-center gap-2">
-                            <Briefcase className="h-4 w-4" />
-                            Yrken
+                            <div className="text-xs text-white/50">Välj →</div>
                           </div>
-                          {jobTitleSuggestions.map((suggestion, index) => (
-                            <div
-                              key={`job-${index}`]
-                              className="flex items-center justify-between p-3 hover:bg-white/10 cursor-pointer border-b border-white/5 last:border-b-0 transition-colors"
-                              onClick={() => {
-                                setSearchTerm(suggestion.title);
-                                setSelectedCompany(null);
-                                setShowSuggestions(false);
-                              }}
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="w-5 h-5 shrink-0 flex items-center justify-center">
-                                  <Briefcase className="h-4 w-4 text-white/50" />
-                                </div>
-                                <div>
-                                  <div className="font-medium text-sm text-white">{suggestion.title}</div>
-                                  <div className="text-xs text-white/60">
-                                    {suggestion.category.label}
-                                  </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Job Title Suggestions */}
+                    {jobTitleSuggestions.length > 0 && (
+                      <div>
+                        <div className="p-2 border-b border-white/10 text-xs text-white/70 font-medium flex items-center gap-2">
+                          <Briefcase className="h-4 w-4" />
+                          Yrken
+                        </div>
+                        {jobTitleSuggestions.map((suggestion, index) => (
+                          <div
+                            key={`job-${index}`}
+                            className="flex items-center justify-between p-3 hover:bg-white/10 cursor-pointer border-b border-white/5 last:border-b-0 transition-colors"
+                            onClick={() => {
+                              setSearchTerm(suggestion.title);
+                              setSelectedCompany(null);
+                              setShowSuggestions(false);
+                            }}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-5 h-5 shrink-0 flex items-center justify-center">
+                                <Briefcase className="h-4 w-4 text-white/50" />
+                              </div>
+                              <div>
+                                <div className="font-medium text-sm text-white">{suggestion.title}</div>
+                                <div className="text-xs text-white/60">
+                                  {suggestion.category.label}
                                 </div>
                               </div>
-                              <div className="text-xs text-white/50">Välj →</div>
                             </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>,
-                    document.body
-                  )}
+                            <div className="text-xs text-white/50">Välj →</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
 
               </div>
               
