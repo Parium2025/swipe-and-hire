@@ -1114,7 +1114,7 @@ const SearchJobs = () => {
                 
                 {/* Enhanced Autocomplete with Companies */}
                 {showSuggestions && (jobTitleSuggestions.length > 0 || companySuggestions.length > 0) && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-slate-700/95 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-50 overflow-hidden">
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-slate-700/95 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-[9999] overflow-hidden">
                     
                     {/* Company Suggestions */}
                     {companySuggestions.length > 0 && (
