@@ -1120,7 +1120,7 @@ const SearchJobs = () => {
                     {companySuggestions.length > 0 && (
                       <div>
                         <div className="p-2 border-b border-white/10 text-xs text-white/70 font-medium flex items-center gap-2">
-                          <Building className="h-3 w-3" />
+                          <Building className="h-4 w-4" />
                           Företag
                         </div>
                         {companySuggestions.map((company, index) => (
