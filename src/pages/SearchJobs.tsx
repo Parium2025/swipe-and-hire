@@ -1062,54 +1062,6 @@ const SearchJobs = () => {
               </div>
             </div>
           )}
-                {selectedCategory !== 'all-categories' && (
-                <Badge variant="default" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30">
-                    <span className="text-xs">{jobCategories.find(cat => cat.value === selectedCategory)?.label}</span>
-                    <button 
-                      onClick={() => {
-                        setSelectedCategory('all-categories');
-                        setSelectedSubcategories([]);
-                      }}
-                      className="ml-1 hover:bg-white/20 rounded p-0.5"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                )}
-                
-                {selectedSubcategories.map((subcategory) => (
-                  <Badge key={subcategory} variant="secondary" className="gap-2 bg-white/10 hover:bg-white/20 text-white border-white/20">
-                    <span className="text-xs">{subcategory}</span>
-                    <button 
-                      onClick={() => setSelectedSubcategories(prev => prev.filter(s => s !== subcategory))}
-                      className="ml-1 hover:bg-white/20 rounded p-0.5"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                ))}
-                
-                {searchTerm && (
-                  <Badge variant="outline" className="gap-2 text-white border-white/30">
-                    <Search className="h-3 w-3" />
-                    <span className="text-xs">"{searchTerm}"</span>
-                    <button onClick={() => setSearchTerm('')} className="ml-1 hover:bg-white/20 rounded p-0.5">
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                )}
-                
-                {jobTitleSearch && (
-                  <Badge variant="outline" className="gap-2 text-white border-white/30">
-                    <span className="text-xs">"{jobTitleSearch}"</span>
-                    <button onClick={() => setJobTitleSearch('')} className="ml-1 hover:bg-white/20 rounded p-0.5">
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* Search Fields Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -1618,3 +1570,5 @@ const SearchJobs = () => {
     </div>
   );
 };
+
+export default SearchJobs;
