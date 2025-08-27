@@ -1179,6 +1179,36 @@ const SearchJobs = () => {
               )}
             </div>
 
+            {/* Yrke Filter - Opens collapsible categories */}
+            <div className="space-y-3">
+              <Label className="text-base font-medium text-white flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                Yrkesområde
+              </Label>
+              <Button
+                onClick={() => setIsJobCategoriesOpen(!isJobCategoriesOpen)}
+                variant="outline"
+                className={`w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between ${
+                  isJobCategoriesOpen ? 'bg-white/15 border-white/40' : ''
+                }`}
+              >
+                <span className="truncate">
+                  {selectedCategory !== 'all-categories' 
+                    ? jobCategories.find(cat => cat.value === selectedCategory)?.label
+                    : selectedSubcategories.length > 0 
+                    ? `${selectedSubcategories.length} yrken valda`
+                    : 'Välj yrkesområde'
+                  }
+                </span>
+                <div className="flex items-center gap-2">
+                  {(selectedCategory !== 'all-categories' || selectedSubcategories.length > 0) && (
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  )}
+                  <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform ${isJobCategoriesOpen ? 'rotate-180' : ''}`} />
+                </div>
+              </Button>
+            </div>
+
             {/* Multi-Select Location */}
             <div className="space-y-3">
               <Label className="text-base font-medium text-white flex items-center gap-2">
