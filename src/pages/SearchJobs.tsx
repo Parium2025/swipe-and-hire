@@ -1618,5 +1618,3 @@ const SearchJobs = () => {
     </div>
   );
 };
-
-export default SearchJobs;
