@@ -29,7 +29,6 @@ const SearchJobs = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [jobTitleSearch, setJobTitleSearch] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('all-locations');
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [locationSearchTerm, setLocationSearchTerm] = useState('');
@@ -648,9 +647,9 @@ const SearchJobs = () => {
         query = query.or(smartSearchConditions);
       }
 
-      // Apply job title search
-      if (jobTitleSearch) {
-        query = query.ilike('title', `%${jobTitleSearch}%`);
+      // Apply combined search for both company and job title
+      if (searchTerm) {
+        query = query.or(`company_name.ilike.%${searchTerm}%,title.ilike.%${searchTerm}%`);
       }
 
       // Apply subcategory filter (more specific than category)
@@ -706,7 +705,7 @@ const SearchJobs = () => {
 
   useEffect(() => {
     fetchJobs();
-  }, [searchTerm, jobTitleSearch, selectedLocations, selectedCategory, selectedSubcategories, selectedEmploymentType]);
+  }, [searchTerm, selectedLocations, selectedCategory, selectedSubcategories, selectedEmploymentType]);
 
   const formatSalary = (min?: number, max?: number) => {
     if (min && max) {
@@ -861,11 +860,11 @@ const SearchJobs = () => {
     return matrix[str2.length][str1.length];
   };
 
-  // Get the matching role for current job title search
-  const matchingRole = findMatchingRole(jobTitleSearch);
+  // Get the matching role for current search term
+  const matchingRole = findMatchingRole(searchTerm);
   
   // Debug logging
-  console.log('🔍 Debug - jobTitleSearch:', jobTitleSearch);
+  console.log('🔍 Debug - searchTerm:', searchTerm);
   console.log('🔍 Debug - matchingRole:', matchingRole);
   
   // Let's also check if "Renhållningschaufför" exists in our categories
@@ -879,7 +878,7 @@ const SearchJobs = () => {
       if (matchingRole.subcategory) {
         setSelectedSubcategories([matchingRole.subcategory]);
       }
-      setJobTitleSearch(''); // Clear the search since we're now using category filters
+      setSearchTerm(''); // Clear the search since we're now using category filters
     }
   };
 
@@ -939,7 +938,7 @@ const SearchJobs = () => {
     }).slice(0, 8); // Limit to 8 suggestions
   };
 
-  const jobTitleSuggestions = getJobTitleSuggestions(jobTitleSearch);
+  const jobTitleSuggestions = getJobTitleSuggestions(searchTerm);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   return (
@@ -958,13 +957,12 @@ const SearchJobs = () => {
       <Card className="bg-white/10 backdrop-blur-sm border-white/20">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
-            {(searchTerm || jobTitleSearch || selectedLocation !== 'all-locations' || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentType !== 'all-types') && (
+            {(searchTerm || selectedLocation !== 'all-locations' || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentType !== 'all-types') && (
               <Button
                 variant="ghost" 
                 size="sm"
                   onClick={() => {
                     setSearchTerm('');
-                    setJobTitleSearch('');
                     setSelectedLocations([]);
                     setSelectedCategory('all-categories');
                     setSelectedSubcategories([]);
@@ -981,19 +979,18 @@ const SearchJobs = () => {
         <CardContent className="space-y-6">
           
           {/* Active Filters Summary */}
-          {(selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || searchTerm || jobTitleSearch || selectedLocations.length > 0) && (
+          {(selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || searchTerm || selectedLocations.length > 0) && (
             <div className="bg-white/5 rounded-lg p-4 border border-white/10">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-sm font-medium text-white">Aktiva filter:</span>
-                <Badge variant="secondary" className="text-xs">
-                  {[
-                    selectedCategory !== 'all-categories' ? 1 : 0,
-                    selectedSubcategories.length,
-                    searchTerm ? 1 : 0,
-                    jobTitleSearch ? 1 : 0,
-                    selectedLocations.length,
-                    selectedEmploymentType !== 'all-types' ? 1 : 0
-                  ].reduce((a, b) => a + b, 0)} aktiva
+                 <Badge variant="secondary" className="text-xs">
+                   {[
+                     selectedCategory !== 'all-categories' ? 1 : 0,
+                     selectedSubcategories.length,
+                     searchTerm ? 1 : 0,
+                     selectedLocations.length,
+                     selectedEmploymentType !== 'all-types' ? 1 : 0
+                   ].reduce((a, b) => a + b, 0)} aktiva
                 </Badge>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -1046,15 +1043,6 @@ const SearchJobs = () => {
                     </button>
                   </Badge>
                 )}
-                
-                {jobTitleSearch && (
-                  <Badge variant="outline" className="gap-2 text-white border-white/30">
-                    <span className="text-xs">"{jobTitleSearch}"</span>
-                    <button onClick={() => setJobTitleSearch('')} className="ml-1 hover:bg-white/20 rounded p-0.5">
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                )}
               </div>
             </div>
           )}
@@ -1062,54 +1050,29 @@ const SearchJobs = () => {
           {/* Search Fields Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             
-            {/* General Search Term */}
-            <div className="space-y-3">
+            {/* Combined Job and Company Search */}
+            <div className="space-y-3 relative">
               <Label htmlFor="search" className="text-base font-medium text-white flex items-center gap-2">
                 <Search className="h-4 w-4" />
-                Sök företag
+                Sök
               </Label>
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/50" />
                 <Input
                   id="search"
-                  placeholder="Sök på företag"
+                  placeholder="sök på jobb eller företag"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-12 h-12 text-base bg-white/5 backdrop-blur-sm border-white/20 text-white placeholder:text-white/50 hover:bg-white/10 focus:bg-white/10 transition-colors"
-                />
-                {searchTerm && (
-                  <button 
-                    onClick={() => setSearchTerm('')}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Job Title Search with Smart Integration */}
-            <div className="space-y-3 relative">
-              <Label htmlFor="jobTitleSearch" className="text-base font-medium text-white flex items-center gap-2">
-                Specifik roll
-              </Label>
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/50" />
-                <Input
-                  id="jobTitleSearch"
-                  placeholder="Sök jobb"
-                  value={jobTitleSearch}
                   onChange={(e) => {
-                    setJobTitleSearch(e.target.value);
+                    setSearchTerm(e.target.value);
                     setShowSuggestions(true);
                   }}
                   onFocus={() => setShowSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                   className="pl-12 h-12 text-base bg-white/5 backdrop-blur-sm border-white/20 text-white placeholder:text-white/50 hover:bg-white/10 focus:bg-white/10 transition-colors"
                 />
-                {jobTitleSearch && (
+                {searchTerm && (
                   <button 
-                    onClick={() => setJobTitleSearch('')}
+                    onClick={() => setSearchTerm('')}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white"
                   >
                     <X className="h-4 w-4" />
@@ -1127,7 +1090,7 @@ const SearchJobs = () => {
                         key={index}
                         className="flex items-center justify-between p-3 hover:bg-white/10 cursor-pointer border-b border-white/5 last:border-b-0 transition-colors"
                         onClick={() => {
-                          setJobTitleSearch(suggestion.title);
+                          setSearchTerm(suggestion.title);
                           setShowSuggestions(false);
                         }}
                       >
@@ -1147,7 +1110,7 @@ const SearchJobs = () => {
               </div>
               
               {/* Smart Role Match */}
-              {matchingRole && jobTitleSearch && (
+              {matchingRole && searchTerm && (
                 <div className="mt-3 p-3 bg-white/10 border border-white/20 rounded-lg">
                   <div className="flex items-center gap-2 text-sm mb-2">
                     <span className="text-white font-medium">Smart match:</span>
@@ -1357,7 +1320,7 @@ const SearchJobs = () => {
                 <span className="text-2xl font-bold text-white">{jobs.length}</span>
                 <span className="text-white/70">jobb hittades</span>
               </div>
-              {(searchTerm || jobTitleSearch || selectedLocations.length > 0 || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentType !== 'all-types') && (
+              {(searchTerm || selectedLocations.length > 0 || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentType !== 'all-types') && (
                 <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
                   Filtrerade resultat
                 </Badge>
@@ -1481,7 +1444,6 @@ const SearchJobs = () => {
                   variant="outline"
                   onClick={() => {
                     setSearchTerm('');
-                    setJobTitleSearch('');
                     setSelectedLocations([]);
                     setSelectedCategory('all-categories');
                     setSelectedSubcategories([]);
