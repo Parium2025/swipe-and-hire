@@ -954,203 +954,6 @@ const SearchJobs = () => {
         </p>
       </div>
 
-      {/* Main Search Bar */}
-      <div className="max-w-2xl mx-auto">
-        <div className="relative">
-          <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 h-6 w-6 text-white/50" />
-          <Input
-            placeholder="Sök jobb, företag eller yrke..."
-            value={jobTitleSearch}
-            onChange={(e) => {
-              setJobTitleSearch(e.target.value);
-              setShowSuggestions(true);
-            }}
-            onFocus={() => setShowSuggestions(true)}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-            className="pl-16 pr-6 h-16 text-lg bg-white/10 backdrop-blur-sm border-white/30 text-white placeholder:text-white/60 hover:bg-white/15 focus:bg-white/15 transition-colors rounded-xl shadow-lg"
-          />
-          {jobTitleSearch && (
-            <button 
-              onClick={() => setJobTitleSearch('')}
-              className="absolute right-6 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          )}
-          
-          {/* Autocomplete Suggestions */}
-          {showSuggestions && jobTitleSuggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-md border border-white/20 rounded-xl shadow-2xl z-50 max-h-80 overflow-y-auto">
-              <div className="p-3 border-b border-gray-200 text-sm text-gray-600 font-medium">
-                Förslag baserat på din sökning
-              </div>
-              {jobTitleSuggestions.map((suggestion, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
-                  onClick={() => {
-                    setJobTitleSearch(suggestion.title);
-                    setShowSuggestions(false);
-                  }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div>
-                      <div className="font-medium text-gray-900">{suggestion.title}</div>
-                      <div className="text-sm text-gray-600">
-                        {suggestion.category.label}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-sm text-gray-400">Välj →</div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Filter Bar - Ort and Yrke filters */}
-      <div className="max-w-4xl mx-auto">
-        <div className="flex flex-wrap items-center gap-3 justify-center">
-          {/* Location Filter */}
-          <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-            <SelectTrigger className="w-auto min-w-[140px] h-12 bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/15 transition-colors rounded-lg">
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                <SelectValue placeholder="Ort" />
-              </div>
-              <ChevronDown className="h-4 w-4 opacity-50" />
-            </SelectTrigger>
-            <SelectContent className="max-h-80 bg-white border border-gray-200 shadow-lg">
-              <SelectItem value="all-locations" className="font-medium">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  Alla orter
-                </div>
-              </SelectItem>
-              <Separator className="my-1" />
-              {swedishCities.map((city) => (
-                <SelectItem key={city.name} value={city.name} className="pl-8">
-                  {city.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Job Category Filter - Now opens collapsible section */}
-          <Button
-            onClick={() => setIsJobCategoriesOpen(!isJobCategoriesOpen)}
-            variant="ghost"
-            className={`w-auto min-w-[140px] h-12 bg-white/10 backdrop-blur-sm border border-white/30 text-white hover:bg-white/15 transition-colors rounded-lg ${
-              isJobCategoriesOpen ? 'bg-white/20 border-white/50' : ''
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4" />
-              <span>Yrke</span>
-              {(selectedCategory !== 'all-categories' || selectedSubcategories.length > 0) && (
-                <div className="w-2 h-2 bg-white rounded-full"></div>
-              )}
-            </div>
-            <ChevronDown className={`h-4 w-4 opacity-50 transition-transform ${isJobCategoriesOpen ? 'rotate-180' : ''}`} />
-          </Button>
-
-          {/* Clear Filters Button */}
-          {(selectedLocation !== 'all-locations' || selectedCategory !== 'all-categories' || jobTitleSearch) && (
-            <Button
-              variant="ghost"
-              onClick={() => {
-                setSelectedLocation('all-locations');
-                setSelectedCategory('all-categories');
-                setJobTitleSearch('');
-                setSelectedSubcategories([]);
-              }}
-              className="h-12 px-4 bg-white/10 backdrop-blur-sm border border-white/30 text-white hover:bg-white/15 transition-colors rounded-lg"
-            >
-              <X className="h-4 w-4 mr-2" />
-              Rensa filter
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {/* Collapsible Job Categories Section */}
-      <Collapsible open={isJobCategoriesOpen} onOpenChange={setIsJobCategoriesOpen}>
-        <CollapsibleContent className="space-y-0">
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-lg animate-accordion-down">
-            <CardHeader className="text-center pb-6">
-              <CardTitle className="text-2xl text-white">Välj yrkesområde</CardTitle>
-              <CardDescription className="text-lg text-white">
-                Klicka på ett område för att se alla lediga jobb
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                {jobCategories.map((category) => (
-                  <DropdownMenu key={category.value}>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="lg"
-                        className={`relative h-auto min-h-[80px] sm:h-20 flex flex-col items-center gap-1 sm:gap-2 p-3 sm:p-4 transition-all duration-200 hover:scale-105 bg-white/10 backdrop-blur-sm border border-white/30 text-white hover:bg-white/20 ${
-                          selectedCategory === category.value 
-                            ? 'shadow-lg border-white/50 bg-white/20' 
-                            : 'hover:shadow-md hover:border-white/50'
-                        }`}
-                      >
-                        {/* Selection indicator */}
-                        {category.subcategories.some(sub => selectedSubcategories.includes(sub)) && (
-                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-white rounded-full flex items-center justify-center">
-                            <div className="w-2 h-2 bg-slate-700 rounded-full"></div>
-                          </div>
-                        )}
-                        <span className="text-xl sm:text-2xl">{category.icon}</span>
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs sm:text-sm font-medium text-center leading-tight px-1">
-                            {category.label}
-                          </span>
-                          <ChevronDown className="h-3 w-3 flex-shrink-0" />
-                        </div>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent 
-                      className="w-64 max-h-80 overflow-y-auto bg-slate-700/90 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
-                      side="bottom"
-                      align="start"
-                      alignOffset={-28}
-                      sideOffset={6}
-                      avoidCollisions={false}
-                    >
-                      <DropdownMenuItem
-                        onClick={() => handleSelectAllInCategory(category.value)}
-                        className="font-medium cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 text-white"
-                      >
-                        Allt inom {category.label}
-                      </DropdownMenuItem>
-                      <Separator className="my-1 bg-slate-600/30" />
-                      <div className="max-h-60 overflow-y-auto scrollbar-thin">
-                        {category.subcategories.map((subcategory) => (
-                          <DropdownMenuItem
-                            key={subcategory}
-                            onClick={() => toggleSubcategory(category.value, subcategory)}
-                            className="text-sm cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white flex items-center justify-between"
-                          >
-                            <span>{subcategory}</span>
-                            {selectedSubcategories.includes(subcategory) && (
-                              <Check className="h-4 w-4 text-white" />
-                            )}
-                          </DropdownMenuItem>
-                        ))}
-                      </div>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </CollapsibleContent>
-      </Collapsible>
-
       {/* Advanced Search - Modern & Integrated */}
       <Card className="bg-white/10 backdrop-blur-sm border-white/20">
         <CardHeader className="pb-4">
@@ -1197,6 +1000,7 @@ const SearchJobs = () => {
                   ].reduce((a, b) => a + b, 0)} aktiva
                 </Badge>
               </div>
+              <div className="flex flex-wrap gap-2">
                 
                 {selectedLocations.map((location) => (
                   <Badge key={location} variant="secondary" className="gap-2 bg-white/10 hover:bg-white/20 text-white border-white/20">
@@ -1209,7 +1013,55 @@ const SearchJobs = () => {
                     </button>
                   </Badge>
                 ))}
-              <div className="flex flex-wrap gap-2">
+                
+                {selectedCategory !== 'all-categories' && (
+                  <Badge variant="default" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30">
+                    <span className="text-xs">{jobCategories.find(cat => cat.value === selectedCategory)?.label}</span>
+                    <button 
+                      onClick={() => {
+                        setSelectedCategory('all-categories');
+                        setSelectedSubcategories([]);
+                      }}
+                      className="ml-1 hover:bg-white/20 rounded p-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+                
+                {selectedSubcategories.map((subcategory) => (
+                  <Badge key={subcategory} variant="secondary" className="gap-2 bg-white/10 hover:bg-white/20 text-white border-white/20">
+                    <span className="text-xs">{subcategory}</span>
+                    <button 
+                      onClick={() => setSelectedSubcategories(prev => prev.filter(s => s !== subcategory))}
+                      className="ml-1 hover:bg-white/20 rounded p-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+                
+                {searchTerm && (
+                  <Badge variant="outline" className="gap-2 text-white border-white/30">
+                    <Search className="h-3 w-3" />
+                    <span className="text-xs">"{searchTerm}"</span>
+                    <button onClick={() => setSearchTerm('')} className="ml-1 hover:bg-white/20 rounded p-0.5">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+                
+                {jobTitleSearch && (
+                  <Badge variant="outline" className="gap-2 text-white border-white/30">
+                    <span className="text-xs">"{jobTitleSearch}"</span>
+                    <button onClick={() => setJobTitleSearch('')} className="ml-1 hover:bg-white/20 rounded p-0.5">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                )}
+              </div>
+            </div>
+          )}
                 {selectedCategory !== 'all-categories' && (
                 <Badge variant="default" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30">
                     <span className="text-xs">{jobCategories.find(cat => cat.value === selectedCategory)?.label}</span>
@@ -1552,6 +1404,83 @@ const SearchJobs = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Collapsible Job Categories Section */}
+      <Collapsible open={isJobCategoriesOpen} onOpenChange={setIsJobCategoriesOpen}>
+        <CollapsibleContent className="space-y-0">
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-lg animate-accordion-down">
+            <CardHeader className="text-center pb-6">
+              <CardTitle className="text-2xl text-white">Välj yrkesområde</CardTitle>
+              <CardDescription className="text-lg text-white">
+                Klicka på ett område för att se alla lediga jobb
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                {jobCategories.map((category) => (
+                  <DropdownMenu key={category.value}>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="lg"
+                        className={`relative h-auto min-h-[80px] sm:h-20 flex flex-col items-center gap-1 sm:gap-2 p-3 sm:p-4 transition-all duration-200 hover:scale-105 bg-white/10 backdrop-blur-sm border border-white/30 text-white hover:bg-white/20 ${
+                          selectedCategory === category.value 
+                            ? 'shadow-lg border-white/50 bg-white/20' 
+                            : 'hover:shadow-md hover:border-white/50'
+                        }`}
+                      >
+                        {/* Selection indicator */}
+                        {category.subcategories.some(sub => selectedSubcategories.includes(sub)) && (
+                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-white rounded-full flex items-center justify-center">
+                            <div className="w-2 h-2 bg-slate-700 rounded-full"></div>
+                          </div>
+                        )}
+                        <span className="text-xl sm:text-2xl">{category.icon}</span>
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs sm:text-sm font-medium text-center leading-tight px-1">
+                            {category.label}
+                          </span>
+                          <ChevronDown className="h-3 w-3 flex-shrink-0" />
+                        </div>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent 
+                      className="w-64 max-h-80 overflow-y-auto bg-slate-700/90 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
+                      side="bottom"
+                      align="start"
+                      alignOffset={-28}
+                      sideOffset={6}
+                      avoidCollisions={false}
+                    >
+                      <DropdownMenuItem
+                        onClick={() => handleSelectAllInCategory(category.value)}
+                        className="font-medium cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 text-white"
+                      >
+                        Allt inom {category.label}
+                      </DropdownMenuItem>
+                      <Separator className="my-1 bg-slate-600/30" />
+                      <div className="max-h-60 overflow-y-auto scrollbar-thin">
+                        {category.subcategories.map((subcategory) => (
+                          <DropdownMenuItem
+                            key={subcategory}
+                            onClick={() => toggleSubcategory(category.value, subcategory)}
+                            className="text-sm cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white flex items-center justify-between"
+                          >
+                            <span>{subcategory}</span>
+                            {selectedSubcategories.includes(subcategory) && (
+                              <Check className="h-4 w-4 text-white" />
+                            )}
+                          </DropdownMenuItem>
+                        ))}
+                      </div>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Results Section */}
       <div className="space-y-6" data-results>
