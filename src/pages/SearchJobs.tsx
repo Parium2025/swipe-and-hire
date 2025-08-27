@@ -958,10 +958,6 @@ const SearchJobs = () => {
       <Card className="bg-white/10 backdrop-blur-sm border-white/20">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-lg text-white">
-              <Filter className="h-5 w-5" />
-              Avancerad sökning
-            </CardTitle>
             {(searchTerm || jobTitleSearch || selectedLocation !== 'all-locations' || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentType !== 'all-types') && (
               <Button
                 variant="ghost" 
@@ -1213,7 +1209,7 @@ const SearchJobs = () => {
             <div className="space-y-3">
               <Label className="text-base font-medium text-white flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                Plats ({selectedLocations.length > 0 ? selectedLocations.length : 'alla'})
+                Plats
               </Label>
               <div className="relative">
                 <DropdownMenu>
