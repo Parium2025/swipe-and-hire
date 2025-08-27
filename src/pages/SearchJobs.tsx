@@ -1035,7 +1035,7 @@ const SearchJobs = () => {
                       onClick={() => setSelectedLocations(prev => prev.filter(l => l !== location))}
                       className="ml-1 hover:bg-white/20 rounded p-0.5"
                     >
-                      <X className="h-3 w-3" />
+                      <X className="h-4 w-4" />
                     </button>
                   </Badge>
                 ))}
@@ -1050,7 +1050,7 @@ const SearchJobs = () => {
                       }}
                       className="ml-1 hover:bg-white/20 rounded p-0.5"
                     >
-                      <X className="h-3 w-3" />
+                      <X className="h-4 w-4" />
                     </button>
                   </Badge>
                 )}
@@ -1062,17 +1062,17 @@ const SearchJobs = () => {
                       onClick={() => setSelectedSubcategories(prev => prev.filter(s => s !== subcategory))}
                       className="ml-1 hover:bg-white/20 rounded p-0.5"
                     >
-                      <X className="h-3 w-3" />
+                      <X className="h-4 w-4" />
                     </button>
                   </Badge>
                 ))}
                 
                 {searchTerm && (
                   <Badge variant="outline" className="gap-2 text-white border-white/30">
-                    <Search className="h-3 w-3" />
+                    <Search className="h-4 w-4" />
                     <span className="text-xs">"{searchTerm}"</span>
                     <button onClick={() => setSearchTerm('')} className="ml-1 hover:bg-white/20 rounded p-0.5">
-                      <X className="h-3 w-3" />
+                      <X className="h-4 w-4" />
                     </button>
                   </Badge>
                 )}
