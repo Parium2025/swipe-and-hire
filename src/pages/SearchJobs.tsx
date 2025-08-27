@@ -1134,7 +1134,9 @@ const SearchJobs = () => {
                             }}
                           >
                             <div className="flex items-center gap-3">
-                              <Building className="h-4 w-4 text-white/50" />
+                              <div className="w-5 h-5 shrink-0 flex items-center justify-center">
+                                <Building className="h-4 w-4 text-white/50" />
+                              </div>
                               <div>
                                 <div className="font-medium text-sm text-white">{company.name}</div>
                                 <div className="text-xs text-white/60">
@@ -1166,7 +1168,9 @@ const SearchJobs = () => {
                             }}
                           >
                             <div className="flex items-center gap-3">
-                              <Briefcase className="h-4 w-4 text-white/50" />
+                              <div className="w-5 h-5 shrink-0 flex items-center justify-center">
+                                <Briefcase className="h-4 w-4 text-white/50" />
+                              </div>
                               <div>
                                 <div className="font-medium text-sm text-white">{suggestion.title}</div>
                                 <div className="text-xs text-white/60">
