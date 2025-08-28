@@ -495,11 +495,19 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: boolean
       }
+      sanitize_filename: {
+        Args: { filename: string }
+        Returns: string
+      }
       test_reset_flow: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
       validate_file_upload: {
+        Args: { content_type: string; file_name: string; file_size: number }
+        Returns: boolean
+      }
+      validate_file_upload_secure: {
         Args: { content_type: string; file_name: string; file_size: number }
         Returns: boolean
       }
