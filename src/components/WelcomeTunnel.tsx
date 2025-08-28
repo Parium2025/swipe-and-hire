@@ -294,67 +294,91 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     if (!file) return;
 
     if (file.type.startsWith('video/')) {
-      // Strikt 30-sekunders kontroll - INGEN video laddas upp om vi inte kan bekräfta längden
+      // Förbättrad video-validering med specifika felmeddelanden
       let proceeded = false;
+      let metadataAttempted = false;
       
       const video = document.createElement('video');
       video.preload = 'metadata';
       video.muted = true;
+      video.crossOrigin = 'anonymous'; // Hjälper med vissa videofiler
 
       const revoke = () => {
         try { URL.revokeObjectURL(video.src); } catch {}
+      };
+
+      const showError = (title: string, description: string) => {
+        toast({ title, description, variant: "destructive" });
       };
 
       video.onloadedmetadata = () => {
         revoke();
         if (proceeded) return;
         proceeded = true;
+        metadataAttempted = true;
         
-        if (Number.isFinite(video.duration) && video.duration > 0) {
-          if (video.duration <= 30) {
-            uploadProfileMedia(file);
-          } else {
-            toast({
-              title: "Video för lång",
-              description: `Videon är ${Math.round(video.duration)} sekunder. Max 30 sekunder tillåtet.`,
-              variant: "destructive"
-            });
-          }
+        console.log('Video duration:', video.duration, 'seconds');
+        
+        if (!Number.isFinite(video.duration) || video.duration <= 0) {
+          showError(
+            "Ogiltig videofil",
+            "Videon har ingen giltig längdning. Välj en annan fil."
+          );
+        } else if (video.duration > 30) {
+          showError(
+            "Video för lång",
+            `Videon är ${Math.round(video.duration)} sekunder. Max 30 sekunder tillåtet.`
+          );
         } else {
-          toast({
-            title: "Kunde inte läsa videolängd",
-            description: "Välj en annan video. Vi måste kunna bekräfta att den är max 30 sekunder.",
-            variant: "destructive"
-          });
+          // Video är OK - ladda upp
+          uploadProfileMedia(file);
         }
       };
 
-      video.onerror = () => {
+      video.onerror = (e) => {
         revoke();
         if (proceeded) return;
         proceeded = true;
         
-        toast({
-          title: "Ogiltig videofil",
-          description: "Kunde inte läsa videon. Prova med en annan fil.",
-          variant: "destructive"
-        });
+        console.error('Video error:', e);
+        showError(
+          "Ogiltig videofil", 
+          "Filen är skadad eller har ett format som inte stöds."
+        );
       };
 
-      // Timeout: Om metadata inte laddar inom 5 sekunder, blockera helt
+      // Längre timeout för stora filer + mer specifik feedback
       setTimeout(() => {
         if (!proceeded) {
           revoke();
           proceeded = true;
-          toast({
-            title: "Timeout vid videoladdning",
-            description: "Kunde inte validera videolängden. Prova med en mindre fil.",
-            variant: "destructive"
-          });
+          
+          if (!metadataAttempted) {
+            showError(
+              "Timeout vid videoladdning",
+              "Filen är för stor eller saknas. Prova med en mindre videofil."
+            );
+          }
         }
-      }, 5000);
+      }, 8000); // Längre timeout för stora filer
 
-      video.src = URL.createObjectURL(file);
+      // Lyssna på progress för att ge feedback om laddning
+      video.onloadstart = () => {
+        console.log('Started loading video metadata...');
+      };
+
+      video.onprogress = () => {
+        console.log('Loading video metadata...');
+      };
+
+      try {
+        video.src = URL.createObjectURL(file);
+      } catch (error) {
+        showError(
+          "Fel vid filhantering",
+          "Kunde inte läsa videofilen. Kontrollera att det är en giltig videofil."
+        );
+      }
     } else if (file.type.startsWith('image/')) {
       // Handle image - open editor
       const imageUrl = URL.createObjectURL(file);
