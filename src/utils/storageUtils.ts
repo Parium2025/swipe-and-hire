@@ -63,3 +63,30 @@ export const getStoragePathFromUrl = (url: string): string | null => {
     return null;
   }
 };
+
+/**
+ * Converts old public URLs to secure signed URLs
+ * This is needed after making storage bucket private
+ */
+export const convertToSignedUrl = async (
+  url: string,
+  bucket: string = 'job-applications',
+  expiresIn: number = 86400 // 24 hours default
+): Promise<string | null> => {
+  if (!url) return null;
+  
+  // If it's already a signed URL, return as-is
+  if (url.includes('/storage/v1/object/sign/')) {
+    return url;
+  }
+  
+  // Extract the path from the public URL
+  const path = getStoragePathFromUrl(url);
+  if (!path) {
+    console.warn('Could not extract path from URL:', url);
+    return null;
+  }
+  
+  // Create a new signed URL
+  return await createSignedUrl(bucket, path, expiresIn);
+};

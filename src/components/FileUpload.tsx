@@ -4,7 +4,7 @@ import { Upload, X, File, Video, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { createSignedUrl } from '@/utils/storageUtils';
+import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
 
 interface FileUploadProps {
   onFileUploaded: (url: string, fileName: string) => void;
@@ -123,16 +123,31 @@ const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   if (currentFile) {
+    // Convert old public URLs to signed URLs for display
+    const displayUrl = currentFile.url.includes('/storage/v1/object/public/') 
+      ? '#' // Placeholder while converting
+      : currentFile.url;
+
     return (
       <div className="border border-border rounded-md p-4 bg-muted/30">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {getFileIcon(currentFile.name)}
             <a
-              href={currentFile.url}
+              href={displayUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-medium truncate max-w-[200px] text-white hover:text-primary underline cursor-pointer"
+              onClick={async (e) => {
+                // For old public URLs, convert to signed URL on click
+                if (currentFile.url.includes('/storage/v1/object/public/')) {
+                  e.preventDefault();
+                  const signedUrl = await convertToSignedUrl(currentFile.url);
+                  if (signedUrl) {
+                    window.open(signedUrl, '_blank');
+                  }
+                }
+              }}
             >
               {currentFile.name}
             </a>

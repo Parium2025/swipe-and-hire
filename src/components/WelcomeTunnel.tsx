@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,7 @@ import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRig
 import ProfileVideo from '@/components/ProfileVideo';
 import SwipeIntro from '@/components/SwipeIntro';
 import PostalCodeSelector from '@/components/PostalCodeSelector';
-import { createSignedUrl } from '@/utils/storageUtils';
+import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
 
 interface WelcomeTunnelProps {
   onComplete: () => void;
@@ -142,6 +142,44 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     const validation = validatePhoneNumber(value);
     setPhoneError(validation.error);
   };
+
+  // Convert old public URLs to signed URLs when component mounts
+  useEffect(() => {
+    const convertExistingUrls = async () => {
+      if (profile?.profile_image_url || profile?.video_url || profile?.cv_url) {
+        const updates: any = {};
+        
+        // Handle profile image/video
+        if (profile.video_url) {
+          const signedVideoUrl = await convertToSignedUrl(profile.video_url);
+          if (signedVideoUrl) {
+            updates.profileImageUrl = signedVideoUrl;
+            updates.profileMediaType = 'video';
+          }
+        } else if (profile.profile_image_url) {
+          const signedImageUrl = await convertToSignedUrl(profile.profile_image_url);
+          if (signedImageUrl) {
+            updates.profileImageUrl = signedImageUrl;
+            updates.profileMediaType = 'image';
+          }
+        }
+        
+        // Handle CV
+        if (profile.cv_url) {
+          const signedCvUrl = await convertToSignedUrl(profile.cv_url);
+          if (signedCvUrl) {
+            updates.cvUrl = signedCvUrl;
+          }
+        }
+        
+        if (Object.keys(updates).length > 0) {
+          setFormData(prev => ({ ...prev, ...updates }));
+        }
+      }
+    };
+    
+    convertExistingUrls();
+  }, [profile]);
 
   const totalSteps = 7; // Introduktion + 5 profil steg + slutskärm
   const progress = currentStep / (totalSteps - 1) * 100;
