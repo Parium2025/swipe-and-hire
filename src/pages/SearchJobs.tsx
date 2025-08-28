@@ -1234,15 +1234,13 @@ const SearchJobs = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
-                  className="w-80 max-h-96 overflow-hidden bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl rounded-lg text-white fixed"
+                  className="w-80 max-h-96 overflow-hidden bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
                   side="bottom"
                   align="center"
                   alignOffset={0}
                   sideOffset={6}
                   avoidCollisions={false}
-                  sticky="always"
                   onCloseAutoFocus={(e) => e.preventDefault()}
-                  style={{ zIndex: 9999, position: 'fixed' }}
                 >
                   {/* Clear selection option */}
                   {(selectedCategory !== 'all-categories' || selectedSubcategories.length > 0) && (
