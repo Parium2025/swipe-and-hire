@@ -294,23 +294,50 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     if (!file) return;
 
     if (file.type.startsWith('video/')) {
-      // Handle video upload (existing logic)
+      // Robust metadata-läsning med fallback så att uppladdning alltid triggas
+      let proceeded = false;
+      const proceedUpload = () => {
+        if (proceeded) return;
+        proceeded = true;
+        uploadProfileMedia(file);
+      };
+
       const video = document.createElement('video');
       video.preload = 'metadata';
-      
+      video.muted = true; // förbättrar metadata-laddning i vissa webbläsare
+
+      const revoke = () => {
+        try { URL.revokeObjectURL(video.src); } catch {}
+      };
+
       video.onloadedmetadata = () => {
-        window.URL.revokeObjectURL(video.src);
-        if (video.duration <= 30) { // Max 30 seconds
-          uploadProfileMedia(file);
+        revoke();
+        // Om vi får duration, respektera 30s-gränsen, annars ladda upp ändå
+        if (Number.isFinite(video.duration) && video.duration > 0) {
+          if (video.duration <= 30) {
+            proceedUpload();
+          } else {
+            toast({
+              title: "Video för lång",
+              description: "Videon får vara max 30 sekunder lång.",
+              variant: "destructive"
+            });
+          }
         } else {
-          toast({
-            title: "Video för lång",
-            description: "Videon får vara max 30 sekunder lång.",
-            variant: "destructive"
-          });
+          // Okänd duration -> tillåt uppladdning
+          proceedUpload();
         }
       };
-      
+
+      video.onerror = () => {
+        revoke();
+        // Vid fel läser vi inte metadata -> tillåt uppladdning så att det aldrig fastnar
+        proceedUpload();
+      };
+
+      // Fallback-timeout: om metadata inte laddar, ladda upp ändå
+      setTimeout(proceedUpload, 3500);
+
       video.src = URL.createObjectURL(file);
     } else if (file.type.startsWith('image/')) {
       // Handle image - open editor
