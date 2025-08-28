@@ -351,118 +351,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      // Först kontrollera om e-postadressen finns i systemet
-      const { data: userData, error: userCheckError } = await supabase
-        .from('profiles')
-        .select('user_id')
-        .eq('user_id', 'NOT_EXISTS') // Dummy query först
-        .limit(1);
-
-      // Kontrollera om användaren finns via en auth query
-      try {
-        const response = await fetch(`https://rvtsfnaqlnggfkoqygbm.supabase.co/rest/v1/profiles?select=user_id&limit=1`, {
-          method: 'HEAD', // Bara för att testa anslutningen
-          headers: {
-            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2dHNmbmFxbG5nZ2Zrb3F5Z2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3MjU3OTIsImV4cCI6MjA2OTMwMTc5Mn0.it7eb24bwKvZt7p6Co5tZ7Dpu7AA-InLdJu_boq7HmA'
-          }
-        });
-      } catch (fetchError) {
-        // Ignorera fetch fel, fortsätt med vanlig inloggning
-      }
-
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (error) {
-        // Specialhantering för "Invalid login credentials"
+        // Förenklad felhantering - inga användaruppräkningskontroller av säkerhetsskäl
         if (error.message === 'Invalid login credentials') {
-          // Kolla om användaren faktiskt finns via vår edge function
-          try {
-            const { data: userCheck, error: checkError } = await supabase.functions.invoke('check-user-exists', {
-              body: { email }
-            });
-
-            if (checkError) {
-              console.error('Error checking user:', checkError);
-              throw checkError;
-            }
-
-            if (userCheck.userExists && userCheck.isConfirmed) {
-              // Användaren finns och är bekräftad - detta är fel lösenord
-              toast({
-                title: "Fel lösenord",
-                description: "Lösenordet stämmer inte. Har du glömt det? Tryck på 'Återställ lösenord' nedan.",
-                variant: "destructive",
-                duration: 8000
-              });
-              
-              return { 
-                error: { 
-                  ...error,
-                  message: 'Invalid login credentials',
-                  showResetPassword: true
-                }
-              };
-            } else if (!userCheck.userExists) {
-              // Användaren finns inte alls - visa registrera-meddelande
-              toast({
-                title: "Vi hittar inget konto med den här e-postadressen",
-                description: "Vill du komma igång? Tryck på Registrera för att skapa ett konto direkt.",
-                variant: "default",
-                duration: 8000
-              });
-              
-              return { 
-                error: { 
-                  ...error,
-                  message: 'User not found',
-                  showRegister: true
-                }
-              };
-            } else {
-              // Användaren finns men är inte bekräftad
-              toast({
-                title: "Kontot är inte bekräftat",
-                description: "Du behöver bekräfta din e-post först. Kolla din inkorg eller begär en ny bekräftelselänk.",
-                variant: "default",
-                duration: 8000
-              });
-              
-              return { 
-                error: { 
-                  ...error,
-                  code: 'email_not_confirmed',
-                  message: 'Email not confirmed'
-                }
-              };
-            }
-          } catch (checkError) {
-            // Fallback om edge function misslyckas
-            toast({
-              title: "Inloggning misslyckades",
-              description: "Kontrollera din e-post och lösenord. Har du glömt lösenordet? Tryck på 'Återställ lösenord' nedan.",
-              variant: "destructive",
-              duration: 8000
-            });
-          }
+          toast({
+            title: "Inloggning misslyckades",
+            description: "Fel e-postadress eller lösenord. Kontrollera dina uppgifter och försök igen.",
+            variant: "destructive"
+          });
+        } else if (error.message === 'Email not confirmed') {
+          toast({
+            title: "Kontot är inte bekräftat",
+            description: "Du behöver bekräfta din e-post först. Kolla din inkorg eller begär en ny bekräftelselänk.",
+            variant: "default",
+            duration: 8000
+          });
           
           return { 
             error: { 
               ...error,
-              userFriendlyMessage: "Inloggning misslyckades"
+              code: 'email_not_confirmed',
+              message: 'Email not confirmed'
             }
           };
+        } else {
+          toast({
+            title: "Inloggningsfel",
+            description: error.message,
+            variant: "destructive"
+          });
         }
-        
-        toast({
-          title: "Inloggningsfel",
-          description: error.code === 'email_not_confirmed' 
-            ? "Du behöver bekräfta din e-post först."
-            : error.message,
-          variant: "destructive"
-        });
         return { error };
       }
 
@@ -477,7 +400,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }, 500);
 
       return {};
-    } catch (error) {
+    } catch (error: any) {
+      toast({
+        title: "Inloggningsfel",
+        description: "Ett oväntat fel inträffade. Försök igen.",
+        variant: "destructive"
+      });
       return { error };
     }
   };
