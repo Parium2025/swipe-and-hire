@@ -17,6 +17,7 @@ import ProfileVideo from '@/components/ProfileVideo';
 import ImageEditor from '@/components/ImageEditor';
 import PostalCodeSelector from '@/components/PostalCodeSelector';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { createSignedUrl } from '@/utils/storageUtils';
 
 const Profile = () => {
   const { profile, userRole, updateProfile, user } = useAuth();
@@ -202,11 +203,13 @@ const Profile = () => {
       
       if (uploadError) throw uploadError;
       
-      const { data: { publicUrl } } = supabase.storage
-        .from('job-applications')
-        .getPublicUrl(fileName);
+      // Use signed URL for secure access
+      const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
+      if (!signedUrl) {
+        throw new Error('Could not create secure access URL');
+      }
       
-      const mediaUrl = `${publicUrl}?t=${Date.now()}`;
+      const mediaUrl = `${signedUrl}&t=${Date.now()}`;
       
       // Update the profile with the correct fields based on file type
       const updates: any = {};
@@ -254,11 +257,13 @@ const Profile = () => {
       
       if (uploadError) throw uploadError;
       
-      const { data: { publicUrl } } = supabase.storage
-        .from('job-applications')
-        .getPublicUrl(fileName);
+      // Use signed URL for secure access
+      const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
+      if (!signedUrl) {
+        throw new Error('Could not create secure access URL');
+      }
       
-      const coverUrl = `${publicUrl}?t=${Date.now()}`;
+      const coverUrl = `${signedUrl}&t=${Date.now()}`;
       
       setCoverImageUrl(coverUrl);
       
@@ -342,11 +347,13 @@ const Profile = () => {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('job-applications')
-        .getPublicUrl(fileName);
+      // Use signed URL for secure access
+      const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
+      if (!signedUrl) {
+        throw new Error('Could not create secure access URL');
+      }
 
-      const imageUrl = `${publicUrl}?t=${Date.now()}`;
+      const imageUrl = `${signedUrl}&t=${Date.now()}`;
       
       await updateProfile({ 
         profile_image_url: imageUrl,
@@ -389,11 +396,13 @@ const Profile = () => {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('job-applications')
-        .getPublicUrl(fileName);
+      // Use signed URL for secure access
+      const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
+      if (!signedUrl) {
+        throw new Error('Could not create secure access URL');
+      }
 
-      const coverUrl = `${publicUrl}?t=${Date.now()}`;
+      const coverUrl = `${signedUrl}&t=${Date.now()}`;
       
       setCoverImageUrl(coverUrl);
       

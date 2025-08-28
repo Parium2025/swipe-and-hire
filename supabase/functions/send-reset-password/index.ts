@@ -9,10 +9,11 @@ const supabase = createClient(
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
+// Restricted CORS - only allow trusted domains
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Origin": "https://09c4e686-17a9-467e-89b1-3cf832371d49.sandbox.lovable.dev",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 interface ResetPasswordRequest {
@@ -45,29 +46,33 @@ const handler = async (req: Request): Promise<Response> => {
     const issued = Date.now();
     
     // Använd Supabase's direkt länk för bättre kompatibilitet
-    const { data, error } = await supabase.auth.admin.generateLink({
-      type: 'recovery',
-      email: email,
-      options: {
-        redirectTo: `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&issued=${issued}`
+    // SECURITY: Always return success to prevent user enumeration
+    // Don't reveal if the user exists or not
+    let resetUrl = null;
+    
+    try {
+      const { data, error } = await supabase.auth.admin.generateLink({
+        type: 'recovery',
+        email: email,
+        options: {
+          redirectTo: `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&issued=${issued}`
+        }
+      });
+
+      if (!error && data.properties?.action_link) {
+        resetUrl = data.properties.action_link;
       }
-    });
-
-    if (error) {
-      console.error('Error generating reset link:', error);
-      throw error;
+    } catch (linkError) {
+      // Don't log errors that might reveal user existence
+      console.log('Password reset attempted for:', email.substring(0, 3) + '***');
     }
 
-    const resetUrl = data.properties?.action_link;
-
-    if (!resetUrl) {
-      throw new Error('No reset URL generated');
-    }
-
-    console.log('🔍 SUPABASE GENERATED RESET URL:', resetUrl);
-    console.log('✅ FINAL RESET URL (direct to auth):', resetUrl);
-
-    const emailResponse = await resend.emails.send({
+    // Only send email if we have a valid reset URL (user exists)
+    let emailResponse = null;
+    if (resetUrl) {
+      console.log('✅ Sending reset email for valid user');
+      
+      emailResponse = await resend.emails.send({
       from: "Parium <noreply@parium.se>",
       to: [email],
       subject: "Återställ ditt lösenord - Parium",
@@ -147,13 +152,17 @@ Parium AB, Stockholm`,
         </body>
         </html>
       `,
-    });
+      });
+      
+      console.log("Password reset email sent successfully:", emailResponse?.data?.id);
+    } else {
+      console.log("Password reset attempted for non-existent user");
+    }
 
-    console.log("Password reset email sent successfully:", emailResponse);
-
+    // SECURITY: Always return the same success message regardless of whether user exists
     return new Response(JSON.stringify({ 
       success: true, 
-      id: emailResponse.data?.id 
+      message: "If an account with that email exists, you will receive a password reset link shortly."
     }), {
       status: 200,
       headers: {

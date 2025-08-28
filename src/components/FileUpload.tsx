@@ -4,6 +4,7 @@ import { Upload, X, File, Video, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { createSignedUrl } from '@/utils/storageUtils';
 
 interface FileUploadProps {
   onFileUploaded: (url: string, fileName: string) => void;
@@ -53,11 +54,13 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('job-applications')
-        .getPublicUrl(fileName);
+      // Use signed URL for secure access
+      const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
+      if (!signedUrl) {
+        throw new Error('Could not create secure access URL');
+      }
 
-      onFileUploaded(publicUrl, file.name);
+      onFileUploaded(signedUrl, file.name);
       
       toast({
         title: "Fil uppladdad!",

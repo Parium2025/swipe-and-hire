@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { User, MapPin, Building, FileText, Camera } from 'lucide-react';
 import FileUpload from './FileUpload';
+import { createSignedUrl } from '@/utils/storageUtils';
 
 const ProfileSetup = () => {
   const { profile, userRole, updateProfile, user } = useAuth();
@@ -46,12 +47,14 @@ const ProfileSetup = () => {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('job-applications')
-        .getPublicUrl(fileName);
+      // Use signed URL for secure access
+      const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
+      if (!signedUrl) {
+        throw new Error('Could not create secure access URL');
+      }
 
       // Add cache busting parameter
-      const imageUrl = `${publicUrl}?t=${Date.now()}`;
+      const imageUrl = `${signedUrl}&t=${Date.now()}`;
       setProfileImageUrl(imageUrl);
       
       toast({

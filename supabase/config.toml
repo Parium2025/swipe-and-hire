@@ -13,7 +13,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.delete-user]
-verify_jwt = false
+verify_jwt = true
 
 [functions.resend-confirmation]
 verify_jwt = false
@@ -25,9 +25,6 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.redirect-confirm]
-verify_jwt = false
-
-[functions.check-user-exists]
 verify_jwt = false
 
 [functions.redirect-recovery]

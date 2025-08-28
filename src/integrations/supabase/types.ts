@@ -412,6 +412,10 @@ export type Database = {
         Args: { birth_date: string }
         Returns: number
       }
+      can_view_job_seeker_profile: {
+        Args: { employer_uuid: string; seeker_uuid: string }
+        Returns: boolean
+      }
       cleanup_expired_confirmations: {
         Args: Record<PropertyKey, never>
         Returns: undefined

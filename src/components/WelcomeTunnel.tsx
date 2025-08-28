@@ -17,6 +17,7 @@ import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRig
 import ProfileVideo from '@/components/ProfileVideo';
 import SwipeIntro from '@/components/SwipeIntro';
 import PostalCodeSelector from '@/components/PostalCodeSelector';
+import { createSignedUrl } from '@/utils/storageUtils';
 
 interface WelcomeTunnelProps {
   onComplete: () => void;
@@ -190,11 +191,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       
       if (uploadError) throw uploadError;
       
-      const { data: { publicUrl } } = supabase.storage
-        .from('job-applications')
-        .getPublicUrl(fileName);
+      // Use signed URL for secure access
+      const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
+      if (!signedUrl) {
+        throw new Error('Could not create secure access URL');
+      }
       
-      const mediaUrl = `${publicUrl}?t=${Date.now()}`;
+      const mediaUrl = `${signedUrl}&t=${Date.now()}`;
       const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
       
       handleInputChange('profileImageUrl', mediaUrl);
@@ -231,11 +234,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       
       if (uploadError) throw uploadError;
       
-      const { data: { publicUrl } } = supabase.storage
-        .from('job-applications')
-        .getPublicUrl(fileName);
+      // Use signed URL for secure access
+      const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
+      if (!signedUrl) {
+        throw new Error('Could not create secure access URL');
+      }
       
-      const coverUrl = `${publicUrl}?t=${Date.now()}`;
+      const coverUrl = `${signedUrl}&t=${Date.now()}`;
       
       handleInputChange('coverImageUrl', coverUrl);
     } catch (error) {
@@ -306,11 +311,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('job-applications')
-        .getPublicUrl(fileName);
+      // Use signed URL for secure access
+      const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
+      if (!signedUrl) {
+        throw new Error('Could not create secure access URL');
+      }
 
-      const imageUrl = `${publicUrl}?t=${Date.now()}`;
+      const imageUrl = `${signedUrl}&t=${Date.now()}`;
       
       handleInputChange('profileImageUrl', imageUrl);
       handleInputChange('profileMediaType', 'image');
@@ -345,11 +352,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('job-applications')
-        .getPublicUrl(fileName);
+      // Use signed URL for secure access
+      const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
+      if (!signedUrl) {
+        throw new Error('Could not create secure access URL');
+      }
 
-      const coverUrl = `${publicUrl}?t=${Date.now()}`;
+      const coverUrl = `${signedUrl}&t=${Date.now()}`;
       
       handleInputChange('coverImageUrl', coverUrl);
       
