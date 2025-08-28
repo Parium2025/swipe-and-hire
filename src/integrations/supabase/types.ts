@@ -232,6 +232,50 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_view_permissions: {
+        Row: {
+          created_at: string
+          employer_id: string
+          expires_at: string | null
+          granted_at: string
+          id: string
+          is_active: boolean
+          job_posting_id: string | null
+          job_seeker_id: string
+          permission_type: string
+        }
+        Insert: {
+          created_at?: string
+          employer_id: string
+          expires_at?: string | null
+          granted_at?: string
+          id?: string
+          is_active?: boolean
+          job_posting_id?: string | null
+          job_seeker_id: string
+          permission_type?: string
+        }
+        Update: {
+          created_at?: string
+          employer_id?: string
+          expires_at?: string | null
+          granted_at?: string
+          id?: string
+          is_active?: boolean
+          job_posting_id?: string | null
+          job_seeker_id?: string
+          permission_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_view_permissions_job_posting_id_fkey"
+            columns: ["job_posting_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           availability: string | null
