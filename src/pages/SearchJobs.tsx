@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Search, MapPin, Clock, Building, Filter, Heart, ExternalLink, X, ChevronDown, Check, Briefcase } from 'lucide-react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { createSmartSearchConditions, expandSearchTerms } from '@/lib/smartSearch';
@@ -35,7 +34,6 @@ const SearchJobs = () => {
   const [selectedCategory, setSelectedCategory] = useState('all-categories');
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
   const [selectedEmploymentType, setSelectedEmploymentType] = useState('all-types');
-  const [isJobCategoriesOpen, setIsJobCategoriesOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const isMobile = useIsMobile();
@@ -1216,34 +1214,141 @@ const SearchJobs = () => {
               )}
             </div>
 
-            {/* Yrke Filter - Opens collapsible categories */}
+            {/* Yrke Filter - Direct dropdown */}
             <div className="space-y-3">
               <Label className="text-base font-medium text-white flex items-center gap-2">
                 <Filter className="h-4 w-4" />
                 Yrkesområde
               </Label>
-              <Button
-                onClick={() => setIsJobCategoriesOpen(!isJobCategoriesOpen)}
-                variant="outline"
-                className={`w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between ${
-                  isJobCategoriesOpen ? 'bg-white/15 border-white/40' : ''
-                }`}
-              >
-                <span className="truncate">
-                  {selectedCategory !== 'all-categories' 
-                    ? jobCategories.find(cat => cat.value === selectedCategory)?.label
-                    : selectedSubcategories.length > 0 
-                    ? `${selectedSubcategories.length} yrken valda`
-                    : 'Välj yrkesområde'
-                  }
-                </span>
-                <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                  >
+                    <span className="truncate">
+                      {selectedCategory !== 'all-categories' 
+                        ? jobCategories.find(cat => cat.value === selectedCategory)?.label
+                        : selectedSubcategories.length > 0 
+                        ? `${selectedSubcategories.length} yrken valda`
+                        : 'Välj yrkesområde'
+                      }
+                    </span>
+                    <div className="flex items-center gap-2">
+                      {(selectedCategory !== 'all-categories' || selectedSubcategories.length > 0) && (
+                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      )}
+                      <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent 
+                  className="w-80 max-h-96 overflow-hidden bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
+                  side="bottom"
+                  align="start"
+                  alignOffset={0}
+                  sideOffset={6}
+                  avoidCollisions={false}
+                >
+                  {/* Clear selection option */}
                   {(selectedCategory !== 'all-categories' || selectedSubcategories.length > 0) && (
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                    <>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setSelectedCategory('all-categories');
+                          setSelectedSubcategories([]);
+                        }}
+                        className="font-medium cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 text-red-300 border-b border-slate-600/30"
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Rensa val
+                      </DropdownMenuItem>
+                    </>
                   )}
-                  <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform ${isJobCategoriesOpen ? 'rotate-180' : ''}`} />
-                </div>
-              </Button>
+                  
+                  {/* Job categories with subcategory dropdowns */}
+                  <div className="max-h-80 overflow-y-auto">
+                    {jobCategories.map((category) => (
+                      <div key={category.value}>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            if (selectedCategory === category.value) {
+                              setSelectedCategory('all-categories');
+                              setSelectedSubcategories([]);
+                            } else {
+                              setSelectedCategory(category.value);
+                              setSelectedSubcategories([]);
+                            }
+                          }}
+                          className="font-medium cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white flex items-center justify-between border-b border-slate-600/30"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">{category.icon}</span>
+                            <span>{category.label}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {selectedCategory === category.value && (
+                              <Check className="h-4 w-4 text-white" />
+                            )}
+                            {category.subcategories.some(sub => selectedSubcategories.includes(sub)) && (
+                              <div className="w-2 h-2 bg-white rounded-full"></div>
+                            )}
+                          </div>
+                        </DropdownMenuItem>
+                        
+                        {/* Show subcategories if category is selected or has selected subcategories */}
+                        {(selectedCategory === category.value || category.subcategories.some(sub => selectedSubcategories.includes(sub))) && (
+                          <div className="bg-slate-800/50 border-l-2 border-slate-600/50 ml-4">
+                            <DropdownMenuItem
+                              onClick={() => {
+                                if (selectedSubcategories.length === category.subcategories.length && 
+                                    category.subcategories.every(sub => selectedSubcategories.includes(sub))) {
+                                  // All selected, deselect all from this category
+                                  setSelectedSubcategories(prev => prev.filter(sub => !category.subcategories.includes(sub)));
+                                } else {
+                                  // Select all from this category
+                                  setSelectedSubcategories(prev => {
+                                    const filtered = prev.filter(sub => !category.subcategories.includes(sub));
+                                    return [...filtered, ...category.subcategories];
+                                  });
+                                }
+                              }}
+                              className="text-sm cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white/90 italic"
+                            >
+                              <span className="ml-4">
+                                {category.subcategories.every(sub => selectedSubcategories.includes(sub))
+                                  ? 'Avmarkera alla'
+                                  : 'Välj alla'
+                                }
+                              </span>
+                            </DropdownMenuItem>
+                            {category.subcategories.map((subcategory) => (
+                              <DropdownMenuItem
+                                key={subcategory}
+                                onClick={() => {
+                                  const isSelected = selectedSubcategories.includes(subcategory);
+                                  if (isSelected) {
+                                    setSelectedSubcategories(prev => prev.filter(s => s !== subcategory));
+                                  } else {
+                                    setSelectedSubcategories(prev => [...prev, subcategory]);
+                                    setSelectedCategory(category.value);
+                                  }
+                                }}
+                                className="text-sm cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white flex items-center justify-between"
+                              >
+                                <span className="ml-6">{subcategory}</span>
+                                {selectedSubcategories.includes(subcategory) && (
+                                  <Check className="h-4 w-4 text-white" />
+                                )}
+                              </DropdownMenuItem>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Multi-Select Location */}
@@ -1424,82 +1529,7 @@ const SearchJobs = () => {
         </CardContent>
       </Card>
 
-      {/* Collapsible Job Categories Section */}
-      <Collapsible open={isJobCategoriesOpen} onOpenChange={setIsJobCategoriesOpen}>
-        <CollapsibleContent className="space-y-0">
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-lg animate-accordion-down">
-            <CardHeader className="text-center pb-6">
-              <CardTitle className="text-2xl text-white">Välj yrkesområde</CardTitle>
-              <CardDescription className="text-lg text-white">
-                Klicka på ett område för att se alla lediga jobb
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                {jobCategories.map((category) => (
-                  <DropdownMenu key={category.value}>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="lg"
-                        className={`relative h-auto min-h-[80px] sm:h-20 flex flex-col items-center gap-1 sm:gap-2 p-3 sm:p-4 transition-all duration-200 hover:scale-105 bg-white/10 backdrop-blur-sm border border-white/30 text-white hover:bg-white/20 ${
-                          selectedCategory === category.value 
-                            ? 'shadow-lg border-white/50 bg-white/20' 
-                            : 'hover:shadow-md hover:border-white/50'
-                        }`}
-                      >
-                        {/* Selection indicator */}
-                        {category.subcategories.some(sub => selectedSubcategories.includes(sub)) && (
-                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-white rounded-full flex items-center justify-center">
-                            <div className="w-2 h-2 bg-slate-700 rounded-full"></div>
-                          </div>
-                        )}
-                        <span className="text-xl sm:text-2xl">{category.icon}</span>
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs sm:text-sm font-medium text-center leading-tight px-1">
-                            {category.label}
-                          </span>
-                          <ChevronDown className="h-3 w-3 flex-shrink-0" />
-                        </div>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent 
-                      className="w-64 max-h-80 overflow-y-auto bg-slate-700/90 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
-                      side="bottom"
-                      align="start"
-                      alignOffset={-28}
-                      sideOffset={6}
-                      avoidCollisions={false}
-                    >
-                      <DropdownMenuItem
-                        onClick={() => handleSelectAllInCategory(category.value)}
-                        className="font-medium cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 text-white"
-                      >
-                        Allt inom {category.label}
-                      </DropdownMenuItem>
-                      <Separator className="my-1 bg-slate-600/30" />
-                      <div className="max-h-60 overflow-y-auto scrollbar-thin">
-                        {category.subcategories.map((subcategory) => (
-                          <DropdownMenuItem
-                            key={subcategory}
-                            onClick={() => toggleSubcategory(category.value, subcategory)}
-                            className="text-sm cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white flex items-center justify-between"
-                          >
-                            <span>{subcategory}</span>
-                            {selectedSubcategories.includes(subcategory) && (
-                              <Check className="h-4 w-4 text-white" />
-                            )}
-                          </DropdownMenuItem>
-                        ))}
-                      </div>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </CollapsibleContent>
-      </Collapsible>
+      {/* Removed collapsible job categories section - now handled in dropdown above */}
 
       {/* Results Section */}
       <div className="space-y-6" data-results>
