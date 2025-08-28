@@ -283,6 +283,7 @@ export type Database = {
           birth_date: string | null
           company_name: string | null
           created_at: string
+          cv_filename: string | null
           cv_url: string | null
           employment_status: string | null
           first_name: string | null
@@ -309,6 +310,7 @@ export type Database = {
           birth_date?: string | null
           company_name?: string | null
           created_at?: string
+          cv_filename?: string | null
           cv_url?: string | null
           employment_status?: string | null
           first_name?: string | null
@@ -335,6 +337,7 @@ export type Database = {
           birth_date?: string | null
           company_name?: string | null
           created_at?: string
+          cv_filename?: string | null
           cv_url?: string | null
           employment_status?: string | null
           first_name?: string | null

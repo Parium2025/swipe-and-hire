@@ -47,7 +47,7 @@ const Profile = () => {
   const [birthDate, setBirthDate] = useState(profile?.birth_date || '');
   const [profileImageUrl, setProfileImageUrl] = useState(profile?.profile_image_url || '');
   const [cvUrl, setCvUrl] = useState((profile as any)?.cv_url || '');
-  const [cvFileName, setCvFileName] = useState('');
+  const [cvFileName, setCvFileName] = useState((profile as any)?.cv_filename || '');
   
   // Extended profile fields that we'll need to add to database
   const [employmentStatus, setEmploymentStatus] = useState('');
@@ -88,16 +88,7 @@ const Profile = () => {
       setBirthDate(values.birthDate);
       setProfileImageUrl(values.profileImageUrl);
       setCvUrl(values.cvUrl);
-      // Extract filename from URL if available
-      if (values.cvUrl) {
-        const urlParts = values.cvUrl.split('/');
-        const fullFileName = urlParts[urlParts.length - 1];
-        // Extract the original filename after timestamp prefix
-        const match = fullFileName.match(/^\d+-(.+)$/);
-        setCvFileName(match ? match[1] : fullFileName.split('?')[0]);
-      } else {
-        setCvFileName('');
-      }
+      setCvFileName((profile as any)?.cv_filename || '');
       setCompanyName(values.companyName);
       setOrgNumber(values.orgNumber);
       setEmploymentStatus(values.employmentStatus);
@@ -546,6 +537,7 @@ const Profile = () => {
         birth_date: birthDate || null,
         profile_image_url: profileImageUrl || null,
         cv_url: cvUrl || null,
+        cv_filename: cvFileName || null,
         employment_status: employmentStatus || null,
         working_hours: workingHours || null,
         availability: availability || null,
