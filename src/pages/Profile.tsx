@@ -88,7 +88,20 @@ const Profile = () => {
       setBirthDate(values.birthDate);
       setProfileImageUrl(values.profileImageUrl);
       setCvUrl(values.cvUrl);
-      setCvFileName((profile as any)?.cv_filename || '');
+      // Set filename from database or extract from URL for existing files
+      if ((profile as any)?.cv_filename) {
+        setCvFileName((profile as any).cv_filename);
+      } else if (values.cvUrl) {
+        // Extract filename from URL for legacy files
+        const urlParts = values.cvUrl.split('/');
+        const fullFileName = urlParts[urlParts.length - 1];
+        // Extract the original filename after timestamp prefix
+        const match = fullFileName.match(/^\d+-(.+)$/);
+        const extractedName = match ? match[1] : fullFileName.split('?')[0];
+        setCvFileName(extractedName);
+      } else {
+        setCvFileName('');
+      }
       setCompanyName(values.companyName);
       setOrgNumber(values.orgNumber);
       setEmploymentStatus(values.employmentStatus);
