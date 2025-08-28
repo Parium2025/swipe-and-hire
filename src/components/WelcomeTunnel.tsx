@@ -296,9 +296,19 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     if (file.type.startsWith('video/')) {
       // Robust metadata-läsning med fallback så att uppladdning alltid triggas
       let proceeded = false;
-      const proceedUpload = () => {
+      const proceedUpload = (skipDurationCheck = false) => {
         if (proceeded) return;
         proceeded = true;
+        
+        if (!skipDurationCheck && Number.isFinite(video.duration) && video.duration > 30) {
+          toast({
+            title: "Video för lång",
+            description: "Videon får vara max 30 sekunder lång.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
         uploadProfileMedia(file);
       };
 
@@ -312,31 +322,31 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
       video.onloadedmetadata = () => {
         revoke();
-        // Om vi får duration, respektera 30s-gränsen, annars ladda upp ändå
-        if (Number.isFinite(video.duration) && video.duration > 0) {
-          if (video.duration <= 30) {
-            proceedUpload();
-          } else {
-            toast({
-              title: "Video för lång",
-              description: "Videon får vara max 30 sekunder lång.",
-              variant: "destructive"
-            });
-          }
-        } else {
-          // Okänd duration -> tillåt uppladdning
-          proceedUpload();
-        }
+        proceedUpload(false); // Kontrollera alltid duration om metadata laddas
       };
 
       video.onerror = () => {
         revoke();
-        // Vid fel läser vi inte metadata -> tillåt uppladdning så att det aldrig fastnar
-        proceedUpload();
+        // Vid fel läser vi inte metadata -> tillåt uppladdning men varna användaren
+        toast({
+          title: "Kunde inte validera videolängd",
+          description: "Laddar upp videon ändå. Se till att den är max 30 sekunder.",
+          variant: "default"
+        });
+        proceedUpload(true); // Hoppa över duration-check endast vid fel
       };
 
-      // Fallback-timeout: om metadata inte laddar, ladda upp ändå
-      setTimeout(proceedUpload, 3500);
+      // Fallback-timeout: om metadata inte laddar, varna och ladda upp ändå
+      setTimeout(() => {
+        if (!proceeded) {
+          toast({
+            title: "Kunde inte validera videolängd", 
+            description: "Laddar upp videon ändå. Se till att den är max 30 sekunder.",
+            variant: "default"
+          });
+          proceedUpload(true); // Hoppa över duration-check endast vid timeout
+        }
+      }, 3500);
 
       video.src = URL.createObjectURL(file);
     } else if (file.type.startsWith('image/')) {
