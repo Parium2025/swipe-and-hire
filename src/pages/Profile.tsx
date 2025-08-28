@@ -47,6 +47,7 @@ const Profile = () => {
   const [birthDate, setBirthDate] = useState(profile?.birth_date || '');
   const [profileImageUrl, setProfileImageUrl] = useState(profile?.profile_image_url || '');
   const [cvUrl, setCvUrl] = useState((profile as any)?.cv_url || '');
+  const [cvFileName, setCvFileName] = useState('');
   
   // Extended profile fields that we'll need to add to database
   const [employmentStatus, setEmploymentStatus] = useState('');
@@ -87,6 +88,16 @@ const Profile = () => {
       setBirthDate(values.birthDate);
       setProfileImageUrl(values.profileImageUrl);
       setCvUrl(values.cvUrl);
+      // Extract filename from URL if available
+      if (values.cvUrl) {
+        const urlParts = values.cvUrl.split('/');
+        const fullFileName = urlParts[urlParts.length - 1];
+        // Extract the original filename after timestamp prefix
+        const match = fullFileName.match(/^\d+-(.+)$/);
+        setCvFileName(match ? match[1] : fullFileName.split('?')[0]);
+      } else {
+        setCvFileName('');
+      }
       setCompanyName(values.companyName);
       setOrgNumber(values.orgNumber);
       setEmploymentStatus(values.employmentStatus);
@@ -953,9 +964,15 @@ const Profile = () => {
                       <Label className="text-base font-medium text-white">CV</Label>
                     </div>
                     <FileUpload
-                      onFileUploaded={(url, fileName) => setCvUrl(url)}
-                      onFileRemoved={() => setCvUrl('')}
-                      currentFile={cvUrl ? { url: cvUrl, name: 'CV.pdf' } : undefined}
+                      onFileUploaded={(url, fileName) => {
+                        setCvUrl(url);
+                        setCvFileName(fileName);
+                      }}
+                      onFileRemoved={() => {
+                        setCvUrl('');
+                        setCvFileName('');
+                      }}
+                      currentFile={cvUrl ? { url: cvUrl, name: cvFileName || 'CV.pdf' } : undefined}
                       acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
                       maxFileSize={5 * 1024 * 1024}
                     />
