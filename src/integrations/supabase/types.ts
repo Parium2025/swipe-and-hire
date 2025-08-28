@@ -122,13 +122,6 @@ export type Database = {
             foreignKeyName: "job_postings_employer_id_fkey"
             columns: ["employer_id"]
             isOneToOne: false
-            referencedRelation: "employer_profile_view"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "job_postings_employer_id_fkey"
-            columns: ["employer_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
           },
@@ -445,66 +438,7 @@ export type Database = {
       }
     }
     Views: {
-      employer_profile_view: {
-        Row: {
-          availability: string | null
-          bio: string | null
-          created_at: string | null
-          cv_url: string | null
-          employment_status: string | null
-          first_name: string | null
-          home_location: string | null
-          id: string | null
-          interests: Json | null
-          last_name: string | null
-          onboarding_completed: boolean | null
-          profile_image_url: string | null
-          role: Database["public"]["Enums"]["user_role"] | null
-          updated_at: string | null
-          user_id: string | null
-          video_url: string | null
-          working_hours: string | null
-        }
-        Insert: {
-          availability?: string | null
-          bio?: string | null
-          created_at?: string | null
-          cv_url?: string | null
-          employment_status?: string | null
-          first_name?: string | null
-          home_location?: string | null
-          id?: string | null
-          interests?: Json | null
-          last_name?: string | null
-          onboarding_completed?: boolean | null
-          profile_image_url?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
-          updated_at?: string | null
-          user_id?: string | null
-          video_url?: string | null
-          working_hours?: string | null
-        }
-        Update: {
-          availability?: string | null
-          bio?: string | null
-          created_at?: string | null
-          cv_url?: string | null
-          employment_status?: string | null
-          first_name?: string | null
-          home_location?: string | null
-          id?: string | null
-          interests?: Json | null
-          last_name?: string | null
-          onboarding_completed?: boolean | null
-          profile_image_url?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
-          updated_at?: string | null
-          user_id?: string | null
-          video_url?: string | null
-          working_hours?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       calculate_age: {
@@ -526,6 +460,28 @@ export type Database = {
       create_secure_confirmation_token: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_limited_profile_for_employer: {
+        Args: { job_seeker_uuid: string }
+        Returns: {
+          availability: string
+          bio: string
+          created_at: string
+          cv_url: string
+          employment_status: string
+          first_name: string
+          home_location: string
+          id: string
+          interests: Json
+          last_name: string
+          onboarding_completed: boolean
+          profile_image_url: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+          video_url: string
+          working_hours: string
+        }[]
       }
       get_user_organization: {
         Args: { user_uuid: string }
