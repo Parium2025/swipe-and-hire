@@ -9,9 +9,9 @@ const supabase = createClient(
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
-// Restricted CORS - only allow trusted domains
+// CORS headers - allow both sandbox and production domains
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://09c4e686-17a9-467e-89b1-3cf832371d49.sandbox.lovable.dev",
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
@@ -55,7 +55,7 @@ const handler = async (req: Request): Promise<Response> => {
         type: 'recovery',
         email: email,
         options: {
-          redirectTo: `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&issued=${issued}`
+          redirectTo: `https://09c4e686-17a9-467e-89b1-3cf832371d49.sandbox.lovable.dev/auth?reset=true&issued=${issued}`
         }
       });
 
