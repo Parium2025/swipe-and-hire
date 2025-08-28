@@ -294,27 +294,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     if (!file) return;
 
     if (file.type.startsWith('video/')) {
-      // Robust metadata-läsning med fallback så att uppladdning alltid triggas
+      // Strikt 30-sekunders kontroll - INGEN video laddas upp om vi inte kan bekräfta längden
       let proceeded = false;
-      const proceedUpload = (skipDurationCheck = false) => {
-        if (proceeded) return;
-        proceeded = true;
-        
-        if (!skipDurationCheck && Number.isFinite(video.duration) && video.duration > 30) {
-          toast({
-            title: "Video för lång",
-            description: "Videon får vara max 30 sekunder lång.",
-            variant: "destructive"
-          });
-          return;
-        }
-        
-        uploadProfileMedia(file);
-      };
-
+      
       const video = document.createElement('video');
       video.preload = 'metadata';
-      video.muted = true; // förbättrar metadata-laddning i vissa webbläsare
+      video.muted = true;
 
       const revoke = () => {
         try { URL.revokeObjectURL(video.src); } catch {}
@@ -322,31 +307,52 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
       video.onloadedmetadata = () => {
         revoke();
-        proceedUpload(false); // Kontrollera alltid duration om metadata laddas
+        if (proceeded) return;
+        proceeded = true;
+        
+        if (Number.isFinite(video.duration) && video.duration > 0) {
+          if (video.duration <= 30) {
+            uploadProfileMedia(file);
+          } else {
+            toast({
+              title: "Video för lång",
+              description: `Videon är ${Math.round(video.duration)} sekunder. Max 30 sekunder tillåtet.`,
+              variant: "destructive"
+            });
+          }
+        } else {
+          toast({
+            title: "Kunde inte läsa videolängd",
+            description: "Välj en annan video. Vi måste kunna bekräfta att den är max 30 sekunder.",
+            variant: "destructive"
+          });
+        }
       };
 
       video.onerror = () => {
         revoke();
-        // Vid fel läser vi inte metadata -> tillåt uppladdning men varna användaren
+        if (proceeded) return;
+        proceeded = true;
+        
         toast({
-          title: "Kunde inte validera videolängd",
-          description: "Laddar upp videon ändå. Se till att den är max 30 sekunder.",
-          variant: "default"
+          title: "Ogiltig videofil",
+          description: "Kunde inte läsa videon. Prova med en annan fil.",
+          variant: "destructive"
         });
-        proceedUpload(true); // Hoppa över duration-check endast vid fel
       };
 
-      // Fallback-timeout: om metadata inte laddar, varna och ladda upp ändå
+      // Timeout: Om metadata inte laddar inom 5 sekunder, blockera helt
       setTimeout(() => {
         if (!proceeded) {
+          revoke();
+          proceeded = true;
           toast({
-            title: "Kunde inte validera videolängd", 
-            description: "Laddar upp videon ändå. Se till att den är max 30 sekunder.",
-            variant: "default"
+            title: "Timeout vid videoladdning",
+            description: "Kunde inte validera videolängden. Prova med en mindre fil.",
+            variant: "destructive"
           });
-          proceedUpload(true); // Hoppa över duration-check endast vid timeout
         }
-      }, 3500);
+      }, 5000);
 
       video.src = URL.createObjectURL(file);
     } else if (file.type.startsWith('image/')) {
