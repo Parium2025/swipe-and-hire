@@ -1037,33 +1037,6 @@ const SearchJobs = () => {
                   </Badge>
                 ))}
                 
-                {selectedCategory !== 'all-categories' && (
-                  <Badge variant="default" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30">
-                    <span className="text-xs">{jobCategories.find(cat => cat.value === selectedCategory)?.label}</span>
-                    <button 
-                      onClick={() => {
-                        setSelectedCategory('all-categories');
-                        setSelectedSubcategories([]);
-                      }}
-                      className="ml-1 hover:bg-white/20 rounded p-0.5"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </Badge>
-                )}
-                
-                {selectedSubcategories.map((subcategory) => (
-                  <Badge key={subcategory} variant="secondary" className="gap-2 bg-white/10 hover:bg-white/20 text-white border-white/20">
-                    <span className="text-xs">{subcategory}</span>
-                    <button 
-                      onClick={() => setSelectedSubcategories(prev => prev.filter(s => s !== subcategory))}
-                      className="ml-1 hover:bg-white/20 rounded p-0.5"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </Badge>
-                ))}
-                
                 {searchTerm && (
                   <Badge variant="outline" className="gap-2 text-white border-white/30">
                     <Search className="h-4 w-4" />
@@ -1499,6 +1472,44 @@ const SearchJobs = () => {
               </Select>
             </div>
           </div>
+
+          {/* Selected Job Categories - Fixed position section */}
+          {(selectedCategory !== 'all-categories' || selectedSubcategories.length > 0) && (
+            <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+              <div className="flex items-center gap-2 mb-3">
+                <Filter className="h-4 w-4 text-white" />
+                <span className="text-sm font-medium text-white">Valda yrkesområden:</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {selectedCategory !== 'all-categories' && (
+                  <Badge variant="default" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30">
+                    <span className="text-xs">{jobCategories.find(cat => cat.value === selectedCategory)?.label}</span>
+                    <button 
+                      onClick={() => {
+                        setSelectedCategory('all-categories');
+                        setSelectedSubcategories([]);
+                      }}
+                      className="ml-1 hover:bg-white/20 rounded p-0.5"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </Badge>
+                )}
+                
+                {selectedSubcategories.map((subcategory) => (
+                  <Badge key={subcategory} variant="secondary" className="gap-2 bg-white/10 hover:bg-white/20 text-white border-white/20">
+                    <span className="text-xs">{subcategory}</span>
+                    <button 
+                      onClick={() => setSelectedSubcategories(prev => prev.filter(s => s !== subcategory))}
+                      className="ml-1 hover:bg-white/20 rounded p-0.5"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Results Summary */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-white/10">
