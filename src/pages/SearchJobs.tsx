@@ -1254,6 +1254,7 @@ const SearchJobs = () => {
                   {(selectedCategory !== 'all-categories' || selectedSubcategories.length > 0) && (
                     <>
                       <DropdownMenuItem
+                        onSelect={(e) => e.preventDefault()}
                         onClick={() => {
                           setSelectedCategory('all-categories');
                           setSelectedSubcategories([]);
@@ -1271,6 +1272,7 @@ const SearchJobs = () => {
                     {jobCategories.map((category) => (
                       <div key={category.value}>
                         <DropdownMenuItem
+                          onSelect={(e) => e.preventDefault()}
                           onClick={() => {
                             if (selectedCategory === category.value) {
                               setSelectedCategory('all-categories');
@@ -1300,6 +1302,7 @@ const SearchJobs = () => {
                         {(selectedCategory === category.value || category.subcategories.some(sub => selectedSubcategories.includes(sub))) && (
                           <div className="bg-slate-800/50 border-l-2 border-slate-600/50 ml-4">
                             <DropdownMenuItem
+                              onSelect={(e) => e.preventDefault()}
                               onClick={() => {
                                 if (selectedSubcategories.length === category.subcategories.length && 
                                     category.subcategories.every(sub => selectedSubcategories.includes(sub))) {
@@ -1325,6 +1328,7 @@ const SearchJobs = () => {
                             {category.subcategories.map((subcategory) => (
                               <DropdownMenuItem
                                 key={subcategory}
+                                onSelect={(e) => e.preventDefault()}
                                 onClick={() => {
                                   const isSelected = selectedSubcategories.includes(subcategory);
                                   if (isSelected) {
