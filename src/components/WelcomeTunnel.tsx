@@ -495,6 +495,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
   const deleteCoverImage = () => {
     handleInputChange('coverImageUrl', '');
+    
+    // Tvinga re-render av ProfileVideo genom att uppdatera profileImageUrl med ny timestamp
+    if (formData.profileImageUrl && formData.profileMediaType === 'video') {
+      const baseUrl = formData.profileImageUrl.split('&t=')[0];
+      handleInputChange('profileImageUrl', `${baseUrl}&t=${Date.now()}`);
+    }
+    
     toast({
       title: "Cover-bild borttagen", 
       description: "Din cover-bild har tagits bort."
