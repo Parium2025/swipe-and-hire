@@ -219,13 +219,11 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}/profile-media.${fileExt}`;
-      
-      await supabase.storage.from('job-applications').remove([fileName]);
+      const fileName = `${user?.id}/${Date.now()}-profile-media.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('job-applications')
-        .upload(fileName, file, { upsert: true });
+        .upload(fileName, file);
       
       if (uploadError) throw uploadError;
       
@@ -262,13 +260,11 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}/cover-image.${fileExt}`;
-      
-      await supabase.storage.from('job-applications').remove([fileName]);
+      const fileName = `${user?.id}/${Date.now()}-cover-image.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('job-applications')
-        .upload(fileName, file, { upsert: true });
+        .upload(fileName, file);
       
       if (uploadError) throw uploadError;
       
