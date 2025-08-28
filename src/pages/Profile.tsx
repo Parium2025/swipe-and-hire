@@ -93,12 +93,22 @@ const Profile = () => {
         setCvFileName((profile as any).cv_filename);
       } else if (values.cvUrl) {
         // Extract filename from URL for legacy files
-        const urlParts = values.cvUrl.split('/');
-        const fullFileName = urlParts[urlParts.length - 1];
-        // Extract the original filename after timestamp prefix
-        const match = fullFileName.match(/^\d+-(.+)$/);
-        const extractedName = match ? match[1] : fullFileName.split('?')[0];
-        setCvFileName(extractedName);
+        // First try to get it from the storage path (not the signed URL)
+        let extractedName = '';
+        
+        // Look for the storage path pattern: /storage/v1/object/sign/job-applications/user-id/timestamp-filename
+        const storageMatch = values.cvUrl.match(/\/job-applications\/[^\/]+\/\d+-(.*?)(?:\?|$)/);
+        if (storageMatch) {
+          extractedName = storageMatch[1];
+        } else {
+          // Fallback: try to extract from the end of URL
+          const urlParts = values.cvUrl.split('/');
+          const lastPart = urlParts[urlParts.length - 1];
+          const match = lastPart.match(/^\d+-(.+?)(?:\?|$)/);
+          extractedName = match ? match[1] : lastPart.split('?')[0];
+        }
+        
+        setCvFileName(extractedName || 'CV.pdf');
       } else {
         setCvFileName('');
       }
