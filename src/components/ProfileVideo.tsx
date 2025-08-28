@@ -27,9 +27,12 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
         setSignedVideoUrl(signed);
       }
       
-      if (coverImageUrl) {
+      if (coverImageUrl && coverImageUrl.trim()) {
         const signedCover = await convertToSignedUrl(coverImageUrl);
         setSignedCoverUrl(signedCover);
+      } else {
+        // Rensa cover-bild omedelbart när coverImageUrl är tom
+        setSignedCoverUrl(null);
       }
     };
     
