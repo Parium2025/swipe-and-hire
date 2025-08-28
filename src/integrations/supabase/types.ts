@@ -544,7 +544,11 @@ export type Database = {
         Returns: string
       }
       validate_file_upload: {
-        Args: { content_type: string; file_path: string; file_size: number }
+        Args: { content_type: string; file_name: string; file_size: number }
+        Returns: boolean
+      }
+      validate_profile_data: {
+        Args: { birth_date: string; cv_url: string; phone: string }
         Returns: boolean
       }
     }
