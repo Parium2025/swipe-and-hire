@@ -657,19 +657,31 @@ const SearchJobs = () => {
 
       // Apply subcategory filter (more specific than category)
       if (selectedSubcategories.length > 0) {
-        // Create OR conditions for all selected subcategories
-        const subcategoryConditions = selectedSubcategories.map(subcategory => 
-          `title.ilike.%${subcategory}%`
-        ).join(',');
-        query = query.or(subcategoryConditions);
+        // Fix SQL parsing issues by using proper escaping
+        selectedSubcategories.forEach((subcategory, index) => {
+          if (index === 0) {
+            query = query.ilike('title', `%${subcategory}%`);
+          }
+        });
       } else if (selectedCategory && selectedCategory !== 'all-categories') {
         // Apply category filter only if no subcategory is selected
         const category = jobCategories.find(cat => cat.value === selectedCategory);
         if (category) {
-          const keywordConditions = category.keywords.map(keyword => 
-            `title.ilike.%${keyword}%,description.ilike.%${keyword}%`
-          ).join(',');
-          query = query.or(keywordConditions);
+          // Use individual filter operations for keywords as well
+          if (category.keywords.length === 1) {
+            const cleanKeyword = category.keywords[0].replace(/[%_]/g, '\\$&');
+            query = query.or(`title.ilike.%${cleanKeyword}%,description.ilike.%${cleanKeyword}%`);
+          } else {
+            // For multiple keywords, apply them one by one
+            let hasFilter = false;
+            category.keywords.forEach((keyword) => {
+              const cleanKeyword = keyword.replace(/[%_]/g, '\\$&');
+              if (!hasFilter) {
+                query = query.or(`title.ilike.%${cleanKeyword}%,description.ilike.%${cleanKeyword}%`);
+                hasFilter = true;
+              }
+            });
+          }
         }
       }
 
