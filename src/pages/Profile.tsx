@@ -193,13 +193,11 @@ const Profile = () => {
     
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}/profile-media.${fileExt}`;
-      
-      await supabase.storage.from('job-applications').remove([fileName]);
+      const fileName = `${user?.id}/${Date.now()}-profile-media.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('job-applications')
-        .upload(fileName, file, { upsert: true });
+        .upload(fileName, file);
       
       if (uploadError) throw uploadError;
       
@@ -247,13 +245,11 @@ const Profile = () => {
     
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}/cover-image.${fileExt}`;
-      
-      await supabase.storage.from('job-applications').remove([fileName]);
+      const fileName = `${user?.id}/${Date.now()}-cover-image.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('job-applications')
-        .upload(fileName, file, { upsert: true });
+        .upload(fileName, file);
       
       if (uploadError) throw uploadError;
       
@@ -293,26 +289,89 @@ const Profile = () => {
     if (!file) return;
 
     if (file.type.startsWith('video/')) {
-      // Handle video upload with duration check
+      // Förbättrad video-validering med specifika felmeddelanden (samma som WelcomeTunnel)
+      let proceeded = false;
+      let metadataAttempted = false;
+      
       const video = document.createElement('video');
       video.preload = 'metadata';
-      
+      video.muted = true;
+      video.crossOrigin = 'anonymous';
+
+      const revoke = () => {
+        try { URL.revokeObjectURL(video.src); } catch {}
+      };
+
+      const showError = (title: string, description: string) => {
+        toast({ title, description, variant: "destructive" });
+      };
+
       video.onloadedmetadata = () => {
-        window.URL.revokeObjectURL(video.src);
-        if (video.duration <= 30) { // Max 30 seconds
-          uploadProfileMedia(file);
+        revoke();
+        if (proceeded) return;
+        proceeded = true;
+        metadataAttempted = true;
+        
+        console.log('Video duration:', video.duration, 'seconds');
+        
+        if (!Number.isFinite(video.duration) || video.duration <= 0) {
+          showError(
+            "Ogiltig videofil",
+            "Videon har ingen giltig längdning. Välj en annan fil."
+          );
+        } else if (video.duration > 30) {
+          showError(
+            "Video för lång",
+            `Videon är ${Math.round(video.duration)} sekunder. Max 30 sekunder tillåtet.`
+          );
         } else {
-          toast({
-            title: "Video för lång",
-            description: "Videon får vara max 30 sekunder lång.",
-            variant: "destructive"
-          });
+          uploadProfileMedia(file);
         }
       };
-      
-      video.src = URL.createObjectURL(file);
+
+      video.onerror = (e) => {
+        revoke();
+        if (proceeded) return;
+        proceeded = true;
+        
+        console.error('Video error:', e);
+        showError(
+          "Ogiltig videofil", 
+          "Filen är skadad eller har ett format som inte stöds."
+        );
+      };
+
+      setTimeout(() => {
+        if (!proceeded) {
+          revoke();
+          proceeded = true;
+          
+          if (!metadataAttempted) {
+            showError(
+              "Timeout vid videoladdning",
+              "Filen är för stor eller saknas. Prova med en mindre videofil."
+            );
+          }
+        }
+      }, 8000);
+
+      video.onloadstart = () => {
+        console.log('Started loading video metadata...');
+      };
+
+      video.onprogress = () => {
+        console.log('Loading video metadata...');
+      };
+
+      try {
+        video.src = URL.createObjectURL(file);
+      } catch (error) {
+        showError(
+          "Fel vid filhantering",
+          "Kunde inte läsa videofilen. Kontrollera att det är en giltig videofil."
+        );
+      }
     } else if (file.type.startsWith('image/')) {
-      // Handle image - open editor
       const imageUrl = URL.createObjectURL(file);
       setPendingImageSrc(imageUrl);
       setImageEditorOpen(true);
@@ -337,13 +396,11 @@ const Profile = () => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('User not authenticated');
 
-      const fileName = `${user.data.user.id}/profile-image.jpg`;
-      
-      await supabase.storage.from('job-applications').remove([fileName]);
+      const fileName = `${user.data.user.id}/${Date.now()}-profile-image.jpg`;
       
       const { error: uploadError } = await supabase.storage
         .from('job-applications')
-        .upload(fileName, editedBlob, { upsert: true });
+        .upload(fileName, editedBlob);
 
       if (uploadError) throw uploadError;
 
@@ -386,13 +443,11 @@ const Profile = () => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('User not authenticated');
 
-      const fileName = `${user.data.user.id}/cover-image.jpg`;
-      
-      await supabase.storage.from('job-applications').remove([fileName]);
+      const fileName = `${user.data.user.id}/${Date.now()}-cover-image.jpg`;
       
       const { error: uploadError } = await supabase.storage
         .from('job-applications')
-        .upload(fileName, editedBlob, { upsert: true });
+        .upload(fileName, editedBlob);
 
       if (uploadError) throw uploadError;
 
