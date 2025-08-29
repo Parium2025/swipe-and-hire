@@ -219,7 +219,7 @@ const AuthMobile = ({
   if (isPasswordReset) {
     return (
       <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-4">
-        <Card className="w-full max-w-sm bg-background/95 backdrop-blur-sm">
+        <Card className="w-full max-w-sm bg-background/95 backdrop-blur-sm border border-border/20">
           <CardHeader className="text-center">
             <CardTitle>Nytt lösenord</CardTitle>
           </CardHeader>
@@ -321,7 +321,7 @@ const AuthMobile = ({
 
           {/* Auth form */}
           <div className="w-full max-w-sm">
-            <Card className="bg-background/95 backdrop-blur-xl border-0 shadow-2xl rounded-2xl overflow-hidden">
+            <Card className="bg-background/95 backdrop-blur-xl border border-border/20 shadow-2xl rounded-2xl overflow-hidden">
               <CardContent className="p-6">
                 <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => setIsLogin(value === 'login')}>
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/80 border border-border/20 rounded-lg p-1">

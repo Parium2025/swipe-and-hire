@@ -219,7 +219,7 @@ const AuthDesktop = ({
   if (isPasswordReset) {
     return (
       <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-8">
-        <Card className="w-full max-w-md bg-background/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-3xl">
+        <Card className="w-full max-w-md bg-background/80 backdrop-blur-2xl border border-border/20 shadow-2xl rounded-3xl">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Nytt lösenord</CardTitle>
           </CardHeader>
@@ -370,7 +370,7 @@ const AuthDesktop = ({
               {/* Card glow effect */}
               <div className="absolute -inset-1 bg-gradient-to-r from-secondary/20 to-accent/20 rounded-3xl blur-lg"></div>
               
-              <Card className="relative bg-background/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-3xl overflow-hidden">
+              <Card className="relative bg-background/80 backdrop-blur-2xl border border-border/20 shadow-2xl rounded-3xl overflow-hidden">
                 <CardContent className="p-12">
                   <div className="text-center mb-8">
                     <h2 className="text-3xl font-bold text-primary-foreground mb-2">

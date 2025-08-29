@@ -210,7 +210,7 @@ const AuthTablet = ({
   if (isPasswordReset) {
     return (
       <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-6">
-        <Card className="w-full max-w-lg bg-background/95 backdrop-blur-sm border border-white/10 shadow-2xl rounded-2xl">
+        <Card className="w-full max-w-lg bg-background/95 backdrop-blur-sm border border-border/20 shadow-2xl rounded-2xl">
           <CardHeader className="text-center pb-4">
             <CardTitle className="text-xl">Nytt lösenord</CardTitle>
           </CardHeader>
@@ -289,7 +289,7 @@ const AuthTablet = ({
             <div className="relative">
               <div className="absolute -inset-1 bg-gradient-to-r from-secondary/20 to-accent/20 rounded-2xl blur-lg"></div>
               
-              <Card className="relative bg-background/90 backdrop-blur-sm border border-white/10 shadow-xl rounded-2xl">
+              <Card className="relative bg-background/90 backdrop-blur-sm border border-border/20 shadow-xl rounded-2xl">
                 <CardContent className="p-6">
                   <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => setIsLogin(value === 'login')}>
                     <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted">
