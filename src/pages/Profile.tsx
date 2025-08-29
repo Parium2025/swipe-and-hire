@@ -560,6 +560,8 @@ const Profile = () => {
         availability: availability || null,
       };
 
+      console.log('Profile updates to save:', updates);
+
       // Handle profile image/video updates
       if (profileImageUrl && (profileImageUrl.includes('.MP4') || profileImageUrl.includes('.mp4'))) {
         // It's a video
@@ -577,7 +579,11 @@ const Profile = () => {
         updates.org_number = orgNumber.trim() || null;
       }
 
+      console.log('Final updates object:', updates);
+
       const result = await updateProfile(updates);
+      
+      console.log('Update result:', result);
       
       if (!result.error) {
         // Update original values after successful save
@@ -585,7 +591,7 @@ const Profile = () => {
           firstName: firstName,
           lastName: lastName,
           bio: bio,
-          location: userLocation,
+          userLocation: userLocation,
           postalCode: postalCode,
           phone: phone,
           birthDate: birthDate,
@@ -597,6 +603,8 @@ const Profile = () => {
           workingHours: workingHours,
           availability: availability,
         };
+        
+        console.log('Updating originalValues:', newOriginalValues);
         setOriginalValues(newOriginalValues);
         setHasUnsavedChanges(false);
         
@@ -604,6 +612,8 @@ const Profile = () => {
           title: "Profil uppdaterad!",
           description: "Dina ändringar har sparats."
         });
+      } else {
+        console.error('Update failed with error:', result.error);
       }
     } catch (error) {
       console.error('Profile update error:', error);
