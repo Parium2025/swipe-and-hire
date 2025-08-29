@@ -448,6 +448,31 @@ const AuthDesktop = ({
                     
                     <TabsContent value="signup">
                       <form onSubmit={handleSubmit} className="space-y-6">
+                        {/* User Role Selection - First */}
+                        <div>
+                          <Label className="text-lg text-white">Jag är:</Label>
+                          <RadioGroup 
+                            value={role} 
+                            onValueChange={(value: 'job_seeker' | 'employer') => setRole(value)}
+                            className="mt-2"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="job_seeker" id="job_seeker" />
+                              <Label htmlFor="job_seeker" className="flex items-center cursor-pointer text-white">
+                                <User className="h-5 w-5 mr-2" />
+                                Jobbsökande
+                              </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="employer" id="employer" />
+                              <Label htmlFor="employer" className="flex items-center cursor-pointer text-white">
+                                <Building2 className="h-5 w-5 mr-2" />
+                                Arbetsgivare
+                              </Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
+
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <Label htmlFor="firstName" className="text-lg text-white">Förnamn</Label>
@@ -549,30 +574,6 @@ const AuthDesktop = ({
                               <li>Ett specialtecken</li>
                             </ul>
                           </div>
-                        </div>
-                        
-                        <div>
-                          <Label className="text-lg text-white">Jag är:</Label>
-                          <RadioGroup 
-                            value={role} 
-                            onValueChange={(value: 'job_seeker' | 'employer') => setRole(value)}
-                            className="mt-2"
-                          >
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="job_seeker" id="job_seeker" />
-                              <Label htmlFor="job_seeker" className="flex items-center cursor-pointer text-white">
-                                <User className="h-5 w-5 mr-2" />
-                                Jobbsökande
-                              </Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="employer" id="employer" />
-                              <Label htmlFor="employer" className="flex items-center cursor-pointer text-white">
-                                <Building2 className="h-5 w-5 mr-2" />
-                                Arbetsgivare
-                              </Label>
-                            </div>
-                          </RadioGroup>
                         </div>
                         
                         <Button type="submit" className="w-full py-3 text-lg" disabled={loading}>
