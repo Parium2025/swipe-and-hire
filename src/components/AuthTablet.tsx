@@ -212,12 +212,12 @@ const AuthTablet = ({
       <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-6">
         <Card className="w-full max-w-lg bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl">
           <CardHeader className="text-center pb-4">
-            <CardTitle className="text-xl">Nytt lösenord</CardTitle>
+            <CardTitle className="text-xl text-white">Nytt lösenord</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handlePasswordReset} className="space-y-4">
               <div>
-                <Label htmlFor="newPassword">Nytt lösenord</Label>
+                <Label htmlFor="newPassword" className="text-white">Nytt lösenord</Label>
                 <Input
                   id="newPassword"
                   type="password"
@@ -227,7 +227,7 @@ const AuthTablet = ({
                 />
               </div>
               <div>
-                <Label htmlFor="confirmPassword">Bekräfta lösenord</Label>
+                <Label htmlFor="confirmPassword" className="text-white">Bekräfta lösenord</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -237,7 +237,7 @@ const AuthTablet = ({
                 />
               </div>
               <Button type="submit" className="w-full bg-parium-navy hover:bg-parium-navy/90 text-white" disabled={loading}>
-                {loading ? 'Sparar...' : 'Spara nytt lösenord'}
+                {loading ? "Sparar..." : "Spara nytt lösenord"}
               </Button>
             </form>
           </CardContent>
@@ -310,7 +310,7 @@ const AuthTablet = ({
                     <TabsContent value="login">
                       <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="relative">
-                          <Label htmlFor="email">
+                          <Label htmlFor="email" className="text-white">
                             <Mail className="h-4 w-4 inline mr-2" />
                             E-post
                           </Label>
@@ -341,7 +341,7 @@ const AuthTablet = ({
                           )}
                         </div>
                         <div>
-                          <Label htmlFor="password">
+                          <Label htmlFor="password" className="text-white">
                             <Key className="h-4 w-4 inline mr-2" />
                             Lösenord
                           </Label>
@@ -365,29 +365,29 @@ const AuthTablet = ({
                           </div>
                         </div>
                         <Button type="submit" className="w-full bg-parium-navy hover:bg-parium-navy/90 text-white" disabled={loading}>
-                          {loading ? 'Loggar in...' : 'Logga in'}
+                          {loading ? "Loggar in..." : "Logga in"}
                         </Button>
                         
                         {showResetPassword && !resetPasswordSent && (
                           <div className="mt-4 p-3 bg-muted/50 rounded-lg text-center">
-                            <p className="text-sm mb-2">Glömt lösenordet?</p>
+                            <p className="text-sm mb-2 text-white">Glömt lösenordet?</p>
                             <Button
                               className="bg-primary hover:bg-primary/90 text-primary-foreground"
                               size="sm"
                               onClick={handleResetPassword}
                               disabled={resetLoading}
                             >
-                              {resetLoading ? 'Skickar...' : 'Återställ lösenord'}
+                              {resetLoading ? "Skickar..." : "Återställ lösenord"}
                             </Button>
                           </div>
                         )}
 
                         {resetPasswordSent && (
                           <div className="mt-4 p-3 bg-muted/50 rounded-lg text-center">
-                            <p className="text-sm mb-3 font-medium">📧 Återställningsmail skickat!</p>
+                            <p className="text-sm mb-3 font-medium text-white">📧 Återställningsmail skickat!</p>
                             <div className="text-xs text-muted-foreground bg-secondary/10 p-2 rounded border-l-4 border-secondary mb-3">
-                              <p className="font-medium">💡 Tips:</p>
-                              <p>Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.</p>
+                              <p className="font-medium text-white">💡 Tips:</p>
+                              <p className="text-white">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.</p>
                             </div>
                             <Button
                               size="sm"
@@ -395,7 +395,7 @@ const AuthTablet = ({
                               disabled={resetLoading}
                               className="bg-parium-navy hover:bg-parium-navy/90 text-white text-xs"
                             >
-                              {resetLoading ? 'Skickar...' : 'Skicka igen'}
+                              {resetLoading ? "Skickar..." : "Skicka igen"}
                             </Button>
                           </div>
                         )}
@@ -406,7 +406,7 @@ const AuthTablet = ({
                       <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <Label htmlFor="firstName">Förnamn</Label>
+                            <Label htmlFor="firstName" className="text-white">Förnamn</Label>
                             <Input
                               id="firstName"
                               value={firstName}
@@ -416,7 +416,7 @@ const AuthTablet = ({
                             />
                           </div>
                           <div>
-                            <Label htmlFor="lastName">Efternamn</Label>
+                            <Label htmlFor="lastName" className="text-white">Efternamn</Label>
                             <Input
                               id="lastName"
                               value={lastName}
@@ -427,7 +427,7 @@ const AuthTablet = ({
                           </div>
                         </div>
                         <div className="relative">
-                          <Label htmlFor="email">
+                          <Label htmlFor="email" className="text-white">
                             <Mail className="h-4 w-4 inline mr-2" />
                             E-post
                           </Label>
@@ -458,7 +458,7 @@ const AuthTablet = ({
                           )}
                         </div>
                         <div>
-                          <Label htmlFor="phone">
+                          <Label htmlFor="phone" className="text-white">
                             <Phone className="h-4 w-4 inline mr-2" />
                             Telefon
                           </Label>
@@ -475,7 +475,7 @@ const AuthTablet = ({
                           )}
                         </div>
                         <div>
-                          <Label htmlFor="password">
+                          <Label htmlFor="password" className="text-white">
                             <Key className="h-4 w-4 inline mr-2" />
                             Lösenord
                           </Label>
@@ -525,7 +525,7 @@ const AuthTablet = ({
                         </div>
                         
                         <div>
-                          <Label>Jag är:</Label>
+                          <Label className="text-white">Jag är:</Label>
                           <RadioGroup 
                             value={role} 
                             onValueChange={(value: 'job_seeker' | 'employer') => setRole(value)}
@@ -533,14 +533,14 @@ const AuthTablet = ({
                           >
                             <div className="flex items-center space-x-2">
                               <RadioGroupItem value="job_seeker" id="job_seeker" />
-                              <Label htmlFor="job_seeker" className="flex items-center cursor-pointer">
+                              <Label htmlFor="job_seeker" className="flex items-center cursor-pointer text-white">
                                 <User className="h-4 w-4 mr-2" />
                                 Jobbsökande
                               </Label>
                             </div>
                             <div className="flex items-center space-x-2">
                               <RadioGroupItem value="employer" id="employer" />
-                              <Label htmlFor="employer" className="flex items-center cursor-pointer">
+                              <Label htmlFor="employer" className="flex items-center cursor-pointer text-white">
                                 <Building2 className="h-4 w-4 mr-2" />
                                 Arbetsgivare
                               </Label>
@@ -549,7 +549,7 @@ const AuthTablet = ({
                         </div>
                         
                         <Button type="submit" className="w-full bg-parium-navy hover:bg-parium-navy/90 text-white" disabled={loading}>
-                          {loading ? 'Registrerar...' : 'Registrera'}
+                          {loading ? "Registrerar..." : "Registrera"}
                         </Button>
                       </form>
                     </TabsContent>
@@ -557,7 +557,7 @@ const AuthTablet = ({
 
                   {showResend && (
                     <div className="mt-4 p-4 bg-secondary/10 rounded-lg text-center border border-secondary/20">
-                      <p className="text-sm mb-2 font-medium">📧 Kolla din e-post för bekräftelselänk</p>
+                      <p className="text-sm mb-2 font-medium text-white">📧 Kolla din e-post för bekräftelselänk</p>
                       <div className="bg-orange-50 border border-orange-200 rounded p-2 mb-3">
                         <p className="text-xs text-orange-800 font-medium">⚠️ VIKTIGT</p>
                         <p className="text-xs text-orange-700">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.</p>

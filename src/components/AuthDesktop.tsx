@@ -221,12 +221,12 @@ const AuthDesktop = ({
       <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-8">
         <Card className="w-full max-w-md bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-3xl">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Nytt lösenord</CardTitle>
+            <CardTitle className="text-2xl text-white">Nytt lösenord</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handlePasswordReset} className="space-y-6">
               <div>
-                <Label htmlFor="newPassword">Nytt lösenord</Label>
+                <Label htmlFor="newPassword" className="text-white">Nytt lösenord</Label>
                 <Input
                   id="newPassword"
                   type="password"
@@ -237,7 +237,7 @@ const AuthDesktop = ({
                 />
               </div>
               <div>
-                <Label htmlFor="confirmPassword">Bekräfta lösenord</Label>
+                <Label htmlFor="confirmPassword" className="text-white">Bekräfta lösenord</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -248,13 +248,13 @@ const AuthDesktop = ({
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Sparar...' : 'Spara nytt lösenord'}
+                {loading ? "Sparar..." : "Spara nytt lösenord"}
               </Button>
               <div className="text-center">
                 <button
                   type="button"
                   onClick={() => navigate('/auth')}
-                  className="text-sm text-primary hover:underline"
+                  className="text-sm text-white hover:underline"
                 >
                   Tillbaka till inloggning
                 </button>
@@ -373,11 +373,11 @@ const AuthDesktop = ({
               <Card className="relative bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-3xl overflow-hidden">
                 <CardContent className="p-12">
                   <div className="text-center mb-8">
-                    <h2 className="text-3xl font-bold text-primary-foreground mb-2">
-                      {isLogin ? 'Välkommen tillbaka' : 'Skapa konto'}
+                    <h2 className="text-3xl font-bold text-white mb-2">
+                      {isLogin ? "Välkommen tillbaka" : "Skapa konto"}
                     </h2>
-                    <p className="text-primary-foreground/80">
-                      {isLogin ? 'Logga in för att fortsätta' : 'Börja din resa mot drömjobbet'}
+                    <p className="text-white/80">
+                      {isLogin ? "Logga in för att fortsätta" : "Börja din resa mot drömjobbet"}
                     </p>
                   </div>
                   
@@ -390,7 +390,7 @@ const AuthDesktop = ({
                     <TabsContent value="login">
                       <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
-                          <Label htmlFor="email" className="text-lg">E-post</Label>
+                          <Label htmlFor="email" className="text-lg text-white">E-post</Label>
                           <div className="relative">
                             <Input
                               id="email"
@@ -405,7 +405,7 @@ const AuthDesktop = ({
                                 {emailSuggestions.map((suggestion, index) => (
                                   <div
                                     key={index}
-                                    className="px-4 py-2 text-sm text-primary-foreground hover:bg-secondary/50 cursor-pointer"
+                                    className="px-4 py-2 text-sm text-white hover:bg-secondary/50 cursor-pointer"
                                     onClick={() => {
                                       setEmail(suggestion);
                                       setShowEmailSuggestions(false);
@@ -419,7 +419,7 @@ const AuthDesktop = ({
                           </div>
                         </div>
                         <div>
-                          <Label htmlFor="password" className="text-lg">Lösenord</Label>
+                          <Label htmlFor="password" className="text-lg text-white">Lösenord</Label>
                           <div className="relative">
                             <Input
                               id="password"
@@ -450,7 +450,7 @@ const AuthDesktop = ({
                       <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <Label htmlFor="firstName" className="text-lg">Förnamn</Label>
+                            <Label htmlFor="firstName" className="text-lg text-white">Förnamn</Label>
                             <Input
                               id="firstName"
                               value={firstName}
@@ -460,7 +460,7 @@ const AuthDesktop = ({
                             />
                           </div>
                           <div>
-                            <Label htmlFor="lastName" className="text-lg">Efternamn</Label>
+                            <Label htmlFor="lastName" className="text-lg text-white">Efternamn</Label>
                             <Input
                               id="lastName"
                               value={lastName}
@@ -471,7 +471,7 @@ const AuthDesktop = ({
                           </div>
                         </div>
                         <div>
-                          <Label htmlFor="email" className="text-lg">E-post</Label>
+                          <Label htmlFor="email" className="text-lg text-white">E-post</Label>
                           <div className="relative">
                             <Input
                               id="email"
@@ -486,7 +486,7 @@ const AuthDesktop = ({
                                 {emailSuggestions.map((suggestion, index) => (
                                   <div
                                     key={index}
-                                    className="px-4 py-2 text-sm text-primary-foreground hover:bg-secondary/50 cursor-pointer"
+                                    className="px-4 py-2 text-sm text-white hover:bg-secondary/50 cursor-pointer"
                                     onClick={() => {
                                       setEmail(suggestion);
                                       setShowEmailSuggestions(false);
@@ -500,7 +500,7 @@ const AuthDesktop = ({
                           </div>
                         </div>
                         <div>
-                          <Label htmlFor="phone" className="text-lg">Telefon</Label>
+                          <Label htmlFor="phone" className="text-lg text-white">Telefon</Label>
                           <Input
                             id="phone"
                             type="tel"
@@ -511,7 +511,7 @@ const AuthDesktop = ({
                           {phoneError && <p className="text-red-500 text-sm mt-1">{phoneError}</p>}
                         </div>
                         <div>
-                          <Label htmlFor="password" className="text-lg">Lösenord</Label>
+                          <Label htmlFor="password" className="text-lg text-white">Lösenord</Label>
                           <div className="relative">
                             <Input
                               id="password"
@@ -533,7 +533,7 @@ const AuthDesktop = ({
                           </div>
                           <div className="mt-2">
                             <div className="flex items-center space-x-2">
-                              <span className="text-sm text-primary-foreground/80">Lösenordsstyrka:</span>
+                              <span className="text-sm text-white/80">Lösenordsstyrka:</span>
                               <div className="relative w-full bg-secondary/20 rounded-full h-2">
                                 <div
                                   className="absolute left-0 top-0 h-full bg-gradient-to-r from-secondary to-accent rounded-full"
@@ -541,7 +541,7 @@ const AuthDesktop = ({
                                 ></div>
                               </div>
                             </div>
-                            <ul className="mt-1 list-disc list-inside text-sm text-primary-foreground/60">
+                            <ul className="mt-1 list-disc list-inside text-sm text-white/60">
                               <li>Minst 8 tecken</li>
                               <li>En stor bokstav</li>
                               <li>En liten bokstav</li>
@@ -552,7 +552,7 @@ const AuthDesktop = ({
                         </div>
                         
                         <div>
-                          <Label className="text-lg">Jag är:</Label>
+                          <Label className="text-lg text-white">Jag är:</Label>
                           <RadioGroup 
                             value={role} 
                             onValueChange={(value: 'job_seeker' | 'employer') => setRole(value)}
@@ -560,14 +560,14 @@ const AuthDesktop = ({
                           >
                             <div className="flex items-center space-x-2">
                               <RadioGroupItem value="job_seeker" id="job_seeker" />
-                              <Label htmlFor="job_seeker" className="flex items-center cursor-pointer">
+                              <Label htmlFor="job_seeker" className="flex items-center cursor-pointer text-white">
                                 <User className="h-5 w-5 mr-2" />
                                 Jobbsökande
                               </Label>
                             </div>
                             <div className="flex items-center space-x-2">
                               <RadioGroupItem value="employer" id="employer" />
-                              <Label htmlFor="employer" className="flex items-center cursor-pointer">
+                              <Label htmlFor="employer" className="flex items-center cursor-pointer text-white">
                                 <Building2 className="h-5 w-5 mr-2" />
                                 Arbetsgivare
                               </Label>
@@ -584,7 +584,7 @@ const AuthDesktop = ({
                   
                   {showResend && (
                     <div className="mt-6 p-4 bg-secondary/10 rounded-lg text-center">
-                      <p className="text-sm mb-2">Kolla din e-post för bekräftelselänk</p>
+                      <p className="text-sm mb-2 text-white">Kolla din e-post för bekräftelselänk</p>
                       <Button
                         variant="outline"
                         size="sm"
@@ -598,7 +598,7 @@ const AuthDesktop = ({
 
                   {showResetPassword && !resetPasswordSent && (
                     <div className="mt-6 p-4 bg-muted/50 rounded-lg text-center">
-                      <p className="text-sm mb-2">Glömt lösenordet?</p>
+                      <p className="text-sm mb-2 text-white">Glömt lösenordet?</p>
                        <Button
                          className="bg-primary hover:bg-primary/90 text-primary-foreground"
                          size="sm"
@@ -612,10 +612,10 @@ const AuthDesktop = ({
 
                   {resetPasswordSent && (
                     <div className="mt-6 p-4 bg-muted/50 rounded-lg text-center">
-                      <p className="text-sm mb-3 font-medium">📧 Återställningsmail skickat!</p>
+                      <p className="text-sm mb-3 font-medium text-white">📧 Återställningsmail skickat!</p>
                       <div className="text-xs text-muted-foreground bg-secondary/10 p-2 rounded border-l-4 border-secondary mb-3">
-                        <p className="font-medium">💡 Tips:</p>
-                        <p>Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.</p>
+                        <p className="font-medium text-white">💡 Tips:</p>
+                        <p className="text-white">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.</p>
                       </div>
                       <Button
                         size="sm"
@@ -623,7 +623,7 @@ const AuthDesktop = ({
                         disabled={resetLoading}
                         className="bg-parium-navy hover:bg-parium-navy/90 text-white text-xs"
                       >
-                        {resetLoading ? 'Skickar...' : 'Skicka igen'}
+                        {resetLoading ? "Skickar..." : "Skicka igen"}
                       </Button>
                     </div>
                   )}
