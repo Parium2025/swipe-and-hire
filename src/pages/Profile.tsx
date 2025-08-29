@@ -767,7 +767,7 @@ const Profile = () => {
                      <div className="flex items-center gap-2">
                        <Badge variant="secondary" className="bg-white/20 text-white text-xs font-normal ml-8">
                          <Check className="h-3 w-3 mr-1" />
-                         Cover-bild uppladdad!
+                         Cover-bilduppladdad!
                        </Badge>
                       <button
                         onClick={deleteCoverImage}
