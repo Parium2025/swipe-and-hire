@@ -734,13 +734,16 @@ const Profile = () => {
 
             {/* Cover image upload for videos */}
             {profile?.video_url && (
-              <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
+              <div className="space-y-2 text-center mt-4 p-4 bg-white/10 rounded-lg backdrop-blur-sm relative">
+                <Label htmlFor="cover-image" className="text-white text-sm">
+                  Cover-bild för video (valfritt)
+                </Label>
                 <Button 
                   variant="outline" 
                   size="sm"
                   onClick={() => document.getElementById('cover-image')?.click()}
                   disabled={isUploadingCover}
-                  className="bg-white/20 border-white/30 text-white hover:bg-white/30 disabled:opacity-50 transition-all duration-200"
+                  className="bg-white/20 border-white/30 text-white hover:bg-white/30 disabled:opacity-50"
                 >
                   {profile?.profile_image_url ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
                 </Button>
@@ -754,29 +757,24 @@ const Profile = () => {
                 />
                 
                 {isUploadingCover && (
-                  <div className="flex flex-col items-center w-full">
-                    <Badge variant="secondary" className="bg-blue-500/20 text-blue-100 text-xs animate-pulse">
-                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-100 mr-1"></div>
-                      Laddar upp cover-bild...
-                    </Badge>
-                  </div>
+                  <Badge variant="secondary" className="bg-blue-500/20 text-blue-100 text-xs animate-pulse">
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-100 mr-1"></div>
+                    Laddar upp cover-bild...
+                  </Badge>
                 )}
                 
                 {profile?.profile_image_url && !isUploadingCover && (
-                  <div className="flex flex-col items-center space-y-2 w-full">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="bg-white/20 text-white text-xs">
-                        <Check className="h-3 w-3 mr-1" />
-                        Cover-bild uppladdad!
-                      </Badge>
-                      <button
-                        onClick={deleteCoverImage}
-                        className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-1.5 shadow-lg transition-colors"
-                        title="Ta bort cover-bild"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    </div>
+                  <div className="flex items-center justify-center gap-2">
+                     <Badge variant="secondary" className="bg-white/20 text-white text-xs ml-8">
+                       <Check className="h-3 w-3 mr-1" />
+                       Cover-bild uppladdad!
+                     </Badge>
+                    <button
+                      onClick={deleteCoverImage}
+                      className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-1.5 shadow-lg transition-colors"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
                   </div>
                 )}
               </div>
