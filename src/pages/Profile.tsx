@@ -765,9 +765,9 @@ const Profile = () => {
                 {profile?.profile_image_url && !isUploadingCover && (
                   <div className="flex flex-col items-center space-y-2 w-full">
                      <div className="flex items-center gap-2">
-                       <Badge variant="secondary" className="bg-white/20 text-white text-xs font-normal ml-8">
+                       <Badge variant="secondary" className="bg-white/20 text-white text-xs font-normal ml-8 whitespace-nowrap">
                          <Check className="h-3 w-3 mr-1" />
-                         Cover-bilduppladdad!
+                         Cover-bild uppladdad!
                        </Badge>
                       <button
                         onClick={deleteCoverImage}
