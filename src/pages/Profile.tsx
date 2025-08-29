@@ -234,24 +234,24 @@ const Profile = () => {
       
       const mediaUrl = `${signedUrl}&t=${Date.now()}`;
       
-      // Update the profile with the correct fields based on file type
-      const updates: any = {};
+      // Update local state instead of saving immediately
       if (isVideo) {
-        updates.video_url = mediaUrl;
-        // Keep existing profile_image_url if it exists (as cover image)
+        setProfileImageUrl(mediaUrl); // Store video URL in profileImageUrl for now
+        // Clear cover image if it was a video file
         if (!profile?.profile_image_url || profile.profile_image_url.includes('.MP4') || profile.profile_image_url.includes('.mp4')) {
-          updates.profile_image_url = null;
+          setCoverImageUrl('');
         }
       } else {
-        updates.profile_image_url = mediaUrl;
-        updates.video_url = null; // Clear video when uploading image
+        setProfileImageUrl(mediaUrl);
+        setCoverImageUrl(''); // Clear cover when uploading profile image
       }
-
-      await updateProfile(updates);
+      
+      // Mark as having unsaved changes
+      setHasUnsavedChanges(true);
       
       toast({
-        title: `Profil${isVideo ? 'video' : 'bild'} uppladdad!`,
-        description: `Din profil${isVideo ? 'video' : 'bild'} har uppdaterats.`
+        title: `${isVideo ? 'Video' : 'Bild'} uppladdad!`,
+        description: `Tryck på "Spara ändringar" för att spara din profil${isVideo ? 'video' : 'bild'}.`
       });
     } catch (error) {
       console.error('Upload error:', error);
@@ -275,10 +275,10 @@ const Profile = () => {
       const { error: uploadError } = await supabase.storage
         .from('job-applications')
         .upload(fileName, file);
-      
+
       if (uploadError) throw uploadError;
-      
-      // Use signed URL for secure access
+
+      // Use signed URL for secure access  
       const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
       if (!signedUrl) {
         throw new Error('Could not create secure access URL');
@@ -286,16 +286,15 @@ const Profile = () => {
       
       const coverUrl = `${signedUrl}&t=${Date.now()}`;
       
+      // Update local state instead of saving immediately
       setCoverImageUrl(coverUrl);
       
-      // Update profile with cover image - use the profile_image_url for video covers
-      if (profile?.video_url) {
-        await updateProfile({ profile_image_url: coverUrl });
-      }
+      // Mark as having unsaved changes
+      setHasUnsavedChanges(true);
       
       toast({
         title: "Cover-bild uppladdad!",
-        description: "Din cover-bild har uppdaterats."
+        description: "Tryck på \"Spara ändringar\" för att spara din cover-bild."
       });
     } catch (error) {
       console.error('Cover upload error:', error);
@@ -437,17 +436,19 @@ const Profile = () => {
 
       const imageUrl = `${signedUrl}&t=${Date.now()}`;
       
-      await updateProfile({ 
-        profile_image_url: imageUrl,
-        video_url: null // Clear video when uploading image
-      });
+      // Update local state instead of saving immediately
+      setProfileImageUrl(imageUrl);
+      setCoverImageUrl(''); // Clear cover when uploading profile image
       
       setImageEditorOpen(false);
       setPendingImageSrc('');
       
+      // Mark as having unsaved changes
+      setHasUnsavedChanges(true);
+      
       toast({
         title: "Profilbild uppladdad!",
-        description: "Din profilbild har uppdaterats."
+        description: "Tryck på \"Spara ändringar\" för att spara din profilbild."
       });
     } catch (error) {
       console.error('Profile image upload error:', error);
@@ -484,19 +485,18 @@ const Profile = () => {
 
       const coverUrl = `${signedUrl}&t=${Date.now()}`;
       
+      // Update local state instead of saving immediately
       setCoverImageUrl(coverUrl);
-      
-      // Update profile with cover image - use the profile_image_url for video covers
-      if (profile?.video_url) {
-        await updateProfile({ profile_image_url: coverUrl });
-      }
       
       setCoverEditorOpen(false);
       setPendingCoverSrc('');
       
+      // Mark as having unsaved changes
+      setHasUnsavedChanges(true);
+      
       toast({
         title: "Cover-bild uppladdad!",
-        description: "Din cover-bild har uppdaterats."
+        description: "Tryck på \"Spara ändringar\" för att spara din cover-bild."
       });
     } catch (error) {
       console.error('Cover upload error:', error);
@@ -519,29 +519,24 @@ const Profile = () => {
       fileInput.value = '';
     }
     
-    // Update profile to clear both image and video
-    updateProfile({
-      profile_image_url: null,
-      video_url: null
-    });
+    // Mark as having unsaved changes
+    setHasUnsavedChanges(true);
     
     toast({
-      title: "Media borttagen",
-      description: "Din profilbild/video har tagits bort."
+      title: "Profilbild/video borttagen!",
+      description: "Tryck på \"Spara ändringar\" för att spara ändringen."
     });
   };
 
   const deleteCoverImage = () => {
     setCoverImageUrl('');
     
-    // If there's a video, clear the profile_image_url (cover image)
-    if (profile?.video_url) {
-      updateProfile({ profile_image_url: null });
-    }
+    // Mark as having unsaved changes
+    setHasUnsavedChanges(true);
     
     toast({
-      title: "Cover-bild borttagen", 
-      description: "Din cover-bild har tagits bort."
+      title: "Cover-bild borttagen!", 
+      description: "Tryck på \"Spara ändringar\" för att spara ändringen."
     });
   };
 
@@ -558,13 +553,24 @@ const Profile = () => {
         postal_code: postalCode.trim() || null,
         phone: phone.trim() || null,
         birth_date: birthDate || null,
-        profile_image_url: profileImageUrl || null,
         cv_url: cvUrl || null,
         cv_filename: cvFileName || null,
         employment_status: employmentStatus || null,
         working_hours: workingHours || null,
         availability: availability || null,
       };
+
+      // Handle profile image/video updates
+      if (profileImageUrl && (profileImageUrl.includes('.MP4') || profileImageUrl.includes('.mp4'))) {
+        // It's a video
+        updates.video_url = profileImageUrl;
+        // Use cover image if available, or clear profile_image_url
+        updates.profile_image_url = coverImageUrl || null;
+      } else {
+        // It's an image or no media
+        updates.profile_image_url = profileImageUrl || null;
+        updates.video_url = null;
+      }
 
       if (isEmployer) {
         updates.company_name = companyName.trim() || null;
