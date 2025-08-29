@@ -295,13 +295,13 @@ const AuthTablet = ({
                     <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0">
                       <TabsTrigger 
                         value="login" 
-                        className="data-[state=active]:bg-parium-navy data-[state=active]:text-white"
+                        className="text-white data-[state=active]:bg-parium-navy data-[state=active]:text-white"
                       >
                         Logga in
                       </TabsTrigger>
                       <TabsTrigger 
                         value="signup"
-                        className="data-[state=active]:bg-parium-navy data-[state=active]:text-white"
+                        className="text-white data-[state=active]:bg-parium-navy data-[state=active]:text-white"
                       >
                         Registrera
                       </TabsTrigger>

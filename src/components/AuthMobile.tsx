@@ -327,13 +327,13 @@ const AuthMobile = ({
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0 p-0 h-auto gap-2">
                     <TabsTrigger 
                       value="login" 
-                      className="data-[state=active]:bg-parium-navy data-[state=active]:text-white rounded-md bg-muted-foreground/20 text-foreground font-medium"
+                      className="text-white data-[state=active]:bg-parium-navy data-[state=active]:text-white rounded-md font-medium"
                     >
                       Logga in
                     </TabsTrigger>
                     <TabsTrigger 
                       value="signup"
-                      className="data-[state=active]:bg-parium-navy data-[state=active]:text-white rounded-md bg-muted-foreground/20 text-foreground font-medium"
+                      className="text-white data-[state=active]:bg-parium-navy data-[state=active]:text-white rounded-md font-medium"
                     >
                       Registrera
                     </TabsTrigger>
