@@ -118,11 +118,14 @@ const Profile = () => {
       setWorkingHours(values.workingHours);
       setAvailability(values.availability);
 
-      // Store original values for comparison
-      setOriginalValues(values);
-      setHasUnsavedChanges(false);
+      // Only update original values and reset unsaved changes if we don't currently have unsaved changes
+      // This prevents the state from being reset when user cancels navigation and returns to profile
+      if (!hasUnsavedChanges) {
+        setOriginalValues(values);
+        setHasUnsavedChanges(false);
+      }
     }
-  }, [profile]);
+  }, [profile, hasUnsavedChanges]);
 
   const checkForChanges = useCallback(() => {
     if (!originalValues.firstName) return false; // Not loaded yet
