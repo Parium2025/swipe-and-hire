@@ -382,7 +382,7 @@ const AuthDesktop = ({
                   </div>
                   
                   <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => setIsLogin(value === 'login')}>
-                    <TabsList className="grid w-full grid-cols-2 mb-8">
+                    <TabsList className="grid w-full grid-cols-2 mb-8 bg-transparent border-0">
                       <TabsTrigger value="login" className="text-lg font-medium">{isLogin ? 'Logga in' : 'Har konto?'}</TabsTrigger>
                       <TabsTrigger value="signup" className="text-lg font-medium">{!isLogin ? 'Registrera' : 'Skapa konto'}</TabsTrigger>
                     </TabsList>

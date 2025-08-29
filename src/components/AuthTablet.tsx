@@ -292,7 +292,7 @@ const AuthTablet = ({
               <Card className="relative bg-white/10 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
                 <CardContent className="p-6">
                   <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => setIsLogin(value === 'login')}>
-                    <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted">
+                    <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0">
                       <TabsTrigger 
                         value="login" 
                         className="data-[state=active]:bg-parium-navy data-[state=active]:text-white"
