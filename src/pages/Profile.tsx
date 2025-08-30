@@ -115,15 +115,15 @@ const Profile = () => {
     }
   }, [profile]);
 
-  // Migration helper: Extract filename for records missing cv_filename
+  // Migration helper: Extract filename for records missing cv_filename or having internal ones
   const migrateOldCvFilenames = useCallback(async () => {
-    if (!user?.id || !cvUrl || cvFileName) return; // Only run if we have URL but no filename
+    if (!user?.id || !cvUrl) return; // Only need user and URL
     
     try {
       const storageMatch = cvUrl.match(/\/job-applications\/[^\/]+\/\d+-(.*?)(?:\?|$)/);
       if (storageMatch) {
         const extractedName = decodeURIComponent(storageMatch[1]);
-        console.log('Migrating CV filename:', extractedName);
+        console.log('Migrating CV filename from:', cvFileName, 'to:', extractedName);
         
         // Update database with extracted filename
         await updateProfile({ cv_filename: extractedName });
@@ -141,8 +141,13 @@ const Profile = () => {
 
   // Run migration for old records on component mount
   useEffect(() => {
-    if (cvUrl && !cvFileName && profile) {
-      setTimeout(() => migrateOldCvFilenames(), 1000);
+    if (cvUrl && cvFileName && profile) {
+      // Check if current filename looks like an internal one (random characters + extension)
+      const isInternalFilename = /^[a-z0-9]{8,}\.(pdf|docx?|rtf)$/i.test(cvFileName);
+      if (isInternalFilename) {
+        console.log('Detected internal filename, running migration:', cvFileName);
+        setTimeout(() => migrateOldCvFilenames(), 1000);
+      }
     }
   }, [profile, cvUrl, cvFileName, migrateOldCvFilenames]);
 
