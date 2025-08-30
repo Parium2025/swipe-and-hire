@@ -737,7 +737,7 @@ const Profile = () => {
             </div>
 
             {/* Cover image upload for videos */}
-            {profile?.video_url && (
+            {(profile?.video_url || (profileImageUrl && (profileImageUrl.includes('.MP4') || profileImageUrl.includes('.mp4')))) && (
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
                 <Button 
                   variant="outline" 
@@ -746,7 +746,7 @@ const Profile = () => {
                   disabled={isUploadingCover}
                   className="bg-white/20 border-white/30 text-white hover:bg-white/30 disabled:opacity-50 transition-all duration-200"
                 >
-                  {profile?.profile_image_url ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
+                  {(profile?.profile_image_url || coverImageUrl) ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
                 </Button>
                 <Input 
                   type="file" 
@@ -766,7 +766,7 @@ const Profile = () => {
                   </div>
                 )}
                 
-                {profile?.profile_image_url && !isUploadingCover && (
+                {(profile?.profile_image_url || coverImageUrl) && !isUploadingCover && (
                   <div className="flex flex-col items-center space-y-2 w-full">
                      <div className="flex items-center gap-2">
                        <Badge variant="secondary" className="bg-white/20 text-white text-xs font-normal ml-6 whitespace-nowrap">
