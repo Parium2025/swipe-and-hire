@@ -138,7 +138,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
           playsInline
           onEnded={handleVideoEnd}
           style={{ 
-            display: showVideo || !signedCoverUrl ? 'block' : 'none' 
+            display: showVideo ? 'block' : 'none' 
           }}
         />
       )}
