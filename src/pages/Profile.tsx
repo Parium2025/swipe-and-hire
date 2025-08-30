@@ -105,23 +105,23 @@ const Profile = () => {
             // Look for the storage path pattern to find the original filename
             const storageMatch = values.cvUrl.match(/\/job-applications\/[^\/]+\/\d+-(.*?)(?:\?|$)/);
             if (storageMatch) {
-              extractedName = storageMatch[1];
+              extractedName = decodeURIComponent(storageMatch[1]);
             }
           }
           
-          // Use extracted name or create a professional fallback
-          setCvFileName(extractedName || `CV - ${firstName} ${lastName}.pdf`);
+          // Use extracted name (original filename) or keep the internal one if extraction fails
+          setCvFileName(extractedName || storedFilename);
         }
       } else if (values.cvUrl) {
-        // No stored filename, try to extract from URL or create a professional name
+        // No stored filename, try to extract from URL
         let extractedName = '';
         
         const storageMatch = values.cvUrl.match(/\/job-applications\/[^\/]+\/\d+-(.*?)(?:\?|$)/);
         if (storageMatch) {
-          extractedName = storageMatch[1];
+          extractedName = decodeURIComponent(storageMatch[1]);
         }
         
-        setCvFileName(extractedName || `CV - ${firstName} ${lastName}.pdf`);
+        setCvFileName(extractedName || 'CV.pdf');
       } else {
         setCvFileName('');
       }
@@ -137,14 +137,19 @@ const Profile = () => {
     }
   }, [profile]);
 
-  // Ensure user-friendly CV filename if internal/random-looking name slips in
+  // Ensure we try to extract original filename if we have an internal one
   useEffect(() => {
     if (!cvUrl || !cvFileName) return;
     const internalPattern = /^[a-z0-9]{8,}\.(pdf|docx?|rtf)$/i;
     if (internalPattern.test(cvFileName)) {
-      setCvFileName(`CV - ${firstName} ${lastName}.pdf`);
+      // Try to extract original filename from URL
+      const storageMatch = cvUrl.match(/\/job-applications\/[^\/]+\/\d+-(.*?)(?:\?|$)/);
+      if (storageMatch) {
+        const extractedName = decodeURIComponent(storageMatch[1]);
+        setCvFileName(extractedName || cvFileName);
+      }
     }
-  }, [cvUrl, cvFileName, firstName, lastName]);
+  }, [cvUrl, cvFileName]);
 
   const checkForChanges = useCallback(() => {
     if (!originalValues.firstName) return false; // Not loaded yet
@@ -1011,7 +1016,7 @@ const Profile = () => {
                           setCvUrl('');
                           setCvFileName('');
                         }}
-                        currentFile={cvUrl ? { url: cvUrl, name: (/^[a-z0-9]{8,}\.(pdf|docx?|rtf)$/i.test(cvFileName || '') ? `CV - ${firstName} ${lastName}.pdf` : (cvFileName || 'CV.pdf')) } : undefined}
+                        currentFile={cvUrl ? { url: cvUrl, name: cvFileName || 'CV.pdf' } : undefined}
                         acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
                         maxFileSize={5 * 1024 * 1024}
                       />
