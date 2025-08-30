@@ -90,20 +90,38 @@ const Profile = () => {
       setCvUrl(values.cvUrl);
       // Set filename from database or extract from URL for existing files
       if ((profile as any)?.cv_filename) {
-        // Use the stored filename if it exists and looks like an original filename (not an internal one)
         const storedFilename = (profile as any).cv_filename;
         // Check if it's an internal filename (looks like random characters + extension)
         const isInternalFilename = /^[a-z0-9]{8,}\.pdf$/i.test(storedFilename);
         
         if (!isInternalFilename) {
+          // It's a proper filename, keep it
           setCvFileName(storedFilename);
         } else {
-          // It's an internal filename, try to extract original from URL or use a generic name
-          setCvFileName(`CV - ${firstName} ${lastName}.pdf`);
+          // It's an internal filename, try to extract original from URL
+          let extractedName = '';
+          
+          if (values.cvUrl) {
+            // Look for the storage path pattern to find the original filename
+            const storageMatch = values.cvUrl.match(/\/job-applications\/[^\/]+\/\d+-(.*?)(?:\?|$)/);
+            if (storageMatch) {
+              extractedName = storageMatch[1];
+            }
+          }
+          
+          // Use extracted name or create a professional fallback
+          setCvFileName(extractedName || `CV - ${firstName} ${lastName}.pdf`);
         }
       } else if (values.cvUrl) {
-        // No stored filename, create a user-friendly one
-        setCvFileName(`CV - ${firstName} ${lastName}.pdf`);
+        // No stored filename, try to extract from URL or create a professional name
+        let extractedName = '';
+        
+        const storageMatch = values.cvUrl.match(/\/job-applications\/[^\/]+\/\d+-(.*?)(?:\?|$)/);
+        if (storageMatch) {
+          extractedName = storageMatch[1];
+        }
+        
+        setCvFileName(extractedName || `CV - ${firstName} ${lastName}.pdf`);
       } else {
         setCvFileName('');
       }
