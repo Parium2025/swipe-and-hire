@@ -90,25 +90,20 @@ const Profile = () => {
       setCvUrl(values.cvUrl);
       // Set filename from database or extract from URL for existing files
       if ((profile as any)?.cv_filename) {
-        setCvFileName((profile as any).cv_filename);
-      } else if (values.cvUrl) {
-        // Extract filename from URL for legacy files
-        // First try to get it from the storage path (not the signed URL)
-        let extractedName = '';
+        // Use the stored filename if it exists and looks like an original filename (not an internal one)
+        const storedFilename = (profile as any).cv_filename;
+        // Check if it's an internal filename (looks like random characters + extension)
+        const isInternalFilename = /^[a-z0-9]{8,}\.pdf$/i.test(storedFilename);
         
-        // Look for the storage path pattern: /storage/v1/object/sign/job-applications/user-id/timestamp-filename
-        const storageMatch = values.cvUrl.match(/\/job-applications\/[^\/]+\/\d+-(.*?)(?:\?|$)/);
-        if (storageMatch) {
-          extractedName = storageMatch[1];
+        if (!isInternalFilename) {
+          setCvFileName(storedFilename);
         } else {
-          // Fallback: try to extract from the end of URL
-          const urlParts = values.cvUrl.split('/');
-          const lastPart = urlParts[urlParts.length - 1];
-          const match = lastPart.match(/^\d+-(.+?)(?:\?|$)/);
-          extractedName = match ? match[1] : lastPart.split('?')[0];
+          // It's an internal filename, try to extract original from URL or use a generic name
+          setCvFileName(`CV - ${firstName} ${lastName}.pdf`);
         }
-        
-        setCvFileName(extractedName || 'CV.pdf');
+      } else if (values.cvUrl) {
+        // No stored filename, create a user-friendly one
+        setCvFileName(`CV - ${firstName} ${lastName}.pdf`);
       } else {
         setCvFileName('');
       }
