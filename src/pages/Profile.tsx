@@ -237,10 +237,7 @@ const Profile = () => {
       // Update local state instead of saving immediately
       if (isVideo) {
         setProfileImageUrl(mediaUrl); // Store video URL in profileImageUrl for now
-        // Clear cover image if it was a video file
-        if (!profile?.profile_image_url || profile.profile_image_url.includes('.MP4') || profile.profile_image_url.includes('.mp4')) {
-          setCoverImageUrl('');
-        }
+        // Keep existing cover image when uploading video - don't clear it
       } else {
         setProfileImageUrl(mediaUrl);
         setCoverImageUrl(''); // Clear cover when uploading profile image
