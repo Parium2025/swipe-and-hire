@@ -669,9 +669,9 @@ const Profile = () => {
           </CardHeader>
           <CardContent className="flex flex-col items-center space-y-4">
             <div className="relative">
-              {profile?.video_url ? (
+              {(profile?.video_url || (profileImageUrl && (profileImageUrl.includes('.MP4') || profileImageUrl.includes('.mp4')))) ? (
                 <ProfileVideo
-                  videoUrl={profile.video_url}
+                  videoUrl={profile.video_url || (profileImageUrl && (profileImageUrl.includes('.MP4') || profileImageUrl.includes('.mp4')) ? profileImageUrl : '')}
                   coverImageUrl={coverImageUrl || profile.profile_image_url || undefined}
                   alt="Profile video"
                   className="w-32 h-32 border-4 border-white/20 hover:border-white/40 transition-all rounded-full overflow-hidden"
