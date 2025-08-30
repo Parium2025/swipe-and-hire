@@ -137,6 +137,15 @@ const Profile = () => {
     }
   }, [profile]);
 
+  // Ensure user-friendly CV filename if internal/random-looking name slips in
+  useEffect(() => {
+    if (!cvUrl || !cvFileName) return;
+    const internalPattern = /^[a-z0-9]{8,}\.(pdf|docx?|rtf)$/i;
+    if (internalPattern.test(cvFileName)) {
+      setCvFileName(`CV - ${firstName} ${lastName}.pdf`);
+    }
+  }, [cvUrl, cvFileName, firstName, lastName]);
+
   const checkForChanges = useCallback(() => {
     if (!originalValues.firstName) return false; // Not loaded yet
     
@@ -1002,7 +1011,7 @@ const Profile = () => {
                           setCvUrl('');
                           setCvFileName('');
                         }}
-                        currentFile={cvUrl ? { url: cvUrl, name: cvFileName || 'CV.pdf' } : undefined}
+                        currentFile={cvUrl ? { url: cvUrl, name: (/^[a-z0-9]{8,}\.(pdf|docx?|rtf)$/i.test(cvFileName || '') ? `CV - ${firstName} ${lastName}.pdf` : (cvFileName || 'CV.pdf')) } : undefined}
                         acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
                         maxFileSize={5 * 1024 * 1024}
                       />
