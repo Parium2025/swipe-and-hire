@@ -974,23 +974,26 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-4 pt-4 border-t border-white/20">
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-4">
                       <FileText className="h-4 w-4 text-white" />
                       <Label className="text-base font-medium text-white">CV</Label>
                     </div>
-                    <FileUpload
-                      onFileUploaded={(url, fileName) => {
-                        setCvUrl(url);
-                        setCvFileName(fileName);
-                      }}
-                      onFileRemoved={() => {
-                        setCvUrl('');
-                        setCvFileName('');
-                      }}
-                      currentFile={cvUrl ? { url: cvUrl, name: cvFileName || 'CV.pdf' } : undefined}
-                      acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
-                      maxFileSize={5 * 1024 * 1024}
-                    />
+                    
+                    <div className="bg-white/5 rounded-lg p-4">
+                      <FileUpload
+                        onFileUploaded={(url, fileName) => {
+                          setCvUrl(url);
+                          setCvFileName(fileName);
+                        }}
+                        onFileRemoved={() => {
+                          setCvUrl('');
+                          setCvFileName('');
+                        }}
+                        currentFile={cvUrl ? { url: cvUrl, name: cvFileName || 'CV.pdf' } : undefined}
+                        acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
+                        maxFileSize={5 * 1024 * 1024}
+                      />
+                    </div>
                   </div>
                 </>
               )}
