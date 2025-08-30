@@ -88,40 +88,18 @@ const Profile = () => {
       setBirthDate(values.birthDate);
       setProfileImageUrl(values.profileImageUrl);
       setCvUrl(values.cvUrl);
-      // Set filename from database or extract from URL for existing files
+      // Prioritize cv_filename from database, fallback to URL extraction only if missing
       if ((profile as any)?.cv_filename) {
-        const storedFilename = (profile as any).cv_filename;
-        // Check if it's an internal filename (looks like random characters + extension)
-        const isInternalFilename = /^[a-z0-9]{8,}\.pdf$/i.test(storedFilename);
-        
-        if (!isInternalFilename) {
-          // It's a proper filename, keep it
-          setCvFileName(storedFilename);
-        } else {
-          // It's an internal filename, try to extract original from URL
-          let extractedName = '';
-          
-          if (values.cvUrl) {
-            // Look for the storage path pattern to find the original filename
-            const storageMatch = values.cvUrl.match(/\/job-applications\/[^\/]+\/\d+-(.*?)(?:\?|$)/);
-            if (storageMatch) {
-              extractedName = decodeURIComponent(storageMatch[1]);
-            }
-          }
-          
-          // Use extracted name (original filename) or keep the internal one if extraction fails
-          setCvFileName(extractedName || storedFilename);
-        }
+        setCvFileName((profile as any).cv_filename);
       } else if (values.cvUrl) {
-        // No stored filename, try to extract from URL
-        let extractedName = '';
-        
+        // Only extract from URL if no filename in DB (for old records)
         const storageMatch = values.cvUrl.match(/\/job-applications\/[^\/]+\/\d+-(.*?)(?:\?|$)/);
         if (storageMatch) {
-          extractedName = decodeURIComponent(storageMatch[1]);
+          const extractedName = decodeURIComponent(storageMatch[1]);
+          setCvFileName(extractedName);
+        } else {
+          setCvFileName('CV.pdf');
         }
-        
-        setCvFileName(extractedName || 'CV.pdf');
       } else {
         setCvFileName('');
       }
@@ -137,19 +115,36 @@ const Profile = () => {
     }
   }, [profile]);
 
-  // Ensure we try to extract original filename if we have an internal one
-  useEffect(() => {
-    if (!cvUrl || !cvFileName) return;
-    const internalPattern = /^[a-z0-9]{8,}\.(pdf|docx?|rtf)$/i;
-    if (internalPattern.test(cvFileName)) {
-      // Try to extract original filename from URL
+  // Migration helper: Extract filename for records missing cv_filename
+  const migrateOldCvFilenames = useCallback(async () => {
+    if (!user?.id || !cvUrl || cvFileName) return; // Only run if we have URL but no filename
+    
+    try {
       const storageMatch = cvUrl.match(/\/job-applications\/[^\/]+\/\d+-(.*?)(?:\?|$)/);
       if (storageMatch) {
         const extractedName = decodeURIComponent(storageMatch[1]);
-        setCvFileName(extractedName || cvFileName);
+        console.log('Migrating CV filename:', extractedName);
+        
+        // Update database with extracted filename
+        await updateProfile({ cv_filename: extractedName });
+        setCvFileName(extractedName);
+        
+        toast({
+          title: "CV-namn uppdaterat",
+          description: `Originalnamnet "${extractedName}" har sparats.`
+        });
       }
+    } catch (error) {
+      console.error('Failed to migrate CV filename:', error);
     }
-  }, [cvUrl, cvFileName]);
+  }, [user?.id, cvUrl, cvFileName, updateProfile, toast]);
+
+  // Run migration for old records on component mount
+  useEffect(() => {
+    if (cvUrl && !cvFileName && profile) {
+      setTimeout(() => migrateOldCvFilenames(), 1000);
+    }
+  }, [profile, cvUrl, cvFileName, migrateOldCvFilenames]);
 
   const checkForChanges = useCallback(() => {
     if (!originalValues.firstName) return false; // Not loaded yet
@@ -1011,7 +1006,8 @@ const Profile = () => {
                         onFileUploaded={(url, fileName) => {
                           console.log('CV uploaded, received:', { url, fileName });
                           setCvUrl(url);
-                          setCvFileName(fileName);
+                          setCvFileName(fileName); // Save original filename to DB
+                          setHasUnsavedChanges(true); // Mark as changed
                         }}
                         onFileRemoved={() => {
                           setCvUrl('');

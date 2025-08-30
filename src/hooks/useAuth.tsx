@@ -38,6 +38,7 @@ interface Profile {
   profile_image_url?: string;
   video_url?: string;
   cv_url?: string;
+  cv_filename?: string;
   employment_status?: string;
   working_hours?: string;
   availability?: string;
