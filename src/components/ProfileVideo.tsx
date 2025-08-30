@@ -8,9 +8,10 @@ interface ProfileVideoProps {
   coverImageUrl?: string;
   alt?: string;
   className?: string;
+  userInitials?: string;
 }
 
-const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "" }: ProfileVideoProps) => {
+const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "", userInitials = "?" }: ProfileVideoProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [signedVideoUrl, setSignedVideoUrl] = useState<string | null>(null);
@@ -108,12 +109,20 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
       onClick={handleTap}
     >
       {/* Cover image or poster frame */}
-      {(!showVideo || !isPlaying) && signedCoverUrl && (
-        <img 
-          src={signedCoverUrl} 
-          alt={alt}
-          className="w-full h-full object-cover transition-opacity duration-300"
-        />
+      {(!showVideo || !isPlaying) && (
+        <>
+          {signedCoverUrl ? (
+            <img 
+              src={signedCoverUrl} 
+              alt={alt}
+              className="w-full h-full object-cover transition-opacity duration-300"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center text-white font-semibold text-2xl">
+              {userInitials}
+            </div>
+          )}
+        </>
       )}
       
       {/* Video element */}
