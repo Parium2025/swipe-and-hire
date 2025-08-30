@@ -672,7 +672,7 @@ const Profile = () => {
               {profile?.video_url ? (
                 <ProfileVideo
                   videoUrl={profile.video_url}
-                  coverImageUrl={profile.profile_image_url || undefined}
+                  coverImageUrl={coverImageUrl || profile.profile_image_url || undefined}
                   alt="Profile video"
                   className="w-32 h-32 border-4 border-white/20 hover:border-white/40 transition-all rounded-full overflow-hidden"
                 />
