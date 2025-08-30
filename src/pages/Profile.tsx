@@ -1009,6 +1009,7 @@ const Profile = () => {
                     <div className="bg-white/5 rounded-lg p-4">
                       <FileUpload
                         onFileUploaded={(url, fileName) => {
+                          console.log('CV uploaded, received:', { url, fileName });
                           setCvUrl(url);
                           setCvFileName(fileName);
                         }}

@@ -7,12 +7,13 @@ import { supabase } from '@/integrations/supabase/client';
 export const createSignedUrl = async (
   bucket: string, 
   path: string, 
-  expiresIn: number = 3600 // 1 hour default
+  expiresIn: number = 3600, // 1 hour default
+  downloadName?: string
 ): Promise<string | null> => {
   try {
     const { data, error } = await supabase.storage
       .from(bucket)
-      .createSignedUrl(path, expiresIn);
+      .createSignedUrl(path, expiresIn, downloadName ? { download: downloadName } : undefined);
     
     if (error) {
       console.error('Error creating signed URL:', error);
@@ -71,12 +72,13 @@ export const getStoragePathFromUrl = (url: string): string | null => {
 export const convertToSignedUrl = async (
   url: string,
   bucket: string = 'job-applications',
-  expiresIn: number = 86400 // 24 hours default
+  expiresIn: number = 86400, // 24 hours default
+  downloadName?: string
 ): Promise<string | null> => {
   if (!url) return null;
   
-  // If it's already a signed URL, return as-is
-  if (url.includes('/storage/v1/object/sign/')) {
+  // If it's already a signed URL, and no custom download name requested, return as-is
+  if (url.includes('/storage/v1/object/sign/') && !downloadName) {
     return url;
   }
   
@@ -88,5 +90,5 @@ export const convertToSignedUrl = async (
   }
   
   // Create a new signed URL
-  return await createSignedUrl(bucket, path, expiresIn);
+  return await createSignedUrl(bucket, path, expiresIn, downloadName);
 };

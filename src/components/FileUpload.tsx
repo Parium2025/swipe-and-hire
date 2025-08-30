@@ -55,7 +55,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       if (uploadError) throw uploadError;
 
       // Use signed URL for secure access
-      const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
+      const signedUrl = await createSignedUrl('job-applications', fileName, 86400, file.name); // 24 hours, preserve download name
       if (!signedUrl) {
         throw new Error('Could not create secure access URL');
       }
@@ -142,7 +142,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 // For old public URLs, convert to signed URL on click
                 if (currentFile.url.includes('/storage/v1/object/public/')) {
                   e.preventDefault();
-                  const signedUrl = await convertToSignedUrl(currentFile.url);
+                  const signedUrl = await convertToSignedUrl(currentFile.url, 'job-applications', 86400, currentFile.name);
                   if (signedUrl) {
                     window.open(signedUrl, '_blank');
                   }
