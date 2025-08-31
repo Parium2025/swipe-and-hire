@@ -1446,10 +1446,6 @@ const SearchJobs = () => {
           {/* Selected Job Categories - Fixed position section */}
           {(selectedCategory !== 'all-categories' || selectedSubcategories.length > 0) && (
             <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-              <div className="flex items-center gap-2 mb-3">
-                <Filter className="h-4 w-4 text-white" />
-                <span className="text-sm font-medium text-white">Valda yrkesområden:</span>
-              </div>
               <div className="flex flex-wrap gap-2">
                 {selectedCategory !== 'all-categories' && (
                   <Badge variant="default" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-white/30">
