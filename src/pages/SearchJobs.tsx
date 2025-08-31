@@ -1328,7 +1328,7 @@ const SearchJobs = () => {
                     align="center"
                     alignOffset={0}
                     sideOffset={6}
-                    avoidCollisions={true}
+                    avoidCollisions={false}
                     onCloseAutoFocus={(e) => e.preventDefault()}
                   >
                     {/* Search input */}
