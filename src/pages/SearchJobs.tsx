@@ -1305,7 +1305,7 @@ const SearchJobs = () => {
                 Plats
               </Label>
               <div className="relative">
-                <DropdownMenu>
+                <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
                     <Button 
                       variant="outline" 
@@ -1323,12 +1323,12 @@ const SearchJobs = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent 
-                    className="w-80 max-h-80 overflow-hidden bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
+                    className="w-80 max-h-80 overflow-hidden bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-[60] rounded-lg text-white"
                     side="bottom"
                     align="center"
                     alignOffset={0}
                     sideOffset={6}
-                    avoidCollisions={false}
+                    avoidCollisions={true}
                     onCloseAutoFocus={(e) => e.preventDefault()}
                   >
                     {/* Search input */}
