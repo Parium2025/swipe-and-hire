@@ -36,6 +36,7 @@ const Profile = () => {
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
   const [pendingCoverSrc, setPendingCoverSrc] = useState<string>('');
   const [coverImageUrl, setCoverImageUrl] = useState('');
+  const [isProfileVideo, setIsProfileVideo] = useState(false);
   
   // Basic form fields
   const [firstName, setFirstName] = useState(profile?.first_name || '');
@@ -86,7 +87,16 @@ const Profile = () => {
       setPostalCode(values.postalCode);
       setPhone(values.phone);
       setBirthDate(values.birthDate);
-      setProfileImageUrl(values.profileImageUrl);
+      
+      // Handle video/image loading from database
+      if ((profile as any)?.video_url) {
+        setProfileImageUrl((profile as any).video_url);
+        setIsProfileVideo(true);
+      } else {
+        setProfileImageUrl(values.profileImageUrl);
+        setIsProfileVideo(false);
+      }
+      
       setCvUrl(values.cvUrl);
       // Only extract from URL if no filename in DB (for old records)
       if ((profile as any)?.cv_filename) {
@@ -244,9 +254,11 @@ const Profile = () => {
       // Update local state instead of saving immediately
       if (isVideo) {
         setProfileImageUrl(mediaUrl); // Store video URL in profileImageUrl for now
+        setIsProfileVideo(true); // Mark as video
         // Keep existing cover image when uploading video - don't clear it
       } else {
         setProfileImageUrl(mediaUrl);
+        setIsProfileVideo(false); // Mark as image
         setCoverImageUrl(''); // Clear cover when uploading profile image
       }
       
@@ -442,6 +454,7 @@ const Profile = () => {
       
       // Update local state instead of saving immediately
       setProfileImageUrl(imageUrl);
+      setIsProfileVideo(false); // Mark as image, not video
       setCoverImageUrl(''); // Clear cover when uploading profile image
       
       setImageEditorOpen(false);
@@ -516,6 +529,7 @@ const Profile = () => {
 
   const deleteProfileMedia = () => {
     setProfileImageUrl('');
+    setIsProfileVideo(false); // Reset video flag
     
     // Reset the file input to allow new uploads
     const fileInput = document.getElementById('profile-image') as HTMLInputElement;
@@ -565,7 +579,7 @@ const Profile = () => {
       };
 
       // Handle profile image/video updates
-      if (profileImageUrl && (profileImageUrl.includes('.MP4') || profileImageUrl.includes('.mp4'))) {
+      if (isProfileVideo && profileImageUrl) {
         // It's a video
         updates.video_url = profileImageUrl;
         // Use cover image if available, or clear profile_image_url
@@ -676,10 +690,10 @@ const Profile = () => {
           </CardHeader>
           <CardContent className="flex flex-col items-center space-y-4">
             <div className="relative">
-              {(profile?.video_url || (profileImageUrl && (profileImageUrl.includes('.MP4') || profileImageUrl.includes('.mp4')))) ? (
+              {(profile?.video_url || isProfileVideo) ? (
                 <ProfileVideo
-                  videoUrl={profile.video_url || (profileImageUrl && (profileImageUrl.includes('.MP4') || profileImageUrl.includes('.mp4')) ? profileImageUrl : '')}
-                  coverImageUrl={coverImageUrl || profile.profile_image_url || undefined}
+                  videoUrl={profile?.video_url || (isProfileVideo ? profileImageUrl : '')}
+                  coverImageUrl={coverImageUrl || profile?.profile_image_url || undefined}
                   userInitials={`${firstName.charAt(0)}${lastName.charAt(0)}`}
                   alt="Profile video"
                   className="w-32 h-32 border-4 border-white/20 hover:border-white/40 transition-all rounded-full overflow-hidden"
@@ -745,7 +759,7 @@ const Profile = () => {
             </div>
 
             {/* Cover image upload for videos */}
-            {(profile?.video_url || (profileImageUrl && (profileImageUrl.includes('.MP4') || profileImageUrl.includes('.mp4')))) && (
+            {(profile?.video_url || isProfileVideo) && (
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
                 <Button 
                   variant="outline" 
