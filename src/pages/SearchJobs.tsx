@@ -1032,7 +1032,7 @@ const SearchJobs = () => {
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/50" />
                 <Input
                   id="search"
-                  placeholder="sök yrke eller företag"
+                  placeholder="Sök yrke eller företag"
                   value={searchTerm}
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
