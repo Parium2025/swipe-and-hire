@@ -99,6 +99,9 @@ const Profile = () => {
         setIsProfileVideo(false);
       }
       
+      // Always load current cover image from DB
+      setCoverImageUrl((profile as any)?.profile_image_url || '');
+      
       setCvUrl(values.cvUrl);
       // Only extract from URL if no filename in DB (for old records)
       if ((profile as any)?.cv_filename) {
@@ -585,7 +588,7 @@ const Profile = () => {
         // It's a video
         updates.video_url = profileImageUrl;
         // Use cover image if available, or clear profile_image_url
-        updates.profile_image_url = coverImageUrl || null;
+        updates.profile_image_url = coverImageUrl || (profile as any)?.profile_image_url || null;
       } else {
         // It's an image or no media
         updates.profile_image_url = profileImageUrl || null;
