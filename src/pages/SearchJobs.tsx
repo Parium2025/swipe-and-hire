@@ -1169,15 +1169,13 @@ const SearchJobs = () => {
                     className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
                   >
                     <span className="truncate">
-                      {selectedCategory !== 'all-categories' 
-                        ? jobCategories.find(cat => cat.value === selectedCategory)?.label
-                        : selectedSubcategories.length > 0 
+                      {selectedSubcategories.length > 0 
                         ? `${selectedSubcategories.length} yrken valda`
                         : 'Välj yrkesområde'
                       }
                     </span>
                     <div className="flex items-center gap-2">
-                      {(selectedCategory !== 'all-categories' || selectedSubcategories.length > 0) && (
+                      {selectedSubcategories.length > 0 && (
                         <div className="w-2 h-2 bg-white rounded-full"></div>
                       )}
                       <ChevronDown className="h-4 w-4 flex-shrink-0" />
@@ -1535,8 +1533,8 @@ const SearchJobs = () => {
             {/* Results Header */}
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold">
-                {selectedCategory !== 'all-categories' 
-                  ? `${jobCategories.find(cat => cat.value === selectedCategory)?.label} Jobb`
+                {selectedSubcategories.length > 0 
+                  ? `${selectedSubcategories.length} yrken valda`
                   : 'Alla Jobb'
                 }
               </h2>
@@ -1579,13 +1577,6 @@ const SearchJobs = () => {
                               </div>
                             </div>
                           </div>
-                          
-                          {/* Category Badge */}
-                          {selectedCategory !== 'all-categories' && (
-                            <Badge className="bg-primary/10 text-primary border-primary/20">
-                              {jobCategories.find(cat => cat.value === selectedCategory)?.label}
-                            </Badge>
-                          )}
                         </div>
                         
                         {/* Job Description */}
