@@ -1019,55 +1019,6 @@ const SearchJobs = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          
-          {/* Active Filters Summary - Always show to prevent layout shifts */}
-          <div className="bg-white/5 rounded-lg p-4 border border-white/10 min-h-[80px]">
-            {(selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || searchTerm || selectedLocations.length > 0) ? (
-              <>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-sm font-medium text-white">Aktiva filter:</span>
-                   <Badge variant="secondary" className="text-xs">
-                      {[
-                        selectedCategory !== 'all-categories' ? 1 : 0,
-                        selectedSubcategories.length,
-                        searchTerm ? 1 : 0,
-                        selectedLocations.length,
-                        selectedEmploymentType !== 'all-types' ? 1 : 0
-                      ].reduce((a, b) => a + b, 0)} aktiva
-                   </Badge>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  
-                  {selectedLocations.map((location) => (
-                    <Badge key={location} variant="secondary" className="gap-2 bg-white/10 hover:bg-white/20 text-white border-white/20">
-                      <span className="text-xs">{location}</span>
-                      <button 
-                        onClick={() => setSelectedLocations(prev => prev.filter(l => l !== location))}
-                        className="ml-1 hover:bg-white/20 rounded p-0.5"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </Badge>
-                  ))}
-                  
-                  {searchTerm && (
-                    <Badge variant="outline" className="gap-2 text-white border-white/30">
-                      <Search className="h-4 w-4" />
-                      <span className="text-xs">"{searchTerm}"</span>
-                      <button onClick={() => setSearchTerm('')} className="ml-1 hover:bg-white/20 rounded p-0.5">
-                        <X className="h-4 w-4" />
-                      </button>
-                    </Badge>
-                  )}
-                </div>
-              </>
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <span className="text-sm text-white/50 italic">Inga aktiva filter</span>
-              </div>
-            )}
-          </div>
-
           {/* Search Fields Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             
