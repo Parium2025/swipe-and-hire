@@ -990,7 +990,7 @@ const SearchJobs = () => {
           Hitta ditt nästa steg
         </h1>
         <p className="text-xl text-white/90 max-w-2xl mx-auto">
-          Enkel, smart och snabb jobbsökning. Välj yrkesområde eller sök fritt - vi hjälper dig hitta rätt.
+          Enkel, smart och snabb jobbsökning. Välj yrkesområde eller sök fritt - vi hjälper dig hitta rätt
         </p>
       </div>
 
