@@ -92,6 +92,8 @@ const Profile = () => {
       if ((profile as any)?.video_url) {
         setProfileImageUrl((profile as any).video_url);
         setIsProfileVideo(true);
+        // Set original values to match current for video
+        values.profileImageUrl = (profile as any).video_url;
       } else {
         setProfileImageUrl(values.profileImageUrl);
         setIsProfileVideo(false);
