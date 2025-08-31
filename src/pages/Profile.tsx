@@ -164,6 +164,30 @@ const Profile = () => {
     };
   }, [hasUnsavedChanges]);
 
+  // Reset form to original values when user confirms leaving without saving on same route
+  useEffect(() => {
+    const onUnsavedConfirm = () => {
+      if (!originalValues) return;
+      setFirstName(originalValues.firstName || '');
+      setLastName(originalValues.lastName || '');
+      setBio(originalValues.bio || '');
+      setUserLocation(originalValues.userLocation || '');
+      setPostalCode(originalValues.postalCode || '');
+      setPhone(originalValues.phone || '');
+      setBirthDate(originalValues.birthDate || '');
+      setProfileImageUrl(originalValues.profileImageUrl || '');
+      setCvUrl(originalValues.cvUrl || '');
+      setCompanyName(originalValues.companyName || '');
+      setOrgNumber(originalValues.orgNumber || '');
+      setEmploymentStatus(originalValues.employmentStatus || '');
+      setWorkingHours(originalValues.workingHours || '');
+      setAvailability(originalValues.availability || '');
+      setHasUnsavedChanges(false);
+    };
+    window.addEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
+    return () => window.removeEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
+  }, [originalValues, setHasUnsavedChanges]);
+
   const isEmployer = userRole?.role === 'employer';
 
   // Hjälpfunktioner

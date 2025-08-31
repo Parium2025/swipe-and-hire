@@ -37,6 +37,8 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
 
   const handleConfirmLeave = () => {
     if (pendingNavigation) {
+      // Notify listeners (e.g., forms) to reset their state
+      window.dispatchEvent(new CustomEvent('unsaved-confirm'));
       setHasUnsavedChanges(false);
       navigate(pendingNavigation);
     }
