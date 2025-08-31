@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { Button } from '@/components/ui/button';
@@ -59,9 +59,6 @@ const Profile = () => {
   const [companyName, setCompanyName] = useState(profile?.company_name || '');
   const [orgNumber, setOrgNumber] = useState(profile?.org_number || '');
 
-  // One-time guard to avoid duplicate migrations/toasts (StrictMode)
-  const migrationRunRef = useRef(false);
-
   // Load profile data when profile changes
   useEffect(() => {
     if (profile) {
@@ -91,18 +88,9 @@ const Profile = () => {
       setBirthDate(values.birthDate);
       setProfileImageUrl(values.profileImageUrl);
       setCvUrl(values.cvUrl);
-      // Prioritize cv_filename from database, fallback to URL extraction only if missing
+      // Only extract from URL if no filename in DB (for old records)
       if ((profile as any)?.cv_filename) {
         setCvFileName((profile as any).cv_filename);
-      } else if (values.cvUrl) {
-        // Only extract from URL if no filename in DB (for old records)
-        const storageMatch = values.cvUrl.match(/\/job-applications\/[^\/]+\/\d+-(.*?)(?:\?|$)/);
-        if (storageMatch) {
-          const extractedName = decodeURIComponent(storageMatch[1]);
-          setCvFileName(extractedName);
-        } else {
-          setCvFileName('CV.pdf');
-        }
       } else {
         setCvFileName('');
       }
@@ -118,52 +106,6 @@ const Profile = () => {
     }
   }, [profile]);
 
-  // Migration helper: Extract filename for records missing cv_filename or having internal ones
-  const migrateOldCvFilenames = useCallback(async () => {
-    if (!user?.id || !cvUrl) return; // Only need user and URL
-    if (migrationRunRef.current) return; // Guard against duplicates
-    
-    try {
-      const storageMatch = cvUrl.match(/\/job-applications\/[^\/]+\/\d+-(.*?)(?:\?|$)/);
-      if (storageMatch) {
-        const extractedName = decodeURIComponent(storageMatch[1]);
-        const internalPattern = /^[a-z0-9]{8,}\.(pdf|docx?|rtf)$/i;
-        
-        // Skip if we couldn't derive a better name
-        if (!extractedName || extractedName === cvFileName || internalPattern.test(extractedName)) {
-          console.log('Skip migration - no original filename found, keeping:', cvFileName);
-          migrationRunRef.current = true;
-          return;
-        }
-        
-        migrationRunRef.current = true;
-        console.log('Migrating CV filename from:', cvFileName, 'to:', extractedName);
-        
-        // Update database with extracted filename
-        await updateProfile({ cv_filename: extractedName });
-        setCvFileName(extractedName);
-        
-        toast({
-          title: "CV-namn uppdaterat",
-          description: `Originalnamnet "${extractedName}" har sparats.`
-        });
-      }
-    } catch (error) {
-      console.error('Failed to migrate CV filename:', error);
-    }
-  }, [user?.id, cvUrl, cvFileName, updateProfile, toast]);
-
-  // Run migration for old records on component mount
-  useEffect(() => {
-    if (cvUrl && cvFileName && profile && !migrationRunRef.current) {
-      // Check if current filename looks like an internal one (random characters + extension)
-      const isInternalFilename = /^[a-z0-9]{8,}\.(pdf|docx?|rtf)$/i.test(cvFileName);
-      if (isInternalFilename) {
-        console.log('Detected internal filename, attempting migration:', cvFileName);
-        setTimeout(() => migrateOldCvFilenames(), 300);
-      }
-    }
-  }, [profile, cvUrl, cvFileName, migrateOldCvFilenames]);
 
   const checkForChanges = useCallback(() => {
     if (!originalValues.firstName) return false; // Not loaded yet
@@ -1032,7 +974,7 @@ const Profile = () => {
                           setCvUrl('');
                           setCvFileName('');
                         }}
-                        currentFile={cvUrl ? { url: cvUrl, name: (/^[a-z0-9]{8,}\.(pdf|docx?|rtf)$/i.test(cvFileName || '') ? 'CV.pdf' : (cvFileName || 'CV.pdf')) } : undefined}
+                        currentFile={cvUrl ? { url: cvUrl, name: 'Din valda fil' } : undefined}
                         acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
                         maxFileSize={5 * 1024 * 1024}
                       />

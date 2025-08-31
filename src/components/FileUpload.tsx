@@ -60,7 +60,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
         throw new Error('Could not create secure access URL');
       }
 
-      onFileUploaded(signedUrl, file.name);
+      onFileUploaded(signedUrl, 'Din valda fil');
       
       toast({
         title: "Fil uppladdad!",
