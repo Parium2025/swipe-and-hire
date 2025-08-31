@@ -983,9 +983,9 @@ const SearchJobs = () => {
   const companySuggestions = getCompanySuggestions(searchTerm);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
+    <div className="max-w-7xl mx-auto space-y-6">
       {/* Hero Section */}
-      <div className="text-center space-y-4 py-8">
+      <div className="text-center space-y-4 py-6">
         <h1 className="text-4xl font-extrabold text-white">
           Ditt nästa steg
         </h1>
