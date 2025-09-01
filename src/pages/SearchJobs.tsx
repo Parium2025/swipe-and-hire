@@ -1273,7 +1273,7 @@ const SearchJobs = () => {
               {/* Clear all filters button */}
               {(searchTerm || selectedLocation !== 'all-locations' || selectedLocations.length > 0 || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentType !== 'all-types' || selectedCompany) && (
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
                   onClick={() => {
                       setSearchTerm('');
@@ -1284,7 +1284,7 @@ const SearchJobs = () => {
                       setSelectedSubcategories([]);
                       setSelectedEmploymentType('all-types');
                     }}
-                  className="text-white/70 hover:text-white hover:bg-white/10 mt-2"
+                  className="text-white/70 hover:text-white hover:bg-white/10 border border-white/20 mt-2"
                 >
                   <X className="h-4 w-4 mr-1" />
                   Rensa alla
