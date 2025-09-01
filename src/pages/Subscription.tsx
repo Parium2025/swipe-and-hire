@@ -52,7 +52,9 @@ const Subscription = () => {
         </div>
       </div>
 
-      <div className="px-4 pb-6">
+        <div className="px-4 pb-6">
+          <Card className="bg-blue-500/10 backdrop-blur-sm border-blue-500/20">
+            <CardContent className="p-4">
         {/* Current Plan Status */}
         <div className="pt-4 mb-6">
           <Card className="bg-blue-500/10 backdrop-blur-sm border-blue-500/20">
@@ -140,7 +142,9 @@ const Subscription = () => {
           })}
         </div>
 
-      </div>
+          </CardContent>
+          </Card>
+        </div>
     </div>
   );
 };
