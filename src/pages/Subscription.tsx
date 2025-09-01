@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Crown, Check, Star, Zap } from 'lucide-react';
+import { Crown, Check, Star, CreditCard, Calendar } from 'lucide-react';
 
 const Subscription = () => {
   const currentPlan = 'basic'; // This would come from your subscription state
@@ -28,7 +28,7 @@ const Subscription = () => {
       name: 'Premium',
       price: '29',
       period: 'månad',
-      description: 'För seriösa jobbsökare och små företag',
+      description: 'För seriösa jobbsökare',
       features: [
         'Obegränsade jobbansökningar',
         'Avancerad profilhantering',
@@ -44,121 +44,138 @@ const Subscription = () => {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-6">
-      <div className="text-center space-y-2">
-        <h1 className="text-2xl sm:text-3xl font-bold">Abonnemang</h1>
-        <p className="text-muted-foreground text-base sm:text-lg">
-          Välj det abonnemang som passar dina behov bäst
-        </p>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="sticky top-0 z-10 bg-background border-b">
+        <div className="px-4 py-4">
+          <h1 className="text-xl font-semibold text-center">Abonnemang</h1>
+        </div>
       </div>
 
-      {/* Current Plan Status */}
-      <Card className="border-primary/20 bg-primary/5">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-            <Crown className="h-5 w-5 text-primary" />
-            Din nuvarande plan
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <p className="font-medium text-base sm:text-lg">Basic Plan</p>
-              <p className="text-sm text-muted-foreground">
-                Aktiv sedan 15 januari 2024
-              </p>
-            </div>
-            <Badge variant="secondary" className="self-start sm:self-center">Aktiv</Badge>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Pricing Plans */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 max-w-4xl mx-auto">
-        {plans.map((plan) => {
-          const Icon = plan.icon;
-          const isCurrent = plan.id === currentPlan;
-          
-          return (
-            <Card 
-              key={plan.id}
-              className={`relative ${plan.recommended ? 'border-primary shadow-lg md:scale-105' : ''} ${isCurrent ? 'border-green-500' : ''}`}
-            >
-              {plan.recommended && (
-                <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary text-xs">
-                  Rekommenderad
-                </Badge>
-              )}
-              
-              <CardHeader className="text-center pb-4">
-                <div className="mx-auto w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3 sm:mb-4">
-                  <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+      <div className="px-4 pb-6">
+        {/* Current Plan Status */}
+        <div className="pt-4 mb-6">
+          <Card className="border-primary/20 bg-primary/5">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <Crown className="h-5 w-5 text-primary" />
+                <span className="font-medium">Din nuvarande plan</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-semibold">Basic Plan</p>
+                  <p className="text-sm text-muted-foreground">
+                    Aktiv sedan 15 januari 2024
+                  </p>
                 </div>
-                <CardTitle className="text-lg sm:text-xl">{plan.name}</CardTitle>
-                <div className="space-y-1">
-                  <div className="text-2xl sm:text-3xl font-bold">
-                    {plan.price} kr
-                    <span className="text-sm sm:text-base font-normal text-muted-foreground">
-                      /{plan.period}
-                    </span>
+                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                  Aktiv
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Available Plans */}
+        <div className="space-y-4 mb-6">
+          <h2 className="text-lg font-semibold">Tillgängliga abonnemang</h2>
+          
+          {plans.map((plan) => {
+            const Icon = plan.icon;
+            const isCurrent = plan.id === currentPlan;
+            
+            return (
+              <Card 
+                key={plan.id}
+                className={`relative ${plan.recommended ? 'border-primary' : ''} ${isCurrent ? 'border-green-500 bg-green-50/50' : ''}`}
+              >
+                {plan.recommended && (
+                  <div className="absolute -top-2 left-4">
+                    <Badge className="bg-primary text-xs">
+                      Rekommenderad
+                    </Badge>
+                  </div>
+                )}
+                
+                <CardContent className="p-4 pt-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Icon className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg">{plan.name}</h3>
+                        <p className="text-sm text-muted-foreground">{plan.description}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold">
+                        {plan.price} kr
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        /{plan.period}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 mb-4">
+                    {plan.features.map((feature, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                        <span className="text-sm">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <Button 
+                    className="w-full" 
+                    variant={isCurrent ? "outline" : (plan.recommended ? "default" : "outline")}
+                    disabled={isCurrent}
+                  >
+                    {isCurrent ? 'Nuvarande plan' : plan.buttonText}
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Billing Information */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">Faktureringsinformation</h2>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="font-medium">Nästa fakturering</p>
+                    <p className="text-sm text-muted-foreground">15 februari 2024</p>
                   </div>
                 </div>
-                <CardDescription className="text-sm">{plan.description}</CardDescription>
-              </CardHeader>
-              
-              <CardContent className="space-y-4 sm:space-y-6">
-                <ul className="space-y-2 sm:space-y-3">
-                  {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
                 
-                <Button 
-                  className="w-full h-10 sm:h-11" 
-                  variant={isCurrent ? "outline" : (plan.recommended ? "default" : "outline")}
-                  disabled={isCurrent}
-                >
-                  {isCurrent ? 'Nuvarande plan' : plan.buttonText}
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Billing Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Faktureringsinformation</CardTitle>
-          <CardDescription>
-            Hantera dina betalningsmetoder och faktureringsdetaljer
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm font-medium">Nästa fakturering</p>
-              <p className="text-sm text-muted-foreground">15 februari 2024</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium">Betalningsmetod</p>
-              <p className="text-sm text-muted-foreground">**** **** **** 4532</p>
-            </div>
-          </div>
+                <div className="flex items-center gap-3">
+                  <CreditCard className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="font-medium">Betalningsmetod</p>
+                    <p className="text-sm text-muted-foreground">**** **** **** 4532</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
           
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button variant="outline" size="sm" className="w-full sm:w-auto">
+          <div className="space-y-2">
+            <Button variant="outline" className="w-full justify-start">
               Uppdatera betalningsmetod
             </Button>
-            <Button variant="outline" size="sm" className="w-full sm:w-auto">
+            <Button variant="outline" className="w-full justify-start">
               Ladda ner fakturor
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
