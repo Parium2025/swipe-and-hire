@@ -46,7 +46,7 @@ const Subscription = () => {
   return (
     <div className="min-h-screen bg-white/10 backdrop-blur-sm border-white/20">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background border-b">
+      <div className="sticky top-0 z-10 bg-white/10 backdrop-blur-sm border-white/20">
         <div className="px-4 py-4">
           <h1 className="text-xl font-semibold text-center text-white">Abonnemang</h1>
         </div>
