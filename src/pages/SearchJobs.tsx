@@ -1301,7 +1301,14 @@ const SearchJobs = () => {
                   <Badge key={subcategory} variant="secondary" className="gap-2 bg-white/10 hover:bg-white/20 text-white border-white/20">
                     <span className="text-xs">{subcategory}</span>
                     <button 
-                      onClick={() => setSelectedSubcategories(prev => prev.filter(s => s !== subcategory))}
+                      onClick={() => {
+                        const newSubcategories = selectedSubcategories.filter(s => s !== subcategory);
+                        setSelectedSubcategories(newSubcategories);
+                        // Reset category if no subcategories left
+                        if (newSubcategories.length === 0) {
+                          setSelectedCategory('all-categories');
+                        }
+                      }}
                       className="ml-1 hover:bg-white/20 rounded p-0.5"
                     >
                       <X className="h-4 w-4" />
@@ -1368,6 +1375,7 @@ const SearchJobs = () => {
                   variant="outline"
                   onClick={() => {
                     setSearchTerm('');
+                    setSelectedLocation('all-locations');
                     setSelectedCompany(null);
                     setSelectedLocations([]);
                     setSelectedCategory('all-categories');
