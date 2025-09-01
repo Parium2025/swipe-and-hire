@@ -52,7 +52,7 @@ const Subscription = () => {
         </div>
       </div>
 
-      <div className="px-4 pb-6">
+      <div className="px-4 pb-6 bg-white/10 backdrop-blur-sm border-white/20 border rounded-lg mx-4 mt-4">
         {/* Current Plan Status */}
         <div className="pt-4 mb-6">
           <Card className="border-primary/20 bg-primary/5">
