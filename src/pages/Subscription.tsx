@@ -52,12 +52,10 @@ const Subscription = () => {
         </div>
       </div>
 
-        <div className="px-4 pb-6">
-          <Card className="bg-blue-500/10 backdrop-blur-sm border-blue-500/20">
-            <CardContent className="p-4">
+      <div className="px-4 pb-6 bg-blue-500/10 backdrop-blur-sm border-blue-500/20 rounded-lg mx-4 mt-4">
         {/* Current Plan Status */}
         <div className="pt-4 mb-6">
-          <Card className="bg-blue-500/10 backdrop-blur-sm border-blue-500/20">
+          <Card className="bg-white/5 backdrop-blur-sm border-white/10">
             <CardContent className="p-4">
               <div className="flex items-center gap-3 mb-3">
                 <Crown className="h-5 w-5 text-blue-400" />
@@ -89,7 +87,7 @@ const Subscription = () => {
             return (
               <Card 
                 key={plan.id}
-                className={`relative bg-blue-500/10 backdrop-blur-sm border-blue-500/20 ${plan.recommended ? 'border-blue-400/50' : ''} ${isCurrent ? 'border-green-400/50 bg-green-500/10' : ''}`}
+                className={`relative bg-white/5 backdrop-blur-sm border-white/10 ${plan.recommended ? 'border-blue-400/50' : ''} ${isCurrent ? 'border-green-400/50 bg-green-500/10' : ''}`}
               >
                 {plan.recommended && (
                   <div className="absolute -top-2 left-4">
@@ -142,9 +140,7 @@ const Subscription = () => {
           })}
         </div>
 
-          </CardContent>
-          </Card>
-        </div>
+      </div>
     </div>
   );
 };
