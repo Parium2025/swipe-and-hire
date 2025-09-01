@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
@@ -68,31 +68,32 @@ export function AppSidebar() {
     return () => window.removeEventListener('unsaved-cancel', closeOnCancel as EventListener);
   }, [isMobile, setOpenMobile]);
 
-  const handleNavigation = (url: string, e: React.MouseEvent) => {
-    console.log('handleNavigation called for:', url);
+  // Memoized navigation handler to prevent re-renders
+  const handleNavigation = useCallback((url: string, e: React.MouseEvent) => {
     e.preventDefault();
+    
     if (checkBeforeNavigation(url)) {
-      console.log('Navigation allowed, navigating to:', url);
       navigate(url);
-      // Close sidebar after successful navigation
+      // Close mobile sidebar immediately for better UX
       if (isMobile) {
         setOpenMobile(false);
       }
-    } else {
-      console.log('Navigation blocked, dialog will show');
     }
-  };
+  }, [checkBeforeNavigation, navigate, isMobile, setOpenMobile]);
+
+  // Memoized active state checker
+  const isActiveUrl = useCallback((path: string) => currentPath === path, [currentPath]);
 
   return (
     <Sidebar
-      className={`${collapsed ? 'w-14' : 'w-64'} sticky top-0 h-screen overflow-y-auto`}
+      className={`${collapsed ? 'w-14' : 'w-64'} sticky top-0 h-screen overflow-y-auto transition-all duration-200 ease-in-out`}
       collapsible="icon"
     >
       <SidebarContent className="p-4">
         {/* User Profile Section */}
         {!collapsed && (
-          <div className="mb-6">
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-sidebar-accent">
+          <div className="mb-6 animate-fade-in">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-sidebar-accent transition-colors duration-150">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={profile?.profile_image_url || ''} />
                 <AvatarFallback>
@@ -120,18 +121,18 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {profileItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
-                      onClick={(e) => handleNavigation(item.url, e)}
-                      className={isActive(item.url) ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent'}
-                      title={collapsed ? item.title : undefined}
-                    >
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                 {profileItems.map((item) => (
+                   <SidebarMenuItem key={item.title}>
+                     <SidebarMenuButton 
+                       onClick={(e) => handleNavigation(item.url, e)}
+                       className={`transition-colors duration-150 ${isActiveUrl(item.url) ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent'}`}
+                       title={collapsed ? item.title : undefined}
+                     >
+                       <item.icon className="h-4 w-4" />
+                       {!collapsed && <span>{item.title}</span>}
+                     </SidebarMenuButton>
+                   </SidebarMenuItem>
+                 ))}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -145,18 +146,18 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {businessItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
-                      onClick={(e) => handleNavigation(item.url, e)}
-                      className={isActive(item.url) ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent'}
-                      title={collapsed ? item.title : undefined}
-                    >
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                 {businessItems.map((item) => (
+                   <SidebarMenuItem key={item.title}>
+                     <SidebarMenuButton 
+                       onClick={(e) => handleNavigation(item.url, e)}
+                       className={`transition-colors duration-150 ${isActiveUrl(item.url) ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent'}`}
+                       title={collapsed ? item.title : undefined}
+                     >
+                       <item.icon className="h-4 w-4" />
+                       {!collapsed && <span>{item.title}</span>}
+                     </SidebarMenuButton>
+                   </SidebarMenuItem>
+                 ))}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -170,18 +171,18 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {supportItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
-                      onClick={(e) => handleNavigation(item.url, e)}
-                      className={isActive(item.url) ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent'}
-                      title={collapsed ? item.title : undefined}
-                    >
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                 {supportItems.map((item) => (
+                   <SidebarMenuItem key={item.title}>
+                     <SidebarMenuButton 
+                       onClick={(e) => handleNavigation(item.url, e)}
+                       className={`transition-colors duration-150 ${isActiveUrl(item.url) ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent'}`}
+                       title={collapsed ? item.title : undefined}
+                     >
+                       <item.icon className="h-4 w-4" />
+                       {!collapsed && <span>{item.title}</span>}
+                     </SidebarMenuButton>
+                   </SidebarMenuItem>
+                 ))}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -192,7 +193,7 @@ export function AppSidebar() {
           <Button 
             onClick={signOut}
             variant="ghost" 
-            className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors duration-150"
             title={collapsed ? 'Logga ut' : undefined}
           >
             <LogOut className="h-4 w-4" />
