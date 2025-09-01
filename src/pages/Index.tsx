@@ -28,6 +28,9 @@ const Index = () => {
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
+    } else if (user && profile && location.pathname === '/') {
+      // Redirect to search-jobs as the default landing page for logged in users
+      navigate('/search-jobs');
     } else if (user && profile && !location.pathname.startsWith('/profile') && !location.pathname.startsWith('/search-jobs') && !location.pathname.startsWith('/subscription') && !location.pathname.startsWith('/support') && !location.pathname.startsWith('/settings') && !location.pathname.startsWith('/billing') && !location.pathname.startsWith('/payment')) {
       // Show profile selector only for admin (fredrikandits@hotmail.com)
       if (user.email === 'fredrikandits@hotmail.com') {
