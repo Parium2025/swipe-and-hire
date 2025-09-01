@@ -302,6 +302,11 @@ const AuthDesktop = ({
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
                   className="relative h-16 w-auto"
+                  width="256"
+                  height="64"
+                  loading="eager"
+                  decoding="sync"
+                  fetchPriority="high"
                 />
               </div>
             </div>

@@ -270,6 +270,11 @@ const AuthTablet = ({
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
                   className="relative h-30 w-auto"
+                  width="300"
+                  height="120"
+                  loading="eager"
+                  decoding="sync"
+                  fetchPriority="high"
                 />
               </div>
             </div>
