@@ -140,41 +140,6 @@ const Subscription = () => {
           })}
         </div>
 
-        {/* Billing Information */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Faktureringsinformation</h2>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Calendar className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">Nästa fakturering</p>
-                    <p className="text-sm text-muted-foreground">15 februari 2024</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <CreditCard className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">Betalningsmetod</p>
-                    <p className="text-sm text-muted-foreground">**** **** **** 4532</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <div className="space-y-2">
-            <Button variant="outline" className="w-full justify-start">
-              Uppdatera betalningsmetod
-            </Button>
-            <Button variant="outline" className="w-full justify-start">
-              Ladda ner fakturor
-            </Button>
-          </div>
-        </div>
       </div>
     </div>
   );
