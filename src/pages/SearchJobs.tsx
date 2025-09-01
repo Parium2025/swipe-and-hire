@@ -875,26 +875,6 @@ const SearchJobs = () => {
       {/* Advanced Search - Modern & Integrated */}
       <Card className="bg-white/10 backdrop-blur-sm border-white/20">
         <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            {(searchTerm || selectedCompany || selectedLocation !== 'all-locations' || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentType !== 'all-types') && (
-              <Button
-                variant="ghost" 
-                size="sm"
-                  onClick={() => {
-                    setSearchTerm('');
-                    setSelectedCompany(null);
-                    setSelectedLocations([]);
-                    setSelectedCategory('all-categories');
-                    setSelectedSubcategories([]);
-                    setSelectedEmploymentType('all-types');
-                  }}
-                className="text-white/70 hover:text-white hover:bg-white/10"
-              >
-                <X className="h-4 w-4 mr-1" />
-                Rensa alla
-              </Button>
-            )}
-          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Search Fields Grid */}
@@ -1289,6 +1269,27 @@ const SearchJobs = () => {
                   ))}
                 </SelectContent>
               </Select>
+              
+              {/* Clear all filters button */}
+              {(searchTerm || selectedLocation !== 'all-locations' || selectedLocations.length > 0 || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentType !== 'all-types' || selectedCompany) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                      setSearchTerm('');
+                      setSelectedLocation('all-locations');
+                      setSelectedCompany(null);
+                      setSelectedLocations([]);
+                      setSelectedCategory('all-categories');
+                      setSelectedSubcategories([]);
+                      setSelectedEmploymentType('all-types');
+                    }}
+                  className="text-white/70 hover:text-white hover:bg-white/10 mt-2"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Rensa alla
+                </Button>
+              )}
             </div>
           </div>
 
