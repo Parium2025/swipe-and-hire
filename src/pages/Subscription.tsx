@@ -44,11 +44,11 @@ const Subscription = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background border-b">
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm text-foreground border-b border-border">
         <div className="px-4 py-4">
-          <h1 className="text-xl font-semibold text-center">Abonnemang</h1>
+          <h1 className="text-xl font-semibold text-center text-foreground">Abonnemang</h1>
         </div>
       </div>
 
