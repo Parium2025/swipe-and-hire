@@ -1364,15 +1364,15 @@ const SearchJobs = () => {
             </div>
           </div>
         ) : jobs.length === 0 ? (
-          <Card className="text-center py-16">
+          <Card className="text-center py-16 bg-white/10 backdrop-blur-sm border-white/20">
             <CardContent>
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold">Inga jobb hittades</h3>
-                <p className="text-muted-foreground max-w-md mx-auto">
+                <h3 className="text-xl font-semibold text-white">Inga jobb hittades</h3>
+                <p className="text-white/70 max-w-md mx-auto">
                   Inga jobb matchade dina sökkriterier. Prova att ändra dina filter eller sökord.
                 </p>
                 <Button 
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => {
                     setSearchTerm('');
                     setSelectedLocation('all-locations');
@@ -1382,6 +1382,7 @@ const SearchJobs = () => {
                     setSelectedSubcategories([]);
                     setSelectedEmploymentType('all-types');
                   }}
+                  className="text-white/70 hover:text-white hover:bg-white/10 border border-white/20"
                 >
                   Visa alla jobb
                 </Button>
