@@ -44,11 +44,11 @@ const Subscription = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background border-b">
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border/50">
         <div className="px-4 py-4">
-          <h1 className="text-xl font-semibold text-center">Abonnemang</h1>
+          <h1 className="text-xl font-semibold text-center text-foreground">Abonnemang</h1>
         </div>
       </div>
 
@@ -59,11 +59,11 @@ const Subscription = () => {
             <CardContent className="p-4">
               <div className="flex items-center gap-3 mb-3">
                 <Crown className="h-5 w-5 text-primary" />
-                <span className="font-medium">Din nuvarande plan</span>
+                <span className="font-medium text-foreground">Din nuvarande plan</span>
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-semibold">Basic Plan</p>
+                  <p className="font-semibold text-foreground">Basic Plan</p>
                   <p className="text-sm text-muted-foreground">
                     Aktiv sedan 15 januari 2024
                   </p>
@@ -78,7 +78,7 @@ const Subscription = () => {
 
         {/* Available Plans */}
         <div className="space-y-4 mb-6">
-          <h2 className="text-lg font-semibold">Tillgängliga abonnemang</h2>
+          <h2 className="text-lg font-semibold text-foreground">Tillgängliga abonnemang</h2>
           
           {plans.map((plan) => {
             const Icon = plan.icon;
@@ -104,12 +104,12 @@ const Subscription = () => {
                         <Icon className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-lg">{plan.name}</h3>
+                        <h3 className="font-semibold text-lg text-foreground">{plan.name}</h3>
                         <p className="text-sm text-muted-foreground">{plan.description}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold">
+                      <div className="text-2xl font-bold text-foreground">
                         {plan.price} kr
                       </div>
                       <div className="text-sm text-muted-foreground">
@@ -122,7 +122,7 @@ const Subscription = () => {
                     {plan.features.map((feature, index) => (
                       <div key={index} className="flex items-center gap-2">
                         <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                        <span className="text-sm">{feature}</span>
+                        <span className="text-sm text-foreground">{feature}</span>
                       </div>
                     ))}
                   </div>
