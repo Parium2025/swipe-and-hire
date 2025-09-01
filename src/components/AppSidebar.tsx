@@ -6,7 +6,6 @@ import {
   User,
   CreditCard,
   MessageCircle,
-  Settings,
   LogOut,
   ChevronRight,
   Building,
@@ -33,7 +32,6 @@ import { Separator } from '@/components/ui/separator';
 const profileItems = [
   { title: 'Min Profil', url: '/profile', icon: User },
   { title: 'Sök Jobb', url: '/search-jobs', icon: Building },
-  { title: 'Inställningar', url: '/settings', icon: Settings },
 ];
 
 const businessItems = [
