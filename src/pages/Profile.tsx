@@ -195,6 +195,7 @@ const Profile = () => {
       setPhone(originalValues.phone || '');
       setBirthDate(originalValues.birthDate || '');
       setProfileImageUrl(originalValues.profileImageUrl || '');
+      setCoverImageUrl(originalValues.coverImageUrl || '');
       setCvUrl(originalValues.cvUrl || '');
       setCompanyName(originalValues.companyName || '');
       setOrgNumber(originalValues.orgNumber || '');
