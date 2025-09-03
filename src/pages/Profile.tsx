@@ -78,6 +78,7 @@ const Profile = () => {
         employmentStatus: (profile as any)?.employment_status || '',
         workingHours: (profile as any)?.working_hours || '',
         availability: (profile as any)?.availability || '',
+        coverImageUrl: (profile as any)?.cover_image_url || '',
       };
 
       setFirstName(values.firstName);
@@ -99,8 +100,10 @@ const Profile = () => {
         setIsProfileVideo(false);
       }
       
-      // Always load current cover image from DB
-      setCoverImageUrl((profile as any)?.profile_image_url || '');
+      // Always load current cover image from DB - use dedicated field if available
+      const dbCoverImage = (profile as any)?.cover_image_url || '';
+      setCoverImageUrl(dbCoverImage);
+      values.coverImageUrl = dbCoverImage;
       
       setCvUrl(values.cvUrl);
       // Only extract from URL if no filename in DB (for old records)
@@ -140,6 +143,7 @@ const Profile = () => {
       employmentStatus,
       workingHours,
       availability,
+      coverImageUrl,
     };
 
     const hasChanges = Object.keys(currentValues).some(
@@ -156,7 +160,7 @@ const Profile = () => {
     setHasUnsavedChanges(hasChanges);
     return hasChanges;
   }, [originalValues, firstName, lastName, bio, userLocation, postalCode, phone, birthDate, 
-      profileImageUrl, cvUrl, companyName, orgNumber, employmentStatus, workingHours, availability]);
+      profileImageUrl, cvUrl, companyName, orgNumber, employmentStatus, workingHours, availability, coverImageUrl]);
 
   // Check for changes whenever form values change
   useEffect(() => {
@@ -460,7 +464,7 @@ const Profile = () => {
       // Update local state instead of saving immediately
       setProfileImageUrl(imageUrl);
       setIsProfileVideo(false); // Mark as image, not video
-      setCoverImageUrl(''); // Clear cover when uploading profile image
+      // Keep cover image when uploading profile image
       
       setImageEditorOpen(false);
       setPendingImageSrc('');
@@ -587,13 +591,15 @@ const Profile = () => {
       if (isProfileVideo && profileImageUrl) {
         // It's a video
         updates.video_url = profileImageUrl;
-        // Use cover image if available, or clear profile_image_url
-        updates.profile_image_url = coverImageUrl || (profile as any)?.profile_image_url || null;
+        updates.profile_image_url = null; // Clear profile image when using video
       } else {
         // It's an image or no media
         updates.profile_image_url = profileImageUrl || null;
         updates.video_url = null;
       }
+      
+      // Always save cover image separately if available
+      updates.cover_image_url = coverImageUrl || null;
 
       if (isEmployer) {
         updates.company_name = companyName.trim() || null;
@@ -619,6 +625,7 @@ const Profile = () => {
           employmentStatus: employmentStatus,
           workingHours: workingHours,
           availability: availability,
+          coverImageUrl: coverImageUrl,
         };
         
         setOriginalValues(newOriginalValues);
