@@ -918,10 +918,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   
                   {formData.coverImageUrl && !isUploadingCover && (
                     <div className="flex items-center justify-center gap-2">
-                       <Badge variant="secondary" className="bg-white/20 text-white text-xs ml-8">
-                         <Check className="h-3 w-3 mr-1" />
-                         Cover-bild uppladdad!
-                       </Badge>
                       <button
                         onClick={deleteCoverImage}
                         className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-1.5 shadow-lg transition-colors"
