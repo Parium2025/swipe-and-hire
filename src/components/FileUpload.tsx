@@ -54,13 +54,14 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
       if (uploadError) throw uploadError;
 
-      // Use signed URL for secure access
+      // Use signed URL for secure access (we will store the storage path and generate signed links on demand)
       const signedUrl = await createSignedUrl('job-applications', fileName, 86400, file.name); // 24 hours, preserve download name
       if (!signedUrl) {
         throw new Error('Could not create secure access URL');
       }
 
-      onFileUploaded(signedUrl, 'Din valda fil');
+      // Store the storage path (fileName) and the original filename
+      onFileUploaded(fileName, file.name);
       
       toast({
         title: "Fil uppladdad!",
@@ -123,10 +124,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   if (currentFile) {
-    // Convert old public URLs to signed URLs for display
-    const displayUrl = currentFile.url.includes('/storage/v1/object/public/') 
-      ? '#' // Placeholder while converting
-      : currentFile.url;
+    // Determine display URL behavior; for storage paths and conversions, we open on click
+    const isPublicUrl = currentFile.url.includes('/storage/v1/object/public/');
+    const isSignedUrl = currentFile.url.includes('/storage/v1/object/sign/');
+    const isStoragePath = !currentFile.url.startsWith('http');
+    const displayUrl = (isPublicUrl || isStoragePath) ? '#' : currentFile.url;
 
     return (
       <div className="border border-border rounded-md p-4 bg-muted/30">
@@ -139,13 +141,19 @@ const FileUpload: React.FC<FileUploadProps> = ({
               rel="noopener noreferrer"
               className="text-sm font-medium truncate max-w-[200px] text-white hover:text-primary underline cursor-pointer"
               onClick={async (e) => {
-                // For old public URLs, convert to signed URL on click
-                if (currentFile.url.includes('/storage/v1/object/public/')) {
-                  e.preventDefault();
-                  const signedUrl = await convertToSignedUrl(currentFile.url, 'job-applications', 86400, currentFile.name);
-                  if (signedUrl) {
-                    window.open(signedUrl, '_blank');
+                e.preventDefault();
+                try {
+                  if (isStoragePath) {
+                    // Generate a fresh signed URL from the storage path
+                    const signedUrl = await createSignedUrl('job-applications', currentFile.url, 86400, currentFile.name);
+                    if (signedUrl) window.open(signedUrl, '_blank');
+                  } else {
+                    // Convert/refresh to a signed URL (also works for expired signed URLs)
+                    const signedUrl = await convertToSignedUrl(currentFile.url, 'job-applications', 86400, currentFile.name);
+                    if (signedUrl) window.open(signedUrl, '_blank');
                   }
+                } catch (err) {
+                  console.error('Error opening file:', err);
                 }
               }}
             >

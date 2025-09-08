@@ -106,6 +106,7 @@ const ProfileSetup = () => {
       // Add CV URL if uploaded
       if (cvUrl) {
         updates.cv_url = cvUrl;
+        updates.cv_filename = cvFileName || null;
       }
 
       const result = await updateProfile(updates);
