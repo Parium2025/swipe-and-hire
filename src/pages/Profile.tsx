@@ -1161,7 +1161,7 @@ const Profile = () => {
                           setCvUrl('');
                           setCvFileName('');
                         }}
-                        currentFile={cvUrl ? { url: cvUrl, name: (cvFileName || 'Din valda fil') } : undefined}
+                        currentFile={cvUrl ? { url: cvUrl, name: "Din valda fil" } : undefined}
                         acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
                         maxFileSize={5 * 1024 * 1024}
                       />

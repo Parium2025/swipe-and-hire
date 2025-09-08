@@ -262,7 +262,7 @@ const ProfileSetup = () => {
                       setCvUrl('');
                       setCvFileName('');
                     }}
-                    currentFile={cvUrl ? { url: cvUrl, name: cvFileName || 'CV.pdf' } : undefined}
+                    currentFile={cvUrl ? { url: cvUrl, name: "Din valda fil" } : undefined}
                     acceptedFileTypes={['application/pdf', '.doc', '.docx']}
                     maxFileSize={5 * 1024 * 1024}
                   />
