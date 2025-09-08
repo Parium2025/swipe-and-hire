@@ -36,6 +36,7 @@ const Profile = () => {
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
   const [pendingCoverSrc, setPendingCoverSrc] = useState<string>('');
   const [coverImageUrl, setCoverImageUrl] = useState('');
+  const [coverFileName, setCoverFileName] = useState(''); // Track filename for deletion
   const [isProfileVideo, setIsProfileVideo] = useState(false);
   
   // Basic form fields
@@ -199,6 +200,7 @@ const Profile = () => {
       setBirthDate(originalValues.birthDate || '');
       setProfileImageUrl(originalValues.profileImageUrl || '');
       setCoverImageUrl(originalValues.coverImageUrl || '');
+      setCoverFileName(originalValues.coverFileName || '');
       setCvUrl(originalValues.cvUrl || '');
       setCompanyName(originalValues.companyName || '');
       setOrgNumber(originalValues.orgNumber || '');
@@ -314,10 +316,12 @@ const Profile = () => {
         throw new Error('Could not create secure access URL');
       }
       
-      const coverUrl = `${signedUrl}&t=${Date.now()}`;
+      // Add stronger cache-busting
+      const coverUrl = `${signedUrl}&t=${Date.now()}&v=${Math.random()}`;
       
-      // Update local state instead of saving immediately
+      // Update local state and track filename  
       setCoverImageUrl(coverUrl);
+      setCoverFileName(fileName); // Store for deletion
       
       // Mark as having unsaved changes
       setHasUnsavedChanges(true);
@@ -560,16 +564,43 @@ const Profile = () => {
     });
   };
 
-  const deleteCoverImage = () => {
-    setCoverImageUrl('');
-    
-    // Mark as having unsaved changes
-    setHasUnsavedChanges(true);
-    
-    toast({
-      title: "Cover-bild borttagen!", 
-      description: "Tryck på \"Spara ändringar\" för att spara ändringen."
-    });
+  const deleteCoverImage = async () => {
+    try {
+      // Delete the actual file from storage if we have a filename
+      if (coverFileName) {
+        const { error: deleteError } = await supabase.storage
+          .from('job-applications')
+          .remove([coverFileName]);
+          
+        if (deleteError) {
+          console.error('Error deleting cover file:', deleteError);
+          // Continue anyway - clear the local state
+        }
+      }
+      
+      // Clear local state
+      setCoverImageUrl('');
+      setCoverFileName('');
+      
+      // Mark as having unsaved changes
+      setHasUnsavedChanges(true);
+      
+      toast({
+        title: "Cover-bild borttagen!", 
+        description: "Tryck på \"Spara ändringar\" för att spara ändringen."
+      });
+    } catch (error) {
+      console.error('Error in deleteCoverImage:', error);
+      // Clear local state anyway
+      setCoverImageUrl('');
+      setCoverFileName('');
+      setHasUnsavedChanges(true);
+      
+      toast({
+        title: "Cover-bild borttagen!", 
+        description: "Tryck på \"Spara ändringar\" för att spara ändringen."
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -631,6 +662,7 @@ const Profile = () => {
           workingHours: workingHours,
           availability: availability,
           coverImageUrl: coverImageUrl,
+          coverFileName: coverFileName,
           isProfileVideo: isProfileVideo,
         };
         
