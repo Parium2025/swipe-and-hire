@@ -233,7 +233,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         throw new Error('Could not create secure access URL');
       }
       
-      const mediaUrl = `${signedUrl}&t=${Date.now()}`;
+      const mediaUrl = `${signedUrl}&t=${Date.now()}&v=${Math.random()}`;
       const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
       
       handleInputChange('profileImageUrl', mediaUrl);
@@ -274,7 +274,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         throw new Error('Could not create secure access URL');
       }
       
-      const coverUrl = `${signedUrl}&t=${Date.now()}`;
+      const coverUrl = `${signedUrl}&t=${Date.now()}&v=${Math.random()}`;
       
       handleInputChange('coverImageUrl', coverUrl);
     } catch (error) {
@@ -517,8 +517,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         working_hours: formData.workingHours,
         availability: formData.availability,
         cv_url: formData.cvUrl,
-        profile_image_url: formData.profileMediaType === 'video' ? formData.coverImageUrl : formData.profileImageUrl,
+        // Fix: Properly save profile media and cover image
+        profile_image_url: formData.profileMediaType === 'video' ? null : formData.profileImageUrl,
         video_url: formData.profileMediaType === 'video' ? formData.profileImageUrl : null,
+        cover_image_url: formData.coverImageUrl || null, // Save cover image correctly
         onboarding_completed: true // Mark onboarding as completed
       } as any);
       
