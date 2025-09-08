@@ -37,6 +37,7 @@ interface Profile {
   birth_date?: string;
   profile_image_url?: string;
   video_url?: string;
+  cover_image_url?: string;
   cv_url?: string;
   cv_filename?: string;
   employment_status?: string;
