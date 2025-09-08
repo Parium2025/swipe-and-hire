@@ -517,6 +517,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         working_hours: formData.workingHours,
         availability: formData.availability,
         cv_url: formData.cvUrl,
+        cv_filename: formData.cvFileName,
         // Fix: Properly save profile media and cover image
         profile_image_url: formData.profileMediaType === 'video' ? null : formData.profileImageUrl,
         video_url: formData.profileMediaType === 'video' ? formData.profileImageUrl : null,
