@@ -235,12 +235,17 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
 
               {formData.videoUrl ? (
                 <div className="text-center">
+                  <Badge variant="secondary">
+                    <Check className="h-3 w-3 mr-1" />
+                    Video uppladdad!
+                  </Badge>
                   <Button 
                     variant="outline" 
-                    size="sm"
+                    size="sm" 
+                    className="ml-2"
                     onClick={() => handleInputChange('videoUrl', '')}
                   >
-                    Ta bort video
+                    Ta bort
                   </Button>
                 </div>
               ) : (
