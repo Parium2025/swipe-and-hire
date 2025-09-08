@@ -37,6 +37,7 @@ const Profile = () => {
   const [pendingCoverSrc, setPendingCoverSrc] = useState<string>('');
   const [coverImageUrl, setCoverImageUrl] = useState('');
   const [coverFileName, setCoverFileName] = useState(''); // Track filename for deletion
+  const [profileFileName, setProfileFileName] = useState(''); // Track profile media filename
   const [isProfileVideo, setIsProfileVideo] = useState(false);
   
   // Basic form fields
@@ -201,6 +202,7 @@ const Profile = () => {
       setProfileImageUrl(originalValues.profileImageUrl || '');
       setCoverImageUrl(originalValues.coverImageUrl || '');
       setCoverFileName(originalValues.coverFileName || '');
+      setProfileFileName(originalValues.profileFileName || '');
       setCvUrl(originalValues.cvUrl || '');
       setCompanyName(originalValues.companyName || '');
       setOrgNumber(originalValues.orgNumber || '');
@@ -250,6 +252,18 @@ const Profile = () => {
     if (isVideo) setIsUploadingVideo(true);
     
     try {
+      // Delete old profile media file if exists
+      if (profileFileName) {
+        try {
+          await supabase.storage
+            .from('job-applications')
+            .remove([profileFileName]);
+          console.log('Deleted old profile media:', profileFileName);
+        } catch (error) {
+          console.error('Error deleting old profile media:', error);
+        }
+      }
+      
       const fileExt = file.name.split('.').pop();
       const fileName = `${user?.id}/${Date.now()}-profile-media.${fileExt}`;
       
@@ -265,9 +279,9 @@ const Profile = () => {
         throw new Error('Could not create secure access URL');
       }
       
-      const mediaUrl = `${signedUrl}&t=${Date.now()}`;
+      const mediaUrl = `${signedUrl}&t=${Date.now()}&v=${Math.random()}`;
       
-      // Update local state instead of saving immediately
+      // Update local state and track filename
       if (isVideo) {
         setProfileImageUrl(mediaUrl); // Store video URL in profileImageUrl for now
         setIsProfileVideo(true); // Mark as video
@@ -276,7 +290,10 @@ const Profile = () => {
         setProfileImageUrl(mediaUrl);
         setIsProfileVideo(false); // Mark as image
         setCoverImageUrl(''); // Clear cover when uploading profile image
+        setCoverFileName(''); // Clear cover filename too
       }
+      
+      setProfileFileName(fileName); // Track the new filename
       
       // Mark as having unsaved changes
       setHasUnsavedChanges(true);
@@ -301,6 +318,18 @@ const Profile = () => {
     setIsUploadingCover(true);
     
     try {
+      // Delete old cover image file if exists
+      if (coverFileName) {
+        try {
+          await supabase.storage
+            .from('job-applications')
+            .remove([coverFileName]);
+          console.log('Deleted old cover image:', coverFileName);
+        } catch (error) {
+          console.error('Error deleting old cover image:', error);
+        }
+      }
+      
       const fileExt = file.name.split('.').pop();
       const fileName = `${user?.id}/${Date.now()}-cover-image.${fileExt}`;
       
@@ -545,23 +574,50 @@ const Profile = () => {
     }
   };
 
-  const deleteProfileMedia = () => {
-    setProfileImageUrl('');
-    setIsProfileVideo(false); // Reset video flag
-    
-    // Reset the file input to allow new uploads
-    const fileInput = document.getElementById('profile-image') as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = '';
+  const deleteProfileMedia = async () => {
+    try {
+      // Delete the actual file from storage if we have a filename
+      if (profileFileName) {
+        const { error: deleteError } = await supabase.storage
+          .from('job-applications')
+          .remove([profileFileName]);
+          
+        if (deleteError) {
+          console.error('Error deleting profile media file:', deleteError);
+        }
+      }
+      
+      // Clear local state
+      setProfileImageUrl('');
+      setIsProfileVideo(false); // Reset video flag
+      setProfileFileName(''); // Clear filename
+      
+      // Reset the file input to allow new uploads
+      const fileInput = document.getElementById('profile-image') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+      
+      // Mark as having unsaved changes
+      setHasUnsavedChanges(true);
+      
+      toast({
+        title: "Profilbild/video borttagen!",
+        description: "Tryck på \"Spara ändringar\" för att spara ändringen."
+      });
+    } catch (error) {
+      console.error('Error in deleteProfileMedia:', error);
+      // Clear local state anyway
+      setProfileImageUrl('');
+      setIsProfileVideo(false);
+      setProfileFileName('');
+      setHasUnsavedChanges(true);
+      
+      toast({
+        title: "Profilbild/video borttagen!",
+        description: "Tryck på \"Spara ändringar\" för att spara ändringen."
+      });
     }
-    
-    // Mark as having unsaved changes
-    setHasUnsavedChanges(true);
-    
-    toast({
-      title: "Profilbild/video borttagen!",
-      description: "Tryck på \"Spara ändringar\" för att spara ändringen."
-    });
   };
 
   const deleteCoverImage = async () => {
@@ -663,6 +719,7 @@ const Profile = () => {
           availability: availability,
           coverImageUrl: coverImageUrl,
           coverFileName: coverFileName,
+          profileFileName: profileFileName,
           isProfileVideo: isProfileVideo,
         };
         
