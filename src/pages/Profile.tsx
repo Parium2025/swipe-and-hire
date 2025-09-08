@@ -79,6 +79,7 @@ const Profile = () => {
         workingHours: (profile as any)?.working_hours || '',
         availability: (profile as any)?.availability || '',
         coverImageUrl: (profile as any)?.cover_image_url || '',
+        isProfileVideo: false, // Will be updated below if video exists
       };
 
       setFirstName(values.firstName);
@@ -95,9 +96,11 @@ const Profile = () => {
         setIsProfileVideo(true);
         // Set original values to match current for video
         values.profileImageUrl = (profile as any).video_url;
+        values.isProfileVideo = true;
       } else {
         setProfileImageUrl(values.profileImageUrl);
         setIsProfileVideo(false);
+        values.isProfileVideo = false;
       }
       
       // Always load current cover image from DB - use dedicated field if available
@@ -202,6 +205,7 @@ const Profile = () => {
       setEmploymentStatus(originalValues.employmentStatus || '');
       setWorkingHours(originalValues.workingHours || '');
       setAvailability(originalValues.availability || '');
+      setIsProfileVideo(originalValues.isProfileVideo || false);
       setHasUnsavedChanges(false);
     };
     window.addEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
@@ -627,6 +631,7 @@ const Profile = () => {
           workingHours: workingHours,
           availability: availability,
           coverImageUrl: coverImageUrl,
+          isProfileVideo: isProfileVideo,
         };
         
         setOriginalValues(newOriginalValues);
