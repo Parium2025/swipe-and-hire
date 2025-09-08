@@ -82,6 +82,8 @@ const Profile = () => {
         availability: (profile as any)?.availability || '',
         coverImageUrl: (profile as any)?.cover_image_url || '',
         isProfileVideo: false, // Will be updated below if video exists
+        profileFileName: '', // Will be extracted from URL
+        coverFileName: '', // Will be extracted from URL
       };
 
       setFirstName(values.firstName);
@@ -99,16 +101,56 @@ const Profile = () => {
         // Set original values to match current for video
         values.profileImageUrl = (profile as any).video_url;
         values.isProfileVideo = true;
+        
+        // Extract filename from video URL for cleanup
+        try {
+          const url = new URL((profile as any).video_url);
+          const fileName = url.pathname.split('/').pop()?.split('?')[0] || '';
+          if (fileName) {
+            setProfileFileName(fileName);
+            values.profileFileName = fileName;
+          }
+        } catch (error) {
+          console.log('Could not extract video filename from URL');
+        }
       } else {
         setProfileImageUrl(values.profileImageUrl);
         setIsProfileVideo(false);
         values.isProfileVideo = false;
+        
+        // Extract filename from image URL if it exists
+        if (values.profileImageUrl) {
+          try {
+            const url = new URL(values.profileImageUrl);
+            const fileName = url.pathname.split('/').pop()?.split('?')[0] || '';
+            if (fileName) {
+              setProfileFileName(fileName);
+              values.profileFileName = fileName;
+            }
+          } catch (error) {
+            console.log('Could not extract image filename from URL');
+          }
+        }
       }
       
       // Always load current cover image from DB - use dedicated field if available
       const dbCoverImage = (profile as any)?.cover_image_url || '';
       setCoverImageUrl(dbCoverImage);
       values.coverImageUrl = dbCoverImage;
+      
+      // Extract cover image filename for cleanup
+      if (dbCoverImage) {
+        try {
+          const url = new URL(dbCoverImage);
+          const fileName = url.pathname.split('/').pop()?.split('?')[0] || '';
+          if (fileName) {
+            setCoverFileName(fileName);
+            values.coverFileName = fileName;
+          }
+        } catch (error) {
+          console.log('Could not extract cover filename from URL');
+        }
+      }
       
       setCvUrl(values.cvUrl);
       // Only extract from URL if no filename in DB (for old records)
