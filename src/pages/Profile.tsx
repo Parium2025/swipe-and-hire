@@ -708,9 +708,9 @@ const Profile = () => {
           </CardHeader>
           <CardContent className="flex flex-col items-center space-y-4">
             <div className="relative">
-              {(profile?.video_url || isProfileVideo) ? (
+              {(isProfileVideo && !!profileImageUrl) ? (
                 <ProfileVideo
-                  videoUrl={profile?.video_url || (isProfileVideo ? profileImageUrl : '')}
+                  videoUrl={profileImageUrl}
                   coverImageUrl={coverImageUrl || profile?.profile_image_url || undefined}
                   userInitials={`${firstName.charAt(0)}${lastName.charAt(0)}`}
                   alt="Profile video"
@@ -731,7 +731,7 @@ const Profile = () => {
               )}
 
               {/* Delete icon for profile media */}
-              {(profile?.video_url || profileImageUrl) && (
+              {(isProfileVideo && !!profileImageUrl) && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -768,7 +768,7 @@ const Profile = () => {
                 </Badge>
               )}
               
-              {(profile?.video_url || profileImageUrl) && !isUploadingVideo && (
+              {(isProfileVideo && !!profileImageUrl) && !isUploadingVideo && (
                 <Badge variant="secondary" className="bg-white/20 text-white">
                   <Check className="h-3 w-3 mr-1" />
                   {profile?.video_url ? 'Video' : 'Bild'} uppladdad!
@@ -777,7 +777,7 @@ const Profile = () => {
             </div>
 
             {/* Cover image upload for videos */}
-            {(profile?.video_url || isProfileVideo) && (
+            {(isProfileVideo && !!profileImageUrl) && (
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
                 <Button 
                   variant="outline" 
