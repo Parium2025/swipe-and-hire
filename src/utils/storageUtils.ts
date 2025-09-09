@@ -77,8 +77,14 @@ export const convertToSignedUrl = async (
 ): Promise<string | null> => {
   if (!url) return null;
   
-  // If it's already a signed URL, and no custom download name requested, return as-is
-  if (url.includes('/storage/v1/object/sign/') && !downloadName) {
+  // If it's already a signed URL, try to re-sign it to refresh expiration
+  if (url.includes('/storage/v1/object/sign/')) {
+    const existingPath = getStoragePathFromUrl(url);
+    if (existingPath) {
+      const refreshed = await createSignedUrl(bucket, existingPath, expiresIn, downloadName);
+      return refreshed ? `${refreshed}&t=${Date.now()}` : null;
+    }
+    // Fallback: return original if we couldn't parse
     return url;
   }
   
