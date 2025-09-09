@@ -901,7 +901,6 @@ const Profile = () => {
               
               {(isProfileVideo && !!profileImageUrl) && !isUploadingVideo && (
                 <Badge variant="secondary" className="bg-white/20 text-white">
-                  <Check className="h-3 w-3 mr-1" />
                   {profile?.video_url ? 'Video' : 'Bild'} uppladdad!
                 </Badge>
               )}
