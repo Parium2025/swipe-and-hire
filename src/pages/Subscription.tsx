@@ -3,8 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Crown, Check, Star, CreditCard, Calendar } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 const Subscription = () => {
+  const { profile, user } = useAuth();
   const currentPlan = 'basic'; // This would come from your subscription state
   const [selectedPlan, setSelectedPlan] = useState(currentPlan);
 
@@ -67,7 +69,11 @@ const Subscription = () => {
                 <div>
                   <p className="font-semibold text-white">Basic Plan</p>
                   <p className="text-sm text-white/80">
-                    Aktiv sedan 15 januari 2024
+                    {user?.created_at ? `Aktiv sedan ${new Date(user.created_at).toLocaleDateString('sv-SE', { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}` : 'Aktiv plan'}
                   </p>
                 </div>
                 <Badge variant="secondary" className="bg-white/20 text-white">
