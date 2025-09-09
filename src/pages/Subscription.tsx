@@ -18,10 +18,10 @@ const Subscription = () => {
       period: 'månad',
       description: 'Perfekt för att komma igång',
       features: [
-        'Upp till 5 jobbansökningar per månad',
-        'Grundläggande profilhantering',
-        'E-postnotifikationer',
-        'Standardsupport'
+        'Skapa profil & ladda upp CV',
+        'Välj inriktning och se matchade jobb',
+        'Swipea jobb - 5 per vecka',
+        'Grundläggande funktionalitet'
       ],
       icon: Star,
       buttonText: 'Nuvarande plan',
