@@ -136,7 +136,7 @@ const Subscription = () => {
                   
                   <Button 
                     className="w-full" 
-                    variant={selectedPlan === plan.id && !isCurrent ? "default" : isCurrent ? "default" : "outline"}
+                    variant="default"
                     disabled={isCurrent}
                     onClick={(e) => {
                       e.stopPropagation();
