@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -5,6 +6,7 @@ import { Crown, Check, Star, CreditCard, Calendar } from 'lucide-react';
 
 const Subscription = () => {
   const currentPlan = 'basic'; // This would come from your subscription state
+  const [selectedPlan, setSelectedPlan] = useState(currentPlan);
 
   const plans = [
     {
@@ -87,7 +89,14 @@ const Subscription = () => {
             return (
               <Card 
                 key={plan.id}
-                className={`bg-white/10 backdrop-blur-sm border-white/20 relative ${plan.recommended ? 'border-primary' : ''} ${isCurrent ? 'border-green-500' : ''}`}
+                onClick={() => setSelectedPlan(plan.id)}
+                className={`bg-white/10 backdrop-blur-sm border-white/20 relative cursor-pointer transition-all duration-200 hover:scale-105 ${
+                  plan.recommended ? 'border-primary' : ''
+                } ${
+                  isCurrent ? 'border-green-500 border-2 shadow-lg shadow-green-500/20' : ''
+                } ${
+                  selectedPlan === plan.id && !isCurrent ? 'border-blue-400 border-2 shadow-lg shadow-blue-400/20' : ''
+                }`}
               >
                 {plan.recommended && (
                   <div className="absolute -top-2 left-4">
@@ -129,10 +138,17 @@ const Subscription = () => {
                   
                   <Button 
                     className="w-full" 
-                    variant={isCurrent ? "outline" : (plan.recommended ? "default" : "outline")}
+                    variant={isCurrent ? "outline" : (selectedPlan === plan.id ? "default" : "outline")}
                     disabled={isCurrent}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!isCurrent) {
+                        console.log(`Upgrading to ${plan.name} plan`);
+                        // Here you would implement the upgrade logic
+                      }
+                    }}
                   >
-                    {isCurrent ? 'Nuvarande plan' : plan.buttonText}
+                    {isCurrent ? 'Nuvarande plan' : selectedPlan === plan.id ? `Välj ${plan.name}` : plan.buttonText}
                   </Button>
                 </CardContent>
               </Card>
