@@ -44,18 +44,18 @@ const Subscription = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white/10 backdrop-blur-sm border-white/20">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-white/10 backdrop-blur-sm border-white/20">
-        <div className="px-4 py-4">
-          <h1 className="text-xl font-semibold text-center text-white">Abonnemang</h1>
-        </div>
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-white">Abonnemang</h1>
+        <p className="text-white">
+          Hantera ditt abonnemang och uppgradera din plan
+        </p>
       </div>
 
       <div className="px-4 pb-6">
         {/* Current Plan Status */}
         <div className="pt-4 mb-6">
-          <Card className="border-primary/20 bg-primary/5">
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardContent className="p-4">
               <div className="flex items-center gap-3 mb-3">
                 <Crown className="h-5 w-5 text-white" />
@@ -87,7 +87,7 @@ const Subscription = () => {
             return (
               <Card 
                 key={plan.id}
-                className={`relative ${plan.recommended ? 'border-primary' : ''} ${isCurrent ? 'border-green-500 bg-green-50/50' : ''}`}
+                className={`bg-white/10 backdrop-blur-sm border-white/20 relative ${plan.recommended ? 'border-primary' : ''} ${isCurrent ? 'border-green-500' : ''}`}
               >
                 {plan.recommended && (
                   <div className="absolute -top-2 left-4">
