@@ -136,8 +136,8 @@ const Subscription = () => {
                   
                   <Button 
                     className="w-full" 
-                    variant={selectedPlan === plan.id ? "default" : "outline"}
-                    disabled={isCurrent && selectedPlan === plan.id}
+                    variant={selectedPlan === plan.id && !isCurrent ? "default" : "outline"}
+                    disabled={isCurrent}
                     onClick={(e) => {
                       e.stopPropagation();
                       if (selectedPlan === plan.id && !isCurrent) {
@@ -146,7 +146,7 @@ const Subscription = () => {
                       }
                     }}
                   >
-                    {isCurrent && selectedPlan === plan.id ? 'Nuvarande plan' : selectedPlan === plan.id ? `Välj ${plan.name}` : plan.buttonText}
+                    {isCurrent ? 'Nuvarande plan' : selectedPlan === plan.id ? `Välj ${plan.name}` : plan.buttonText}
                   </Button>
                 </CardContent>
               </Card>
