@@ -93,9 +93,7 @@ const Subscription = () => {
                 className={`bg-white/10 backdrop-blur-sm border-white/20 relative cursor-pointer transition-all duration-200 hover:scale-105 ${
                   plan.recommended ? 'border-primary' : ''
                 } ${
-                  isCurrent ? 'border-green-500 border-2 shadow-lg shadow-green-500/20' : ''
-                } ${
-                  selectedPlan === plan.id && !isCurrent ? 'border-blue-400 border-2 shadow-lg shadow-blue-400/20' : ''
+                  selectedPlan === plan.id ? 'border-green-500 border-2 shadow-lg shadow-green-500/20' : ''
                 }`}
               >
                 {plan.recommended && (
@@ -138,17 +136,17 @@ const Subscription = () => {
                   
                   <Button 
                     className="w-full" 
-                    variant={isCurrent ? "outline" : (selectedPlan === plan.id ? "default" : "outline")}
-                    disabled={isCurrent}
+                    variant={selectedPlan === plan.id ? "default" : "outline"}
+                    disabled={isCurrent && selectedPlan === plan.id}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (!isCurrent) {
+                      if (selectedPlan === plan.id && !isCurrent) {
                         console.log(`Upgrading to ${plan.name} plan`);
                         // Here you would implement the upgrade logic
                       }
                     }}
                   >
-                    {isCurrent ? 'Nuvarande plan' : selectedPlan === plan.id ? `Välj ${plan.name}` : plan.buttonText}
+                    {isCurrent && selectedPlan === plan.id ? 'Nuvarande plan' : selectedPlan === plan.id ? `Välj ${plan.name}` : plan.buttonText}
                   </Button>
                 </CardContent>
               </Card>
