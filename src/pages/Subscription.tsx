@@ -19,7 +19,7 @@ const Subscription = () => {
       description: 'Perfekt för att komma igång',
       features: [
         'Skapa profil & ladda upp CV',
-        'Välj inriktning och se&nbsp;matchade&nbsp;jobb',
+        'Välj inriktning och se matchade jobb',
         'Swipea jobb - 5 per vecka',
         'Grundläggande funktionalitet'
       ],
@@ -138,7 +138,7 @@ const Subscription = () => {
                     {plan.features.map((feature, index) => (
                       <div key={index} className="flex items-center gap-2">
                         <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                        <span className="text-sm text-white">{feature}</span>
+                        <span className="text-sm text-white break-words">{feature}</span>
                       </div>
                     ))}
                   </div>
