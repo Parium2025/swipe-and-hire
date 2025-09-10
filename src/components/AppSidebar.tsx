@@ -9,7 +9,6 @@ import {
   LogOut,
   ChevronRight,
   Building,
-  FileText,
   Crown
 } from 'lucide-react';
 
@@ -36,8 +35,7 @@ const profileItems = [
 
 const businessItems = [
   { title: 'Abonnemang', url: '/subscription', icon: Crown },
-  { title: 'Fakturor', url: '/billing', icon: FileText },
-  { title: 'Betalning', url: '/payment', icon: CreditCard },
+  { title: 'Betalningar', url: '/billing', icon: CreditCard },
 ];
 
 const supportItems = [
