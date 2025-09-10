@@ -134,11 +134,11 @@ const Subscription = () => {
                     </div>
                   </div>
                   
-                  <div className="space-y-2 mb-4 min-h-[240px] flex flex-col">
+                  <div className="space-y-2 mb-4">
                     {plan.features.map((feature, index) => (
                       <div key={index} className="flex items-center gap-2">
                         <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                        <span className="text-sm text-white break-words">{feature}</span>
+                        <span className="text-sm text-white">{feature}</span>
                       </div>
                     ))}
                   </div>
