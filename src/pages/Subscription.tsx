@@ -19,7 +19,7 @@ const Subscription = () => {
       description: 'Perfekt för att komma igång',
       features: [
         'Skapa profil & ladda upp CV',
-        'Välj inriktning och se matchade jobb',
+        'Välj inriktning och se&nbsp;matchade&nbsp;jobb',
         'Swipea jobb - 5 per vecka',
         'Grundläggande funktionalitet'
       ],
