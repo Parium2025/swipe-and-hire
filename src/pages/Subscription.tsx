@@ -34,12 +34,15 @@ const Subscription = () => {
       period: 'månad',
       description: 'För seriösa jobbsökare',
       features: [
-        'Obegränsade jobbansökningar',
-        'Avancerad profilhantering',
-        'Prioriterade notifikationer',
-        'AI-driven matchning',
-        'Prioriterad support',
-        'Analys och statistik'
+        'Skapa profil & ladda upp CV',
+        'Välj inriktning och se matchade jobb',
+        'Swipea jobb - Obegränsat',
+        'Videopresentation',
+        'Pushnotiser för relevanta jobb',
+        'Direktkontakt till arbetsgivare (e-post)',
+        'Se vilka arbetsgivare visat intresse',
+        'Prioriterad synlighet i arbetsgivarens lista',
+        'Annonsfri upplevelse'
       ],
       icon: Crown,
       buttonText: 'Uppgradera till Premium',
