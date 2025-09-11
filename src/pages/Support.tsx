@@ -106,44 +106,8 @@ const Support = () => {
       </div>
 
       <div className="px-4 pb-6 space-y-4 md:space-y-6 overflow-x-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 overflow-x-hidden">
-          {/* Contact Information */}
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-            <CardHeader className="pb-3 md:pb-6">
-              <CardTitle className="flex items-center gap-2 text-white text-base md:text-lg">
-                <MessageCircle className="h-4 w-4 md:h-5 md:w-5 text-white" />
-                Kontakta oss
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 md:space-y-4 pt-0">
-              <div className="flex items-center gap-3">
-                <Mail className="h-4 w-4 text-white/70 flex-shrink-0" />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-white">E-post</p>
-                  <p className="text-sm text-white/70 break-all">support@parium.se</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <Phone className="h-4 w-4 text-white/70 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-white">Telefon</p>
-                  <p className="text-sm text-white/70">08-123 456 78</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <Clock className="h-4 w-4 text-white/70 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-white">Öppettider</p>
-                  <p className="text-sm text-white/70">Mån-Fre 9:00-17:00</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Support Form */}
-          <Card className="lg:col-span-2 bg-white/10 backdrop-blur-sm border-white/20">
+        {/* Support Form */}
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardHeader className="pb-3 md:pb-6">
               <CardTitle className="text-white text-base md:text-lg">Skicka ett meddelande</CardTitle>
               <CardDescription className="text-white/70 text-sm">
@@ -203,7 +167,6 @@ const Support = () => {
               </form>
             </CardContent>
           </Card>
-        </div>
 
         {/* Existing Tickets */}
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
