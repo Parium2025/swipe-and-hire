@@ -4,11 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Crown, Check, Star, CreditCard, Calendar } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { PremiumUpgradeDialog } from '@/components/PremiumUpgradeDialog';
 
 const Subscription = () => {
   const { profile, user } = useAuth();
   const currentPlan = 'basic'; // This would come from your subscription state
   const [selectedPlan, setSelectedPlan] = useState(currentPlan);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
   const plans = [
     {
@@ -149,9 +151,8 @@ const Subscription = () => {
                     disabled={isCurrent}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (selectedPlan === plan.id && !isCurrent) {
-                        console.log(`Upgrading to ${plan.name} plan`);
-                        // Here you would implement the upgrade logic
+                      if (selectedPlan === plan.id && !isCurrent && plan.id === 'premium') {
+                        setShowUpgradeDialog(true);
                       }
                     }}
                   >
@@ -164,6 +165,11 @@ const Subscription = () => {
         </div>
 
       </div>
+
+      <PremiumUpgradeDialog 
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+      />
     </div>
   );
 };
