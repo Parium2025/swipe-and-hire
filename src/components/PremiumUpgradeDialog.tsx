@@ -47,7 +47,7 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-gradient-to-br from-slate-900 to-slate-800 backdrop-blur-sm border-white/20 text-white max-w-md">
+      <DialogContent className="bg-primary-gradient backdrop-blur-sm border-white/20 text-white max-w-md">
         <DialogHeader className="text-center">
           <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/20 backdrop-blur-sm flex items-center justify-center border border-white/20">
             <Crown className="h-8 w-8 text-white" />
