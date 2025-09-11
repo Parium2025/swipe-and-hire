@@ -34,7 +34,7 @@ const SearchJobs = () => {
   const [locationSearchTerm, setLocationSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all-categories');
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
-  const [selectedEmploymentType, setSelectedEmploymentType] = useState('all-types');
+  const [selectedEmploymentTypes, setSelectedEmploymentTypes] = useState<string[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const isMobile = useIsMobile();
@@ -692,8 +692,13 @@ const SearchJobs = () => {
         query = query.ilike('location', `%${selectedLocation}%`);
       }
 
-      if (selectedEmploymentType && selectedEmploymentType !== 'all-types') {
-        query = query.eq('employment_type', selectedEmploymentType);
+      if (selectedEmploymentTypes.length > 0) {
+        // Convert search labels to database codes if needed
+        const employmentCodes = selectedEmploymentTypes.map(type => {
+          const foundType = SEARCH_EMPLOYMENT_TYPES.find(t => t.value === type);
+          return foundType?.code || type; // Use code if available, fallback to original value
+        });
+        query = query.in('employment_type', employmentCodes);
       }
 
       const { data, error } = await query.limit(20);
@@ -716,7 +721,7 @@ const SearchJobs = () => {
 
   useEffect(() => {
     fetchJobs();
-  }, [searchTerm, selectedLocations, selectedCategory, selectedSubcategories, selectedEmploymentType, selectedCompany]);
+  }, [searchTerm, selectedLocations, selectedCategory, selectedSubcategories, selectedEmploymentTypes, selectedCompany]);
 
   const formatSalary = (min?: number, max?: number) => {
     if (min && max) {
@@ -1251,7 +1256,12 @@ const SearchJobs = () => {
                     className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
                   >
                     <span className="truncate">
-                      {employmentTypes.find(type => type.value === selectedEmploymentType)?.label || 'Alla typer'}
+                      {selectedEmploymentTypes.length === 0 
+                        ? 'Alla typer' 
+                        : selectedEmploymentTypes.length === 1 
+                          ? employmentTypes.find(type => type.value === selectedEmploymentTypes[0])?.label 
+                          : `${selectedEmploymentTypes.length} valda`
+                      }
                     </span>
                     <ChevronDown className="h-4 w-4 flex-shrink-0" />
                   </Button>
@@ -1266,31 +1276,40 @@ const SearchJobs = () => {
                   onCloseAutoFocus={(e) => e.preventDefault()}
                 >
                   <DropdownMenuItem
-                    onClick={() => setSelectedEmploymentType('all-types')}
+                    onClick={() => setSelectedEmploymentTypes([])}
                     className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white flex items-center justify-between"
                   >
                     <span>Alla typer</span>
-                    {selectedEmploymentType === 'all-types' && (
+                    {selectedEmploymentTypes.length === 0 && (
                       <Check className="h-4 w-4 text-white" />
                     )}
                   </DropdownMenuItem>
-                  {employmentTypes.map((type) => (
-                    <DropdownMenuItem
-                      key={type.value}
-                      onClick={() => setSelectedEmploymentType(type.value)}
-                      className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white flex items-center justify-between"
-                    >
-                      <span>{type.label}</span>
-                      {selectedEmploymentType === type.value && (
-                        <Check className="h-4 w-4 text-white" />
-                      )}
-                    </DropdownMenuItem>
-                  ))}
+                  {employmentTypes.map((type) => {
+                    const isSelected = selectedEmploymentTypes.includes(type.value);
+                    return (
+                      <DropdownMenuItem
+                        key={type.value}
+                        onClick={() => {
+                          if (isSelected) {
+                            setSelectedEmploymentTypes(prev => prev.filter(t => t !== type.value));
+                          } else {
+                            setSelectedEmploymentTypes(prev => [...prev, type.value]);
+                          }
+                        }}
+                        className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white flex items-center justify-between"
+                      >
+                        <span>{type.label}</span>
+                        {isSelected && (
+                          <Check className="h-4 w-4 text-white" />
+                        )}
+                      </DropdownMenuItem>
+                    );
+                  })}
                 </DropdownMenuContent>
               </DropdownMenu>
               
               {/* Clear all filters button */}
-              {(searchTerm || selectedLocation !== 'all-locations' || selectedLocations.length > 0 || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentType !== 'all-types' || selectedCompany) && (
+              {(searchTerm || selectedLocation !== 'all-locations' || selectedLocations.length > 0 || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentTypes.length > 0 || selectedCompany) && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -1301,7 +1320,7 @@ const SearchJobs = () => {
                       setSelectedLocations([]);
                       setSelectedCategory('all-categories');
                       setSelectedSubcategories([]);
-                      setSelectedEmploymentType('all-types');
+                      setSelectedEmploymentTypes([]);
                     }}
                   className="text-white/70 hover:text-white hover:bg-white/10 border border-white/20 mt-2"
                 >
@@ -1345,7 +1364,7 @@ const SearchJobs = () => {
                 <span className="text-2xl font-bold text-white">{jobs.length}</span>
                 <span className="text-white/70">jobb hittades</span>
               </div>
-              {(searchTerm || selectedLocations.length > 0 || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentType !== 'all-types') && (
+              {(searchTerm || selectedLocations.length > 0 || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentTypes.length > 0) && (
                 <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
                   Filtrerade resultat
                 </Badge>
@@ -1399,7 +1418,7 @@ const SearchJobs = () => {
                     setSelectedLocations([]);
                     setSelectedCategory('all-categories');
                     setSelectedSubcategories([]);
-                    setSelectedEmploymentType('all-types');
+                    setSelectedEmploymentTypes([]);
                   }}
                   className="text-white/70 hover:text-white hover:bg-white/10 border border-white/20"
                 >
