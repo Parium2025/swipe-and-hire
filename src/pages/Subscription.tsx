@@ -125,7 +125,7 @@ const Subscription = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-white">
+                      <div className="text-2xl font-bold text-white whitespace-nowrap">
                         {plan.price} kr
                       </div>
                       <div className="text-sm text-white/80">
