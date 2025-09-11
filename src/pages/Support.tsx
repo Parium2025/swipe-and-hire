@@ -97,7 +97,7 @@ const Support = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
+    <div className="max-w-4xl mx-auto space-y-4 md:space-y-6 overflow-x-hidden">
       <div className="text-center px-4">
         <h1 className="text-2xl md:text-3xl font-bold text-white">Kundtjänst</h1>
         <p className="text-white text-sm md:text-base">
@@ -105,8 +105,8 @@ const Support = () => {
         </p>
       </div>
 
-      <div className="px-4 pb-6 space-y-4 md:space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+      <div className="px-4 pb-6 space-y-4 md:space-y-6 overflow-x-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 overflow-x-hidden">
           {/* Contact Information */}
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardHeader className="pb-3 md:pb-6">
