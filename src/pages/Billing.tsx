@@ -127,9 +127,9 @@ const Billing = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-white">Betalningar</h1>
-        <p className="text-white">
+      <div className="text-center px-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-white">Betalningar</h1>
+        <p className="text-white text-sm md:text-base">
           Hantera dina betalningsmetoder och se din betalningshistorik
         </p>
       </div>
@@ -140,15 +140,15 @@ const Billing = () => {
         <div>
           <h2 className="text-lg font-semibold text-white mb-4">Betalningsmetod</h2>
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded flex items-center justify-center">
-                    <CreditCard className="h-5 w-5 text-white" />
+            <CardContent className="p-4 md:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="w-10 h-8 md:w-12 md:h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded flex items-center justify-center flex-shrink-0">
+                    <CreditCard className="h-4 w-4 md:h-5 md:w-5 text-white" />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-white">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium text-white text-sm md:text-base">
                         {paymentMethod.type} •••• {paymentMethod.last4}
                       </span>
                       {paymentMethod.isDefault && (
@@ -157,7 +157,7 @@ const Billing = () => {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-white/70">
+                    <p className="text-xs md:text-sm text-white/70">
                       Upphör {paymentMethod.expiryMonth}/{paymentMethod.expiryYear}
                     </p>
                   </div>
@@ -165,7 +165,7 @@ const Billing = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                  className="bg-white/10 border-white/30 text-white hover:bg-white/20 w-full sm:w-auto"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Lägg till kort
@@ -190,18 +190,18 @@ const Billing = () => {
                     onClick={() => toggleMonth(monthData.month)}
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Calendar className="h-5 w-5 text-white" />
-                        <div>
-                          <h3 className="font-medium text-white">{monthData.monthName}</h3>
-                          <p className="text-sm text-white/70">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Calendar className="h-4 w-4 md:h-5 md:w-5 text-white flex-shrink-0" />
+                        <div className="min-w-0">
+                          <h3 className="font-medium text-white text-sm md:text-base truncate">{monthData.monthName}</h3>
+                          <p className="text-xs md:text-sm text-white/70">
                             {monthData.payments.length} betalning{monthData.payments.length !== 1 ? 'ar' : ''}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
                         <div className="text-right">
-                          <p className="font-semibold text-white">
+                          <p className="font-semibold text-white text-sm md:text-base">
                             {getTotalForMonth(monthData.payments)} kr
                           </p>
                           <p className="text-xs text-white/70">Totalt</p>
@@ -222,33 +222,33 @@ const Billing = () => {
                         <div key={payment.id}>
                           {index > 0 && <Separator className="bg-white/10" />}
                           <div className="p-4 hover:bg-white/5 transition-colors">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                              <div className="flex items-center gap-3 min-w-0">
                                 {getStatusIcon(payment.status)}
-                                <div>
-                                  <p className="font-medium text-white">{payment.description}</p>
-                                  <p className="text-sm text-white/70">
+                                <div className="min-w-0">
+                                  <p className="font-medium text-white text-sm md:text-base">{payment.description}</p>
+                                  <p className="text-xs md:text-sm text-white/70">
                                     {formatDate(payment.date)} • {getStatusText(payment.status)}
                                   </p>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-3">
-                                <div className="text-right">
-                                  <p className="font-semibold text-white">
+                              <div className="flex items-center justify-between sm:justify-end gap-3">
+                                <div className="text-left sm:text-right">
+                                  <p className="font-semibold text-white text-sm md:text-base">
                                     {payment.amount} {payment.currency}
                                   </p>
                                   <p className="text-xs text-white/70">
                                     #{payment.invoice}
                                   </p>
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex gap-1 md:gap-2 flex-shrink-0">
                                   <Button
                                     variant="ghost"
                                     size="sm"
                                     className="h-8 w-8 p-0 text-white/70 hover:text-white hover:bg-white/10"
                                     title="Visa faktura"
                                   >
-                                    <Eye className="h-4 w-4" />
+                                    <Eye className="h-3 w-3 md:h-4 md:w-4" />
                                   </Button>
                                   <Button
                                     variant="ghost"
@@ -256,7 +256,7 @@ const Billing = () => {
                                     className="h-8 w-8 p-0 text-white/70 hover:text-white hover:bg-white/10"
                                     title="Ladda ner faktura"
                                   >
-                                    <Download className="h-4 w-4" />
+                                    <Download className="h-3 w-3 md:h-4 md:w-4" />
                                   </Button>
                                 </div>
                               </div>
@@ -273,10 +273,10 @@ const Billing = () => {
 
           {paymentHistory.length === 0 && (
             <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardContent className="p-8 text-center">
-                <CreditCard className="h-12 w-12 text-white/50 mx-auto mb-4" />
-                <h3 className="font-medium text-white mb-2">Ingen betalningshistorik</h3>
-                <p className="text-sm text-white/70">
+              <CardContent className="p-6 md:p-8 text-center">
+                <CreditCard className="h-10 w-10 md:h-12 md:w-12 text-white/50 mx-auto mb-4" />
+                <h3 className="font-medium text-white mb-2 text-sm md:text-base">Ingen betalningshistorik</h3>
+                <p className="text-xs md:text-sm text-white/70">
                   Du har inga betalningar att visa än. När du gör ditt första köp kommer det att visas här.
                 </p>
               </CardContent>
