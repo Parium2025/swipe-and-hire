@@ -93,7 +93,7 @@ export function AppSidebar() {
           <div className="mb-6 animate-fade-in">
             <div className="flex items-center gap-3 p-3 rounded-lg bg-sidebar-accent transition-colors duration-150">
               <Avatar className="h-10 w-10">
-                <AvatarImage src={profile?.profile_image_url || ''} />
+                <AvatarImage src={profile?.cover_image_url || profile?.profile_image_url || ''} />
                 <AvatarFallback>
                   {profile?.first_name?.[0]}{profile?.last_name?.[0]}
                 </AvatarFallback>
