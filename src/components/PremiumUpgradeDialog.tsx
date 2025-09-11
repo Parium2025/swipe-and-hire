@@ -103,7 +103,7 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="flex-1 bg-slate-800 border-white/30 text-white hover:bg-slate-700"
+            className="flex-1 bg-primary border-white/30 text-white hover:bg-primary/90"
           >
             Avbryt
           </Button>
