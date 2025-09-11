@@ -1290,7 +1290,7 @@ const SearchJobs = () => {
                       )}
                     </DropdownMenuItem>
                   ))}
-                  <div className="h-4 w-full"></div>
+                  <div className="pb-4 pt-2 border-t border-slate-600/20 mt-2"></div>
                 </DropdownMenuContent>
               </DropdownMenu>
               
