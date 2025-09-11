@@ -629,8 +629,6 @@ const SearchJobs = () => {
     { value: 'Sommarjobb', label: 'Sommarjobb' }
   ];
 
-  console.log('Employment types:', employmentTypes);
-
   const fetchJobs = async () => {
     setLoading(true);
     try {
@@ -1264,7 +1262,7 @@ const SearchJobs = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
-                  className="w-72 max-h-64 overflow-hidden bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
+                  className="w-72 max-h-80 overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
                   side="bottom"
                   align="center"
                   alignOffset={0}
