@@ -27,6 +27,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { convertToSignedUrl } from '@/utils/storageUtils';
 
 const profileItems = [
   { title: 'Min Profil', url: '/profile', icon: User },
@@ -50,6 +51,7 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { checkBeforeNavigation } = useUnsavedChanges();
   const currentPath = location.pathname;
+  const [avatarUrl, setAvatarUrl] = useState<string>('');
 
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
@@ -64,7 +66,23 @@ export function AppSidebar() {
     };
     window.addEventListener('unsaved-cancel', closeOnCancel as EventListener);
     return () => window.removeEventListener('unsaved-cancel', closeOnCancel as EventListener);
-  }, [isMobile, setOpenMobile]);
+}, [isMobile, setOpenMobile]);
+
+  // Ensure avatar uses a fresh signed URL (handles expired links)
+  useEffect(() => {
+    const loadAvatar = async () => {
+      const candidate = profile?.cover_image_url || profile?.profile_image_url || '';
+      if (!candidate) { setAvatarUrl(''); return; }
+      try {
+        const refreshed = await convertToSignedUrl(candidate, 'job-applications', 86400);
+        const finalUrl = (refreshed || candidate) + (candidate.includes('?') ? `&t=${Date.now()}` : `?t=${Date.now()}`);
+        setAvatarUrl(finalUrl);
+      } catch {
+        setAvatarUrl(candidate);
+      }
+    };
+    loadAvatar();
+  }, [profile?.cover_image_url, profile?.profile_image_url]);
 
   // Memoized navigation handler to prevent re-renders
   const handleNavigation = useCallback((url: string, e: React.MouseEvent) => {
@@ -93,7 +111,7 @@ export function AppSidebar() {
           <div className="mb-6 animate-fade-in">
             <div className="flex items-center gap-3 p-3 rounded-lg bg-sidebar-accent transition-colors duration-150">
               <Avatar className="h-10 w-10">
-                <AvatarImage src={profile?.cover_image_url || profile?.profile_image_url || ''} />
+                <AvatarImage src={avatarUrl} alt="Profilbild" onError={() => setAvatarUrl('')} />
                 <AvatarFallback>
                   {profile?.first_name?.[0]}{profile?.last_name?.[0]}
                 </AvatarFallback>
