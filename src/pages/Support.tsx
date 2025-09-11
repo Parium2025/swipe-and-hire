@@ -98,159 +98,163 @@ const Support = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Kundtjänst</h1>
-        <p className="text-muted-foreground">
+      <div className="text-center px-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-white">Kundtjänst</h1>
+        <p className="text-white text-sm md:text-base">
           Vi hjälper dig gärna med dina frågor och problem
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Contact Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5" />
-              Kontakta oss
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-3">
-              <Mail className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">E-post</p>
-                <p className="text-sm text-muted-foreground">support@parium.se</p>
+      <div className="px-4 pb-6 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Contact Information */}
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-white">
+                <MessageCircle className="h-5 w-5 text-white" />
+                Kontakta oss
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Mail className="h-4 w-4 text-white/70" />
+                <div>
+                  <p className="text-sm font-medium text-white">E-post</p>
+                  <p className="text-sm text-white/70">support@parium.se</p>
+                </div>
               </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <Phone className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Telefon</p>
-                <p className="text-sm text-muted-foreground">08-123 456 78</p>
+              
+              <div className="flex items-center gap-3">
+                <Phone className="h-4 w-4 text-white/70" />
+                <div>
+                  <p className="text-sm font-medium text-white">Telefon</p>
+                  <p className="text-sm text-white/70">08-123 456 78</p>
+                </div>
               </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">Öppettider</p>
-                <p className="text-sm text-muted-foreground">Mån-Fre 9:00-17:00</p>
+              
+              <div className="flex items-center gap-3">
+                <Clock className="h-4 w-4 text-white/70" />
+                <div>
+                  <p className="text-sm font-medium text-white">Öppettider</p>
+                  <p className="text-sm text-white/70">Mån-Fre 9:00-17:00</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Support Form */}
-        <Card className="lg:col-span-2">
+          {/* Support Form */}
+          <Card className="lg:col-span-2 bg-white/10 backdrop-blur-sm border-white/20">
+            <CardHeader>
+              <CardTitle className="text-white">Skicka ett meddelande</CardTitle>
+              <CardDescription className="text-white/70">
+                Beskriv ditt problem eller din fråga så detaljerat som möjligt
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="category" className="text-white">Kategori</Label>
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                      <SelectValue placeholder="Välj kategori" className="text-white/70" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white/95 backdrop-blur-sm border-white/20">
+                      <SelectItem value="technical">Teknisk support</SelectItem>
+                      <SelectItem value="billing">Fakturering</SelectItem>
+                      <SelectItem value="account">Kontofrågor</SelectItem>
+                      <SelectItem value="feature">Funktionsfrågor</SelectItem>
+                      <SelectItem value="other">Övrigt</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="subject" className="text-white">Ämne</Label>
+                  <Input
+                    id="subject"
+                    placeholder="Kort beskrivning av ditt problem"
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    required
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="message" className="text-white">Meddelande</Label>
+                  <Textarea
+                    id="message"
+                    placeholder="Beskriv ditt problem eller din fråga detaljerat..."
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    rows={6}
+                    required
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  />
+                </div>
+
+                <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white" disabled={loading}>
+                  {loading ? 'Skickar...' : 'Skicka meddelande'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Existing Tickets */}
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader>
-            <CardTitle>Skicka ett meddelande</CardTitle>
-            <CardDescription>
-              Beskriv ditt problem eller din fråga så detaljerat som möjligt
+            <CardTitle className="text-white">Dina supportärenden</CardTitle>
+            <CardDescription className="text-white/70">
+              Översikt över dina tidigare och pågående supportärenden
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="category">Kategori</Label>
-                <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Välj kategori" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="technical">Teknisk support</SelectItem>
-                    <SelectItem value="billing">Fakturering</SelectItem>
-                    <SelectItem value="account">Kontofrågor</SelectItem>
-                    <SelectItem value="feature">Funktionsfrågor</SelectItem>
-                    <SelectItem value="other">Övrigt</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-3">
+              {tickets.map((ticket) => (
+                <div key={ticket.id} className="flex items-center justify-between p-3 border border-white/20 rounded-lg bg-white/5">
+                  <div className="flex items-center gap-3">
+                    {getStatusIcon(ticket.status)}
+                    <div>
+                      <p className="font-medium text-white">{ticket.subject}</p>
+                      <p className="text-sm text-white/70">
+                        Ärende {ticket.id} • Skapad {ticket.created}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge className={`${getStatusColor(ticket.status)} border-white/20`}>
+                    {ticket.status}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
-              <div className="space-y-2">
-                <Label htmlFor="subject">Ämne</Label>
-                <Input
-                  id="subject"
-                  placeholder="Kort beskrivning av ditt problem"
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="message">Meddelande</Label>
-                <Textarea
-                  id="message"
-                  placeholder="Beskriv ditt problem eller din fråga detaljerat..."
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  rows={6}
-                  required
-                />
-              </div>
-
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Skickar...' : 'Skicka meddelande'}
-              </Button>
-            </form>
+        {/* FAQ Section */}
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+          <CardHeader>
+            <CardTitle className="text-white">Vanliga frågor</CardTitle>
+            <CardDescription className="text-white/70">
+              Hitta snabba svar på de vanligaste frågorna
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Accordion type="single" collapsible className="w-full">
+              {faqs.map((faq, index) => (
+                <AccordionItem key={index} value={`item-${index}`} className="border-white/20">
+                  <AccordionTrigger className="text-left text-white hover:text-white/80">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-white/70">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
           </CardContent>
         </Card>
       </div>
-
-      {/* Existing Tickets */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Dina supportärenden</CardTitle>
-          <CardDescription>
-            Översikt över dina tidigare och pågående supportärenden
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {tickets.map((ticket) => (
-              <div key={ticket.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  {getStatusIcon(ticket.status)}
-                  <div>
-                    <p className="font-medium">{ticket.subject}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Ärende {ticket.id} • Skapad {ticket.created}
-                    </p>
-                  </div>
-                </div>
-                <Badge className={getStatusColor(ticket.status)}>
-                  {ticket.status}
-                </Badge>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* FAQ Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Vanliga frågor</CardTitle>
-          <CardDescription>
-            Hitta snabba svar på de vanligaste frågorna
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Accordion type="single" collapsible className="w-full">
-            {faqs.map((faq, index) => (
-              <AccordionItem key={index} value={`item-${index}`}>
-                <AccordionTrigger className="text-left">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </CardContent>
-      </Card>
     </div>
   );
 };
