@@ -1418,7 +1418,7 @@ const SearchJobs = () => {
           
           {/* No jobs found helper text and actions */}
           {jobs.length === 0 && (
-            <div className="text-center pt-4 space-y-4">
+            <div className="text-center pt-2 space-y-3">
               <p className="text-white/70 max-w-md mx-auto">
                 Inga jobb matchade dina sökkriterier. Prova att ändra dina filter eller sökord.
               </p>
