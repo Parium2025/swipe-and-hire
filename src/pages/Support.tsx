@@ -223,7 +223,7 @@ const Support = () => {
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="pb-3 md:pb-6">
             <CardTitle className="text-white text-base md:text-lg">Vanliga frågor</CardTitle>
-            <CardDescription className="text-white/70 text-sm">
+            <CardDescription className="text-white text-sm">
               Hitta snabba svar på de vanligaste frågorna
             </CardDescription>
           </CardHeader>
