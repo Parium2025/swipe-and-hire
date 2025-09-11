@@ -152,7 +152,23 @@ const Subscription = () => {
                     onClick={(e) => {
                       e.stopPropagation();
                       if (selectedPlan === plan.id && !isCurrent && plan.id === 'premium') {
-                        setShowUpgradeDialog(true);
+                        // Detect if mobile app or web
+                        const isMobileApp = typeof window !== 'undefined' && 
+                                          ((window as any).Capacitor?.isNativePlatform?.() || 
+                                           (window as any).cordova ||
+                                           navigator.userAgent?.includes('CapacitorWebView'));
+                        
+                        console.log('Button clicked - isMobileApp:', isMobileApp);
+                        
+                        if (isMobileApp) {
+                          // Mobile app: Show dialog with parium.se text
+                          setShowUpgradeDialog(true);
+                        } else {
+                          // Web: Go directly to Stripe checkout
+                          console.log('Web detected - should go to Stripe');
+                          // TODO: Implement Stripe checkout here
+                          alert('Webb-version: Här ska Stripe öppnas direkt');
+                        }
                       }
                     }}
                   >

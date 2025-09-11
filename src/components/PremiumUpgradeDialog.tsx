@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Crown, ExternalLink, Info } from 'lucide-react';
-import { Capacitor } from '@capacitor/core';
 
 interface PremiumUpgradeDialogProps {
   open: boolean;
@@ -14,7 +13,21 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange }: PremiumUpgradeDialo
 
   useEffect(() => {
     // Detect if running in Capacitor (mobile app) vs web
-    setIsMobileApp(Capacitor.isNativePlatform());
+    // Check multiple ways to detect mobile app
+    const isCapacitor = typeof window !== 'undefined' && 
+                       (window as any).Capacitor && 
+                       (window as any).Capacitor.isNativePlatform();
+    
+    const isCordova = typeof window !== 'undefined' && 
+                     (window as any).cordova;
+    
+    const isApp = isCapacitor || isCordova || 
+                 (typeof navigator !== 'undefined' && 
+                  navigator.userAgent && 
+                  navigator.userAgent.includes('CapacitorWebView'));
+    
+    console.log('Platform detection:', { isCapacitor, isCordova, isApp });
+    setIsMobileApp(isApp);
   }, []);
 
   const handleUpgrade = () => {
