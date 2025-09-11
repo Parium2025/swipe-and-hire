@@ -80,19 +80,19 @@ const PostalCodeSelector = ({
           Var bor du?
         </Label>
         <div className="relative">
-          <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <MapPin className="absolute left-3 top-3 h-4 w-4 text-white/60" />
           <Input
             id="postalCode"
             value={postalCodeValue}
             onChange={handlePostalCodeChange}
             placeholder="Skriv in ditt postnummer"
-            className="pl-10 text-base"
+            className="pl-10 text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
             maxLength={6}
             autoComplete="off"
           />
           {isLoading && (
             <div className="absolute right-3 top-3">
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              <Loader2 className="h-4 w-4 animate-spin text-white/60" />
             </div>
           )}
         </div>

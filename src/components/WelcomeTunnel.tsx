@@ -637,72 +637,72 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             </div>
             
             <div className="space-y-4 max-w-md mx-auto">
-              <div>
-                <Label htmlFor="firstName" className="text-white">Förnamn</Label>
-                <Input 
-                  id="firstName" 
-                  value={formData.firstName} 
-                  onChange={(e) => handleInputChange('firstName', e.target.value)} 
-                  placeholder="Ditt förnamn" 
-                  className="text-base" 
-                />
-              </div>
-              <div>
-                <Label htmlFor="lastName" className="text-white">Efternamn</Label>
-                <Input 
-                  id="lastName" 
-                  value={formData.lastName} 
-                  onChange={(e) => handleInputChange('lastName', e.target.value)} 
-                  placeholder="Ditt efternamn" 
-                  className="text-base" 
-                />
-              </div>
-              <div>
-                <Label htmlFor="email" className="text-white">E-post</Label>
-                <Input 
-                  id="email" 
-                  type="email"
-                  value={formData.email} 
-                  onChange={(e) => handleInputChange('email', e.target.value)} 
-                  placeholder="Din e-postadress" 
-                  className="text-base" 
-                />
-              </div>
-              <div>
-                <Label htmlFor="birthDate" className="text-white">Födelsedatum</Label>
-                <Input 
-                  id="birthDate" 
-                  type={inputType}
-                  value={formData.birthDate} 
-                  onChange={(e) => handleInputChange('birthDate', e.target.value)} 
-                  onFocus={() => setInputType('date')}
-                  onBlur={() => {
-                    if (!formData.birthDate) {
-                      setInputType('text');
-                    }
-                  }}
-                  className="text-base custom-date-input" 
-                  max={new Date().toISOString().split('T')[0]}
-                  min="1920-01-01"
-                  placeholder="åååå-mm-dd"
-                />
-              </div>
-              <div>
-                <Label htmlFor="phone" className="text-white">
-                  <Phone className="h-4 w-4 inline mr-2" />
-                  Telefonnummer
-                </Label>
-                <Input 
-                  id="phone" 
-                  type="tel" 
-                  required
-                  value={formData.phone} 
-                  onChange={(e) => handlePhoneChange(e.target.value)} 
-                  className="text-base" 
-                  placeholder="070-123 45 67" 
-                />
-                {phoneError && <p className="text-destructive text-xs mt-1">{phoneError}</p>}
+               <div>
+                 <Label htmlFor="firstName" className="text-white">Förnamn</Label>
+                 <Input 
+                   id="firstName" 
+                   value={formData.firstName} 
+                   onChange={(e) => handleInputChange('firstName', e.target.value)} 
+                   placeholder="Ditt förnamn" 
+                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60" 
+                 />
                </div>
+               <div>
+                 <Label htmlFor="lastName" className="text-white">Efternamn</Label>
+                 <Input 
+                   id="lastName" 
+                   value={formData.lastName} 
+                   onChange={(e) => handleInputChange('lastName', e.target.value)} 
+                   placeholder="Ditt efternamn" 
+                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60" 
+                 />
+               </div>
+               <div>
+                 <Label htmlFor="email" className="text-white">E-post</Label>
+                 <Input 
+                   id="email" 
+                   type="email"
+                   value={formData.email} 
+                   onChange={(e) => handleInputChange('email', e.target.value)} 
+                   placeholder="Din e-postadress" 
+                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60" 
+                 />
+               </div>
+               <div>
+                 <Label htmlFor="birthDate" className="text-white">Födelsedatum</Label>
+                 <Input 
+                   id="birthDate" 
+                   type={inputType}
+                   value={formData.birthDate} 
+                   onChange={(e) => handleInputChange('birthDate', e.target.value)} 
+                   onFocus={() => setInputType('date')}
+                   onBlur={() => {
+                     if (!formData.birthDate) {
+                       setInputType('text');
+                     }
+                   }}
+                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 custom-date-input" 
+                   max={new Date().toISOString().split('T')[0]}
+                   min="1920-01-01"
+                   placeholder="åååå-mm-dd"
+                 />
+               </div>
+               <div>
+                 <Label htmlFor="phone" className="text-white">
+                   <Phone className="h-4 w-4 inline mr-2" />
+                   Telefonnummer
+                 </Label>
+                 <Input 
+                   id="phone" 
+                   type="tel" 
+                   required
+                   value={formData.phone} 
+                   onChange={(e) => handlePhoneChange(e.target.value)} 
+                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60" 
+                   placeholder="070-123 45 67" 
+                 />
+                 {phoneError && <p className="text-destructive text-xs mt-1">{phoneError}</p>}
+                </div>
                <PostalCodeSelector
                  postalCodeValue={postalCode}
                  onPostalCodeChange={setPostalCode}
