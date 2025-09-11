@@ -1418,11 +1418,11 @@ const SearchJobs = () => {
           
           {/* No jobs found helper text and actions */}
           {jobs.length === 0 && (
-            <div className="text-center space-y-1">
-              <p className="text-white/70 max-w-md mx-auto text-sm mt-1">
+            <div className="text-center">
+              <p className="text-white/70 max-w-md mx-auto text-sm">
                 Inga jobb matchade dina sökkriterier. Prova att ändra dina filter eller sökord.
               </p>
-              <div className="pt-2">
+              <div className="pt-3">
                 <Button 
                   variant="outline"
                   className="bg-white/10 border-white/30 text-white hover:bg-white/20"
