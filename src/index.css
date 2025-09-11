@@ -109,6 +109,12 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    /* Permanent gradient + corner glow handled on body to avoid React re-mount flicker */
+    background-image: var(--gradient-parium), radial-gradient(circle at 100% 100%, hsl(var(--secondary) / 0.45) 0%, transparent 60%);
+    background-repeat: no-repeat, no-repeat;
+    background-size: cover, 60vw 60vw;
+    background-position: center, right -10vw bottom -10vw;
+    background-attachment: fixed, fixed;
     padding-top: 0 !important;
     margin-top: 0 !important;
   }

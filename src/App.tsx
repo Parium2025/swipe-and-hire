@@ -33,13 +33,9 @@ const App = () => {
       <Sonner />
       <BrowserRouter>
         <UnsavedChangesProvider>
-          <div className="min-h-screen bg-gradient-parium">
-            {/* Static animated background - identical to WelcomeTunnel */}
+          <div className="min-h-screen">
+            {/* Static background now handled via global CSS on body for zero flicker */}
             <div className="fixed inset-0 pointer-events-none z-0">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
-              
-              {/* Soft fade at bottom to prevent hard edges */}
-              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary-dark via-primary-dark/80 to-transparent"></div>
               
               {/* Animated floating elements */}
               <div className="fixed top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce pointer-events-none z-[1]" style={{ animationDuration: '2s' }}></div>
