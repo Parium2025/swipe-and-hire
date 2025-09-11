@@ -119,15 +119,15 @@ const Support = () => {
                 <div className="space-y-2">
                   <Label htmlFor="category" className="text-white text-sm">Kategori</Label>
                   <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white h-11 md:h-10">
-                      <SelectValue placeholder="Välj kategori" className="text-white/70" />
+                    <SelectTrigger className="text-base focus:ring-0 focus:ring-offset-0 focus:border-input h-11 md:h-10">
+                      <SelectValue placeholder="Välj kategori" />
                     </SelectTrigger>
-                    <SelectContent className="bg-background border border-border shadow-xl rounded-lg z-50">
-                      <SelectItem value="technical">Teknisk support</SelectItem>
-                      <SelectItem value="billing">Fakturering</SelectItem>
-                      <SelectItem value="account">Kontofrågor</SelectItem>
-                      <SelectItem value="feature">Funktionsfrågor</SelectItem>
-                      <SelectItem value="other">Övrigt</SelectItem>
+                    <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] max-h-[200px] overflow-y-auto bg-background border border-border shadow-xl rounded-lg z-50">
+                      <SelectItem value="technical" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">Teknisk support</SelectItem>
+                      <SelectItem value="billing" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">Fakturering</SelectItem>
+                      <SelectItem value="account" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">Kontofrågor</SelectItem>
+                      <SelectItem value="feature" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">Funktionsfrågor</SelectItem>
+                      <SelectItem value="other" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">Övrigt</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
