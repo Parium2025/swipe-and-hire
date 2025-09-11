@@ -11,6 +11,7 @@ import { Search, MapPin, Clock, Building, Filter, Heart, ExternalLink, X, Chevro
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { createSmartSearchConditions, expandSearchTerms } from '@/lib/smartSearch';
+import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { swedishCities } from '@/lib/swedishCities';
 interface Job {
   id: string;
@@ -620,14 +621,8 @@ const SearchJobs = () => {
     'Värnamo', 'Flen', 'Tibro', 'Markaryd', 'Kungälv', 'Kungsbacka', 'Solna'
   ];
 
-  const employmentTypes = [
-    { value: 'Heltid', label: 'Heltid' },
-    { value: 'Deltid', label: 'Deltid' },
-    { value: 'Konsult', label: 'Konsultuppdrag' },
-    { value: 'Praktik', label: 'Praktik' },
-    { value: 'Tillfällig', label: 'Vikariat' },
-    { value: 'Sommarjobb', label: 'Sommarjobb' }
-  ];
+  // Employment types for filtering - using centralized configuration
+  const employmentTypes = SEARCH_EMPLOYMENT_TYPES;
 
   const fetchJobs = async () => {
     setLoading(true);

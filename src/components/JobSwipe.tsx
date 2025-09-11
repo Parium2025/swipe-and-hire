@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { MapPin, Clock, Euro, Heart, X, Building2, Users, Mail, Info } from 'lucide-react';
 import JobApplicationDialog from './JobApplicationDialog';
 
@@ -153,16 +154,6 @@ const JobSwipe = () => {
     return '';
   };
 
-  const getEmploymentTypeLabel = (type?: string) => {
-    const types: Record<string, string> = {
-      full_time: 'Heltid',
-      part_time: 'Deltid',
-      contract: 'Konsult',
-      temporary: 'Tillfällig',
-      internship: 'Praktik'
-    };
-    return type ? types[type] || type : '';
-  };
 
   if (loading) {
     return (

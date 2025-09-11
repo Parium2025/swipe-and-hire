@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2 } from 'lucide-react';
 import CreateJobDialog from '@/components/CreateJobDialog';
 import EditJobDialog from '@/components/EditJobDialog';
@@ -141,16 +142,6 @@ const EmployerDashboard = () => {
     setEditDialogOpen(true);
   };
 
-  const getEmploymentTypeLabel = (type?: string) => {
-    const types: Record<string, string> = {
-      full_time: 'Heltid',
-      part_time: 'Deltid',
-      contract: 'Konsult',
-      temporary: 'Tillfällig',
-      internship: 'Praktik'
-    };
-    return type ? types[type] || type : '';
-  };
 
   const formatSalary = (min?: number, max?: number) => {
     if (!min && !max) return '';

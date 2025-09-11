@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { Loader2 } from 'lucide-react';
 import JobQuestionsManager from '@/components/JobQuestionsManager';
 
@@ -203,17 +204,17 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
               <div className="space-y-2">
                 <Label htmlFor="edit_employment_type">Anställningsform</Label>
-                <Select value={formData.employment_type || 'unspecified'} onValueChange={(value) => handleInputChange('employment_type', value === 'unspecified' ? '' : value)}>
+                <Select value={formData.employment_type || ''} onValueChange={(value) => handleInputChange('employment_type', value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Välj anställningsform" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="unspecified">Ej specificerat</SelectItem>
-                    <SelectItem value="full_time">Heltid</SelectItem>
-                    <SelectItem value="part_time">Deltid</SelectItem>
-                    <SelectItem value="contract">Konsult</SelectItem>
-                    <SelectItem value="temporary">Tillfällig</SelectItem>
-                    <SelectItem value="internship">Praktik</SelectItem>
+                    <SelectItem value="">Ej specificerat</SelectItem>
+                    {EMPLOYMENT_TYPES.map(type => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

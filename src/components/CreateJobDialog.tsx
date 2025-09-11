@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { categorizeJob } from '@/lib/jobCategorization';
+import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { Plus, Loader2 } from 'lucide-react';
 import JobQuestionsManager from '@/components/JobQuestionsManager';
 
@@ -219,11 +220,11 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
                     <SelectValue placeholder="Välj anställningsform" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="full_time">Heltid</SelectItem>
-                    <SelectItem value="part_time">Deltid</SelectItem>
-                    <SelectItem value="contract">Konsult</SelectItem>
-                    <SelectItem value="temporary">Tillfällig</SelectItem>
-                    <SelectItem value="internship">Praktik</SelectItem>
+                    {EMPLOYMENT_TYPES.map(type => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
