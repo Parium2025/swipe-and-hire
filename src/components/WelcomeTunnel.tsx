@@ -716,7 +716,14 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                    <SelectTrigger className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors">
                      <SelectValue placeholder="Välj din nuvarande situation" />
                    </SelectTrigger>
-                   <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] max-h-[200px] overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl rounded-lg z-50 text-white">
+                   <SelectContent 
+                     className="w-full min-w-[var(--radix-select-trigger-width)] max-h-[200px] overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl rounded-lg z-50 text-white"
+                     side="bottom"
+                     align="center"
+                     sideOffset={4}
+                     avoidCollisions={false}
+                     position="popper"
+                   >
                      <SelectItem value="tillsvidareanställning" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
                        Fast anställning
                      </SelectItem>
@@ -755,7 +762,14 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                      <SelectTrigger className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors">
                        <SelectValue placeholder="Välj arbetstid/omfattning" />
                      </SelectTrigger>
-                     <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] max-h-[200px] overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl rounded-lg z-50 text-white">
+                     <SelectContent 
+                       className="w-full min-w-[var(--radix-select-trigger-width)] max-h-[200px] overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl rounded-lg z-50 text-white"
+                       side="bottom"
+                       align="center"
+                       sideOffset={4}
+                       avoidCollisions={false}
+                       position="popper"
+                     >
                        <SelectItem value="heltid" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
                          Heltid
                        </SelectItem>
@@ -780,7 +794,14 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                      <SelectTrigger className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors">
                        <SelectValue placeholder="Välj din tillgänglighet" />
                      </SelectTrigger>
-                     <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] max-h-[200px] overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl rounded-lg z-50 text-white">
+                     <SelectContent 
+                       className="w-full min-w-[var(--radix-select-trigger-width)] max-h-[200px] overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl rounded-lg z-50 text-white"
+                       side="bottom"
+                       align="center"
+                       sideOffset={4}
+                       avoidCollisions={false}
+                       position="popper"
+                     >
                        <SelectItem value="omgaende" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
                          Omgående
                        </SelectItem>
