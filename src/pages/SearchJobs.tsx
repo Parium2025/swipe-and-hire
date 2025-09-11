@@ -1418,24 +1418,26 @@ const SearchJobs = () => {
           
           {/* No jobs found helper text and actions */}
           {jobs.length === 0 && (
-            <div className="text-center pt-1 space-y-2">
-              <p className="text-white/70 max-w-md mx-auto">
+            <div className="text-center space-y-1">
+              <p className="text-white/70 max-w-md mx-auto text-sm mt-1">
                 Inga jobb matchade dina sökkriterier. Prova att ändra dina filter eller sökord.
               </p>
-              <Button 
-                variant="outline"
-                className="bg-white/10 border-white/30 text-white hover:bg-white/20"
-                onClick={() => {
-                  setSearchTerm('');
-                  setSelectedLocations([]);
-                  setSelectedCategory('all-categories');
-                  setSelectedSubcategories([]);
-                  setSelectedEmploymentTypes([]);
-                  setSelectedCompany(null);
-                }}
-              >
-                Visa alla jobb
-              </Button>
+              <div className="pt-2">
+                <Button 
+                  variant="outline"
+                  className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSelectedLocations([]);
+                    setSelectedCategory('all-categories');
+                    setSelectedSubcategories([]);
+                    setSelectedEmploymentTypes([]);
+                    setSelectedCompany(null);
+                  }}
+                >
+                  Visa alla jobb
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
