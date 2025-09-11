@@ -1308,6 +1308,33 @@ const SearchJobs = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
               
+              {/* Selected employment types preview */}
+              {selectedEmploymentTypes.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {selectedEmploymentTypes.slice(0, 3).map((typeValue) => {
+                    const typeLabel = employmentTypes.find(t => t.value === typeValue)?.label || typeValue;
+                    return (
+                      <Badge 
+                        key={typeValue} 
+                        variant="secondary" 
+                        className="text-xs bg-white/10 text-white border-white/20 gap-2 hover:bg-white/20 cursor-pointer" 
+                        onClick={() => {
+                          setSelectedEmploymentTypes(prev => prev.filter(t => t !== typeValue));
+                        }}
+                      >
+                        <span>{typeLabel}</span>
+                        <X className="h-3 w-3" />
+                      </Badge>
+                    );
+                  })}
+                  {selectedEmploymentTypes.length > 3 && (
+                    <Badge variant="secondary" className="text-xs bg-white/10 text-white border-white/20">
+                      +{selectedEmploymentTypes.length - 3} till
+                    </Badge>
+                  )}
+                </div>
+              )}
+              
               {/* Clear all filters button */}
               {(searchTerm || selectedLocation !== 'all-locations' || selectedLocations.length > 0 || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentTypes.length > 0 || selectedCompany) && (
                 <Button
