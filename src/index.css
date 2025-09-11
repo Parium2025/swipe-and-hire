@@ -127,15 +127,53 @@ All colors MUST be HSL.
 
   /* Custom date input styling */
   .custom-date-input::placeholder {
-    color: rgb(156 163 175);
+    color: rgba(255, 255, 255, 0.6) !important;
   }
   
   .custom-date-input::-webkit-input-placeholder {
-    color: rgb(156 163 175);
+    color: rgba(255, 255, 255, 0.6) !important;
   }
   
   .custom-date-input::-moz-placeholder {
-    color: rgb(156 163 175);
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+
+  /* Style date picker calendar icon */
+  .custom-date-input::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+    opacity: 0.8;
+  }
+
+  .custom-date-input::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+  }
+
+  /* Custom date picker calendar styling */
+  .custom-date-input::-webkit-datetime-edit-fields-wrapper {
+    color: white;
+  }
+
+  .custom-date-input::-webkit-datetime-edit {
+    color: white;
+  }
+
+  .custom-date-input::-webkit-datetime-edit-year-field,
+  .custom-date-input::-webkit-datetime-edit-month-field,
+  .custom-date-input::-webkit-datetime-edit-day-field {
+    color: white;
+  }
+
+  /* Date picker calendar dropdown styling */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(1.2);
+    cursor: pointer;
+    opacity: 0.9;
+    transition: opacity 0.2s;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
   }
 }
 
