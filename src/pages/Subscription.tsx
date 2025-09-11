@@ -151,28 +151,30 @@ const Subscription = () => {
                     disabled={isCurrent}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (selectedPlan === plan.id && !isCurrent && plan.id === 'premium') {
-                        // Detect if mobile app or web
-                        const isMobileApp = typeof window !== 'undefined' && 
-                                          ((window as any).Capacitor?.isNativePlatform?.() || 
-                                           (window as any).cordova ||
-                                           navigator.userAgent?.includes('CapacitorWebView'));
+                      if (plan.id === 'premium' && !isCurrent) {
+                        // Enkel detektion - om vi är i en iframe eller har speciell user agent
+                        const isInCapacitor = window.location.href.includes('capacitor://') || 
+                                            window.location.href.includes('localhost') ||
+                                            navigator.userAgent.includes('wv') || // WebView
+                                            !window.location.href.includes('lovableproject.com');
                         
-                        console.log('Button clicked - isMobileApp:', isMobileApp);
+                        console.log('Premium clicked!');
+                        console.log('URL:', window.location.href);
+                        console.log('UserAgent:', navigator.userAgent);
+                        console.log('IsCapacitor detected:', isInCapacitor);
                         
-                        if (isMobileApp) {
-                          // Mobile app: Show dialog with parium.se text
+                        if (isInCapacitor) {
+                          // App-version: Visa dialog med parium.se
                           setShowUpgradeDialog(true);
                         } else {
-                          // Web: Go directly to Stripe checkout
-                          console.log('Web detected - should go to Stripe');
-                          // TODO: Implement Stripe checkout here
-                          alert('Webb-version: Här ska Stripe öppnas direkt');
+                          // Webb: Direkt till Stripe
+                          console.log('Webb - ska till Stripe');
+                          alert('Webb-version: Här öppnas Stripe direkt');
                         }
                       }
                     }}
                   >
-                    {isCurrent ? 'Nuvarande plan' : selectedPlan === plan.id ? `Välj ${plan.name}` : plan.buttonText}
+                    {isCurrent ? 'Nuvarande plan' : plan.buttonText}
                   </Button>
                 </CardContent>
               </Card>
