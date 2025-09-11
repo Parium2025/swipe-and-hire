@@ -1334,27 +1334,8 @@ const SearchJobs = () => {
                   )}
                 </div>
               )}
-              
-              {/* Clear all filters button */}
-              {(searchTerm || selectedLocation !== 'all-locations' || selectedLocations.length > 0 || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentTypes.length > 0 || selectedCompany) && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                      setSearchTerm('');
-                      setSelectedLocation('all-locations');
-                      setSelectedCompany(null);
-                      setSelectedLocations([]);
-                      setSelectedCategory('all-categories');
-                      setSelectedSubcategories([]);
-                      setSelectedEmploymentTypes([]);
-                    }}
-                  className="text-white/70 hover:text-white hover:bg-white/10 border border-white/20 mt-2"
-                >
-                  <X className="h-4 w-4 mr-1" />
-                  Rensa alla
-                </Button>
-              )}
+               
+              {/* Moved clear all filters button to after categories */}
             </div>
           </div>
 
@@ -1381,6 +1362,29 @@ const SearchJobs = () => {
                   </Badge>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Clear all filters button - moved here to come after all selections */}
+          {(searchTerm || selectedLocation !== 'all-locations' || selectedLocations.length > 0 || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentTypes.length > 0 || selectedCompany) && (
+            <div className="flex justify-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                    setSearchTerm('');
+                    setSelectedLocation('all-locations');
+                    setSelectedCompany(null);
+                    setSelectedLocations([]);
+                    setSelectedCategory('all-categories');
+                    setSelectedSubcategories([]);
+                    setSelectedEmploymentTypes([]);
+                  }}
+                className="text-white/70 hover:text-white hover:bg-white/10 border border-white/20"
+              >
+                <X className="h-4 w-4 mr-1" />
+                Rensa alla
+              </Button>
             </div>
           )}
 
