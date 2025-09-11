@@ -625,7 +625,8 @@ const SearchJobs = () => {
     { value: 'Deltid', label: 'Deltid' },
     { value: 'Konsult', label: 'Konsultuppdrag' },
     { value: 'Praktik', label: 'Praktik' },
-    { value: 'Tillfällig', label: 'Vikariat' }
+    { value: 'Tillfällig', label: 'Vikariat' },
+    { value: 'Sommarjobb', label: 'Sommarjobb' }
   ];
 
   const fetchJobs = async () => {
@@ -1290,9 +1291,6 @@ const SearchJobs = () => {
                       )}
                     </DropdownMenuItem>
                   ))}
-                   <div className="py-3 text-center border-t border-slate-600/30 mt-1">
-                     <span className="text-xs text-slate-400">• • •</span>
-                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
               
