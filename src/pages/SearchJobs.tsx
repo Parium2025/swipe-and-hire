@@ -629,6 +629,8 @@ const SearchJobs = () => {
     { value: 'Sommarjobb', label: 'Sommarjobb' }
   ];
 
+  console.log('Employment types:', employmentTypes);
+
   const fetchJobs = async () => {
     setLoading(true);
     try {
