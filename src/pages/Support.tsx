@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,45 +9,106 @@ import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Clock, CheckCircle, AlertCircle, ChevronDown, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+interface SupportTicket {
+  id: string;
+  category: string;
+  subject: string;
+  message: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
 
 const Support = () => {
   const [category, setCategory] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [tickets, setTickets] = useState<SupportTicket[]>([]);
+  const [ticketsLoading, setTicketsLoading] = useState(true);
   const { toast } = useToast();
+
+  // Hämta befintliga ärenden
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
+  const fetchTickets = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('support_tickets')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setTickets(data || []);
+    } catch (error) {
+      console.error('Error fetching tickets:', error);
+    } finally {
+      setTicketsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!category || !message) {
+      toast({
+        title: "Fel",
+        description: "Vänligen fyll i alla fält",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const { data: newTicket, error } = await supabase
+        .from('support_tickets')
+        .insert({
+          category,
+          subject: categoryOptions.find(opt => opt.value === category)?.label || 'Supportärende',
+          message,
+          status: 'open'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Skicka e-mail notifiering
+      try {
+        await supabase.functions.invoke('notify-support-ticket', {
+          body: { ticketId: newTicket.id }
+        });
+      } catch (emailError) {
+        console.error('Error sending notification email:', emailError);
+        // Fortsätt ändå även om e-mailet misslyckas
+      }
+
       toast({
         title: "Meddelande skickat!",
         description: "Vi kommer att svara inom 24 timmar."
       });
+      
       setCategory('');
       setMessage('');
+      fetchTickets(); // Uppdatera listan
+    } catch (error) {
+      console.error('Error creating ticket:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte skicka meddelandet. Försök igen.",
+        variant: "destructive"
+      });
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
-  const tickets = [
-    {
-      id: 'T-001',
-      subject: 'Problem med profiluppladdning',
-      status: 'öppen',
-      created: '2024-01-20',
-      updated: '2024-01-21'
-    },
-    {
-      id: 'T-002',
-      subject: 'Fråga om fakturering',
-      status: 'löst',
-      created: '2024-01-15',
-      updated: '2024-01-16'
-    }
-  ];
+  // Mock tickets ersatt med riktiga data från databasen
 
   const faqs = [
     {
@@ -83,10 +144,12 @@ const Support = () => {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'öppen':
+      case 'open':
         return <AlertCircle className="h-4 w-4 text-yellow-500" />;
-      case 'löst':
+      case 'closed':
         return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'in_progress':
+        return <Clock className="h-4 w-4 text-blue-500" />;
       default:
         return <Clock className="h-4 w-4 text-gray-500" />;
     }
@@ -94,12 +157,27 @@ const Support = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'öppen':
+      case 'open':
         return 'bg-yellow-100 text-yellow-800';
-      case 'löst':
+      case 'closed':
         return 'bg-green-100 text-green-800';
+      case 'in_progress':
+        return 'bg-blue-100 text-blue-800';
       default:
         return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'open':
+        return 'Öppen';
+      case 'closed':
+        return 'Stängd';
+      case 'in_progress':
+        return 'Pågår';
+      default:
+        return status;
     }
   };
 
@@ -196,26 +274,36 @@ const Support = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="space-y-3">
-              {tickets.map((ticket) => (
-                <div key={ticket.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 border border-white/20 rounded-lg bg-white/5">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex-shrink-0">
-                      {getStatusIcon(ticket.status)}
+            {ticketsLoading ? (
+              <div className="text-center text-white/70 py-8">
+                Laddar ärenden...
+              </div>
+            ) : tickets.length === 0 ? (
+              <div className="text-center text-white/70 py-8">
+                Inga supportärenden ännu
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {tickets.map((ticket) => (
+                  <div key={ticket.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 border border-white/20 rounded-lg bg-white/5">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex-shrink-0">
+                        {getStatusIcon(ticket.status)}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-medium text-white text-sm md:text-base truncate">{ticket.subject}</p>
+                        <p className="text-xs md:text-sm text-white/70">
+                          Ärende {ticket.id.slice(0, 8)} • Skapad {new Date(ticket.created_at).toLocaleDateString('sv-SE')}
+                        </p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="font-medium text-white text-sm md:text-base truncate">{ticket.subject}</p>
-                      <p className="text-xs md:text-sm text-white/70">
-                        Ärende {ticket.id} • Skapad {ticket.created}
-                      </p>
-                    </div>
+                    <Badge className={`${getStatusColor(ticket.status)} border-white/20 text-xs self-start sm:self-center flex-shrink-0`}>
+                      {getStatusLabel(ticket.status)}
+                    </Badge>
                   </div>
-                  <Badge className={`${getStatusColor(ticket.status)} border-white/20 text-xs self-start sm:self-center flex-shrink-0`}>
-                    {ticket.status}
-                  </Badge>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 

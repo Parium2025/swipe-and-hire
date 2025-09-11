@@ -15,6 +15,7 @@ import SearchJobs from '@/pages/SearchJobs';
 import Subscription from '@/pages/Subscription';
 import Billing from '@/pages/Billing';
 import Support from '@/pages/Support';
+import SupportAdmin from '@/pages/SupportAdmin';
 import DeveloperControls from '@/components/DeveloperControls';
 import { ArrowRightLeft } from 'lucide-react';
 
@@ -99,7 +100,7 @@ const Index = () => {
   }
 
   // Render sidebar layout for profile pages
-  const sidebarRoutes = ['/profile', '/search-jobs', '/subscription', '/billing', '/payment', '/support', '/settings'];
+  const sidebarRoutes = ['/profile', '/search-jobs', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin'];
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
 
   if (isSidebarRoute) {
@@ -115,6 +116,14 @@ const Index = () => {
           return <Billing />;
         case '/support':
           return <Support />;
+        case '/admin':
+          // Endast Fredrik kan komma åt admin-sidan
+          if (user.email === 'fredrikandits@hotmail.com') {
+            return <SupportAdmin />;
+          } else {
+            navigate('/support');
+            return <Support />;
+          }
         default:
           return <Profile />;
       }

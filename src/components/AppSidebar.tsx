@@ -9,7 +9,8 @@ import {
   LogOut,
   ChevronRight,
   Building,
-  Crown
+  Crown,
+  Settings
 } from 'lucide-react';
 
 import {
@@ -39,14 +40,10 @@ const businessItems = [
   { title: 'Betalningar', url: '/billing', icon: CreditCard },
 ];
 
-const supportItems = [
-  { title: 'Kundtjänst', url: '/support', icon: MessageCircle },
-];
-
 export function AppSidebar() {
   const { state, setOpenMobile, isMobile } = useSidebar();
   const collapsed = state === 'collapsed';
-  const { profile, userRole, signOut } = useAuth();
+  const { profile, userRole, signOut, user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { checkBeforeNavigation } = useUnsavedChanges();
@@ -58,6 +55,13 @@ export function AppSidebar() {
     isActive ? 'bg-muted text-primary font-medium' : 'hover:bg-muted/50';
 
   const isEmployer = userRole?.role === 'employer';
+  const isAdmin = user?.email === 'fredrikandits@hotmail.com';
+
+  // Support items - add admin for Fredrik
+  const supportItems = [
+    { title: 'Kundtjänst', url: '/support', icon: MessageCircle },
+    ...(isAdmin ? [{ title: 'Admin Panel', url: '/admin', icon: Settings }] : [])
+  ];
 
   // Close mobile sidebar when user cancels unsaved dialog
   useEffect(() => {
