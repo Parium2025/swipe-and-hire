@@ -234,7 +234,7 @@ const Support = () => {
                   <AccordionTrigger className="text-left text-white hover:text-white/80 text-sm md:text-base py-3 md:py-4">
                     {faq.question}
                   </AccordionTrigger>
-                  <AccordionContent className="text-white/70 text-sm pb-3 md:pb-4">
+                  <AccordionContent className="text-white text-sm pb-3 md:pb-4">
                     {faq.answer}
                   </AccordionContent>
                 </AccordionItem>
