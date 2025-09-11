@@ -117,7 +117,7 @@ const Support = () => {
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardHeader className="pb-3 md:pb-6">
               <CardTitle className="text-white text-base md:text-lg">Skicka ett meddelande</CardTitle>
-              <CardDescription className="text-white/70 text-sm">
+              <CardDescription className="text-white text-sm">
                 Beskriv ditt problem eller din fråga så detaljerat som möjligt
               </CardDescription>
             </CardHeader>
@@ -191,7 +191,7 @@ const Support = () => {
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="pb-3 md:pb-6">
             <CardTitle className="text-white text-base md:text-lg">Dina supportärenden</CardTitle>
-            <CardDescription className="text-white/70 text-sm">
+            <CardDescription className="text-white text-sm">
               Översikt över dina tidigare och pågående supportärenden
             </CardDescription>
           </CardHeader>
