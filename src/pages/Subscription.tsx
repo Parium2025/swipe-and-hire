@@ -99,10 +99,10 @@ const Subscription = () => {
               <Card 
                 key={plan.id}
                 onClick={() => setSelectedPlan(plan.id)}
-                className={`bg-white/10 backdrop-blur-sm border-white/20 relative cursor-pointer transition-all duration-200 hover:scale-105 ${
+                className={`bg-white/10 backdrop-blur-sm border-white/20 relative cursor-pointer transition-all duration-200 border-2 ${
                   plan.recommended ? 'border-primary' : ''
                 } ${
-                  selectedPlan === plan.id ? 'border-green-500 border-2 shadow-lg shadow-green-500/20' : ''
+                  selectedPlan === plan.id ? 'border-green-500 shadow-lg shadow-green-500/20' : ''
                 }`}
               >
                 {plan.recommended && (
