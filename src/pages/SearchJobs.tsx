@@ -1248,27 +1248,50 @@ const SearchJobs = () => {
                 <Clock className="h-4 w-4" />
                 Anställning
               </Label>
-              <Select value={selectedEmploymentType} onValueChange={(value) => setSelectedEmploymentType(value === 'all-types' ? 'all-types' : value)}>
-                <SelectTrigger className="h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors">
-                  <SelectValue placeholder="Alla anställningsformer" />
-                </SelectTrigger>
-                <SelectContent 
-                  className="bg-slate-700/95 backdrop-blur-md text-white border-white/20"
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                  >
+                    <span className="truncate">
+                      {employmentTypes.find(type => type.value === selectedEmploymentType)?.label || 'Alla typer'}
+                    </span>
+                    <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent 
+                  className="w-72 max-h-64 overflow-hidden bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
                   side="bottom"
-                  align="start"
-                  alignOffset={-18}
+                  align="center"
+                  alignOffset={0}
+                  sideOffset={6}
                   avoidCollisions={false}
+                  onCloseAutoFocus={(e) => e.preventDefault()}
                 >
-                  <SelectItem value="all-types" className="hover:bg-white/10 focus:bg-white/10">
-                    Alla typer
-                  </SelectItem>
+                  <DropdownMenuItem
+                    onClick={() => setSelectedEmploymentType('all-types')}
+                    className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white flex items-center justify-between"
+                  >
+                    <span>Alla typer</span>
+                    {selectedEmploymentType === 'all-types' && (
+                      <Check className="h-4 w-4 text-white" />
+                    )}
+                  </DropdownMenuItem>
                   {employmentTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value} className="hover:bg-white/10 focus:bg-white/10">
-                      {type.label}
-                    </SelectItem>
+                    <DropdownMenuItem
+                      key={type.value}
+                      onClick={() => setSelectedEmploymentType(type.value)}
+                      className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white flex items-center justify-between"
+                    >
+                      <span>{type.label}</span>
+                      {selectedEmploymentType === type.value && (
+                        <Check className="h-4 w-4 text-white" />
+                      )}
+                    </DropdownMenuItem>
                   ))}
-                </SelectContent>
-              </Select>
+                </DropdownMenuContent>
+              </DropdownMenu>
               
               {/* Clear all filters button */}
               {(searchTerm || selectedLocation !== 'all-locations' || selectedLocations.length > 0 || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentType !== 'all-types' || selectedCompany) && (
