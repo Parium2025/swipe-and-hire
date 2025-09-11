@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { MessageCircle, Mail, Phone, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Clock, CheckCircle, AlertCircle, ChevronDown, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const Support = () => {
@@ -73,6 +73,15 @@ const Support = () => {
       answer: 'Vi stöder PDF, Word-dokument (.doc, .docx) och vissa bildformat. Maximal filstorlek är 5 MB.'
     }
   ];
+  
+  // Kategorier för dropdown (matchar stilen från Sök jobb)
+  const categoryOptions = [
+    { value: 'technical', label: 'Teknisk support' },
+    { value: 'billing', label: 'Fakturering' },
+    { value: 'account', label: 'Kontofrågor' },
+    { value: 'feature', label: 'Funktionsfrågor' },
+    { value: 'other', label: 'Övrigt' },
+  ];
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -118,18 +127,42 @@ const Support = () => {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="category" className="text-white text-sm">Kategori</Label>
-                  <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className="text-base focus:ring-0 focus:ring-offset-0 focus:border-input h-11 md:h-10">
-                      <SelectValue placeholder="Välj kategori" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] max-h-[200px] overflow-y-auto bg-background border border-border shadow-xl rounded-lg z-50">
-                      <SelectItem value="technical" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">Teknisk support</SelectItem>
-                      <SelectItem value="billing" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">Fakturering</SelectItem>
-                      <SelectItem value="account" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">Kontofrågor</SelectItem>
-                      <SelectItem value="feature" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">Funktionsfrågor</SelectItem>
-                      <SelectItem value="other" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">Övrigt</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                      >
+                        <span className="truncate">
+                          {categoryOptions.find(o => o.value === category)?.label || 'Välj kategori'}
+                        </span>
+                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      className="w-72 max-h-80 overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
+                      side="bottom"
+                      align="center"
+                      alignOffset={0}
+                      sideOffset={6}
+                      avoidCollisions={false}
+                      onCloseAutoFocus={(e) => e.preventDefault()}
+                    >
+                      {categoryOptions.map((opt) => {
+                        const isSelected = category === opt.value;
+                        return (
+                          <DropdownMenuItem
+                            key={opt.value}
+                            onClick={() => setCategory(opt.value)}
+                            className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white flex items-center justify-between"
+                          >
+                            <span>{opt.label}</span>
+                            {isSelected && <Check className="h-4 w-4 text-white" />}
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
 
                 <div className="space-y-2">
