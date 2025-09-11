@@ -11,7 +11,6 @@ import { Clock, CheckCircle, AlertCircle, ChevronDown, Check } from 'lucide-reac
 import { useToast } from '@/hooks/use-toast';
 
 const Support = () => {
-  const [subject, setSubject] = useState('');
   const [category, setCategory] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,7 +26,6 @@ const Support = () => {
         title: "Meddelande skickat!",
         description: "Vi kommer att svara inom 24 timmar."
       });
-      setSubject('');
       setCategory('');
       setMessage('');
       setLoading(false);
@@ -163,18 +161,6 @@ const Support = () => {
                       })}
                     </DropdownMenuContent>
                   </DropdownMenu>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="subject" className="text-white text-sm">Ämne</Label>
-                  <Input
-                    id="subject"
-                    placeholder="Kort beskrivning av ditt problem"
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    required
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 h-11 md:h-10"
-                  />
                 </div>
 
                 <div className="space-y-2">
