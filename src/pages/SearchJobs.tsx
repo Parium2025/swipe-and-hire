@@ -1290,6 +1290,7 @@ const SearchJobs = () => {
                       )}
                     </DropdownMenuItem>
                   ))}
+                  <div className="h-3"></div>
                 </DropdownMenuContent>
               </DropdownMenu>
               
