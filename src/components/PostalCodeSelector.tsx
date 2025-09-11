@@ -80,7 +80,7 @@ const PostalCodeSelector = ({
           Var bor du?
         </Label>
         <div className="relative">
-          <MapPin className="absolute left-3 top-3 h-4 w-4 text-white/60" />
+          <MapPin className="absolute left-3 top-3 h-4 w-4 text-white" />
           <Input
             id="postalCode"
             value={postalCodeValue}
@@ -92,7 +92,7 @@ const PostalCodeSelector = ({
           />
           {isLoading && (
             <div className="absolute right-3 top-3">
-              <Loader2 className="h-4 w-4 animate-spin text-white/60" />
+              <Loader2 className="h-4 w-4 animate-spin text-white" />
             </div>
           )}
         </div>

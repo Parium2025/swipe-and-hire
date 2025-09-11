@@ -681,7 +681,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                        setInputType('text');
                      }
                    }}
-                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 custom-date-input" 
+                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white custom-date-input" 
                    max={new Date().toISOString().split('T')[0]}
                    min="1920-01-01"
                    placeholder="åååå-mm-dd"
