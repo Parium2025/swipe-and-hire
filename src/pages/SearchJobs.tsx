@@ -1386,7 +1386,7 @@ const SearchJobs = () => {
 
           {/* Results Summary */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-white/10">
-            <div className={`flex items-center gap-2 flex-wrap ${jobs.length === 0 ? 'mx-auto' : ''}`}>
+            <div className={`flex items-center gap-2 flex-wrap ${jobs.length === 0 ? 'mx-auto mb-0' : ''}`}>
               <span className="text-2xl font-bold text-white">{jobs.length}</span>
               <span className="text-white/70">jobb hittades</span>
               {(searchTerm || selectedLocations.length > 0 || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentTypes.length > 0) && (
@@ -1418,7 +1418,7 @@ const SearchJobs = () => {
           
           {/* No jobs found helper text and actions */}
           {jobs.length === 0 && (
-            <div className="text-center -mt-2">
+            <div className="text-center -mt-4 sm:-mt-2">
               <p className="text-white/70 max-w-md mx-auto text-sm">
                 Inga jobb matchade dina sökkriterier. Prova att ändra dina filter eller sökord.
               </p>
