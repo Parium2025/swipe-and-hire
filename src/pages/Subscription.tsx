@@ -5,9 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { Crown, Check, Star, CreditCard, Calendar } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { PremiumUpgradeDialog } from '@/components/PremiumUpgradeDialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Subscription = () => {
   const { profile, user } = useAuth();
+  const isMobile = useIsMobile();
   const currentPlan = 'basic'; // This would come from your subscription state
   const [selectedPlan, setSelectedPlan] = useState(currentPlan);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
@@ -152,24 +154,12 @@ const Subscription = () => {
                     onClick={(e) => {
                       e.stopPropagation();
                       if (plan.id === 'premium' && !isCurrent) {
-                        // Enkel detektion - om vi är i en iframe eller har speciell user agent
-                        const isInCapacitor = window.location.href.includes('capacitor://') || 
-                                            window.location.href.includes('localhost') ||
-                                            navigator.userAgent.includes('wv') || // WebView
-                                            !window.location.href.includes('lovableproject.com');
-                        
-                        console.log('Premium clicked!');
-                        console.log('URL:', window.location.href);
-                        console.log('UserAgent:', navigator.userAgent);
-                        console.log('IsCapacitor detected:', isInCapacitor);
-                        
-                        if (isInCapacitor) {
-                          // App-version: Visa dialog med parium.se
+                        if (isMobile) {
+                          // App-version (mobil vy): visa dialog med parium.se
                           setShowUpgradeDialog(true);
                         } else {
-                          // Webb: Direkt till Stripe
-                          console.log('Webb - ska till Stripe');
-                          alert('Webb-version: Här öppnas Stripe direkt');
+                          // Webb: Direkt till Stripe (placeholder tills vi kopplar Stripe)
+                          alert('Öppnar Stripe (webb)');
                         }
                       }
                     }}
@@ -187,6 +177,7 @@ const Subscription = () => {
       <PremiumUpgradeDialog 
         open={showUpgradeDialog}
         onOpenChange={setShowUpgradeDialog}
+        isAppOverride={isMobile}
       />
     </div>
   );

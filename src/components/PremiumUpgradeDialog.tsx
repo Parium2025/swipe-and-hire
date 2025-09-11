@@ -6,9 +6,10 @@ import { Crown, ExternalLink, Info } from 'lucide-react';
 interface PremiumUpgradeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  isAppOverride?: boolean;
 }
 
-export const PremiumUpgradeDialog = ({ open, onOpenChange }: PremiumUpgradeDialogProps) => {
+export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: PremiumUpgradeDialogProps) => {
   const [isMobileApp, setIsMobileApp] = useState(false);
 
   useEffect(() => {
@@ -30,8 +31,10 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange }: PremiumUpgradeDialo
     setIsMobileApp(isApp);
   }, []);
 
+  const isApp = (typeof isAppOverride === 'boolean') ? isAppOverride : isMobileApp;
+
   const handleUpgrade = () => {
-    if (isMobileApp) {
+    if (isApp) {
       // Mobile app: Show info about visiting website
       // No action needed - just show the message
       return;
@@ -53,7 +56,7 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange }: PremiumUpgradeDialo
             Uppgradera till Premium
           </DialogTitle>
           
-          {isMobileApp ? (
+          {isApp ? (
             <DialogDescription className="text-center space-y-4 pt-4">
               <div className="flex items-center justify-center gap-2 text-blue-600">
                 <Info className="h-5 w-5" />
@@ -105,7 +108,7 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange }: PremiumUpgradeDialo
             Avbryt
           </Button>
           
-          {!isMobileApp && (
+          {!isApp && (
             <Button
               onClick={handleUpgrade}
               className="flex-1"
@@ -114,7 +117,7 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange }: PremiumUpgradeDialo
             </Button>
           )}
           
-          {isMobileApp && (
+          {isApp && (
             <Button
               onClick={() => onOpenChange(false)}
               className="flex-1"
