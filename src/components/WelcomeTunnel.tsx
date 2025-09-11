@@ -707,95 +707,95 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                  onPostalCodeChange={setPostalCode}
                  onLocationChange={(location) => handleInputChange('location', location)}
                />
-               <div>
-                <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget?</Label>
-                <Select 
-                  value={formData.employmentStatus} 
-                  onValueChange={(value) => handleInputChange('employmentStatus', value)}
-                >
-                  <SelectTrigger className="text-base focus:ring-0 focus:ring-offset-0 focus:border-input">
-                    <SelectValue placeholder="Välj din nuvarande situation" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] max-h-[200px] overflow-y-auto bg-background border border-border shadow-xl rounded-lg z-50">
-                    <SelectItem value="tillsvidareanställning" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Fast anställning
-                    </SelectItem>
-                    <SelectItem value="visstidsanställning" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Visstidsanställning
-                    </SelectItem>
-                    <SelectItem value="provanställning" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Provanställning
-                    </SelectItem>
-                    <SelectItem value="interim" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Interim anställning
-                    </SelectItem>
-                    <SelectItem value="bemanningsanställning" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Bemanningsanställning
-                    </SelectItem>
-                    <SelectItem value="egenforetagare" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Egenföretagare / Frilans
-                    </SelectItem>
-                    <SelectItem value="arbetssokande" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Arbetssökande
-                    </SelectItem>
-                    <SelectItem value="annat" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                      Annat
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                <div>
+                 <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget?</Label>
+                 <Select 
+                   value={formData.employmentStatus} 
+                   onValueChange={(value) => handleInputChange('employmentStatus', value)}
+                 >
+                   <SelectTrigger className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors">
+                     <SelectValue placeholder="Välj din nuvarande situation" />
+                   </SelectTrigger>
+                   <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] max-h-[200px] overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl rounded-lg z-50 text-white">
+                     <SelectItem value="tillsvidareanställning" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                       Fast anställning
+                     </SelectItem>
+                     <SelectItem value="visstidsanställning" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                       Visstidsanställning
+                     </SelectItem>
+                     <SelectItem value="provanställning" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                       Provanställning
+                     </SelectItem>
+                     <SelectItem value="interim" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                       Interim anställning
+                     </SelectItem>
+                     <SelectItem value="bemanningsanställning" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                       Bemanningsanställning
+                     </SelectItem>
+                     <SelectItem value="egenforetagare" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                       Egenföretagare / Frilans
+                     </SelectItem>
+                     <SelectItem value="arbetssokande" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                       Arbetssökande
+                     </SelectItem>
+                     <SelectItem value="annat" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                       Annat
+                     </SelectItem>
+                   </SelectContent>
+                 </Select>
+               </div>
               {/* Visa arbetstid-frågan endast om användaren har valt något OCH det inte är arbetssökande */}
               {formData.employmentStatus && formData.employmentStatus !== 'arbetssokande' && (
-                <div>
-                  <Label htmlFor="workingHours" className="text-white text-sm font-medium">Hur mycket jobbar du idag?</Label>
-                  <Select 
-                    value={formData.workingHours} 
-                    onValueChange={(value) => handleInputChange('workingHours', value)}
-                  >
-                    <SelectTrigger className="text-base focus:ring-0 focus:ring-offset-0 focus:border-input">
-                      <SelectValue placeholder="Välj arbetstid/omfattning" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] max-h-[200px] overflow-y-auto bg-background border border-border shadow-xl rounded-lg z-50">
-                      <SelectItem value="heltid" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                        Heltid
-                      </SelectItem>
-                      <SelectItem value="deltid" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                        Deltid
-                      </SelectItem>
-                      <SelectItem value="varierande" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                        Varierande / Flexibelt
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                 <div>
+                   <Label htmlFor="workingHours" className="text-white text-sm font-medium">Hur mycket jobbar du idag?</Label>
+                   <Select 
+                     value={formData.workingHours} 
+                     onValueChange={(value) => handleInputChange('workingHours', value)}
+                   >
+                     <SelectTrigger className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors">
+                       <SelectValue placeholder="Välj arbetstid/omfattning" />
+                     </SelectTrigger>
+                     <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] max-h-[200px] overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl rounded-lg z-50 text-white">
+                       <SelectItem value="heltid" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                         Heltid
+                       </SelectItem>
+                       <SelectItem value="deltid" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                         Deltid
+                       </SelectItem>
+                       <SelectItem value="varierande" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                         Varierande / Flexibelt
+                       </SelectItem>
+                     </SelectContent>
+                   </Select>
+                 </div>
               )}
               {/* Visa tillgänglighet-frågan endast om användaren har valt något i employment status */}
               {formData.employmentStatus && (
-                <div>
-                  <Label htmlFor="availability" className="text-white text-sm font-medium">När kan du börja nytt jobb?</Label>
-                  <Select 
-                    value={formData.availability} 
-                    onValueChange={(value) => handleInputChange('availability', value)}
-                  >
-                    <SelectTrigger className="text-base focus:ring-0 focus:ring-offset-0 focus:border-input">
-                      <SelectValue placeholder="Välj din tillgänglighet" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] max-h-[200px] overflow-y-auto bg-background border border-border shadow-xl rounded-lg z-50">
-                      <SelectItem value="omgaende" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                        Omgående
-                      </SelectItem>
-                      <SelectItem value="inom-1-manad" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                        Inom 1 månad
-                      </SelectItem>
-                      <SelectItem value="inom-3-manader" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                        Inom 3 månader
-                      </SelectItem>
-                      <SelectItem value="osaker" className="h-11 text-sm px-3 hover:bg-accent/30 focus:bg-accent/40 cursor-pointer transition-colors">
-                        Osäker
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                 <div>
+                   <Label htmlFor="availability" className="text-white text-sm font-medium">När kan du börja nytt jobb?</Label>
+                   <Select 
+                     value={formData.availability} 
+                     onValueChange={(value) => handleInputChange('availability', value)}
+                   >
+                     <SelectTrigger className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors">
+                       <SelectValue placeholder="Välj din tillgänglighet" />
+                     </SelectTrigger>
+                     <SelectContent className="w-full min-w-[var(--radix-select-trigger-width)] max-h-[200px] overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl rounded-lg z-50 text-white">
+                       <SelectItem value="omgaende" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                         Omgående
+                       </SelectItem>
+                       <SelectItem value="inom-1-manad" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                         Inom 1 månad
+                       </SelectItem>
+                       <SelectItem value="inom-3-manader" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                         Inom 3 månader
+                       </SelectItem>
+                       <SelectItem value="osaker" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                         Osäker
+                       </SelectItem>
+                     </SelectContent>
+                   </Select>
+                 </div>
               )}
             </div>
           </div>
