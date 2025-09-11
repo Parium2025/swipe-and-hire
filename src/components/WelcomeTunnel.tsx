@@ -8,12 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import FileUpload from '@/components/FileUpload';
 import ImageEditor from '@/components/ImageEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import phoneWithPariumLogo from '@/assets/phone-with-parium-logo.jpg';
-import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone, Play, Video, Trash2 } from 'lucide-react';
+import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone, Play, Video, Trash2, ChevronDown } from 'lucide-react';
 import ProfileVideo from '@/components/ProfileVideo';
 import SwipeIntro from '@/components/SwipeIntro';
 import PostalCodeSelector from '@/components/PostalCodeSelector';
@@ -707,115 +708,157 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                  onPostalCodeChange={setPostalCode}
                  onLocationChange={(location) => handleInputChange('location', location)}
                />
-                <div>
-                 <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget?</Label>
-                 <Select 
-                   value={formData.employmentStatus} 
-                   onValueChange={(value) => handleInputChange('employmentStatus', value)}
-                 >
-                   <SelectTrigger className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors">
-                     <SelectValue placeholder="Välj din nuvarande situation" />
-                   </SelectTrigger>
-                   <SelectContent 
-                     className="w-full min-w-[var(--radix-select-trigger-width)] max-h-[200px] overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl rounded-lg z-50 text-white"
-                     side="bottom"
-                     align="center"
-                     sideOffset={4}
-                     avoidCollisions={false}
-                     position="popper"
-                   >
-                     <SelectItem value="tillsvidareanställning" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
-                       Fast anställning
-                     </SelectItem>
-                     <SelectItem value="visstidsanställning" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
-                       Visstidsanställning
-                     </SelectItem>
-                     <SelectItem value="provanställning" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
-                       Provanställning
-                     </SelectItem>
-                     <SelectItem value="interim" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
-                       Interim anställning
-                     </SelectItem>
-                     <SelectItem value="bemanningsanställning" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
-                       Bemanningsanställning
-                     </SelectItem>
-                     <SelectItem value="egenforetagare" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
-                       Egenföretagare / Frilans
-                     </SelectItem>
-                     <SelectItem value="arbetssokande" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
-                       Arbetssökande
-                     </SelectItem>
-                     <SelectItem value="annat" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
-                       Annat
-                     </SelectItem>
-                   </SelectContent>
-                 </Select>
-               </div>
+                 <div>
+                  <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget?</Label>
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                      >
+                        <span className="truncate">
+                          {formData.employmentStatus ? (
+                            ({
+                              tillsvidareanställning: 'Fast anställning',
+                              visstidsanställning: 'Visstidsanställning',
+                              provanställning: 'Provanställning',
+                              interim: 'Interim anställning',
+                              bemanningsanställning: 'Bemanningsanställning',
+                              egenforetagare: 'Egenföretagare / Frilans',
+                              arbetssokande: 'Arbetssökande',
+                              annat: 'Annat',
+                            } as Record<string, string>)[formData.employmentStatus]
+                          ) : 'Välj din nuvarande situation'}
+                        </span>
+                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent 
+                      className="w-72 max-h-80 overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
+                      side="bottom"
+                      align="center"
+                      alignOffset={0}
+                      sideOffset={6}
+                      avoidCollisions={false}
+                      onCloseAutoFocus={(e) => e.preventDefault()}
+                    >
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => handleInputChange('employmentStatus', 'tillsvidareanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                        Fast anställning
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => handleInputChange('employmentStatus', 'visstidsanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                        Visstidsanställning
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => handleInputChange('employmentStatus', 'provanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                        Provanställning
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => handleInputChange('employmentStatus', 'interim')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                        Interim anställning
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => handleInputChange('employmentStatus', 'bemanningsanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                        Bemanningsanställning
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => handleInputChange('employmentStatus', 'egenforetagare')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                        Egenföretagare / Frilans
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => handleInputChange('employmentStatus', 'arbetssokande')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                        Arbetssökande
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => handleInputChange('employmentStatus', 'annat')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                        Annat
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               {/* Visa arbetstid-frågan endast om användaren har valt något OCH det inte är arbetssökande */}
               {formData.employmentStatus && formData.employmentStatus !== 'arbetssokande' && (
                  <div>
                    <Label htmlFor="workingHours" className="text-white text-sm font-medium">Hur mycket jobbar du idag?</Label>
-                   <Select 
-                     value={formData.workingHours} 
-                     onValueChange={(value) => handleInputChange('workingHours', value)}
-                   >
-                     <SelectTrigger className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors">
-                       <SelectValue placeholder="Välj arbetstid/omfattning" />
-                     </SelectTrigger>
-                     <SelectContent 
-                       className="w-full min-w-[var(--radix-select-trigger-width)] max-h-[200px] overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl rounded-lg z-50 text-white"
+                   <DropdownMenu modal={false}>
+                     <DropdownMenuTrigger asChild>
+                       <Button
+                         variant="outline"
+                         className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                       >
+                         <span className="truncate">
+                           {formData.workingHours ? (
+                             ({
+                               heltid: 'Heltid',
+                               deltid: 'Deltid',
+                               varierande: 'Varierande / Flexibelt',
+                             } as Record<string, string>)[formData.workingHours]
+                           ) : 'Välj arbetstid/omfattning'}
+                         </span>
+                         <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                       </Button>
+                     </DropdownMenuTrigger>
+                     <DropdownMenuContent 
+                       className="w-72 max-h-80 overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
                        side="bottom"
                        align="center"
-                       sideOffset={4}
+                       alignOffset={0}
+                       sideOffset={6}
                        avoidCollisions={false}
-                       position="popper"
+                       onCloseAutoFocus={(e) => e.preventDefault()}
                      >
-                       <SelectItem value="heltid" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                       <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => handleInputChange('workingHours', 'heltid')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
                          Heltid
-                       </SelectItem>
-                       <SelectItem value="deltid" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                       </DropdownMenuItem>
+                       <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => handleInputChange('workingHours', 'deltid')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
                          Deltid
-                       </SelectItem>
-                       <SelectItem value="varierande" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                       </DropdownMenuItem>
+                       <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => handleInputChange('workingHours', 'varierande')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
                          Varierande / Flexibelt
-                       </SelectItem>
-                     </SelectContent>
-                   </Select>
+                       </DropdownMenuItem>
+                     </DropdownMenuContent>
+                   </DropdownMenu>
                  </div>
               )}
               {/* Visa tillgänglighet-frågan endast om användaren har valt något i employment status */}
               {formData.employmentStatus && (
                  <div>
                    <Label htmlFor="availability" className="text-white text-sm font-medium">När kan du börja nytt jobb?</Label>
-                   <Select 
-                     value={formData.availability} 
-                     onValueChange={(value) => handleInputChange('availability', value)}
-                   >
-                     <SelectTrigger className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors">
-                       <SelectValue placeholder="Välj din tillgänglighet" />
-                     </SelectTrigger>
-                     <SelectContent 
-                       className="w-full min-w-[var(--radix-select-trigger-width)] max-h-[200px] overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl rounded-lg z-50 text-white"
+                   <DropdownMenu modal={false}>
+                     <DropdownMenuTrigger asChild>
+                       <Button
+                         variant="outline"
+                         className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                       >
+                         <span className="truncate">
+                           {formData.availability ? (
+                             ({
+                               omgaende: 'Omgående',
+                               'inom-1-manad': 'Inom 1 månad',
+                               'inom-3-manader': 'Inom 3 månader',
+                               osaker: 'Osäker',
+                             } as Record<string, string>)[formData.availability]
+                           ) : 'Välj din tillgänglighet'}
+                         </span>
+                         <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                       </Button>
+                     </DropdownMenuTrigger>
+                     <DropdownMenuContent 
+                       className="w-72 max-h-80 overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
                        side="bottom"
                        align="center"
-                       sideOffset={4}
+                       alignOffset={0}
+                       sideOffset={6}
                        avoidCollisions={false}
-                       position="popper"
+                       onCloseAutoFocus={(e) => e.preventDefault()}
                      >
-                       <SelectItem value="omgaende" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                       <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => handleInputChange('availability', 'omgaende')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
                          Omgående
-                       </SelectItem>
-                       <SelectItem value="inom-1-manad" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                       </DropdownMenuItem>
+                       <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => handleInputChange('availability', 'inom-1-manad')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
                          Inom 1 månad
-                       </SelectItem>
-                       <SelectItem value="inom-3-manader" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                       </DropdownMenuItem>
+                       <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => handleInputChange('availability', 'inom-3-manader')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
                          Inom 3 månader
-                       </SelectItem>
-                       <SelectItem value="osaker" className="h-11 text-sm px-3 hover:bg-slate-700/70 focus:bg-slate-700/70 cursor-pointer transition-colors text-white">
+                       </DropdownMenuItem>
+                       <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => handleInputChange('availability', 'osaker')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
                          Osäker
-                       </SelectItem>
-                     </SelectContent>
-                   </Select>
+                       </DropdownMenuItem>
+                     </DropdownMenuContent>
+                   </DropdownMenu>
                  </div>
               )}
             </div>
