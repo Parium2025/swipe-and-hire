@@ -33,18 +33,22 @@ const App = () => {
       <Sonner />
       <BrowserRouter>
         <UnsavedChangesProvider>
-          <div className="min-h-screen">
-            {/* Static background now handled via global CSS on body for zero flicker */}
+          <div className="min-h-screen bg-gradient-parium">
+            {/* Static animated background - identical to WelcomeTunnel */}
             <div className="fixed inset-0 pointer-events-none z-0">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
+              
+              {/* Soft fade at bottom to prevent hard edges */}
+              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary-dark via-primary-dark/80 to-transparent"></div>
               
               {/* Animated floating elements */}
               <div className="fixed top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce pointer-events-none z-[1]" style={{ animationDuration: '2s' }}></div>
               <div className="fixed top-32 left-16 w-2 h-2 bg-accent/40 rounded-full animate-bounce pointer-events-none z-[1]" style={{ animationDuration: '2.5s' }}></div>
               <div className="fixed top-24 left-20 w-3 h-3 bg-secondary/20 rounded-full animate-bounce pointer-events-none z-[1]" style={{ animationDuration: '3s' }}></div>
               
-              <div className="fixed bottom-40 right-20 w-5 h-5 bg-secondary/60 rounded-full pointer-events-none z-[1]"></div>
-              <div className="fixed bottom-32 right-16 w-3 h-3 bg-secondary/70 rounded-full pointer-events-none z-[1]"></div>
-              <div className="fixed bottom-36 right-24 w-2 h-2 bg-secondary/50 rounded-full pointer-events-none z-[1]"></div>
+              <div className="fixed bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full animate-bounce pointer-events-none z-[1]" style={{ animationDuration: '2.2s' }}></div>
+              <div className="fixed bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full animate-bounce pointer-events-none z-[1]" style={{ animationDuration: '2.8s' }}></div>
+              <div className="fixed bottom-36 right-24 w-2 h-2 bg-accent/35 rounded-full animate-bounce pointer-events-none z-[1]" style={{ animationDuration: '2.3s' }}></div>
               
               {/* Pulsing lights */}
               <div className="fixed top-10 right-10 w-3 h-3 bg-secondary/40 rounded-full animate-pulse pointer-events-none z-[1]" style={{ animationDuration: '1.5s' }}></div>
