@@ -115,15 +115,15 @@ const PostalCodeSelector = ({
               </div>
             </div>
             <div className="flex-1">
-              <p className="text-sm text-white/70">Din plats:</p>
+              <p className="text-sm text-white">Din plats:</p>
               <p className="text-lg font-semibold text-white">
                 {foundLocation.city}
                 {foundLocation.area && foundLocation.area !== foundLocation.city && (
-                  <span className="text-white/80">, {foundLocation.area}</span>
+                  <span className="text-white">, {foundLocation.area}</span>
                 )}
               </p>
               {foundLocation.county && (
-                <p className="text-xs text-white/60">{foundLocation.county}</p>
+                <p className="text-xs text-white">{foundLocation.county}</p>
               )}
             </div>
           </div>
