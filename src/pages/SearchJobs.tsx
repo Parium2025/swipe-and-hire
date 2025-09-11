@@ -1385,8 +1385,8 @@ const SearchJobs = () => {
           )}
 
           {/* Results Summary */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-white/10">
-            <div className={`flex items-center gap-2 flex-wrap ${jobs.length === 0 ? 'mx-auto mb-0' : ''}`}>
+          <div className={`flex flex-col sm:flex-row items-center gap-4 pt-4 border-t border-white/10 ${jobs.length === 0 ? 'justify-center' : 'justify-between'}`}>
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-2xl font-bold text-white">{jobs.length}</span>
               <span className="text-white/70">jobb hittades</span>
               {(searchTerm || selectedLocations.length > 0 || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentTypes.length > 0) && (
