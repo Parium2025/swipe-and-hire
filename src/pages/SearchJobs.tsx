@@ -1415,6 +1415,29 @@ const SearchJobs = () => {
               </Button>
             )}
           </div>
+          
+          {/* No jobs found helper text and actions */}
+          {jobs.length === 0 && (
+            <div className="text-center pt-4 space-y-4">
+              <p className="text-white/70 max-w-md mx-auto">
+                Inga jobb matchade dina sökkriterier. Prova att ändra dina filter eller sökord.
+              </p>
+              <Button 
+                variant="outline"
+                className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                onClick={() => {
+                  setSearchTerm('');
+                  setSelectedLocations([]);
+                  setSelectedCategory('all-categories');
+                  setSelectedSubcategories([]);
+                  setSelectedEmploymentTypes([]);
+                  setSelectedCompany(null);
+                }}
+              >
+                Visa alla jobb
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -1429,32 +1452,6 @@ const SearchJobs = () => {
               <p className="text-lg text-muted-foreground">Söker bland tusentals jobb...</p>
             </div>
           </div>
-        ) : jobs.length === 0 ? (
-          <Card className="text-center py-16 bg-white/10 backdrop-blur-sm border-white/20">
-            <CardContent>
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-white">Inga jobb hittades</h3>
-                <p className="text-white/70 max-w-md mx-auto">
-                  Inga jobb matchade dina sökkriterier. Prova att ändra dina filter eller sökord.
-                </p>
-                <Button 
-                  variant="ghost"
-                  onClick={() => {
-                    setSearchTerm('');
-                    setSelectedLocation('all-locations');
-                    setSelectedCompany(null);
-                    setSelectedLocations([]);
-                    setSelectedCategory('all-categories');
-                    setSelectedSubcategories([]);
-                    setSelectedEmploymentTypes([]);
-                  }}
-                  className="text-white/70 hover:text-white hover:bg-white/10 border border-white/20"
-                >
-                  Visa alla jobb
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         ) : (
           <>
             {/* Results Header */}
