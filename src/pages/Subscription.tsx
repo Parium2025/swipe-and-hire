@@ -126,10 +126,7 @@ const Subscription = () => {
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold text-white">
-                        {plan.price} kr
-                      </div>
-                      <div className="text-sm text-white/80">
-                        /{plan.period}
+                        {plan.price} kr/{plan.period}
                       </div>
                     </div>
                   </div>
