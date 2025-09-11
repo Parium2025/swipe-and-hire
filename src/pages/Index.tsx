@@ -13,6 +13,7 @@ import WelcomeTunnel from '@/components/WelcomeTunnel';
 import Profile from '@/pages/Profile';
 import SearchJobs from '@/pages/SearchJobs';
 import Subscription from '@/pages/Subscription';
+import Billing from '@/pages/Billing';
 import Support from '@/pages/Support';
 import DeveloperControls from '@/components/DeveloperControls';
 import { ArrowRightLeft } from 'lucide-react';
@@ -110,6 +111,8 @@ const Index = () => {
           return <SearchJobs />;
         case '/subscription':
           return <Subscription />;
+        case '/billing':
+          return <Billing />;
         case '/support':
           return <Support />;
         default:
