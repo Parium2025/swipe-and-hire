@@ -100,29 +100,28 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
         </DialogHeader>
         
         <div className="flex gap-3 pt-4">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            className="flex-1 bg-primary border-white/30 text-white hover:bg-primary/90 hover:text-white"
-          >
-            Avbryt
-          </Button>
-          
-          {!isApp && (
-            <Button
-              onClick={handleUpgrade}
-              className="flex-1 bg-primary hover:bg-primary/90 text-white"
-            >
-              Fortsätt här
-            </Button>
-          )}
-          
-          {isApp && (
+          {!isApp ? (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="flex-1 bg-primary border-white/30 text-white hover:bg-primary/90 hover:text-white"
+              >
+                Stäng
+              </Button>
+              <Button
+                onClick={handleUpgrade}
+                className="flex-1 bg-primary hover:bg-primary/90 text-white"
+              >
+                Nu kör vi!
+              </Button>
+            </>
+          ) : (
             <Button
               onClick={() => onOpenChange(false)}
-              className="flex-1 bg-primary hover:bg-primary/90 text-white"
+              className="w-full bg-primary hover:bg-primary/90 text-white"
             >
-              Förstått
+              Nu kör vi!
             </Button>
           )}
         </div>
