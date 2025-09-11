@@ -838,7 +838,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                      </DropdownMenuTrigger>
                      <DropdownMenuContent 
                        className="w-72 max-h-[240px] overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
-                       side="bottom"
+                       side="top"
                        align="center"
                        alignOffset={0}
                        sideOffset={6}
