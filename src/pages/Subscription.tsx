@@ -106,14 +106,14 @@ const Subscription = () => {
                 }`}
               >
                 {plan.recommended && (
-                  <div className="absolute top-4 left-4">
+                  <div className="absolute top-2 left-4">
                     <Badge className="bg-white/20 text-white text-xs">
                       Rekommenderad
                     </Badge>
                   </div>
                 )}
                 
-                <CardContent className="p-4 pt-6">
+                <CardContent className={`p-4 ${plan.recommended ? 'pt-14' : 'pt-6'}`}>
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
