@@ -1454,25 +1454,6 @@ const SearchJobs = () => {
           </div>
         ) : (
           <>
-            {/* Results Header */}
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold">
-                {selectedSubcategories.length > 0 
-                  ? `${selectedSubcategories.length} yrken valda`
-                  : 'Alla Jobb'
-                }
-              </h2>
-              <Select value="newest" onValueChange={() => {}}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Sortera efter" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="newest">Senast publicerade</SelectItem>
-                  <SelectItem value="relevant">Mest relevanta</SelectItem>
-                  <SelectItem value="salary">Högsta lönen</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
             {/* Job Cards */}
             <div className="grid gap-6">
               {jobs.map((job) => (
