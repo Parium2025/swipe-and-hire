@@ -47,9 +47,9 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-gradient-to-br from-primary/95 to-primary-dark/95 backdrop-blur-sm border-white/20 text-white max-w-md">
+      <DialogContent className="bg-gradient-to-br from-slate-900 to-slate-800 backdrop-blur-sm border-white/20 text-white max-w-md">
         <DialogHeader className="text-center">
-          <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
+          <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/20 backdrop-blur-sm flex items-center justify-center border border-white/20">
             <Crown className="h-8 w-8 text-white" />
           </div>
           <DialogTitle className="text-2xl font-bold text-white">
@@ -58,40 +58,40 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
           
           {isApp ? (
             <DialogDescription className="text-center space-y-4 pt-4">
-              <div className="flex items-center justify-center gap-2 text-blue-200">
+              <div className="flex items-center justify-center gap-2 text-white/90">
                 <Info className="h-5 w-5" />
                 <span className="font-medium">Uppgradering via webbplats</span>
               </div>
-              <div className="space-y-4 text-white/90">
+              <div className="space-y-4 text-white">
                 <p>
                   För att uppgradera till Premium, besök vår webbplats:
                 </p>
-                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6 border border-white/30">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
                   <p className="text-2xl font-bold text-white tracking-wide">
                     parium.se
                   </p>
                 </div>
-                <p className="text-sm text-white/70">
+                <p className="text-sm text-white/80">
                   Öppna din webbläsare och navigera till adressen ovan för att slutföra din Premium-uppgradering.
                 </p>
               </div>
             </DialogDescription>
           ) : (
             <DialogDescription className="text-center space-y-4 pt-4">
-              <div className="flex items-center justify-center gap-2 text-green-200">
+              <div className="flex items-center justify-center gap-2 text-white/90">
                 <ExternalLink className="h-5 w-5" />
                 <span className="font-medium">Uppgradera nu</span>
               </div>
-              <div className="space-y-4 text-white/90">
+              <div className="space-y-4 text-white">
                 <p>
                   Du kan uppgradera direkt här på webben eller besöka:
                 </p>
-                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6 border border-white/30">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
                   <p className="text-2xl font-bold text-white tracking-wide">
                     parium.se
                   </p>
                 </div>
-                <p className="text-sm text-white/70">
+                <p className="text-sm text-white/80">
                   Välj det alternativ som passar dig bäst.
                 </p>
               </div>
@@ -103,7 +103,7 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="flex-1 border-white/30 text-white hover:bg-white/10"
+            className="flex-1 bg-slate-800 border-white/30 text-white hover:bg-slate-700"
           >
             Avbryt
           </Button>
@@ -111,7 +111,7 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
           {!isApp && (
             <Button
               onClick={handleUpgrade}
-              className="flex-1 bg-white text-primary hover:bg-white/90"
+              className="flex-1 bg-primary hover:bg-primary/90 text-white"
             >
               Fortsätt här
             </Button>
@@ -120,7 +120,7 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
           {isApp && (
             <Button
               onClick={() => onOpenChange(false)}
-              className="flex-1 bg-white text-primary hover:bg-white/90"
+              className="flex-1 bg-primary hover:bg-primary/90 text-white"
             >
               Förstått
             </Button>
