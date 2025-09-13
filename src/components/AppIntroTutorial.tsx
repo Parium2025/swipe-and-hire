@@ -105,7 +105,7 @@ const AppIntroTutorial = ({ onComplete }: AppIntroTutorialProps) => {
   const Icon = currentStepData.icon;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Progress indicator */}
         <div className="flex justify-center mb-8">
