@@ -105,7 +105,7 @@ const AppIntroTutorial = ({ onComplete }: AppIntroTutorialProps) => {
   const Icon = currentStepData.icon;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Progress indicator */}
         <div className="flex justify-center mb-8">
@@ -118,7 +118,7 @@ const AppIntroTutorial = ({ onComplete }: AppIntroTutorialProps) => {
                     ? 'bg-primary w-6' 
                     : index < currentStep 
                       ? 'bg-primary/60' 
-                      : 'bg-muted'
+                      : 'bg-white/30'
                 }`}
               />
             ))}
@@ -126,19 +126,19 @@ const AppIntroTutorial = ({ onComplete }: AppIntroTutorialProps) => {
         </div>
 
         {/* Main card */}
-        <Card className="relative overflow-hidden animate-fade-in">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
+        <Card className="relative overflow-hidden animate-fade-in bg-white/10 backdrop-blur-sm border-white/20">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent"></div>
           <CardHeader className="text-center pb-4">
             <div className="mb-4">
               {currentStepData.illustration}
             </div>
-            <CardTitle className="text-2xl mb-2">{currentStepData.title}</CardTitle>
-            <Badge variant="outline" className="mx-auto">
+            <CardTitle className="text-2xl mb-2 text-white">{currentStepData.title}</CardTitle>
+            <Badge variant="outline" className="mx-auto border-white/30 text-white">
               {currentStep + 1} av {steps.length}
             </Badge>
           </CardHeader>
           <CardContent className="text-center pb-8">
-            <p className="text-muted-foreground leading-relaxed mb-8">
+            <p className="text-white/80 leading-relaxed mb-8">
               {currentStepData.description}
             </p>
             
@@ -149,7 +149,7 @@ const AppIntroTutorial = ({ onComplete }: AppIntroTutorialProps) => {
                   <Button 
                     variant="ghost" 
                     onClick={handlePrevious}
-                    className="text-muted-foreground hover:text-foreground"
+                    className="text-white/70 hover:text-white hover:bg-white/10"
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Tillbaka
@@ -161,11 +161,11 @@ const AppIntroTutorial = ({ onComplete }: AppIntroTutorialProps) => {
                 <Button 
                   variant="outline" 
                   onClick={handleSkip}
-                  className="text-muted-foreground"
+                  className="text-white/70 border-white/30 hover:bg-white/10 hover:text-white"
                 >
                   Hoppa över
                 </Button>
-                <Button onClick={handleNext} className="min-w-[100px]">
+                <Button onClick={handleNext} className="min-w-[100px] bg-primary hover:bg-primary/90">
                   {currentStep === steps.length - 1 ? 'Börja använda appen!' : 'Nästa'}
                   {currentStep !== steps.length - 1 && <ArrowRight className="h-4 w-4 ml-2" />}
                 </Button>
@@ -176,7 +176,7 @@ const AppIntroTutorial = ({ onComplete }: AppIntroTutorialProps) => {
 
         {/* Skip message */}
         <div className="text-center mt-4">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-white/60">
             Du kan alltid komma åt dessa funktioner via menyn senare
           </p>
         </div>
