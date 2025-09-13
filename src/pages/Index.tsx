@@ -10,6 +10,7 @@ import JobSwipe from '@/components/JobSwipe';
 import ProfileSetup from '@/components/ProfileSetup';
 import ProfileSelector from '@/components/ProfileSelector';
 import WelcomeTunnel from '@/components/WelcomeTunnel';
+import AppIntroTutorial from '@/components/AppIntroTutorial';
 import Profile from '@/pages/Profile';
 import SearchJobs from '@/pages/SearchJobs';
 import Subscription from '@/pages/Subscription';
@@ -17,6 +18,7 @@ import Billing from '@/pages/Billing';
 import Support from '@/pages/Support';
 import SupportAdmin from '@/pages/SupportAdmin';
 import DeveloperControls from '@/components/DeveloperControls';
+import { supabase } from '@/integrations/supabase/client';
 import { ArrowRightLeft } from 'lucide-react';
 
 const Index = () => {
@@ -24,6 +26,7 @@ const Index = () => {
   const [switching, setSwitching] = useState(false);
   const [showProfileSelector, setShowProfileSelector] = useState(false);
   const [developerView, setDeveloperView] = useState<string>('dashboard');
+  const [showIntroTutorial, setShowIntroTutorial] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -89,7 +92,24 @@ const Index = () => {
   
   // For job seekers, show WelcomeTunnel if onboarding not completed
   if (needsOnboarding && (profile as any)?.role === 'job_seeker') {
-    return <WelcomeTunnel onComplete={() => navigate('/search-jobs')} />;
+    return <WelcomeTunnel onComplete={async () => {
+      // Mark onboarding as completed
+      await supabase
+        .from('profiles')
+        .update({ onboarding_completed: true })
+        .eq('id', user.id);
+      
+      // Show tutorial next
+      setShowIntroTutorial(true);
+    }} />;
+  }
+
+  // Show app intro tutorial after onboarding
+  if (showIntroTutorial) {
+    return <AppIntroTutorial onComplete={() => {
+      setShowIntroTutorial(false);
+      navigate('/search-jobs');
+    }} />;
   }
   
   // For employers, check if profile needs setup (basic info missing)
