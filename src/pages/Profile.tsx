@@ -980,6 +980,7 @@ const Profile = () => {
                       placeholder="Förnamn"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
+                      className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                     />
                   </div>
 
@@ -990,6 +991,7 @@ const Profile = () => {
                       placeholder="Efternamn"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
+                      className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                     />
                   </div>
                 </div>
@@ -1002,6 +1004,7 @@ const Profile = () => {
                       type="date"
                       value={birthDate}
                       onChange={(e) => setBirthDate(e.target.value)}
+                      className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                     />
                     {age !== null && (
                       <p className="text-sm text-white">Ålder: {age} år</p>
@@ -1018,7 +1021,7 @@ const Profile = () => {
                         placeholder="+46 70 123 45 67"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="pl-10"
+                        className="pl-10 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                       />
                     </div>
                   </div>
@@ -1067,6 +1070,7 @@ const Profile = () => {
                   value={bio}
                   onChange={(e) => handleBioChange(e.target.value)}
                   rows={4}
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                 />
                 <div className="flex justify-end">
                   <span className="text-xs text-white/70">
@@ -1088,7 +1092,7 @@ const Profile = () => {
                       <div className="space-y-2">
                         <Label htmlFor="employmentStatus" className="text-white">Anställningsstatus</Label>
                         <Select value={employmentStatus} onValueChange={setEmploymentStatus}>
-                          <SelectTrigger>
+                          <SelectTrigger className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10">
                             <SelectValue placeholder="Välj din nuvarande situation" />
                           </SelectTrigger>
                           <SelectContent className="bg-white z-50">
@@ -1109,7 +1113,7 @@ const Profile = () => {
                         <div className="space-y-2">
                           <Label htmlFor="workingHours" className="text-white">Hur mycket jobbar du idag?</Label>
                           <Select value={workingHours} onValueChange={setWorkingHours}>
-                            <SelectTrigger>
+                            <SelectTrigger className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10">
                               <SelectValue placeholder="Välj arbetstid/omfattning" />
                             </SelectTrigger>
                             <SelectContent className="bg-white z-50">
@@ -1127,7 +1131,7 @@ const Profile = () => {
                       <div className="space-y-2">
                         <Label htmlFor="availability" className="text-white">När kan du börja nytt jobb?</Label>
                         <Select value={availability} onValueChange={setAvailability}>
-                          <SelectTrigger>
+                          <SelectTrigger className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10">
                             <SelectValue placeholder="Välj din tillgänglighet" />
                           </SelectTrigger>
                           <SelectContent className="bg-white z-50">
@@ -1184,6 +1188,7 @@ const Profile = () => {
                         placeholder="Mitt Företag AB"
                         value={companyName}
                         onChange={(e) => setCompanyName(e.target.value)}
+                        className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                       />
                     </div>
 
@@ -1194,6 +1199,7 @@ const Profile = () => {
                         placeholder="556123-4567"
                         value={orgNumber}
                         onChange={(e) => setOrgNumber(e.target.value)}
+                        className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                       />
                     </div>
                   </div>
