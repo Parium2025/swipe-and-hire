@@ -110,29 +110,6 @@ const Support = () => {
 
   // Mock tickets ersatt med riktiga data från databasen
 
-  const faqs = [
-    {
-      question: 'Hur ändrar jag min profilbild?',
-      answer: 'Gå till Min Profil, klicka på kameraikon bredvid din nuvarande profilbild och välj en ny bild från din dator.'
-    },
-    {
-      question: 'Hur fungerar abonnemangen?',
-      answer: 'Vi erbjuder tre olika abonnemang: Basic (gratis), Premium (199 kr/månad) och Enterprise (999 kr/månad). Du kan ändra ditt abonnemang när som helst.'
-    },
-    {
-      question: 'Kan jag avbryta mitt abonnemang?',
-      answer: 'Ja, du kan avbryta ditt abonnemang när som helst. Avbrytningen träder i kraft vid nästa faktureringsperiod.'
-    },
-    {
-      question: 'Hur kontaktar jag kundtjänst?',
-      answer: 'Du kan kontakta oss via supportformuläret nedan, via e-post på support@parium.se eller telefon 08-123 456 78.'
-    },
-    {
-      question: 'Vilka filformat stöds för CV-uppladdning?',
-      answer: 'Vi stöder PDF, Word-dokument (.doc, .docx) och vissa bildformat. Maximal filstorlek är 5 MB.'
-    }
-  ];
-  
   // Kategorier för dropdown (matchar stilen från Sök jobb)
   const categoryOptions = [
     { value: 'technical', label: 'Teknisk support' },
@@ -303,30 +280,6 @@ const Support = () => {
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
-
-        {/* FAQ Section */}
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="pb-3 md:pb-6">
-            <CardTitle className="text-white text-base md:text-lg">Vanliga frågor</CardTitle>
-            <CardDescription className="text-white text-sm">
-              Hitta snabba svar på de vanligaste frågorna
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <Accordion type="single" collapsible className="w-full">
-              {faqs.map((faq, index) => (
-                <AccordionItem key={index} value={`item-${index}`} className="border-white/20">
-                  <AccordionTrigger className="text-left text-white hover:text-white/80 text-sm md:text-base py-3 md:py-4">
-                    {faq.question}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-white text-sm pb-3 md:pb-4">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
           </CardContent>
         </Card>
       </div>
