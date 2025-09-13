@@ -115,9 +115,9 @@ const AppIntroTutorial = ({ onComplete }: AppIntroTutorialProps) => {
                 key={index}
                 className={`w-2 h-2 rounded-full transition-all duration-300 ${
                   index === currentStep 
-                    ? 'bg-primary w-6' 
+                    ? 'bg-white w-6' 
                     : index < currentStep 
-                      ? 'bg-primary/60' 
+                      ? 'bg-white/60' 
                       : 'bg-white/30'
                 }`}
               />
@@ -125,57 +125,53 @@ const AppIntroTutorial = ({ onComplete }: AppIntroTutorialProps) => {
           </div>
         </div>
 
-        {/* Main card */}
-        <Card className="relative overflow-hidden animate-fade-in bg-white/10 backdrop-blur-sm border-white/20 max-w-md mx-auto">
-          <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent"></div>
-          <CardHeader className="text-center pb-4">
-            <div className="mb-4">
-              {currentStepData.illustration}
-            </div>
-            <CardTitle className="text-2xl mb-2 text-white">{currentStepData.title}</CardTitle>
-            <Badge variant="outline" className="mx-auto border-white/30 text-white">
-              {currentStep + 1} av {steps.length}
-            </Badge>
-          </CardHeader>
-          <CardContent className="text-center pb-8">
-            <p className="text-white/80 leading-relaxed mb-8">
-              {currentStepData.description}
-            </p>
-            
-            {/* Navigation buttons */}
-            <div className="flex justify-between items-center">
-              <div className="flex-1">
-                {currentStep > 0 && (
-                  <Button 
-                    variant="ghost" 
-                    onClick={handlePrevious}
-                    className="text-white/70 hover:text-white hover:bg-white/10"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Tillbaka
-                  </Button>
-                )}
-              </div>
-              
-              <div className="flex gap-3">
+        {/* Main content - no card background */}
+        <div className="text-center animate-fade-in">
+          <div className="mb-6">
+            {currentStepData.illustration}
+          </div>
+          <h2 className="text-3xl font-bold mb-4 text-white">{currentStepData.title}</h2>
+          <Badge variant="outline" className="mx-auto border-white/30 text-white bg-white/10 mb-6">
+            {currentStep + 1} av {steps.length}
+          </Badge>
+          
+          <p className="text-white/90 leading-relaxed mb-12 text-lg">
+            {currentStepData.description}
+          </p>
+          
+          {/* Navigation buttons */}
+          <div className="flex justify-between items-center">
+            <div className="flex-1">
+              {currentStep > 0 && (
                 <Button 
-                  variant="outline" 
-                  onClick={handleSkip}
-                  className="text-white/70 border-white/30 hover:bg-white/10 hover:text-white"
+                  variant="ghost" 
+                  onClick={handlePrevious}
+                  className="text-white/70 hover:text-white hover:bg-white/10"
                 >
-                  Hoppa över
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Tillbaka
                 </Button>
-                <Button onClick={handleNext} className="min-w-[100px] bg-primary hover:bg-primary/90">
-                  {currentStep === steps.length - 1 ? 'Börja använda appen!' : 'Nästa'}
-                  {currentStep !== steps.length - 1 && <ArrowRight className="h-4 w-4 ml-2" />}
-                </Button>
-              </div>
+              )}
             </div>
-          </CardContent>
-        </Card>
+            
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                onClick={handleSkip}
+                className="text-white/70 border-white/30 hover:bg-white/10 hover:text-white"
+              >
+                Hoppa över
+              </Button>
+              <Button onClick={handleNext} className="min-w-[140px] bg-primary hover:bg-primary/90 text-white">
+                {currentStep === steps.length - 1 ? 'Börja använda appen!' : 'Nästa'}
+                {currentStep !== steps.length - 1 && <ArrowRight className="h-4 w-4 ml-2" />}
+              </Button>
+            </div>
+          </div>
+        </div>
 
         {/* Skip message */}
-        <div className="text-center mt-4">
+        <div className="text-center mt-6">
           <p className="text-sm text-white/60">
             Du kan alltid komma åt dessa funktioner via menyn senare
           </p>
