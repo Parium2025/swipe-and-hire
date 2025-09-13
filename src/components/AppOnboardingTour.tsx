@@ -78,17 +78,17 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
 
   return (
     <div className={getPositionClasses()}>
-      <Card className="w-80 bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl animate-fade-in">
-        <CardContent className="p-6">
+      <Card className="w-64 bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl animate-fade-in">
+        <CardContent className="p-4">
           {/* Progress indicator */}
-          <div className="flex justify-center mb-4">
-            <div className="flex space-x-2">
+          <div className="flex justify-center mb-3">
+            <div className="flex space-x-1.5">
               {steps.map((_, index) => (
                 <div
                   key={index}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
                     index === currentStep 
-                      ? 'bg-white w-6' 
+                      ? 'bg-white w-4' 
                       : index < currentStep 
                         ? 'bg-white/60' 
                         : 'bg-white/30'
@@ -99,45 +99,45 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
           </div>
 
           {/* Icon */}
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-              <Icon className="h-8 w-8 text-white" />
+          <div className="flex justify-center mb-3">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Icon className="h-6 w-6 text-white" />
             </div>
           </div>
 
           {/* Content */}
           <div className="text-center">
-            <h3 className="text-xl font-bold text-white mb-2">
+            <h3 className="text-lg font-bold text-white mb-2">
               {currentStepData.title}
             </h3>
             
-            <Badge variant="outline" className="mb-4 border-white/20 text-white bg-white/20">
+            <Badge variant="outline" className="mb-3 border-white/20 text-white bg-white/20 text-xs">
               {currentStep + 1} av {steps.length}
             </Badge>
             
-            <p className="text-white/80 text-sm leading-relaxed mb-6">
+            <p className="text-white/80 text-xs leading-relaxed mb-4">
               {currentStepData.description}
             </p>
             
             {/* Navigation buttons */}
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center gap-2">
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={onComplete}
-                className="text-white/60 hover:text-white hover:bg-white/10"
+                className="text-white/60 hover:text-white hover:bg-white/10 text-xs px-2 py-1 h-8"
               >
-                <X className="h-4 w-4 mr-2" />
+                <X className="h-3 w-3 mr-1" />
                 Hoppa över
               </Button>
               
               <Button 
                 onClick={handleNext}
                 size="sm"
-                className="min-w-[100px]"
+                className="min-w-[80px] text-xs px-3 py-1 h-8"
               >
                 {currentStep === steps.length - 1 ? 'Färdig!' : 'Nästa'}
-                {currentStep !== steps.length - 1 && <ArrowRight className="h-4 w-4 ml-2" />}
+                {currentStep !== steps.length - 1 && <ArrowRight className="h-3 w-3 ml-1" />}
               </Button>
             </div>
           </div>
