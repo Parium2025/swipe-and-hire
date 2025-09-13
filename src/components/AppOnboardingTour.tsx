@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Heart, PanelLeft, User, Crown, ArrowRight, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useSidebar } from '@/components/ui/sidebar';
 
 interface AppOnboardingTourProps {
   onComplete: () => void;
@@ -13,9 +12,6 @@ interface AppOnboardingTourProps {
 const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
-  const { state, open, setOpen, toggleSidebar } = useSidebar();
-  const sidebarOpen = open;
-  const [awaitingSidebarOpen, setAwaitingSidebarOpen] = useState(false);
 
   const steps = [
     {
@@ -57,29 +53,12 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
       if (nextStepData.page) {
         navigate(nextStepData.page);
       }
-
-      // If the next step is the sidebar step, prepare to wait for user action
-      if (nextStepData.position === 'sidebar') {
-        setAwaitingSidebarOpen(true);
-        setOpen(false); // ensure sidebar is closed so the user must open it
-      }
       
       setCurrentStep(nextStep);
     } else {
       onComplete();
     }
   };
-
-  // Listen for sidebar opening ONLY on step 1 (sidebar step - index 1)
-  useEffect(() => {
-    if (currentStep === 1 && awaitingSidebarOpen && sidebarOpen) {
-      setAwaitingSidebarOpen(false);
-      const timer = setTimeout(() => {
-        handleNext();
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [currentStep, awaitingSidebarOpen, sidebarOpen]);
 
   const currentStepData = steps[currentStep];
   const Icon = currentStepData.icon;
@@ -89,7 +68,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
       case "bottom-right":
         return "fixed top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50";
       case "sidebar":
-        return "fixed top-20 left-20 z-50"; // Position near the sidebar trigger
+        return "fixed top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50";
       case "center":
         return "fixed top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50";
       default:
@@ -97,121 +76,74 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
     }
   };
 
-  const isSidebarStep = currentStep === 1;
-
   return (
-    <>
-      {/* Overlay that blocks interaction except with sidebar trigger */}
-      {isSidebarStep && (
-        <div 
-          className="fixed inset-0 z-40"
-          style={{
-            pointerEvents: 'auto',
-            background: 'rgba(0, 0, 0, 0.3)'
-          }}
-          onClick={(e) => {
-            // Only allow clicks on elements with data-sidebar="trigger"
-            const target = e.target as HTMLElement;
-            const sidebarTrigger = target.closest('[data-sidebar="trigger"]');
-            if (!sidebarTrigger) {
-              e.preventDefault();
-              e.stopPropagation();
-            }
-          }}
-        />
-      )}
-      {isSidebarStep && !sidebarOpen && (
-        <Button
-          data-sidebar="trigger"
-          variant="ghost"
-          size="icon"
-          onClick={toggleSidebar}
-          className="fixed top-4 left-4 z-50 text-white hover:bg-white/20"
-        >
-          <PanelLeft className="h-5 w-5" />
-          <span className="sr-only">Öppna menyn</span>
-        </Button>
-      )}
-      
-
-      <div className={getPositionClasses()}>
-        <Card className="w-64 bg-[hsl(var(--surface-blue))]/90 backdrop-blur-sm border-white/20 shadow-2xl animate-fade-in">
-          <CardContent className="p-4">
-            {/* Progress indicator */}
-            <div className="flex justify-center mb-3">
-              <div className="flex space-x-1.5">
-                {steps.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                      index === currentStep 
-                        ? 'bg-white w-4' 
-                        : index < currentStep 
-                          ? 'bg-white/60' 
-                          : 'bg-white/30'
-                    }`}
-                  />
-                ))}
-              </div>
+    <div className={getPositionClasses()}>
+      <Card className="w-64 bg-[hsl(var(--surface-blue))]/90 backdrop-blur-sm border-white/20 shadow-2xl animate-fade-in">
+        <CardContent className="p-4">
+          {/* Progress indicator */}
+          <div className="flex justify-center mb-3">
+            <div className="flex space-x-1.5">
+              {steps.map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                    index === currentStep 
+                      ? 'bg-white w-4' 
+                      : index < currentStep 
+                        ? 'bg-white/60' 
+                        : 'bg-white/30'
+                  }`}
+                />
+              ))}
             </div>
+          </div>
 
-            {/* Icon */}
-            <div className="flex justify-center mb-3">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Icon className="h-6 w-6 text-white" />
-              </div>
+          {/* Icon */}
+          <div className="flex justify-center mb-3">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Icon className="h-6 w-6 text-white" />
             </div>
+          </div>
 
-            {/* Content */}
-            <div className="text-center">
-              <h3 className="text-lg font-bold text-white mb-2">
-                {currentStepData.title}
-              </h3>
+          {/* Content */}
+          <div className="text-center">
+            <h3 className="text-lg font-bold text-white mb-2">
+              {currentStepData.title}
+            </h3>
+            
+            <Badge variant="outline" className="mb-3 border-white/20 text-white bg-white/20 text-xs">
+              {currentStep + 1} av {steps.length}
+            </Badge>
+            
+            <p className="text-white/80 text-xs leading-relaxed mb-4">
+              {currentStepData.description}
+            </p>
+            
+            {/* Navigation buttons */}
+            <div className="flex justify-between items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={onComplete}
+                className="text-white/60 hover:text-white hover:bg-white/10 text-xs px-2 py-1 h-8"
+              >
+                <X className="h-3 w-3 mr-1" />
+                Hoppa över
+              </Button>
               
-              <Badge variant="outline" className="mb-3 border-white/20 text-white bg-white/20 text-xs">
-                {currentStep + 1} av {steps.length}
-              </Badge>
-              
-              <p className="text-white/80 text-xs leading-relaxed mb-4">
-                {currentStepData.description}
-              </p>
-              
-              {/* Navigation buttons */}
-              <div className="flex justify-between items-center gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={onComplete}
-                  className="text-white/60 hover:text-white hover:bg-white/10 text-xs px-2 py-1 h-8"
-                >
-                  <X className="h-3 w-3 mr-1" />
-                  Hoppa över
-                </Button>
-                
-                {/* Only show next button if not on sidebar step or if sidebar is already open */}
-                {(!isSidebarStep || sidebarOpen) && (
-                  <Button 
-                    onClick={handleNext}
-                    size="sm"
-                    className="min-w-[80px] text-xs px-3 py-1 h-8"
-                  >
-                    {currentStep === steps.length - 1 ? 'Färdig!' : 'Nästa'}
-                    {currentStep !== steps.length - 1 && <ArrowRight className="h-3 w-3 ml-1" />}
-                  </Button>
-                )}
-                
-                {/* Show instruction text on sidebar step */}
-                {isSidebarStep && !sidebarOpen && (
-                  <div className="text-xs text-white/70 mt-2">
-                    Tryck på menyikonen ↑ för att fortsätta
-                  </div>
-                )}
-              </div>
+              <Button 
+                onClick={handleNext}
+                size="sm"
+                className="min-w-[80px] text-xs px-3 py-1 h-8"
+              >
+                {currentStep === steps.length - 1 ? 'Färdig!' : 'Nästa'}
+                {currentStep !== steps.length - 1 && <ArrowRight className="h-3 w-3 ml-1" />}
+              </Button>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    </>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
