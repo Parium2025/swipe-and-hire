@@ -11,7 +11,7 @@ import { Search, MapPin, Clock, Building, Filter, Heart, ExternalLink, X, Chevro
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/hooks/useAuth';
-import AppIntroTutorial from '@/components/AppIntroTutorial';
+
 import { createSmartSearchConditions, expandSearchTerms } from '@/lib/smartSearch';
 import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { swedishCities } from '@/lib/swedishCities';
@@ -40,31 +40,7 @@ const SearchJobs = () => {
   const [selectedEmploymentTypes, setSelectedEmploymentTypes] = useState<string[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [showIntroTutorial, setShowIntroTutorial] = useState(false);
   const isMobile = useIsMobile();
-  // Check if user should see intro tutorial
-  useEffect(() => {
-    const checkShowIntroTutorial = async () => {
-      if (user && profile && (profile as any)?.role === 'job_seeker') {
-        // Check if user just completed onboarding
-        const hasCompletedOnboarding = profile.onboarding_completed;
-        const hasSeenTutorial = localStorage.getItem(`intro_tutorial_seen_${user.id}`);
-        
-        if (hasCompletedOnboarding && !hasSeenTutorial) {
-          setShowIntroTutorial(true);
-        }
-      }
-    };
-    
-    checkShowIntroTutorial();
-  }, [user, profile]);
-
-  const handleTutorialComplete = () => {
-    setShowIntroTutorial(false);
-    if (user) {
-      localStorage.setItem(`intro_tutorial_seen_${user.id}`, 'true');
-    }
-  };
   
   const dropdownAlignOffset = 0;
   // Job categories with subcategories - based on AF structure
@@ -891,12 +867,6 @@ const SearchJobs = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-4 relative">
-      {/* Intro Tutorial Overlay */}
-      {showIntroTutorial && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <AppIntroTutorial onComplete={handleTutorialComplete} />
-        </div>
-      )}
       
       {/* Main content */}
       {/* Hero Section */}
