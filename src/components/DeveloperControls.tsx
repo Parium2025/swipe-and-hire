@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Settings, UserCheck, Building, Users, ArrowRightLeft, Code } from 'lucide-react';
+import { Settings, UserCheck, Building, Users, ArrowRightLeft, Code, Lightbulb } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
@@ -79,6 +79,14 @@ const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, cur
         >
           <UserCheck className="mr-2 h-4 w-4" />
           Välkomsttunnel (Jobbsökare)
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem 
+          onClick={() => handleViewChange('intro_tutorial')}
+          className="cursor-pointer hover:bg-white/10"
+        >
+          <Lightbulb className="mr-2 h-4 w-4" />
+          Introduktionssekvens
         </DropdownMenuItem>
         
         <DropdownMenuItem 
