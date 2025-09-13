@@ -105,7 +105,7 @@ const AppIntroTutorial = ({ onComplete }: AppIntroTutorialProps) => {
   const Icon = currentStepData.icon;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 flex items-center justify-center p-4">
+    <div className="flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Progress indicator */}
         <div className="flex justify-center mb-8">
@@ -126,7 +126,7 @@ const AppIntroTutorial = ({ onComplete }: AppIntroTutorialProps) => {
         </div>
 
         {/* Main card */}
-        <Card className="relative overflow-hidden animate-fade-in bg-white/10 backdrop-blur-sm border-white/20">
+        <Card className="relative overflow-hidden animate-fade-in bg-white/10 backdrop-blur-sm border-white/20 max-w-md mx-auto">
           <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent"></div>
           <CardHeader className="text-center pb-4">
             <div className="mb-4">

@@ -93,14 +93,14 @@ const Index = () => {
   // For job seekers, show WelcomeTunnel if onboarding not completed
   if (needsOnboarding && (profile as any)?.role === 'job_seeker') {
     return <WelcomeTunnel onComplete={async () => {
-      // Show tutorial immediately
-      setShowIntroTutorial(true);
-      
       // Mark onboarding as completed in background
       supabase
         .from('profiles')
         .update({ onboarding_completed: true })
         .eq('id', user.id);
+      
+      // Navigate to search jobs page
+      navigate('/search-jobs');
     }} />;
   }
 
