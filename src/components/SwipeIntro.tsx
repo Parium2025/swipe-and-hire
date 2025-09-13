@@ -102,8 +102,8 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             </div>
           </div>
           <div className="text-center max-w-xs">
-            <p className="text-primary-foreground/80 text-sm">
-              Din personlighet säger mer än ett CV.
+            <p className="text-white text-sm">
+              Din personlighet säger mer än ett CV
             </p>
           </div>
         </div>
