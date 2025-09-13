@@ -233,6 +233,7 @@ const AuthMobile = ({
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                 />
               </div>
               <div>
@@ -243,6 +244,7 @@ const AuthMobile = ({
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
@@ -357,7 +359,7 @@ const AuthMobile = ({
                           value={email}
                           onChange={(e) => handleEmailChange(e.target.value)}
                           required
-                          className="mt-1"
+                          className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                         />
                         {showEmailSuggestions && emailSuggestions.length > 0 && (
                           <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-40 overflow-y-auto">
@@ -389,6 +391,7 @@ const AuthMobile = ({
                             value={password}
                             onChange={(e) => handlePasswordChange(e.target.value)}
                             required
+                            className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                           />
                           <Button
                             type="button"
@@ -483,7 +486,7 @@ const AuthMobile = ({
                             value={firstName}
                             onChange={(e) => setFirstName(e.target.value)}
                             required
-                            className="mt-1"
+                            className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                           />
                         </div>
                         <div>
@@ -493,7 +496,7 @@ const AuthMobile = ({
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
                             required
-                            className="mt-1"
+                            className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                           />
                         </div>
                       </div>
@@ -508,7 +511,7 @@ const AuthMobile = ({
                           value={email}
                           onChange={(e) => handleEmailChange(e.target.value)}
                           required
-                          className="mt-1"
+                          className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                         />
                         {showEmailSuggestions && emailSuggestions.length > 0 && (
                           <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-40 overflow-y-auto">
@@ -538,7 +541,7 @@ const AuthMobile = ({
                            type="tel"
                            value={phone}
                            onChange={(e) => handlePhoneChange(e.target.value)}
-                           className="mt-1"
+                           className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                            placeholder="070-123 45 67"
                            required
                          />
@@ -558,6 +561,7 @@ const AuthMobile = ({
                             value={password}
                             onChange={(e) => handlePasswordChange(e.target.value)}
                             required
+                            className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                           />
                           <Button
                             type="button"
