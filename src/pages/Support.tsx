@@ -275,11 +275,11 @@ const Support = () => {
           </CardHeader>
           <CardContent className="pt-0">
             {ticketsLoading ? (
-              <div className="text-center text-white/70 py-8">
+              <div className="text-center text-white py-8">
                 Laddar ärenden...
               </div>
             ) : tickets.length === 0 ? (
-              <div className="text-center text-white/70 py-8">
+              <div className="text-center text-white py-8">
                 Inga supportärenden ännu
               </div>
             ) : (
@@ -292,7 +292,7 @@ const Support = () => {
                       </div>
                       <div className="min-w-0">
                         <p className="font-medium text-white text-sm md:text-base truncate">{ticket.subject}</p>
-                        <p className="text-xs md:text-sm text-white/70">
+                        <p className="text-xs md:text-sm text-white">
                           Ärende {ticket.id.slice(0, 8)} • Skapad {new Date(ticket.created_at).toLocaleDateString('sv-SE')}
                         </p>
                       </div>
@@ -319,7 +319,7 @@ const Support = () => {
             <Accordion type="single" collapsible className="w-full">
               {faqs.map((faq, index) => (
                 <AccordionItem key={index} value={`item-${index}`} className="border-white/20">
-                  <AccordionTrigger className="text-left text-white hover:text-white/80 text-sm md:text-base py-3 md:py-4">
+                  <AccordionTrigger className="text-left text-white hover:text-white text-sm md:text-base py-3 md:py-4">
                     {faq.question}
                   </AccordionTrigger>
                   <AccordionContent className="text-white text-sm pb-3 md:pb-4">
