@@ -1039,8 +1039,8 @@ const Profile = () => {
                   <div className="space-y-2">
                     <Label className="text-white">E-post</Label>
                     <div className="relative group">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
-                      <div className="flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm text-foreground min-w-0">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-white z-10" />
+                      <div className="flex h-10 w-full rounded-md border bg-white/5 backdrop-blur-sm border-white/20 text-white pl-10 pr-3 py-2 text-sm min-w-0">
                         <span 
                           className="truncate hover:overflow-visible hover:whitespace-normal hover:break-all transition-all duration-200" 
                           title={user?.email || ''}
