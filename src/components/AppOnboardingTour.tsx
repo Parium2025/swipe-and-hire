@@ -66,13 +66,13 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
   const getPositionClasses = () => {
     switch (currentStepData.position) {
       case "bottom-right":
-        return "fixed bottom-6 right-6 z-50";
+        return "fixed top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50";
       case "sidebar":
-        return "fixed top-20 left-6 z-50";
+        return "fixed top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50";
       case "center":
-        return "fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50";
+        return "fixed top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50";
       default:
-        return "fixed bottom-6 right-6 z-50";
+        return "fixed top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50";
     }
   };
 
