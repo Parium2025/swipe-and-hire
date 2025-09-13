@@ -9,9 +9,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { User, MapPin, Building, Camera, Mail, Phone, Calendar, Briefcase, Clock, FileText, Video, Play, Check, Trash2 } from 'lucide-react';
+import { User, MapPin, Building, Camera, Mail, Phone, Calendar, Briefcase, Clock, FileText, Video, Play, Check, Trash2, ChevronDown } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
 import ProfileVideo from '@/components/ProfileVideo';
 import ImageEditor from '@/components/ImageEditor';
@@ -1091,37 +1092,106 @@ const Profile = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="employmentStatus" className="text-white">Anställningsstatus</Label>
-                        <Select value={employmentStatus} onValueChange={setEmploymentStatus}>
-                          <SelectTrigger className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10">
-                            <SelectValue placeholder="Välj din nuvarande situation" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-white z-50">
-                            <SelectItem value="tillsvidareanställning">Fast anställning</SelectItem>
-                            <SelectItem value="visstidsanställning">Visstidsanställning</SelectItem>
-                            <SelectItem value="provanställning">Provanställning</SelectItem>
-                            <SelectItem value="interim">Interim anställning</SelectItem>
-                            <SelectItem value="bemanningsanställning">Bemanningsanställning</SelectItem>
-                            <SelectItem value="egenforetagare">Egenföretagare / Frilans</SelectItem>
-                            <SelectItem value="arbetssokande">Arbetssökande</SelectItem>
-                            <SelectItem value="annat">Annat</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <DropdownMenu modal={false}>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                            >
+                              <span className="truncate">
+                                {employmentStatus ? (
+                                  ({
+                                    tillsvidareanställning: 'Fast anställning',
+                                    visstidsanställning: 'Visstidsanställning',
+                                    provanställning: 'Provanställning',
+                                    interim: 'Interim anställning',
+                                    bemanningsanställning: 'Bemanningsanställning',
+                                    egenforetagare: 'Egenföretagare / Frilans',
+                                    arbetssokande: 'Arbetssökande',
+                                    annat: 'Annat',
+                                  } as Record<string, string>)[employmentStatus]
+                                ) : 'Välj din nuvarande situation'}
+                              </span>
+                              <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent 
+                            className="w-72 max-h-80 overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
+                            side="top"
+                            align="center"
+                            alignOffset={0}
+                            sideOffset={6}
+                            avoidCollisions={false}
+                          >
+                            <DropdownMenuItem onClick={() => setEmploymentStatus('tillsvidareanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                              Fast anställning
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setEmploymentStatus('visstidsanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                              Visstidsanställning
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setEmploymentStatus('provanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                              Provanställning
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setEmploymentStatus('interim')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                              Interim anställning
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setEmploymentStatus('bemanningsanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                              Bemanningsanställning
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setEmploymentStatus('egenforetagare')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                              Egenföretagare / Frilans
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setEmploymentStatus('arbetssokande')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                              Arbetssökande
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setEmploymentStatus('annat')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                              Annat
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
 
                       {/* Visa arbetstid endast om användaren har valt något OCH det inte är arbetssökande */}
                       {employmentStatus && employmentStatus !== 'arbetssokande' && (
                         <div className="space-y-2">
                           <Label htmlFor="workingHours" className="text-white">Hur mycket jobbar du idag?</Label>
-                          <Select value={workingHours} onValueChange={setWorkingHours}>
-                            <SelectTrigger className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10">
-                              <SelectValue placeholder="Välj arbetstid/omfattning" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-white z-50">
-                              <SelectItem value="heltid">Heltid</SelectItem>
-                              <SelectItem value="deltid">Deltid</SelectItem>
-                              <SelectItem value="varierande">Varierande / Flexibelt</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <DropdownMenu modal={false}>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                              >
+                                <span className="truncate">
+                                  {workingHours ? (
+                                    ({
+                                      heltid: 'Heltid',
+                                      deltid: 'Deltid',
+                                      varierande: 'Varierande / Flexibelt',
+                                    } as Record<string, string>)[workingHours]
+                                  ) : 'Välj arbetstid/omfattning'}
+                                </span>
+                                <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent 
+                              className="w-72 max-h-80 overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
+                              side="top"
+                              align="center"
+                              alignOffset={0}
+                              sideOffset={6}
+                              avoidCollisions={false}
+                            >
+                              <DropdownMenuItem onClick={() => setWorkingHours('heltid')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                                Heltid
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setWorkingHours('deltid')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                                Deltid
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setWorkingHours('varierande')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                                Varierande / Flexibelt
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       )}
                     </div>
@@ -1130,17 +1200,47 @@ const Profile = () => {
                     {employmentStatus && (
                       <div className="space-y-2">
                         <Label htmlFor="availability" className="text-white">När kan du börja nytt jobb?</Label>
-                        <Select value={availability} onValueChange={setAvailability}>
-                          <SelectTrigger className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10">
-                            <SelectValue placeholder="Välj din tillgänglighet" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-white z-50">
-                            <SelectItem value="omgaende">Omgående</SelectItem>
-                            <SelectItem value="inom-1-manad">Inom 1 månad</SelectItem>
-                            <SelectItem value="inom-3-manader">Inom 3 månader</SelectItem>
-                            <SelectItem value="osaker">Osäker</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <DropdownMenu modal={false}>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                            >
+                              <span className="truncate">
+                                {availability ? (
+                                  ({
+                                    omgaende: 'Omgående',
+                                    'inom-1-manad': 'Inom 1 månad',  
+                                    'inom-3-manader': 'Inom 3 månader',
+                                    osaker: 'Osäker',
+                                  } as Record<string, string>)[availability]
+                                ) : 'Välj din tillgänglighet'}
+                              </span>
+                              <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent 
+                            className="w-72 max-h-80 overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
+                            side="top"
+                            align="center"
+                            alignOffset={0}
+                            sideOffset={6}
+                            avoidCollisions={false}
+                          >
+                            <DropdownMenuItem onClick={() => setAvailability('omgaende')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                              Omgående
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setAvailability('inom-1-manad')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                              Inom 1 månad
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setAvailability('inom-3-manader')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                              Inom 3 månader
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setAvailability('osaker')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                              Osäker
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     )}
                   </div>
