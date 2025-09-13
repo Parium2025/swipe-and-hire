@@ -78,7 +78,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
 
   return (
     <div className={getPositionClasses()}>
-      <Card className="w-80 bg-white/95 backdrop-blur-sm border-0 shadow-2xl animate-fade-in">
+      <Card className="w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-2xl animate-fade-in">
         <CardContent className="p-6">
           {/* Progress indicator */}
           <div className="flex justify-center mb-4">
@@ -88,10 +88,10 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
                   key={index}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
                     index === currentStep 
-                      ? 'bg-primary w-6' 
+                      ? 'bg-blue-400 w-6' 
                       : index < currentStep 
-                        ? 'bg-primary/60' 
-                        : 'bg-primary/30'
+                        ? 'bg-blue-400/60' 
+                        : 'bg-blue-400/30'
                   }`}
                 />
               ))}
@@ -100,22 +100,22 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
 
           {/* Icon */}
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-              <Icon className="h-8 w-8 text-primary" />
+            <div className="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center">
+              <Icon className="h-8 w-8 text-blue-400" />
             </div>
           </div>
 
           {/* Content */}
           <div className="text-center">
-            <h3 className="text-xl font-bold text-foreground mb-2">
+            <h3 className="text-xl font-bold text-white mb-2">
               {currentStepData.title}
             </h3>
             
-            <Badge variant="outline" className="mb-4">
+            <Badge variant="outline" className="mb-4 border-blue-400/30 text-blue-300">
               {currentStep + 1} av {steps.length}
             </Badge>
             
-            <p className="text-muted-foreground text-sm leading-relaxed mb-6">
+            <p className="text-white/80 text-sm leading-relaxed mb-6">
               {currentStepData.description}
             </p>
             
@@ -125,7 +125,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
                 variant="ghost" 
                 size="sm"
                 onClick={onComplete}
-                className="text-muted-foreground hover:text-foreground"
+                className="text-white/60 hover:text-white hover:bg-white/10"
               >
                 <X className="h-4 w-4 mr-2" />
                 Hoppa över
@@ -134,7 +134,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
               <Button 
                 onClick={handleNext}
                 size="sm"
-                className="min-w-[100px]"
+                className="min-w-[100px] bg-blue-600 hover:bg-blue-700 text-white"
               >
                 {currentStep === steps.length - 1 ? 'Färdig!' : 'Nästa'}
                 {currentStep !== steps.length - 1 && <ArrowRight className="h-4 w-4 ml-2" />}
