@@ -31,7 +31,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
     {
       icon: User,
       title: "Din profil",
-      description: "Håll din profil uppdaterad med bilder, CV och information som gör att arbetsgivare vill anställa dig!",
+      description: "Håll din profil uppdaterad med bilder, CV och information.",
       position: "center",
       page: "/profile"
     },
