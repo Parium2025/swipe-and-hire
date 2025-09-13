@@ -1053,7 +1053,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Label htmlFor="bio" className="text-white">Frivilligt</Label>
                 <Textarea
                   id="bio"
-                  className="text-base" 
+                  className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60" 
                   value={formData.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
                   placeholder="Berätta kort om dig själv..."
