@@ -78,7 +78,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
 
   return (
     <div className={getPositionClasses()}>
-      <Card className="w-64 bg-white/40 backdrop-blur-sm border-white/50 shadow-2xl animate-fade-in">
+      <Card className="w-64 bg-blue-500/40 backdrop-blur-sm border-blue-400/50 shadow-2xl animate-fade-in">
         <CardContent className="p-4">
           {/* Progress indicator */}
           <div className="flex justify-center mb-3">
