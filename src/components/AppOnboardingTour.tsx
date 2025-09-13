@@ -17,7 +17,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
     {
       icon: Heart,
       title: "Här söker du jobb",
-      description: "Swipa höger på jobb du är intresserad av och vänster på jobb du vill passa. Enkelt och snabbt!",
+      description: "Fyll i fältet, sedan swipa höger på jobb du är intresserad av och vänster på jobb du vill passa. Enkelt och snabbt!",
       position: "bottom-right",
       page: "/search-jobs"
     },
