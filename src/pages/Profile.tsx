@@ -1074,7 +1074,7 @@ const Profile = () => {
                   className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                 />
                 <div className="flex justify-end">
-                  <span className="text-xs text-white/70">
+                  <span className="text-xs text-white">
                     {countWords(bio)}/100 ord
                   </span>
                 </div>
