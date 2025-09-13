@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Heart, PanelLeft, User, Sparkles, ArrowRight, X } from 'lucide-react';
+import { Heart, PanelLeft, User, Crown, ArrowRight, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface AppOnboardingTourProps {
@@ -36,7 +36,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
       page: "/profile"
     },
     {
-      icon: Sparkles,
+      icon: Crown,
       title: "Uppgradera till Premium",
       description: "Få tillgång till fler funktioner och öka dina chanser att hitta drömjobbet med våra premiumfunktioner!",
       position: "center",
