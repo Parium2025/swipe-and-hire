@@ -50,6 +50,10 @@ All colors MUST be HSL.
     --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(200 100% 98%));
     --gradient-glass: linear-gradient(135deg, hsla(0 0% 100% / 0.1), hsla(0 0% 100% / 0.05));
 
+    /* Surface overlays */
+    --surface-blue: 215 90% 15%;
+    --surface-blue-contrast: 210 40% 98%;
+
     /* Sidebar colors - använder gradient istället för solid färg */
     --sidebar-background: transparent;
     --sidebar-foreground: 0 0% 100%;
