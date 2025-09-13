@@ -821,7 +821,7 @@ const Profile = () => {
               </div>
 
               {/* "eller" text */}
-              <div className="text-white/80 text-sm font-medium flex-shrink-0">
+              <div className="text-white text-sm font-medium flex-shrink-0">
                 eller
               </div>
 
