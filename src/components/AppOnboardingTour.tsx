@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Heart, Menu, User, Sparkles, ArrowRight, X } from 'lucide-react';
+import { Heart, PanelLeft, User, Sparkles, ArrowRight, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface AppOnboardingTourProps {
@@ -22,7 +22,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
       page: "/search-jobs"
     },
     {
-      icon: Menu,
+      icon: PanelLeft,
       title: "Använd sidomenyn",
       description: "I sidomenyn hittar du alla funktioner - din profil, inställningar, support och mycket mer!",
       position: "sidebar",
