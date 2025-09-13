@@ -10,7 +10,7 @@ import JobSwipe from '@/components/JobSwipe';
 import ProfileSetup from '@/components/ProfileSetup';
 import ProfileSelector from '@/components/ProfileSelector';
 import WelcomeTunnel from '@/components/WelcomeTunnel';
-import AppIntroTutorial from '@/components/AppIntroTutorial';
+import AppOnboardingTour from '@/components/AppOnboardingTour';
 import Profile from '@/pages/Profile';
 import SearchJobs from '@/pages/SearchJobs';
 import Subscription from '@/pages/Subscription';
@@ -89,13 +89,8 @@ const Index = () => {
       return <ProfileSetup />;
     }
     if (developerView === 'intro_tutorial') {
-      return (
-        <div className="min-h-screen bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 flex items-center justify-center">
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <AppIntroTutorial onComplete={() => setDeveloperView('dashboard')} />
-          </div>
-        </div>
-      );
+      setShowIntroTutorial(true);
+      setDeveloperView('dashboard');
     }
   }
   
@@ -114,12 +109,7 @@ const Index = () => {
   }
 
   // Show app intro tutorial after onboarding
-  if (showIntroTutorial) {
-    return <AppIntroTutorial onComplete={() => {
-      setShowIntroTutorial(false);
-      navigate('/search-jobs');
-    }} />;
-  }
+  const showTourOverlay = showIntroTutorial;
   
   // For employers, check if profile needs setup (basic info missing)
   const needsProfileSetup = !profile.bio && !profile.location && !profile.profile_image_url;
@@ -185,6 +175,9 @@ const Index = () => {
             
             <main className="flex-1 overflow-y-auto overflow-x-hidden p-6">
               {renderSidebarContent()}
+              {showTourOverlay && (
+                <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
+              )}
             </main>
           </div>
         </div>
