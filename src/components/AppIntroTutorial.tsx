@@ -97,10 +97,6 @@ const AppIntroTutorial = ({ onComplete }: AppIntroTutorialProps) => {
     }
   };
 
-  const handleSkip = () => {
-    onComplete();
-  };
-
   const currentStepData = steps[currentStep];
   const Icon = currentStepData.icon;
 
@@ -154,14 +150,7 @@ const AppIntroTutorial = ({ onComplete }: AppIntroTutorialProps) => {
               )}
             </div>
             
-            <div className="flex gap-3">
-              <Button 
-                variant="outline" 
-                onClick={handleSkip}
-                className="text-white/70 border-white/30 hover:bg-white/10 hover:text-white"
-              >
-                Hoppa över
-              </Button>
+            <div className="flex gap-3 justify-center">
               <Button onClick={handleNext} className="min-w-[140px] bg-primary hover:bg-primary/90 text-white">
                 {currentStep === steps.length - 1 ? 'Börja använda appen!' : 'Nästa'}
                 {currentStep !== steps.length - 1 && <ArrowRight className="h-4 w-4 ml-2" />}
