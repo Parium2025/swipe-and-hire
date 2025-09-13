@@ -13,8 +13,9 @@ interface AppOnboardingTourProps {
 const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
-  const { state } = useSidebar();
-  const sidebarOpen = state === 'expanded';
+  const { state, open, setOpen, toggleSidebar } = useSidebar();
+  const sidebarOpen = open;
+  const [awaitingSidebarOpen, setAwaitingSidebarOpen] = useState(false);
 
   const steps = [
     {
@@ -56,6 +57,12 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
       if (nextStepData.page) {
         navigate(nextStepData.page);
       }
+
+      // If the next step is the sidebar step, prepare to wait for user action
+      if (nextStepData.position === 'sidebar') {
+        setAwaitingSidebarOpen(true);
+        setOpen(false); // ensure sidebar is closed so the user must open it
+      }
       
       setCurrentStep(nextStep);
     } else {
@@ -65,14 +72,14 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
 
   // Listen for sidebar opening ONLY on step 1 (sidebar step - index 1)
   useEffect(() => {
-    if (currentStep === 1 && sidebarOpen) {
-      // Sidebar was opened, move to next step after a short delay
+    if (currentStep === 1 && awaitingSidebarOpen && sidebarOpen) {
+      setAwaitingSidebarOpen(false);
       const timer = setTimeout(() => {
         handleNext();
-      }, 1000);
+      }, 300);
       return () => clearTimeout(timer);
     }
-  }, [sidebarOpen, currentStep]);
+  }, [currentStep, awaitingSidebarOpen, sidebarOpen]);
 
   const currentStepData = steps[currentStep];
   const Icon = currentStepData.icon;
@@ -113,7 +120,20 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
           }}
         />
       )}
+      {isSidebarStep && !sidebarOpen && (
+        <Button
+          data-sidebar="trigger"
+          variant="ghost"
+          size="icon"
+          onClick={toggleSidebar}
+          className="fixed top-4 left-4 z-50 text-white hover:bg-white/20"
+        >
+          <PanelLeft className="h-5 w-5" />
+          <span className="sr-only">Öppna menyn</span>
+        </Button>
+      )}
       
+
       <div className={getPositionClasses()}>
         <Card className="w-64 bg-[hsl(var(--surface-blue))]/90 backdrop-blur-sm border-white/20 shadow-2xl animate-fade-in">
           <CardContent className="p-4">
