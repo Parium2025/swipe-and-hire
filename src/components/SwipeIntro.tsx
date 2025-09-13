@@ -59,7 +59,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             </div>
           </div>
           <div className="text-center">
-            <p className="text-primary-foreground/70 text-sm mb-4">
+            <p className="text-white text-sm mb-4">
               {device === 'mobile' || device === 'tablet' ? 'Swipa vänster för att fortsätta' : 'Tryck på pilen eller använd piltangenterna'}
             </p>
           </div>
@@ -85,7 +85,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             </div>
 
             {/* "eller" text */}
-            <div className="text-primary-foreground/60 text-sm font-medium flex-shrink-0">
+            <div className="text-white text-sm font-medium flex-shrink-0">
               eller
             </div>
 
@@ -378,7 +378,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
                 ))}
               </div>
               {/* Helper text under dots */}
-              <p className="text-primary-foreground/50 text-sm">
+              <p className="text-white text-sm">
                 {currentSlide < slides.length - 1 
                   ? (device === 'mobile' || device === 'tablet'
                       ? 'Nästa generation av jobbsök är här'
