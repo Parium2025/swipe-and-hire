@@ -47,9 +47,9 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     location: profile?.location || '',
     phone: profile?.phone || '',
     birthDate: '',
-    employmentStatus: '',
-    workingHours: '', // Arbetstid/Omfattning
-    availability: '', // Tillgänglighet
+    employmentStatus: (profile as any)?.employment_status || '',
+    workingHours: (profile as any)?.working_hours || '', // Arbetstid/Omfattning
+    availability: (profile as any)?.availability || '', // Tillgänglighet
     profileImageUrl: profile?.profile_image_url || '',
     profileMediaType: 'image', // 'image' or 'video'
     coverImageUrl: '', // Cover image for videos

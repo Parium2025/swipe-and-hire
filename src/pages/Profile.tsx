@@ -1212,6 +1212,8 @@ const Profile = () => {
                                     omgaende: 'Omgående',
                                     'inom-1-manad': 'Inom 1 månad',  
                                     'inom-3-manader': 'Inom 3 månader',
+                                    'inom-6-manader': 'Inom 6 månader',
+                                    'ej-aktuellt': 'Inte aktuellt just nu',
                                     osaker: 'Osäker',
                                   } as Record<string, string>)[availability]
                                 ) : 'Välj din tillgänglighet'}
@@ -1235,6 +1237,12 @@ const Profile = () => {
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setAvailability('inom-3-manader')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
                               Inom 3 månader
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setAvailability('inom-6-manader')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                              Inom 6 månader
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setAvailability('ej-aktuellt')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                              Inte aktuellt just nu
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setAvailability('osaker')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
                               Osäker
