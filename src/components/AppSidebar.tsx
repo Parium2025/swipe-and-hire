@@ -136,7 +136,7 @@ export function AppSidebar() {
         <div className="space-y-4">
           {/* Profile Section */}
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider">
+            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-white">
               {collapsed ? <User className="h-4 w-4" /> : 'Profil'}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -161,8 +161,8 @@ export function AppSidebar() {
 
           {/* Business Section */}
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider">
-              {collapsed ? <Building className="h-4 w-4" /> : 'Företag'}
+            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-white">
+              {collapsed ? <Building className="h-4 w-4" /> : 'Ekonomi'}
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -186,7 +186,7 @@ export function AppSidebar() {
 
           {/* Support Section */}
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider">
+            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-white">
               {collapsed ? <MessageCircle className="h-4 w-4" /> : 'Support'}
             </SidebarGroupLabel>
             <SidebarGroupContent>
