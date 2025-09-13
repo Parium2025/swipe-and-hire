@@ -16,33 +16,6 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
   const { state } = useSidebar();
   const sidebarOpen = state === 'expanded';
 
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      const nextStep = currentStep + 1;
-      const nextStepData = steps[nextStep];
-      
-      // Navigate to the next page if needed
-      if (nextStepData.page) {
-        navigate(nextStepData.page);
-      }
-      
-      setCurrentStep(nextStep);
-    } else {
-      onComplete();
-    }
-  };
-
-  // Listen for sidebar opening on step 1 (sidebar step)
-  useEffect(() => {
-    if (currentStep === 1 && sidebarOpen) {
-      // Sidebar was opened, move to next step after a short delay
-      const timer = setTimeout(() => {
-        handleNext();
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [sidebarOpen, currentStep]);
-
   const steps = [
     {
       icon: Heart,
@@ -73,6 +46,33 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
       page: "/subscription"
     }
   ];
+
+  const handleNext = () => {
+    if (currentStep < steps.length - 1) {
+      const nextStep = currentStep + 1;
+      const nextStepData = steps[nextStep];
+      
+      // Navigate to the next page if needed
+      if (nextStepData.page) {
+        navigate(nextStepData.page);
+      }
+      
+      setCurrentStep(nextStep);
+    } else {
+      onComplete();
+    }
+  };
+
+  // Listen for sidebar opening ONLY on step 1 (sidebar step - index 1)
+  useEffect(() => {
+    if (currentStep === 1 && sidebarOpen) {
+      // Sidebar was opened, move to next step after a short delay
+      const timer = setTimeout(() => {
+        handleNext();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [sidebarOpen, currentStep]);
 
   const currentStepData = steps[currentStep];
   const Icon = currentStepData.icon;
