@@ -350,7 +350,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
           </h1>
           
           {/* Subtitle */}
-          <p className="text-primary-foreground/90 mb-8 md:mb-10 animate-fade-in leading-relaxed text-xl">
+          <p className="text-white mb-8 md:mb-10 animate-fade-in leading-relaxed text-xl">
             {slides[currentSlide].subtitle}
           </p>
 
