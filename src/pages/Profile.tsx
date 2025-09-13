@@ -1015,7 +1015,7 @@ const Profile = () => {
                   <div className="space-y-2">
                     <Label htmlFor="phone" className="text-white">Telefon</Label>
                     <div className="relative">
-                      <Phone className="absolute left-3 top-3 h-4 w-4 text-white" />
+                      <Phone className="absolute left-3 top-3 h-4 w-4 text-white/70" />
                       <Input
                         id="phone"
                         type="tel"
