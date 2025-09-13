@@ -215,20 +215,6 @@ const Profile = () => {
     checkForChanges();
   }, [checkForChanges]);
 
-  // Debug logging to check loaded values
-  useEffect(() => {
-    if (profile) {
-      console.log('Profile loaded:', {
-        employment_status: (profile as any)?.employment_status,
-        availability: (profile as any)?.availability,
-        working_hours: (profile as any)?.working_hours,
-        employmentStatus: employmentStatus,
-        availability_state: availability,
-        workingHours: workingHours
-      });
-    }
-  }, [profile, employmentStatus, availability, workingHours]);
-
   // Prevent leaving page with unsaved changes (browser/tab close)
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -1214,9 +1200,6 @@ const Profile = () => {
                     {employmentStatus && (
                       <div className="space-y-2">
                         <Label htmlFor="availability" className="text-white">När kan du börja nytt jobb?</Label>
-                        <div className="text-xs text-white/60 mb-2">
-                          Debug: employmentStatus="{employmentStatus}", availability="{availability}"
-                        </div>
                         <DropdownMenu modal={false}>
                           <DropdownMenuTrigger asChild>
                             <Button
