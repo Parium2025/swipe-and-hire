@@ -138,7 +138,6 @@ const Support = () => {
     { value: 'technical', label: 'Teknisk support' },
     { value: 'billing', label: 'Fakturering' },
     { value: 'account', label: 'Kontofrågor' },
-    { value: 'feature', label: 'Funktionsfrågor' },
     { value: 'other', label: 'Övrigt' },
   ];
 
