@@ -78,7 +78,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
 
   return (
     <div className={getPositionClasses()}>
-      <Card className="w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-2xl animate-fade-in">
+      <Card className="w-80 bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl animate-fade-in">
         <CardContent className="p-6">
           {/* Progress indicator */}
           <div className="flex justify-center mb-4">
@@ -88,10 +88,10 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
                   key={index}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
                     index === currentStep 
-                      ? 'bg-blue-400 w-6' 
+                      ? 'bg-white w-6' 
                       : index < currentStep 
-                        ? 'bg-blue-400/60' 
-                        : 'bg-blue-400/30'
+                        ? 'bg-white/60' 
+                        : 'bg-white/30'
                   }`}
                 />
               ))}
@@ -100,8 +100,8 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
 
           {/* Icon */}
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center">
-              <Icon className="h-8 w-8 text-blue-400" />
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+              <Icon className="h-8 w-8 text-white" />
             </div>
           </div>
 
@@ -111,7 +111,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
               {currentStepData.title}
             </h3>
             
-            <Badge variant="outline" className="mb-4 border-blue-400/30 text-blue-300">
+            <Badge variant="outline" className="mb-4 border-white/20 text-white bg-white/20">
               {currentStep + 1} av {steps.length}
             </Badge>
             
@@ -134,7 +134,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
               <Button 
                 onClick={handleNext}
                 size="sm"
-                className="min-w-[100px] bg-blue-600 hover:bg-blue-700 text-white"
+                className="min-w-[100px]"
               >
                 {currentStep === steps.length - 1 ? 'Färdig!' : 'Nästa'}
                 {currentStep !== steps.length - 1 && <ArrowRight className="h-4 w-4 ml-2" />}
