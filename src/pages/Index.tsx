@@ -89,7 +89,7 @@ const Index = () => {
   
   // For job seekers, show WelcomeTunnel if onboarding not completed
   if (needsOnboarding && (profile as any)?.role === 'job_seeker') {
-    return <WelcomeTunnel onComplete={() => window.location.reload()} />;
+    return <WelcomeTunnel onComplete={() => navigate('/search-jobs')} />;
   }
   
   // For employers, check if profile needs setup (basic info missing)
