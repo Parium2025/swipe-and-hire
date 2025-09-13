@@ -1059,7 +1059,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   placeholder="Berätta kort om dig själv..."
                 />
                 <div className="flex justify-end mt-1">
-                  <span className="text-xs text-white/70">
+                  <span className="text-xs text-white">
                     {countWords(formData.bio)}/100 ord
                   </span>
                 </div>
