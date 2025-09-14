@@ -39,6 +39,29 @@ const ResetRedirect = () => {
     setIsInAppBrowser(inApp);
     setIsMobile(mobile);
 
+    // Om Supabase redan har verifierat och skickat tillbaka access/refresh tokens i hash,
+    // vidarebefordra direkt till /auth och bevara hash-parametrarna.
+    const hashStr = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
+    const hash = new URLSearchParams(hashStr);
+    const accessToken = hash.get('access_token');
+    const refreshToken = hash.get('refresh_token');
+    const typeInHash = hash.get('type');
+    if (accessToken && refreshToken) {
+      const target = new URL('/auth', window.location.origin);
+      const issued = searchParams.get('issued');
+      const finalType = typeInHash || searchParams.get('type') || 'recovery';
+      if (finalType) target.searchParams.set('type', finalType);
+      if (issued) target.searchParams.set('issued', issued);
+      const newHash = new URLSearchParams();
+      newHash.set('access_token', accessToken);
+      newHash.set('refresh_token', refreshToken);
+      if (finalType) newHash.set('type', finalType);
+      target.hash = newHash.toString();
+      console.log('🔁 Found tokens in hash – forwarding to /auth:', target.toString());
+      window.location.replace(target.toString());
+      return;
+    }
+
     // Kontrollera om länken har gått ut (10 minuter)
     const checkLinkExpiry = () => {
       const issued = searchParams.get('issued');
