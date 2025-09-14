@@ -24,7 +24,7 @@ export function UnsavedChangesDialog({
 }: UnsavedChangesDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-md bg-background text-foreground border-border shadow-lg">
+      <AlertDialogContent className="max-w-md bg-sidebar-accent text-sidebar-foreground border-sidebar-border backdrop-blur-md shadow-lg">
         <AlertDialogHeader>
           <AlertDialogTitle>Osparade ändringar</AlertDialogTitle>
           <AlertDialogDescription>
