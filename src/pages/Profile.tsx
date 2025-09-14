@@ -451,8 +451,8 @@ const Profile = () => {
           );
         } else if (video.duration > 30) {
           showError(
-            "Video för lång",
-            `Videon är ${Math.round(video.duration)} sekunder. Max 30 sekunder tillåtet.`
+            "Videon är för lång",
+            `Videon är ${Math.round(video.duration)} sekunder. Max 30 sekunder tillåtet`
           );
         } else {
           uploadProfileMedia(file);
