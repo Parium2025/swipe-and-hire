@@ -37,7 +37,7 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(null, {
         status: 302,
         headers: {
-          "Location": "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&expired=true",
+          "Location": "https://09c4e686-17a9-467e-89b1-3cf832371d49.sandbox.lovable.dev/auth?reset=true&expired=true",
           ...corsHeaders,
         },
       });
@@ -57,7 +57,7 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(null, {
         status: 302,
         headers: {
-          "Location": "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&expired=true",
+          "Location": "https://09c4e686-17a9-467e-89b1-3cf832371d49.sandbox.lovable.dev/auth?reset=true&expired=true",
           ...corsHeaders,
         },
       });
@@ -65,7 +65,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Om länken är giltig enligt tid, skicka vidare till auth sidan
     // Auth sidan kommer själv hantera om token är använd eller inte
-    let redirectUrl = "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true";
+    let redirectUrl = "https://09c4e686-17a9-467e-89b1-3cf832371d49.sandbox.lovable.dev/auth?reset=true";
     
     if (token) {
       const paramName = url.searchParams.get('token_hash') ? 'token_hash' : 'token';
@@ -74,6 +74,10 @@ const handler = async (req: Request): Promise<Response> => {
     
     if (type) {
       redirectUrl += `&type=${type}`;
+    }
+    
+    if (issued) {
+      redirectUrl += `&issued=${issued}`;
     }
     
     console.log(`✅ VALID RESET LINK - Redirecting to: ${redirectUrl}`);
@@ -93,7 +97,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, {
       status: 302,
       headers: {
-        "Location": "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&expired=true",
+        "Location": "https://09c4e686-17a9-467e-89b1-3cf832371d49.sandbox.lovable.dev/auth?reset=true&expired=true",
         ...corsHeaders,
       },
     });
