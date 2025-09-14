@@ -397,11 +397,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         duration: 2000
       });
 
-      // Navigate to home after successful login with a smoother delay
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 1500);
-
       return {};
     } catch (error: any) {
       toast({

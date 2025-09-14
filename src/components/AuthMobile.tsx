@@ -164,6 +164,11 @@ const AuthMobile = ({
           } else if (result.error.showResetPassword) {
             setShowResetPassword(true);
           }
+        } else {
+          // Navigate to home after successful login with a smooth transition
+          setTimeout(() => {
+            navigate('/');
+          }, 1500);
         }
       } else {
         const result = await signUp(email, password, {
