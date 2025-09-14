@@ -868,6 +868,7 @@ const Auth = () => {
     }
   }
 
+  // Använd rätt komponent baserat på skärmstorlek
   if (device === 'mobile') {
     return (
       <AuthMobile
