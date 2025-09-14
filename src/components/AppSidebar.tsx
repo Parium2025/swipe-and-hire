@@ -114,12 +114,12 @@ export function AppSidebar() {
         {!collapsed && (
           <div className="mb-6 animate-fade-in">
             <div className="flex items-center gap-3 p-3 rounded-lg bg-sidebar-accent transition-colors duration-150">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={avatarUrl} alt="Profilbild" onError={() => setAvatarUrl('')} />
-                <AvatarFallback>
-                  {profile?.first_name?.[0]}{profile?.last_name?.[0]}
-                </AvatarFallback>
-              </Avatar>
+               <Avatar className="h-10 w-10">
+                 <AvatarImage src={avatarUrl} alt="Profilbild" onError={() => setAvatarUrl('')} />
+                 <AvatarFallback className="bg-white/20 text-white">
+                   {profile?.first_name?.[0]}{profile?.last_name?.[0]}
+                 </AvatarFallback>
+               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">
                   {profile?.first_name} {profile?.last_name}
