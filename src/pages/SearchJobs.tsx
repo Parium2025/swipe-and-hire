@@ -1022,9 +1022,11 @@ const SearchJobs = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
                   className={`w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white ${isMobile ? 'max-h-[60vh]' : 'max-h-96'} overflow-y-auto overscroll-contain`}
+                  side="bottom"
                   align="center"
                   alignOffset={0}
                   sideOffset={6}
+                  avoidCollisions={false}
                   onCloseAutoFocus={(e) => e.preventDefault()}
                 >
                   {/* Clear selection option */}
@@ -1158,9 +1160,11 @@ const SearchJobs = () => {
                   </DropdownMenuTrigger>
                    <DropdownMenuContent 
                      className={`w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-[60] rounded-lg text-white ${isMobile ? 'max-h-[50vh]' : 'max-h-80'} overflow-y-auto overscroll-contain`}
+                     side="bottom"
                      align="center"
                      alignOffset={0}
                      sideOffset={6}
+                     avoidCollisions={false}
                      onCloseAutoFocus={(e) => e.preventDefault()}
                    >
                     {/* Search input */}
@@ -1270,9 +1274,11 @@ const SearchJobs = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
                   className={`w-72 bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white ${isMobile ? 'max-h-[50vh]' : 'max-h-80'} overflow-y-auto overscroll-contain`}
+                  side="bottom"
                   align="center"
                   alignOffset={0}
                   sideOffset={6}
+                  avoidCollisions={false}
                   onCloseAutoFocus={(e) => e.preventDefault()}
                 >
                   <DropdownMenuItem
