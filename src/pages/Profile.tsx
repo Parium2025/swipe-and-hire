@@ -10,15 +10,20 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { User, MapPin, Building, Camera, Mail, Phone, Calendar, Briefcase, Clock, FileText, Video, Play, Check, Trash2, ChevronDown } from 'lucide-react';
+import { User, MapPin, Building, Camera, Mail, Phone, Calendar as CalendarIcon, Briefcase, Clock, FileText, Video, Play, Check, Trash2, ChevronDown } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
 import ProfileVideo from '@/components/ProfileVideo';
 import ImageEditor from '@/components/ImageEditor';
 import PostalCodeSelector from '@/components/PostalCodeSelector';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createSignedUrl } from '@/utils/storageUtils';
+import { format } from 'date-fns';
+import { sv } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 const Profile = () => {
   const { profile, userRole, updateProfile, user } = useAuth();
@@ -1000,13 +1005,40 @@ const Profile = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="birthDate" className="text-white">Födelsedatum</Label>
-                    <Input
-                      id="birthDate"
-                      type="date"
-                      value={birthDate}
-                      onChange={(e) => setBirthDate(e.target.value)}
-                      className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full h-10 pl-3 pr-3 text-left font-normal bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 justify-start",
+                            !birthDate && "text-white/60"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {birthDate ? (
+                            format(new Date(birthDate), "yyyy-MM-dd", { locale: sv })
+                          ) : (
+                            <span>Välj födelsedatum</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={birthDate ? new Date(birthDate) : undefined}
+                          onSelect={(date) => {
+                            if (date) {
+                              setBirthDate(format(date, "yyyy-MM-dd"));
+                            }
+                          }}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
                     {age !== null && (
                       <p className="text-sm text-white">Ålder: {age} år</p>
                     )}
