@@ -103,16 +103,17 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
     }
   }, [currentStep, location.pathname]);
 
-  // Positionera första steget under Sök-rubriken, fallback till hjälprubrik
+  // Positionera första steget under Sök-rubriken, föredra hjälprubriken
   const [cardPos, setCardPos] = useState<{ top: number; left: number } | null>(null);
   useEffect(() => {
     const update = () => {
       if (currentStep === 0 && location.pathname === '/search-jobs') {
+        const hero = document.querySelector("[data-onboarding='search-hero']") as HTMLElement | null;
         const label = document.querySelector("[data-onboarding='search-label']") as HTMLElement | null;
-        const anchor = label || (document.querySelector("[data-onboarding='search-hero']") as HTMLElement | null);
+        const anchor = hero || label;
         if (anchor) {
           const rect = anchor.getBoundingClientRect();
-          setCardPos({ top: rect.bottom + 12, left: rect.left + rect.width / 2 });
+          setCardPos({ top: rect.bottom + 6, left: rect.left + rect.width / 2 });
           return;
         }
       }
@@ -163,7 +164,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
   return (
     <>
       {/* Fullscreen overlay */}
-      <div className="fixed inset-0 bg-black/25 z-30 backdrop-blur-[2px]" />
+      <div className="fixed inset-0 bg-black/25 z-30 backdrop-blur-[2px] pointer-events-none" />
       
       {/* Highlight för tillåtna element */}
       {renderHighlight()}
