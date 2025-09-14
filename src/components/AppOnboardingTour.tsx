@@ -55,6 +55,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
       if (nextStepData.page && nextStepData.page !== location.pathname) {
         navigate(nextStepData.page);
       }
+      setCurrentStep(nextStep);
     } else {
       onComplete();
     }
@@ -113,7 +114,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
         const anchor = hero || label;
         if (anchor) {
           const rect = anchor.getBoundingClientRect();
-          setCardPos({ top: rect.bottom + 6, left: rect.left + rect.width / 2 });
+          setCardPos({ top: rect.bottom - 20, left: rect.left + rect.width / 2 });
           return;
         }
       }
@@ -164,7 +165,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
   return (
     <>
       {/* Fullscreen overlay */}
-      <div className="fixed inset-0 bg-black/25 z-30 backdrop-blur-[2px] pointer-events-none" />
+      <div className="fixed inset-0 bg-black/10 z-30 backdrop-blur-0 pointer-events-none" />
       
       {/* Highlight för tillåtna element */}
       {renderHighlight()}
