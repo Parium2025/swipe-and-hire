@@ -393,7 +393,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       toast({
         title: "Välkommen tillbaka!",
-        description: "Du är nu inloggad."
+        description: "Du är nu inloggad"
       });
 
       // Navigate to home after successful login
@@ -486,9 +486,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
     setUserRole(null);
     setOrganization(null);
-    toast({
+  toast({
       title: "Utloggad",
-      description: "Du har loggats ut."
+      description: "Du har loggats ut"
     });
   };
 

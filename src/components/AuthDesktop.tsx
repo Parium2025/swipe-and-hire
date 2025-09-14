@@ -403,6 +403,11 @@ const AuthDesktop = ({
                               value={email}
                               onChange={(e) => handleEmailChange(e.target.value)}
                               required
+                              name="email"
+                              autoComplete="email"
+                              inputMode="email"
+                              spellCheck={false}
+                              autoCapitalize="none"
                               className="mt-2 w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                             />
                             {/* email suggestions removed for simpler UX */}
@@ -417,6 +422,8 @@ const AuthDesktop = ({
                               value={password}
                               onChange={(e) => handlePasswordChange(e.target.value)}
                               required
+                              name="current-password"
+                              autoComplete="current-password"
                               className="mt-2 w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                             />
                             <Button
@@ -514,13 +521,15 @@ const AuthDesktop = ({
                           <Label htmlFor="password" className="text-lg text-white">Lösenord</Label>
                           <div className="relative">
                             <Input
-                              id="password"
-                              type={showPassword ? 'text' : 'password'}
-                              value={password}
-                              onChange={(e) => handlePasswordChange(e.target.value)}
-                              required
-                              className="mt-2 w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                            />
+                                id="password"
+                                type={showPassword ? 'text' : 'password'}
+                                value={password}
+                                onChange={(e) => handlePasswordChange(e.target.value)}
+                                required
+                                name="new-password"
+                                autoComplete="new-password"
+                                className="mt-2 w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                              />
                             <Button
                               type="button"
                               variant="ghost"
