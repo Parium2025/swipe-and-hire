@@ -10,7 +10,8 @@ import {
   ChevronRight,
   Building,
   Crown,
-  Settings
+  Settings,
+  AlertTriangle
 } from 'lucide-react';
 
 import {
@@ -49,6 +50,8 @@ export function AppSidebar() {
   const { checkBeforeNavigation } = useUnsavedChanges();
   const currentPath = location.pathname;
   const [avatarUrl, setAvatarUrl] = useState<string>('');
+  const [showUnsavedNotice, setShowUnsavedNotice] = useState(false);
+  const [unsavedHandlers, setUnsavedHandlers] = useState<{onConfirm: () => void, onCancel: () => void} | null>(null);
 
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
@@ -70,7 +73,28 @@ export function AppSidebar() {
     };
     window.addEventListener('unsaved-cancel', closeOnCancel as EventListener);
     return () => window.removeEventListener('unsaved-cancel', closeOnCancel as EventListener);
-}, [isMobile, setOpenMobile]);
+  }, [isMobile, setOpenMobile]);
+
+  // Listen for unsaved changes notices
+  useEffect(() => {
+    const showNotice = (event: CustomEvent) => {
+      setUnsavedHandlers(event.detail);
+      setShowUnsavedNotice(true);
+    };
+    
+    const hideNotice = () => {
+      setShowUnsavedNotice(false);
+      setUnsavedHandlers(null);
+    };
+
+    window.addEventListener('show-unsaved-notice', showNotice as EventListener);
+    window.addEventListener('hide-unsaved-notice', hideNotice as EventListener);
+    
+    return () => {
+      window.removeEventListener('show-unsaved-notice', showNotice as EventListener);
+      window.removeEventListener('hide-unsaved-notice', hideNotice as EventListener);
+    };
+  }, []);
 
   // Ensure avatar uses a fresh signed URL (handles expired links)
   useEffect(() => {
@@ -157,6 +181,44 @@ export function AppSidebar() {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
+
+          <Separator />
+
+          {/* Unsaved Changes Notice */}
+          {showUnsavedNotice && !collapsed && (
+            <div className="animate-fade-in">
+              <div className="p-4 rounded-lg bg-amber-500/20 border border-amber-500/30 backdrop-blur-sm">
+                <div className="flex items-start gap-3 mb-3">
+                  <AlertTriangle className="h-5 w-5 text-amber-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="text-sm font-medium text-amber-100 mb-1">
+                      Osparade ändringar
+                    </h4>
+                    <p className="text-xs text-amber-200/80 leading-relaxed">
+                      Du har osparade ändringar i din profil. Vill du spara innan du navigerar bort?
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    onClick={unsavedHandlers?.onCancel}
+                    className="flex-1 bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs"
+                  >
+                    Stanna och spara
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={unsavedHandlers?.onConfirm}
+                    variant="destructive"
+                    className="flex-1 text-xs"
+                  >
+                    Lämna ändå
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
 
           <Separator />
 

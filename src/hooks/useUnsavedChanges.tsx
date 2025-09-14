@@ -28,42 +28,28 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
     if (hasUnsavedChanges) {
       setPendingNavigation(targetUrl);
       
-      // Show toast with action buttons
-      toast({
-        title: "Osparade ändringar",
-        description: "Du har osparade ändringar. Vill du spara innan du lämnar?",
-        action: (
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                // Navigate without saving
-                if (targetUrl) {
-                  window.dispatchEvent(new CustomEvent('unsaved-confirm'));
-                  setHasUnsavedChanges(false);
-                  navigate(targetUrl);
-                }
-                setPendingNavigation(null);
-              }}
-              className="bg-red-500/80 hover:bg-red-500/90 text-white px-3 py-1 rounded text-sm"
-            >
-              Lämna utan att spara
-            </button>
-            <button
-              onClick={() => {
-                // Cancel and stay on current page
-                setPendingNavigation(null);
-                window.dispatchEvent(new CustomEvent('unsaved-cancel'));
-                if (location.pathname !== '/profile') {
-                  navigate('/profile', { replace: true });
-                }
-              }}
-              className="bg-white/10 hover:bg-white/20 text-white px-3 py-1 rounded text-sm border border-white/30"
-            >
-              Stanna och spara
-            </button>
-          </div>
-        ),
-      });
+      // Show a custom notice in the sidebar instead of toast
+      window.dispatchEvent(new CustomEvent('show-unsaved-notice', {
+        detail: {
+          onConfirm: () => {
+            if (targetUrl) {
+              window.dispatchEvent(new CustomEvent('unsaved-confirm'));
+              setHasUnsavedChanges(false);
+              navigate(targetUrl);
+            }
+            setPendingNavigation(null);
+            window.dispatchEvent(new CustomEvent('hide-unsaved-notice'));
+          },
+          onCancel: () => {
+            setPendingNavigation(null);
+            window.dispatchEvent(new CustomEvent('unsaved-cancel'));
+            window.dispatchEvent(new CustomEvent('hide-unsaved-notice'));
+            if (location.pathname !== '/profile') {
+              navigate('/profile', { replace: true });
+            }
+          }
+        }
+      }));
       
       return false; // Block navigation initially
     }
