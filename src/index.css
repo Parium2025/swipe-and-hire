@@ -194,6 +194,19 @@ All colors MUST be HSL.
     transition: background-color 9999s ease-in-out 0s !important;
     border-color: hsl(var(--border)) !important;
   }
+
+  /* Auth pages force light text for autofill */
+  .auth-dark input:-webkit-autofill,
+  .auth-dark input:-webkit-autofill:hover,
+  .auth-dark input:-webkit-autofill:focus,
+  .auth-dark textarea:-webkit-autofill,
+  .auth-dark select:-webkit-autofill {
+    -webkit-text-fill-color: hsl(210 40% 98%) !important;
+    caret-color: hsl(210 40% 98%) !important;
+    -webkit-box-shadow: 0 0 0px 1000px hsla(0 0% 100% / 0.05) inset !important;
+    box-shadow: 0 0 0px 1000px hsla(0 0% 100% / 0.05) inset !important;
+    border-color: hsl(var(--border)) !important;
+  }
 }
 
 @layer utilities {

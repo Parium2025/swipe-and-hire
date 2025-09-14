@@ -218,7 +218,7 @@ const AuthDesktop = ({
 
   if (isPasswordReset) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-8">
+      <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-8 auth-dark">
         <Card className="w-full max-w-md bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-3xl">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl text-white">Nytt lösenord</CardTitle>
@@ -267,7 +267,7 @@ const AuthDesktop = ({
   }
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] bg-gradient-parium overflow-hidden">
+    <div className="relative min-h-[calc(100vh-4rem)] bg-gradient-parium overflow-hidden auth-dark">
       {/* Modern animated mobile background */}
       <div className="absolute inset-0">
         <div 
@@ -405,22 +405,7 @@ const AuthDesktop = ({
                               required
                               className="mt-2 w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                             />
-                            {showEmailSuggestions && emailSuggestions.length > 0 && (
-                              <div className="absolute left-0 mt-1 w-full bg-white/5 backdrop-blur-sm border-white/20 rounded-md shadow-sm z-10">
-                                {emailSuggestions.map((suggestion, index) => (
-                                  <div
-                                    key={index}
-                                    className="px-4 py-2 text-sm text-white hover:bg-white/10 cursor-pointer"
-                                    onClick={() => {
-                                      setEmail(suggestion);
-                                      setShowEmailSuggestions(false);
-                                    }}
-                                  >
-                                    {suggestion}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                            {/* email suggestions removed for simpler UX */}
                           </div>
                         </div>
                         <div>
@@ -511,22 +496,7 @@ const AuthDesktop = ({
                               required
                               className="mt-2 w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                             />
-                            {showEmailSuggestions && emailSuggestions.length > 0 && (
-                              <div className="absolute left-0 mt-1 w-full bg-background border border-input rounded-md shadow-sm z-10">
-                                {emailSuggestions.map((suggestion, index) => (
-                                  <div
-                                    key={index}
-                                    className="px-4 py-2 text-sm text-white hover:bg-secondary/50 cursor-pointer"
-                                    onClick={() => {
-                                      setEmail(suggestion);
-                                      setShowEmailSuggestions(false);
-                                    }}
-                                  >
-                                    {suggestion}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                            {/* email suggestions removed for simpler UX */}
                           </div>
                         </div>
                         <div>

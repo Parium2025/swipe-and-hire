@@ -218,7 +218,7 @@ const AuthMobile = ({
 
   if (isPasswordReset) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-4">
+      <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-4 auth-dark">
         <Card className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="text-center">
             <CardTitle className="text-white">Nytt lösenord</CardTitle>
@@ -267,7 +267,7 @@ const AuthMobile = ({
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex flex-col relative">
+    <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex flex-col relative auth-dark">
       {/* Static animated background - won't re-render */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
@@ -361,23 +361,7 @@ const AuthMobile = ({
                           required
                           className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                         />
-                        {showEmailSuggestions && emailSuggestions.length > 0 && (
-                          <div className="absolute z-50 w-full mt-1 bg-white/5 backdrop-blur-sm border-white/20 rounded-md shadow-lg max-h-40 overflow-y-auto">
-                            {emailSuggestions.slice(0, 5).map((suggestion, index) => (
-                              <button
-                                key={index}
-                                type="button"
-                                className="w-full px-3 py-2 text-left hover:bg-white/10 text-sm text-white"
-                                onClick={() => {
-                                  setEmail(suggestion);
-                                  setShowEmailSuggestions(false);
-                                }}
-                              >
-                                {suggestion}
-                              </button>
-                            ))}
-                          </div>
-                        )}
+                        {/* email suggestions removed for simpler UX */}
                       </div>
                       <div>
                         <Label htmlFor="password" className="text-white">
@@ -513,23 +497,7 @@ const AuthMobile = ({
                           required
                           className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                         />
-                        {showEmailSuggestions && emailSuggestions.length > 0 && (
-                          <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-40 overflow-y-auto">
-                            {emailSuggestions.slice(0, 5).map((suggestion, index) => (
-                              <button
-                                key={index}
-                                type="button"
-                                className="w-full px-3 py-2 text-left hover:bg-muted text-sm"
-                                onClick={() => {
-                                  setEmail(suggestion);
-                                  setShowEmailSuggestions(false);
-                                }}
-                              >
-                                {suggestion}
-                              </button>
-                            ))}
-                          </div>
-                        )}
+                        {/* email suggestions removed for simpler UX */}
                       </div>
                       <div>
                         <Label htmlFor="phone" className="text-white">
