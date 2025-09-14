@@ -185,7 +185,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
       {renderHighlight()}
       
       {/* Onboarding tour card */}
-      <div className={`fixed z-50 onboarding-tour ${cardPos ? '' : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform'}`} style={cardPos ? { top: cardPos.top, left: cardPos.left, transform: 'translateX(-50%)' } : undefined}>
+      <div className={`fixed z-50 onboarding-tour ${cardPos ? '' : 'top-1/2 left-1/2 transform -translate-y-1/2'}`} style={cardPos ? { top: cardPos.top, left: cardPos.left, transform: 'translateX(-50%)' } : { transform: 'translate(-60%, -50%)' }}>
         <Card className="w-64 bg-[hsl(var(--surface-blue))]/90 backdrop-blur-sm border-white/20 shadow-2xl animate-fade-in">
           <CardContent className="p-4">
             {/* Progress indicator */}
