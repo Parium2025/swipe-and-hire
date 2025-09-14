@@ -482,9 +482,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
     setUserRole(null);
     setOrganization(null);
-  toast({
+    toast({
       title: "Utloggad",
-      description: "Du har loggats ut"
+      description: "Du har loggats ut",
+      duration: 5000
     });
   };
 
