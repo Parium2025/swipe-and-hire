@@ -889,7 +889,7 @@ const SearchJobs = () => {
             
             {/* Combined Job and Company Search */}
             <div className="space-y-3 relative z-[10000]">
-              <Label htmlFor="search" className="text-base font-medium text-white flex items-center gap-2">
+              <Label htmlFor="search" data-onboarding="search-label" className="text-base font-medium text-white flex items-center gap-2">
                 <Search className="h-4 w-4" />
                 Sök
               </Label>

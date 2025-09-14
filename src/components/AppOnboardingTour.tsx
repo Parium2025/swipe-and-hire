@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -51,8 +51,8 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
       const nextStep = currentStep + 1;
       const nextStepData = steps[nextStep];
       
-      // Navigate to the next page if needed
-      if (nextStepData.page) {
+      // Navigate to the next page if needed (only if different)
+      if (nextStepData.page && nextStepData.page !== location.pathname) {
         navigate(nextStepData.page);
       }
     } else {
@@ -103,12 +103,13 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
     }
   }, [currentStep, location.pathname]);
 
-  // Positionera första steget under hjälprubriken på /search-jobs
+  // Positionera första steget under Sök-rubriken, fallback till hjälprubrik
   const [cardPos, setCardPos] = useState<{ top: number; left: number } | null>(null);
   useEffect(() => {
     const update = () => {
       if (currentStep === 0 && location.pathname === '/search-jobs') {
-        const anchor = document.querySelector("[data-onboarding='search-hero']") as HTMLElement | null;
+        const label = document.querySelector("[data-onboarding='search-label']") as HTMLElement | null;
+        const anchor = label || (document.querySelector("[data-onboarding='search-hero']") as HTMLElement | null);
         if (anchor) {
           const rect = anchor.getBoundingClientRect();
           setCardPos({ top: rect.bottom + 12, left: rect.left + rect.width / 2 });
@@ -162,7 +163,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
   return (
     <>
       {/* Fullscreen overlay */}
-      <div className="fixed inset-0 bg-black/50 z-30 backdrop-blur-sm" />
+      <div className="fixed inset-0 bg-black/25 z-30 backdrop-blur-[2px]" />
       
       {/* Highlight för tillåtna element */}
       {renderHighlight()}
