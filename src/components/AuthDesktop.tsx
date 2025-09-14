@@ -406,11 +406,11 @@ const AuthDesktop = ({
                               className="mt-2 w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                             />
                             {showEmailSuggestions && emailSuggestions.length > 0 && (
-                              <div className="absolute left-0 mt-1 w-full bg-background border border-input rounded-md shadow-sm z-10">
+                              <div className="absolute left-0 mt-1 w-full bg-white/5 backdrop-blur-sm border-white/20 rounded-md shadow-sm z-10">
                                 {emailSuggestions.map((suggestion, index) => (
                                   <div
                                     key={index}
-                                    className="px-4 py-2 text-sm text-white hover:bg-secondary/50 cursor-pointer"
+                                    className="px-4 py-2 text-sm text-white hover:bg-white/10 cursor-pointer"
                                     onClick={() => {
                                       setEmail(suggestion);
                                       setShowEmailSuggestions(false);
