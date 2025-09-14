@@ -46,7 +46,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
     {
       icon: Crown,
       title: "Uppgradera till Premium",
-      description: "Få tillgång till fler funktioner och öka dina chanser med vår premiumfunktion.",
+      description: "psssssttt, glöm inte att du kan uppgradera till fler förmånliga funktioner när du uppgradera till Premium.",
       page: "/search-jobs",
       allowedElement: null // Bara nästa-knappen tillåten
     }
