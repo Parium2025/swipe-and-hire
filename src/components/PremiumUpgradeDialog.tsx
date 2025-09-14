@@ -60,19 +60,11 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
             <DialogDescription className="text-center space-y-4 pt-4">
               <div className="flex items-center justify-center gap-2 text-white/90">
                 <Info className="h-5 w-5" />
-                <span className="font-medium">Uppgradering via webbplats</span>
+                <span className="font-medium">För att uppgradera till Premium, besök vår webbplats</span>
               </div>
-              <div className="space-y-4 text-white">
-                <p>
-                  För att uppgradera till Premium, besök vår webbplats:
-                </p>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                  <p className="text-2xl font-bold text-white tracking-wide">
-                    parium.se
-                  </p>
-                </div>
-                <p className="text-sm text-white/80">
-                  Öppna din webbläsare och navigera till adressen ovan för att slutföra din Premium-uppgradering.
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                <p className="text-2xl font-bold text-white tracking-wide">
+                  parium.se
                 </p>
               </div>
             </DialogDescription>
