@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,6 +28,7 @@ const Index = () => {
   const [developerView, setDeveloperView] = useState<string>('dashboard');
   const [showIntroTutorial, setShowIntroTutorial] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [uiReady, setUiReady] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -52,6 +53,11 @@ const Index = () => {
     }
   }, [user, loading, navigate, profile, location.pathname]);
 
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setUiReady(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
   if (loading || isInitializing) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -64,6 +70,10 @@ const Index = () => {
 
   if (!user || !profile) {
     return null;
+  }
+
+  if (location.pathname === '/') {
+    return <Navigate to="/search-jobs" replace />;
   }
 
   // Show profile selector first (admin only)
@@ -159,7 +169,7 @@ const Index = () => {
     return (
       <SidebarProvider>
         <div className="min-h-screen flex w-full overflow-x-hidden">
-          <AppSidebar />
+          {uiReady ? <AppSidebar /> : null}
           <div className="flex-1 flex flex-col overflow-x-hidden">
             <header className="sticky top-0 z-40 h-16 flex items-center justify-between border-b bg-white/10 backdrop-blur-sm px-6">
               <div className="flex items-center gap-4">
