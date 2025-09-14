@@ -27,7 +27,7 @@ export function UnsavedChangesDialog({
       <AlertDialogContent className="max-w-md bg-white/10 backdrop-blur-sm border-white/20 text-white shadow-lg">
         <AlertDialogHeader>
           <AlertDialogTitle>Osparade ändringar</AlertDialogTitle>
-          <AlertDialogDescription>
+          <AlertDialogDescription className="text-white">
             Du har osparade ändringar. Är du säker på att du vill lämna sidan utan att spara?
           </AlertDialogDescription>
         </AlertDialogHeader>
