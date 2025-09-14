@@ -97,16 +97,10 @@ export function BirthDatePicker({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent
-        className="w-[360px] p-0 bg-primary backdrop-blur-sm border-primary/30"
-        side="bottom"
-        align="center"
-        sideOffset={8}
-        avoidCollisions={false}
-      >
+      <PopoverContent className="w-auto p-0 bg-primary backdrop-blur-sm border-primary/30" align="center">
         <div className="p-3 space-y-3">
-          {/* Year and Month Selectors */}
-          <div className="flex gap-2 relative z-50">
+          {/* Year and Month Selectors - Fixed container to prevent movement */}
+          <div className="flex gap-2 h-10">
             <Select
               value={selectedDate ? selectedDate.getFullYear().toString() : undefined}
               onValueChange={handleYearChange}
@@ -114,7 +108,7 @@ export function BirthDatePicker({
               <SelectTrigger className="flex-1 bg-white/10 border-white/30 text-white hover:bg-white/20">
                 <SelectValue placeholder="År" />
               </SelectTrigger>
-              <SelectContent className="z-[60] max-h-60 bg-primary backdrop-blur-sm border-primary/30 text-white" position="popper" sideOffset={4}>
+              <SelectContent className="max-h-60 bg-primary backdrop-blur-sm border-primary/30 text-white">
                 {years.map((year) => (
                   <SelectItem key={year} value={year.toString()} className="hover:bg-white/20 focus:bg-white/20">
                     {year}
@@ -130,7 +124,7 @@ export function BirthDatePicker({
               <SelectTrigger className="flex-1 bg-white/10 border-white/30 text-white hover:bg-white/20">
                 <SelectValue placeholder="Månad" />
               </SelectTrigger>
-              <SelectContent className="bg-primary backdrop-blur-sm border-primary/30 text-white" position="popper" sideOffset={4}>
+              <SelectContent className="bg-primary backdrop-blur-sm border-primary/30 text-white">
                 {months.map((month) => (
                   <SelectItem key={month.value} value={month.value.toString()} className="hover:bg-white/20 focus:bg-white/20">
                     {month.label}
@@ -140,21 +134,19 @@ export function BirthDatePicker({
             </Select>
           </div>
 
-          {/* Calendar for day selection - Fixed container */}
-          <div className="min-h-[280px]">
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={handleDateSelect}
-              disabled={(date) =>
-                date > new Date() || date < new Date("1900-01-01")
-              }
-              month={selectedDate}
-              onMonthChange={setSelectedDate}
-              initialFocus
-              className="p-0 text-white [&_.rdp-caption]:text-white [&_.rdp-nav_button]:text-white [&_.rdp-nav_button]:border-white/20 [&_.rdp-nav_button]:hover:bg-white/20 [&_.rdp-day]:text-white [&_.rdp-day]:hover:bg-white/20 [&_.rdp-day_selected]:bg-primary [&_.rdp-day_selected]:text-primary-foreground [&_.rdp-day_today]:bg-white/20"
-            />
-          </div>
+          {/* Calendar for day selection */}
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={handleDateSelect}
+            disabled={(date) =>
+              date > new Date() || date < new Date("1900-01-01")
+            }
+            month={selectedDate}
+            onMonthChange={setSelectedDate}
+            initialFocus
+            className="p-0 text-white [&_.rdp-caption]:text-white [&_.rdp-nav_button]:text-white [&_.rdp-nav_button]:border-white/20 [&_.rdp-nav_button]:hover:bg-white/20 [&_.rdp-day]:text-white [&_.rdp-day]:hover:bg-white/20 [&_.rdp-day_selected]:bg-primary [&_.rdp-day_selected]:text-primary-foreground [&_.rdp-day_today]:bg-white/20"
+          />
         </div>
       </PopoverContent>
     </Popover>
