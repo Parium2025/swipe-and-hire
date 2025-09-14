@@ -47,39 +47,39 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-parium-gradient backdrop-blur-sm border-2 border-primary/40 text-white max-w-md mx-4">
+      <DialogContent className="bg-parium-gradient backdrop-blur-sm border-2 border-primary/40 text-white max-w-sm mx-4">
         <DialogHeader className="text-center">
-          <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-primary/20 backdrop-blur-sm flex items-center justify-center border border-white/20">
-            <Crown className="h-8 w-8 text-white" />
+          <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-primary/20 backdrop-blur-sm flex items-center justify-center border border-white/20">
+            <Crown className="h-6 w-6 text-white" />
           </div>
-          <DialogTitle className="text-2xl font-bold text-white">
+          <DialogTitle className="text-xl font-bold text-white">
             Uppgradera till Premium
           </DialogTitle>
           
           {isApp ? (
-            <DialogDescription className="text-center space-y-4 pt-4 px-4">
-              <span className="font-medium text-base leading-relaxed block text-white/90">
+            <DialogDescription className="text-center space-y-3 pt-3">
+              <span className="font-medium text-sm leading-relaxed block text-white/90">
                 För att uppgradera till Premium,<br className="sm:hidden" /> besök vår webbplats
               </span>
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-primary/40 mx-auto max-w-xs">
-                <p className="text-xl sm:text-2xl font-bold text-white tracking-wide">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-primary/40 mx-auto w-fit">
+                <p className="text-lg font-bold text-white tracking-wide">
                   parium.se
                 </p>
               </div>
             </DialogDescription>
           ) : (
-            <DialogDescription className="text-center space-y-4 pt-4 px-4">
-              <span className="font-medium text-base block text-white/90">Uppgradera nu</span>
-              <div className="space-y-4 text-white">
-                <p className="text-sm sm:text-base leading-relaxed">
+            <DialogDescription className="text-center space-y-3 pt-3">
+              <span className="font-medium text-sm block text-white/90">Uppgradera nu</span>
+              <div className="space-y-3 text-white">
+                <p className="text-xs leading-relaxed">
                   Du kan uppgradera direkt här på webben eller besöka:
                 </p>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-primary/40 mx-auto max-w-xs">
-                  <p className="text-xl sm:text-2xl font-bold text-white tracking-wide">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-primary/40 mx-auto w-fit">
+                  <p className="text-lg font-bold text-white tracking-wide">
                     parium.se
                   </p>
                 </div>
-                <p className="text-xs sm:text-sm text-white/80">
+                <p className="text-xs text-white/80">
                   Välj det alternativ som passar dig bäst.
                 </p>
               </div>
@@ -87,19 +87,19 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
           )}
         </DialogHeader>
         
-        <div className="flex gap-2 sm:gap-3 pt-4 px-4">
+        <div className="flex gap-2 pt-3">
           {!isApp ? (
             <>
               <Button
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                className="flex-1 bg-primary border-primary/60 text-white hover:bg-primary/90 hover:text-white text-sm sm:text-base py-3"
+                className="flex-1 bg-primary border-primary/60 text-white hover:bg-primary/90 hover:text-white text-sm py-2"
               >
                 Stäng
               </Button>
               <Button
                 onClick={handleUpgrade}
-                className="flex-1 bg-primary hover:bg-primary/90 text-white text-sm sm:text-base py-3 border border-primary/60"
+                className="flex-1 bg-primary hover:bg-primary/90 text-white text-sm py-2 border border-primary/60"
               >
                 Nu kör vi!
               </Button>
@@ -107,7 +107,7 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
           ) : (
             <Button
               onClick={() => onOpenChange(false)}
-              className="w-full bg-primary hover:bg-primary/90 text-white text-sm sm:text-base py-3 border border-primary/60"
+              className="w-full bg-primary hover:bg-primary/90 text-white text-sm py-2 border border-primary/60"
             >
               Nu kör vi!
             </Button>
