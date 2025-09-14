@@ -803,7 +803,7 @@ const Profile = () => {
               Profilbild/Profilvideo
             </CardTitle>
             <CardDescription className="text-white text-center">
-              Ladda upp en kort profilvideo eller en bild och gör ditt första intryck minnesvärt.
+              Ladda upp en kort profilvideo eller en bild och gör ditt första intryck minnesvärt
             </CardDescription>
             
             {/* Video and Camera Icons */}
