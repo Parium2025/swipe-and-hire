@@ -55,7 +55,7 @@ const handler = async (req: Request): Promise<Response> => {
         type: 'recovery',
         email: email,
         options: {
-          redirectTo: `https://rvtsfnaqlnggfkoqygbm.supabase.co/functions/v1/reset-redirect?issued=${issued}`
+          redirectTo: `https://09c4e686-17a9-467e-89b1-3cf832371d49.sandbox.lovable.dev/reset-redirect?issued=${issued}`
         }
       });
 
