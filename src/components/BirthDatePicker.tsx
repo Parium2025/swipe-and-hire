@@ -12,12 +12,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface BirthDatePickerProps {
   value?: string
@@ -99,39 +98,69 @@ export function BirthDatePicker({
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0 bg-primary backdrop-blur-sm border-primary/30" align="center">
         <div className="p-3 space-y-3">
-          {/* Year and Month Selectors - Fixed container to prevent movement */}
-          <div className="flex gap-2 h-10">
-            <Select
-              value={selectedDate ? selectedDate.getFullYear().toString() : undefined}
-              onValueChange={handleYearChange}
-            >
-              <SelectTrigger className="flex-1 bg-white/10 border-white/30 text-white hover:bg-white/20">
-                <SelectValue placeholder="År" />
-              </SelectTrigger>
-              <SelectContent className="max-h-60 bg-primary backdrop-blur-sm border-primary/30 text-white">
+          {/* Year and Month Selectors */}
+          <div className="flex gap-2">
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="flex-1 h-10 bg-white/10 border-white/30 text-white hover:bg-white/20 justify-between"
+                >
+                  <span>
+                    {selectedDate ? selectedDate.getFullYear() : "År"}
+                  </span>
+                  <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent 
+                className="w-32 max-h-60 overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
+                side="top"
+                align="center"
+                sideOffset={6}
+                avoidCollisions={false}
+              >
                 {years.map((year) => (
-                  <SelectItem key={year} value={year.toString()} className="hover:bg-white/20 focus:bg-white/20">
+                  <DropdownMenuItem 
+                    key={year} 
+                    onClick={() => handleYearChange(year.toString())} 
+                    className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white"
+                  >
                     {year}
-                  </SelectItem>
+                  </DropdownMenuItem>
                 ))}
-              </SelectContent>
-            </Select>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-            <Select
-              value={selectedDate ? selectedDate.getMonth().toString() : undefined}
-              onValueChange={handleMonthChange}
-            >
-              <SelectTrigger className="flex-1 bg-white/10 border-white/30 text-white hover:bg-white/20">
-                <SelectValue placeholder="Månad" />
-              </SelectTrigger>
-              <SelectContent className="bg-primary backdrop-blur-sm border-primary/30 text-white">
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="flex-1 h-10 bg-white/10 border-white/30 text-white hover:bg-white/20 justify-between"
+                >
+                  <span>
+                    {selectedDate ? months[selectedDate.getMonth()].label : "Månad"}
+                  </span>
+                  <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent 
+                className="w-40 max-h-60 overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
+                side="top"
+                align="center"
+                sideOffset={6}
+                avoidCollisions={false}
+              >
                 {months.map((month) => (
-                  <SelectItem key={month.value} value={month.value.toString()} className="hover:bg-white/20 focus:bg-white/20">
+                  <DropdownMenuItem 
+                    key={month.value} 
+                    onClick={() => handleMonthChange(month.value.toString())} 
+                    className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white"
+                  >
                     {month.label}
-                  </SelectItem>
+                  </DropdownMenuItem>
                 ))}
-              </SelectContent>
-            </Select>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Calendar for day selection */}
