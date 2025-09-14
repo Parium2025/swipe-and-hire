@@ -393,13 +393,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       toast({
         title: "Välkommen tillbaka!",
-        description: "Du är nu inloggad"
+        description: "Du är nu inloggad",
+        duration: 2000
       });
 
-      // Navigate to home after successful login
+      // Navigate to home after successful login with a smoother delay
       setTimeout(() => {
         window.location.href = '/';
-      }, 500);
+      }, 1500);
 
       return {};
     } catch (error: any) {
