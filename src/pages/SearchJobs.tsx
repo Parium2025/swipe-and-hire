@@ -1021,12 +1021,12 @@ const SearchJobs = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
-                  className="w-80 max-h-96 overflow-hidden bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
+                  className={`w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white ${isMobile ? 'max-h-[60vh]' : 'max-h-96'} overflow-y-auto overscroll-contain`}
                   side="bottom"
                   align="center"
                   alignOffset={0}
                   sideOffset={6}
-                  avoidCollisions={false}
+                  avoidCollisions={true}
                   onCloseAutoFocus={(e) => e.preventDefault()}
                 >
                   {/* Clear selection option */}
@@ -1158,15 +1158,15 @@ const SearchJobs = () => {
                       <ChevronDown className="h-4 w-4 flex-shrink-0" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent 
-                    className="w-80 max-h-80 overflow-hidden bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-[60] rounded-lg text-white"
-                    side="bottom"
-                    align="center"
-                    alignOffset={0}
-                    sideOffset={6}
-                    avoidCollisions={false}
-                    onCloseAutoFocus={(e) => e.preventDefault()}
-                  >
+                   <DropdownMenuContent 
+                     className={`w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-[60] rounded-lg text-white ${isMobile ? 'max-h-[50vh]' : 'max-h-80'} overflow-y-auto overscroll-contain`}
+                     side="bottom"
+                     align="center"
+                     alignOffset={0}
+                     sideOffset={6}
+                     avoidCollisions={true}
+                     onCloseAutoFocus={(e) => e.preventDefault()}
+                   >
                     {/* Search input */}
                     <div className="p-2 border-b border-slate-600/30">
                       <div className="relative">
@@ -1273,12 +1273,12 @@ const SearchJobs = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
-                  className="w-72 max-h-80 overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
+                  className={`w-72 bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white ${isMobile ? 'max-h-[50vh]' : 'max-h-80'} overflow-y-auto overscroll-contain`}
                   side="bottom"
                   align="center"
                   alignOffset={0}
                   sideOffset={6}
-                  avoidCollisions={false}
+                  avoidCollisions={true}
                   onCloseAutoFocus={(e) => e.preventDefault()}
                 >
                   <DropdownMenuItem
