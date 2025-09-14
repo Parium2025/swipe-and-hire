@@ -601,11 +601,11 @@ const AuthDesktop = ({
                   )}
 
                   {resetPasswordSent && (
-                    <div className="mt-6 p-4 bg-slate-700/50 rounded-lg text-center">
+                    <div className="mt-6 p-4 bg-white/10 backdrop-blur-sm border-white/20 rounded-lg text-center">
                       <p className="text-sm mb-3 font-medium text-white">Återställningsmail skickat!</p>
                       <div className="text-xs text-muted-foreground bg-secondary/10 p-2 rounded border-l-4 border-secondary mb-3">
                         <p className="font-medium text-white">Tips:</p>
-                        <p className="text-white">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.</p>
+                        <p className="text-white">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där</p>
                       </div>
                       <Button
                         size="sm"
