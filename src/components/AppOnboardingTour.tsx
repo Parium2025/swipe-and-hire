@@ -25,7 +25,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
     {
       icon: PanelLeft,
       title: "Använd sidomenyn",
-      description: "Tryck på menyknappen för att öppna sidebaren och se alla funktioner!",
+      description: "Tryck på menyknappen för att öppna och se fler funktioner.",
       page: "/search-jobs",
       allowedElement: "[data-sidebar='trigger']" // Bara sidebar trigger tillåten
     },
