@@ -37,6 +37,13 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
       allowedElement: "[data-onboarding='min-profil']" // Endast 'Min Profil' tillåten
     },
     {
+      icon: User,
+      title: "Redigera din profil",
+      description: "Här kan du redigera CV, bilder, video, dina uppgifter etc.",
+      page: "/profile",
+      allowedElement: null // Bara nästa-knappen tillåten
+    },
+    {
       icon: Crown,
       title: "Uppgradera till Premium",
       description: "Få tillgång till fler funktioner och öka dina chanser att hitta drömjobbet med våra premiumfunktioner!",
@@ -144,7 +151,12 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
     return () => window.removeEventListener('resize', update);
   }, [currentStep, location.pathname]);
 
-  // Borttagen auto-redirect till /subscription i sista steget för att inte hoppa över profilsteget
+  // Om vi är på sista steget (Premium) säkerställ att vi är på /subscription
+  useEffect(() => {
+    if (currentStep === 4 && location.pathname !== '/subscription') {
+      navigate('/subscription');
+    }
+  }, [currentStep, location.pathname, navigate]);
 
   // Highlight för tillåtna element
   const renderHighlight = () => {
