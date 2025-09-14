@@ -97,7 +97,13 @@ export function BirthDatePicker({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 bg-primary backdrop-blur-sm border-primary/30" align="end">
+      <PopoverContent
+        className="w-[360px] p-0 bg-primary backdrop-blur-sm border-primary/30"
+        side="bottom"
+        align="center"
+        sideOffset={8}
+        avoidCollisions={false}
+      >
         <div className="p-3 space-y-3">
           {/* Year and Month Selectors */}
           <div className="flex gap-2 relative z-50">
@@ -108,7 +114,7 @@ export function BirthDatePicker({
               <SelectTrigger className="flex-1 bg-white/10 border-white/30 text-white hover:bg-white/20">
                 <SelectValue placeholder="År" />
               </SelectTrigger>
-              <SelectContent className="max-h-60 bg-primary backdrop-blur-sm border-primary/30 text-white" position="popper" sideOffset={4}>
+              <SelectContent className="z-[60] max-h-60 bg-primary backdrop-blur-sm border-primary/30 text-white" position="popper" sideOffset={4}>
                 {years.map((year) => (
                   <SelectItem key={year} value={year.toString()} className="hover:bg-white/20 focus:bg-white/20">
                     {year}
