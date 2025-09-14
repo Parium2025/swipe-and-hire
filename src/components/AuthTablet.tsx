@@ -158,10 +158,8 @@ const AuthTablet = ({
             setShowResetPassword(true);
           }
         } else {
-          // Navigate to home after successful login with a smooth transition
-          setTimeout(() => {
-            navigate('/');
-          }, 1500);
+          // Navigate to app after successful login
+          navigate('/search-jobs', { replace: true });
         }
       } else {
         const result = await signUp(email, password, {

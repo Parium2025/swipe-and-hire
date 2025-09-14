@@ -299,8 +299,8 @@ const Auth = () => {
       // If user is logged in, redirect to home immediately (but not during recovery flow)
       const hasRecoveryParamsNow = isReset || !!accessToken || !!refreshToken || !!tokenParam || !!tokenHashParam || tokenType === 'recovery';
       if (user && !hasRecoveryParamsNow && confirmationStatus === 'none' && recoveryStatus === 'none' && !confirmed) {
-        console.log('User is logged in, redirecting to home');
-        navigate('/');
+        console.log('User is logged in, redirecting to app');
+        navigate('/search-jobs', { replace: true });
       }
     };
 
