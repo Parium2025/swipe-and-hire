@@ -869,7 +869,7 @@ const Profile = () => {
               )}
 
               {/* Delete icon for profile media */}
-              {(isProfileVideo && !!profileImageUrl) && (
+              {!!profileImageUrl && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
