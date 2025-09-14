@@ -1121,11 +1121,11 @@ const Profile = () => {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent 
                             className="w-72 max-h-80 overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
-                            side="top"
+                            side="bottom"
                             align="center"
                             alignOffset={0}
                             sideOffset={6}
-                            avoidCollisions={false}
+                            avoidCollisions={true}
                           >
                             <DropdownMenuItem onClick={() => setEmploymentStatus('tillsvidareanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
                               Fast anställning
@@ -1179,11 +1179,11 @@ const Profile = () => {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent 
                               className="w-72 max-h-80 overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
-                              side="top"
+                              side="bottom"
                               align="center"
                               alignOffset={0}
                               sideOffset={6}
-                              avoidCollisions={false}
+                              avoidCollisions={true}
                             >
                               <DropdownMenuItem onClick={() => setWorkingHours('heltid')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
                                 Heltid
@@ -1227,11 +1227,11 @@ const Profile = () => {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent 
                             className="w-72 max-h-80 overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
-                            side="top"
+                            side="bottom"
                             align="center"
                             alignOffset={0}
                             sideOffset={6}
-                            avoidCollisions={false}
+                            avoidCollisions={true}
                           >
                             <DropdownMenuItem onClick={() => setAvailability('omgaende')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
                               Omgående

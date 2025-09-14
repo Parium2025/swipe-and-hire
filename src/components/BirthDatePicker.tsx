@@ -114,10 +114,10 @@ export function BirthDatePicker({
               </DropdownMenuTrigger>
               <DropdownMenuContent 
                 className="w-32 max-h-60 overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
-                side="top"
+                side="bottom"
                 align="center"
                 sideOffset={6}
-                avoidCollisions={false}
+                avoidCollisions={true}
               >
                 {years.map((year) => (
                   <DropdownMenuItem 
@@ -145,10 +145,10 @@ export function BirthDatePicker({
               </DropdownMenuTrigger>
               <DropdownMenuContent 
                 className="w-40 max-h-60 overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
-                side="top"
+                side="bottom"
                 align="center"
                 sideOffset={6}
-                avoidCollisions={false}
+                avoidCollisions={true}
               >
                 {months.map((month) => (
                   <DropdownMenuItem 
