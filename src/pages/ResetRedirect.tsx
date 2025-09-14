@@ -56,29 +56,21 @@ const ResetRedirect = () => {
         return; // Redirectar redan, avbryt
       }
       
-      const tokenHash = searchParams.get('token_hash');
-      const token = searchParams.get('token');
       const type = searchParams.get('type') || 'recovery';
       const issued = searchParams.get('issued');
-      const chosenToken = tokenHash || token;
-      const paramName = tokenHash ? 'token_hash' : 'token';
-      if (chosenToken) {
-        const origin = window.location.origin;
-        const issuedPart = issued ? `&issued=${encodeURIComponent(issued)}` : '';
-        const url = `${origin}/auth?${paramName}=${encodeURIComponent(chosenToken)}&type=${encodeURIComponent(type)}${issuedPart}`;
-        window.location.replace(url);
-      }
+      const origin = window.location.origin;
+      const hash = window.location.hash || '';
+      const issuedPart = issued ? `&issued=${encodeURIComponent(issued)}` : '';
+      const url = `${origin}/auth?reset=true${issuedPart}${hash}`;
+      window.location.replace(url);
     }
   }, [searchParams, navigate]);
 
   const buildResetUrl = () => {
-    const tokenHash = searchParams.get('token_hash');
-    const token = searchParams.get('token');
     const type = searchParams.get('type') || 'recovery';
     const issued = searchParams.get('issued');
-    const chosenToken = tokenHash || token;
-    const paramName = tokenHash ? 'token_hash' : 'token';
     const origin = window.location.origin;
+    const hash = window.location.hash || '';
     
     // Kontrollera om länken har gått ut
     if (issued) {
@@ -87,13 +79,12 @@ const ResetRedirect = () => {
       const tenMinutesInMs = 10 * 60 * 1000;
       
       if (currentTime - issuedTime > tenMinutesInMs) {
-        // Om länken har gått ut, redirecta till expired-sidan
         return `${origin}/auth?recovery_status=expired`;
       }
     }
     
     const issuedPart = issued ? `&issued=${issued}` : '';
-    return `${origin}/auth?${paramName}=${chosenToken}&type=${type}${issuedPart}`;
+    return `${origin}/auth?reset=true&type=${type}${issuedPart}${hash}`;
   };
 
   const copyUrlToClipboard = async () => {
