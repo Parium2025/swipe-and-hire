@@ -415,7 +415,7 @@ const AuthMobile = ({
                        </div>
                        
                         {showResetPassword && !resetPasswordSent && (
-                         <div className="mt-4 p-3 bg-muted/50 rounded-lg text-center">
+                         <div className="mt-4 p-3 rounded-lg text-center">
                             <Button
                               className="bg-primary hover:bg-primary/90 text-primary-foreground"
                               size="sm"

@@ -373,7 +373,7 @@ const AuthTablet = ({
                         </Button>
                         
                         {showResetPassword && !resetPasswordSent && (
-                          <div className="mt-4 p-3 bg-muted/50 rounded-lg text-center">
+                          <div className="mt-4 p-3 rounded-lg text-center">
                             <p className="text-sm mb-2 text-white">Glömt lösenordet?</p>
                             <Button
                               className="bg-primary hover:bg-primary/90 text-primary-foreground"

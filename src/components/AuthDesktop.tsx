@@ -587,7 +587,7 @@ const AuthDesktop = ({
                   )}
 
                   {showResetPassword && !resetPasswordSent && (
-                    <div className="mt-6 p-4 bg-muted/50 rounded-lg text-center">
+                    <div className="mt-6 p-4 rounded-lg text-center">
                       <p className="text-sm mb-2 text-white">Glömt lösenordet?</p>
                        <Button
                          className="bg-primary hover:bg-primary/90 text-primary-foreground"
