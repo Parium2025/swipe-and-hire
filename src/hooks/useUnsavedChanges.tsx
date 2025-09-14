@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
+import { useToast } from '@/hooks/use-toast';
 
 interface UnsavedChangesContextType {
   hasUnsavedChanges: boolean;
@@ -12,50 +12,62 @@ const UnsavedChangesContext = createContext<UnsavedChangesContextType | undefine
 
 export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
   const lastSafePathRef = useRef<string>(location.pathname);
 
   // Track the last safe path (where the user currently is) to return on cancel
   useEffect(() => {
-    if (!showUnsavedDialog) {
-      lastSafePathRef.current = location.pathname;
-    }
-  }, [location.pathname, showUnsavedDialog]);
+    lastSafePathRef.current = location.pathname;
+  }, [location.pathname]);
 
   const checkBeforeNavigation = (targetUrl: string): boolean => {
     console.log('checkBeforeNavigation called, hasUnsavedChanges:', hasUnsavedChanges);
     if (hasUnsavedChanges) {
       setPendingNavigation(targetUrl);
-      setShowUnsavedDialog(true);
+      
+      // Show toast with action buttons
+      toast({
+        title: "Osparade ändringar",
+        description: "Du har osparade ändringar. Vill du spara innan du lämnar?",
+        action: (
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                // Navigate without saving
+                if (targetUrl) {
+                  window.dispatchEvent(new CustomEvent('unsaved-confirm'));
+                  setHasUnsavedChanges(false);
+                  navigate(targetUrl);
+                }
+                setPendingNavigation(null);
+              }}
+              className="bg-red-500/80 hover:bg-red-500/90 text-white px-3 py-1 rounded text-sm"
+            >
+              Lämna utan att spara
+            </button>
+            <button
+              onClick={() => {
+                // Cancel and stay on current page
+                setPendingNavigation(null);
+                window.dispatchEvent(new CustomEvent('unsaved-cancel'));
+                if (location.pathname !== '/profile') {
+                  navigate('/profile', { replace: true });
+                }
+              }}
+              className="bg-white/10 hover:bg-white/20 text-white px-3 py-1 rounded text-sm border border-white/30"
+            >
+              Stanna och spara
+            </button>
+          </div>
+        ),
+      });
+      
       return false; // Block navigation initially
     }
     return true;
-  };
-
-  const handleConfirmLeave = () => {
-    if (pendingNavigation) {
-      // Notify listeners (e.g., forms) to reset their state
-      window.dispatchEvent(new CustomEvent('unsaved-confirm'));
-      setHasUnsavedChanges(false);
-      navigate(pendingNavigation);
-    }
-    setShowUnsavedDialog(false);
-    setPendingNavigation(null);
-  };
-
-  const handleCancelLeave = () => {
-    console.log('Cancel button clicked - closing dialog and returning to profile if needed');
-    setShowUnsavedDialog(false);
-    setPendingNavigation(null);
-    // Notify listeners (e.g., sidebar) to close on cancel
-    window.dispatchEvent(new CustomEvent('unsaved-cancel'));
-    // Ensure we are on profile where unsaved changes exist
-    if (location.pathname !== '/profile') {
-      navigate('/profile', { replace: true });
-    }
   };
 
   return (
@@ -65,12 +77,6 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
       checkBeforeNavigation
     }}>
       {children}
-      <UnsavedChangesDialog
-        open={showUnsavedDialog}
-        onOpenChange={setShowUnsavedDialog}
-        onConfirm={handleConfirmLeave}
-        onCancel={handleCancelLeave}
-      />
     </UnsavedChangesContext.Provider>
   );
 }
