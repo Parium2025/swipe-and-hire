@@ -54,7 +54,7 @@ const handler = async (req: Request): Promise<Response> => {
         type: 'recovery',
         email: email,
         options: {
-          redirectTo: `https://09c4e686-17a9-467e-89b1-3cf832371d49.sandbox.lovable.dev/reset-redirect?issued=${issued}`
+          redirectTo: `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/reset-redirect?issued=${issued}`
         }
       });
 
@@ -66,7 +66,7 @@ const handler = async (req: Request): Promise<Response> => {
         
         if (token) {
           const paramName = supabaseUrl.searchParams.get('token_hash') ? 'token_hash' : 'token';
-          resetUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.sandbox.lovable.dev/reset-redirect?${paramName}=${token}&type=${type}&issued=${issued}`;
+          resetUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/reset-redirect?${paramName}=${token}&type=${type}&issued=${issued}`;
         }
       }
     } catch (linkError) {
