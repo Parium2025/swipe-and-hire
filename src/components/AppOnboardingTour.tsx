@@ -144,12 +144,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
     return () => window.removeEventListener('resize', update);
   }, [currentStep, location.pathname]);
 
-  // Om vi är på sista steget (Premium) säkerställ att vi är på /subscription
-  useEffect(() => {
-    if (currentStep === 3 && location.pathname !== '/subscription') {
-      navigate('/subscription');
-    }
-  }, [currentStep, location.pathname, navigate]);
+  // Borttagen auto-redirect till /subscription i sista steget för att inte hoppa över profilsteget
 
   // Highlight för tillåtna element
   const renderHighlight = () => {
