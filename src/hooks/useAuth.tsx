@@ -592,7 +592,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       toast({
-        title: "📧 Återställningsmail skickat!",
+        title: "Återställningsmail skickat!",
         description: "Kontrollera din e-post för instruktioner om lösenordsåterställning.",
         duration: 8000
       });

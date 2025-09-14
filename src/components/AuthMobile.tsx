@@ -428,10 +428,10 @@ const AuthMobile = ({
                         )}
 
                         {resetPasswordSent && (
-                          <div className="mt-4 p-3 bg-muted/50 rounded-lg text-center">
-                            <p className="text-sm mb-3 font-medium text-white">📧 Återställningsmail skickat!</p>
+                          <div className="mt-4 p-3 bg-slate-700/50 rounded-lg text-center">
+                            <p className="text-sm mb-3 font-medium text-white">Återställningsmail skickat!</p>
                             <div className="text-xs text-muted-foreground bg-secondary/10 p-2 rounded border-l-4 border-secondary mb-3">
-                              <p className="font-medium text-white">💡 Tips:</p>
+                              <p className="font-medium text-white">Tips:</p>
                               <p className="text-white">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.</p>
                             </div>
                              <Button
