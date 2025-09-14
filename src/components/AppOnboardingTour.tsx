@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +11,7 @@ interface AppOnboardingTourProps {
 
 const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [sidebarWasOpened, setSidebarWasOpened] = useState(false);
+  
   const navigate = useNavigate();
 
   const steps = [
@@ -45,25 +45,6 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
     }
   ];
 
-  // Lyssna på sidebar-öppning för steg 2
-  useEffect(() => {
-    if (currentStep === 1 && !sidebarWasOpened) {
-      const checkSidebar = () => {
-        const sidebar = document.querySelector('[data-sidebar="sidebar"]');
-        const isExpanded = sidebar?.getAttribute('data-state') === 'expanded' || !sidebar?.hasAttribute('data-state');
-        if (isExpanded) {
-          setSidebarWasOpened(true);
-          // Gå till nästa steg (Min Profil)
-          setTimeout(() => {
-            handleNext();
-          }, 400);
-        }
-      };
-
-      const interval = setInterval(checkSidebar, 100);
-      return () => clearInterval(interval);
-    }
-  }, [currentStep, sidebarWasOpened]);
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -73,13 +54,6 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
       // Navigate to the next page if needed
       if (nextStepData.page) {
         navigate(nextStepData.page);
-      }
-      
-      setCurrentStep(nextStep);
-      
-      // Reset sidebar state for next step
-      if (nextStep !== 1) {
-        setSidebarWasOpened(false);
       }
     } else {
       onComplete();
@@ -96,8 +70,13 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
       if ((target as HTMLElement).closest('.onboarding-tour')) return;
       
       if (step.allowedElement) {
-        // Tillåt endast det markerade elementet
-        if (!((target as HTMLElement).closest(step.allowedElement))) {
+        const isAllowed = (target as HTMLElement).closest(step.allowedElement);
+        if (isAllowed) {
+          if (currentStep === 1) {
+            setTimeout(() => handleNext(), 300);
+          }
+          return;
+        } else {
           e.preventDefault();
           e.stopPropagation();
         }
@@ -123,6 +102,32 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
       setCurrentStep(3);
     }
   }, [currentStep, location.pathname]);
+
+  // Positionera första steget under hjälprubriken på /search-jobs
+  const [cardPos, setCardPos] = useState<{ top: number; left: number } | null>(null);
+  useEffect(() => {
+    const update = () => {
+      if (currentStep === 0 && location.pathname === '/search-jobs') {
+        const anchor = document.querySelector("[data-onboarding='search-hero']") as HTMLElement | null;
+        if (anchor) {
+          const rect = anchor.getBoundingClientRect();
+          setCardPos({ top: rect.bottom + 12, left: rect.left + rect.width / 2 });
+          return;
+        }
+      }
+      setCardPos(null);
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, [currentStep, location.pathname]);
+
+  // Om vi är på sista steget (Premium) säkerställ att vi är på /subscription
+  useEffect(() => {
+    if (currentStep === 3 && location.pathname !== '/subscription') {
+      navigate('/subscription');
+    }
+  }, [currentStep, location.pathname, navigate]);
 
   // Highlight för tillåtna element
   const renderHighlight = () => {
@@ -163,7 +168,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
       {renderHighlight()}
       
       {/* Onboarding tour card */}
-      <div className="fixed top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 onboarding-tour">
+      <div className={`fixed z-50 onboarding-tour ${cardPos ? '' : 'top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 transform'}`} style={cardPos ? { top: cardPos.top, left: cardPos.left, transform: 'translateX(-50%)' } : undefined}>
         <Card className="w-64 bg-[hsl(var(--surface-blue))]/90 backdrop-blur-sm border-white/20 shadow-2xl animate-fade-in">
           <CardContent className="p-4">
             {/* Progress indicator */}

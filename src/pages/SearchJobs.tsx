@@ -870,7 +870,7 @@ const SearchJobs = () => {
       
       {/* Main content */}
       {/* Hero Section */}
-      <div className="text-center space-y-3 py-4">
+      <div className="text-center space-y-3 py-4" data-onboarding="search-hero">
         <h1 className="text-4xl font-extrabold text-white">
           Ditt nästa steg
         </h1>
