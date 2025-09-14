@@ -86,7 +86,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
     }
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
     accept: acceptedFileTypes.reduce((acc, type) => {
       acc[type] = [];
@@ -94,6 +94,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
     }, {} as Record<string, string[]>),
     maxSize: maxFileSize,
     multiple: false,
+    noClick: false, // Allow click to open file dialog
     onDropRejected: (fileRejections) => {
       const error = fileRejections[0]?.errors[0];
       let message = "Filen kunde inte laddas upp.";
@@ -174,33 +175,46 @@ const FileUpload: React.FC<FileUploadProps> = ({
   }
 
   return (
-    <div
-      {...getRootProps()}
-      className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-        isDragActive
-          ? 'border-primary bg-primary/5'
-          : 'border-border hover:border-muted-foreground bg-muted/30'
-      } ${uploading ? 'pointer-events-none opacity-50' : ''}`}
-    >
-      <input {...getInputProps()} />
-      <div className="space-y-2">
-        <Upload className="h-8 w-8 mx-auto text-white" />
-        {uploading ? (
-          <p className="text-sm text-white">Laddar upp...</p>
-        ) : (
-          <>
-            <p className="text-sm font-medium text-white">
-              {isDragActive
-                ? 'Släpp filen här...'
-                : 'Dra och släpp en fil här, eller klicka för att välja'}
-            </p>
-            <p className="text-xs text-white">
-              {getAcceptedTypesText()} (max {Math.round(maxFileSize / 1024 / 1024)}MB)
-            </p>
-          </>
-        )}
+    <>
+      {/* Hidden file input for better mobile support */}
+      <input 
+        {...getInputProps()} 
+        accept={acceptedFileTypes.join(',')}
+        style={{ display: 'none' }}
+        id={`file-input-${Math.random().toString(36).substring(2)}`}
+      />
+      
+      <div
+        {...getRootProps()}
+        className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+          isDragActive
+            ? 'border-primary bg-primary/5'
+            : 'border-border hover:border-muted-foreground bg-muted/30'
+        } ${uploading ? 'pointer-events-none opacity-50' : ''}`}
+        onClick={(e) => {
+          e.preventDefault();
+          open(); // Explicitly open file dialog
+        }}
+      >
+        <div className="space-y-2">
+          <Upload className="h-8 w-8 mx-auto text-white" />
+          {uploading ? (
+            <p className="text-sm text-white">Laddar upp...</p>
+          ) : (
+            <>
+              <p className="text-sm font-medium text-white">
+                {isDragActive
+                  ? 'Släpp filen här...'
+                  : 'Klicka för att välja fil'}
+              </p>
+              <p className="text-xs text-white">
+                {getAcceptedTypesText()} (max {Math.round(maxFileSize / 1024 / 1024)}MB)
+              </p>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
