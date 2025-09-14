@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Heart, PanelLeft, User, Crown, ArrowRight, X } from 'lucide-react';
+import { Heart, PanelLeft, User, Crown, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface AppOnboardingTourProps {
@@ -119,18 +119,8 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
               {currentStepData.description}
             </p>
             
-            {/* Navigation buttons */}
-            <div className="flex justify-between items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={onComplete}
-                className="text-white/60 hover:text-white hover:bg-white/10 text-xs px-2 py-1 h-8"
-              >
-                <X className="h-3 w-3 mr-1" />
-                Hoppa över
-              </Button>
-              
+            {/* Navigation button */}
+            <div className="flex justify-center">
               <Button 
                 onClick={handleNext}
                 size="sm"
