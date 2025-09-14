@@ -46,7 +46,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
     {
       icon: Crown,
       title: "Uppgradera till Premium",
-      description: "Få tillgång till fler funktioner och öka dina chanser att hitta drömjobbet med våra premiumfunktioner!",
+      description: "Få tillgång till fler funktioner och öka dina chanser med vår premiumfunktion.",
       page: "/subscription",
       allowedElement: null // Bara nästa-knappen tillåten
     }
@@ -247,7 +247,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
                     size="sm"
                     className="min-w-[80px] text-xs px-3 py-1 h-8"
                   >
-                    {currentStep === steps.length - 1 ? 'Färdig!' : 'Nästa'}
+                    {currentStep === steps.length - 1 ? 'Nu kör vi!' : 'Nästa'}
                     {currentStep !== steps.length - 1 && <ArrowRight className="h-3 w-3 ml-1" />}
                   </Button>
                 </div>
