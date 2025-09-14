@@ -54,20 +54,14 @@ const handler = async (req: Request): Promise<Response> => {
         type: 'recovery',
         email: email,
         options: {
-          redirectTo: `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/reset-redirect?issued=${issued}`
+          redirectTo: `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&issued=${issued}`
         }
       });
 
       if (!error && data.properties?.action_link) {
-        // Extrahera token från Supabase länken och skapa vår egen
-        const supabaseUrl = new URL(data.properties.action_link);
-        const token = supabaseUrl.searchParams.get('token') || supabaseUrl.searchParams.get('token_hash');
-        const type = supabaseUrl.searchParams.get('type') || 'recovery';
-        
-        if (token) {
-          const paramName = supabaseUrl.searchParams.get('token_hash') ? 'token_hash' : 'token';
-          resetUrl = `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/reset-redirect?${paramName}=${token}&type=${type}&issued=${issued}`;
-        }
+        // Använd Supabase's egen länk direkt istället för att bygga vår egen
+        resetUrl = data.properties.action_link;
+        console.log('🔍 SUPABASE GENERATED LINK:', resetUrl);
       }
     } catch (linkError) {
       // Don't log errors that might reveal user existence
