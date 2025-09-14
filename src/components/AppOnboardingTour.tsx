@@ -245,7 +245,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
               {currentStepData.allowedElement && (
                 <div className="text-center">
                   <p className="text-white/60 text-xs">
-                    👆 Tryck på det markerade elementet
+                    Tryck på det markerade elementet
                   </p>
                 </div>
               )}
