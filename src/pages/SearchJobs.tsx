@@ -1403,7 +1403,7 @@ const SearchJobs = () => {
           <div className={`flex flex-col sm:flex-row items-center gap-4 pt-4 border-t border-white/10 ${jobs.length === 0 ? 'justify-center' : 'justify-between'}`}>
             <div className={`flex items-center gap-2 flex-wrap ${jobs.length === 0 ? 'justify-center text-center mx-auto' : ''}`}>
               <span className="text-2xl font-bold text-white">{jobs.length}</span>
-              <span className="text-white/70">jobb hittades</span>
+              <span className="text-white">jobb hittades</span>
               {(searchTerm || selectedLocations.length > 0 || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentTypes.length > 0) && (
                 <>
                   <span className="text-white/70">•</span>
