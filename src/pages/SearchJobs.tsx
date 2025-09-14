@@ -1273,7 +1273,12 @@ const SearchJobs = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
-                  className={`w-72 bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white ${isMobile ? 'max-h-[50vh]' : 'max-h-80'} overflow-y-auto overscroll-contain`}
+                  className={`w-72 bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white ${isMobile ? 'max-h-[45vh]' : 'max-h-80'} overflow-y-auto overscroll-contain`}
+                  style={{ 
+                    WebkitOverflowScrolling: 'touch',
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: '#64748b #334155'
+                  }}
                   side="bottom"
                   align="center"
                   alignOffset={0}
