@@ -31,6 +31,19 @@ const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Debug mobilproblem
+  useEffect(() => {
+    console.log('📱 INDEX DEBUG - Current state:', {
+      loading,
+      user: !!user,
+      profile: !!profile,
+      userRole: userRole?.role,
+      pathname: location.pathname,
+      needsOnboarding: !profile?.onboarding_completed,
+      isMobile: window.innerWidth <= 768
+    });
+  }, [loading, user, profile, userRole, location.pathname]);
+
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
@@ -124,8 +137,9 @@ const Index = () => {
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
 
   if (isSidebarRoute) {
+    // Temporärt inaktivera swipe för debugging
     const { containerRef } = useSwipeToOpen({
-      enabled: true,
+      enabled: false, // Inaktiverat för att testa mobilproblem
       swipeThreshold: 80,
       edgeThreshold: 50
     });
