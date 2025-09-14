@@ -75,6 +75,11 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
         if (isAllowed) {
           if (currentStep === 1) {
             setTimeout(() => handleNext(), 300);
+          } else if (currentStep === 2 && step.allowedElement === "[data-onboarding='min-profil']") {
+            // När användaren klickar på "Min Profil", navigera till profil först
+            setTimeout(() => {
+              navigate('/profile');
+            }, 100);
           }
           return;
         }
