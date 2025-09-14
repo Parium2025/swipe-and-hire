@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Heart, PanelLeft, User, Crown, ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface AppOnboardingTourProps {
   onComplete: () => void;
@@ -31,10 +31,10 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
     },
     {
       icon: User,
-      title: "Din profil",
-      description: "Håll din profil uppdaterad med bilder, CV och information.",
-      page: "/profile",
-      allowedElement: null // Bara nästa-knappen tillåten
+      title: "Tryck på Min Profil",
+      description: "Tryck på 'Min Profil' i sidomenyn.",
+      page: null,
+      allowedElement: "[data-onboarding='min-profil']" // Endast 'Min Profil' tillåten
     },
     {
       icon: Crown,
@@ -50,12 +50,13 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
     if (currentStep === 1 && !sidebarWasOpened) {
       const checkSidebar = () => {
         const sidebar = document.querySelector('[data-sidebar="sidebar"]');
-        if (sidebar && !sidebar.hasAttribute('data-state') || sidebar?.getAttribute('data-state') === 'expanded') {
+        const isExpanded = sidebar?.getAttribute('data-state') === 'expanded' || !sidebar?.hasAttribute('data-state');
+        if (isExpanded) {
           setSidebarWasOpened(true);
-          // Automatiskt gå till nästa steg efter kort fördröjning
+          // Gå till nästa steg (Min Profil)
           setTimeout(() => {
             handleNext();
-          }, 1000);
+          }, 400);
         }
       };
 
@@ -89,29 +90,23 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       const target = e.target as Element;
-      const currentStepData = steps[currentStep];
+      const step = steps[currentStep];
       
-      // Tillåt alltid klick på onboarding-turen själv
-      if (target.closest('.onboarding-tour')) {
+      // Tillåt alltid klick på onboarding-kortet
+      if ((target as HTMLElement).closest('.onboarding-tour')) return;
+      
+      if (step.allowedElement) {
+        // Tillåt endast det markerade elementet
+        if (!((target as HTMLElement).closest(step.allowedElement))) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
         return;
       }
       
-      // För steg 2 (sidebar), tillåt bara sidebar trigger
-      if (currentStep === 1 && currentStepData.allowedElement) {
-        const allowedElement = document.querySelector(currentStepData.allowedElement);
-        if (!target.closest(currentStepData.allowedElement) && target !== allowedElement) {
-          e.preventDefault();
-          e.stopPropagation();
-          return false;
-        }
-      }
-      
-      // För alla andra steg, blockera alla klick utom på onboarding-turen
-      if (currentStep !== 1) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      }
+      // I steg utan specifikt element: blockera allt utom kortet
+      e.preventDefault();
+      e.stopPropagation();
     };
 
     document.addEventListener('click', handleClick, true);
@@ -121,9 +116,17 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
   const currentStepData = steps[currentStep];
   const Icon = currentStepData.icon;
 
-  // Highlight för sidebar trigger på steg 2
+  const location = useLocation();
+  // Gå vidare när användaren har navigerat till /profile via sidomenyn
+  useEffect(() => {
+    if (currentStep === 2 && location.pathname === '/profile') {
+      setCurrentStep(3);
+    }
+  }, [currentStep, location.pathname]);
+
+  // Highlight för tillåtna element
   const renderHighlight = () => {
-    if (currentStep === 1 && currentStepData.allowedElement) {
+    if (currentStepData.allowedElement) {
       return (
         <div className="fixed inset-0 z-40 pointer-events-none">
           <style>
@@ -216,11 +219,11 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
                 </div>
               )}
               
-              {/* Specialtext för steg 2 */}
-              {currentStep === 1 && (
+              {/* Specialtext när ett element är markerat */}
+              {currentStepData.allowedElement && (
                 <div className="text-center">
                   <p className="text-white/60 text-xs">
-                    👆 Tryck på menyknappen som pulsar
+                    👆 Tryck på det markerade elementet
                   </p>
                 </div>
               )}

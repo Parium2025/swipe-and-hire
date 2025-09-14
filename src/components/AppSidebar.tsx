@@ -144,6 +144,7 @@ export function AppSidebar() {
                  {profileItems.map((item) => (
                    <SidebarMenuItem key={item.title}>
                      <SidebarMenuButton 
+                       data-onboarding={item.title === 'Min Profil' ? 'min-profil' : undefined}
                        onClick={(e) => handleNavigation(item.url, e)}
                        className={`transition-colors duration-150 ${isActiveUrl(item.url) ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent'}`}
                        title={collapsed ? item.title : undefined}
