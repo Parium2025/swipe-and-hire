@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
+import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 
 interface UnsavedChangesContextType {
   hasUnsavedChanges: boolean;
@@ -12,48 +12,50 @@ const UnsavedChangesContext = createContext<UnsavedChangesContextType | undefine
 
 export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
   const lastSafePathRef = useRef<string>(location.pathname);
 
   // Track the last safe path (where the user currently is) to return on cancel
   useEffect(() => {
-    lastSafePathRef.current = location.pathname;
-  }, [location.pathname]);
+    if (!showUnsavedDialog) {
+      lastSafePathRef.current = location.pathname;
+    }
+  }, [location.pathname, showUnsavedDialog]);
 
   const checkBeforeNavigation = (targetUrl: string): boolean => {
     console.log('checkBeforeNavigation called, hasUnsavedChanges:', hasUnsavedChanges);
     if (hasUnsavedChanges) {
       setPendingNavigation(targetUrl);
-      
-      // Show a custom notice in the sidebar instead of toast
-      window.dispatchEvent(new CustomEvent('show-unsaved-notice', {
-        detail: {
-          onConfirm: () => {
-            if (targetUrl) {
-              window.dispatchEvent(new CustomEvent('unsaved-confirm'));
-              setHasUnsavedChanges(false);
-              navigate(targetUrl);
-            }
-            setPendingNavigation(null);
-            window.dispatchEvent(new CustomEvent('hide-unsaved-notice'));
-          },
-          onCancel: () => {
-            setPendingNavigation(null);
-            window.dispatchEvent(new CustomEvent('unsaved-cancel'));
-            window.dispatchEvent(new CustomEvent('hide-unsaved-notice'));
-            if (location.pathname !== '/profile') {
-              navigate('/profile', { replace: true });
-            }
-          }
-        }
-      }));
-      
+      setShowUnsavedDialog(true);
       return false; // Block navigation initially
     }
     return true;
+  };
+
+  const handleConfirmLeave = () => {
+    if (pendingNavigation) {
+      // Notify listeners (e.g., forms) to reset their state
+      window.dispatchEvent(new CustomEvent('unsaved-confirm'));
+      setHasUnsavedChanges(false);
+      navigate(pendingNavigation);
+    }
+    setShowUnsavedDialog(false);
+    setPendingNavigation(null);
+  };
+
+  const handleCancelLeave = () => {
+    console.log('Cancel button clicked - closing dialog and returning to profile if needed');
+    setShowUnsavedDialog(false);
+    setPendingNavigation(null);
+    // Notify listeners (e.g., sidebar) to close on cancel
+    window.dispatchEvent(new CustomEvent('unsaved-cancel'));
+    // Ensure we are on profile where unsaved changes exist
+    if (location.pathname !== '/profile') {
+      navigate('/profile', { replace: true });
+    }
   };
 
   return (
@@ -63,6 +65,12 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
       checkBeforeNavigation
     }}>
       {children}
+      <UnsavedChangesDialog
+        open={showUnsavedDialog}
+        onOpenChange={setShowUnsavedDialog}
+        onConfirm={handleConfirmLeave}
+        onCancel={handleCancelLeave}
+      />
     </UnsavedChangesContext.Provider>
   );
 }
