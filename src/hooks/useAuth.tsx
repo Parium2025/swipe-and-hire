@@ -394,7 +394,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast({
         title: "Välkommen tillbaka!",
         description: "Du är nu inloggad",
-        duration: 2000
+        duration: 3000
       });
 
       return {};
@@ -485,7 +485,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     toast({
       title: "Utloggad",
       description: "Du har loggats ut",
-      duration: 5000
+      duration: 3000
     });
   };
 
