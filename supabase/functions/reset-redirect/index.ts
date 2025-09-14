@@ -76,10 +76,6 @@ const handler = async (req: Request): Promise<Response> => {
       redirectUrl += `&type=${type}`;
     }
     
-    if (issued) {
-      redirectUrl += `&issued=${issued}`;
-    }
-    
     console.log(`✅ VALID RESET LINK - Redirecting to: ${redirectUrl}`);
 
     return new Response(null, {

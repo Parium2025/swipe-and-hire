@@ -45,6 +45,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Generera issued timestamp
     const issued = Date.now();
     
+    // Använd Supabase's direkt länk för bättre kompatibilitet
     // SECURITY: Always return success to prevent user enumeration
     // Don't reveal if the user exists or not
     let resetUrl = null;
@@ -54,13 +55,12 @@ const handler = async (req: Request): Promise<Response> => {
         type: 'recovery',
         email: email,
         options: {
-          redirectTo: `https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/reset-redirect?issued=${issued}`
+          redirectTo: `https://09c4e686-17a9-467e-89b1-3cf832371d49.sandbox.lovable.dev/auth?reset=true&issued=${issued}`
         }
       });
 
       if (!error && data.properties?.action_link) {
         resetUrl = data.properties.action_link;
-        console.log('🔍 SUPABASE GENERATED LINK:', resetUrl);
       }
     } catch (linkError) {
       // Don't log errors that might reveal user existence

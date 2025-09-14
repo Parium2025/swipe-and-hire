@@ -15,12 +15,6 @@ const ResetRedirect = () => {
 
   useEffect(() => {
     const userAgent = navigator.userAgent;
-    
-    console.log('🔍 RESET-REDIRECT PAGE LOADED:', {
-      userAgent: userAgent.substring(0, 100),
-      currentUrl: window.location.href,
-      searchParams: Array.from(searchParams.entries())
-    });
 
     const isGmail = userAgent.includes('Gmail');
     const isLinkedIn = userAgent.includes('LinkedInApp');
@@ -34,55 +28,20 @@ const ResetRedirect = () => {
 
     const mobile = /iPhone|iPad|iPod|Android|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
 
-    console.log('🔍 BROWSER DETECTION:', { inApp, mobile, isGmail, isLinkedIn, isFacebook });
-
     setIsInAppBrowser(inApp);
     setIsMobile(mobile);
-
-    // Om Supabase redan har verifierat och skickat tillbaka access/refresh tokens i hash,
-    // vidarebefordra direkt till /auth och bevara hash-parametrarna.
-    const hashStr = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
-    const hash = new URLSearchParams(hashStr);
-    const accessToken = hash.get('access_token');
-    const refreshToken = hash.get('refresh_token');
-    const typeInHash = hash.get('type');
-    if (accessToken && refreshToken) {
-      const target = new URL('/auth', window.location.origin);
-      const issued = searchParams.get('issued');
-      const finalType = typeInHash || searchParams.get('type') || 'recovery';
-      if (finalType) target.searchParams.set('type', finalType);
-      if (issued) target.searchParams.set('issued', issued);
-      const newHash = new URLSearchParams();
-      newHash.set('access_token', accessToken);
-      newHash.set('refresh_token', refreshToken);
-      if (finalType) newHash.set('type', finalType);
-      target.hash = newHash.toString();
-      console.log('🔁 Found tokens in hash – forwarding to /auth:', target.toString());
-      window.location.replace(target.toString());
-      return;
-    }
 
     // Kontrollera om länken har gått ut (10 minuter)
     const checkLinkExpiry = () => {
       const issued = searchParams.get('issued');
-      console.log('⏰ CHECKING LINK EXPIRY:', { issued });
       if (issued) {
         const issuedTime = parseInt(issued);
         const currentTime = Date.now();
         const tenMinutesInMs = 10 * 60 * 1000; // 10 minuter i millisekunder
         
-        console.log('⏰ EXPIRY CHECK DETAILS:', {
-          issuedTime,
-          currentTime,
-          timeDiff: currentTime - issuedTime,
-          tenMinutesInMs,
-          isExpired: currentTime - issuedTime > tenMinutesInMs
-        });
-        
         if (currentTime - issuedTime > tenMinutesInMs) {
           // Länken har gått ut, redirecta till expired-sidan
           const origin = window.location.origin;
-          console.log('❌ LINK EXPIRED - Redirecting to expired page');
           window.location.replace(`${origin}/auth?recovery_status=expired`);
           return true;
         }
@@ -92,8 +51,6 @@ const ResetRedirect = () => {
 
     // Om inte in-app browser, gå direkt till vår Auth-sida med token-parametrar
     if (!inApp) {
-      console.log('✅ NOT IN-APP BROWSER - Proceeding with direct redirect');
-      
       // Kontrollera först om länken har gått ut
       if (checkLinkExpiry()) {
         return; // Redirectar redan, avbryt
@@ -105,29 +62,12 @@ const ResetRedirect = () => {
       const issued = searchParams.get('issued');
       const chosenToken = tokenHash || token;
       const paramName = tokenHash ? 'token_hash' : 'token';
-      
-      console.log('🔍 TOKEN DETAILS:', {
-        tokenHash: !!tokenHash,
-        token: !!token,
-        type,
-        issued,
-        chosenToken: !!chosenToken,
-        paramName
-      });
-      
       if (chosenToken) {
         const origin = window.location.origin;
         const issuedPart = issued ? `&issued=${encodeURIComponent(issued)}` : '';
         const url = `${origin}/auth?${paramName}=${encodeURIComponent(chosenToken)}&type=${encodeURIComponent(type)}${issuedPart}`;
-        console.log('🚀 REDIRECTING TO AUTH PAGE:', url);
         window.location.replace(url);
-      } else {
-        console.log('❌ NO TOKEN FOUND - Redirecting to expired page');
-        const origin = window.location.origin;
-        window.location.replace(`${origin}/auth?recovery_status=expired`);
       }
-    } else {
-      console.log('📱 IN-APP BROWSER DETECTED - Showing manual instructions');
     }
   }, [searchParams, navigate]);
 
