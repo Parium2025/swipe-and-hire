@@ -77,20 +77,34 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
             setTimeout(() => handleNext(), 300);
           }
           return;
-        } else {
-          e.preventDefault();
-          e.stopPropagation();
         }
-        return;
       }
       
-      // I steg utan specifikt element: blockera allt utom kortet
+      // Blockera alla andra klick
       e.preventDefault();
       e.stopPropagation();
     };
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Blockera alla tangenttryckningar utom Escape (för att inte hindra utvecklare)
+      if (e.key !== 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    // Fånga alla klick och tangenttryckningar
     document.addEventListener('click', handleClick, true);
-    return () => document.removeEventListener('click', handleClick, true);
+    document.addEventListener('mousedown', handleClick, true);
+    document.addEventListener('touchstart', handleClick, true);
+    document.addEventListener('keydown', handleKeyDown, true);
+    
+    return () => {
+      document.removeEventListener('click', handleClick, true);
+      document.removeEventListener('mousedown', handleClick, true);
+      document.removeEventListener('touchstart', handleClick, true);
+      document.removeEventListener('keydown', handleKeyDown, true);
+    };
   }, [currentStep]);
 
   const currentStepData = steps[currentStep];
@@ -164,8 +178,8 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
 
   return (
     <>
-      {/* Fullscreen overlay */}
-      <div className="fixed inset-0 bg-black/10 z-30 backdrop-blur-0 pointer-events-none" />
+      {/* Fullscreen overlay that blocks all interactions */}
+      <div className="fixed inset-0 bg-black/10 z-30 backdrop-blur-0 pointer-events-auto" />
       
       {/* Highlight för tillåtna element */}
       {renderHighlight()}
