@@ -24,18 +24,18 @@ export function UnsavedChangesDialog({
 }: UnsavedChangesDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-md bg-white/10 backdrop-blur-sm border-white/20 text-white">
+      <AlertDialogContent className="max-w-md bg-white/20 backdrop-blur-md border-white/30 text-white shadow-2xl">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-white">Osparade ändringar</AlertDialogTitle>
-          <AlertDialogDescription className="text-white/80">
+          <AlertDialogDescription className="text-white/90">
             Du har osparade ändringar. Är du säker på att du vill lämna sidan utan att spara?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onCancel} className="bg-white/5 border-white/20 text-white hover:bg-white/10">
+          <AlertDialogCancel onClick={onCancel} className="bg-white/10 border-white/30 text-white hover:bg-white/20">
             Avbryt
           </AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+          <AlertDialogAction onClick={onConfirm} className="bg-red-500/80 text-white hover:bg-red-500/90 border-red-500/50">
             Lämna utan att spara
           </AlertDialogAction>
         </AlertDialogFooter>
