@@ -1279,7 +1279,7 @@ const SearchJobs = () => {
                     scrollbarWidth: 'thin',
                     scrollbarColor: '#64748b #334155'
                   }}
-                  side="bottom"
+                  side="top"
                   align="center"
                   alignOffset={0}
                   sideOffset={6}
