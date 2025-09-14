@@ -61,6 +61,7 @@ const handler = async (req: Request): Promise<Response> => {
 
       if (!error && data.properties?.action_link) {
         resetUrl = data.properties.action_link;
+        console.log(`🔍 SUPABASE GENERATED LINK: ${resetUrl}`);
       }
     } catch (linkError) {
       // Don't log errors that might reveal user existence
