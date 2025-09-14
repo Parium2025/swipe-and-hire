@@ -18,7 +18,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
     {
       icon: Heart,
       title: "Här söker du jobb",
-      description: "Fyll i fältet, sedan swipa höger på jobb du är intresserad av och vänster på jobb du vill passa",
+      description: "Fyll i fälten, sedan swipa höger på jobb du är intresserad av och vänster på jobb du vill passa",
       page: "/search-jobs",
       allowedElement: null // Bara nästa-knappen tillåten
     },
@@ -185,7 +185,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
       {renderHighlight()}
       
       {/* Onboarding tour card */}
-      <div className={`fixed z-50 onboarding-tour ${cardPos ? '' : 'top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 transform'}`} style={cardPos ? { top: cardPos.top, left: cardPos.left, transform: 'translateX(-50%)' } : undefined}>
+      <div className={`fixed z-50 onboarding-tour ${cardPos ? '' : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform'}`} style={cardPos ? { top: cardPos.top, left: cardPos.left, transform: 'translateX(-50%)' } : undefined}>
         <Card className="w-64 bg-[hsl(var(--surface-blue))]/90 backdrop-blur-sm border-white/20 shadow-2xl animate-fade-in">
           <CardContent className="p-4">
             {/* Progress indicator */}
