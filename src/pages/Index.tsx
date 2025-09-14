@@ -27,24 +27,32 @@ const Index = () => {
   const [showProfileSelector, setShowProfileSelector] = useState(false);
   const [developerView, setDeveloperView] = useState<string>('dashboard');
   const [showIntroTutorial, setShowIntroTutorial] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
+      setIsInitializing(false);
     } else if (user && profile && location.pathname === '/') {
-      // Redirect to search-jobs as the default landing page for logged in users
-      navigate('/search-jobs');
+      // Small delay to prevent flicker during navigation
+      setTimeout(() => {
+        navigate('/search-jobs');
+        setIsInitializing(false);
+      }, 50);
     } else if (user && profile && !location.pathname.startsWith('/profile') && !location.pathname.startsWith('/search-jobs') && !location.pathname.startsWith('/subscription') && !location.pathname.startsWith('/support') && !location.pathname.startsWith('/settings') && !location.pathname.startsWith('/billing') && !location.pathname.startsWith('/payment')) {
       // Show profile selector only for admin (fredrikandits@hotmail.com)
       if (user.email === 'fredrikandits@hotmail.com') {
         setShowProfileSelector(true);
       }
+      setIsInitializing(false);
+    } else if (user && profile) {
+      setIsInitializing(false);
     }
   }, [user, loading, navigate, profile, location.pathname]);
 
-  if (loading) {
+  if (loading || isInitializing) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

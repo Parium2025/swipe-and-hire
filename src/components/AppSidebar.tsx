@@ -72,20 +72,40 @@ export function AppSidebar() {
     return () => window.removeEventListener('unsaved-cancel', closeOnCancel as EventListener);
 }, [isMobile, setOpenMobile]);
 
-  // Ensure avatar uses a fresh signed URL (handles expired links)
+  // Ensure avatar uses a fresh signed URL (handles expired links) with debouncing
   useEffect(() => {
+    let isCancelled = false;
+    
     const loadAvatar = async () => {
       const candidate = profile?.cover_image_url || profile?.profile_image_url || '';
-      if (!candidate) { setAvatarUrl(''); return; }
+      if (!candidate) { 
+        if (!isCancelled) setAvatarUrl(''); 
+        return; 
+      }
+      
       try {
+        // Add small delay to prevent rapid updates during login
+        await new Promise(resolve => setTimeout(resolve, 50));
+        if (isCancelled) return;
+        
         const refreshed = await convertToSignedUrl(candidate, 'job-applications', 86400);
         const finalUrl = (refreshed || candidate) + (candidate.includes('?') ? `&t=${Date.now()}` : `?t=${Date.now()}`);
-        setAvatarUrl(finalUrl);
+        
+        if (!isCancelled) {
+          setAvatarUrl(finalUrl);
+        }
       } catch {
-        setAvatarUrl(candidate);
+        if (!isCancelled) {
+          setAvatarUrl(candidate);
+        }
       }
     };
+    
     loadAvatar();
+    
+    return () => {
+      isCancelled = true;
+    };
   }, [profile?.cover_image_url, profile?.profile_image_url]);
 
   // Memoized navigation handler to prevent re-renders
@@ -114,12 +134,18 @@ export function AppSidebar() {
         {!collapsed && (
           <div className="mb-6 animate-fade-in">
             <div className="flex items-center gap-3 p-3 rounded-lg bg-sidebar-accent transition-colors duration-150">
-               <Avatar className="h-10 w-10">
-                 <AvatarImage src={avatarUrl} alt="Profilbild" onError={() => setAvatarUrl('')} />
-                 <AvatarFallback className="bg-white/20 text-white">
-                   {profile?.first_name?.[0]}{profile?.last_name?.[0]}
-                 </AvatarFallback>
-               </Avatar>
+                <Avatar className="h-10 w-10">
+                  <AvatarImage 
+                    src={avatarUrl} 
+                    alt="Profilbild" 
+                    onError={() => setAvatarUrl('')}
+                    className="transition-opacity duration-200"
+                    style={{ opacity: avatarUrl ? 1 : 0 }}
+                  />
+                  <AvatarFallback className="bg-white/20 text-white transition-opacity duration-200">
+                    {profile?.first_name?.[0]}{profile?.last_name?.[0]}
+                  </AvatarFallback>
+                </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">
                   {profile?.first_name} {profile?.last_name}
