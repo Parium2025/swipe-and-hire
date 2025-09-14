@@ -1147,14 +1147,14 @@ const SearchJobs = () => {
                       variant="outline" 
                       className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
                     >
-                      <span className="truncate">
-                        {selectedLocations.length === 0 
-                          ? 'Alla platser i Sverige'
-                          : selectedLocations.length === 1 
-                          ? selectedLocations[0]
-                          : `${selectedLocations.length} orter valda`
-                        }
-                      </span>
+                       <span className="truncate">
+                         {selectedLocations.length === 0 
+                           ? 'Välj ort eller sök fritt'
+                           : selectedLocations.length === 1 
+                           ? selectedLocations[0]
+                           : `${selectedLocations.length} orter valda`
+                         }
+                       </span>
                       <ChevronDown className="h-4 w-4 flex-shrink-0" />
                     </Button>
                   </DropdownMenuTrigger>
