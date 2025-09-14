@@ -108,9 +108,9 @@ export function BirthDatePicker({
               <SelectTrigger className="flex-1 bg-white/10 border-white/30 text-white hover:bg-white/20">
                 <SelectValue placeholder="År" />
               </SelectTrigger>
-              <SelectContent className="max-h-60 bg-white/95 backdrop-blur-sm border-white/20">
+              <SelectContent className="max-h-60 bg-primary backdrop-blur-sm border-primary/30 text-white">
                 {years.map((year) => (
-                  <SelectItem key={year} value={year.toString()}>
+                  <SelectItem key={year} value={year.toString()} className="hover:bg-white/20 focus:bg-white/20">
                     {year}
                   </SelectItem>
                 ))}
@@ -124,9 +124,9 @@ export function BirthDatePicker({
               <SelectTrigger className="flex-1 bg-white/10 border-white/30 text-white hover:bg-white/20">
                 <SelectValue placeholder="Månad" />
               </SelectTrigger>
-              <SelectContent className="bg-white/95 backdrop-blur-sm border-white/20">
+              <SelectContent className="bg-primary backdrop-blur-sm border-primary/30 text-white">
                 {months.map((month) => (
-                  <SelectItem key={month.value} value={month.value.toString()}>
+                  <SelectItem key={month.value} value={month.value.toString()} className="hover:bg-white/20 focus:bg-white/20">
                     {month.label}
                   </SelectItem>
                 ))}
