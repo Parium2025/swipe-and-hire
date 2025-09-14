@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useSwipeToOpen } from '@/hooks/useSwipeToOpen';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
@@ -123,6 +124,12 @@ const Index = () => {
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
 
   if (isSidebarRoute) {
+    const { containerRef } = useSwipeToOpen({
+      enabled: true,
+      swipeThreshold: 80,
+      edgeThreshold: 50
+    });
+
     const renderSidebarContent = () => {
       switch (location.pathname) {
         case '/profile':
@@ -150,7 +157,7 @@ const Index = () => {
 
     return (
       <SidebarProvider>
-        <div className="min-h-screen flex w-full overflow-x-hidden">
+        <div ref={containerRef} className="min-h-screen flex w-full overflow-x-hidden">
           <AppSidebar />
           <div className="flex-1 flex flex-col overflow-x-hidden">
             <header className="sticky top-0 z-40 h-16 flex items-center justify-between border-b bg-white/10 backdrop-blur-sm px-6">
