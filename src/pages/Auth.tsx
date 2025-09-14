@@ -868,8 +868,32 @@ const Auth = () => {
     }
   }
 
-  // Använd rätt komponent baserat på skärmstorlek
-  // Använd alltid AuthDesktop för alla enheter för att få den vackra designen
+  if (device === 'mobile') {
+    return (
+      <AuthMobile
+        isPasswordReset={isPasswordReset}
+        newPassword={newPassword}
+        setNewPassword={setNewPassword}
+        confirmPassword={confirmPassword}
+        setConfirmPassword={setConfirmPassword}
+        handlePasswordReset={handlePasswordReset}
+      />
+    );
+  }
+
+  if (device === 'tablet') {
+    return (
+      <AuthTablet
+        isPasswordReset={isPasswordReset}
+        newPassword={newPassword}
+        setNewPassword={setNewPassword}
+        confirmPassword={confirmPassword}
+        setConfirmPassword={setConfirmPassword}
+        handlePasswordReset={handlePasswordReset}
+      />
+    );
+  }
+
   return (
     <AuthDesktop
       isPasswordReset={isPasswordReset}
