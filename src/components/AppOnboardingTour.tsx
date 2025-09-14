@@ -47,7 +47,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
       icon: Crown,
       title: "Uppgradera till Premium",
       description: "Få tillgång till fler funktioner och öka dina chanser med vår premiumfunktion.",
-      page: "/subscription",
+      page: "/search-jobs",
       allowedElement: null // Bara nästa-knappen tillåten
     }
   ];
@@ -151,10 +151,10 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
     return () => window.removeEventListener('resize', update);
   }, [currentStep, location.pathname]);
 
-  // Om vi är på sista steget (Premium) säkerställ att vi är på /subscription
+  // Om vi är på sista steget (Premium) säkerställ att vi är på /search-jobs
   useEffect(() => {
-    if (currentStep === 4 && location.pathname !== '/subscription') {
-      navigate('/subscription');
+    if (currentStep === 4 && location.pathname !== '/search-jobs') {
+      navigate('/search-jobs');
     }
   }, [currentStep, location.pathname, navigate]);
 
