@@ -356,7 +356,7 @@ const AuthTablet = ({
                               type="button"
                               variant="ghost"
                               size="sm"
-                              className="absolute right-2 top-1/2 -translate-y-1/2 h-auto p-1"
+                              className="absolute right-2 top-1/2 -translate-y-1/2 h-auto p-1 text-white hover:text-white/80"
                               onClick={() => setShowPassword(!showPassword)}
                             >
                               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -507,7 +507,7 @@ const AuthTablet = ({
                               type="button"
                               variant="ghost"
                               size="sm"
-                              className="absolute right-2 top-1/2 -translate-y-1/2 h-auto p-1"
+                              className="absolute right-2 top-1/2 -translate-y-1/2 h-auto p-1 text-white hover:text-white/80"
                               onClick={() => setShowPassword(!showPassword)}
                             >
                               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
