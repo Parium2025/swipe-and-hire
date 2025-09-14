@@ -58,10 +58,22 @@ const handler = async (req: Request): Promise<Response> => {
         }
       });
 
-      if (!error && data.properties?.action_link) {
-        // Använd Supabase's egen länk direkt istället för att bygga vår egen
+      try {
+        // Bygg vår egen länk: ANVÄND ALLTID token_hash på vår domän
+        const supabaseUrl = new URL(data.properties.action_link);
+        const rawToken = supabaseUrl.searchParams.get('token') || supabaseUrl.searchParams.get('token_hash');
+        const type = supabaseUrl.searchParams.get('type') || 'recovery';
+        if (rawToken) {
+          const origin = 'https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com';
+          resetUrl = `${origin}/reset-redirect?token_hash=${encodeURIComponent(rawToken)}&type=${encodeURIComponent(type)}&issued=${issued}`;
+          console.log('🔗 Custom reset link (using token_hash):', resetUrl);
+        } else {
+          // Fallback till Supabases länk om vi av någon anledning inte hittade token
+          resetUrl = data.properties.action_link;
+        }
+      } catch (_e) {
+        // Fallback vid parse-fel
         resetUrl = data.properties.action_link;
-        console.log('🔍 SUPABASE GENERATED LINK:', resetUrl);
       }
     } catch (linkError) {
       // Don't log errors that might reveal user existence
