@@ -141,21 +141,28 @@ const FileUpload: React.FC<FileUploadProps> = ({
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-medium truncate max-w-[200px] text-white hover:text-primary underline cursor-pointer"
-              onClick={async (e) => {
+              onClick={(e) => {
                 e.preventDefault();
-                try {
-                  if (isStoragePath) {
-                    // Generate a fresh signed URL from the storage path
-                    const signedUrl = await createSignedUrl('job-applications', currentFile.url, 86400, currentFile.name);
-                    if (signedUrl) window.open(signedUrl, '_blank');
-                  } else {
-                    // Convert/refresh to a signed URL (also works for expired signed URLs)
-                    const signedUrl = await convertToSignedUrl(currentFile.url, 'job-applications', 86400, currentFile.name);
-                    if (signedUrl) window.open(signedUrl, '_blank');
+                const popup = window.open('', '_blank');
+                const openUrl = (url?: string | null) => {
+                  if (!url) { popup?.close(); return; }
+                  if (popup) popup.location.href = url;
+                  else window.open(url, '_blank');
+                };
+                (async () => {
+                  try {
+                    if (isStoragePath) {
+                      const signedUrl = await createSignedUrl('job-applications', currentFile.url, 86400, currentFile.name);
+                      openUrl(signedUrl);
+                    } else {
+                      const signedUrl = await convertToSignedUrl(currentFile.url, 'job-applications', 86400, currentFile.name);
+                      openUrl(signedUrl);
+                    }
+                  } catch (err) {
+                    console.error('Error opening file:', err);
+                    popup?.close();
                   }
-                } catch (err) {
-                  console.error('Error opening file:', err);
-                }
+                })();
               }}
             >
               {currentFile.name}
