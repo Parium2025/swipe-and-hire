@@ -10,8 +10,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 const Subscription = () => {
   const { profile, user } = useAuth();
   const isMobile = useIsMobile();
-  const currentPlan = 'basic'; // This would come from your subscription state
-  const [selectedPlan, setSelectedPlan] = useState(currentPlan);
+  const [currentPlan, setCurrentPlan] = useState<'basic' | 'premium'>('basic'); // This would come from your subscription state
+  const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium'>(currentPlan);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
   const plans = [
@@ -69,12 +69,18 @@ const Subscription = () => {
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardContent className="p-4">
               <div className="flex items-center gap-3 mb-3">
-                <Crown className="h-5 w-5 text-white" />
+                {currentPlan === 'premium' ? (
+                  <Crown className="h-5 w-5 text-white" />
+                ) : (
+                  <Star className="h-5 w-5 text-white" />
+                )}
                 <span className="font-medium text-white">Din nuvarande plan</span>
               </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-semibold text-white">Basic Plan</p>
+               <div className="flex items-center justify-between">
+                 <div>
+                   <p className="font-semibold text-white">
+                     {plans.find(p => p.id === currentPlan)?.name} Plan
+                   </p>
                   <p className="text-sm text-white/80">
                     {user?.created_at ? `Aktiv sedan ${new Date(user.created_at).toLocaleDateString('sv-SE', { 
                       year: 'numeric', 
@@ -102,7 +108,7 @@ const Subscription = () => {
             return (
               <Card 
                 key={plan.id}
-                onClick={() => setSelectedPlan(plan.id)}
+                onClick={() => setSelectedPlan(plan.id as 'basic' | 'premium')}
                 className={`bg-white/10 backdrop-blur-sm border-white/20 relative cursor-pointer transition-all duration-200 border-2 ${
                   plan.recommended ? 'border-primary' : ''
                 } ${
