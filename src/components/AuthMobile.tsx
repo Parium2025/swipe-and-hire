@@ -223,50 +223,57 @@ const AuthMobile = ({
 
   if (isPasswordReset) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-4 auth-dark">
-        <Card className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="text-center">
-            <CardTitle className="text-white">Nytt lösenord</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handlePasswordReset} className="space-y-4">
-              <div>
-                <Label htmlFor="newPassword" className="text-white">Nytt lösenord</Label>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  required
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                />
-              </div>
-              <div>
-                <Label htmlFor="confirmPassword" className="text-white">Bekräfta lösenord</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Sparar..." : "Spara nytt lösenord"}
-              </Button>
-               <div className="text-center">
-                <button
-                  type="button"
-                  onClick={() => navigate('/auth')}
-                  className="text-sm text-white hover:underline"
-                >
-                  Tillbaka till inloggning
-                </button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+      <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-8 auth-dark">
+        {/* Glassmorphism card med glow effect */}
+        <div className="relative w-full max-w-md">
+          {/* Card glow effect */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-secondary/20 to-accent/20 rounded-3xl blur-lg"></div>
+          
+          <Card className="relative bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-3xl overflow-hidden">
+            <CardHeader className="text-center pb-8">
+              <CardTitle className="text-3xl font-bold text-white mb-2">Nytt lösenord</CardTitle>
+              <p className="text-white/80">Ange ditt nya lösenord nedan</p>
+            </CardHeader>
+            <CardContent className="px-8 pb-8">
+              <form onSubmit={handlePasswordReset} className="space-y-6">
+                <div>
+                  <Label htmlFor="newPassword" className="text-lg text-white">Nytt lösenord</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                    className="mt-2 w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="confirmPassword" className="text-lg text-white">Bekräfta lösenord</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    className="mt-2 w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                  />
+                </div>
+                <Button type="submit" className="w-full py-3 text-lg" disabled={loading}>
+                  {loading ? "Sparar..." : "Spara nytt lösenord"}
+                </Button>
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/auth')}
+                    className="text-sm text-white hover:underline"
+                  >
+                    Tillbaka till inloggning
+                  </button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
