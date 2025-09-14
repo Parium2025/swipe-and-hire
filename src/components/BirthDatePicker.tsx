@@ -97,7 +97,7 @@ export function BirthDatePicker({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-auto p-0 bg-white/5 backdrop-blur-sm border-white/20" align="start">
         <div className="p-3 space-y-3">
           {/* Year and Month Selectors */}
           <div className="flex gap-2">
@@ -105,10 +105,10 @@ export function BirthDatePicker({
               value={selectedDate ? selectedDate.getFullYear().toString() : undefined}
               onValueChange={handleYearChange}
             >
-              <SelectTrigger className="flex-1">
+              <SelectTrigger className="flex-1 bg-white/10 border-white/30 text-white hover:bg-white/20">
                 <SelectValue placeholder="År" />
               </SelectTrigger>
-              <SelectContent className="max-h-60">
+              <SelectContent className="max-h-60 bg-white/95 backdrop-blur-sm border-white/20">
                 {years.map((year) => (
                   <SelectItem key={year} value={year.toString()}>
                     {year}
@@ -121,10 +121,10 @@ export function BirthDatePicker({
               value={selectedDate ? selectedDate.getMonth().toString() : undefined}
               onValueChange={handleMonthChange}
             >
-              <SelectTrigger className="flex-1">
+              <SelectTrigger className="flex-1 bg-white/10 border-white/30 text-white hover:bg-white/20">
                 <SelectValue placeholder="Månad" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white/95 backdrop-blur-sm border-white/20">
                 {months.map((month) => (
                   <SelectItem key={month.value} value={month.value.toString()}>
                     {month.label}
@@ -145,7 +145,7 @@ export function BirthDatePicker({
             month={selectedDate}
             onMonthChange={setSelectedDate}
             initialFocus
-            className="p-0"
+            className="p-0 text-white [&_.rdp-caption]:text-white [&_.rdp-nav_button]:text-white [&_.rdp-nav_button]:border-white/20 [&_.rdp-nav_button]:hover:bg-white/20 [&_.rdp-day]:text-white [&_.rdp-day]:hover:bg-white/20 [&_.rdp-day_selected]:bg-primary [&_.rdp-day_selected]:text-primary-foreground [&_.rdp-day_today]:bg-white/20"
           />
         </div>
       </PopoverContent>
