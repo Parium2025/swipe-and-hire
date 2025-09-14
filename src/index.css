@@ -179,6 +179,21 @@ All colors MUST be HSL.
   input[type="date"]::-webkit-calendar-picker-indicator:hover {
     opacity: 1;
   }
+
+  /* Fix browser autofill (Chrome/Safari) on dark inputs so they don't turn bright */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-text-fill-color: hsl(var(--foreground)) !important;
+    caret-color: hsl(var(--foreground)) !important;
+    /* Simulate bg-white/5 using HSL */
+    -webkit-box-shadow: 0 0 0px 1000px hsla(0 0% 100% / 0.05) inset !important;
+    box-shadow: 0 0 0px 1000px hsla(0 0% 100% / 0.05) inset !important;
+    transition: background-color 9999s ease-in-out 0s !important;
+    border-color: hsl(var(--border)) !important;
+  }
 }
 
 @layer utilities {
