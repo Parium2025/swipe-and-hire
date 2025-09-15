@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Eye, EyeOff, User, Building2, Mail, Key, Phone } from 'lucide-react';
+import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
 
 interface AuthTabletProps {
   isPasswordReset: boolean;
@@ -84,39 +85,9 @@ const AuthTablet = ({
     }
   };
 
+  // Use centralized phone validation
   const validatePhoneNumber = (phoneNumber: string) => {
-    if (!phoneNumber.trim()) return { isValid: true, error: '' };
-    
-    const cleaned = phoneNumber.replace(/[^\d+]/g, '');
-    let isSwedish = false;
-    let digitsOnly = '';
-    
-    if (cleaned.startsWith('+46')) {
-      isSwedish = true;
-      digitsOnly = cleaned.substring(3);
-    } else if (cleaned.startsWith('0046')) {
-      isSwedish = true;
-      digitsOnly = cleaned.substring(4);
-    } else if (cleaned.startsWith('0')) {
-      isSwedish = true;
-      digitsOnly = cleaned.substring(1);
-    } else if (cleaned.match(/^\d+$/)) {
-      if (cleaned.length >= 9 && cleaned.length <= 11) {
-        isSwedish = true;
-        digitsOnly = cleaned.startsWith('0') ? cleaned.substring(1) : cleaned;
-      }
-    }
-    
-    if (isSwedish) {
-      if (digitsOnly.length !== 9) {
-        return {
-          isValid: false,
-          error: `Svenska telefonnummer ska ha 10 siffror (du har ${digitsOnly.length + 1})`
-        };
-      }
-    }
-    
-    return { isValid: true, error: '' };
+    return validateSwedishPhoneNumber(phoneNumber, false);
   };
 
   const handlePhoneChange = (value: string) => {

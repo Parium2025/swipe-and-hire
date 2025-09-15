@@ -25,6 +25,7 @@ import { createSignedUrl } from '@/utils/storageUtils';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { isValidSwedishPhone } from '@/lib/phoneValidation';
 
 const Profile = () => {
   const { profile, userRole, updateProfile, user } = useAuth();
@@ -305,11 +306,7 @@ const Profile = () => {
 
   const age = calculateAge(birthDate);
 
-  // Required field validation
-  const isValidSwedishPhone = (value: string) => {
-    const digits = value.replace(/\s+/g, '');
-    return /^(\+46|0)[1-9][0-9]{7,9}$/.test(digits);
-  };
+  // Required field validation - uses centralized phone validation
 
   const validateRequiredFields = () => {
     const newErrors: typeof errors = {};
