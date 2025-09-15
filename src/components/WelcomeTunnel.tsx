@@ -615,15 +615,15 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                    <Phone className="h-4 w-4 inline mr-2" />
                    Telefonnummer
                  </Label>
-                 <Input 
-                   id="phone" 
-                   type="tel" 
-                   required
-                   value={formData.phone} 
-                   onChange={(e) => handlePhoneChange(e.target.value)} 
-                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60" 
-                   placeholder="070-123 45 67" 
-                 />
+                  <Input 
+                    id="phone" 
+                    type="tel" 
+                    required
+                    value={formData.phone} 
+                    onChange={(e) => handlePhoneChange(e.target.value)} 
+                    className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60" 
+                    placeholder="Skriv in ditt telefonnummer" 
+                  />
                  
                 </div>
                <PostalCodeSelector
