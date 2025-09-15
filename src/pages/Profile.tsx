@@ -908,9 +908,8 @@ const Profile = () => {
                     {(profileImageUrl || coverImageUrl) ? (
                       <AvatarImage src={profileImageUrl || coverImageUrl} alt="Profilbild" />
                     ) : null}
-                    <AvatarFallback className="text-2xl font-semibold bg-white/15 text-white">
-                      {(firstName?.trim()?.[0]?.toUpperCase() || '')}
-                      {(lastName?.trim()?.[0]?.toUpperCase() || '')}
+                    <AvatarFallback delayMs={0} className="text-2xl font-semibold bg-white/15 text-white">
+                      {((firstName?.trim()?.[0]?.toUpperCase() || '') + (lastName?.trim()?.[0]?.toUpperCase() || '')) || '?'}
                     </AvatarFallback>
                   </Avatar>
                 </div>
