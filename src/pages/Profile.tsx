@@ -905,9 +905,11 @@ const Profile = () => {
                   onClick={() => document.getElementById('profile-image')?.click()}
                 >
                   <Avatar className="h-32 w-32 border-4 border-white/20 hover:border-white/40 transition-all">
-                    <AvatarImage src={profileImageUrl || (profile as any)?.cover_image_url} />
+                    {(profileImageUrl || coverImageUrl) ? (
+                      <AvatarImage src={profileImageUrl || coverImageUrl} />
+                    ) : null}
                     <AvatarFallback className="text-2xl bg-white/20 text-white">
-                      {profile?.first_name?.[0]}{profile?.last_name?.[0]}
+                      {firstName?.[0]}{lastName?.[0]}
                     </AvatarFallback>
                   </Avatar>
                 </div>
