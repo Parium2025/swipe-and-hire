@@ -764,8 +764,9 @@ const Profile = () => {
         postal_code: postalCode.trim() || null,
         phone: phone.trim() || null,
         birth_date: birthDate || null,
-        cv_url: cvUrl || null,
-        cv_filename: cvFileName || null,
+        // Preserve existing CV unless explicitly changed/removed
+        cv_url: cvUrl ? cvUrl : (originalValues?.cvUrl || null),
+        cv_filename: cvFileName ? cvFileName : ((profile as any)?.cv_filename || null),
         employment_status: employmentStatus || null,
         working_hours: workingHours || null,
         availability: availability || null,
