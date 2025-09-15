@@ -695,7 +695,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                    className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60" 
                    placeholder="070-123 45 67" 
                  />
-                 {phoneError && <p className="text-destructive text-xs mt-1">{phoneError}</p>}
+                 
                 </div>
                <PostalCodeSelector
                  postalCodeValue={postalCode}
