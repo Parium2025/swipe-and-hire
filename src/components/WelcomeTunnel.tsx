@@ -676,6 +676,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     onChange={(date) => handleInputChange('birthDate', date)}
                     placeholder="Välj födelsedatum"
                     className="w-full"
+                    popoverAlign="center"
+                    popoverAlignOffset={-240}
                   />
                 </div>
                <div>
