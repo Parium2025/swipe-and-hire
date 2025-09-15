@@ -35,20 +35,6 @@ const profileItems = [
   { title: 'Sök Jobb', url: '/search-jobs', icon: Building },
 ];
 
-// Add settings for job seekers only
-const getProfileItems = (role: string | undefined) => {
-  const baseItems = [
-    { title: 'Min Profil', url: '/profile', icon: User },
-    { title: 'Sök Jobb', url: '/search-jobs', icon: Building },
-  ];
-  
-  if (role === 'job_seeker') {
-    baseItems.push({ title: 'Inställningar', url: '/settings', icon: Settings });
-  }
-  
-  return baseItems;
-};
-
 const businessItems = [
   { title: 'Abonnemang', url: '/subscription', icon: Crown },
   { title: 'Betalningar', url: '/billing', icon: CreditCard },
@@ -181,7 +167,7 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                 {getProfileItems(profile?.role).map((item) => (
+                 {profileItems.map((item) => (
                    <SidebarMenuItem key={item.title}>
                      <SidebarMenuButton 
                        data-onboarding={item.title === 'Min Profil' ? 'min-profil' : undefined}

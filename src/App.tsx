@@ -16,7 +16,6 @@ import { Header } from "@/components/Header";
 import AuthTokenBridge from "./components/AuthTokenBridge";
 import { useStatusBar } from "@/hooks/useStatusBar";
 import { useDevice } from "@/hooks/use-device";
-import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 

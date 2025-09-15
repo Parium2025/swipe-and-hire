@@ -24,10 +24,9 @@ interface Organization {
   max_recruiters: number;
 }
 
-export interface Profile {
+interface Profile {
   id: string;
   user_id: string;
-  role?: UserRole;
   first_name?: string;
   last_name?: string;
   phone?: string;
