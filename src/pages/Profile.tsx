@@ -63,11 +63,21 @@ const Profile = () => {
   const [employmentStatus, setEmploymentStatus] = useState('');
   const [workingHours, setWorkingHours] = useState('');
   const [availability, setAvailability] = useState('');
-  
+
   
   // Employer-specific fields
   const [companyName, setCompanyName] = useState(profile?.company_name || '');
   const [orgNumber, setOrgNumber] = useState(profile?.org_number || '');
+
+  // Validation errors
+  const [errors, setErrors] = useState<{
+    firstName?: string;
+    lastName?: string;
+    userLocation?: string;
+    phone?: string;
+    birthDate?: string;
+    employmentStatus?: string;
+  }>({});
 
   // Load profile data when profile changes
   useEffect(() => {
@@ -294,6 +304,29 @@ const Profile = () => {
   };
 
   const age = calculateAge(birthDate);
+
+  // Required field validation
+  const isValidSwedishPhone = (value: string) => {
+    const digits = value.replace(/\s+/g, '');
+    return /^(\+46|0)[1-9][0-9]{7,9}$/.test(digits);
+  };
+
+  const validateRequiredFields = () => {
+    const newErrors: typeof errors = {};
+    if (!firstName.trim()) newErrors.firstName = 'Förnamn är obligatoriskt.';
+    if (!lastName.trim()) newErrors.lastName = 'Efternamn är obligatoriskt.';
+    if (!userLocation.trim()) newErrors.userLocation = 'Var bor du? är obligatoriskt.';
+    if (!phone.trim()) newErrors.phone = 'Telefonnummer är obligatoriskt.';
+    else if (!isValidSwedishPhone(phone)) newErrors.phone = 'Ange ett giltigt svenskt nummer (+46 eller 0).';
+    if (!birthDate) newErrors.birthDate = 'Födelsedatum är obligatoriskt.';
+    else {
+      const a = calculateAge(birthDate);
+      if (a !== null && a < 16) newErrors.birthDate = 'Du måste vara minst 16 år.';
+    }
+    if (!isEmployer && !employmentStatus) newErrors.employmentStatus = 'Anställningsstatus är obligatorisk.';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
 
   const uploadProfileMedia = async (file: File) => {
@@ -710,6 +743,18 @@ const Profile = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate required fields before saving
+    const valid = validateRequiredFields();
+    if (!valid) {
+      toast({
+        title: "Komplettera uppgifter",
+        description: "Fyll i alla obligatoriska fält markerade med rött.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -987,8 +1032,11 @@ const Profile = () => {
                       placeholder="Förnamn"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
+                      onBlur={() => setErrors(prev => ({ ...prev, firstName: firstName.trim() ? undefined : 'Förnamn är obligatoriskt.' }))}
+                      aria-invalid={!!errors.firstName}
                       className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                     />
+                    {errors.firstName && <p className="text-xs text-red-300">{errors.firstName}</p>}
                   </div>
 
                   <div className="space-y-2">
@@ -998,8 +1046,11 @@ const Profile = () => {
                       placeholder="Efternamn"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
+                      onBlur={() => setErrors(prev => ({ ...prev, lastName: lastName.trim() ? undefined : 'Efternamn är obligatoriskt.' }))}
+                      aria-invalid={!!errors.lastName}
                       className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                     />
+                    {errors.lastName && <p className="text-xs text-red-300">{errors.lastName}</p>}
                   </div>
                 </div>
 
@@ -1008,12 +1059,16 @@ const Profile = () => {
                     <Label htmlFor="birthDate" className="text-white">Födelsedatum</Label>
                     <BirthDatePicker
                       value={birthDate}
-                      onChange={setBirthDate}
+                      onChange={(v) => {
+                        setBirthDate(v);
+                        setErrors(prev => ({ ...prev, birthDate: v ? undefined : 'Födelsedatum är obligatoriskt.' }));
+                      }}
                       placeholder="Välj födelsedatum"
                     />
                     {age !== null && (
                       <p className="text-sm text-white">Ålder: {age} år</p>
                     )}
+                    {errors.birthDate && <p className="text-xs text-red-300">{errors.birthDate}</p>}
                   </div>
 
                   <div className="space-y-2">
@@ -1026,9 +1081,12 @@ const Profile = () => {
                         placeholder="+46 70 123 45 67"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
+                        onBlur={() => setErrors(prev => ({ ...prev, phone: phone.trim() ? (isValidSwedishPhone(phone) ? undefined : 'Ange ett giltigt svenskt nummer (+46 eller 0).') : 'Telefonnummer är obligatoriskt.' }))}
+                        aria-invalid={!!errors.phone}
                         className="pl-10 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                       />
                     </div>
+                    {errors.phone && <p className="text-xs text-red-300">{errors.phone}</p>}
                   </div>
                 </div>
               </div>
@@ -1062,6 +1120,7 @@ const Profile = () => {
                       onPostalCodeChange={setPostalCode}
                       onLocationChange={setUserLocation}
                     />
+                    {errors.userLocation && <p className="text-xs text-red-300">{errors.userLocation}</p>}
                   </div>
                 </div>
               </div>
@@ -1153,6 +1212,7 @@ const Profile = () => {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
+                        {errors.employmentStatus && <p className="text-xs text-red-300">{errors.employmentStatus}</p>}
                       </div>
 
                       {/* Visa arbetstid endast om användaren har valt något OCH det inte är arbetssökande */}
