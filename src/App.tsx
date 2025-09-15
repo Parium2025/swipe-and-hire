@@ -16,6 +16,7 @@ import { Header } from "@/components/Header";
 import AuthTokenBridge from "./components/AuthTokenBridge";
 import { useStatusBar } from "@/hooks/useStatusBar";
 import { useDevice } from "@/hooks/use-device";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -79,7 +80,7 @@ const App = () => {
                   <Route path="/subscription" element={<Index />} />
                   <Route path="/support" element={<Index />} />
                   <Route path="/admin" element={<Index />} />
-                  <Route path="/settings" element={<Index />} />
+                  <Route path="/settings" element={<Settings />} />
                   <Route path="/billing" element={<Index />} />
                   <Route path="/payment" element={<Index />} />
                   <Route path="/reset-redirect" element={<ResetRedirect />} />
