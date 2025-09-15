@@ -174,7 +174,7 @@ export function BirthDatePicker({
             month={selectedDate}
             onMonthChange={setSelectedDate}
             initialFocus
-            className="p-0 pointer-events-auto text-white [&_.rdp-caption]:text-white [&_.rdp-nav_button]:text-white [&_.rdp-nav_button]:border-white/20 [&_.rdp-nav_button]:hover:bg-white/20 [&_.rdp-day]:text-white [&_.rdp-day]:hover:bg-white/20 [&_.rdp-day_selected]:bg-white [&_.rdp-day_selected]:text-primary [&_.rdp-day_today]:bg-transparent [&_.rdp-day_today]:text-white/60 [&_.rdp-day_today]:underline"
+            className="p-0 pointer-events-auto text-white [&_.rdp-caption]:text-white [&_.rdp-nav_button]:text-white [&_.rdp-nav_button]:border-white/20 [&_.rdp-nav_button]:hover:bg-white/20 [&_.rdp-day]:text-white [&_.rdp-day]:hover:bg-white/20 [&_.rdp-day_selected]:bg-white [&_.rdp-day_selected]:text-primary [&_.rdp-day_today]:bg-transparent [&_.rdp-day_today]:text-white [&_.rdp-day_today]:font-normal"
           />
         </div>
       </PopoverContent>
