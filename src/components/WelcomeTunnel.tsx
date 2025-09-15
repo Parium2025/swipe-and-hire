@@ -634,11 +634,11 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                  <div>
                   <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget?</Label>
                   <DropdownMenu modal={false}>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
-                      >
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                        >
                         <span className="truncate">
                           {formData.employmentStatus ? (
                             ({
@@ -696,11 +696,11 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                  <div>
                    <Label htmlFor="workingHours" className="text-white text-sm font-medium">Hur mycket jobbar du idag?</Label>
                    <DropdownMenu modal={false}>
-                     <DropdownMenuTrigger asChild>
-                       <Button
-                         variant="outline"
-                         className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
-                       >
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                        >
                          <span className="truncate">
                            {formData.workingHours ? (
                              ({
@@ -739,11 +739,11 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                  <div>
                    <Label htmlFor="availability" className="text-white text-sm font-medium">När kan du börja nytt jobb?</Label>
                    <DropdownMenu modal={false}>
-                     <DropdownMenuTrigger asChild>
-                       <Button
-                         variant="outline"
-                         className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
-                       >
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                        >
                          <span className="truncate">
                            {formData.availability ? (
                              ({
