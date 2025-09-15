@@ -84,15 +84,15 @@ export function BirthDatePicker({
           variant="outline"
           className={cn(
             "w-full h-10 pl-3 pr-3 text-left font-normal bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 justify-start",
-            !selectedDate && "text-white/60",
+            !selectedDate && "text-white placeholder:text-white",
             className
           )}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
+          <CalendarIcon className="mr-2 h-4 w-4 text-white" />
           {selectedDate ? (
             format(selectedDate, "yyyy-MM-dd", { locale: sv })
           ) : (
-            <span>{placeholder}</span>
+            <span className="text-white">{placeholder}</span>
           )}
         </Button>
       </PopoverTrigger>
