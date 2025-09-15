@@ -36,27 +36,26 @@ const PostalCodeSelector = ({
             setFoundLocation(location);
             
             if (location) {
-              // Skicka tillbaka den fullständiga platsinformationen
+              // Skicka tillbaka den fullständiga platsinformationen endast vid giltig träff
               onLocationChange(`${location.city}${location.area && location.area !== location.city ? `, ${location.area}` : ''}`);
-            } else {
-              onLocationChange('');
             }
+            // Ingen uppdatering av plats om inget resultat hittas
           } catch (error) {
             console.error('Error fetching postal code:', error);
             setFoundLocation(null);
-            onLocationChange('');
+            // Rör inte användarens plats vid fel
           } finally {
             setIsLoading(false);
           }
         } else {
           setFoundLocation(null);
-          onLocationChange('');
+          // Uppdatera inte plats vid ogiltigt eller ofullständigt postnummer
           setIsLoading(false);
         }
       } else {
         setFoundLocation(null);
         setIsValid(false);
-        onLocationChange('');
+        // Låt befintlig plats vara oförändrad när fältet är tomt
         setIsLoading(false);
       }
     };
