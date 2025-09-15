@@ -68,6 +68,19 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     return validateSwedishPhoneNumber(phoneNumber, true);
   };
 
+  // Calculate age from birth date
+  const calculateAge = (birthDate: string) => {
+    if (!birthDate) return null;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
   const handlePhoneChange = (value: string) => {
     handleInputChange('phone', value);
     const validation = validatePhoneNumber(value);
@@ -598,7 +611,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                    className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60" 
                  />
                </div>
-                <div>
+                 <div>
                   <Label htmlFor="birthDate" className="text-white">Födelsedatum</Label>
                   <BirthDatePicker
                     value={formData.birthDate}
@@ -609,6 +622,11 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     popoverAlignOffset={-240}
                     alignToIcon={true}
                   />
+                  {formData.birthDate && calculateAge(formData.birthDate) !== null && (
+                    <p className="text-sm text-white/70 mt-1">
+                      {calculateAge(formData.birthDate)} år gammal
+                    </p>
+                  )}
                 </div>
                <div>
                  <Label htmlFor="phone" className="text-white">
