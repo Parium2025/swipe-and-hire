@@ -859,6 +859,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     coverImageUrl={formData.coverImageUrl}
                     alt="Profile video"
                     className="w-32 h-32 cursor-pointer border-4 border-white/20 hover:border-white/40 transition-all rounded-full overflow-hidden"
+                    userInitials={`${formData.firstName?.[0] || ''}${formData.lastName?.[0] || ''}`}
                   />
                 ) : (
                   <Avatar className="w-32 h-32 cursor-pointer border-4 border-white/20 hover:border-white/40 transition-all" onClick={() => document.getElementById('profileMedia')?.click()}>
