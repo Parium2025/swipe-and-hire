@@ -55,7 +55,8 @@ const PostalCodeSelector = ({
       } else {
         setFoundLocation(null);
         setIsValid(false);
-        // Låt befintlig plats vara oförändrad när fältet är tomt
+        // Nollställ platsen när postnumret är tomt
+        onLocationChange('');
         setIsLoading(false);
       }
     };

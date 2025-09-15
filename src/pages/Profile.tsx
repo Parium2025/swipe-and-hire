@@ -315,7 +315,7 @@ const Profile = () => {
     const newErrors: typeof errors = {};
     if (!firstName.trim()) newErrors.firstName = 'Förnamn är obligatoriskt.';
     if (!lastName.trim()) newErrors.lastName = 'Efternamn är obligatoriskt.';
-    if (!userLocation.trim()) newErrors.userLocation = 'Var bor du? är obligatoriskt.';
+    if (!userLocation.trim() && !postalCode.trim()) newErrors.userLocation = 'Var bor du? är obligatoriskt.';
     if (!phone.trim()) newErrors.phone = 'Telefonnummer är obligatoriskt.';
     else if (!isValidSwedishPhone(phone)) newErrors.phone = 'Ange ett giltigt svenskt nummer (+46 eller 0).';
     if (!birthDate) newErrors.birthDate = 'Födelsedatum är obligatoriskt.';
@@ -327,6 +327,7 @@ const Profile = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
 
 
   const uploadProfileMedia = async (file: File) => {
