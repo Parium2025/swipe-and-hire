@@ -906,10 +906,11 @@ const Profile = () => {
                 >
                   <Avatar className="h-32 w-32 border-4 border-white/20 hover:border-white/40 transition-all">
                     {(profileImageUrl || coverImageUrl) ? (
-                      <AvatarImage src={profileImageUrl || coverImageUrl} />
+                      <AvatarImage src={profileImageUrl || coverImageUrl} alt="Profilbild" />
                     ) : null}
-                    <AvatarFallback className="text-2xl bg-white/20 text-white">
-                      {firstName?.[0]}{lastName?.[0]}
+                    <AvatarFallback className="text-2xl font-semibold bg-white/15 text-white">
+                      {(firstName?.trim()?.[0]?.toUpperCase() || '')}
+                      {(lastName?.trim()?.[0]?.toUpperCase() || '')}
                     </AvatarFallback>
                   </Avatar>
                 </div>
