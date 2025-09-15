@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import FileUpload from '@/components/FileUpload';
 import ImageEditor from '@/components/ImageEditor';
+import { BirthDatePicker } from '@/components/BirthDatePicker';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import phoneWithPariumLogo from '@/assets/phone-with-parium-logo.jpg';
@@ -668,25 +669,15 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                    className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60" 
                  />
                </div>
-               <div>
-                 <Label htmlFor="birthDate" className="text-white">Födelsedatum</Label>
-                 <Input 
-                   id="birthDate" 
-                   type={inputType}
-                   value={formData.birthDate} 
-                   onChange={(e) => handleInputChange('birthDate', e.target.value)} 
-                   onFocus={() => setInputType('date')}
-                   onBlur={() => {
-                     if (!formData.birthDate) {
-                       setInputType('text');
-                     }
-                   }}
-                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white custom-date-input" 
-                   max={new Date().toISOString().split('T')[0]}
-                   min="1920-01-01"
-                   placeholder="åååå-mm-dd"
-                 />
-               </div>
+                <div>
+                  <Label htmlFor="birthDate" className="text-white">Födelsedatum</Label>
+                  <BirthDatePicker
+                    value={formData.birthDate}
+                    onChange={(date) => handleInputChange('birthDate', date)}
+                    placeholder="Välj födelsedatum"
+                    className="w-full"
+                  />
+                </div>
                <div>
                  <Label htmlFor="phone" className="text-white">
                    <Phone className="h-4 w-4 inline mr-2" />
