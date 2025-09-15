@@ -96,7 +96,7 @@ export function BirthDatePicker({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 bg-primary backdrop-blur-sm border-primary/30" align="center" side="bottom" sideOffset={8} avoidCollisions={false}>
+      <PopoverContent className="w-[320px] sm:w-[360px] p-0 bg-primary backdrop-blur-sm border-primary/30 rounded-xl shadow-xl z-50" align="center" alignOffset={0} side="bottom" sideOffset={8} avoidCollisions={false}>
         <div className="p-3 space-y-3">
           {/* Year and Month Selectors */}
           <div className="flex gap-2">
