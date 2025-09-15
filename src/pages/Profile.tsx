@@ -656,7 +656,7 @@ const Profile = () => {
 
   const deleteProfileMedia = async () => {
     try {
-      // Delete the actual file from storage if we have a filename
+      // Delete the actual profile media file from storage if we have a filename
       if (profileFileName) {
         const { error: deleteError } = await supabase.storage
           .from('job-applications')
@@ -666,11 +666,24 @@ const Profile = () => {
           console.error('Error deleting profile media file:', deleteError);
         }
       }
+
+      // Also delete cover image file if it exists
+      if (coverFileName) {
+        const { error: deleteCoverError } = await supabase.storage
+          .from('job-applications')
+          .remove([coverFileName]);
+          
+        if (deleteCoverError) {
+          console.error('Error deleting cover image file:', deleteCoverError);
+        }
+      }
       
-      // Clear local state
+      // Clear both profile media AND cover image from local state
       setProfileImageUrl('');
       setIsProfileVideo(false); // Reset video flag
-      setProfileFileName(''); // Clear filename
+      setProfileFileName(''); // Clear profile filename
+      setCoverImageUrl(''); // Clear cover image
+      setCoverFileName(''); // Clear cover filename
       
       // Reset the file input to allow new uploads
       const fileInput = document.getElementById('profile-image') as HTMLInputElement;
@@ -691,6 +704,8 @@ const Profile = () => {
       setProfileImageUrl('');
       setIsProfileVideo(false);
       setProfileFileName('');
+      setCoverImageUrl('');
+      setCoverFileName('');
       setHasUnsavedChanges(true);
       
       toast({
@@ -966,13 +981,6 @@ const Profile = () => {
                 <Badge variant="secondary" className="bg-white/20 text-white text-xs font-normal">
                   Cover-bild vald
                 </Badge>
-                <button
-                  onClick={deleteCoverImage}
-                  className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-1.5 shadow-lg transition-colors"
-                  title="Ta bort cover-bild"
-                >
-                  <Trash2 className="h-3 w-3" />
-                </button>
               </div>
             )}
 
