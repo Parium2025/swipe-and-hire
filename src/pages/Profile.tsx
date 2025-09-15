@@ -722,8 +722,8 @@ const Profile = () => {
       setHasUnsavedChanges(true);
       
       toast({
-        title: "Cover-bild borttagen!", 
-        description: "Tryck på \"Spara ändringar\" för att spara ändringen."
+        title: "Cover-bild borttagen", 
+        description: "Tryck på \"Spara ändringar\" för att spara ändringen"
       });
     } catch (error) {
       console.error('Error in deleteCoverImage:', error);
@@ -733,8 +733,8 @@ const Profile = () => {
       setHasUnsavedChanges(true);
       
       toast({
-        title: "Cover-bild borttagen!", 
-        description: "Tryck på \"Spara ändringar\" för att spara ändringen."
+        title: "Cover-bild borttagen", 
+        description: "Tryck på \"Spara ändringar\" för att spara ändringen"
       });
     }
   };

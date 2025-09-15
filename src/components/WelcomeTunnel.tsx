@@ -442,7 +442,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     
     toast({
       title: "Cover-bild borttagen", 
-      description: "Din cover-bild har tagits bort."
+      description: "Din cover-bild har tagits bort"
     });
   };
 
