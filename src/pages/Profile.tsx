@@ -1027,7 +1027,7 @@ const Profile = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName" className="text-white">
-                      Förnamn <span className="text-red-400">*</span>
+                      Förnamn <span className="text-white">*</span>
                     </Label>
                     <Input
                       id="firstName"
@@ -1048,7 +1048,7 @@ const Profile = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="lastName" className="text-white">
-                      Efternamn <span className="text-red-400">*</span>
+                      Efternamn <span className="text-white">*</span>
                     </Label>
                     <Input
                       id="lastName"
@@ -1071,7 +1071,7 @@ const Profile = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="birthDate" className="text-white">
-                      Födelsedatum <span className="text-red-400">*</span>
+                      Födelsedatum <span className="text-white">*</span>
                     </Label>
                     <BirthDatePicker
                       value={birthDate}
@@ -1089,7 +1089,7 @@ const Profile = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="phone" className="text-white">
-                      Telefon <span className="text-red-400">*</span>
+                      Telefon <span className="text-white">*</span>
                     </Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-3 h-4 w-4 text-white z-10" />
@@ -1178,7 +1178,7 @@ const Profile = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="employmentStatus" className="text-white">
-                          Anställningsstatus <span className="text-red-400">*</span>
+                          Anställningsstatus <span className="text-white">*</span>
                         </Label>
                         <DropdownMenu modal={false}>
                           <DropdownMenuTrigger asChild>
