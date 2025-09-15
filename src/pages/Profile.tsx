@@ -958,6 +958,22 @@ const Profile = () => {
               )}
             </div>
 
+            {/* Cover controls when no video is present */}
+            {!isProfileVideo && coverImageUrl && (
+              <div className="flex items-center justify-center gap-2 mt-2">
+                <Badge variant="secondary" className="bg-white/20 text-white text-xs font-normal">
+                  Cover-bild vald
+                </Badge>
+                <button
+                  onClick={deleteCoverImage}
+                  className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-1.5 shadow-lg transition-colors"
+                  title="Ta bort cover-bild"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+
             {/* Cover image upload for videos */}
             {(isProfileVideo && !!profileImageUrl) && (
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
