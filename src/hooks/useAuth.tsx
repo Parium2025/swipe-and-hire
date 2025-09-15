@@ -513,7 +513,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       toast({
         title: "Profil uppdaterad",
-        description: "Dina ändringar har sparats."
+        description: "Dina ändringar har sparats.",
+        duration: 2000
       });
 
       return {};
