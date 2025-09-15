@@ -207,20 +207,20 @@ const CitySelector = ({
         {showCitySuggestions && filteredCities.length > 0 && (
           <div 
             ref={citySuggestionsRef}
-            className="absolute z-50 w-full mt-1 bg-white/95 backdrop-blur-sm border border-white/20 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+            className="absolute z-50 w-full mt-1 bg-slate-800/95 backdrop-blur-sm border border-white/20 rounded-lg shadow-lg max-h-48 overflow-y-auto"
           >
             {filteredCities.map((city, index) => (
               <div
                 key={city.name}
                 className={`px-4 py-2 cursor-pointer transition-colors ${
                   index === activeCityIndex 
-                    ? 'bg-primary/20 text-primary-foreground' 
-                    : 'hover:bg-white/20 text-gray-800'
+                    ? 'bg-primary/20 text-white' 
+                    : 'hover:bg-white/20 text-white'
                 }`}
                 onClick={() => handleCitySelect(city.name)}
               >
-                <div className="font-medium">{city.name}</div>
-                <div className="text-xs text-gray-600">
+                <div className="font-medium text-white">{city.name}</div>
+                <div className="text-xs text-white/60">
                   Klicka för att se postnummer
                 </div>
               </div>
@@ -250,9 +250,9 @@ const CitySelector = ({
         {showPostalSuggestions && filteredPostalCodes.length > 0 && (
           <div 
             ref={postalSuggestionsRef}
-            className="absolute z-50 w-full mt-1 bg-white/95 backdrop-blur-sm border border-white/20 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+            className="absolute z-50 w-full mt-1 bg-slate-800/95 backdrop-blur-sm border border-white/20 rounded-lg shadow-lg max-h-48 overflow-y-auto"
           >
-            <div className="px-4 py-2 text-xs text-gray-600 border-b border-white/20">
+            <div className="px-4 py-2 text-xs text-white/60 border-b border-white/20">
               Postnummer för {cityValue}:
             </div>
             {filteredPostalCodes.map((postalCode, index) => (
@@ -260,12 +260,12 @@ const CitySelector = ({
                 key={postalCode}
                 className={`px-4 py-2 cursor-pointer transition-colors ${
                   index === activePostalIndex 
-                    ? 'bg-primary/20 text-primary-foreground' 
-                    : 'hover:bg-white/20 text-gray-800'
+                    ? 'bg-primary/20 text-white' 
+                    : 'hover:bg-white/20 text-white'
                 }`}
                 onClick={() => handlePostalCodeSelect(postalCode)}
               >
-                <div className="font-medium">{postalCode}</div>
+                <div className="font-medium text-white">{postalCode}</div>
               </div>
             ))}
           </div>
@@ -273,14 +273,14 @@ const CitySelector = ({
         
         {/* Stad-förslag baserat på postnummer */}
         {suggestedCity && (
-          <div className="absolute z-50 w-full mt-1 bg-white/95 backdrop-blur-sm border border-white/20 rounded-lg shadow-lg">
+          <div className="absolute z-50 w-full mt-1 bg-slate-800/95 backdrop-blur-sm border border-white/20 rounded-lg shadow-lg">
             <div
-              className="px-4 py-2 cursor-pointer transition-colors hover:bg-white/20 text-gray-800"
+              className="px-4 py-2 cursor-pointer transition-colors hover:bg-white/20 text-white"
               onClick={handleCitySuggestionAccept}
             >
-              <div className="text-xs text-gray-600">Förslag baserat på postnummer:</div>
-              <div className="font-medium">{suggestedCity}</div>
-              <div className="text-xs text-gray-500">Klicka för att välja</div>
+              <div className="text-xs text-white/60">Förslag baserat på postnummer:</div>
+              <div className="font-medium text-white">{suggestedCity}</div>
+              <div className="text-xs text-white/40">Klicka för att välja</div>
             </div>
           </div>
         )}
