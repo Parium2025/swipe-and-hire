@@ -450,7 +450,26 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      await updateProfile({
+      console.log('Starting profile update with data:', {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        bio: formData.bio,
+        location: formData.location,
+        postal_code: postalCode,
+        phone: formData.phone,
+        birth_date: formData.birthDate || null,
+        employment_status: formData.employmentStatus,
+        working_hours: formData.workingHours,
+        availability: formData.availability,
+        cv_url: formData.cvUrl,
+        cv_filename: formData.cvFileName,
+        profile_image_url: formData.profileMediaType === 'video' ? null : formData.profileImageUrl,
+        video_url: formData.profileMediaType === 'video' ? formData.profileImageUrl : null,
+        cover_image_url: formData.coverImageUrl || null,
+        onboarding_completed: true
+      });
+
+      const result = await updateProfile({
         first_name: formData.firstName,
         last_name: formData.lastName,
         bio: formData.bio,
@@ -470,6 +489,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         onboarding_completed: true // Mark onboarding as completed
       } as any);
       
+      console.log('Profile update result:', result);
+      
+      if (result?.error) {
+        console.error('Profile update failed:', result.error);
+        throw new Error('Profile update failed: ' + result.error);
+      }
+      
       setCurrentStep(totalSteps - 1); // Go to completion step
 
       setTimeout(() => {
@@ -480,6 +506,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         onComplete();
       }, 2000);
     } catch (error) {
+      console.error('Error in handleSubmit:', error);
       toast({
         title: "Ett fel uppstod",
         description: "Kunde inte skapa profilen. Försök igen.",
