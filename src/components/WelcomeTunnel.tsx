@@ -424,6 +424,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const deleteProfileMedia = () => {
     handleInputChange('profileImageUrl', '');
     handleInputChange('profileMediaType', 'image');
+    handleInputChange('coverImageUrl', ''); // Also clear cover image
     
     // Reset the file input to allow new uploads
     const fileInput = document.getElementById('profileMedia') as HTMLInputElement;
@@ -927,16 +928,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   )}
                   
                   {formData.coverImageUrl && !isUploadingCover && (
-                    <div className="flex items-center justify-center gap-2">
-                       <Badge variant="secondary" className="bg-white/20 text-white text-xs ml-8">
+                    <div className="flex items-center justify-center">
+                       <Badge variant="secondary" className="bg-white/20 text-white text-xs">
                           Cover-bild uppladdad!
                         </Badge>
-                      <button
-                        onClick={deleteCoverImage}
-                        className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-1.5 shadow-lg transition-colors"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </button>
                     </div>
                   )}
                 </div>
