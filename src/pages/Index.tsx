@@ -182,7 +182,7 @@ const Index = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                {user.email === 'fredrikandits@hotmail.com' && (
+                {user.email === 'fredrik.andits@icloud.com' && (
                   <DeveloperControls 
                     onViewChange={setDeveloperView}
                     currentView={developerView}
@@ -224,7 +224,7 @@ const Index = () => {
               >
                 Min Profil
               </Button>
-              {user.email === 'fredrikandits@hotmail.com' && (
+              {user.email === 'fredrik.andits@icloud.com' && (
                 <DeveloperControls 
                   onViewChange={setDeveloperView}
                   currentView={developerView}
@@ -264,7 +264,7 @@ const Index = () => {
             >
               Min Profil
             </Button>
-            {user.email === 'fredrikandits@hotmail.com' && (
+            {user.email === 'fredrik.andits@icloud.com' && (
               <DeveloperControls 
                 onViewChange={setDeveloperView}
                 currentView={developerView}
