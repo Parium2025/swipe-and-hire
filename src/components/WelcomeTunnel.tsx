@@ -433,7 +433,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     
     toast({
       title: "Media borttagen",
-      description: "Din profilbild/video har tagits bort."
+      description: "Din profilbild/video har tagits bort"
     });
   };
 
