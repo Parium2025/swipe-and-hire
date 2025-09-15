@@ -177,7 +177,7 @@ export function BirthDatePicker({
             className="p-0 pointer-events-auto text-white [&_.rdp-caption]:text-white [&_.rdp-nav_button]:text-white [&_.rdp-nav_button]:border-white/20 [&_.rdp-nav_button]:hover:bg-white/20"
             classNames={{
               day: "h-9 w-9 p-0 font-normal text-white hover:bg-white/20",
-              day_selected: "bg-white text-primary hover:bg-white focus:bg-white",
+              day_selected: "bg-white !text-primary-foreground font-semibold hover:bg-white focus:bg-white",
               day_today: "bg-transparent text-white font-normal",
             }}
           />
