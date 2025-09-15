@@ -820,8 +820,8 @@ const Profile = () => {
         setHasUnsavedChanges(false);
         
         toast({
-          title: "Profil uppdaterad!",
-          description: "Dina ändringar har sparats.",
+          title: "Profil uppdaterad",
+          description: "Dina ändringar har sparats",
           duration: 2000
         });
       }
