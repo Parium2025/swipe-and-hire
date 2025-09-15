@@ -16,7 +16,7 @@ const Settings = () => {
   }
 
   // Only job seekers can access settings
-  if (!user || userRole?.role !== 'job_seeker') {
+  if (!user || profile?.role !== 'job_seeker') {
     return <Navigate to="/" replace />;
   }
 
