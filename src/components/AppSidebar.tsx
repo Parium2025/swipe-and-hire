@@ -36,13 +36,13 @@ const profileItems = [
 ];
 
 // Add settings for job seekers only
-const getProfileItems = (userRole: string | undefined) => {
+const getProfileItems = (role: string | undefined) => {
   const baseItems = [
     { title: 'Min Profil', url: '/profile', icon: User },
     { title: 'Sök Jobb', url: '/search-jobs', icon: Building },
   ];
   
-  if (userRole === 'job_seeker') {
+  if (role === 'job_seeker') {
     baseItems.push({ title: 'Inställningar', url: '/settings', icon: Settings });
   }
   
@@ -181,7 +181,7 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                 {getProfileItems(userRole?.role).map((item) => (
+                 {getProfileItems(profile?.role).map((item) => (
                    <SidebarMenuItem key={item.title}>
                      <SidebarMenuButton 
                        data-onboarding={item.title === 'Min Profil' ? 'min-profil' : undefined}
