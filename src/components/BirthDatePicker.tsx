@@ -117,7 +117,7 @@ export function BirthDatePicker({
                 side="bottom"
                 align="center"
                 sideOffset={6}
-                avoidCollisions={true}
+                avoidCollisions={false}
               >
                 {years.map((year) => (
                   <DropdownMenuItem 
@@ -148,7 +148,7 @@ export function BirthDatePicker({
                 side="bottom"
                 align="center"
                 sideOffset={6}
-                avoidCollisions={true}
+                avoidCollisions={false}
               >
                 {months.map((month) => (
                   <DropdownMenuItem 
