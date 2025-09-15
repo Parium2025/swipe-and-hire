@@ -678,6 +678,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     className="w-full"
                     popoverAlign="center"
                     popoverAlignOffset={-240}
+                    alignToIcon={true}
                   />
                 </div>
                <div>

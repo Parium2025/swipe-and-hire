@@ -25,6 +25,7 @@ interface BirthDatePickerProps {
   className?: string
   popoverAlign?: "start" | "center" | "end"
   popoverAlignOffset?: number
+  alignToIcon?: boolean
 }
 
 export function BirthDatePicker({
@@ -33,12 +34,19 @@ export function BirthDatePicker({
   placeholder = "Välj födelsedatum",
   className,
   popoverAlign,
-  popoverAlignOffset
+  popoverAlignOffset,
+  alignToIcon = false,
 }: BirthDatePickerProps) {
   const [isOpen, setIsOpen] = React.useState(false)
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(
     value ? new Date(value) : undefined
   )
+
+  // Alignment refs
+  const triggerRef = React.useRef<HTMLButtonElement>(null)
+  const iconRef = React.useRef<HTMLSpanElement>(null)
+  const yearRef = React.useRef<HTMLButtonElement>(null)
+  const [computedOffset, setComputedOffset] = React.useState<number | undefined>(undefined)
 
   // Generate years from 1920 to current year
   const currentYear = new Date().getFullYear()
@@ -81,10 +89,39 @@ export function BirthDatePicker({
     }
   }, [value])
 
+  React.useEffect(() => {
+    if (!isOpen || !alignToIcon) return
+    const raf = requestAnimationFrame(() => {
+      const iconEl = iconRef.current
+      const yearEl = yearRef.current
+      if (iconEl && yearEl) {
+        const iconRect = iconEl.getBoundingClientRect()
+        const yearRect = yearEl.getBoundingClientRect()
+        setComputedOffset(iconRect.left - yearRect.left)
+      }
+    })
+    const onResize = () => {
+      if (!isOpen || !alignToIcon) return
+      const iconEl = iconRef.current
+      const yearEl = yearRef.current
+      if (iconEl && yearEl) {
+        const iconRect = iconEl.getBoundingClientRect()
+        const yearRect = yearEl.getBoundingClientRect()
+        setComputedOffset(iconRect.left - yearRect.left)
+      }
+    }
+    window.addEventListener('resize', onResize)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('resize', onResize)
+    }
+  }, [isOpen, alignToIcon, selectedDate])
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
+          ref={triggerRef}
           variant="outline"
           className={cn(
             "w-full h-10 pl-3 pr-3 text-left font-normal bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 justify-start",
@@ -92,7 +129,7 @@ export function BirthDatePicker({
             className
           )}
         >
-          <CalendarIcon className="mr-2 h-4 w-4 text-white" />
+          <span ref={iconRef} className="mr-2 inline-flex items-center"><CalendarIcon className="h-4 w-4 text-white" /></span>
           {selectedDate ? (
             format(selectedDate, "yyyy-MM-dd", { locale: sv })
           ) : (
@@ -100,13 +137,14 @@ export function BirthDatePicker({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 bg-primary backdrop-blur-sm border-primary/30 rounded-xl shadow-xl z-50" align={popoverAlign ?? "center"} alignOffset={(popoverAlignOffset ?? -150)} side="bottom" sideOffset={8} avoidCollisions={false}>
+      <PopoverContent className="w-auto p-0 bg-primary backdrop-blur-sm border-primary/30 rounded-xl shadow-xl z-50" align={popoverAlign ?? "center"} alignOffset={(computedOffset ?? (popoverAlignOffset ?? -150))} side="bottom" sideOffset={8} avoidCollisions={false}>
         <div className="p-3 space-y-3">
           {/* Year and Month Selectors */}
           <div className="flex gap-2">
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
                 <Button
+                  ref={yearRef}
                   variant="outline"
                   className="flex-1 h-10 bg-white/10 border-white/30 text-white hover:bg-white/20 justify-between"
                 >
