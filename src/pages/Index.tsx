@@ -17,6 +17,7 @@ import Subscription from '@/pages/Subscription';
 import Billing from '@/pages/Billing';
 import Support from '@/pages/Support';
 import SupportAdmin from '@/pages/SupportAdmin';
+import Settings from '@/pages/Settings';
 import DeveloperControls from '@/components/DeveloperControls';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRightLeft } from 'lucide-react';
@@ -153,6 +154,8 @@ const Index = () => {
           return <Billing />;
         case '/support':
           return <Support />;
+        case '/settings':
+          return <Settings />;
         case '/admin':
           // Endast Fredrik kan komma åt admin-sidan
           if (user.email === 'fredrikandits@hotmail.com') {
