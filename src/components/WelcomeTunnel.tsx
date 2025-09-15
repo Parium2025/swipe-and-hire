@@ -623,7 +623,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     alignToIcon={true}
                   />
                   {formData.birthDate && calculateAge(formData.birthDate) !== null && (
-                    <p className="text-sm text-white/70 mt-1">
+                    <p className="text-sm text-white mt-1">
                       {calculateAge(formData.birthDate)} år gammal
                     </p>
                   )}
