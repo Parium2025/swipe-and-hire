@@ -76,7 +76,7 @@ const PostalCodeSelector = ({
       {/* Postnummer input */}
       <div>
         <Label htmlFor="postalCode" className="text-white">
-          Var bor du?
+          Var bor du? <span className="text-red-400">*</span>
         </Label>
         <div className="relative">
           <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white z-10" />

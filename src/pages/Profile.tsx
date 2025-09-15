@@ -1026,29 +1026,43 @@ const Profile = () => {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-white">Förnamn</Label>
+                    <Label htmlFor="firstName" className="text-white">
+                      Förnamn <span className="text-red-400">*</span>
+                    </Label>
                     <Input
                       id="firstName"
                       placeholder="Förnamn"
                       value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
+                      onChange={(e) => {
+                        setFirstName(e.target.value);
+                        if (e.target.value.trim()) {
+                          setErrors(prev => ({ ...prev, firstName: undefined }));
+                        }
+                      }}
                       onBlur={() => setErrors(prev => ({ ...prev, firstName: firstName.trim() ? undefined : 'Förnamn är obligatoriskt.' }))}
                       aria-invalid={!!errors.firstName}
-                      className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                      className={`bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 ${errors.firstName ? 'border-red-400' : ''}`}
                     />
                     {errors.firstName && <p className="text-xs text-red-300">{errors.firstName}</p>}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-white">Efternamn</Label>
+                    <Label htmlFor="lastName" className="text-white">
+                      Efternamn <span className="text-red-400">*</span>
+                    </Label>
                     <Input
                       id="lastName"
                       placeholder="Efternamn"
                       value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
+                      onChange={(e) => {
+                        setLastName(e.target.value);
+                        if (e.target.value.trim()) {
+                          setErrors(prev => ({ ...prev, lastName: undefined }));
+                        }
+                      }}
                       onBlur={() => setErrors(prev => ({ ...prev, lastName: lastName.trim() ? undefined : 'Efternamn är obligatoriskt.' }))}
                       aria-invalid={!!errors.lastName}
-                      className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                      className={`bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 ${errors.lastName ? 'border-red-400' : ''}`}
                     />
                     {errors.lastName && <p className="text-xs text-red-300">{errors.lastName}</p>}
                   </div>
@@ -1056,7 +1070,9 @@ const Profile = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="birthDate" className="text-white">Födelsedatum</Label>
+                    <Label htmlFor="birthDate" className="text-white">
+                      Födelsedatum <span className="text-red-400">*</span>
+                    </Label>
                     <BirthDatePicker
                       value={birthDate}
                       onChange={(v) => {
@@ -1072,7 +1088,9 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-white">Telefon</Label>
+                    <Label htmlFor="phone" className="text-white">
+                      Telefon <span className="text-red-400">*</span>
+                    </Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-3 h-4 w-4 text-white z-10" />
                       <Input
@@ -1080,10 +1098,15 @@ const Profile = () => {
                         type="tel"
                         placeholder="+46 70 123 45 67"
                         value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
+                        onChange={(e) => {
+                          setPhone(e.target.value);
+                          if (e.target.value.trim()) {
+                            setErrors(prev => ({ ...prev, phone: undefined }));
+                          }
+                        }}
                         onBlur={() => setErrors(prev => ({ ...prev, phone: phone.trim() ? (isValidSwedishPhone(phone) ? undefined : 'Ange ett giltigt svenskt nummer (+46 eller 0).') : 'Telefonnummer är obligatoriskt.' }))}
                         aria-invalid={!!errors.phone}
-                        className="pl-10 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                        className={`pl-10 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 ${errors.phone ? 'border-red-400' : ''}`}
                       />
                     </div>
                     {errors.phone && <p className="text-xs text-red-300">{errors.phone}</p>}
@@ -1154,7 +1177,9 @@ const Profile = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="employmentStatus" className="text-white">Anställningsstatus</Label>
+                        <Label htmlFor="employmentStatus" className="text-white">
+                          Anställningsstatus <span className="text-red-400">*</span>
+                        </Label>
                         <DropdownMenu modal={false}>
                           <DropdownMenuTrigger asChild>
                             <Button
