@@ -72,7 +72,7 @@ const App = () => {
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<Auth />} />
-                  <Route path="/consent" element={<Index />} />
+                  <Route path="/consent" element={<Consent />} />
                   <Route path="/verify" element={<EmailVerification />} />
                   <Route path="/email-redirect" element={<EmailRedirect />} />
                   <Route path="/confirm" element={<EmailConfirm />} />
