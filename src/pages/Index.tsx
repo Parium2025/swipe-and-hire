@@ -12,7 +12,6 @@ import ProfileSelector from '@/components/ProfileSelector';
 import WelcomeTunnel from '@/components/WelcomeTunnel';
 import AppOnboardingTour from '@/components/AppOnboardingTour';
 import Profile from '@/pages/Profile';
-import Consent from '@/pages/Consent';
 import SearchJobs from '@/pages/SearchJobs';
 import Subscription from '@/pages/Subscription';
 import Billing from '@/pages/Billing';
@@ -138,7 +137,7 @@ const Index = () => {
   }
 
   // Render sidebar layout for profile pages
-  const sidebarRoutes = ['/profile', '/search-jobs', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/consent'];
+  const sidebarRoutes = ['/profile', '/search-jobs', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin'];
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
 
   if (isSidebarRoute) {
@@ -146,8 +145,6 @@ const Index = () => {
       switch (location.pathname) {
         case '/profile':
           return <Profile />;
-        case '/consent':
-          return <Consent />;
         case '/search-jobs':
           return <SearchJobs />;
         case '/subscription':
