@@ -593,6 +593,7 @@ export type Database = {
           home_location: string
           id: string
           interests: Json
+          last_name: string
           onboarding_completed: boolean
           phone: string
           postal_code: string

@@ -16,9 +16,12 @@ interface MaskedProfile {
   availability?: string;
   home_location?: string; // City level only
   first_name?: string;
-  bio?: string; // Truncated for privacy
+  last_name?: string; // Now included with consent
+  age?: number; // Age instead of birth_date
   profile_image_url?: string;
   video_url?: string;
+  phone?: string; // Included with consent
+  postal_code?: string; // Included with consent
 }
 
 export const useSecureProfileAccess = () => {

@@ -55,7 +55,7 @@ export const DataSharingConsent = () => {
           consent_given: newConsentValue,
           consent_date: new Date().toISOString(),
           consent_version: '1.0',
-          data_types_consented: ['age', 'postal_code', 'phone', 'email', 'location']
+          data_types_consented: ['name', 'age', 'postal_code', 'phone', 'email', 'location']
         }, {
           onConflict: 'user_id'
         });
@@ -122,7 +122,7 @@ export const DataSharingConsent = () => {
             </div>
             <p className="text-sm text-white/70">
               {consentGiven 
-                ? 'Arbetsgivare kan se din ålder, postnummer, telefon, e-post och kommun när du söker jobb.'
+                ? 'Arbetsgivare kan se ditt namn, ålder, postnummer, telefon, e-post och kommun när du söker jobb.'
                 : 'Arbetsgivare kan inte se din kontaktinformation. Du kan fortfarande söka jobb.'
               }
             </p>
@@ -141,6 +141,10 @@ export const DataSharingConsent = () => {
             Vad som delas när samtycke är givet:
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+            <div className="flex items-center gap-2 text-white/80">
+              <Check className="h-3 w-3 text-green-400" />
+              <span>Ditt för- och efternamn</span>
+            </div>
             <div className="flex items-center gap-2 text-white/80">
               <Check className="h-3 w-3 text-green-400" />
               <span>Din ålder (inte exakt födelsedatum)</span>
@@ -162,7 +166,7 @@ export const DataSharingConsent = () => {
 
         <div className="p-3 rounded-lg bg-white/5 border border-white/10">
           <p className="text-xs text-white/70">
-            <strong>Obs:</strong> Även med samtycke delas aldrig ditt exakta födelsedatum, fullständiga hemadress eller efternamn. 
+            <strong>Obs:</strong> Även med samtycke delas aldrig ditt exakta födelsedatum eller fullständiga hemadress. 
             Du kan när som helst ändra detta samtycke härifrån.
           </p>
         </div>
