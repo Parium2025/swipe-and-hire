@@ -69,7 +69,8 @@ export const DataSharingConsent = () => {
         description: newConsentValue 
           ? "Arbetsgivare kan nu se din grundläggande information när du söker jobb."
           : "Arbetsgivare kan inte längre se din information. Du kan fortfarande söka jobb men arbetsgivare kommer inte kunna se dina kontaktuppgifter.",
-        variant: "default"
+        variant: "default",
+        duration: 4000
       });
     } catch (error) {
       console.error('Error updating consent:', error);
@@ -120,7 +121,7 @@ export const DataSharingConsent = () => {
             <p className="text-sm text-white">
               {consentGiven 
                 ? 'Du kan när som helst ändra detta samtycke här'
-                : 'Du kan fortfarande söka jobb men arbetsgivare ser inte din kontaktinformation.'
+                : ''
               }
             </p>
           </div>
