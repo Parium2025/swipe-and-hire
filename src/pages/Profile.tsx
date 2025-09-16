@@ -20,6 +20,7 @@ import ProfileVideo from '@/components/ProfileVideo';
 import ImageEditor from '@/components/ImageEditor';
 import PostalCodeSelector from '@/components/PostalCodeSelector';
 import { BirthDatePicker } from '@/components/BirthDatePicker';
+import { ProfileAccessManagement } from '@/components/ProfileAccessManagement';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { format } from 'date-fns';
@@ -1432,6 +1433,11 @@ const Profile = () => {
             </form>
           </CardContent>
         </Card>
+
+        {/* Profile Access Management - Only for job seekers */}
+        {!isEmployer && (
+          <ProfileAccessManagement />
+        )}
       </div>
 
       {/* Image Editors */}

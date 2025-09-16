@@ -540,11 +540,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      cleanup_expired_profile_permissions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       create_secure_confirmation_token: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
-      get_limited_profile_for_employer: {
+      get_masked_profile_for_employer: {
         Args: { job_seeker_uuid: string }
         Returns: {
           availability: string
@@ -556,7 +560,6 @@ export type Database = {
           home_location: string
           id: string
           interests: Json
-          last_name: string
           onboarding_completed: boolean
           profile_image_url: string
           role: Database["public"]["Enums"]["user_role"]
@@ -576,6 +579,22 @@ export type Database = {
       }
       is_super_admin: {
         Args: { user_uuid: string }
+        Returns: boolean
+      }
+      is_support_admin: {
+        Args: { user_uuid: string }
+        Returns: boolean
+      }
+      log_profile_access_attempt: {
+        Args: {
+          access_granted: boolean
+          employer_uuid: string
+          job_seeker_uuid: string
+        }
+        Returns: undefined
+      }
+      revoke_profile_access: {
+        Args: { job_seeker_id?: string; target_employer_id: string }
         Returns: boolean
       }
       sanitize_filename: {
