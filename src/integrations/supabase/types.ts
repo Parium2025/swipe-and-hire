@@ -481,6 +481,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_data_consents: {
+        Row: {
+          consent_date: string | null
+          consent_given: boolean
+          consent_version: string
+          created_at: string
+          data_types_consented: Json | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          consent_date?: string | null
+          consent_given?: boolean
+          consent_version?: string
+          created_at?: string
+          data_types_consented?: Json | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          consent_date?: string | null
+          consent_given?: boolean
+          consent_version?: string
+          created_at?: string
+          data_types_consented?: Json | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -548,6 +581,29 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_consented_profile_for_employer: {
+        Args: { job_seeker_uuid: string }
+        Returns: {
+          age: number
+          availability: string
+          created_at: string
+          cv_url: string
+          employment_status: string
+          first_name: string
+          home_location: string
+          id: string
+          interests: Json
+          onboarding_completed: boolean
+          phone: string
+          postal_code: string
+          profile_image_url: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+          video_url: string
+          working_hours: string
+        }[]
+      }
       get_masked_profile_for_employer: {
         Args: { job_seeker_uuid: string }
         Returns: {
@@ -604,6 +660,10 @@ export type Database = {
       test_reset_flow: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      user_has_given_consent: {
+        Args: { user_uuid: string }
+        Returns: boolean
       }
       validate_file_upload: {
         Args: { content_type: string; file_name: string; file_size: number }

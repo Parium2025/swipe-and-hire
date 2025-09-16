@@ -57,7 +57,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     coverImageUrl: '', // Cover image for videos
     cvUrl: '',
     cvFileName: '',
-    interests: [] as string[]
+    interests: [] as string[],
+    consentGiven: false // New field for data sharing consent
   });
   const [inputType, setInputType] = useState('text');
   const [phoneError, setPhoneError] = useState('');
@@ -125,14 +126,14 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     convertExistingUrls();
   }, [profile]);
 
-  const totalSteps = 7; // Introduktion + 5 profil steg + slutskärm
+  const totalSteps = 8; // Introduktion + 5 profil steg + samtycke + submit + slutskärm
   const progress = currentStep / (totalSteps - 1) * 100;
 
   const countWords = (text: string) => {
     return text.trim().split(/\s+/).filter(word => word.length > 0).length;
   };
 
-  const handleInputChange = (field: string, value: string | string[]) => {
+  const handleInputChange = (field: string, value: string | string[] | boolean) => {
     if (field === 'bio' && typeof value === 'string') {
       const wordCount = countWords(value);
       if (wordCount <= 100) {
@@ -469,6 +470,24 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         onboarding_completed: true
       });
 
+      // First, save consent
+      if (formData.consentGiven) {
+        const { error: consentError } = await supabase
+          .from('user_data_consents')
+          .upsert({
+            user_id: user?.id,
+            consent_given: true,
+            consent_date: new Date().toISOString(),
+            consent_version: '1.0',
+            data_types_consented: ['age', 'postal_code', 'phone', 'email', 'location']
+          });
+
+        if (consentError) {
+          console.error('Consent save failed:', consentError);
+          throw new Error('Could not save consent: ' + consentError.message);
+        }
+      }
+
       const result = await updateProfile({
         first_name: formData.firstName,
         last_name: formData.lastName,
@@ -531,7 +550,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       case 2: return true; // Profile image is optional
       case 3: return !!formData.cvUrl.trim(); // CV is now required
       case 4: return true; // Bio is optional
-      case 5: return true; // Interests are optional
+      case 5: return formData.consentGiven; // Consent is required
+      case 6: return true; // Submit step
       default: return false;
     }
   };
@@ -1034,6 +1054,76 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
       case 5:
         return (
+          <div className="space-y-6">
+            <div className="text-center mb-8">
+              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
+                <Users className="h-8 w-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2 text-white">Dela din information</h2>
+              <p className="text-white/90">För att kunna matcha dig med rätt jobb behöver vi kunna dela viss information med arbetsgivare.</p>
+            </div>
+
+            <div className="max-w-md mx-auto space-y-6">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 space-y-4">
+                <h3 className="text-white font-semibold mb-3">Detta kommer att delas med arbetsgivare:</h3>
+                <div className="space-y-2 text-sm text-white/90">
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-400" />
+                    <span>Din ålder (inte exakt födelsedatum)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-400" />
+                    <span>Postnummer (för geografisk matchning)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-400" />
+                    <span>Telefonnummer och e-post</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-400" />
+                    <span>Kommun/stad (inte fullständig adress)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6 space-y-3">
+                <h3 className="text-white font-semibold">Detta delas INTE:</h3>
+                <div className="space-y-2 text-sm text-white/70">
+                  <div className="flex items-center gap-2">
+                    <span className="text-red-400">✗</span>
+                    <span>Exakt födelsedatum</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-red-400">✗</span>
+                    <span>Fullständig hemadress</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-red-400">✗</span>
+                    <span>Efternamn</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <label className="flex items-start gap-3 cursor-pointer bg-white/10 rounded-lg p-4 hover:bg-white/15 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={formData.consentGiven}
+                    onChange={(e) => handleInputChange('consentGiven', e.target.checked)}
+                    className="mt-1 rounded border-white/30 bg-white/10 text-primary focus:ring-primary focus:ring-offset-0"
+                  />
+                  <div className="text-sm text-white">
+                    <p className="font-medium mb-1">Jag godkänner att mina uppgifter delas</p>
+                    <p className="text-white/80">Genom att kryssa i denna ruta godkänner jag att Parium delar ovanstående information med arbetsgivare när jag ansöker om jobb. Du kan när som helst återkalla detta samtycke från din profil.</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 6:
+        return (
           <div className="text-center space-y-8">
             <div className="bg-white/20 backdrop-blur-sm p-6 rounded-full w-fit mx-auto mb-6">
               <Check className="h-12 w-12 text-white" />
@@ -1071,7 +1161,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
           </div>
         );
 
-      case 6:
+      case 7:
         return (
           <div className="text-center space-y-6">
             <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
@@ -1127,7 +1217,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       {currentStep > 0 && currentStep < totalSteps - 1 && (
         <div className="w-full max-w-md mx-auto pt-8 px-6">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-white font-medium">Steg {currentStep} av {totalSteps - 2}</span>
+            <span className="text-sm text-white font-medium">Steg {currentStep} av {totalSteps - 3}</span>
             <span className="text-sm text-white font-medium">{Math.round(progress)}%</span>
           </div>
           <div className="relative h-2 w-full overflow-hidden rounded-full bg-primary/30">
@@ -1147,7 +1237,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       </div>
 
       {/* Navigation buttons */}
-      {currentStep < totalSteps - 1 && currentStep < 5 && (
+      {currentStep < totalSteps - 1 && currentStep < 6 && (
         <div className="w-full max-w-md mx-auto px-6 pb-8 relative z-10">
           <div className="flex gap-4">
             {currentStep > 0 && (
@@ -1161,7 +1251,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               </Button>
             )}
             
-            {currentStep === 4 ? (
+            {currentStep === 5 ? (
               <Button
                 onClick={handleNext}
                 disabled={!isStepValid()}
@@ -1170,7 +1260,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 Nästa
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
-            ) : currentStep < 4 ? (
+            ) : currentStep < 5 ? (
               <Button
                 onClick={handleNext}
                 disabled={!isStepValid()}

@@ -28,7 +28,7 @@ export const useSecureProfileAccess = () => {
   const getJobSeekerProfile = async (jobSeekerId: string): Promise<MaskedProfile | null> => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.rpc('get_masked_profile_for_employer', {
+      const { data, error } = await supabase.rpc('get_consented_profile_for_employer', {
         job_seeker_uuid: jobSeekerId
       });
 
