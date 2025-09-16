@@ -103,7 +103,7 @@ export const DataSharingConsent = () => {
           <Shield className="h-5 w-5 text-white" />
           <CardTitle className="text-white">Datadelning med arbetsgivare</CardTitle>
         </div>
-        <CardDescription className="text-white/70">
+        <CardDescription className="text-white">
           Hantera hur din information delas med potentiella arbetsgivare
         </CardDescription>
       </CardHeader>
@@ -120,7 +120,7 @@ export const DataSharingConsent = () => {
                 {consentGiven ? 'Datadelning aktiverad' : 'Datadelning inaktiverad'}
               </Label>
             </div>
-            <p className="text-sm text-white/70">
+            <p className="text-sm text-white">
               {consentGiven 
                 ? 'Du kan när som helst ändra detta samtycke här'
                 : 'Du kan fortfarande söka jobb men arbetsgivare ser inte din kontaktinformation.'
@@ -141,23 +141,23 @@ export const DataSharingConsent = () => {
             Vad som delas när samtycke är givet:
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-            <div className="flex items-center gap-2 text-white/80">
+            <div className="flex items-center gap-2 text-white">
               <Check className="h-3 w-3 text-green-400" />
               <span>Ditt för- och efternamn</span>
             </div>
-            <div className="flex items-center gap-2 text-white/80">
+            <div className="flex items-center gap-2 text-white">
               <Check className="h-3 w-3 text-green-400" />
               <span>Din ålder (inte exakt födelsedatum)</span>
             </div>
-            <div className="flex items-center gap-2 text-white/80">
+            <div className="flex items-center gap-2 text-white">
               <Check className="h-3 w-3 text-green-400" />
               <span>Postnummer</span>
             </div>
-            <div className="flex items-center gap-2 text-white/80">
+            <div className="flex items-center gap-2 text-white">
               <Check className="h-3 w-3 text-green-400" />
               <span>Telefonnummer och e-post</span>
             </div>
-            <div className="flex items-center gap-2 text-white/80">
+            <div className="flex items-center gap-2 text-white">
               <Check className="h-3 w-3 text-green-400" />
               <span>Kommun/stad</span>
             </div>
