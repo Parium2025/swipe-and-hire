@@ -20,7 +20,7 @@ import ProfileVideo from '@/components/ProfileVideo';
 import ImageEditor from '@/components/ImageEditor';
 import PostalCodeSelector from '@/components/PostalCodeSelector';
 import { BirthDatePicker } from '@/components/BirthDatePicker';
-import { ProfileAccessManagement } from '@/components/ProfileAccessManagement';
+import { DataSharingConsent } from '@/components/DataSharingConsent';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { format } from 'date-fns';
@@ -1434,9 +1434,9 @@ const Profile = () => {
           </CardContent>
         </Card>
 
-        {/* Profile Access Management - Only for job seekers */}
+        {/* Data Sharing Consent - Only for job seekers */}
         {!isEmployer && (
-          <ProfileAccessManagement />
+          <DataSharingConsent />
         )}
       </div>
 
