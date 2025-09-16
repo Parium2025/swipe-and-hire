@@ -121,7 +121,7 @@ export const DataSharingConsent = () => {
             <p className="text-sm text-white">
               {consentGiven 
                 ? 'Du kan när som helst ändra detta samtycke här'
-                : ''
+                : 'Du kan fortfarande söka jobb men arbetsgivare ser inte din kontaktinformation'
               }
             </p>
           </div>
