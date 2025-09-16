@@ -122,7 +122,7 @@ export const DataSharingConsent = () => {
             </div>
             <p className="text-sm text-white/70">
               {consentGiven 
-                ? 'Du kan när som helst ändra detta samtycke här.'
+                ? 'Du kan när som helst ändra detta samtycke här'
                 : 'Du kan fortfarande söka jobb men arbetsgivare ser inte din kontaktinformation.'
               }
             </p>
@@ -162,13 +162,6 @@ export const DataSharingConsent = () => {
               <span>Kommun/stad</span>
             </div>
           </div>
-        </div>
-
-        <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-          <p className="text-xs text-white/70">
-            <strong>Obs:</strong> Även med samtycke delas aldrig ditt exakta födelsedatum eller fullständiga hemadress. 
-            Du kan när som helst ändra detta samtycke härifrån.
-          </p>
         </div>
       </CardContent>
     </Card>
