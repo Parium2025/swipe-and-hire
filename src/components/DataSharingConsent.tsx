@@ -103,9 +103,6 @@ export const DataSharingConsent = () => {
           <Shield className="h-6 w-6 text-white" />
           <CardTitle className="text-white">Datadelning med arbetsgivare</CardTitle>
         </div>
-        <CardDescription className="text-white">
-          Hantera hur din information delas med potentiella arbetsgivare
-        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
