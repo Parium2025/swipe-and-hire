@@ -145,7 +145,7 @@ export const DataSharingConsent = () => {
             </div>
             <div className="flex items-center gap-2 text-white">
               <Check className="h-3 w-3 text-green-400" />
-              <span>Din ålder (inte exakt födelsedatum)</span>
+              <span>Din ålder</span>
             </div>
             <div className="flex items-center gap-2 text-white">
               <Check className="h-3 w-3 text-green-400" />
