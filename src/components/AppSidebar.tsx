@@ -32,6 +32,7 @@ import { convertToSignedUrl } from '@/utils/storageUtils';
 
 const profileItems = [
   { title: 'Min Profil', url: '/profile', icon: User },
+  { title: 'Mitt samtycke', url: '/consent', icon: Settings },
   { title: 'Sök Jobb', url: '/search-jobs', icon: Building },
 ];
 

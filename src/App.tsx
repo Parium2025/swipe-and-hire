@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import Consent from "./pages/Consent";
 import EmailConfirm from "./pages/EmailConfirm";
 import EmailRedirect from "./pages/EmailRedirect";
 import ResetRedirect from "./pages/ResetRedirect";
@@ -71,6 +72,7 @@ const App = () => {
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<Auth />} />
+                  <Route path="/consent" element={<Consent />} />
                   <Route path="/verify" element={<EmailVerification />} />
                   <Route path="/email-redirect" element={<EmailRedirect />} />
                   <Route path="/confirm" element={<EmailConfirm />} />
