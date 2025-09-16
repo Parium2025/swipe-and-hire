@@ -122,8 +122,8 @@ export const DataSharingConsent = () => {
             </div>
             <p className="text-sm text-white/70">
               {consentGiven 
-                ? 'Arbetsgivare kan se ditt namn, ålder, postnummer, telefon, e-post och kommun när du söker jobb.'
-                : 'Arbetsgivare kan inte se din kontaktinformation. Du kan fortfarande söka jobb.'
+                ? 'Du kan när som helst ändra detta samtycke här.'
+                : 'Du kan fortfarande söka jobb men arbetsgivare ser inte din kontaktinformation.'
               }
             </p>
           </div>
