@@ -561,8 +561,8 @@ export type Database = {
         Args: { birth_date: string }
         Returns: number
       }
-      can_access_confirmation_data: {
-        Args: { confirmation_user_id: string }
+      can_cleanup_confirmations: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       can_view_job_seeker_profile: {
@@ -634,6 +634,10 @@ export type Database = {
         Args: { org_uuid?: string; user_uuid: string }
         Returns: string
       }
+      is_confirmation_owner: {
+        Args: { confirmation_user_id: string }
+        Returns: boolean
+      }
       is_super_admin: {
         Args: { user_uuid: string }
         Returns: boolean
@@ -665,6 +669,15 @@ export type Database = {
       user_has_given_consent: {
         Args: { user_uuid: string }
         Returns: boolean
+      }
+      validate_confirmation_token: {
+        Args: { input_token: string }
+        Returns: {
+          email: string
+          expires_at: string
+          is_valid: boolean
+          user_id: string
+        }[]
       }
       validate_file_upload: {
         Args: { content_type: string; file_name: string; file_size: number }
