@@ -231,7 +231,7 @@ const Auth = () => {
       const hasToken = !!tokenParam;
       
       if (hasAccessPair || hasTokenHash || hasToken) {
-        console.log('🔍 Sparar återställningstoken för senare användning:', {
+        console.log('🔍 Recovery token detekterad - SPARAR INTE ännu:', {
           hasAccessPair,
           hasTokenHash,
           hasToken,
@@ -255,29 +255,11 @@ const Auth = () => {
           }
         }
         
-        // Spara token-informationen
-        const payload = {
-          type: tokenType || 'recovery',
-          token: tokenParam || null,
-          token_hash: tokenHashParam || null,
-          access_token: accessToken || null,
-          refresh_token: refreshToken || null,
-          issued_at: issuedMs || Date.now(),
-          stored_at: Date.now()
-        };
-
+        // VIKTIGT: Spara INTE token i sessionStorage ännu!
+        // VIKTIGT: Städa INTE URL:en ännu!
+        // Token ska bara konsumeras när användaren faktiskt ändrar lösenordet
         
-        sessionStorage.setItem('parium-pending-recovery', JSON.stringify(payload));
-        
-        // Städa URL
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.delete('token');
-        newUrl.searchParams.delete('token_hash');
-        newUrl.searchParams.delete('access_token');
-        newUrl.searchParams.delete('refresh_token');
-        newUrl.searchParams.delete('type');
-        newUrl.searchParams.set('reset', 'true');
-        window.history.replaceState({}, '', newUrl.toString());
+        console.log('✅ Token är giltig - visar reset-formulär MEN konsumerar INTE token ännu');
         setShowIntro(false);
         setIsPasswordReset(true);
         return;
@@ -312,6 +294,8 @@ const Auth = () => {
   useEffect(() => {
     if (isPasswordReset) {
       console.log('🚨 PASSWORD RESET SIDA AKTIVERAD - Kollar expiry direkt');
+      
+      // Först kolla sessionStorage (för tidigare besök)
       const raw = sessionStorage.getItem('parium-pending-recovery');
       if (raw) {
         try {
@@ -324,7 +308,7 @@ const Auth = () => {
             const tenMinutesInMs = 10 * 60 * 1000;
             const timeElapsed = currentTime - issuedTime;
             
-            console.log('⏰ DIREKT EXPIRY-KONTROLL:', {
+            console.log('⏰ DIREKT EXPIRY-KONTROLL (sessionStorage):', {
               issued_at: pending.issued_at,
               issuedTime,
               currentTime,
@@ -335,47 +319,93 @@ const Auth = () => {
             });
             
             if (timeElapsed > tenMinutesInMs) {
-              console.log('❌ TOKEN EXPIRED PÅ PASSWORD RESET AKTIVERING!');
+              console.log('❌ TOKEN EXPIRED PÅ PASSWORD RESET AKTIVERING (sessionStorage)!');
               sessionStorage.removeItem('parium-pending-recovery');
               setRecoveryStatus('expired');
               setIsPasswordReset(false);
               return;
             }
-            console.log('✅ Token giltig när password reset aktiveras');
-          } else {
-            console.log('⚠️ Ingen issued_at i sessionStorage - sätter som expired');
-            setRecoveryStatus('expired');
-            setIsPasswordReset(false);
+            console.log('✅ Token giltig när password reset aktiveras (sessionStorage)');
           }
         } catch (e) {
-          console.warn('Fel vid expiry-kontroll:', e);
+          console.warn('Fel vid expiry-kontroll (sessionStorage):', e);
           setRecoveryStatus('expired');
           setIsPasswordReset(false);
+          return;
         }
       } else {
-        // Kolla om det finns issued parameter i URL istället för sessionStorage
+        // NYTT: Kolla tokens från URL (första besöket)
+        const accessTokenQP = searchParams.get('access_token');
+        const refreshTokenQP = searchParams.get('refresh_token');
+        const tokenParamQP = searchParams.get('token');
+        const tokenHashParamQP = searchParams.get('token_hash');
         const issuedParam = searchParams.get('issued');
-        if (issuedParam) {
-          console.log('✅ Ingen sessionStorage men finns issued parameter - tillåter reset');
+        
+        const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
+        const hashParams = new URLSearchParams(hash);
+        const accessTokenHash = hashParams.get('access_token');
+        const refreshTokenHash = hashParams.get('refresh_token');
+        const tokenParamHash = hashParams.get('token');
+        const tokenHashParamHash = hashParams.get('token_hash');
+        const issuedHash = hashParams.get('issued');
+        
+        const hasAnyToken = !!(accessTokenQP || refreshTokenQP || tokenParamQP || tokenHashParamQP ||
+                              accessTokenHash || refreshTokenHash || tokenParamHash || tokenHashParamHash);
+        const finalIssued = issuedHash || issuedParam;
+        
+        console.log('🔍 Kollar tokens från URL:', {
+          hasAnyToken,
+          issuedParam: finalIssued,
+          url: window.location.href
+        });
+        
+        if (hasAnyToken || finalIssued) {
+          if (finalIssued) {
+            const issuedTime = parseInt(finalIssued);
+            const currentTime = Date.now();
+            const tenMinutesInMs = 10 * 60 * 1000;
+            const timeElapsed = currentTime - issuedTime;
+            
+            console.log('⏰ DIREKT EXPIRY-KONTROLL (URL):', {
+              issued: finalIssued,
+              issuedTime,
+              currentTime,
+              timeElapsed,
+              tenMinutesInMs,
+              isExpired: timeElapsed > tenMinutesInMs,
+              timeElapsedMinutes: Math.floor(timeElapsed / 1000 / 60)
+            });
+            
+            if (timeElapsed > tenMinutesInMs) {
+              console.log('❌ TOKEN EXPIRED PÅ PASSWORD RESET AKTIVERING (URL)!');
+              setRecoveryStatus('expired');
+              setIsPasswordReset(false);
+              return;
+            }
+            console.log('✅ Token giltig när password reset aktiveras (URL)');
+          } else if (hasAnyToken) {
+            console.log('✅ Har tokens men ingen issued timestamp - tillåter reset');
+          }
         } else {
-          console.log('⚠️ Ingen sessionStorage data och ingen issued parameter - sätter som expired');
+          console.log('⚠️ Ingen sessionStorage data och inga URL tokens - sätter som expired');
           setRecoveryStatus('expired');
           setIsPasswordReset(false);
         }
       }
     }
-  }, [isPasswordReset]);
+  }, [isPasswordReset, searchParams]);
 
   // Auto-expire timer: kontrollera om lagrad token är äldre än 10 minuter
   useEffect(() => {
     if (!isPasswordReset) return;
     
     const checkTokenExpiry = () => {
+      // Kolla först sessionStorage
       const raw = sessionStorage.getItem('parium-pending-recovery');
       if (raw) {
         try {
           const pending = JSON.parse(raw);
-          console.log('🕐 AUTO-TIMER: Kollar expiry automatiskt');
+          console.log('🕐 AUTO-TIMER: Kollar expiry automatiskt (sessionStorage)');
           
           if (pending.issued_at) {
             const issuedTime = parseInt(pending.issued_at);
@@ -383,7 +413,7 @@ const Auth = () => {
             const tenMinutesInMs = 10 * 60 * 1000;
             const timeElapsed = currentTime - issuedTime;
             
-            console.log('⏰ AUTO-TIMER CHECK:', {
+            console.log('⏰ AUTO-TIMER CHECK (sessionStorage):', {
               issued_at: pending.issued_at,
               current_time: currentTime,
               time_elapsed_ms: timeElapsed,
@@ -393,16 +423,46 @@ const Auth = () => {
             });
             
             if (timeElapsed > tenMinutesInMs) {
-              console.log('❌ AUTO-TIMER: Token har gått ut - växlar till expired sida');
+              console.log('❌ AUTO-TIMER: Token har gått ut (sessionStorage) - växlar till expired sida');
               sessionStorage.removeItem('parium-pending-recovery');
               setRecoveryStatus('expired');
               setIsPasswordReset(false);
               return;
             }
-            console.log('✅ AUTO-TIMER: Token fortfarande giltig');
+            console.log('✅ AUTO-TIMER: Token fortfarande giltig (sessionStorage)');
           }
         } catch (e) {
-          console.warn('AUTO-TIMER fel:', e);
+          console.warn('AUTO-TIMER fel (sessionStorage):', e);
+        }
+      } else {
+        // Kolla tokens från URL
+        const issuedParam = searchParams.get('issued');
+        const issuedHash = window.location.hash.includes('issued=') ? 
+          new URLSearchParams(window.location.hash.slice(1)).get('issued') : null;
+        const finalIssued = issuedHash || issuedParam;
+        
+        if (finalIssued) {
+          const issuedTime = parseInt(finalIssued);
+          const currentTime = Date.now();
+          const tenMinutesInMs = 10 * 60 * 1000;
+          const timeElapsed = currentTime - issuedTime;
+          
+          console.log('⏰ AUTO-TIMER CHECK (URL):', {
+            issued: finalIssued,
+            current_time: currentTime,
+            time_elapsed_ms: timeElapsed,
+            time_elapsed_minutes: Math.floor(timeElapsed / 1000 / 60),
+            ten_minutes_ms: tenMinutesInMs,
+            is_expired: timeElapsed > tenMinutesInMs
+          });
+          
+          if (timeElapsed > tenMinutesInMs) {
+            console.log('❌ AUTO-TIMER: Token har gått ut (URL) - växlar till expired sida');
+            setRecoveryStatus('expired');
+            setIsPasswordReset(false);
+            return;
+          }
+          console.log('✅ AUTO-TIMER: Token fortfarande giltig (URL)');
         }
       }
     };
@@ -414,7 +474,7 @@ const Auth = () => {
     const interval = setInterval(checkTokenExpiry, 60000);
     
     return () => clearInterval(interval);
-  }, [isPasswordReset]);
+  }, [isPasswordReset, searchParams]);
 
   const handleEmailConfirmation = async (token: string) => {
     console.log('Starting email confirmation with token:', token);
@@ -501,6 +561,8 @@ const Auth = () => {
       
       // FÖRSTA KONTROLLEN: Kolla om token har gått ut baserat på issued timestamp
       console.log('🕐 Checking if reset token has expired...');
+      
+      // Kolla först sessionStorage (från tidigare besök)
       const raw = sessionStorage.getItem('parium-pending-recovery');
       console.log('📦 SessionStorage data:', raw);
       
@@ -514,7 +576,7 @@ const Auth = () => {
           const tenMinutesInMs = 10 * 60 * 1000;
           const timeElapsed = currentTime - issuedTime;
           
-          console.log('🔍 Password reset token check:', {
+          console.log('🔍 Password reset token check (sessionStorage):', {
             issued_at: pending.issued_at,
             issuedTime,
             currentTime,
@@ -525,24 +587,30 @@ const Auth = () => {
           });
           
           if (timeElapsed > tenMinutesInMs) {
-            console.log('❌ Token expired during password reset attempt');
+            console.log('❌ Token expired during password reset attempt (sessionStorage)');
             sessionStorage.removeItem('parium-pending-recovery');
             setRecoveryStatus('expired');
             return;
           }
-          console.log('✅ Token is still valid');
+          console.log('✅ Token is still valid (sessionStorage)');
         }
       } else {
-        // Kolla om vi har issued parameter utan sessionStorage (nya länkar)
+        // NYTT: Kolla tokens direkt från URL (första användningen)
+        console.log('🔍 Kollar tokens från URL för expiry check...');
+        
         const issuedParam = searchParams.get('issued');
-        if (issuedParam) {
-          const issuedTime = parseInt(issuedParam);
+        const issuedHash = window.location.hash.includes('issued=') ? 
+          new URLSearchParams(window.location.hash.slice(1)).get('issued') : null;
+        const finalIssued = issuedHash || issuedParam;
+        
+        if (finalIssued) {
+          const issuedTime = parseInt(finalIssued);
           const currentTime = Date.now();
           const tenMinutesInMs = 10 * 60 * 1000;
           const timeElapsed = currentTime - issuedTime;
           
-          console.log('🔍 Checking issued parameter for expiry:', {
-            issuedParam,
+          console.log('🔍 Checking issued parameter for expiry (URL):', {
+            issued: finalIssued,
             issuedTime,
             currentTime,
             timeElapsed,
@@ -551,11 +619,11 @@ const Auth = () => {
           });
           
           if (timeElapsed > tenMinutesInMs) {
-            console.log('❌ Issued parameter shows token expired');
+            console.log('❌ Issued parameter shows token expired (URL)');
             setRecoveryStatus('expired');
             return;
           }
-          console.log('✅ Issued parameter shows token is still valid');
+          console.log('✅ Issued parameter shows token is still valid (URL)');
         } else {
           console.log('⚠️ No pending recovery data and no issued parameter found');
         }
@@ -569,6 +637,8 @@ const Auth = () => {
 
       if (!hasSession) {
         console.log('🗂️ No active session, attempting to establish session...');
+        
+        // Kolla först om vi har sparad token i sessionStorage (från tidigare besök)
         if (raw) {
           const pending = JSON.parse(raw);
           
@@ -588,23 +658,98 @@ const Auth = () => {
             hasSession = true;
           }
         } else {
-          // För nya länkar med bara issued parameter - kontrollera om de är giltiga först
-          const issuedParam = searchParams.get('issued');
-          if (issuedParam) {
-            const issuedTime = parseInt(issuedParam);
-            const currentTime = Date.now();
-            const tenMinutesInMs = 10 * 60 * 1000;
-            const timeElapsed = currentTime - issuedTime;
+          // NYTT: Hämta tokens från URL (första gången de används)
+          console.log('🔍 Hämtar tokens från URL för första användningen...');
+          
+          const accessTokenQP = searchParams.get('access_token');
+          const refreshTokenQP = searchParams.get('refresh_token');
+          const tokenTypeQP = searchParams.get('type');
+          const tokenParamQP = searchParams.get('token');
+          const tokenHashParamQP = searchParams.get('token_hash');
+          
+          const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
+          const hashParams = new URLSearchParams(hash);
+          const accessTokenHash = hashParams.get('access_token');
+          const refreshTokenHash = hashParams.get('refresh_token');
+          const tokenTypeHash = hashParams.get('type');
+          const tokenParamHash = hashParams.get('token');
+          const tokenHashParamHash = hashParams.get('token_hash');
+          
+          const urlAccessToken = accessTokenHash || accessTokenQP;
+          const urlRefreshToken = refreshTokenHash || refreshTokenQP;
+          const urlTokenType = tokenTypeHash || tokenTypeQP;
+          const urlTokenParam = tokenParamHash || tokenParamQP;
+          const urlTokenHashParam = tokenHashParamHash || tokenHashParamQP;
+          
+          console.log('🔍 URL tokens found:', {
+            hasAccessToken: !!urlAccessToken,
+            hasRefreshToken: !!urlRefreshToken,
+            hasTokenParam: !!urlTokenParam,
+            hasTokenHashParam: !!urlTokenHashParam,
+            tokenType: urlTokenType
+          });
+          
+          if (urlAccessToken && urlRefreshToken) {
+            console.log('✅ Using access/refresh tokens from URL');
+            const { error } = await supabase.auth.setSession({
+              access_token: urlAccessToken,
+              refresh_token: urlRefreshToken,
+            });
+            if (error) throw error;
+            hasSession = true;
             
-            if (timeElapsed > tenMinutesInMs) {
-              console.log('❌ Issued parameter shows expired token on session check');
-              setRecoveryStatus('expired');
-              return;
-            } else {
-              console.log('⚠️ Har bara issued parameter, inte riktiga tokens - kan inte uppdatera lösenord');
-              // Automatiskt dirigera till "consumed" sidan så användaren kan begära ny länk
-              setRecoveryStatus('consumed');
-              return;
+            // Spara token-info för senare rensning
+            const payload = {
+              type: urlTokenType || 'recovery',
+              token: urlTokenParam || null,
+              token_hash: urlTokenHashParam || null,
+              access_token: urlAccessToken,
+              refresh_token: urlRefreshToken,
+              issued_at: Date.now(),
+              stored_at: Date.now()
+            };
+            sessionStorage.setItem('parium-pending-recovery', JSON.stringify(payload));
+            
+          } else if (urlTokenHashParam || urlTokenParam) {
+            console.log('✅ Using token/token_hash from URL');
+            const verifyOptions: any = { type: 'recovery' };
+            if (urlTokenHashParam) verifyOptions.token_hash = urlTokenHashParam;
+            if (urlTokenParam) verifyOptions.token = urlTokenParam;
+            
+            const { error } = await supabase.auth.verifyOtp(verifyOptions);
+            if (error) throw error;
+            hasSession = true;
+            
+            // Spara token-info för senare rensning
+            const payload = {
+              type: urlTokenType || 'recovery',
+              token: urlTokenParam || null,
+              token_hash: urlTokenHashParam || null,
+              access_token: null,
+              refresh_token: null,
+              issued_at: Date.now(),
+              stored_at: Date.now()
+            };
+            sessionStorage.setItem('parium-pending-recovery', JSON.stringify(payload));
+            
+          } else {
+            // För nya länkar med bara issued parameter
+            const issuedParam = searchParams.get('issued');
+            if (issuedParam) {
+              const issuedTime = parseInt(issuedParam);
+              const currentTime = Date.now();
+              const tenMinutesInMs = 10 * 60 * 1000;
+              const timeElapsed = currentTime - issuedTime;
+              
+              if (timeElapsed > tenMinutesInMs) {
+                console.log('❌ Issued parameter shows expired token on session check');
+                setRecoveryStatus('expired');
+                return;
+              } else {
+                console.log('⚠️ Har bara issued parameter, inte riktiga tokens - kan inte uppdatera lösenord');
+                setRecoveryStatus('consumed');
+                return;
+              }
             }
           }
         }
@@ -613,8 +758,26 @@ const Auth = () => {
       const result = await updatePassword(newPassword);
       if (result.error) throw result.error;
 
-
+      // Nu när lösenordet är ändrat - rensa sessionStorage och URL
       sessionStorage.removeItem('parium-pending-recovery');
+      
+      // Städa URL:en NU (efter lyckad lösenordsändring)
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('token');
+      newUrl.searchParams.delete('token_hash');
+      newUrl.searchParams.delete('access_token');
+      newUrl.searchParams.delete('refresh_token');
+      newUrl.searchParams.delete('type');
+      newUrl.searchParams.delete('reset');
+      newUrl.searchParams.delete('issued');
+      newUrl.hash = '';
+      window.history.replaceState({}, '', newUrl.toString());
+      
+      toast({
+        title: "Lösenord uppdaterat",
+        description: "Ditt lösenord har ändrats och du är nu inloggad.",
+      });
+      
       navigate('/');
     } catch (err: any) {
       console.error('Återställning misslyckades:', err);
