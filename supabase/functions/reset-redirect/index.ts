@@ -63,25 +63,67 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Om länken är giltig enligt tid, skicka vidare till auth sidan
-    // Auth sidan kommer själv hantera om token är använd eller inte
-    let redirectUrl = "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true";
-    
+    // Om länken är giltig enligt tid, testa först om token fortfarande är giltig
     if (token) {
-      const paramName = url.searchParams.get('token_hash') ? 'token_hash' : 'token';
-      redirectUrl += `&${paramName}=${token}`;
+      console.log('🔍 TESTING TOKEN VALIDITY');
+      
+      try {
+        // Försök verifiera token med Supabase
+        const { data, error } = await supabase.auth.verifyOtp({
+          token_hash: token,
+          type: 'recovery'
+        });
+        
+        console.log('Token verification result:', { data: !!data, error: error?.message });
+        
+        // Om token är giltig, redirect till auth med token
+        if (!error && data) {
+          let redirectUrl = "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true";
+          const paramName = url.searchParams.get('token_hash') ? 'token_hash' : 'token';
+          redirectUrl += `&${paramName}=${token}`;
+          if (type) redirectUrl += `&type=${type}`;
+          
+          console.log(`✅ VALID TOKEN - Redirecting to: ${redirectUrl}`);
+          return new Response(null, {
+            status: 302,
+            headers: { "Location": redirectUrl, ...corsHeaders },
+          });
+        }
+        
+        // Om token är ogiltig men inom tidsgränsen, skicka nytt mail automatiskt
+        console.log('❌ TOKEN ALREADY USED - Generating new reset link');
+        
+        // Extrahera emailen från ursprungliga mailet (om möjligt)
+        // För nu redirect till auth med en special parameter för att visa meddelande om nytt mail
+        return new Response(null, {
+          status: 302,
+          headers: {
+            "Location": "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true&token_used=true",
+            ...corsHeaders,
+          },
+        });
+        
+      } catch (verifyError) {
+        console.error('Token verification error:', verifyError);
+        // Fallback - redirect med token och låt auth sidan hantera
+        let redirectUrl = "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true";
+        const paramName = url.searchParams.get('token_hash') ? 'token_hash' : 'token';
+        redirectUrl += `&${paramName}=${token}`;
+        if (type) redirectUrl += `&type=${type}`;
+        
+        return new Response(null, {
+          status: 302,
+          headers: { "Location": redirectUrl, ...corsHeaders },
+        });
+      }
     }
     
-    if (type) {
-      redirectUrl += `&type=${type}`;
-    }
-    
-    console.log(`✅ VALID RESET LINK - Redirecting to: ${redirectUrl}`);
-
+    // Om ingen token, redirect till auth
+    console.log(`✅ NO TOKEN - Redirecting to auth page`);
     return new Response(null, {
       status: 302,
       headers: {
-        "Location": redirectUrl,
+        "Location": "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?reset=true",
         ...corsHeaders,
       },
     });

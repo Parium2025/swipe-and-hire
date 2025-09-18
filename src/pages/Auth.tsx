@@ -85,6 +85,7 @@ const Auth = () => {
         // ANDRA KONTROLLEN: Kontrollera expired parameter från redirect-funktionen
         const isExpired = searchParams.get('expired') === 'true';
         const isUsed = searchParams.get('used') === 'true';
+        const isTokenUsed = searchParams.get('token_used') === 'true';
         if (isExpired) {
           console.log('❌ EXPIRED parameter funnen - Visar expired direkt');
           setRecoveryStatus('expired');
@@ -93,6 +94,11 @@ const Auth = () => {
         if (isUsed) {
           console.log('❌ USED parameter funnen - Visar used direkt');
           setRecoveryStatus('used');
+          return;
+        }
+        if (isTokenUsed) {
+          console.log('❌ TOKEN_USED parameter funnen - Token redan använd');
+          setRecoveryStatus('consumed');
           return;
         }
 
