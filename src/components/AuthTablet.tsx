@@ -18,6 +18,7 @@ interface AuthTabletProps {
   confirmPassword: string;
   setConfirmPassword: (value: string) => void;
   handlePasswordReset: (e: React.FormEvent) => void;
+  onBackToLogin?: () => void;
 }
 
 const AuthTablet = ({ 
@@ -26,7 +27,8 @@ const AuthTablet = ({
   setNewPassword, 
   confirmPassword, 
   setConfirmPassword, 
-  handlePasswordReset 
+  handlePasswordReset,
+  onBackToLogin
 }: AuthTabletProps) => {
   const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);

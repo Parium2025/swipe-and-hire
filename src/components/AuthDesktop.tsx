@@ -19,6 +19,7 @@ interface AuthDesktopProps {
   confirmPassword: string;
   setConfirmPassword: (value: string) => void;
   handlePasswordReset: (e: React.FormEvent) => void;
+  onBackToLogin?: () => void;
 }
 
 const AuthDesktop = ({ 
@@ -27,7 +28,8 @@ const AuthDesktop = ({
   setNewPassword, 
   confirmPassword, 
   setConfirmPassword, 
-  handlePasswordReset 
+  handlePasswordReset,
+  onBackToLogin
 }: AuthDesktopProps) => {
   const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
@@ -231,15 +233,15 @@ const AuthDesktop = ({
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Sparar..." : "Spara nytt lösenord"}
               </Button>
-               <div className="text-center">
-                 <button
-                   type="button"
-                   onClick={handleBackToLogin}
-                   className="text-sm text-white hover:underline"
-                 >
-                   Tillbaka till inloggning
-                 </button>
-               </div>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => (onBackToLogin ? onBackToLogin() : navigate('/auth'))}
+                  className="text-sm text-white hover:underline"
+                >
+                  Tillbaka till inloggning
+                </button>
+              </div>
             </form>
           </CardContent>
         </Card>

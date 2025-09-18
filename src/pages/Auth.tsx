@@ -1052,6 +1052,7 @@ const Auth = () => {
         confirmPassword={confirmPassword}
         setConfirmPassword={setConfirmPassword}
         handlePasswordReset={handlePasswordReset}
+        onBackToLogin={handleBackToLogin}
       />
     );
   }
@@ -1065,6 +1066,7 @@ const Auth = () => {
         confirmPassword={confirmPassword}
         setConfirmPassword={setConfirmPassword}
         handlePasswordReset={handlePasswordReset}
+        onBackToLogin={handleBackToLogin}
       />
     );
   }
@@ -1077,6 +1079,7 @@ const Auth = () => {
       confirmPassword={confirmPassword}
       setConfirmPassword={setConfirmPassword}
       handlePasswordReset={handlePasswordReset}
+      onBackToLogin={handleBackToLogin}
     />
   );
 };
