@@ -533,6 +533,16 @@ const Auth = () => {
     }
   };
 
+  const handleBackToLogin = () => {
+    try {
+      sessionStorage.removeItem('parium-pending-recovery');
+    } catch {}
+    setRecoveryStatus('none');
+    setIsPasswordReset(false);
+    // Navigera till ren auth-sida utan query/hash
+    navigate('/auth', { replace: true });
+  };
+
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -866,7 +876,7 @@ const Auth = () => {
             {resendMessage && (
               <p className="text-sm text-primary-foreground/80 whitespace-pre-line">{resendMessage}</p>
             )}
-            <Button onClick={() => navigate('/')} className="w-full">
+            <Button onClick={handleBackToLogin} className="w-full">
               Tillbaka till inloggning
             </Button>
           </CardContent>
@@ -1017,7 +1027,7 @@ const Auth = () => {
                     {resendMessage && (
                       <p className="text-sm text-primary-foreground/80">{resendMessage}</p>
                     )}
-                    <Button variant="outline" onClick={() => navigate('/')} className="w-full">
+                    <Button variant="outline" onClick={handleBackToLogin} className="w-full">
                       Tillbaka till inloggning
                     </Button>
                   </CardContent>
