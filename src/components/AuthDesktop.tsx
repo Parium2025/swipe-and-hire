@@ -172,22 +172,30 @@ const AuthDesktop = ({
     setLoading(false);
   };
 
-  const handleResetPassword = async () => {
-    if (!email) {
-      toast({
-        title: "E-post krävs",
-        description: "Ange din e-postadress först",
-        variant: "destructive"
-      });
-      return;
-    }
-    setResetLoading(true);
-    const result = await resetPassword(email);
-    if (!result.error) {
-      setResetPasswordSent(true);
-    }
-    setResetLoading(false);
-  };
+   const handleResetPassword = async () => {
+     if (!email) {
+       toast({
+         title: "E-post krävs",
+         description: "Ange din e-postadress först",
+         variant: "destructive"
+       });
+       return;
+     }
+     setResetLoading(true);
+     const result = await resetPassword(email);
+     if (!result.error) {
+       setResetPasswordSent(true);
+     }
+     setResetLoading(false);
+   };
+
+   const handleBackToLogin = () => {
+     // Rensa password reset-relaterad data
+     sessionStorage.removeItem('parium-pending-recovery');
+     
+     // Navigera till ren auth-sida utan parametrar
+     navigate('/auth', { replace: true });
+   };
 
   if (isPasswordReset) {
     return (
@@ -223,15 +231,15 @@ const AuthDesktop = ({
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Sparar..." : "Spara nytt lösenord"}
               </Button>
-              <div className="text-center">
-                <button
-                  type="button"
-                  onClick={() => navigate('/auth')}
-                  className="text-sm text-white hover:underline"
-                >
-                  Tillbaka till inloggning
-                </button>
-              </div>
+               <div className="text-center">
+                 <button
+                   type="button"
+                   onClick={handleBackToLogin}
+                   className="text-sm text-white hover:underline"
+                 >
+                   Tillbaka till inloggning
+                 </button>
+               </div>
             </form>
           </CardContent>
         </Card>
