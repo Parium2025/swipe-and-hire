@@ -651,7 +651,7 @@ const AuthMobile = ({
                                              setIndustry(searchTerm);
                                              setSearchTerm('');
                                            }}
-                                           className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white border-t border-slate-600/30 italic transition-colors touch-manipulation`}
+                                           className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white border-t border-slate-600/30 transition-colors touch-manipulation`}
                                          >
                                            <span className="flex-1">Använd "{searchTerm}"</span>
                                          </DropdownMenuItem>
