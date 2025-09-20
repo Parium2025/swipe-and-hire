@@ -236,12 +236,12 @@ export default function ProfilePreview() {
     };
 
     return (
-      <div className="w-full max-w-sm mx-auto px-4 sm:px-0">
+      <div className="w-full max-w-sm mx-auto">
         {/* Modern Profile Card */}
         <Card className="bg-white backdrop-blur-sm border-0 shadow-2xl overflow-hidden rounded-3xl transition-all duration-300 hover:shadow-3xl">
           {/* Profile Image with Video */}
           <div 
-            className="relative h-64 sm:h-80 bg-gradient-to-br from-gray-100 to-gray-200 group overflow-hidden rounded-t-3xl"
+            className="relative h-64 sm:h-80 bg-gradient-to-br from-gray-100 to-gray-200 group overflow-hidden"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={handleTap}
