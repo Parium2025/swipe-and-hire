@@ -695,6 +695,15 @@ export type Database = {
         Args: { content_type: string; file_name: string; file_size: number }
         Returns: boolean
       }
+      validate_file_upload_enhanced: {
+        Args: {
+          content_type: string
+          file_content?: string
+          file_name: string
+          file_size: number
+        }
+        Returns: boolean
+      }
       validate_file_upload_secure: {
         Args: { content_type: string; file_name: string; file_size: number }
         Returns: boolean
