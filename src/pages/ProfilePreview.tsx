@@ -273,25 +273,8 @@ export default function ProfilePreview() {
         >
           {/* Helskärm profilbild/video */}
           <div className="relative w-full h-full bg-transparent overflow-hidden">
-            {/* Video play-knapp och text ovanför avatar */}
-            {videoUrl && (
-              <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-30 flex flex-col items-center gap-2">
-                <span className="text-white text-sm font-medium bg-black/30 px-3 py-1 rounded-full">
-                  videotillgängligt
-                </span>
-                {!isPlaying && (
-                  <button
-                    onClick={handleVideoTap}
-                    className="bg-black/50 hover:bg-black/70 text-white rounded-full p-3 transition-all duration-200 hover:scale-110"
-                  >
-                    <Play className="h-6 w-6 ml-0.5" />
-                  </button>
-                )}
-              </div>
-            )}
-            
             {/* Avatar-område för både bild och video - centrerat längst upp */}
-            <div className="absolute top-16 left-1/2 transform -translate-x-1/2 w-64 h-64 rounded-full overflow-hidden border-4 border-white/40 shadow-2xl bg-gradient-to-br from-primary/20 to-primary/30">
+            <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-64 h-64 rounded-full overflow-hidden border-4 border-white/40 shadow-2xl bg-gradient-to-br from-primary/20 to-primary/30">
               
               {/* Cover Image - visas när video inte spelas */}
               {(!showVideo || !isPlaying) && (
@@ -327,12 +310,33 @@ export default function ProfilePreview() {
               )}
             </div>
 
+            {/* Video play-knapp precis under bilden */}
+            {videoUrl && !isPlaying && (
+              <button
+                onClick={handleVideoTap}
+                className="absolute top-80 left-1/2 transform -translate-x-1/2 z-30 bg-black/50 hover:bg-black/70 text-white rounded-full p-3 transition-all duration-200 hover:scale-110"
+              >
+                <Play className="h-6 w-6 ml-0.5" />
+              </button>
+            )}
+
             {/* Tinder-stil gradient overlay längst ner med minimal info */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6">
               <div className="text-white">
-                <h1 className="text-3xl font-bold mb-3">
-                  {data.first_name}{isConsented && data.age && `, ${data.age}`}
+                <h1 className="text-3xl font-bold mb-1">
+                  {data.first_name}{isConsented && data.age && ` ${
+                    data.age === 47 ? 'fyrtiosju' : 
+                    data.age === 48 ? 'fyrtioåtta' :
+                    data.age === 49 ? 'fyrtionio' :
+                    data.age === 50 ? 'femtio' :
+                    data.age.toString()
+                  }`}
                 </h1>
+                
+                {/* Video tillgängligt text */}
+                {videoUrl && (
+                  <p className="text-sm text-white/80 mb-3">video tillgängligt</p>
+                )}
                 
                 {/* Plats */}
                 {data.location && (
