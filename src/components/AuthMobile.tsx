@@ -68,6 +68,7 @@ const AuthMobile = ({
   const [resetPasswordSent, setResetPasswordSent] = useState(false);
 
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const employeeCountTriggerRef = useRef<HTMLButtonElement>(null);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
@@ -673,18 +674,48 @@ const AuthMobile = ({
 
                               <div>
                                 <Label htmlFor="employeeCount" className="text-white">Anställda</Label>
-                                <Select value={employeeCount} onValueChange={setEmployeeCount}>
-                                  <SelectTrigger className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10">
-                                    <SelectValue placeholder="Antal" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {EMPLOYEE_COUNT_OPTIONS.map((count) => (
-                                      <SelectItem key={count} value={count}>
-                                        {count}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                <DropdownMenu modal={false}>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      ref={employeeCountTriggerRef}
+                                      variant="outline"
+                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
+                                    >
+                                      <span className="truncate text-left flex-1 px-1">
+                                        {employeeCount || 'Antal'}
+                                      </span>
+                                      <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent 
+                                    className={`w-80 bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
+                                    side="bottom"
+                                    align="center"
+                                    alignOffset={0}
+                                    sideOffset={8}
+                                    avoidCollisions={false}
+                                    onCloseAutoFocus={(e) => e.preventDefault()}
+                                  >
+                                    {/* Employee count options */}
+                                    <div className={`overflow-y-auto ${isMobile ? 'max-h-[calc(50vh-4rem)]' : 'max-h-80'} overscroll-contain`}>
+                                      {EMPLOYEE_COUNT_OPTIONS.map((count) => (
+                                        <DropdownMenuItem
+                                          key={count}
+                                          onSelect={(e) => e.preventDefault()}
+                                          onClick={() => {
+                                            setEmployeeCount(count);
+                                          }}
+                                          className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white flex items-center justify-between transition-colors touch-manipulation`}
+                                        >
+                                          <span className="flex-1 pr-2">{count}</span>
+                                          {employeeCount === count && (
+                                            <Check className={`${isMobile ? 'h-4 w-4' : 'h-4 w-4'} text-green-400 flex-shrink-0`} />
+                                          )}
+                                        </DropdownMenuItem>
+                                      ))}
+                                    </div>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </div>
 
                               <div>
