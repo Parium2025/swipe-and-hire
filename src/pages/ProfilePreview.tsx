@@ -283,11 +283,12 @@ export default function ProfilePreview() {
                     <img
                       src={avatarUrl}
                       alt="Profilbild"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover cursor-pointer"
                       draggable={false}
+                      onClick={handleVideoTap}
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
+                    <div className="w-full h-full flex items-center justify-center cursor-pointer" onClick={handleVideoTap}>
                       <User className="h-16 w-16 text-primary/60" />
                     </div>
                   )}
@@ -310,16 +311,6 @@ export default function ProfilePreview() {
               )}
             </div>
 
-            {/* Video play-knapp precis under bilden */}
-            {videoUrl && !isPlaying && (
-              <button
-                onClick={handleVideoTap}
-                className="absolute top-80 left-1/2 transform -translate-x-1/2 z-30 bg-black/50 hover:bg-black/70 text-white rounded-full p-3 transition-all duration-200 hover:scale-110"
-              >
-                <Play className="h-6 w-6 ml-0.5" />
-              </button>
-            )}
-
             {/* Tinder-stil gradient overlay längst ner med minimal info */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6">
               <div className="text-white">
@@ -335,7 +326,7 @@ export default function ProfilePreview() {
                 
                 {/* Video tillgängligt text */}
                 {videoUrl && (
-                  <p className="text-sm text-white/80 mb-3">video tillgängligt</p>
+                  <p className="text-sm text-white/80 mb-3">Video tillgängligt</p>
                 )}
                 
                 {/* Plats */}
