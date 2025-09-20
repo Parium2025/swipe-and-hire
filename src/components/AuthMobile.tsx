@@ -586,81 +586,81 @@ const AuthMobile = ({
                                       <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
                                     </Button>
                                   </DropdownMenuTrigger>
-                                  <DropdownMenuContent 
-                                    className={`w-[calc(100vw-2rem)] sm:w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white ${isMobile ? 'max-h-[70vh]' : 'max-h-96'} overflow-hidden`}
-                                    side="bottom"
-                                    align="start"
-                                    alignOffset={0}
-                                    sideOffset={8}
-                                    avoidCollisions={true}
-                                    onCloseAutoFocus={(e) => e.preventDefault()}
-                                  >
-                                    {/* Search input - optimized for mobile */}
-                                    <div className="p-4 border-b border-slate-600/30 sticky top-0 bg-slate-700/95 backdrop-blur-md">
-                                      <div className="relative">
-                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/60" />
-                                        <Input
-                                          placeholder="Sök bransch..."
-                                          value={searchTerm}
-                                          onChange={(e) => setSearchTerm(e.target.value)}
-                                          className={`pl-12 pr-4 ${isMobile ? 'h-12 text-base' : 'h-10'} bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-lg`}
-                                          autoComplete="off"
-                                          autoCapitalize="none"
-                                          autoCorrect="off"
-                                        />
-                                      </div>
-                                    </div>
+                                   <DropdownMenuContent 
+                                     className={`w-[calc(100vw-2rem)] sm:w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white ${isMobile ? 'max-h-[50vh]' : 'max-h-96'} overflow-hidden`}
+                                     side="bottom"
+                                     align="start"
+                                     alignOffset={0}
+                                     sideOffset={8}
+                                     avoidCollisions={true}
+                                     onCloseAutoFocus={(e) => e.preventDefault()}
+                                   >
+                                     {/* Search input - optimized for mobile */}
+                                     <div className="p-3 border-b border-slate-600/30 sticky top-0 bg-slate-700/95 backdrop-blur-md">
+                                       <div className="relative">
+                                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                                         <Input
+                                           placeholder="Sök bransch..."
+                                           value={searchTerm}
+                                           onChange={(e) => setSearchTerm(e.target.value)}
+                                           className={`pl-10 pr-4 ${isMobile ? 'h-10 text-sm' : 'h-10'} bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-lg`}
+                                           autoComplete="off"
+                                           autoCapitalize="none"
+                                           autoCorrect="off"
+                                         />
+                                       </div>
+                                     </div>
                                     
-                                    {/* Industry options - optimized for mobile scrolling */}
-                                    <div className={`overflow-y-auto ${isMobile ? 'max-h-[calc(70vh-5rem)]' : 'max-h-80'} overscroll-contain`}>
-                                      {SWEDISH_INDUSTRIES
-                                        .filter(industryOption => 
+                                     {/* Industry options - optimized for mobile scrolling */}
+                                     <div className={`overflow-y-auto ${isMobile ? 'max-h-[calc(50vh-4rem)]' : 'max-h-80'} overscroll-contain`}>
+                                       {SWEDISH_INDUSTRIES
+                                         .filter(industryOption => 
+                                           industryOption.toLowerCase().includes(searchTerm.toLowerCase())
+                                         )
+                                         .map((industryOption) => (
+                                           <DropdownMenuItem
+                                             key={industryOption}
+                                             onSelect={(e) => e.preventDefault()}
+                                             onClick={() => {
+                                               setIndustry(industryOption);
+                                               setSearchTerm('');
+                                             }}
+                                             className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white flex items-center justify-between transition-colors touch-manipulation`}
+                                           >
+                                             <span className="flex-1 pr-2">{industryOption}</span>
+                                             {industry === industryOption && (
+                                               <Check className={`${isMobile ? 'h-4 w-4' : 'h-4 w-4'} text-green-400 flex-shrink-0`} />
+                                             )}
+                                           </DropdownMenuItem>
+                                         ))}
+                                       
+                                       {/* Custom value option if no matches and search term exists */}
+                                       {searchTerm && 
+                                        !SWEDISH_INDUSTRIES.some(industryOption => 
                                           industryOption.toLowerCase().includes(searchTerm.toLowerCase())
-                                        )
-                                        .map((industryOption) => (
-                                          <DropdownMenuItem
-                                            key={industryOption}
-                                            onSelect={(e) => e.preventDefault()}
-                                            onClick={() => {
-                                              setIndustry(industryOption);
-                                              setSearchTerm('');
-                                            }}
-                                            className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-4 px-4 text-base' : 'py-2 px-3'} text-white flex items-center justify-between transition-colors touch-manipulation`}
-                                          >
-                                            <span className="flex-1 pr-2">{industryOption}</span>
-                                            {industry === industryOption && (
-                                              <Check className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} text-green-400 flex-shrink-0`} />
-                                            )}
-                                          </DropdownMenuItem>
-                                        ))}
-                                      
-                                      {/* Custom value option if no matches and search term exists */}
-                                      {searchTerm && 
-                                       !SWEDISH_INDUSTRIES.some(industryOption => 
-                                         industryOption.toLowerCase().includes(searchTerm.toLowerCase())
-                                       ) && (
-                                        <DropdownMenuItem
-                                          onSelect={(e) => e.preventDefault()}
-                                          onClick={() => {
-                                            setIndustry(searchTerm);
-                                            setSearchTerm('');
-                                          }}
-                                          className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-4 px-4 text-base' : 'py-2 px-3'} text-white border-t border-slate-600/30 italic transition-colors touch-manipulation`}
-                                        >
-                                          <span className="flex-1">Använd "{searchTerm}"</span>
-                                        </DropdownMenuItem>
-                                      )}
-                                      
-                                      {/* Show message if no results */}
-                                      {searchTerm && 
-                                       SWEDISH_INDUSTRIES.filter(industryOption => 
-                                         industryOption.toLowerCase().includes(searchTerm.toLowerCase())
-                                       ).length === 0 && (
-                                        <div className={`${isMobile ? 'py-6 px-4' : 'py-4 px-3'} text-center text-white/60 italic`}>
-                                          Inga resultat hittades för "{searchTerm}"
-                                        </div>
-                                      )}
-                                    </div>
+                                        ) && (
+                                         <DropdownMenuItem
+                                           onSelect={(e) => e.preventDefault()}
+                                           onClick={() => {
+                                             setIndustry(searchTerm);
+                                             setSearchTerm('');
+                                           }}
+                                           className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white border-t border-slate-600/30 italic transition-colors touch-manipulation`}
+                                         >
+                                           <span className="flex-1">Använd "{searchTerm}"</span>
+                                         </DropdownMenuItem>
+                                       )}
+                                       
+                                       {/* Show message if no results */}
+                                       {searchTerm && 
+                                        SWEDISH_INDUSTRIES.filter(industryOption => 
+                                          industryOption.toLowerCase().includes(searchTerm.toLowerCase())
+                                        ).length === 0 && (
+                                         <div className={`${isMobile ? 'py-4 px-4' : 'py-4 px-3'} text-center text-white/60 italic`}>
+                                           Inga resultat hittades för "{searchTerm}"
+                                         </div>
+                                       )}
+                                     </div>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
                               </div>
