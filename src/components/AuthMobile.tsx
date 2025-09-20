@@ -569,21 +569,17 @@ const AuthMobile = ({
                              </div>
 
                              <div className="grid grid-cols-2 gap-2">
-                               <div>
-                                 <Label htmlFor="industry" className="text-white">Bransch *</Label>
-                                 <Select value={industry} onValueChange={setIndustry}>
-                                   <SelectTrigger className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10">
-                                     <SelectValue placeholder="Välj bransch" />
-                                   </SelectTrigger>
-                                   <SelectContent>
-                                     {SWEDISH_INDUSTRIES.map((ind) => (
-                                       <SelectItem key={ind} value={ind}>
-                                         {ind}
-                                       </SelectItem>
-                                     ))}
-                                   </SelectContent>
-                                 </Select>
-                               </div>
+                                <div>
+                                  <Label htmlFor="industry" className="text-white">Bransch *</Label>
+                                  <Input
+                                    id="industry"
+                                    value={industry}
+                                    onChange={(e) => setIndustry(e.target.value)}
+                                    placeholder="Sök bransch..."
+                                    className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                    required
+                                  />
+                                </div>
 
                                <div>
                                  <Label htmlFor="employeeCount" className="text-white">Anställda</Label>
