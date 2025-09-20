@@ -43,7 +43,7 @@ const Index = () => {
         navigate('/search-jobs');
         setIsInitializing(false);
       }, 50);
-    } else if (user && profile && !location.pathname.startsWith('/profile') && !location.pathname.startsWith('/search-jobs') && !location.pathname.startsWith('/subscription') && !location.pathname.startsWith('/support') && !location.pathname.startsWith('/settings') && !location.pathname.startsWith('/billing') && !location.pathname.startsWith('/payment')) {
+    } else if (user && profile && !location.pathname.startsWith('/profile') && !location.pathname.startsWith('/search-jobs') && !location.pathname.startsWith('/subscription') && !location.pathname.startsWith('/support') && !location.pathname.startsWith('/settings') && !location.pathname.startsWith('/billing') && !location.pathname.startsWith('/payment') && !location.pathname.startsWith('/consent')) {
       // Show profile selector only for admin (fredrikandits@hotmail.com)
       if (user.email === 'fredrikandits@hotmail.com') {
         setShowProfileSelector(true);
