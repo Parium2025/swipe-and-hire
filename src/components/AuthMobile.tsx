@@ -8,12 +8,13 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Eye, EyeOff, User, Building2, Mail, Key, Phone, Globe, MapPin, Users } from 'lucide-react';
+import { Eye, EyeOff, User, Building2, Mail, Key, Phone, Globe, MapPin, Users, ChevronDown, Search, Check } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Combobox } from '@/components/ui/combobox';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Textarea } from '@/components/ui/textarea';
 import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
 import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AuthMobileProps {
   isPasswordReset: boolean;
@@ -37,6 +38,8 @@ const AuthMobile = ({
   const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
+  const isMobile = useIsMobile();
+  const [searchTerm, setSearchTerm] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -571,18 +574,82 @@ const AuthMobile = ({
 
                               <div>
                                 <Label htmlFor="industry" className="text-white">Bransch *</Label>
-                                <Select value={industry} onValueChange={setIndustry}>
-                                  <SelectTrigger className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10">
-                                    <SelectValue placeholder="Välj bransch" />
-                                  </SelectTrigger>
-                                  <SelectContent className="max-h-[300px] bg-white/5 backdrop-blur-sm border-white/20 text-white">
-                                    {SWEDISH_INDUSTRIES.map((industryOption) => (
-                                      <SelectItem key={industryOption} value={industryOption} className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">
-                                        {industryOption}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                <DropdownMenu modal={false}>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1"
+                                    >
+                                      <span className="truncate text-left flex-1">
+                                        {industry || 'Välj bransch'}
+                                      </span>
+                                      <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent 
+                                    className={`w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white ${isMobile ? 'max-h-[60vh]' : 'max-h-96'} overflow-y-auto overscroll-contain`}
+                                    side="bottom"
+                                    align="start"
+                                    alignOffset={0}
+                                    sideOffset={4}
+                                    avoidCollisions={false}
+                                    onCloseAutoFocus={(e) => e.preventDefault()}
+                                  >
+                                    {/* Search input */}
+                                    <div className="p-3 border-b border-slate-600/30">
+                                      <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                                        <Input
+                                          placeholder="Sök bransch..."
+                                          value={searchTerm}
+                                          onChange={(e) => setSearchTerm(e.target.value)}
+                                          className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40"
+                                        />
+                                      </div>
+                                    </div>
+                                    
+                                    {/* Industry options */}
+                                    <div className="max-h-80 overflow-y-auto">
+                                      {SWEDISH_INDUSTRIES
+                                        .filter(industryOption => 
+                                          industryOption.toLowerCase().includes(searchTerm.toLowerCase())
+                                        )
+                                        .map((industryOption) => (
+                                          <DropdownMenuItem
+                                            key={industryOption}
+                                            onSelect={(e) => e.preventDefault()}
+                                            onClick={() => {
+                                              setIndustry(industryOption);
+                                              setSearchTerm('');
+                                            }}
+                                            className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white flex items-center justify-between"
+                                          >
+                                            <span>{industryOption}</span>
+                                            {industry === industryOption && (
+                                              <Check className="h-4 w-4 text-green-400" />
+                                            )}
+                                          </DropdownMenuItem>
+                                        ))}
+                                      
+                                      {/* Custom value option if no matches and search term exists */}
+                                      {searchTerm && 
+                                       !SWEDISH_INDUSTRIES.some(industryOption => 
+                                         industryOption.toLowerCase().includes(searchTerm.toLowerCase())
+                                       ) && (
+                                        <DropdownMenuItem
+                                          onSelect={(e) => e.preventDefault()}
+                                          onClick={() => {
+                                            setIndustry(searchTerm);
+                                            setSearchTerm('');
+                                          }}
+                                          className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white border-t border-slate-600/30 italic"
+                                        >
+                                          Använd "{searchTerm}"
+                                        </DropdownMenuItem>
+                                      )}
+                                    </div>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </div>
 
                               <div>
