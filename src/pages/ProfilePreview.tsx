@@ -219,7 +219,7 @@ export default function ProfilePreview() {
 
     // FÖRSTA VY: Minimal Tinder-stil
     const TinderCard = () => (
-      <div className="w-full max-w-sm mx-auto h-[600px] relative">
+      <div className="w-full max-w-sm mx-auto aspect-[9/16] relative">
         <Card 
           className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl overflow-hidden rounded-3xl transition-all duration-300 hover:shadow-3xl cursor-pointer group h-full"
           onClick={() => setShowDetailedView(true)}
@@ -230,21 +230,12 @@ export default function ProfilePreview() {
             {(!showVideo || !isPlaying) && (
               <>
                 {avatarUrl ? (
-                  <>
-                    <img
-                      src={avatarUrl}
-                      alt=""
-                      aria-hidden="true"
-                      className="absolute inset-0 w-full h-full object-cover blur-md scale-110 opacity-80"
-                      draggable={false}
-                    />
-                    <img
-                      src={avatarUrl}
-                      alt="Profilbild"
-                      className="absolute inset-0 w-full h-full object-contain z-10"
-                      draggable={false}
-                    />
-                  </>
+                  <img
+                    src={avatarUrl}
+                    alt="Profilbild"
+                    className="absolute inset-0 w-full h-full object-contain object-top"
+                    draggable={false}
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/30">
                     <User className="h-16 w-16 text-primary/60" />
