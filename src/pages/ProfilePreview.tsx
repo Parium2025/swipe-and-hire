@@ -204,41 +204,19 @@ export default function ProfilePreview() {
                 <User className="h-16 w-16 sm:h-20 sm:w-20 text-primary/60" />
               </div>
             )}
-            {/* Three dots menu (decorative) */}
-            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-white/20 backdrop-blur-sm rounded-full p-2 opacity-80 hover:opacity-100 transition-opacity">
-              <div className="flex gap-1">
-                <div className="w-1 h-1 bg-white rounded-full"></div>
-                <div className="w-1 h-1 bg-white rounded-full"></div>
-                <div className="w-1 h-1 bg-white rounded-full"></div>
-              </div>
-            </div>
-          </div>
-
-          <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-            {/* Name and Title */}
-            <div className="space-y-1 sm:space-y-2 text-center">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
-                {data.first_name} {isConsented ? data.last_name : '***'}
-                {isConsented && data.age && (
-                  <span className="block sm:inline text-xl sm:text-2xl font-normal text-gray-600 sm:ml-2 mt-1 sm:mt-0">{data.age}</span>
-                )}
-              </h1>
-              <p className="text-base sm:text-lg text-gray-600 font-medium">
-                {data.employment_status || 'Jobbsökande'}
-              </p>
-            </div>
-
-            {/* Video Presentation Button */}
+            
+            {/* Video Play Button Overlay */}
             {data.video_url && (
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button 
-                    className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-2xl py-3 sm:py-4 text-sm sm:text-base font-medium transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5"
+                  <button 
+                    className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-all duration-300 group-hover:bg-black/40"
                     onClick={handleVideoClick}
                   >
-                    <Play className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                    Video Presentation
-                  </Button>
+                    <div className="bg-white/90 hover:bg-white rounded-full p-4 sm:p-6 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110">
+                      <Play className="h-8 w-8 sm:h-10 sm:w-10 text-gray-800 ml-1" />
+                    </div>
+                  </button>
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl">
                   <DialogHeader>
@@ -266,6 +244,30 @@ export default function ProfilePreview() {
                 </DialogContent>
               </Dialog>
             )}
+
+            {/* Three dots menu (decorative) */}
+            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-white/20 backdrop-blur-sm rounded-full p-2 opacity-80 hover:opacity-100 transition-opacity">
+              <div className="flex gap-1">
+                <div className="w-1 h-1 bg-white rounded-full"></div>
+                <div className="w-1 h-1 bg-white rounded-full"></div>
+                <div className="w-1 h-1 bg-white rounded-full"></div>
+              </div>
+            </div>
+          </div>
+
+          <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+            {/* Name and Title */}
+            <div className="space-y-1 sm:space-y-2 text-center">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
+                {data.first_name} {isConsented ? data.last_name : '***'}
+                {isConsented && data.age && (
+                  <span className="block sm:inline text-xl sm:text-2xl font-normal text-gray-600 sm:ml-2 mt-1 sm:mt-0">{data.age}</span>
+                )}
+              </h1>
+              <p className="text-base sm:text-lg text-gray-600 font-medium">
+                {data.employment_status || 'Jobbsökande'}
+              </p>
+            </div>
 
             {/* About Me Section */}
             {data.bio && (
