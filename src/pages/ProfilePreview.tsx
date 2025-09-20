@@ -372,12 +372,12 @@ export default function ProfilePreview() {
             <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
               <Button 
                 variant="outline" 
-                className="flex-1 rounded-2xl py-2.5 sm:py-3 text-sm sm:text-base font-medium border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 hover:shadow-md"
+                className="flex-1 rounded-2xl py-2.5 sm:py-3 text-sm sm:text-base font-medium bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 hover:border-white/30 transition-all duration-200 hover:shadow-md"
               >
                 <Phone className="h-4 w-4 mr-1 sm:mr-2" />
                 Ring
               </Button>
-              <Button className="flex-1 bg-blue-600 hover:bg-blue-700 rounded-2xl py-2.5 sm:py-3 text-sm sm:text-base font-medium transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5">
+              <Button className="flex-1 bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 rounded-2xl py-2.5 sm:py-3 text-sm sm:text-base font-medium text-white transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5">
                 <Video className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
                 Video Chat
               </Button>
@@ -386,7 +386,7 @@ export default function ProfilePreview() {
             {/* Job Notifications Toggle */}
             <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-white/20">
               <span className="text-base sm:text-lg font-semibold text-white">Jobbnotifieringar</span>
-              <button className="w-11 h-6 sm:w-12 sm:h-6 bg-blue-600 rounded-full relative hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+              <button className="w-11 h-6 sm:w-12 sm:h-6 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full relative hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2">
                 <div className="w-4 h-4 sm:w-5 sm:h-5 bg-white rounded-full absolute top-1 right-1 shadow-sm transition-transform hover:scale-110"></div>
               </button>
             </div>
@@ -396,12 +396,12 @@ export default function ProfilePreview() {
               <div className="pt-2">
                 <button
                   onClick={handleCvClick}
-                  className="w-full flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-green-50 hover:bg-green-100 rounded-lg border border-green-200 hover:border-green-300 transition-all duration-200 hover:shadow-md transform hover:-translate-y-0.5 group"
+                  className="w-full flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 hover:bg-white/20 hover:border-white/30 transition-all duration-200 hover:shadow-md transform hover:-translate-y-0.5 group"
                 >
-                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0 group-hover:scale-110 transition-transform" />
-                  <span className="text-sm sm:text-base text-green-800 font-medium">Visa CV</span>
-                  <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 ml-auto opacity-60 group-hover:opacity-100 transition-opacity" />
-                  <Badge variant="secondary" className="text-xs bg-green-200 text-green-800">PDF</Badge>
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-white flex-shrink-0 group-hover:scale-110 transition-transform" />
+                  <span className="text-sm sm:text-base text-white font-medium">Visa CV</span>
+                  <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 text-white/80 ml-auto opacity-60 group-hover:opacity-100 transition-opacity" />
+                  <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/20">PDF</Badge>
                 </button>
               </div>
             )}
@@ -412,15 +412,15 @@ export default function ProfilePreview() {
                 <h3 className="text-sm font-semibold text-white">Tillgänglighet</h3>
                 <div className="grid grid-cols-1 gap-2">
                   {data.working_hours && (
-                    <div className="bg-purple-50 rounded-lg p-3 border border-purple-100">
-                      <span className="text-xs text-purple-700 font-medium">Arbetstid</span>
-                      <p className="text-sm text-purple-900">{data.working_hours}</p>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                      <span className="text-xs text-white/80 font-medium">Arbetstid</span>
+                      <p className="text-sm text-white">{data.working_hours}</p>
                     </div>
                   )}
                   {data.availability && (
-                    <div className="bg-orange-50 rounded-lg p-3 border border-orange-100">
-                      <span className="text-xs text-orange-700 font-medium">Kan börja</span>
-                      <p className="text-sm text-orange-900">{data.availability}</p>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                      <span className="text-xs text-white/80 font-medium">Kan börja</span>
+                      <p className="text-sm text-white">{data.availability}</p>
                     </div>
                   )}
                 </div>
