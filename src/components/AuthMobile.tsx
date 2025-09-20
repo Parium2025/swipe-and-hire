@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
 import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { searchAddresses } from '@/lib/addressSearch';
+import PostalCodeSelector from '@/components/PostalCodeSelector';
 
 interface AuthMobileProps {
   isPasswordReset: boolean;
@@ -41,8 +41,7 @@ const AuthMobile = ({
   const [isLogin, setIsLogin] = useState(true);
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState('');
-  const [addressSearchTerm, setAddressSearchTerm] = useState('');
-  const [addressSuggestions, setAddressSuggestions] = useState<string[]>([]);
+  const [addressPostalCode, setAddressPostalCode] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -70,7 +69,6 @@ const AuthMobile = ({
   const [resetPasswordSent, setResetPasswordSent] = useState(false);
 
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const addressTriggerRef = useRef<HTMLButtonElement>(null);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
@@ -229,23 +227,6 @@ const AuthMobile = ({
      // Navigera till ren auth-sida utan parametrar
      navigate('/auth', { replace: true });
    };
-
-  // Handle address search
-  const handleAddressSearch = async (searchValue: string) => {
-    setAddressSearchTerm(searchValue);
-    
-    if (searchValue.length >= 2) {
-      try {
-        const suggestions = await searchAddresses(searchValue);
-        setAddressSuggestions(suggestions);
-      } catch (error) {
-        console.error('Address search error:', error);
-        setAddressSuggestions([]);
-      }
-    } else {
-      setAddressSuggestions([]);
-    }
-  };
 
   if (isPasswordReset) {
     return (
@@ -705,99 +686,13 @@ const AuthMobile = ({
                                     ))}
                                   </SelectContent>
                                 </Select>
-                              </div>
+                               </div>
 
-                              <div>
-                                <Label htmlFor="address" className="text-white">
-                                  <MapPin className="h-4 w-4 inline mr-2" />
-                                  Adress *
-                                </Label>
-                                <DropdownMenu modal={false}>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button
-                                      ref={addressTriggerRef}
-                                      variant="outline"
-                                      className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
-                                    >
-                                      <span className="truncate text-left flex-1 px-1">
-                                        {address || 'Ange adress'}
-                                      </span>
-                                      <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                   <DropdownMenuContent 
-                                     className={`w-80 bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
-                                     side="bottom"
-                                     align="center"
-                                     alignOffset={0}
-                                     sideOffset={8}
-                                     avoidCollisions={false}
-                                     onCloseAutoFocus={(e) => e.preventDefault()}
-                                   >
-                                     {/* Search input */}
-                                     <div className="p-3 border-b border-slate-600/30 sticky top-0 bg-slate-700/95 backdrop-blur-md">
-                                       <div className="relative">
-                                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
-                                          <Input
-                                            placeholder="Sök adress..."
-                                            value={addressSearchTerm}
-                                            onChange={(e) => handleAddressSearch(e.target.value)}
-                                            className={`pl-10 pr-4 ${isMobile ? 'h-10 text-sm' : 'h-10'} bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-lg`}
-                                            autoComplete="off"
-                                            autoCapitalize="none"
-                                            autoCorrect="off"
-                                            onKeyDownCapture={(e) => e.stopPropagation()}
-                                            onKeyDown={(e) => e.stopPropagation()}
-                                          />
-                                       </div>
-                                     </div>
-                                    
-                                     {/* Address suggestions */}
-                                     <div className={`overflow-y-auto ${isMobile ? 'max-h-[calc(50vh-4rem)]' : 'max-h-80'} overscroll-contain`}>
-                                        {addressSuggestions.map((addressOption, index) => (
-                                           <DropdownMenuItem
-                                             key={`${addressOption}-${index}`}
-                                             onSelect={(e) => e.preventDefault()}
-                                             onClick={() => {
-                                               setAddress(addressOption);
-                                               setAddressSearchTerm('');
-                                               setAddressSuggestions([]);
-                                             }}
-                                             className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white flex items-center justify-between transition-colors touch-manipulation`}
-                                           >
-                                             <span className="flex-1 pr-2">{addressOption}</span>
-                                             {address === addressOption && (
-                                               <Check className={`${isMobile ? 'h-4 w-4' : 'h-4 w-4'} text-green-400 flex-shrink-0`} />
-                                             )}
-                                           </DropdownMenuItem>
-                                         ))}
-                                       
-                                       {/* Custom value option if no matches and search term exists */}
-                                        {addressSearchTerm.trim().length >= 2 &&
-                                        addressSuggestions.length === 0 && (
-                                         <DropdownMenuItem
-                                           onSelect={(e) => e.preventDefault()}
-                                           onClick={() => {
-                                             setAddress(addressSearchTerm);
-                                             setAddressSearchTerm('');
-                                           }}
-                                           className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white border-t border-slate-600/30 transition-colors touch-manipulation`}
-                                         >
-                                           <span className="flex-1">Använd "{addressSearchTerm}"</span>
-                                         </DropdownMenuItem>
-                                       )}
-                                       
-                                       {/* Show message if no results */}
-                                       {addressSearchTerm.trim().length >= 2 && 
-                                        addressSuggestions.length === 0 && (
-                                         <div className={`${isMobile ? 'py-4 px-4' : 'py-4 px-3'} text-center text-white/60`}>
-                                           Inga adressförslag hittades för "{addressSearchTerm}"
-                                         </div>
-                                       )}
-                                     </div>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
+                               <PostalCodeSelector
+                                 postalCodeValue={addressPostalCode}
+                                 onPostalCodeChange={setAddressPostalCode}
+                                 onLocationChange={setAddress}
+                               />
 
                              <div>
                                <Label htmlFor="website" className="text-white">
