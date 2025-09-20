@@ -1071,7 +1071,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <div className="space-y-2 text-sm text-white/90">
                   <div className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-400" />
-                    <span>Din ålder (inte exakt födelsedatum)</span>
+                    <span>Din ålder</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-400" />
@@ -1091,10 +1091,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6 space-y-3">
                 <h3 className="text-white font-semibold">Detta delas INTE:</h3>
                 <div className="space-y-2 text-sm text-white/70">
-                  <div className="flex items-center gap-2">
-                    <span className="text-red-400">✗</span>
-                    <span>Exakt födelsedatum</span>
-                  </div>
                   <div className="flex items-center gap-2">
                     <span className="text-red-400">✗</span>
                     <span>Fullständig hemadress</span>
