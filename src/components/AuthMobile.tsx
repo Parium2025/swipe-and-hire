@@ -613,10 +613,10 @@ const AuthMobile = ({
                                     
                                      {/* Industry options - optimized for mobile scrolling */}
                                      <div className={`overflow-y-auto ${isMobile ? 'max-h-[calc(50vh-4rem)]' : 'max-h-80'} overscroll-contain`}>
-                                       {SWEDISH_INDUSTRIES
-                                       .filter(industryOption => 
-                                            searchTerm.trim().length < 3 ? true : industryOption.toLowerCase().includes(searchTerm.toLowerCase())
-                                          )
+                                        {SWEDISH_INDUSTRIES
+                                        .filter(industryOption => 
+                                             searchTerm.trim().length >= 3 ? industryOption.toLowerCase().includes(searchTerm.toLowerCase()) : true
+                                           )
                                          .map((industryOption) => (
                                            <DropdownMenuItem
                                              key={industryOption}
