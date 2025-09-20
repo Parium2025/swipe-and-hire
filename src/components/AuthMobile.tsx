@@ -758,11 +758,13 @@ const AuthMobile = ({
                                            <DropdownMenuItem
                                              key={`${addressOption}-${index}`}
                                              onSelect={(e) => e.preventDefault()}
-                                             onClick={() => {
-                                               setAddress(addressOption);
-                                               setAddressSearchTerm('');
-                                               setAddressSuggestions([]);
-                                             }}
+                                              onClick={() => {
+                                                setAddress(addressOption);
+                                                setAddressSearchTerm('');
+                                                setAddressSuggestions([]);
+                                                // Stäng dropdown-menyn
+                                                addressTriggerRef.current?.click();
+                                              }}
                                              className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white flex items-center justify-between transition-colors touch-manipulation`}
                                            >
                                              <span className="flex-1 pr-2">{addressOption}</span>
@@ -777,10 +779,12 @@ const AuthMobile = ({
                                         addressSuggestions.length === 0 && (
                                          <DropdownMenuItem
                                            onSelect={(e) => e.preventDefault()}
-                                           onClick={() => {
-                                             setAddress(addressSearchTerm);
-                                             setAddressSearchTerm('');
-                                           }}
+                                            onClick={() => {
+                                              setAddress(addressSearchTerm);
+                                              setAddressSearchTerm('');
+                                              // Stäng dropdown-menyn
+                                              addressTriggerRef.current?.click();
+                                            }}
                                            className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white border-t border-slate-600/30 transition-colors touch-manipulation`}
                                          >
                                            <span className="flex-1">Använd "{addressSearchTerm}"</span>
