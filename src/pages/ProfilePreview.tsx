@@ -257,7 +257,7 @@ export default function ProfilePreview() {
                   <img 
                     src={avatarUrl} 
                     alt="Profilbild"
-                    className="w-full h-full object-cover scale-105 transition-transform duration-300 group-hover:scale-110"
+                    className="absolute inset-0 w-full h-full object-cover block"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/30">
@@ -272,8 +272,8 @@ export default function ProfilePreview() {
               <video 
                 ref={videoRef}
                 src={videoUrl}
-                className={`w-full h-full object-cover transition-opacity duration-300 ${
-                  showVideo && isPlaying ? 'opacity-100' : 'opacity-0 absolute inset-0'
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
+                  showVideo && isPlaying ? 'opacity-100' : 'opacity-0'
                 }`}
                 loop={false}
                 muted={false}
@@ -287,7 +287,7 @@ export default function ProfilePreview() {
 
             {/* Play/Pause overlay for mobile */}
             {isMobile && videoUrl && (
-              <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+              <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
                 {isPlaying ? (
                   <Pause className="h-8 w-8 text-white" />
                 ) : (
@@ -298,7 +298,7 @@ export default function ProfilePreview() {
             
             {/* Hover indicator for desktop */}
             {!isMobile && !isPlaying && videoUrl && (
-              <div className="absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+              <div className="absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
                 <Play className="h-6 w-6 text-white drop-shadow-lg" />
               </div>
             )}
