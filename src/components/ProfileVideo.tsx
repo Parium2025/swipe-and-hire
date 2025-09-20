@@ -143,21 +143,15 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
         />
       )}
       
-      {/* Play/Pause overlay for mobile */}
-      {isMobile && (
-        <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-          {isPlaying ? (
-            <Pause className="h-8 w-8 text-white" />
-          ) : (
-            <Play className="h-8 w-8 text-white" />
-          )}
-        </div>
-      )}
-      
-      {/* Hover indicator for desktop */}
-      {!isMobile && !isPlaying && (
-        <div className="absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-          <Play className="h-6 w-6 text-white drop-shadow-lg" />
+      {/* Video indicator - always visible when not playing */}
+      {!isPlaying && (
+        <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center transition-opacity">
+          <div className="bg-white/90 rounded-full p-3 mb-2 shadow-lg">
+            <Play className="h-6 w-6 text-gray-800" fill="currentColor" />
+          </div>
+          <div className="bg-white/90 rounded-lg px-3 py-1 shadow-lg">
+            <span className="text-sm font-medium text-gray-800">Klicka för att spela</span>
+          </div>
         </div>
       )}
     </div>
