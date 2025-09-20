@@ -120,113 +120,115 @@ export default function ProfilePreview() {
     if (!data) return <div className="text-white">Ingen data tillgänglig</div>;
 
     return (
-      <div className="space-y-6">
-        {/* Header med avatar och grundinfo */}
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardContent className="p-6">
-            <div className="flex items-start gap-4">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src={avatarUrl} alt="Profilbild" />
-                <AvatarFallback className="bg-white/20 text-white text-lg">
-                  {data.first_name?.[0]}{data.last_name?.[0]}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <h2 className="text-xl font-semibold text-white">
-                  {data.first_name} {isConsented ? data.last_name : '***'}
-                </h2>
-                <div className="flex items-center gap-2 mt-1">
-                  <MapPin className="h-4 w-4 text-white/70" />
-                  <span className="text-white/70">{data.location}</span>
-                  {isConsented && data.postal_code && (
-                    <Badge variant="secondary" className="ml-2">
-                      {data.postal_code}
-                    </Badge>
-                  )}
-                </div>
-                {isConsented && data.age && (
-                  <div className="flex items-center gap-2 mt-1">
-                    <Calendar className="h-4 w-4 text-white/70" />
-                    <span className="text-white/70">{data.age} år</span>
-                  </div>
-                )}
-                {isConsented && data.phone && (
-                  <div className="flex items-center gap-2 mt-1">
-                    <Phone className="h-4 w-4 text-white/70" />
-                    <span className="text-white/70">{data.phone}</span>
-                  </div>
-                )}
+      <div className="max-w-md mx-auto">
+        {/* Modern Profile Card */}
+        <Card className="bg-white backdrop-blur-sm border-0 shadow-2xl overflow-hidden">
+          {/* Profile Image */}
+          <div className="relative h-80 bg-gradient-to-br from-gray-100 to-gray-200">
+            {avatarUrl ? (
+              <img 
+                src={avatarUrl} 
+                alt="Profilbild"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/30">
+                <User className="h-20 w-20 text-primary/60" />
+              </div>
+            )}
+            {/* Three dots menu (decorative) */}
+            <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-full p-2">
+              <div className="flex gap-1">
+                <div className="w-1 h-1 bg-white rounded-full"></div>
+                <div className="w-1 h-1 bg-white rounded-full"></div>
+                <div className="w-1 h-1 bg-white rounded-full"></div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Anställningsstatus */}
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Anställningsstatus
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {data.employment_status && (
-              <div>
-                <span className="text-white/70 text-sm">Nuvarande status:</span>
-                <p className="text-white font-medium">{data.employment_status}</p>
-              </div>
-            )}
-            {data.working_hours && (
-              <div>
-                <span className="text-white/70 text-sm">Arbetstid:</span>
-                <p className="text-white font-medium">{data.working_hours}</p>
-              </div>
-            )}
-            {data.availability && (
-              <div>
-                <span className="text-white/70 text-sm">Kan börja:</span>
-                <p className="text-white font-medium">{data.availability}</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          <CardContent className="p-8 space-y-6">
+            {/* Name and Title */}
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold text-gray-900">
+                {data.first_name} {isConsented ? data.last_name : '***'}
+                {isConsented && data.age && (
+                  <span className="text-2xl font-normal text-gray-600 ml-2">{data.age}</span>
+                )}
+              </h1>
+              <p className="text-lg text-gray-600 font-medium">
+                {data.employment_status || 'Jobbsökande'}
+              </p>
+            </div>
 
-        {/* Bio */}
-        {data.bio && (
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white">Om mig</CardTitle>
-              {!isConsented && data.bio.endsWith('...') && (
-                <CardDescription className="text-amber-200 flex items-center gap-1">
-                  <Info className="h-4 w-4" />
-                  Begränsad text utan samtycke
-                </CardDescription>
-              )}
-            </CardHeader>
-            <CardContent>
-              <p className="text-white leading-relaxed">{data.bio}</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Filer */}
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader>
-            <CardTitle className="text-white">Filer & Media</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {data.cv_url && (
-              <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg">
-                <FileText className="h-5 w-5 text-white/70" />
-                <span className="text-white">CV tillgängligt</span>
-                <Badge variant="outline" className="ml-auto">PDF</Badge>
-              </div>
-            )}
+            {/* Video Presentation Button */}
             {data.video_url && (
-              <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg">
-                <Video className="h-5 w-5 text-white/70" />
-                <span className="text-white">Presentationsvideo</span>
-                <Badge variant="outline" className="ml-auto">Video</Badge>
+              <Button className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-2xl py-4 text-base font-medium">
+                <Video className="h-5 w-5 mr-2" />
+                Video Presentation
+              </Button>
+            )}
+
+            {/* About Me Section */}
+            {data.bio && (
+              <div className="space-y-3">
+                <h2 className="text-xl font-bold text-gray-900">About Me</h2>
+                <p className="text-gray-700 leading-relaxed">
+                  {data.bio}
+                </p>
+                {!isConsented && data.bio.endsWith('...') && (
+                  <p className="text-amber-600 text-sm flex items-center gap-1">
+                    <Info className="h-4 w-4" />
+                    Begränsad text utan samtycke
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Contact Information (only with consent) */}
+            {isConsented && (
+              <div className="space-y-3">
+                {data.phone && (
+                  <div className="flex items-center gap-3 text-gray-700">
+                    <Phone className="h-5 w-5" />
+                    <span>{data.phone}</span>
+                  </div>
+                )}
+                {data.location && (
+                  <div className="flex items-center gap-3 text-gray-700">
+                    <MapPin className="h-5 w-5" />
+                    <span>{data.location} {data.postal_code && `(${data.postal_code})`}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1 rounded-2xl py-3 text-base font-medium">
+                Meddelande
+              </Button>
+              <Button className="flex-1 bg-blue-600 hover:bg-blue-700 rounded-2xl py-3 text-base font-medium">
+                <Video className="h-5 w-5 mr-2" />
+                Video Chat
+              </Button>
+            </div>
+
+            {/* Job Notifications Toggle */}
+            <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+              <span className="text-lg font-semibold text-gray-900">Jobbnotifieringar</span>
+              <div className="w-12 h-6 bg-blue-600 rounded-full relative">
+                <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 right-0.5 shadow-sm"></div>
+              </div>
+            </div>
+
+            {/* CV and Files */}
+            {data.cv_url && (
+              <div className="pt-2">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                  <FileText className="h-5 w-5 text-gray-600" />
+                  <span className="text-gray-800 font-medium">CV tillgängligt</span>
+                  <Badge variant="secondary" className="ml-auto">PDF</Badge>
+                </div>
               </div>
             )}
           </CardContent>
