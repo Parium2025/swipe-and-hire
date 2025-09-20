@@ -241,7 +241,7 @@ export default function ProfilePreview() {
         <Card className="bg-white backdrop-blur-sm border-0 shadow-2xl overflow-hidden rounded-3xl transition-all duration-300 hover:shadow-3xl">
           {/* Profile Image with Video */}
           <div 
-            className="relative h-64 sm:h-80 bg-gradient-to-br from-gray-100 to-gray-200 group overflow-hidden"
+            className="relative h-64 sm:h-80 bg-gradient-to-br from-gray-100 to-gray-200 group overflow-hidden rounded-t-3xl"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={handleTap}
