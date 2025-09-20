@@ -554,7 +554,42 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      email_confirmations_safe: {
+        Row: {
+          confirmed_at: string | null
+          created_at: string | null
+          email: string | null
+          expires_at: string | null
+          id: string | null
+          is_confirmed: boolean | null
+          is_expired: boolean | null
+          pin_expires_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          confirmed_at?: string | null
+          created_at?: string | null
+          email?: string | null
+          expires_at?: string | null
+          id?: string | null
+          is_confirmed?: never
+          is_expired?: never
+          pin_expires_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          confirmed_at?: string | null
+          created_at?: string | null
+          email?: string | null
+          expires_at?: string | null
+          id?: string | null
+          is_confirmed?: never
+          is_expired?: never
+          pin_expires_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       calculate_age: {
@@ -580,6 +615,14 @@ export type Database = {
       create_secure_confirmation_token: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_confirmation_status: {
+        Args: { user_uuid: string }
+        Returns: {
+          expires_at: string
+          is_confirmed: boolean
+          is_expired: boolean
+        }[]
       }
       get_consented_profile_for_employer: {
         Args: { job_seeker_uuid: string }
@@ -633,6 +676,10 @@ export type Database = {
       get_user_role: {
         Args: { org_uuid?: string; user_uuid: string }
         Returns: string
+      }
+      has_pending_confirmation: {
+        Args: { user_uuid: string }
+        Returns: boolean
       }
       is_confirmation_owner: {
         Args: { confirmation_user_id: string }
