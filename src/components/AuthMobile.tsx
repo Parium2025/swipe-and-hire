@@ -474,11 +474,13 @@ const AuthMobile = ({
                         </div>
 
                        {/* Account Information Section */}
-                       <div className="space-y-4 border-t border-white/20 pt-4">
-                         <div className="flex items-center gap-2 mb-2">
-                           <User className="h-4 w-4 text-white" />
-                           <Label className="text-white font-medium">Konto Info</Label>
-                         </div>
+                        <div className="space-y-4 border-t border-white/20 pt-4">
+                          {role === 'employer' && (
+                            <div className="flex items-center gap-2 mb-2">
+                              <User className="h-4 w-4 text-white" />
+                              <Label className="text-white font-medium">Konto Info</Label>
+                            </div>
+                          )}
 
                          <div className="grid grid-cols-2 gap-2">
                            <div>
