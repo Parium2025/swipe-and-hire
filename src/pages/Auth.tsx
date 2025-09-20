@@ -849,7 +849,7 @@ const Auth = () => {
     let title, description;
     if (isUsed) {
       title = 'Återställningslänken är redan använd';
-      description = 'Du kan bara byta lösenord en gång med denna länk. Länken fungerar bara en gång om du har tryckt på tillbaka till inloggning av säkerhetsskäl. Begär en ny länk för att ändra ditt lösenord igen.';
+      description = 'Av säkerhetsskäl kan denna länk endast användas en gång för att återställa ditt lösenord.\nOm du redan har återgått till inloggningssidan eller försöker använda länken igen behöver du begära en ny återställningslänk.';
     } else if (isConsumed) {
       title = 'Återställningslänken är förbrukad';
       description = 'Återställningslänkar kan bara användas en gång av säkerhetsskäl. Begär en ny länk för att ändra ditt lösenord.';
