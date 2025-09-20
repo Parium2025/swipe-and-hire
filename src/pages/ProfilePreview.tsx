@@ -385,66 +385,14 @@ export default function ProfilePreview() {
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center gap-2 text-white">
-          <Eye className="h-6 w-6" />
-          <h1 className="text-2xl font-bold">Förhandsgranska Profil</h1>
-        </div>
-        <p className="text-white/80 max-w-2xl mx-auto">
-          Se hur din profil visas för arbetsgivare. Skillnaden mellan vyerna beror på om du har gett samtycke för datadelning och om arbetsgivaren har fått tillstånd att se din profil.
+      <div className="text-center space-y-4 mb-6">
+        <p className="text-white max-w-2xl mx-auto">
+          Se hur din profil visas för arbetsgivare.
         </p>
       </div>
 
-      {/* Info Cards */}
-      <div className="grid md:grid-cols-2 gap-4">
-        <Card className="bg-emerald-500/20 backdrop-blur-sm border-emerald-300/30">
-          <CardContent className="p-4 flex items-center gap-3">
-            <Unlock className="h-8 w-8 text-emerald-300" />
-            <div>
-              <h3 className="font-semibold text-white">Med Samtycke & Tillstånd</h3>
-              <p className="text-emerald-100 text-sm">Arbetsgivare ser full profil efter jobbansökan</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-amber-500/20 backdrop-blur-sm border-amber-300/30">
-          <CardContent className="p-4 flex items-center gap-3">
-            <Lock className="h-8 w-8 text-amber-300" />
-            <div>
-              <h3 className="font-semibold text-white">Utan Tillstånd</h3>
-              <p className="text-amber-100 text-sm">Begränsad vy innan jobbansökan</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Tabs för de olika vyerna */}
-      <Tabs defaultValue="consented" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-sm">
-          <TabsTrigger 
-            value="consented" 
-            className="flex items-center gap-2 data-[state=active]:bg-white/20 data-[state=active]:text-white text-white/70"
-          >
-            <Unlock className="h-4 w-4" />
-            Med Samtycke & Tillstånd
-          </TabsTrigger>
-          <TabsTrigger 
-            value="masked" 
-            className="flex items-center gap-2 data-[state=active]:bg-white/20 data-[state=active]:text-white text-white/70"
-          >
-            <Lock className="h-4 w-4" />
-            Utan Tillstånd
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="consented" className="mt-6">
-          <ProfileView data={consentedData} isConsented={true} />
-        </TabsContent>
-
-        <TabsContent value="masked" className="mt-6">
-          <ProfileView data={maskedData} isConsented={false} />
-        </TabsContent>
-      </Tabs>
+      {/* Profile View */}
+      <ProfileView data={consentedData} isConsented={true} />
 
       {/* Tips */}
       <Card className="bg-blue-500/20 backdrop-blur-sm border-blue-300/30 mt-8">
