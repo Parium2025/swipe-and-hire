@@ -336,7 +336,7 @@ export default function ProfilePreview() {
                 )}
                 
                 {/* Swipe-indikator */}
-                <div className="flex items-center justify-center mt-6 animate-bounce">
+                <div className="flex items-center justify-center mt-6">
                   <div className="bg-white/20 rounded-full px-4 py-2 flex items-center gap-2">
                     <span className="text-sm text-white/80">Tryck för mer info</span>
                     <ArrowRight className="h-4 w-4 text-white/80" />
