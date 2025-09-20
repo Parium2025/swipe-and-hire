@@ -582,7 +582,7 @@ const AuthMobile = ({
                                     <Button
                                       ref={triggerRef}
                                       variant="outline"
-                                      className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
+                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
                                     >
                                       <span className="truncate text-left flex-1 px-1">
                                         {industry || 'Välj bransch'}
