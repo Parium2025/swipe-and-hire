@@ -273,42 +273,42 @@ export default function ProfilePreview() {
         >
           {/* Helskärm profilbild/video */}
           <div className="relative w-full h-full bg-transparent overflow-hidden">
-            {/* Cover Image - shown when video is not playing */}
-            {(!showVideo || !isPlaying) && (
-              <>
-                {avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt="Profilbild"
-                    className="absolute inset-0 w-full h-full object-contain object-top"
-                    draggable={false}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/30">
-                    <User className="h-16 w-16 text-primary/60" />
-                  </div>
-                )}
-              </>
-            )}
-            
-            {/* Video Element - spelas i fullskärm med cirkulär mask */}
-            {videoUrl && showVideo && (
-              <div className="absolute inset-0 flex items-center justify-center z-20">
-                <div className="w-64 h-64 rounded-full overflow-hidden border-4 border-white/40 shadow-2xl">
-                  <video 
-                    ref={videoRef}
-                    src={videoUrl}
-                    className="w-full h-full object-cover"
-                    loop={false}
-                    muted={false}
-                    playsInline
-                    onEnded={handleVideoEnd}
-                    onClick={handleVideoTap}
-                    autoPlay
-                  />
-                </div>
-              </div>
-            )}
+            {/* Avatar-område för både bild och video - centrerat längst upp */}
+            <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-64 h-64 rounded-full overflow-hidden border-4 border-white/40 shadow-2xl bg-gradient-to-br from-primary/20 to-primary/30">
+              
+              {/* Cover Image - visas när video inte spelas */}
+              {(!showVideo || !isPlaying) && (
+                <>
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt="Profilbild"
+                      className="w-full h-full object-cover"
+                      draggable={false}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <User className="h-16 w-16 text-primary/60" />
+                    </div>
+                  )}
+                </>
+              )}
+              
+              {/* Video Element - spelas på exakt samma plats som bilden */}
+              {videoUrl && showVideo && isPlaying && (
+                <video 
+                  ref={videoRef}
+                  src={videoUrl}
+                  className="w-full h-full object-cover"
+                  loop={false}
+                  muted={false}
+                  playsInline
+                  onEnded={handleVideoEnd}
+                  onClick={handleVideoTap}
+                  autoPlay
+                />
+              )}
+            </div>
 
             {/* Video play-knapp om video finns */}
             {videoUrl && !isPlaying && (
