@@ -526,24 +526,25 @@ const AuthMobile = ({
                            {/* email suggestions removed for simpler UX */}
                          </div>
                          
-                         <div>
-                            <Label htmlFor="phone" className="text-white">
-                              <Phone className="h-4 w-4 inline mr-2" />
-                              Telefon {role === 'employer' ? '' : '(frivilligt)'}
-                            </Label>
-                             <Input
-                               id="phone"
-                               type="tel"
-                               value={phone}
-                               onChange={(e) => handlePhoneChange(e.target.value)}
-                               className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                               placeholder="070-123 45 67"
-                               required={role === 'employer'}
-                             />
-                            {phoneError && (
-                              <p className="text-destructive text-xs mt-1">{phoneError}</p>
-                            )}
-                          </div>
+                          {role === 'job_seeker' && (
+                            <div>
+                               <Label htmlFor="phone" className="text-white">
+                                 <Phone className="h-4 w-4 inline mr-2" />
+                                 Telefon (frivilligt)
+                               </Label>
+                                <Input
+                                  id="phone"
+                                  type="tel"
+                                  value={phone}
+                                  onChange={(e) => handlePhoneChange(e.target.value)}
+                                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                  placeholder="070-123 45 67"
+                                />
+                               {phoneError && (
+                                 <p className="text-destructive text-xs mt-1">{phoneError}</p>
+                               )}
+                             </div>
+                          )}
                        </div>
 
                        {/* Employer-specific fields */}
