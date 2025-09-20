@@ -11,6 +11,9 @@ import { Eye, Lock, Unlock, User, Phone, MapPin, Calendar, FileText, Video, Info
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { convertToSignedUrl } from '@/utils/storageUtils';
 import { useToast } from '@/hooks/use-toast';
+import DeveloperControls from '@/components/DeveloperControls';
+import { AppSidebar } from '@/components/AppSidebar';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { useDevice } from '@/hooks/use-device';
 
 interface ProfileViewData {
@@ -38,6 +41,7 @@ export default function ProfilePreview() {
   const [maskedData, setMaskedData] = useState<ProfileViewData | null>(null);
   const [loading, setLoading] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string>('');
+  const [currentView, setCurrentView] = useState('profile');
 
   useEffect(() => {
     const loadPreviewData = async () => {
@@ -239,9 +243,9 @@ export default function ProfilePreview() {
       <div className="w-full max-w-sm mx-auto">
         {/* Modern Profile Card */}
         <Card className="bg-white backdrop-blur-sm border-0 shadow-2xl overflow-hidden rounded-3xl transition-all duration-300 hover:shadow-3xl">
-          {/* Profile Image with Video */}
+          {/* Profile Image with Video - No padding, full coverage */}
           <div 
-            className="relative h-64 sm:h-80 bg-gradient-to-br from-gray-100 to-gray-200 group overflow-hidden"
+            className="relative h-64 sm:h-80 bg-gradient-to-br from-gray-100 to-gray-200 group overflow-hidden -m-0"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={handleTap}
@@ -253,7 +257,7 @@ export default function ProfilePreview() {
                   <img 
                     src={avatarUrl} 
                     alt="Profilbild"
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="w-full h-full object-cover scale-105 transition-transform duration-300 group-hover:scale-110"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/30">
@@ -439,36 +443,50 @@ export default function ProfilePreview() {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-4 mb-6">
-        <div className="flex items-center justify-center gap-2 text-white">
-          <Eye className="h-6 w-6" />
-          <h1 className="text-2xl font-bold">Förhandsgranska Profil</h1>
+    <SidebarProvider>
+      <AppSidebar />
+      <div className="flex-1 flex flex-col">
+        {/* Header with developer controls */}
+        <div className="flex items-center justify-between p-4 bg-transparent">
+          <SidebarTrigger className="text-white" />
+          <DeveloperControls 
+            onViewChange={setCurrentView}
+            currentView={currentView}
+          />
         </div>
-        <p className="text-white max-w-2xl mx-auto">
-          Se hur din profil visas för arbetsgivare.
-        </p>
+
+        <div className="p-6 max-w-4xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="text-center space-y-4 mb-6">
+            <div className="flex items-center justify-center gap-2 text-white">
+              <Eye className="h-6 w-6" />
+              <h1 className="text-2xl font-bold">Förhandsgranska Profil</h1>
+            </div>
+            <p className="text-white max-w-2xl mx-auto">
+              Se hur din profil visas för arbetsgivare.
+            </p>
+          </div>
+
+          {/* Profile View */}
+          <ProfileView data={consentedData} isConsented={true} />
+
+          {/* Tips */}
+          <Card className="bg-blue-500/20 backdrop-blur-sm border-blue-300/30 mt-8">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Info className="h-5 w-5" />
+                Tips för bättre profil
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-blue-100">
+              <p>• Fyll i en utförlig bio för att sticka ut</p>
+              <p>• Ladda upp en presentationsvideo för personlig touch</p>
+              <p>• Håll ditt CV uppdaterat med senaste erfarenheter</p>
+              <p>• Lägg till en professionell profilbild</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-
-      {/* Profile View */}
-      <ProfileView data={consentedData} isConsented={true} />
-
-      {/* Tips */}
-      <Card className="bg-blue-500/20 backdrop-blur-sm border-blue-300/30 mt-8">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <Info className="h-5 w-5" />
-            Tips för bättre profil
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-blue-100">
-          <p>• Fyll i en utförlig bio för att sticka ut</p>
-          <p>• Ladda upp en presentationsvideo för personlig touch</p>
-          <p>• Håll ditt CV uppdaterat med senaste erfarenheter</p>
-          <p>• Lägg till en professionell profilbild</p>
-        </CardContent>
-      </Card>
-    </div>
+    </SidebarProvider>
   );
 }
