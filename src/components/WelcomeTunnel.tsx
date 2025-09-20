@@ -1088,19 +1088,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 </div>
               </div>
 
-              <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6 space-y-3">
-                <h3 className="text-white font-semibold">Detta delas INTE:</h3>
-                <div className="space-y-2 text-sm text-white/70">
-                  <div className="flex items-center gap-2">
-                    <span className="text-red-400">✗</span>
-                    <span>Fullständig hemadress</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-red-400">✗</span>
-                    <span>Efternamn</span>
-                  </div>
-                </div>
-              </div>
 
               <div className="space-y-4">
                 <label className="flex items-start gap-3 cursor-pointer bg-white/10 rounded-lg p-4 hover:bg-white/15 transition-colors">
