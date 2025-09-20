@@ -473,85 +473,76 @@ const AuthMobile = ({
                           </RadioGroup>
                         </div>
 
-                        {/* Account Information Section - Only for Employers */}
-                        {role === 'employer' && (
-                          <div className="space-y-4 border-t border-white/20 pt-4">
-                            <div className="flex items-center gap-2 mb-2">
-                              <User className="h-4 w-4 text-white" />
-                              <Label className="text-white font-medium">Konto Info</Label>
-                            </div>
+                       {/* Account Information Section */}
+                       <div className="space-y-4 border-t border-white/20 pt-4">
+                         <div className="flex items-center gap-2 mb-2">
+                           <User className="h-4 w-4 text-white" />
+                           <Label className="text-white font-medium">Konto Info</Label>
+                         </div>
 
-                            <div className="grid grid-cols-2 gap-2">
-                              <div>
-                                <Label htmlFor="firstName" className="text-white">Förnamn</Label>
-                                <Input
-                                  id="firstName"
-                                  value={firstName}
-                                  onChange={(e) => setFirstName(e.target.value)}
-                                  required
-                                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                                />
-                              </div>
-                              <div>
-                                <Label htmlFor="lastName" className="text-white">Efternamn</Label>
-                                <Input
-                                  id="lastName"
-                                  value={lastName}
-                                  onChange={(e) => setLastName(e.target.value)}
-                                  required
-                                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                                />
-                              </div>
-                            </div>
-                            
-                            <div className="relative">
-                              <Label htmlFor="email" className="text-white">
-                                <Mail className="h-4 w-4 inline mr-2" />
-                                E-post
-                              </Label>
-                              <Input
-                                id="email"
-                                type="email"
-                                value={email}
-                                onChange={(e) => handleEmailChange(e.target.value)}
-                                required
-                                name="email"
-                                autoComplete="email"
-                                inputMode="email"
-                                spellCheck={false}
-                                autoCapitalize="none"
-                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                              />
-                              {/* email suggestions removed for simpler UX */}
-                            </div>
+                         <div className="grid grid-cols-2 gap-2">
+                           <div>
+                             <Label htmlFor="firstName" className="text-white">Förnamn</Label>
+                             <Input
+                               id="firstName"
+                               value={firstName}
+                               onChange={(e) => setFirstName(e.target.value)}
+                               required
+                               className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                             />
+                           </div>
+                           <div>
+                             <Label htmlFor="lastName" className="text-white">Efternamn</Label>
+                             <Input
+                               id="lastName"
+                               value={lastName}
+                               onChange={(e) => setLastName(e.target.value)}
+                               required
+                               className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                             />
+                           </div>
+                         </div>
+                         
+                         <div className="relative">
+                           <Label htmlFor="email" className="text-white">
+                             <Mail className="h-4 w-4 inline mr-2" />
+                             E-post
+                           </Label>
+                           <Input
+                             id="email"
+                             type="email"
+                             value={email}
+                             onChange={(e) => handleEmailChange(e.target.value)}
+                             required
+                             name="email"
+                             autoComplete="email"
+                             inputMode="email"
+                             spellCheck={false}
+                             autoCapitalize="none"
+                             className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                           />
+                           {/* email suggestions removed for simpler UX */}
+                         </div>
+                         
+                         <div>
+                            <Label htmlFor="phone" className="text-white">
+                              <Phone className="h-4 w-4 inline mr-2" />
+                              Telefon {role === 'employer' ? '' : '(frivilligt)'}
+                            </Label>
+                             <Input
+                               id="phone"
+                               type="tel"
+                               value={phone}
+                               onChange={(e) => handlePhoneChange(e.target.value)}
+                               className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                               placeholder="070-123 45 67"
+                               required={role === 'employer'}
+                             />
+                            {phoneError && (
+                              <p className="text-destructive text-xs mt-1">{phoneError}</p>
+                            )}
                           </div>
-                        )}
-
-                        {/* Basic fields for job seekers */}
-                        {role === 'job_seeker' && (
-                          <div className="space-y-4">
-                            <div className="relative">
-                              <Label htmlFor="email" className="text-white">
-                                <Mail className="h-4 w-4 inline mr-2" />
-                                E-post
-                              </Label>
-                              <Input
-                                id="email"
-                                type="email"
-                                value={email}
-                                onChange={(e) => handleEmailChange(e.target.value)}
-                                required
-                                name="email"
-                                autoComplete="email"
-                                inputMode="email"
-                                spellCheck={false}
-                                autoCapitalize="none"
-                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                              />
-                              {/* email suggestions removed for simpler UX */}
-                            </div>
-                          </div>
-                        )}
+                       </div>
 
                        {/* Employer-specific fields */}
                        {role === 'employer' && (
