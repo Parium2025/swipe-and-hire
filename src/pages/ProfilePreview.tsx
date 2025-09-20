@@ -230,12 +230,21 @@ export default function ProfilePreview() {
             {(!showVideo || !isPlaying) && (
               <>
                 {avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt="Profilbild"
-                    className="absolute inset-0 w-full h-full object-contain"
-                    draggable={false}
-                  />
+                  <>
+                    <img
+                      src={avatarUrl}
+                      alt=""
+                      aria-hidden="true"
+                      className="absolute inset-0 w-full h-full object-cover blur-md scale-110 opacity-80"
+                      draggable={false}
+                    />
+                    <img
+                      src={avatarUrl}
+                      alt="Profilbild"
+                      className="absolute inset-0 w-full h-full object-contain z-10"
+                      draggable={false}
+                    />
+                  </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/30">
                     <User className="h-16 w-16 text-primary/60" />
@@ -267,7 +276,7 @@ export default function ProfilePreview() {
             {videoUrl && !isPlaying && (
               <button
                 onClick={handleVideoTap}
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-4 transition-all duration-200 hover:scale-110"
+                className="absolute z-30 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-4 transition-all duration-200 hover:scale-110"
               >
                 <Play className="h-8 w-8 ml-1" />
               </button>
