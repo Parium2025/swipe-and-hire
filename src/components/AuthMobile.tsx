@@ -589,10 +589,10 @@ const AuthMobile = ({
                                       <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
                                     </Button>
                                   </DropdownMenuTrigger>
-                                   <DropdownMenuContent 
+                                    <DropdownMenuContent 
                                      className={`bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
                                      side="bottom"
-                                     align="start"
+                                     align="center"
                                      alignOffset={0}
                                      sideOffset={8}
                                      avoidCollisions={false}
@@ -619,10 +619,10 @@ const AuthMobile = ({
                                     
                                      {/* Industry options - optimized for mobile scrolling */}
                                      <div className={`overflow-y-auto ${isMobile ? 'max-h-[calc(50vh-4rem)]' : 'max-h-80'} overscroll-contain`}>
-                                        {SWEDISH_INDUSTRIES
-                                        .filter(industryOption => 
-                                             searchTerm.trim().length >= 3 ? industryOption.toLowerCase().includes(searchTerm.toLowerCase()) : true
-                                           )
+                                         {SWEDISH_INDUSTRIES
+                                         .filter(industryOption => 
+                                              searchTerm.trim().length >= 2 ? industryOption.toLowerCase().includes(searchTerm.toLowerCase()) : true
+                                            )
                                          .map((industryOption) => (
                                            <DropdownMenuItem
                                              key={industryOption}
@@ -640,8 +640,8 @@ const AuthMobile = ({
                                            </DropdownMenuItem>
                                          ))}
                                        
-                                       {/* Custom value option if no matches and search term exists */}
-                                        {searchTerm.trim().length >= 3 && 
+                                        {/* Custom value option if no matches and search term exists */}
+                                         {searchTerm.trim().length >= 2 &&
                                         !SWEDISH_INDUSTRIES.some(industryOption => 
                                           industryOption.toLowerCase().includes(searchTerm.toLowerCase())
                                         ) && (
