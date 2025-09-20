@@ -242,7 +242,7 @@ export default function ProfilePreview() {
     return (
       <div className="w-full max-w-sm mx-auto">
         {/* Modern Profile Card */}
-        <Card className="bg-white backdrop-blur-sm border-0 shadow-2xl overflow-visible rounded-3xl transition-all duration-300 hover:shadow-3xl">
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl overflow-visible rounded-3xl transition-all duration-300 hover:shadow-3xl">
           {/* Profile Image with Video - No padding, full coverage */}
           <div 
             className="relative aspect-square w-full bg-transparent group overflow-hidden -m-0"
@@ -325,16 +325,16 @@ export default function ProfilePreview() {
             </div>
           </div>
 
-          <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+          <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6 text-white">
             {/* Name and Title */}
             <div className="space-y-1 sm:space-y-2 text-center">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
                 {data.first_name} {isConsented ? data.last_name : '***'}
                 {isConsented && data.age && (
-                  <span className="block sm:inline text-xl sm:text-2xl font-normal text-gray-600 sm:ml-2 mt-1 sm:mt-0">{data.age}</span>
+                  <span className="block sm:inline text-xl sm:text-2xl font-normal text-white/80 sm:ml-2 mt-1 sm:mt-0">{data.age}</span>
                 )}
               </h1>
-              <p className="text-base sm:text-lg text-gray-600 font-medium">
+              <p className="text-base sm:text-lg text-white/90 font-medium">
                 {data.employment_status || 'Jobbsökande'}
               </p>
             </div>
@@ -342,13 +342,13 @@ export default function ProfilePreview() {
             {/* About Me Section */}
             {data.bio && (
               <div className="space-y-2 sm:space-y-3">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900">About Me</h2>
-                <div className="bg-gray-50 rounded-2xl p-3 sm:p-4 border border-gray-100">
-                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                <h2 className="text-lg sm:text-xl font-bold text-white">About Me</h2>
+                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 sm:p-4 border border-white/20">
+                  <p className="text-sm sm:text-base text-white/90 leading-relaxed">
                     {data.bio}
                   </p>
                   {!isConsented && data.bio.endsWith('...') && (
-                    <p className="text-amber-600 text-xs sm:text-sm flex items-center gap-1 mt-2 pt-2 border-t border-gray-200">
+                    <p className="text-amber-300 text-xs sm:text-sm flex items-center gap-1 mt-2 pt-2 border-t border-white/20">
                       <Info className="h-3 w-3 sm:h-4 sm:w-4" />
                       Begränsad text utan samtycke
                     </p>
@@ -359,19 +359,19 @@ export default function ProfilePreview() {
 
             {/* Contact Information (only with consent) */}
             {isConsented && (data.phone || data.location) && (
-              <div className="space-y-2 sm:space-y-3 bg-blue-50 rounded-2xl p-3 sm:p-4 border border-blue-100">
-                <h3 className="text-sm font-semibold text-gray-900 mb-2">Kontaktinformation</h3>
+              <div className="space-y-2 sm:space-y-3 bg-white/10 backdrop-blur-sm rounded-2xl p-3 sm:p-4 border border-white/20">
+                <h3 className="text-sm font-semibold text-white mb-2">Kontaktinformation</h3>
                 {data.phone && (
                   <button
                     onClick={handlePhoneClick}
-                    className="flex items-center gap-2 sm:gap-3 text-gray-700 hover:text-blue-600 transition-colors w-full text-left group"
+                    className="flex items-center gap-2 sm:gap-3 text-white/90 hover:text-white transition-colors w-full text-left group"
                   >
                     <Phone className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 group-hover:scale-110 transition-transform" />
                     <span className="text-sm sm:text-base underline decoration-dotted">{data.phone}</span>
                   </button>
                 )}
                 {data.location && (
-                  <div className="flex items-center gap-2 sm:gap-3 text-gray-700">
+                  <div className="flex items-center gap-2 sm:gap-3 text-white/90">
                     <MapPin className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                     <span className="text-sm sm:text-base">{data.location} {data.postal_code && `(${data.postal_code})`}</span>
                   </div>
@@ -395,8 +395,8 @@ export default function ProfilePreview() {
             </div>
 
             {/* Job Notifications Toggle */}
-            <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-200">
-              <span className="text-base sm:text-lg font-semibold text-gray-900">Jobbnotifieringar</span>
+            <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-white/20">
+              <span className="text-base sm:text-lg font-semibold text-white">Jobbnotifieringar</span>
               <button className="w-11 h-6 sm:w-12 sm:h-6 bg-blue-600 rounded-full relative hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                 <div className="w-4 h-4 sm:w-5 sm:h-5 bg-white rounded-full absolute top-1 right-1 shadow-sm transition-transform hover:scale-110"></div>
               </button>
@@ -420,7 +420,7 @@ export default function ProfilePreview() {
             {/* Employment Status Details */}
             {(data.working_hours || data.availability) && (
               <div className="pt-2 space-y-2">
-                <h3 className="text-sm font-semibold text-gray-900">Tillgänglighet</h3>
+                <h3 className="text-sm font-semibold text-white">Tillgänglighet</h3>
                 <div className="grid grid-cols-1 gap-2">
                   {data.working_hours && (
                     <div className="bg-purple-50 rounded-lg p-3 border border-purple-100">
