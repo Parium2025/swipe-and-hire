@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/use-toast';
@@ -65,6 +65,8 @@ const AuthMobile = ({
   const [showResend, setShowResend] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetPasswordSent, setResetPasswordSent] = useState(false);
+
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
@@ -577,6 +579,7 @@ const AuthMobile = ({
                                 <DropdownMenu modal={false}>
                                   <DropdownMenuTrigger asChild>
                                     <Button
+                                      ref={triggerRef}
                                       variant="outline"
                                       className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
                                     >
@@ -587,27 +590,30 @@ const AuthMobile = ({
                                     </Button>
                                   </DropdownMenuTrigger>
                                    <DropdownMenuContent 
-                                     className={`w-[calc(100vw-2rem)] sm:w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white ${isMobile ? 'max-h-[50vh]' : 'max-h-96'} overflow-hidden`}
+                                     className={`bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
                                      side="bottom"
                                      align="start"
                                      alignOffset={0}
                                      sideOffset={8}
                                      avoidCollisions={false}
                                      onCloseAutoFocus={(e) => e.preventDefault()}
+                                     style={{ width: triggerRef.current ? `${triggerRef.current.offsetWidth}px` : undefined }}
                                    >
                                      {/* Search input - optimized for mobile */}
                                      <div className="p-3 border-b border-slate-600/30 sticky top-0 bg-slate-700/95 backdrop-blur-md">
                                        <div className="relative">
-                                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
-                                         <Input
-                                           placeholder="Sök bransch..."
-                                           value={searchTerm}
-                                           onChange={(e) => setSearchTerm(e.target.value)}
-                                           className={`pl-10 pr-4 ${isMobile ? 'h-10 text-sm' : 'h-10'} bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-lg`}
-                                           autoComplete="off"
-                                           autoCapitalize="none"
-                                           autoCorrect="off"
-                                         />
+                                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                                          <Input
+                                            placeholder="Sök bransch..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className={`pl-10 pr-4 ${isMobile ? 'h-10 text-sm' : 'h-10'} bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-lg`}
+                                            autoComplete="off"
+                                            autoCapitalize="none"
+                                            autoCorrect="off"
+                                            onKeyDownCapture={(e) => e.stopPropagation()}
+                                            onKeyDown={(e) => e.stopPropagation()}
+                                          />
                                        </div>
                                      </div>
                                     
