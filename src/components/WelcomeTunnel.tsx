@@ -63,6 +63,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const [inputType, setInputType] = useState('text');
   const [phoneError, setPhoneError] = useState('');
   const [postalCode, setPostalCode] = useState((profile as any)?.postal_code || '');
+  const [hasValidLocation, setHasValidLocation] = useState(false);
 
   // Use centralized phone validation
   const validatePhoneNumber = (phoneNumber: string) => {
@@ -544,11 +545,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       case 1: 
         const requiredFields = !!(formData.firstName.trim() && formData.lastName.trim() && formData.email.trim() && formData.phone.trim() && formData.birthDate.trim() && formData.location.trim() && formData.employmentStatus.trim());
         const phoneValid = validatePhoneNumber(formData.phone).isValid;
+        const locationValid = hasValidLocation; // Must have valid postal code/location
         // Only require workingHours if NOT arbetssokande AND employment status is selected
         const workingHoursValid = formData.employmentStatus === 'arbetssokande' || !formData.employmentStatus || formData.workingHours.trim();
         // Only require availability if employment status is selected
         const availabilityValid = !formData.employmentStatus || formData.availability.trim();
-        return requiredFields && phoneValid && workingHoursValid && availabilityValid;
+        return requiredFields && phoneValid && locationValid && workingHoursValid && availabilityValid;
       case 2: return true; // Profile image is optional
       case 3: return !!formData.cvUrl.trim(); // CV is now required
       case 4: return true; // Bio is optional
@@ -698,9 +700,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                  postalCodeValue={postalCode}
                  onPostalCodeChange={setPostalCode}
                  onLocationChange={(location) => handleInputChange('location', location)}
+                 onValidationChange={setHasValidLocation}
                />
                  <div>
-                  <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget?</Label>
+                  <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget? <span className="text-white">*</span></Label>
                   <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -762,7 +765,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               {/* Visa arbetstid-frågan endast om användaren har valt något OCH det inte är arbetssökande */}
               {formData.employmentStatus && formData.employmentStatus !== 'arbetssokande' && (
                  <div>
-                   <Label htmlFor="workingHours" className="text-white text-sm font-medium">Hur mycket jobbar du idag?</Label>
+                   <Label htmlFor="workingHours" className="text-white text-sm font-medium">Hur mycket jobbar du idag? <span className="text-white">*</span></Label>
                    <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -805,7 +808,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               {/* Visa tillgänglighet-frågan endast om användaren har valt något i employment status */}
               {formData.employmentStatus && (
                  <div>
-                   <Label htmlFor="availability" className="text-white text-sm font-medium">När kan du börja nytt jobb?</Label>
+                   <Label htmlFor="availability" className="text-white text-sm font-medium">När kan du börja nytt jobb? <span className="text-white">*</span></Label>
                    <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
                         <Button
