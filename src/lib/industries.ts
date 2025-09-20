@@ -1,4 +1,12 @@
 export const SWEDISH_INDUSTRIES = [
+  // Bemanning och personaluthyrning
+  'Bemanningsbranschen',
+  'Personaluthyrning',
+  'Rekrytering och headhunting',
+  'HR-tjänster',
+  'Temp-anställningar',
+  'Konsultförmedling',
+  
   // Primära sektorer
   'Jordbruk och trädgård',
   'Skogsbruk',

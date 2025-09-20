@@ -26,6 +26,7 @@ interface ComboboxProps {
   emptyMessage?: string
   className?: string
   disabled?: boolean
+  allowCustomValue?: boolean
 }
 
 export function Combobox({
@@ -36,7 +37,8 @@ export function Combobox({
   searchPlaceholder = "Sök...",
   emptyMessage = "Inga resultat hittades.",
   className,
-  disabled = false
+  disabled = false,
+  allowCustomValue = false
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
   const [searchValue, setSearchValue] = React.useState("")
@@ -44,6 +46,19 @@ export function Combobox({
   const filteredOptions = options.filter(option =>
     option.toLowerCase().includes(searchValue.toLowerCase())
   )
+
+  const handleSelect = (selectedValue: string) => {
+    onSelect(selectedValue)
+    setOpen(false)
+    setSearchValue("")
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && allowCustomValue && searchValue.trim()) {
+      e.preventDefault()
+      handleSelect(searchValue.trim())
+    }
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -69,20 +84,33 @@ export function Combobox({
             placeholder={searchPlaceholder}
             value={searchValue}
             onValueChange={setSearchValue}
+            onKeyDown={handleKeyDown}
             className="border-none"
           />
           <CommandList className="max-h-[200px]">
-            <CommandEmpty>{emptyMessage}</CommandEmpty>
+            {filteredOptions.length === 0 && allowCustomValue && searchValue.trim() ? (
+              <CommandEmpty>
+                <div className="flex flex-col items-center gap-2 p-2">
+                  <span>{emptyMessage}</span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => handleSelect(searchValue.trim())}
+                    className="text-primary hover:text-primary/80"
+                  >
+                    Använd "{searchValue.trim()}"
+                  </Button>
+                </div>
+              </CommandEmpty>
+            ) : (
+              <CommandEmpty>{emptyMessage}</CommandEmpty>
+            )}
             <CommandGroup>
               {filteredOptions.map((option) => (
                 <CommandItem
                   key={option}
                   value={option}
-                  onSelect={() => {
-                    onSelect(option)
-                    setOpen(false)
-                    setSearchValue("")
-                  }}
+                  onSelect={() => handleSelect(option)}
                   className="cursor-pointer"
                 >
                   <Check

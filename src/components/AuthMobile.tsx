@@ -575,10 +575,11 @@ const AuthMobile = ({
                                   options={SWEDISH_INDUSTRIES}
                                   value={industry}
                                   onSelect={setIndustry}
-                                  placeholder="Välj din bransch..."
+                                  placeholder="Sök och välj bransch..."
                                   searchPlaceholder="Sök bransch..."
-                                  emptyMessage="Ingen bransch hittades."
+                                  emptyMessage="Ingen matchning hittades."
                                   className="mt-1"
+                                  allowCustomValue={true}
                                 />
                               </div>
 
