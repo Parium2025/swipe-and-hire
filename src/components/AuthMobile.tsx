@@ -589,16 +589,15 @@ const AuthMobile = ({
                                       <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
                                     </Button>
                                   </DropdownMenuTrigger>
-                                    <DropdownMenuContent 
-                                     className={`bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
-                                     side="bottom"
-                                     align="center"
-                                     alignOffset={0}
-                                     sideOffset={8}
-                                     avoidCollisions={false}
-                                     onCloseAutoFocus={(e) => e.preventDefault()}
-                                     style={{ width: triggerRef.current ? `${triggerRef.current.offsetWidth}px` : undefined }}
-                                   >
+                                     <DropdownMenuContent 
+                                      className={`w-full bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
+                                      side="bottom"
+                                      align="center"
+                                      alignOffset={0}
+                                      sideOffset={8}
+                                      avoidCollisions={false}
+                                      onCloseAutoFocus={(e) => e.preventDefault()}
+                                    >
                                      {/* Search input - optimized for mobile */}
                                      <div className="p-3 border-b border-slate-600/30 sticky top-0 bg-slate-700/95 backdrop-blur-md">
                                        <div className="relative">
