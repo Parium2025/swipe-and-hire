@@ -242,10 +242,10 @@ export default function ProfilePreview() {
     return (
       <div className="w-full max-w-sm mx-auto">
         {/* Modern Profile Card */}
-        <Card className="bg-white backdrop-blur-sm border-0 shadow-2xl overflow-hidden rounded-3xl transition-all duration-300 hover:shadow-3xl">
+        <Card className="bg-white backdrop-blur-sm border-0 shadow-2xl overflow-visible rounded-3xl transition-all duration-300 hover:shadow-3xl">
           {/* Profile Image with Video - No padding, full coverage */}
           <div 
-            className="relative h-64 sm:h-80 bg-gradient-to-br from-gray-100 to-gray-200 group overflow-hidden -m-0"
+            className="relative aspect-square w-full bg-gradient-to-br from-gray-100 to-gray-200 group overflow-hidden -m-0"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={handleTap}
