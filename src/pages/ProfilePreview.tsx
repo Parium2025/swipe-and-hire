@@ -323,26 +323,15 @@ export default function ProfilePreview() {
             {/* Tinder-stil gradient overlay längst ner med minimal info */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6">
               <div className="text-white">
-                <h1 className="text-3xl font-bold mb-1">
+                <h1 className="text-3xl font-bold mb-3">
                   {data.first_name}{isConsented && data.age && `, ${data.age}`}
                 </h1>
-                <p className="text-lg text-white/90 mb-2">
-                  {data.employment_status || 'Jobbsökande'}
-                </p>
                 
                 {/* Plats */}
                 {data.location && (
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-4">
                     <MapPin className="h-4 w-4 text-white/80" />
                     <span className="text-sm text-white/90">{data.location}</span>
-                  </div>
-                )}
-                
-                {/* När kan börja */}
-                {data.availability && (
-                  <div className="flex items-center gap-2 mb-4">
-                    <Calendar className="h-4 w-4 text-white/80" />
-                    <span className="text-sm text-white/90">{data.availability}</span>
                   </div>
                 )}
                 
