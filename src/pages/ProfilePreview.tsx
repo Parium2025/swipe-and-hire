@@ -291,24 +291,22 @@ export default function ProfilePreview() {
               </>
             )}
             
-            {/* Video Element - centrerat och cirkulärt som avatar */}
-            {videoUrl && (
-              <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-full overflow-hidden border-4 border-white/20">
-                <video 
-                  ref={videoRef}
-                  src={videoUrl}
-                  className={`w-full h-full object-cover transition-opacity duration-300 ${
-                    showVideo && isPlaying ? 'opacity-100' : 'opacity-0'
-                  }`}
-                  loop={false}
-                  muted={false}
-                  playsInline
-                  onEnded={handleVideoEnd}
-                  onClick={handleVideoTap}
-                  style={{ 
-                    display: showVideo ? 'block' : 'none' 
-                  }}
-                />
+            {/* Video Element - spelas i fullskärm med cirkulär mask */}
+            {videoUrl && showVideo && (
+              <div className="absolute inset-0 flex items-center justify-center z-20">
+                <div className="w-64 h-64 rounded-full overflow-hidden border-4 border-white/40 shadow-2xl">
+                  <video 
+                    ref={videoRef}
+                    src={videoUrl}
+                    className="w-full h-full object-cover"
+                    loop={false}
+                    muted={false}
+                    playsInline
+                    onEnded={handleVideoEnd}
+                    onClick={handleVideoTap}
+                    autoPlay
+                  />
+                </div>
               </div>
             )}
 
