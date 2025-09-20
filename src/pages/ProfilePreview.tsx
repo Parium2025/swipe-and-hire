@@ -320,13 +320,13 @@ export default function ProfilePreview() {
                 
                 {/* Video tillgängligt text */}
                 {videoUrl && (
-                  <p className="text-sm text-white/80 mb-3">Video tillgängligt</p>
+                  <p className="text-sm text-white mb-3">Video tillgängligt</p>
                 )}
                 
                 {/* Plats */}
                 {data.location && (
                   <div className="flex items-center gap-2 mb-4">
-                    <MapPin className="h-4 w-4 text-white/80" />
+                    <MapPin className="h-4 w-4 text-white" />
                     <span className="text-sm text-white/90">Bor i {data.location}</span>
                   </div>
                 )}
@@ -334,7 +334,7 @@ export default function ProfilePreview() {
                 {/* Swipe-indikator */}
                 <div className="flex items-center justify-center mt-6">
                   <div className="bg-white/20 rounded-full px-4 py-2 flex items-center gap-2">
-                    <span className="text-sm text-white/80">Tryck för mer info</span>
+                    <span className="text-sm text-blue-400">Tryck för mer info</span>
                     <ArrowRight className="h-4 w-4 text-white/80" />
                   </div>
                 </div>
