@@ -245,7 +245,7 @@ export default function ProfilePreview() {
         <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl overflow-visible rounded-3xl transition-all duration-300 hover:shadow-3xl">
           {/* Profile Image with Video - No padding, full coverage */}
           <div 
-            className="relative aspect-square w-full bg-transparent group overflow-hidden -m-0"
+            className="relative aspect-square w-full bg-white/10 backdrop-blur-sm group overflow-hidden -m-0"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={handleTap}
@@ -254,23 +254,12 @@ export default function ProfilePreview() {
             {(!showVideo || !isPlaying) && (
               <>
                 {avatarUrl ? (
-                  <>
-                    {/* Fyll kvadraten med samma bild (blurred cover) */}
-                    <img
-                      src={avatarUrl}
-                      alt=""
-                      aria-hidden
-                      className="absolute inset-0 w-full h-full object-cover scale-110 blur-sm"
-                      draggable={false}
-                    />
-                    {/* Visa hela bilden utan beskärning */}
-                    <img
-                      src={avatarUrl}
-                      alt="Profilbild"
-                      className="absolute inset-0 w-full h-full object-contain"
-                      draggable={false}
-                    />
-                  </>
+                  <img
+                    src={avatarUrl}
+                    alt="Profilbild"
+                    className="absolute inset-0 w-full h-full object-contain"
+                    draggable={false}
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/30">
                     <User className="h-16 w-16 sm:h-20 sm:w-20 text-primary/60" />
