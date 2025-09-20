@@ -558,14 +558,14 @@ const AuthMobile = ({
                              
                              <div>
                                <Label htmlFor="companyName" className="text-white">Företagsnamn *</Label>
-                               <Input
-                                 id="companyName"
-                                 value={companyName}
-                                 onChange={(e) => setCompanyName(e.target.value)}
-                                 placeholder="Mitt Företag AB"
-                                 className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                                 required
-                               />
+                                <Input
+                                  id="companyName"
+                                  value={companyName}
+                                  onChange={(e) => setCompanyName(e.target.value)}
+                                  placeholder="Mitt Företag"
+                                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                  required
+                                />
                              </div>
 
                              <div className="grid grid-cols-2 gap-2">
