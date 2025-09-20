@@ -849,7 +849,7 @@ const Auth = () => {
     let title, description;
     if (isUsed) {
       title = 'Återställningslänken är redan använd';
-      description = 'Du kan bara byta lösenord en gång med denna länk av säkerhetsskäl. Begär en ny länk för att ändra ditt lösenord igen.';
+      description = 'Du kan bara byta lösenord en gång med denna länk. Länken fungerar bara en gång om du har tryckt på tillbaka till inloggning av säkerhetsskäl. Begär en ny länk för att ändra ditt lösenord igen.';
     } else if (isConsumed) {
       title = 'Återställningslänken är förbrukad';
       description = 'Återställningslänkar kan bara användas en gång av säkerhetsskäl. Begär en ny länk för att ändra ditt lösenord.';
@@ -864,7 +864,7 @@ const Auth = () => {
           <CardContent className="p-8 text-center space-y-4">
             <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
             <h2 className="text-2xl font-bold text-primary-foreground">{title}</h2>
-            <p className="text-primary-foreground/80">{description}</p>
+            <p className="text-white">{description}</p>
             <form onSubmit={handleResendReset} className="space-y-3">
               <Input
                 type="email"
