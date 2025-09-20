@@ -10,7 +10,8 @@ import {
   ChevronRight,
   Building,
   Crown,
-  Settings
+  Settings,
+  Eye
 } from 'lucide-react';
 
 import {
@@ -32,6 +33,7 @@ import { convertToSignedUrl } from '@/utils/storageUtils';
 
 const profileItems = [
   { title: 'Min Profil', url: '/profile', icon: User },
+  { title: 'Förhandsgranska Profil', url: '/profile-preview', icon: Eye },
   { title: 'Mitt samtycke', url: '/consent', icon: Settings },
   { title: 'Sök Jobb', url: '/search-jobs', icon: Building },
 ];

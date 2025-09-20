@@ -10,6 +10,7 @@ import EmailConfirm from "./pages/EmailConfirm";
 import EmailRedirect from "./pages/EmailRedirect";
 import ResetRedirect from "./pages/ResetRedirect";
 import EmailVerification from "./pages/EmailVerification";
+import ProfilePreview from "./pages/ProfilePreview";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/hooks/useAuth";
 import { UnsavedChangesProvider } from "@/hooks/useUnsavedChanges";
@@ -77,6 +78,7 @@ const App = () => {
                   <Route path="/email-redirect" element={<EmailRedirect />} />
                   <Route path="/confirm" element={<EmailConfirm />} />
                   <Route path="/profile" element={<Index />} />
+                  <Route path="/profile-preview" element={<ProfilePreview />} />
                   <Route path="/search-jobs" element={<Index />} />
                   <Route path="/subscription" element={<Index />} />
                   <Route path="/support" element={<Index />} />
