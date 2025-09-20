@@ -278,18 +278,23 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           availability: string | null
           bio: string | null
           birth_date: string | null
+          company_description: string | null
+          company_logo_url: string | null
           company_name: string | null
           cover_image_url: string | null
           created_at: string
           cv_filename: string | null
           cv_url: string | null
+          employee_count: string | null
           employment_status: string | null
           first_name: string | null
           home_location: string | null
           id: string
+          industry: string | null
           interests: Json | null
           last_name: string | null
           location: string | null
@@ -303,21 +308,27 @@ export type Database = {
           updated_at: string
           user_id: string
           video_url: string | null
+          website: string | null
           working_hours: string | null
         }
         Insert: {
+          address?: string | null
           availability?: string | null
           bio?: string | null
           birth_date?: string | null
+          company_description?: string | null
+          company_logo_url?: string | null
           company_name?: string | null
           cover_image_url?: string | null
           created_at?: string
           cv_filename?: string | null
           cv_url?: string | null
+          employee_count?: string | null
           employment_status?: string | null
           first_name?: string | null
           home_location?: string | null
           id?: string
+          industry?: string | null
           interests?: Json | null
           last_name?: string | null
           location?: string | null
@@ -331,21 +342,27 @@ export type Database = {
           updated_at?: string
           user_id: string
           video_url?: string | null
+          website?: string | null
           working_hours?: string | null
         }
         Update: {
+          address?: string | null
           availability?: string | null
           bio?: string | null
           birth_date?: string | null
+          company_description?: string | null
+          company_logo_url?: string | null
           company_name?: string | null
           cover_image_url?: string | null
           created_at?: string
           cv_filename?: string | null
           cv_url?: string | null
+          employee_count?: string | null
           employment_status?: string | null
           first_name?: string | null
           home_location?: string | null
           id?: string
+          industry?: string | null
           interests?: Json | null
           last_name?: string | null
           location?: string | null
@@ -359,6 +376,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           video_url?: string | null
+          website?: string | null
           working_hours?: string | null
         }
         Relationships: [

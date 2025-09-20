@@ -6,11 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { User, MapPin, Building, FileText, Camera } from 'lucide-react';
+import { User, MapPin, Building, FileText, Camera, Globe, Users } from 'lucide-react';
 import FileUpload from './FileUpload';
 import { createSignedUrl } from '@/utils/storageUtils';
+import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
 
 const ProfileSetup = () => {
   const { profile, userRole, updateProfile, user } = useAuth();
@@ -26,6 +28,14 @@ const ProfileSetup = () => {
   const [profileImageUrl, setProfileImageUrl] = useState(profile?.profile_image_url || '');
   const [cvUrl, setCvUrl] = useState('');
   const [cvFileName, setCvFileName] = useState('');
+  
+  // New employer fields  
+  const [industry, setIndustry] = useState((profile as any)?.industry || '');
+  const [address, setAddress] = useState((profile as any)?.address || '');
+  const [website, setWebsite] = useState((profile as any)?.website || '');
+  const [companyLogoUrl, setCompanyLogoUrl] = useState((profile as any)?.company_logo_url || '');
+  const [companyDescription, setCompanyDescription] = useState((profile as any)?.company_description || '');
+  const [employeeCount, setEmployeeCount] = useState((profile as any)?.employee_count || '');
 
   const isEmployer = userRole?.role === 'employer';
 
@@ -101,6 +111,12 @@ const ProfileSetup = () => {
       if (isEmployer) {
         updates.company_name = companyName.trim() || null;
         updates.org_number = orgNumber.trim() || null;
+        updates.industry = industry.trim() || null;
+        updates.address = address.trim() || null;
+        updates.website = website.trim() || null;
+        updates.company_logo_url = companyLogoUrl || null;
+        updates.company_description = companyDescription.trim() || null;
+        updates.employee_count = employeeCount || null;
       }
 
       // Add CV URL if uploaded
@@ -214,19 +230,20 @@ const ProfileSetup = () => {
             {/* Employer-specific fields */}
             {isEmployer && (
               <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-4">
                   <Building className="h-4 w-4" />
                   <Label className="text-base font-medium">Företagsinformation</Label>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="companyName">Företagsnamn</Label>
+                    <Label htmlFor="companyName">Företagsnamn *</Label>
                     <Input
                       id="companyName"
                       placeholder="Mitt Företag AB"
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
+                      required
                     />
                   </div>
 
@@ -239,6 +256,89 @@ const ProfileSetup = () => {
                       onChange={(e) => setOrgNumber(e.target.value)}
                     />
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="industry">Bransch *</Label>
+                    <Select value={industry} onValueChange={setIndustry}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Välj bransch" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SWEDISH_INDUSTRIES.map((ind) => (
+                          <SelectItem key={ind} value={ind}>
+                            {ind}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="employeeCount">Antal anställda</Label>
+                    <Select value={employeeCount} onValueChange={setEmployeeCount}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Välj antal anställda" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {EMPLOYEE_COUNT_OPTIONS.map((count) => (
+                          <SelectItem key={count} value={count}>
+                            {count}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="address">Adress *</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="address"
+                        placeholder="Storgatan 1, 123 45 Stockholm"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="website">Webbplats</Label>
+                    <div className="relative">
+                      <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="website"
+                        placeholder="https://exempel.se"
+                        value={website}
+                        onChange={(e) => setWebsite(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="companyDescription">Kort beskrivning av företaget</Label>
+                  <Textarea
+                    id="companyDescription"
+                    placeholder="Beskriv vad ert företag gör och er kultur i några meningar..."
+                    value={companyDescription}
+                    onChange={(e) => setCompanyDescription(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Företagslogotyp</Label>
+                  <FileUpload
+                    onFileUploaded={(url) => setCompanyLogoUrl(url)}
+                    onFileRemoved={() => setCompanyLogoUrl('')}
+                    currentFile={companyLogoUrl ? { url: companyLogoUrl, name: "Företagslogotyp" } : undefined}
+                    acceptedFileTypes={['image/*']}
+                    maxFileSize={2 * 1024 * 1024}
+                  />
                 </div>
               </div>
             )}
