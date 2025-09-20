@@ -592,7 +592,7 @@ const AuthMobile = ({
                                      align="start"
                                      alignOffset={0}
                                      sideOffset={8}
-                                     avoidCollisions={true}
+                                     avoidCollisions={false}
                                      onCloseAutoFocus={(e) => e.preventDefault()}
                                    >
                                      {/* Search input - optimized for mobile */}
@@ -614,9 +614,9 @@ const AuthMobile = ({
                                      {/* Industry options - optimized for mobile scrolling */}
                                      <div className={`overflow-y-auto ${isMobile ? 'max-h-[calc(50vh-4rem)]' : 'max-h-80'} overscroll-contain`}>
                                        {SWEDISH_INDUSTRIES
-                                         .filter(industryOption => 
-                                           industryOption.toLowerCase().includes(searchTerm.toLowerCase())
-                                         )
+                                       .filter(industryOption => 
+                                            searchTerm.trim().length < 3 ? true : industryOption.toLowerCase().includes(searchTerm.toLowerCase())
+                                          )
                                          .map((industryOption) => (
                                            <DropdownMenuItem
                                              key={industryOption}
@@ -635,7 +635,7 @@ const AuthMobile = ({
                                          ))}
                                        
                                        {/* Custom value option if no matches and search term exists */}
-                                       {searchTerm && 
+                                        {searchTerm.trim().length >= 3 && 
                                         !SWEDISH_INDUSTRIES.some(industryOption => 
                                           industryOption.toLowerCase().includes(searchTerm.toLowerCase())
                                         ) && (
@@ -652,7 +652,7 @@ const AuthMobile = ({
                                        )}
                                        
                                        {/* Show message if no results */}
-                                       {searchTerm && 
+                                       {searchTerm.trim().length >= 3 && 
                                         SWEDISH_INDUSTRIES.filter(industryOption => 
                                           industryOption.toLowerCase().includes(searchTerm.toLowerCase())
                                         ).length === 0 && (

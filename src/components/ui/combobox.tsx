@@ -44,7 +44,7 @@ export function Combobox({
   const [searchValue, setSearchValue] = React.useState("")
 
   const filteredOptions = options.filter(option =>
-    searchValue.length < 2 ? true : option.toLowerCase().includes(searchValue.toLowerCase())
+    searchValue.length < 3 ? options : option.toLowerCase().includes(searchValue.toLowerCase())
   )
 
   const handleSelect = (selectedValue: string) => {
@@ -84,6 +84,7 @@ export function Combobox({
         side="bottom"
         align="start"
         sideOffset={4}
+        avoidCollisions={false}
       >
         <Command>
           <CommandInput 
