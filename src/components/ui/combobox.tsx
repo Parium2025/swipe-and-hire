@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ChevronDown } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -68,17 +68,23 @@ export function Combobox({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full justify-between bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:text-white",
+            "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+            "bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:text-white hover:border-white/30",
             !value && "text-white/60",
             className
           )}
           disabled={disabled}
         >
-          {value || placeholder}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <span className="flex-1 text-left truncate">{value || placeholder}</span>
+          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0 bg-background/95 backdrop-blur-sm border-border z-50">
+      <PopoverContent 
+        className="w-full p-0 bg-popover text-popover-foreground shadow-md border rounded-md z-50" 
+        side="bottom"
+        align="start"
+        sideOffset={4}
+      >
         <Command>
           <CommandInput 
             placeholder={searchPlaceholder}
@@ -111,15 +117,15 @@ export function Combobox({
                   key={option}
                   value={option}
                   onSelect={() => handleSelect(option)}
-                  className="cursor-pointer"
+                  className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
+                      "absolute left-2 h-4 w-4",
                       value === option ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {option}
+                  <span className="flex-1">{option}</span>
                 </CommandItem>
               ))}
             </CommandGroup>
