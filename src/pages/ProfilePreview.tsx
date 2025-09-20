@@ -310,19 +310,14 @@ export default function ProfilePreview() {
               />
             )}
 
-            {/* Video indicator - tydlig indikator om video finns */}
+            {/* Video play-knapp om video finns */}
             {videoUrl && !isPlaying && (
-              <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center z-20">
-                <button
-                  onClick={handleVideoTap}
-                  className="bg-white/90 rounded-full p-4 mb-3 shadow-lg transition-all duration-200 hover:scale-105"
-                >
-                  <Play className="h-8 w-8 text-gray-800" fill="currentColor" />
-                </button>
-                <div className="bg-white/90 rounded-lg px-4 py-2 shadow-lg">
-                  <span className="text-sm font-semibold text-gray-800">Klicka för att spela video</span>
-                </div>
-              </div>
+              <button
+                onClick={handleVideoTap}
+                className="absolute bottom-4 right-4 z-30 bg-black/50 hover:bg-black/70 text-white rounded-full p-3 transition-all duration-200 hover:scale-110"
+              >
+                <Play className="h-6 w-6 ml-0.5" />
+              </button>
             )}
 
             {/* Tinder-stil gradient overlay längst ner med minimal info */}
