@@ -120,11 +120,11 @@ export default function ProfilePreview() {
     if (!data) return <div className="text-white">Ingen data tillgänglig</div>;
 
     return (
-      <div className="max-w-md mx-auto">
+      <div className="w-full max-w-sm mx-auto px-4 sm:px-0">
         {/* Modern Profile Card */}
-        <Card className="bg-white backdrop-blur-sm border-0 shadow-2xl overflow-hidden">
+        <Card className="bg-white backdrop-blur-sm border-0 shadow-2xl overflow-hidden rounded-3xl">
           {/* Profile Image */}
-          <div className="relative h-80 bg-gradient-to-br from-gray-100 to-gray-200">
+          <div className="relative h-64 sm:h-80 bg-gradient-to-br from-gray-100 to-gray-200">
             {avatarUrl ? (
               <img 
                 src={avatarUrl} 
@@ -133,11 +133,11 @@ export default function ProfilePreview() {
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/30">
-                <User className="h-20 w-20 text-primary/60" />
+                <User className="h-16 w-16 sm:h-20 sm:w-20 text-primary/60" />
               </div>
             )}
             {/* Three dots menu (decorative) */}
-            <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-full p-2">
+            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-white/20 backdrop-blur-sm rounded-full p-2">
               <div className="flex gap-1">
                 <div className="w-1 h-1 bg-white rounded-full"></div>
                 <div className="w-1 h-1 bg-white rounded-full"></div>
@@ -146,38 +146,38 @@ export default function ProfilePreview() {
             </div>
           </div>
 
-          <CardContent className="p-8 space-y-6">
+          <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
             {/* Name and Title */}
-            <div className="space-y-2">
-              <h1 className="text-3xl font-bold text-gray-900">
+            <div className="space-y-1 sm:space-y-2 text-center">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
                 {data.first_name} {isConsented ? data.last_name : '***'}
                 {isConsented && data.age && (
-                  <span className="text-2xl font-normal text-gray-600 ml-2">{data.age}</span>
+                  <span className="block sm:inline text-xl sm:text-2xl font-normal text-gray-600 sm:ml-2 mt-1 sm:mt-0">{data.age}</span>
                 )}
               </h1>
-              <p className="text-lg text-gray-600 font-medium">
+              <p className="text-base sm:text-lg text-gray-600 font-medium">
                 {data.employment_status || 'Jobbsökande'}
               </p>
             </div>
 
             {/* Video Presentation Button */}
             {data.video_url && (
-              <Button className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-2xl py-4 text-base font-medium">
-                <Video className="h-5 w-5 mr-2" />
+              <Button className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-2xl py-3 sm:py-4 text-sm sm:text-base font-medium transition-colors">
+                <Video className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                 Video Presentation
               </Button>
             )}
 
             {/* About Me Section */}
             {data.bio && (
-              <div className="space-y-3">
-                <h2 className="text-xl font-bold text-gray-900">About Me</h2>
-                <p className="text-gray-700 leading-relaxed">
+              <div className="space-y-2 sm:space-y-3">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">About Me</h2>
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                   {data.bio}
                 </p>
                 {!isConsented && data.bio.endsWith('...') && (
-                  <p className="text-amber-600 text-sm flex items-center gap-1">
-                    <Info className="h-4 w-4" />
+                  <p className="text-amber-600 text-xs sm:text-sm flex items-center gap-1">
+                    <Info className="h-3 w-3 sm:h-4 sm:w-4" />
                     Begränsad text utan samtycke
                   </p>
                 )}
@@ -185,49 +185,49 @@ export default function ProfilePreview() {
             )}
 
             {/* Contact Information (only with consent) */}
-            {isConsented && (
-              <div className="space-y-3">
+            {isConsented && (data.phone || data.location) && (
+              <div className="space-y-2 sm:space-y-3">
                 {data.phone && (
-                  <div className="flex items-center gap-3 text-gray-700">
-                    <Phone className="h-5 w-5" />
-                    <span>{data.phone}</span>
+                  <div className="flex items-center gap-2 sm:gap-3 text-gray-700">
+                    <Phone className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">{data.phone}</span>
                   </div>
                 )}
                 {data.location && (
-                  <div className="flex items-center gap-3 text-gray-700">
-                    <MapPin className="h-5 w-5" />
-                    <span>{data.location} {data.postal_code && `(${data.postal_code})`}</span>
+                  <div className="flex items-center gap-2 sm:gap-3 text-gray-700">
+                    <MapPin className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">{data.location} {data.postal_code && `(${data.postal_code})`}</span>
                   </div>
                 )}
               </div>
             )}
 
             {/* Action Buttons */}
-            <div className="flex gap-3 pt-4">
-              <Button variant="outline" className="flex-1 rounded-2xl py-3 text-base font-medium">
+            <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
+              <Button variant="outline" className="flex-1 rounded-2xl py-2.5 sm:py-3 text-sm sm:text-base font-medium border-gray-300 hover:bg-gray-50">
                 Meddelande
               </Button>
-              <Button className="flex-1 bg-blue-600 hover:bg-blue-700 rounded-2xl py-3 text-base font-medium">
-                <Video className="h-5 w-5 mr-2" />
+              <Button className="flex-1 bg-blue-600 hover:bg-blue-700 rounded-2xl py-2.5 sm:py-3 text-sm sm:text-base font-medium transition-colors">
+                <Video className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
                 Video Chat
               </Button>
             </div>
 
             {/* Job Notifications Toggle */}
-            <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-              <span className="text-lg font-semibold text-gray-900">Jobbnotifieringar</span>
-              <div className="w-12 h-6 bg-blue-600 rounded-full relative">
-                <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 right-0.5 shadow-sm"></div>
+            <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-200">
+              <span className="text-base sm:text-lg font-semibold text-gray-900">Jobbnotifieringar</span>
+              <div className="w-11 h-6 sm:w-12 sm:h-6 bg-blue-600 rounded-full relative">
+                <div className="w-4 h-4 sm:w-5 sm:h-5 bg-white rounded-full absolute top-1 right-1 shadow-sm transition-transform"></div>
               </div>
             </div>
 
             {/* CV and Files */}
             {data.cv_url && (
               <div className="pt-2">
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <FileText className="h-5 w-5 text-gray-600" />
-                  <span className="text-gray-800 font-medium">CV tillgängligt</span>
-                  <Badge variant="secondary" className="ml-auto">PDF</Badge>
+                <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-gray-50 rounded-lg">
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 flex-shrink-0" />
+                  <span className="text-sm sm:text-base text-gray-800 font-medium">CV tillgängligt</span>
+                  <Badge variant="secondary" className="ml-auto text-xs">PDF</Badge>
                 </div>
               </div>
             )}
