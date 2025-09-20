@@ -233,7 +233,7 @@ export default function ProfilePreview() {
                   <img
                     src={avatarUrl}
                     alt="Profilbild"
-                    className="absolute inset-0 w-full h-full object-contain"
+                    className="absolute inset-0 w-full h-full object-cover object-center"
                     draggable={false}
                   />
                 ) : (
