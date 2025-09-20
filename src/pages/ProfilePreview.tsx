@@ -245,7 +245,7 @@ export default function ProfilePreview() {
         <Card className="bg-white backdrop-blur-sm border-0 shadow-2xl overflow-visible rounded-3xl transition-all duration-300 hover:shadow-3xl">
           {/* Profile Image with Video - No padding, full coverage */}
           <div 
-            className="relative aspect-square w-full bg-gray-900 group overflow-hidden -m-0"
+            className="relative aspect-square w-full bg-transparent group overflow-hidden -m-0"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={handleTap}
@@ -257,7 +257,7 @@ export default function ProfilePreview() {
                   <img
                     src={avatarUrl}
                     alt="Profilbild"
-                    className="absolute inset-0 w-full h-full min-w-full min-h-full object-cover transform-gpu scale-[1.25] sm:scale-[1.15]"
+                    className="absolute inset-0 w-full h-full min-w-full min-h-full object-cover transform-gpu scale-[1.6]"
                     draggable={false}
                   />
                 ) : (
