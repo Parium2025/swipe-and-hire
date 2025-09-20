@@ -254,11 +254,11 @@ export default function ProfilePreview() {
             {(!showVideo || !isPlaying) && (
               <>
                 {avatarUrl ? (
-                  <div 
-                    role="img"
-                    aria-label="Profilbild"
-                    className="absolute inset-0 bg-center bg-cover bg-no-repeat transform-gpu scale-[1.12] origin-center"
-                    style={{ backgroundImage: `url(${avatarUrl})` }}
+                  <img
+                    src={avatarUrl}
+                    alt="Profilbild"
+                    className="absolute inset-0 w-full h-full min-w-full min-h-full object-cover transform-gpu scale-[1.03]"
+                    draggable={false}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/30">
