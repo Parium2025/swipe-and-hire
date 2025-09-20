@@ -71,6 +71,7 @@ const AuthMobile = ({
 
   const triggerRef = useRef<HTMLButtonElement>(null);
   const addressTriggerRef = useRef<HTMLButtonElement>(null);
+  const [addressMenuOpen, setAddressMenuOpen] = useState(false);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
@@ -712,7 +713,7 @@ const AuthMobile = ({
                                   <MapPin className="h-4 w-4 inline mr-2" />
                                   Adress *
                                 </Label>
-                                <DropdownMenu modal={false}>
+                                <DropdownMenu modal={false} open={addressMenuOpen} onOpenChange={setAddressMenuOpen}>
                                   <DropdownMenuTrigger asChild>
                                     <Button
                                       ref={addressTriggerRef}
@@ -757,13 +758,14 @@ const AuthMobile = ({
                                         {addressSuggestions.map((addressOption, index) => (
                                            <DropdownMenuItem
                                              key={`${addressOption}-${index}`}
-                                             onSelect={(e) => e.preventDefault()}
+                                              onSelect={(e) => e.preventDefault()}
                                               onClick={() => {
                                                 setAddress(addressOption);
                                                 setAddressSearchTerm('');
                                                 setAddressSuggestions([]);
                                                 // Stäng dropdown-menyn
-                                                addressTriggerRef.current?.click();
+                                                setAddressMenuOpen(false);
+                                                addressTriggerRef.current?.blur();
                                               }}
                                              className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white flex items-center justify-between transition-colors touch-manipulation`}
                                            >
@@ -783,7 +785,8 @@ const AuthMobile = ({
                                               setAddress(addressSearchTerm);
                                               setAddressSearchTerm('');
                                               // Stäng dropdown-menyn
-                                              addressTriggerRef.current?.click();
+                                              setAddressMenuOpen(false);
+                                              addressTriggerRef.current?.blur();
                                             }}
                                            className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white border-t border-slate-600/30 transition-colors touch-manipulation`}
                                          >
