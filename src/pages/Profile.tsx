@@ -1272,7 +1272,7 @@ const Profile = () => {
                       {/* Visa arbetstid endast om användaren har valt något OCH det inte är arbetssökande */}
                       {employmentStatus && employmentStatus !== 'arbetssokande' && (
                         <div className="space-y-2">
-                          <Label htmlFor="workingHours" className="text-white">Hur mycket jobbar du idag?</Label>
+                          <Label htmlFor="workingHours" className="text-white">Hur mycket jobbar du idag? <span className="text-white">*</span></Label>
                           <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
                               <Button
@@ -1317,7 +1317,7 @@ const Profile = () => {
                     {/* Visa tillgänglighet endast om användaren har valt något i anställningsstatus */}
                     {employmentStatus && (
                       <div className="space-y-2">
-                        <Label htmlFor="availability" className="text-white">När kan du börja nytt jobb?</Label>
+                        <Label htmlFor="availability" className="text-white">När kan du börja nytt jobb? <span className="text-white">*</span></Label>
                         <DropdownMenu modal={false}>
                           <DropdownMenuTrigger asChild>
                             <Button
