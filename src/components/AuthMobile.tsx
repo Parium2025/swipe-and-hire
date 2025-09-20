@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Eye, EyeOff, User, Building2, Mail, Key, Phone, Globe, MapPin, Users } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 import { Textarea } from '@/components/ui/textarea';
 import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
 import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
@@ -570,13 +571,14 @@ const AuthMobile = ({
 
                               <div>
                                 <Label htmlFor="industry" className="text-white">Bransch *</Label>
-                                <Input
-                                  id="industry"
+                                <Combobox
+                                  options={SWEDISH_INDUSTRIES}
                                   value={industry}
-                                  onChange={(e) => setIndustry(e.target.value)}
-                                  placeholder="Min bransch"
-                                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                                  required
+                                  onSelect={setIndustry}
+                                  placeholder="Välj din bransch..."
+                                  searchPlaceholder="Sök bransch..."
+                                  emptyMessage="Ingen bransch hittades."
+                                  className="mt-1"
                                 />
                               </div>
 
