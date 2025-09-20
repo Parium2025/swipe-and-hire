@@ -233,7 +233,7 @@ export default function ProfilePreview() {
                   <img
                     src={avatarUrl}
                     alt="Profilbild"
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-contain"
                     draggable={false}
                   />
                 ) : (
@@ -279,6 +279,9 @@ export default function ProfilePreview() {
                 <h1 className="text-3xl font-bold mb-1">
                   {data.first_name}{isConsented && data.age && `, ${data.age}`}
                 </h1>
+                <p className="text-lg text-white/90 mb-3">
+                  {data.employment_status || 'Jobbsökande'}
+                </p>
                 <p className="text-lg text-white/90 mb-3">
                   {data.employment_status || 'Jobbsökande'}
                 </p>
