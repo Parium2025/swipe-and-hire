@@ -217,12 +217,59 @@ export default function ProfilePreview() {
       }
     };
 
-    // FÖRSTA VY: Minimal Tinder-stil
-    const TinderCard = () => (
+    // FÖRSTA VY: Minimal Tinder-stil med swipe
+    const TinderCard = () => {
+      const [startX, setStartX] = useState(0);
+      const [currentX, setCurrentX] = useState(0);
+      const [isDragging, setIsDragging] = useState(false);
+
+      const handleTouchStart = (e: React.TouchEvent) => {
+        setStartX(e.touches[0].clientX);
+        setIsDragging(true);
+      };
+
+      const handleTouchMove = (e: React.TouchEvent) => {
+        if (!isDragging) return;
+        setCurrentX(e.touches[0].clientX - startX);
+      };
+
+      const handleTouchEnd = () => {
+        if (!isDragging) return;
+        setIsDragging(false);
+        
+        // Swipe threshold
+        if (Math.abs(currentX) > 100) {
+          if (currentX > 0) {
+            // Swipe höger - visa intresse
+            toast({
+              title: "Swipade höger! 👍",
+              description: "Visar intresse för kandidaten",
+            });
+          } else {
+            // Swipe vänster - inte intresserad
+            toast({
+              title: "Swipade vänster 👎",
+              description: "Inte intresserad av kandidaten",
+            });
+          }
+        }
+        
+        // Reset position
+        setCurrentX(0);
+      };
+
+      return (
       <div className="w-full max-w-sm mx-auto aspect-[9/16] relative">
         <Card 
           className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl overflow-hidden rounded-3xl transition-all duration-300 hover:shadow-3xl cursor-pointer group h-full"
           onClick={() => setShowDetailedView(true)}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          style={{
+            transform: `translateX(${currentX}px) rotate(${currentX * 0.1}deg)`,
+            transition: isDragging ? 'none' : 'transform 0.3s ease-out'
+          }}
         >
           {/* Helskärm profilbild/video */}
           <div className="relative w-full h-full bg-transparent overflow-hidden">
@@ -267,9 +314,9 @@ export default function ProfilePreview() {
             {videoUrl && !isPlaying && (
               <button
                 onClick={handleVideoTap}
-                className="absolute z-30 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-4 transition-all duration-200 hover:scale-110"
+                className="absolute bottom-4 right-4 z-30 bg-black/50 hover:bg-black/70 text-white rounded-full p-3 transition-all duration-200 hover:scale-110"
               >
-                <Play className="h-8 w-8 ml-1" />
+                <Play className="h-6 w-6 ml-0.5" />
               </button>
             )}
 
@@ -299,6 +346,7 @@ export default function ProfilePreview() {
         </Card>
       </div>
     );
+    };
 
     // ANDRA VY: Fullständig information
     const DetailedView = () => (
