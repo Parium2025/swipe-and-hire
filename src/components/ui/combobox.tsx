@@ -44,7 +44,7 @@ export function Combobox({
   const [searchValue, setSearchValue] = React.useState("")
 
   const filteredOptions = options.filter(option =>
-    option.toLowerCase().includes(searchValue.toLowerCase())
+    searchValue.length < 2 ? true : option.toLowerCase().includes(searchValue.toLowerCase())
   )
 
   const handleSelect = (selectedValue: string) => {
