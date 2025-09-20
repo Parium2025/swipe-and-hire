@@ -554,42 +554,7 @@ export type Database = {
       }
     }
     Views: {
-      email_confirmations_safe: {
-        Row: {
-          confirmed_at: string | null
-          created_at: string | null
-          email: string | null
-          expires_at: string | null
-          id: string | null
-          is_confirmed: boolean | null
-          is_expired: boolean | null
-          pin_expires_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          confirmed_at?: string | null
-          created_at?: string | null
-          email?: string | null
-          expires_at?: string | null
-          id?: string | null
-          is_confirmed?: never
-          is_expired?: never
-          pin_expires_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          confirmed_at?: string | null
-          created_at?: string | null
-          email?: string | null
-          expires_at?: string | null
-          id?: string | null
-          is_confirmed?: never
-          is_expired?: never
-          pin_expires_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       calculate_age: {
