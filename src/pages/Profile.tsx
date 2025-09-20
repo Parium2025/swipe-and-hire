@@ -64,6 +64,7 @@ const Profile = () => {
   const [employmentStatus, setEmploymentStatus] = useState('');
   const [workingHours, setWorkingHours] = useState('');
   const [availability, setAvailability] = useState('');
+  const [hasValidLocation, setHasValidLocation] = useState(false);
 
   
   // Employer-specific fields
@@ -313,6 +314,7 @@ const Profile = () => {
     if (!firstName.trim()) newErrors.firstName = 'Förnamn är obligatoriskt.';
     if (!lastName.trim()) newErrors.lastName = 'Efternamn är obligatoriskt.';
     if (!postalCode.trim()) newErrors.userLocation = 'Postnummer är obligatoriskt.';
+    else if (!hasValidLocation) newErrors.userLocation = 'Ange ett giltigt postnummer som finns i Sverige.';
     if (!phone.trim()) newErrors.phone = 'Telefonnummer är obligatoriskt.';
     else if (!isValidSwedishPhone(phone)) newErrors.phone = 'Ange ett giltigt svenskt nummer (+46 eller 0).';
     if (!birthDate) newErrors.birthDate = 'Födelsedatum är obligatoriskt.';
@@ -1161,6 +1163,7 @@ const Profile = () => {
                       postalCodeValue={postalCode}
                       onPostalCodeChange={setPostalCode}
                       onLocationChange={setUserLocation}
+                      onValidationChange={setHasValidLocation}
                     />
                     {errors.userLocation && <p className="text-xs text-red-300">{errors.userLocation}</p>}
                   </div>

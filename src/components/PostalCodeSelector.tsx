@@ -9,6 +9,7 @@ interface PostalCodeSelectorProps {
   postalCodeValue: string;
   onPostalCodeChange: (postalCode: string) => void;
   onLocationChange: (location: string) => void;
+  onValidationChange?: (isValid: boolean) => void;
   className?: string;
 }
 
@@ -16,11 +17,18 @@ const PostalCodeSelector = ({
   postalCodeValue, 
   onPostalCodeChange,
   onLocationChange,
+  onValidationChange,
   className = ""
 }: PostalCodeSelectorProps) => {
   const [foundLocation, setFoundLocation] = useState<PostalCodeResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isValid, setIsValid] = useState(false);
+
+  // Report validation status to parent
+  useEffect(() => {
+    const hasValidLocation = foundLocation !== null && isValid;
+    onValidationChange?.(hasValidLocation);
+  }, [foundLocation, isValid, onValidationChange]);
 
   useEffect(() => {
     const fetchLocation = async () => {
@@ -49,14 +57,13 @@ const PostalCodeSelector = ({
           }
         } else {
           setFoundLocation(null);
-          // Uppdatera inte plats vid ogiltigt eller ofullständigt postnummer
+          onLocationChange(''); // Clear location when postal code is invalid
           setIsLoading(false);
         }
       } else {
         setFoundLocation(null);
         setIsValid(false);
-        // Nollställ platsen när postnumret är tomt
-        onLocationChange('');
+        onLocationChange(''); // Clear location when postal code is empty
         setIsLoading(false);
       }
     };
