@@ -315,13 +315,7 @@ export default function ProfilePreview() {
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6">
               <div className="text-white">
                 <h1 className="text-3xl font-bold mb-1">
-                  {data.first_name}{isConsented && data.age && ` ${
-                    data.age === 47 ? 'fyrtiosju' : 
-                    data.age === 48 ? 'fyrtioåtta' :
-                    data.age === 49 ? 'fyrtionio' :
-                    data.age === 50 ? 'femtio' :
-                    data.age.toString()
-                  }`}
+                  {data.first_name}{isConsented && data.age && ` ${data.age}`}
                 </h1>
                 
                 {/* Video tillgängligt text */}
