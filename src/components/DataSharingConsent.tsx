@@ -67,7 +67,7 @@ export const DataSharingConsent = () => {
       toast({
         title: newConsentValue ? "Samtycke givit" : "Samtycke återkallat",
         description: newConsentValue 
-          ? "Arbetsgivare kan nu se din grundläggande information när du söker jobb."
+          ? "Arbetsgivare kan nu se din grundläggande information när du söker jobb"
           : "Arbetsgivare kan inte längre se din information. Du kan fortfarande söka jobb men arbetsgivare kommer inte kunna se dina kontaktuppgifter.",
         variant: "default",
         duration: 4000
