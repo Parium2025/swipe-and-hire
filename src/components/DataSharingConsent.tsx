@@ -109,14 +109,14 @@ export const DataSharingConsent = () => {
         <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
+              <Label htmlFor="consent-switch" className="text-white font-medium">
+                {consentGiven ? 'Datadelning aktiverad' : 'Datadelning inaktiverad'}
+              </Label>
               {consentGiven ? (
                 <Check className="h-4 w-4 text-green-400" />
               ) : (
                 <X className="h-4 w-4 text-red-400" />
               )}
-              <Label htmlFor="consent-switch" className="text-white font-medium">
-                {consentGiven ? 'Datadelning aktiverad' : 'Datadelning inaktiverad'}
-              </Label>
             </div>
             <p className="text-sm text-white">
               {consentGiven 
