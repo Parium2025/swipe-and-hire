@@ -257,7 +257,7 @@ export default function ProfilePreview() {
                   <div 
                     role="img"
                     aria-label="Profilbild"
-                    className="absolute inset-0 bg-center bg-cover"
+                    className="absolute inset-0 bg-center bg-cover bg-no-repeat transform-gpu scale-[1.12] origin-center"
                     style={{ backgroundImage: `url(${avatarUrl})` }}
                   />
                 ) : (
