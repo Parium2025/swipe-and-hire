@@ -245,7 +245,7 @@ export default function ProfilePreview() {
         <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl overflow-visible rounded-3xl transition-all duration-300 hover:shadow-3xl">
           {/* Profile Image with Video - No padding, full coverage */}
           <div 
-            className="relative aspect-square w-full bg-white/10 backdrop-blur-sm group overflow-hidden -m-0"
+            className="relative aspect-square w-full bg-transparent group overflow-hidden -m-0"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={handleTap}
