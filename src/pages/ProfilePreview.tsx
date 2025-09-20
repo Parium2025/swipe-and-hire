@@ -291,23 +291,25 @@ export default function ProfilePreview() {
               </>
             )}
             
-            {/* Video Element */}
+            {/* Video Element - centrerat och cirkulärt som avatar */}
             {videoUrl && (
-              <video 
-                ref={videoRef}
-                src={videoUrl}
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
-                  showVideo && isPlaying ? 'opacity-100' : 'opacity-0'
-                }`}
-                loop={false}
-                muted={false}
-                playsInline
-                onEnded={handleVideoEnd}
-                onClick={handleVideoTap}
-                style={{ 
-                  display: showVideo ? 'block' : 'none' 
-                }}
-              />
+              <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-full overflow-hidden border-4 border-white/20">
+                <video 
+                  ref={videoRef}
+                  src={videoUrl}
+                  className={`w-full h-full object-cover transition-opacity duration-300 ${
+                    showVideo && isPlaying ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  loop={false}
+                  muted={false}
+                  playsInline
+                  onEnded={handleVideoEnd}
+                  onClick={handleVideoTap}
+                  style={{ 
+                    display: showVideo ? 'block' : 'none' 
+                  }}
+                />
+              </div>
             )}
 
             {/* Video play-knapp om video finns */}
