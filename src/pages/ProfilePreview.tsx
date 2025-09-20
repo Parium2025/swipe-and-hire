@@ -331,7 +331,7 @@ export default function ProfilePreview() {
                 {data.location && (
                   <div className="flex items-center gap-2 mb-4">
                     <MapPin className="h-4 w-4 text-white/80" />
-                    <span className="text-sm text-white/90">{data.location}</span>
+                    <span className="text-sm text-white/90">Bor i {data.location}</span>
                   </div>
                 )}
                 
