@@ -8,8 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Eye, EyeOff, User, Building2, Mail, Key, Phone } from 'lucide-react';
+import { Eye, EyeOff, User, Building2, Mail, Key, Phone, Globe, MapPin, Users } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
+import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
 
 interface AuthMobileProps {
   isPasswordReset: boolean;
@@ -42,6 +45,15 @@ const AuthMobile = ({
   const [company, setCompany] = useState('');
   const [jobTitle, setJobTitle] = useState('');
   const [role, setRole] = useState<'job_seeker' | 'employer'>('job_seeker');
+  
+  // New employer-specific fields
+  const [companyName, setCompanyName] = useState('');
+  const [orgNumber, setOrgNumber] = useState('');
+  const [industry, setIndustry] = useState('');
+  const [address, setAddress] = useState('');
+  const [website, setWebsite] = useState('');
+  const [companyDescription, setCompanyDescription] = useState('');
+  const [employeeCount, setEmployeeCount] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -145,7 +157,16 @@ const AuthMobile = ({
           role,
           first_name: firstName,
           last_name: lastName,
-          phone: phone
+          phone: phone,
+          ...(role === 'employer' && {
+            company_name: companyName,
+            org_number: orgNumber,
+            industry: industry,
+            address: address,
+            website: website,
+            company_description: companyDescription,
+            employee_count: employeeCount
+          })
         });
         
         if (result.error) {
@@ -494,24 +515,123 @@ const AuthMobile = ({
                         />
                         {/* email suggestions removed for simpler UX */}
                       </div>
-                      <div>
-                        <Label htmlFor="phone" className="text-white">
-                          <Phone className="h-4 w-4 inline mr-2" />
-                          Telefon
-                        </Label>
-                         <Input
-                           id="phone"
-                           type="tel"
-                           value={phone}
-                           onChange={(e) => handlePhoneChange(e.target.value)}
-                           className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                           placeholder="070-123 45 67"
-                           required
-                         />
-                        {phoneError && (
-                          <p className="text-destructive text-xs mt-1">{phoneError}</p>
-                        )}
-                      </div>
+                       <div>
+                         <Label htmlFor="phone" className="text-white">
+                           <Phone className="h-4 w-4 inline mr-2" />
+                           Telefon {role === 'employer' ? '' : '(frivilligt)'}
+                         </Label>
+                          <Input
+                            id="phone"
+                            type="tel"
+                            value={phone}
+                            onChange={(e) => handlePhoneChange(e.target.value)}
+                            className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                            placeholder="070-123 45 67"
+                            required={role === 'employer'}
+                          />
+                         {phoneError && (
+                           <p className="text-destructive text-xs mt-1">{phoneError}</p>
+                         )}
+                       </div>
+
+                       {/* Employer-specific fields */}
+                       {role === 'employer' && (
+                         <>
+                           <div className="space-y-4 border-t border-white/20 pt-4">
+                             <div className="flex items-center gap-2 mb-2">
+                               <Building2 className="h-4 w-4 text-white" />
+                               <Label className="text-white font-medium">Företagsinformation</Label>
+                             </div>
+                             
+                             <div>
+                               <Label htmlFor="companyName" className="text-white">Företagsnamn *</Label>
+                               <Input
+                                 id="companyName"
+                                 value={companyName}
+                                 onChange={(e) => setCompanyName(e.target.value)}
+                                 placeholder="Mitt Företag AB"
+                                 className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                 required
+                               />
+                             </div>
+
+                             <div className="grid grid-cols-2 gap-2">
+                               <div>
+                                 <Label htmlFor="industry" className="text-white">Bransch *</Label>
+                                 <Select value={industry} onValueChange={setIndustry}>
+                                   <SelectTrigger className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10">
+                                     <SelectValue placeholder="Välj bransch" />
+                                   </SelectTrigger>
+                                   <SelectContent>
+                                     {SWEDISH_INDUSTRIES.map((ind) => (
+                                       <SelectItem key={ind} value={ind}>
+                                         {ind}
+                                       </SelectItem>
+                                     ))}
+                                   </SelectContent>
+                                 </Select>
+                               </div>
+
+                               <div>
+                                 <Label htmlFor="employeeCount" className="text-white">Anställda</Label>
+                                 <Select value={employeeCount} onValueChange={setEmployeeCount}>
+                                   <SelectTrigger className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10">
+                                     <SelectValue placeholder="Antal" />
+                                   </SelectTrigger>
+                                   <SelectContent>
+                                     {EMPLOYEE_COUNT_OPTIONS.map((count) => (
+                                       <SelectItem key={count} value={count}>
+                                         {count}
+                                       </SelectItem>
+                                     ))}
+                                   </SelectContent>
+                                 </Select>
+                               </div>
+                             </div>
+
+                             <div>
+                               <Label htmlFor="address" className="text-white">
+                                 <MapPin className="h-4 w-4 inline mr-2" />
+                                 Adress *
+                               </Label>
+                               <Input
+                                 id="address"
+                                 value={address}
+                                 onChange={(e) => setAddress(e.target.value)}
+                                 placeholder="Storgatan 1, 123 45 Stockholm"
+                                 className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                 required
+                               />
+                             </div>
+
+                             <div>
+                               <Label htmlFor="website" className="text-white">
+                                 <Globe className="h-4 w-4 inline mr-2" />
+                                 Webbplats
+                               </Label>
+                               <Input
+                                 id="website"
+                                 value={website}
+                                 onChange={(e) => setWebsite(e.target.value)}
+                                 placeholder="https://exempel.se"
+                                 className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                               />
+                             </div>
+
+                             <div>
+                               <Label htmlFor="companyDescription" className="text-white">Kort beskrivning</Label>
+                               <Textarea
+                                 id="companyDescription"
+                                 value={companyDescription}
+                                 onChange={(e) => setCompanyDescription(e.target.value)}
+                                 placeholder="Beskriv vad ert företag gör..."
+                                 className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 resize-none"
+                                 rows={2}
+                               />
+                             </div>
+                           </div>
+                         </>
+                       )}
                       <div>
                         <Label htmlFor="password" className="text-white">
                           <Key className="h-4 w-4 inline mr-2" />
