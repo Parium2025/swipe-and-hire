@@ -574,7 +574,7 @@ const AuthMobile = ({
                                   id="industry"
                                   value={industry}
                                   onChange={(e) => setIndustry(e.target.value)}
-                                  placeholder="Sök bransch..."
+                                  placeholder="Min bransch"
                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                                   required
                                 />
