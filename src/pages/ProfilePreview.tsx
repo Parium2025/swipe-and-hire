@@ -254,12 +254,23 @@ export default function ProfilePreview() {
             {(!showVideo || !isPlaying) && (
               <>
                 {avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt="Profilbild"
-                    className="absolute inset-0 w-full h-full min-w-full min-h-full object-cover transform-gpu scale-[1.6]"
-                    draggable={false}
-                  />
+                  <>
+                    {/* Fyll kvadraten med samma bild (blurred cover) */}
+                    <img
+                      src={avatarUrl}
+                      alt=""
+                      aria-hidden
+                      className="absolute inset-0 w-full h-full object-cover scale-110 blur-sm"
+                      draggable={false}
+                    />
+                    {/* Visa hela bilden utan beskärning */}
+                    <img
+                      src={avatarUrl}
+                      alt="Profilbild"
+                      className="absolute inset-0 w-full h-full object-contain"
+                      draggable={false}
+                    />
+                  </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/30">
                     <User className="h-16 w-16 sm:h-20 sm:w-20 text-primary/60" />
