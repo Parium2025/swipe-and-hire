@@ -233,6 +233,13 @@ const Profile = () => {
     checkForChanges();
   }, [checkForChanges]);
 
+  // Clear location error when a valid location is detected
+  useEffect(() => {
+    if (hasValidLocation && errors.userLocation) {
+      setErrors(prev => ({ ...prev, userLocation: undefined }));
+    }
+  }, [hasValidLocation, errors.userLocation]);
+
   // Prevent leaving page with unsaved changes (browser/tab close)
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -1165,7 +1172,7 @@ const Profile = () => {
                       onLocationChange={setUserLocation}
                       onValidationChange={setHasValidLocation}
                     />
-                    {errors.userLocation && <p className="text-xs text-red-300">{errors.userLocation}</p>}
+                    {errors.userLocation && !hasValidLocation && <p className="text-xs text-red-300">{errors.userLocation}</p>}
                   </div>
                 </div>
               </div>
