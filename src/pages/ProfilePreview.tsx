@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,10 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Eye, Lock, Unlock, User, Phone, MapPin, Calendar, FileText, Video, Info, Download, Play, ExternalLink } from 'lucide-react';
+import { Eye, Lock, Unlock, User, Phone, MapPin, Calendar, FileText, Video, Info, Download, Play, ExternalLink, Pause } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { convertToSignedUrl } from '@/utils/storageUtils';
 import { useToast } from '@/hooks/use-toast';
+import { useDevice } from '@/hooks/use-device';
 
 interface ProfileViewData {
   id: string;
@@ -121,9 +122,14 @@ export default function ProfilePreview() {
   const ProfileView = ({ data, isConsented }: { data: ProfileViewData | null; isConsented: boolean }) => {
     if (!data) return <div className="text-white">Ingen data tillgänglig</div>;
     const { toast } = useToast();
+    const device = useDevice();
+    const isMobile = device === 'mobile';
 
     const [videoUrl, setVideoUrl] = useState<string>('');
     const [cvUrl, setCvUrl] = useState<string>('');
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [showVideo, setShowVideo] = useState(false);
+    const videoRef = useRef<HTMLVideoElement>(null);
 
     // Load signed URLs for media
     useEffect(() => {
@@ -150,22 +156,64 @@ export default function ProfilePreview() {
       loadMediaUrls();
     }, [data.video_url, data.cv_url]);
 
+    const handleMouseEnter = () => {
+      if (!isMobile && !isPlaying && videoUrl) {
+        setShowVideo(true);
+        setIsPlaying(true);
+        if (videoRef.current) {
+          videoRef.current.currentTime = 0;
+          videoRef.current.play();
+        }
+      }
+    };
+
+    const handleMouseLeave = () => {
+      if (!isMobile) {
+        setShowVideo(false);
+        setIsPlaying(false);
+        if (videoRef.current) {
+          videoRef.current.pause();
+          videoRef.current.currentTime = 0;
+        }
+      }
+    };
+
+    const handleTap = () => {
+      if (isMobile && videoUrl) {
+        if (!isPlaying) {
+          setShowVideo(true);
+          setIsPlaying(true);
+          if (videoRef.current) {
+            videoRef.current.currentTime = 0;
+            videoRef.current.play();
+          }
+        } else {
+          setShowVideo(false);
+          setIsPlaying(false);
+          if (videoRef.current) {
+            videoRef.current.pause();
+            videoRef.current.currentTime = 0;
+          }
+        }
+      }
+    };
+
+    const handleVideoEnd = () => {
+      setIsPlaying(false);
+      if (videoRef.current) {
+        videoRef.current.currentTime = 0;
+      }
+      if (!isMobile) {
+        setShowVideo(false);
+      }
+    };
+
     const handlePhoneClick = () => {
       if (isConsented && data.phone) {
         navigator.clipboard.writeText(data.phone);
         toast({
           title: "Telefonnummer kopierat",
           description: "Telefonnumret har kopierats till urklipp",
-        });
-      }
-    };
-
-    const handleVideoClick = () => {
-      if (!videoUrl) {
-        toast({
-          title: "Video ej tillgänglig",
-          description: "Videolänken kunde inte laddas",
-          variant: "destructive"
         });
       }
     };
@@ -191,58 +239,64 @@ export default function ProfilePreview() {
       <div className="w-full max-w-sm mx-auto px-4 sm:px-0">
         {/* Modern Profile Card */}
         <Card className="bg-white backdrop-blur-sm border-0 shadow-2xl overflow-hidden rounded-3xl transition-all duration-300 hover:shadow-3xl">
-          {/* Profile Image */}
-          <div className="relative h-64 sm:h-80 bg-gradient-to-br from-gray-100 to-gray-200 group">
-            {avatarUrl ? (
-              <img 
-                src={avatarUrl} 
-                alt="Profilbild"
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          {/* Profile Image with Video */}
+          <div 
+            className="relative h-64 sm:h-80 bg-gradient-to-br from-gray-100 to-gray-200 group overflow-hidden"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            onClick={handleTap}
+          >
+            {/* Cover Image - shown when video is not playing */}
+            {(!showVideo || !isPlaying) && (
+              <>
+                {avatarUrl ? (
+                  <img 
+                    src={avatarUrl} 
+                    alt="Profilbild"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/30">
+                    <User className="h-16 w-16 sm:h-20 sm:w-20 text-primary/60" />
+                  </div>
+                )}
+              </>
+            )}
+            
+            {/* Video Element */}
+            {videoUrl && (
+              <video 
+                ref={videoRef}
+                src={videoUrl}
+                className={`w-full h-full object-cover transition-opacity duration-300 ${
+                  showVideo && isPlaying ? 'opacity-100' : 'opacity-0 absolute inset-0'
+                }`}
+                loop={false}
+                muted={false}
+                playsInline
+                onEnded={handleVideoEnd}
+                style={{ 
+                  display: showVideo ? 'block' : 'none' 
+                }}
               />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/30">
-                <User className="h-16 w-16 sm:h-20 sm:w-20 text-primary/60" />
+            )}
+
+            {/* Play/Pause overlay for mobile */}
+            {isMobile && videoUrl && (
+              <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                {isPlaying ? (
+                  <Pause className="h-8 w-8 text-white" />
+                ) : (
+                  <Play className="h-8 w-8 text-white" />
+                )}
               </div>
             )}
             
-            {/* Video Play Button Overlay */}
-            {data.video_url && (
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button 
-                    className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-all duration-300 group-hover:bg-black/40"
-                    onClick={handleVideoClick}
-                  >
-                    <div className="bg-white/90 hover:bg-white rounded-full p-4 sm:p-6 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110">
-                      <Play className="h-8 w-8 sm:h-10 sm:w-10 text-gray-800 ml-1" />
-                    </div>
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="max-w-4xl">
-                  <DialogHeader>
-                    <DialogTitle>Presentationsvideo - {data.first_name}</DialogTitle>
-                  </DialogHeader>
-                  <div className="w-full aspect-video bg-black rounded-lg overflow-hidden">
-                    {videoUrl ? (
-                      <video 
-                        controls 
-                        className="w-full h-full"
-                        poster={avatarUrl}
-                      >
-                        <source src={videoUrl} type="video/mp4" />
-                        Din webbläsare stödjer inte videouppspelning.
-                      </video>
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-white">
-                        <div className="text-center">
-                          <Video className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                          <p>Video laddas...</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </DialogContent>
-              </Dialog>
+            {/* Hover indicator for desktop */}
+            {!isMobile && !isPlaying && videoUrl && (
+              <div className="absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                <Play className="h-6 w-6 text-white drop-shadow-lg" />
+              </div>
             )}
 
             {/* Three dots menu (decorative) */}
