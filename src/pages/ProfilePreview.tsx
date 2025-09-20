@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Eye, Lock, Unlock, User, Phone, MapPin, Calendar, FileText, Video, Info, Download, Play, ExternalLink, Pause } from 'lucide-react';
+import { Eye, Lock, Unlock, User, Phone, MapPin, Calendar, FileText, Video, Info, Download, Play, ExternalLink, Pause, ArrowRight } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { convertToSignedUrl } from '@/utils/storageUtils';
 import { useToast } from '@/hooks/use-toast';
@@ -42,6 +42,7 @@ export default function ProfilePreview() {
   const [loading, setLoading] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [currentView, setCurrentView] = useState('profile');
+  const [showDetailedView, setShowDetailedView] = useState(false);
 
   useEffect(() => {
     const loadPreviewData = async () => {
