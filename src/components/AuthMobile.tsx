@@ -575,9 +575,9 @@ const AuthMobile = ({
                                   <SelectTrigger className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10">
                                     <SelectValue placeholder="Välj bransch" />
                                   </SelectTrigger>
-                                  <SelectContent className="max-h-[300px]">
+                                  <SelectContent className="max-h-[300px] bg-white/5 backdrop-blur-sm border-white/20 text-white">
                                     {SWEDISH_INDUSTRIES.map((industryOption) => (
-                                      <SelectItem key={industryOption} value={industryOption}>
+                                      <SelectItem key={industryOption} value={industryOption} className="text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">
                                         {industryOption}
                                       </SelectItem>
                                     ))}
