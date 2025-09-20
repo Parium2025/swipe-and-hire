@@ -628,10 +628,11 @@ const AuthMobile = ({
                                            <DropdownMenuItem
                                              key={industryOption}
                                              onSelect={(e) => e.preventDefault()}
-                                             onClick={() => {
-                                               setIndustry(industryOption);
-                                               setSearchTerm('');
-                                             }}
+                                              onClick={() => {
+                                                setIndustry(industryOption);
+                                                setSearchTerm('');
+                                                triggerRef.current?.click();
+                                              }}
                                              className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white flex items-center justify-between transition-colors touch-manipulation`}
                                            >
                                              <span className="flex-1 pr-2">{industryOption}</span>
@@ -648,10 +649,11 @@ const AuthMobile = ({
                                         ) && (
                                          <DropdownMenuItem
                                            onSelect={(e) => e.preventDefault()}
-                                           onClick={() => {
-                                             setIndustry(searchTerm);
-                                             setSearchTerm('');
-                                           }}
+                                            onClick={() => {
+                                              setIndustry(searchTerm);
+                                              setSearchTerm('');
+                                              triggerRef.current?.click();
+                                            }}
                                            className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white border-t border-slate-600/30 transition-colors touch-manipulation`}
                                          >
                                            <span className="flex-1">Använd "{searchTerm}"</span>
@@ -704,6 +706,7 @@ const AuthMobile = ({
                                           onSelect={(e) => e.preventDefault()}
                                           onClick={() => {
                                             setEmployeeCount(count);
+                                            employeeCountTriggerRef.current?.click();
                                           }}
                                           className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white flex items-center justify-between transition-colors touch-manipulation`}
                                         >
