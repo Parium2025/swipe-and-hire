@@ -326,12 +326,25 @@ export default function ProfilePreview() {
                 <h1 className="text-3xl font-bold mb-1">
                   {data.first_name}{isConsented && data.age && `, ${data.age}`}
                 </h1>
-                <p className="text-lg text-white/90 mb-3">
+                <p className="text-lg text-white/90 mb-2">
                   {data.employment_status || 'Jobbsökande'}
                 </p>
-                <p className="text-lg text-white/90 mb-3">
-                  {data.employment_status || 'Jobbsökande'}
-                </p>
+                
+                {/* Plats */}
+                {data.location && (
+                  <div className="flex items-center gap-2 mb-2">
+                    <MapPin className="h-4 w-4 text-white/80" />
+                    <span className="text-sm text-white/90">{data.location}</span>
+                  </div>
+                )}
+                
+                {/* När kan börja */}
+                {data.availability && (
+                  <div className="flex items-center gap-2 mb-4">
+                    <Calendar className="h-4 w-4 text-white/80" />
+                    <span className="text-sm text-white/90">{data.availability}</span>
+                  </div>
+                )}
                 
                 {/* Swipe-indikator */}
                 <div className="flex items-center justify-center mt-6 animate-bounce">
