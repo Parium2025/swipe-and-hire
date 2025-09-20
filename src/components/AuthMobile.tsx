@@ -571,16 +571,18 @@ const AuthMobile = ({
 
                               <div>
                                 <Label htmlFor="industry" className="text-white">Bransch *</Label>
-                                <Combobox
-                                  options={SWEDISH_INDUSTRIES}
-                                  value={industry}
-                                  onSelect={setIndustry}
-                                  placeholder="Sök och välj bransch..."
-                                  searchPlaceholder="Sök bransch..."
-                                  emptyMessage="Ingen matchning hittades."
-                                  className="mt-1"
-                                  allowCustomValue={true}
-                                />
+                                <Select value={industry} onValueChange={setIndustry}>
+                                  <SelectTrigger className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10">
+                                    <SelectValue placeholder="Välj bransch" />
+                                  </SelectTrigger>
+                                  <SelectContent className="max-h-[300px]">
+                                    {SWEDISH_INDUSTRIES.map((industryOption) => (
+                                      <SelectItem key={industryOption} value={industryOption}>
+                                        {industryOption}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                               </div>
 
                               <div>
