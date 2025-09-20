@@ -69,6 +69,8 @@ const AuthMobile = ({
 
   const triggerRef = useRef<HTMLButtonElement>(null);
   const employeeCountTriggerRef = useRef<HTMLButtonElement>(null);
+  const [industryMenuOpen, setIndustryMenuOpen] = useState(false);
+  const [employeeMenuOpen, setEmployeeMenuOpen] = useState(false);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
@@ -578,7 +580,7 @@ const AuthMobile = ({
 
                               <div>
                                 <Label htmlFor="industry" className="text-white">Bransch *</Label>
-                                <DropdownMenu modal={false}>
+                                <DropdownMenu modal={false} open={industryMenuOpen} onOpenChange={setIndustryMenuOpen}>
                                   <DropdownMenuTrigger asChild>
                                     <Button
                                       ref={triggerRef}
@@ -631,7 +633,7 @@ const AuthMobile = ({
                                               onClick={() => {
                                                 setIndustry(industryOption);
                                                 setSearchTerm('');
-                                                triggerRef.current?.click();
+                                                setIndustryMenuOpen(false);
                                               }}
                                              className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white flex items-center justify-between transition-colors touch-manipulation`}
                                            >
@@ -652,7 +654,7 @@ const AuthMobile = ({
                                             onClick={() => {
                                               setIndustry(searchTerm);
                                               setSearchTerm('');
-                                              triggerRef.current?.click();
+                                              setIndustryMenuOpen(false);
                                             }}
                                            className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white border-t border-slate-600/30 transition-colors touch-manipulation`}
                                          >
@@ -676,7 +678,7 @@ const AuthMobile = ({
 
                               <div>
                                 <Label htmlFor="employeeCount" className="text-white">Anställda</Label>
-                                <DropdownMenu modal={false}>
+                                <DropdownMenu modal={false} open={employeeMenuOpen} onOpenChange={setEmployeeMenuOpen}>
                                   <DropdownMenuTrigger asChild>
                                     <Button
                                       ref={employeeCountTriggerRef}
@@ -706,7 +708,7 @@ const AuthMobile = ({
                                           onSelect={(e) => e.preventDefault()}
                                           onClick={() => {
                                             setEmployeeCount(count);
-                                            employeeCountTriggerRef.current?.click();
+                                            setEmployeeMenuOpen(false);
                                           }}
                                           className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white flex items-center justify-between transition-colors touch-manipulation`}
                                         >
