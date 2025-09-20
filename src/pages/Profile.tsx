@@ -314,7 +314,7 @@ const Profile = () => {
     if (!firstName.trim()) newErrors.firstName = 'Förnamn är obligatoriskt.';
     if (!lastName.trim()) newErrors.lastName = 'Efternamn är obligatoriskt.';
     if (!postalCode.trim()) newErrors.userLocation = 'Postnummer är obligatoriskt.';
-    else if (!hasValidLocation) newErrors.userLocation = 'Ange ett giltigt postnummer som finns i Sverige.';
+    else if (!hasValidLocation) newErrors.userLocation = 'Ange ett giltigt postnummer som finns i Sverige';
     if (!phone.trim()) newErrors.phone = 'Telefonnummer är obligatoriskt.';
     else if (!isValidSwedishPhone(phone)) newErrors.phone = 'Ange ett giltigt svenskt nummer (+46 eller 0).';
     if (!birthDate) newErrors.birthDate = 'Födelsedatum är obligatoriskt.';
