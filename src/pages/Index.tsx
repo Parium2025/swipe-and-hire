@@ -100,7 +100,7 @@ const Index = () => {
   console.log('========================');
   
   // Developer overrides for admin user
-  if (user?.email === 'fredrikandits@hotmail.com') {
+  if (user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') {
     if (developerView === 'welcome_tunnel') {
       return <WelcomeTunnel onComplete={() => setDeveloperView('dashboard')} />;
     }
@@ -130,9 +130,10 @@ const Index = () => {
   // Show app intro tutorial after onboarding
   const showTourOverlay = showIntroTutorial;
   
-  // For employers, check if profile needs setup (basic info missing) - except for admin
+  // For employers, check if profile needs setup (basic info missing) - except for admin emails
   const needsProfileSetup = !profile.bio && !profile.location && !profile.profile_image_url;
-  if (needsProfileSetup && userRole?.role === 'employer' && user?.email !== 'fredrikandits@hotmail.com') {
+  const isAdminEmail = user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com';
+  if (needsProfileSetup && userRole?.role === 'employer' && !isAdminEmail) {
     console.log('Showing ProfileSetup for employer');
     return <ProfileSetup />;
   }
@@ -185,7 +186,7 @@ const Index = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                {(user.email === 'fredrik.andits@icloud.com' || user.email === 'fredrikandits@hotmail.com') && (
+                {(user.email === 'fredrik.andits@icloud.com' || user.email === 'fredrikandits@hotmail.com' || user.email === 'pariumab2025@hotmail.com') && (
                   <DeveloperControls 
                     onViewChange={setDeveloperView}
                     currentView={developerView}
