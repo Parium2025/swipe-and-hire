@@ -45,6 +45,8 @@ const AuthTablet = ({
   const [employerData, setEmployerData] = useState({
     firstName: '',
     lastName: '',
+    company: '',
+    jobTitle: '',
     email: '',
     password: ''
   });
@@ -342,8 +344,8 @@ const AuthTablet = ({
                             value={role === 'job_seeker' ? jobSeekerData.email : employerData.email}
                             onChange={(e) => handleEmailChange(e.target.value)}
                             required
-                            name="email"
-                            autoComplete="email"
+                              name={`email-${role}`}
+                              autoComplete={`${role}-email`}
                             inputMode="email"
                             spellCheck={false}
                             autoCapitalize="none"
@@ -363,8 +365,8 @@ const AuthTablet = ({
                               value={role === 'job_seeker' ? jobSeekerData.password : employerData.password}
                               onChange={(e) => handlePasswordChange(e.target.value)}
                               required
-                              name="current-password"
-                              autoComplete="current-password"
+                              name={`password-${role}`}
+                              autoComplete={`${role}-current-password`}
                               className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                             />
                             <Button
@@ -532,8 +534,8 @@ const AuthTablet = ({
                               value={role === 'job_seeker' ? jobSeekerData.password : employerData.password}
                               onChange={(e) => handlePasswordChange(e.target.value)}
                               required
-                              name="new-password"
-                              autoComplete="new-password"
+                              name={`new-password-${role}`}
+                              autoComplete={`${role}-new-password`}
                               className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                             />
                             <Button

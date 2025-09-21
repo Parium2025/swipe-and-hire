@@ -34,8 +34,6 @@ const AuthDesktop = ({
   const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   // Separate form data for each role
   const [jobSeekerData, setJobSeekerData] = useState({
     firstName: '',
@@ -432,8 +430,8 @@ const AuthDesktop = ({
                               value={role === 'job_seeker' ? jobSeekerData.email : employerData.email}
                               onChange={(e) => handleEmailChange(e.target.value)}
                               required
-                              name="email"
-                              autoComplete="email"
+                              name={`email-${role}`}
+                              autoComplete={`${role}-email`}
                               inputMode="email"
                               spellCheck={false}
                               autoCapitalize="none"
@@ -451,8 +449,8 @@ const AuthDesktop = ({
                               value={role === 'job_seeker' ? jobSeekerData.password : employerData.password}
                               onChange={(e) => handlePasswordChange(e.target.value)}
                               required
-                              name="current-password"
-                              autoComplete="current-password"
+                              name={`password-${role}`}
+                              autoComplete={`${role}-current-password`}
                               className="mt-2 w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                             />
                             <Button
@@ -596,8 +594,8 @@ const AuthDesktop = ({
                                 value={role === 'job_seeker' ? jobSeekerData.password : employerData.password}
                                 onChange={(e) => handlePasswordChange(e.target.value)}
                                 required
-                                name="new-password"
-                                autoComplete="new-password"
+                              name={`new-password-${role}`}
+                              autoComplete={`${role}-new-password`}
                                 className="mt-2 w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                               />
                             <Button
