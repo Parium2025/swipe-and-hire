@@ -25,7 +25,7 @@ const App = () => {
   // Konfigurera statusbaren för mobila appar
   useStatusBar();
   const device = useDevice();
-  const showHeader = device !== 'mobile';
+  const showHeader = false; // Header removed for cleaner UI
 
   return (
   <QueryClientProvider client={queryClient}>
