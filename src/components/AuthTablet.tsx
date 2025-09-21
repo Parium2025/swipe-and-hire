@@ -358,17 +358,17 @@ const AuthTablet = ({
                         )}
 
                         {resetPasswordSent && (
-                          <div className="mt-4 p-3 rounded-lg text-center">
-                            <p className="text-sm mb-3 font-medium text-white">Återställningsmail skickat!</p>
-                            <div className="text-xs text-muted-foreground bg-secondary/10 p-2 rounded border-l-4 border-secondary mb-3">
-                              <p className="font-medium text-white">Tips:</p>
-                              <p className="text-white">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där</p>
+                          <div className="mt-4 p-4 bg-secondary/10 rounded-lg text-center border border-secondary/20">
+                            <p className="text-sm mb-2 font-medium text-white">📧 Återställningsmail skickat!</p>
+                            <div className="bg-orange-50 border border-orange-200 rounded p-2 mb-3">
+                              <p className="text-xs text-orange-800 font-medium">⚠️ VIKTIGT</p>
+                              <p className="text-xs text-orange-700">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.</p>
                             </div>
                             <Button
+                              variant="outline"
                               size="sm"
                               onClick={handleResetPassword}
                               disabled={resetLoading}
-                              className="bg-parium-navy hover:bg-parium-navy/90 text-white text-xs"
                             >
                               {resetLoading ? "Skickar..." : "Skicka igen"}
                             </Button>
@@ -525,9 +525,9 @@ const AuthTablet = ({
 
                   {showResend && (
                     <div className="mt-4 p-4 bg-secondary/10 rounded-lg text-center border border-secondary/20">
-                      <p className="text-sm mb-2 font-medium text-white">Kolla din e-post för bekräftelselänk</p>
+                      <p className="text-sm mb-2 font-medium text-white">📧 Kolla din e-post för bekräftelselänk</p>
                       <div className="bg-orange-50 border border-orange-200 rounded p-2 mb-3">
-                        <p className="text-xs text-orange-800 font-medium">VIKTIGT</p>
+                        <p className="text-xs text-orange-800 font-medium">⚠️ VIKTIGT</p>
                         <p className="text-xs text-orange-700">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.</p>
                       </div>
                       <Button
