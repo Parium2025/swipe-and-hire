@@ -3,8 +3,9 @@ import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
+import EmployerSidebar from "@/components/EmployerSidebar";
 import EmployerDashboard from '@/components/EmployerDashboard';
 import JobSwipe from '@/components/JobSwipe';
 import ProfileSetup from '@/components/ProfileSetup';
@@ -212,7 +213,7 @@ const Index = () => {
     return (
       <SidebarProvider>
         <div className="min-h-screen flex w-full overflow-x-hidden">
-          {uiReady ? <AppSidebar /> : null}
+          {uiReady ? <EmployerSidebar /> : null}
           <div className="flex-1 flex flex-col overflow-x-hidden">
             <header className="sticky top-0 z-40 h-16 flex items-center justify-between border-b bg-white/10 backdrop-blur-sm px-6">
               <div className="flex items-center gap-4">
@@ -225,7 +226,7 @@ const Index = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                {(user.email === 'fredrik.andits@icloud.com' || user.email === 'fredrikandits@hotmail.com') && (
+                {(user.email === 'fredrik.andits@icloud.com' || user.email === 'fredrikandits@hotmail.com' || user.email === 'pariumab2025@hotmail.com') && (
                   <DeveloperControls 
                     onViewChange={setDeveloperView}
                     currentView={developerView}
