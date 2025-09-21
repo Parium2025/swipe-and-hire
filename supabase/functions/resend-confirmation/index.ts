@@ -133,15 +133,15 @@ const handler = async (req: Request): Promise<Response> => {
             <td style="padding: 40px 30px;">
               <p style="margin: 0 0 24px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
                 ${greet}<br/><br/>
-                Välkommen till Parium - plattformen där <strong>${companyName}</strong> hittar nästa generations talanger.<br/>
-                Förenkla er rekrytering och koppla upp er med de bästa kandidaterna.
-              </p>
-              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
-                <tr>
-                  <td style="font-size: 16px; color: #111827;">
-                    <p style="margin: 0 0 12px 0;">• Kvalificerade kandidater som matchar era behov</p>
-                    <p style="margin: 0 0 12px 0;">• Smidiga rekryteringsverktyg för modern personalrekrytering</p>
-                    <p style="margin: 0;">• Direkt kontakt med potentiella medarbetare</p>
+                 Välkommen till Parium - plattformen där <strong>${companyName}</strong> hittar nästa generations talanger.<br/>
+                Vi hjälper er att rekrytera enklare, snabbare och träffsäkrare.
+               </p>
+               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
+                 <tr>
+                   <td style="font-size: 16px; color: #111827;">
+                     <p style="margin: 0 0 12px 0;">• Kandidater med rätt kvalifikationer och driv</p>
+                     <p style="margin: 0 0 12px 0;">• Smidiga rekryteringsverktyg för modern personalrekrytering</p>
+                     <p style="margin: 0;">• Direkt kontakt med potentiella medarbetare</p>
                   </td>
                 </tr>
               </table>
