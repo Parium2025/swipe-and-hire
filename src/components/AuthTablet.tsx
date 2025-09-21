@@ -294,14 +294,14 @@ const AuthTablet = ({
               </div>
             </div>
             
-            <h1 className="text-4xl font-bold text-primary-foreground mb-4">
-              Välkommen till
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-accent block"> Parium</span>
-            </h1>
-            
-            <p className="text-lg text-primary-foreground/90 leading-relaxed">
-              Framtiden börjar med ett swipe
-            </p>
+            <div className="text-center mb-6">
+              <h1 className="text-3xl font-bold text-white mb-2">
+                Välkommen till Parium
+              </h1>
+              <p className="text-white/80">
+                Framtiden börjar med ett swipe
+              </p>
+            </div>
           </div>
 
           {/* Right side - Auth form */}
@@ -311,6 +311,14 @@ const AuthTablet = ({
               
               <Card className="relative bg-white/10 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
                 <CardContent className="p-6">
+                  <div className="text-center mb-6">
+                    <h2 className="text-2xl font-bold text-white mb-2">
+                      Välkommen till Parium
+                    </h2>
+                    <p className="text-white/80">
+                      Framtiden börjar med ett swipe
+                    </p>
+                  </div>
                    <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => {
                      setIsLogin(value === 'login');
                      setHasRegistered(false); // Låt upp knappen när användaren byter flik
