@@ -556,23 +556,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resendConfirmation = async (email: string) => {
     try {
-      console.log('Resending confirmation email using Supabase native method for:', email);
+      console.log('Resending confirmation email using custom edge function for:', email);
       
-      // Använd Supabase's inbyggda resend funktionalitet
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth`
+      // Hämta användarens profil för att få rollen
+      const { data: profiles, error: profileError } = await supabase
+        .from('profiles')
+        .select('role, first_name')
+        .eq('user_id', user?.id)
+        .single();
+      
+      if (profileError) {
+        console.error('Could not fetch user profile:', profileError);
+        throw new Error('Kunde inte hämta användarprofil');
+      }
+      
+      // Använd vår custom edge function istället
+      const { error } = await supabase.functions.invoke('send-confirmation-email', {
+        body: {
+          email: email,
+          role: profiles.role || 'job_seeker',
+          first_name: profiles.first_name || 'Användare',
+          confirmation_url: `${window.location.origin}/auth?confirmed=true`
         }
       });
 
       if (error) {
-        console.error('Supabase resend error:', error);
+        console.error('Edge function resend error:', error);
         throw error;
       }
 
-      console.log('Confirmation email resent successfully');
+      console.log('Confirmation email resent successfully via edge function');
 
       toast({
         title: "Ny bekräftelselänk skickad!",
@@ -598,7 +611,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: errorMessage,
         variant: "destructive"
       });
-      
+
       return { error };
     }
   };

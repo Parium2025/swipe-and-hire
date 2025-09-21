@@ -71,6 +71,7 @@ const AuthMobile = ({
   const [showResend, setShowResend] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetPasswordSent, setResetPasswordSent] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
 
   const triggerRef = useRef<HTMLButtonElement>(null);
   const employeeCountTriggerRef = useRef<HTMLButtonElement>(null);
@@ -347,9 +348,9 @@ const AuthMobile = ({
   const handleResendConfirmation = async () => {
     const currentData = role === 'job_seeker' ? jobSeekerData : employerData;
     if (!currentData.email) return;
-    setLoading(true);
+    setResendLoading(true);
     await resendConfirmation(currentData.email);
-    setLoading(false);
+    setResendLoading(false);
   };
 
    const handleResetPasswordEmail = async () => {
@@ -998,9 +999,9 @@ const AuthMobile = ({
                       className="bg-parium-navy hover:bg-parium-navy/90 text-white"
                       size="sm"
                       onClick={handleResendConfirmation}
-                      disabled={loading}
+                      disabled={resendLoading}
                     >
-                      Skicka igen
+                      {resendLoading ? "Skickar..." : "Skicka igen"}
                     </Button>
                   </div>
                 )}
