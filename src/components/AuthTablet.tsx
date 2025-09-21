@@ -311,7 +311,7 @@ const AuthTablet = ({
                 <CardContent className="p-6">
                    <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => {
                      setIsLogin(value === 'login');
-                     setHasRegistered(false); // Återställ bara registreringsstatus, inte showResend
+                     setHasRegistered(false); // Låt upp knappen när användaren byter flik
                    }}>
                     <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0">
                       <TabsTrigger 
@@ -424,7 +424,8 @@ const AuthTablet = ({
                              value={role} 
                               onValueChange={(value: 'job_seeker' | 'employer') => {
                                 setRole(value);
-                                setHasRegistered(false); // Återställ bara registreringsstatus, inte showResend
+                                setHasRegistered(false); // Återställ knappstatus
+                                setShowResend(false); // Återställ meddelande när roll byts
                               }}
                              className="mt-2 grid grid-cols-2 gap-4"
                            >
