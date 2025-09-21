@@ -178,20 +178,21 @@ const getEmployerTemplate = (firstName: string, confirmationUrl: string) => `
       </div>
     </div>
     
-    <!-- Footer -->
-    <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e9ecef;">
-      <p style="color: #666666; font-size: 14px; margin: 0 0 10px 0;">
-        Fick du detta mail av misstag? Ignorera det bara.
-      </p>
-      <p style="color: #333333; font-size: 16px; margin: 0; font-weight: bold;">
-        Med vänliga hälsningar,<br>
-        Parium-teamet
-      </p>
-      
-      <p style="color: #999999; font-size: 12px; margin: 20px 0 0 0;">
-        Parium – Framtidens jobbsök börjar här.
-      </p>
-    </div>
+     <!-- Footer -->
+     <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e9ecef;">
+       <p style="color: #666666; font-size: 14px; margin: 0 0 10px 0;">
+         Fick du detta mail av misstag? Ignorera det bara.
+       </p>
+       <p style="color: #333333; font-size: 16px; margin: 0; font-weight: bold;">
+         Med vänliga hälsningar,<br>
+         Parium-teamet
+       </p>
+       
+       <p style="color: #999999; font-size: 12px; margin: 20px 0 0 0;">
+         Parium – Framtidens jobbsök börjar här.<br>
+         Du får detta mail för att du registrerat ett företagskonto i Parium-appen.
+       </p>
+     </div>
     
   </div>
   
