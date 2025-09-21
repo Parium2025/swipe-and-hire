@@ -67,6 +67,7 @@ export const SWEDISH_INDUSTRIES = [
   'Fruktodling',
   'Funktionshinderomsorg',
   'Fysioterapi och sjukgymnastik',
+  'Försäljning',
   'Företagsutbildning',
   'Förnybar energi',
   'Förskola',
