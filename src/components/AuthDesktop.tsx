@@ -551,10 +551,13 @@ const AuthDesktop = ({
                   </Tabs>
                   
                   {showResend && (
-                    <div className="mt-6 p-4 bg-secondary/10 rounded-lg text-center">
-                      <p className="text-sm mb-2 text-white">Kolla din e-post för bekräftelselänk</p>
+                    <div className="mt-6 p-4 bg-primary/10 backdrop-blur-sm border border-primary/20 rounded-lg text-center">
+                      <p className="text-sm mb-3 text-white font-medium">Kolla din e-post för bekräftelselänk</p>
+                      <div className="text-xs text-primary-foreground/80 bg-primary/10 p-2 rounded border-l-4 border-primary mb-3">
+                        <p className="text-white">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där</p>
+                      </div>
                       <Button
-                        variant="outline"
+                        className="bg-parium-navy hover:bg-parium-navy/90 text-white"
                         size="sm"
                         onClick={handleResendConfirmation}
                         disabled={loading}
