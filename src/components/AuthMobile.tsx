@@ -163,6 +163,28 @@ const AuthMobile = ({
           navigate('/search-jobs', { replace: true });
         }
       } else {
+        // Validate required fields for employer
+        if (role === 'employer') {
+          if (!employeeCount) {
+            toast({
+              title: "Anställda krävs",
+              description: "Vänligen välj antal anställda",
+              variant: "destructive"
+            });
+            setLoading(false);
+            return;
+          }
+          if (!website) {
+            toast({
+              title: "Webbplats krävs", 
+              description: "Vänligen ange företagets webbplats",
+              variant: "destructive"
+            });
+            setLoading(false);
+            return;
+          }
+        }
+
         const result = await signUp(email, password, {
           role,
           first_name: firstName,
@@ -677,7 +699,7 @@ const AuthMobile = ({
                               </div>
 
                               <div>
-                                <Label htmlFor="employeeCount" className="text-white">Anställda</Label>
+                                <Label htmlFor="employeeCount" className="text-white">Anställda *</Label>
                                 <DropdownMenu modal={false} open={employeeMenuOpen} onOpenChange={setEmployeeMenuOpen}>
                                   <DropdownMenuTrigger asChild>
                                     <Button
@@ -738,19 +760,20 @@ const AuthMobile = ({
                                 />
                               </div>
 
-                             <div>
-                               <Label htmlFor="website" className="text-white">
-                                 <Globe className="h-4 w-4 inline mr-2" />
-                                 Webbplats
-                               </Label>
-                               <Input
-                                 id="website"
-                                 value={website}
-                                 onChange={(e) => setWebsite(e.target.value)}
-                                 placeholder="https://exempel.se"
-                                 className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                               />
-                             </div>
+                               <div>
+                                <Label htmlFor="website" className="text-white">
+                                  <Globe className="h-4 w-4 inline mr-2" />
+                                  Webbplats *
+                                </Label>
+                                <Input
+                                  id="website"
+                                  value={website}
+                                  onChange={(e) => setWebsite(e.target.value)}
+                                  placeholder="https://exempel.se"
+                                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                  required
+                                />
+                              </div>
 
                              <div>
                                <Label htmlFor="companyDescription" className="text-white">Kort beskrivning</Label>
