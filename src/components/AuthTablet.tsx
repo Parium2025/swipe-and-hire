@@ -277,7 +277,7 @@ const AuthTablet = ({
         <div className="w-full max-w-2xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           
           {/* Left side - Compact branding */}
-          <div className="text-center lg:text-left">
+          <div className="hidden">
             <div className="mb-6">
               <div className="relative mx-auto lg:mx-0 w-fit">
                 <div className="absolute inset-0 blur-xl bg-secondary/30 rounded-full"></div>
@@ -306,19 +306,30 @@ const AuthTablet = ({
 
           {/* Right side - Auth form */}
           <div className="w-full">
+            <div className="text-center mb-6">
+              <div className="mb-2">
+                <div className="relative mx-auto w-fit">
+                  <div className="absolute inset-0 blur-xl bg-secondary/30 rounded-full"></div>
+                  <img 
+                    src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
+                    alt="Parium" 
+                    className="relative h-28 w-auto"
+                    width="320"
+                    height="112"
+                    loading="eager"
+                    decoding="sync"
+                    fetchPriority="high"
+                  />
+                </div>
+              </div>
+              <h1 className="text-2xl font-bold text-white mb-2">Välkommen till Parium</h1>
+              <p className="text-white/80">Framtiden börjar med ett swipe</p>
+            </div>
             <div className="relative">
               <div className="absolute -inset-1 bg-gradient-to-r from-secondary/20 to-accent/20 rounded-2xl blur-lg"></div>
               
               <Card className="relative bg-white/10 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
                 <CardContent className="p-6">
-                  <div className="text-center mb-6">
-                    <h2 className="text-2xl font-bold text-white mb-2">
-                      Välkommen till Parium
-                    </h2>
-                    <p className="text-white/80">
-                      Framtiden börjar med ett swipe
-                    </p>
-                  </div>
                    <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => {
                      setIsLogin(value === 'login');
                      setHasRegistered(false); // Låt upp knappen när användaren byter flik

@@ -315,7 +315,7 @@ const AuthDesktop = ({
       
       <div className="relative z-10 min-h-[calc(100vh-4rem)] flex">
         {/* Left side - Hero content */}
-        <div className="w-1/2 flex flex-col justify-center px-12 text-primary-foreground">
+        <div className="hidden">
           <div className="max-w-lg animate-fade-in">
             {/* Logo with glow effect */}
             <div className="mb-8">
@@ -391,8 +391,27 @@ const AuthDesktop = ({
         </div>
         
         {/* Right side - Modern Auth form */}
-        <div className="w-1/2 flex items-center justify-center p-12">
+        <div className="w-full flex items-center justify-center p-12">
           <div className="w-full max-w-md animate-scale-in">
+            <div className="text-center mb-8">
+              <div className="mb-2">
+                <div className="relative mx-auto w-fit">
+                  <div className="absolute inset-0 blur-xl bg-secondary/30 rounded-full"></div>
+                  <img 
+                    src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
+                    alt="Parium" 
+                    className="relative h-24 w-auto"
+                    width="320"
+                    height="128"
+                    loading="eager"
+                    decoding="sync"
+                    fetchPriority="high"
+                  />
+                </div>
+              </div>
+              <h1 className="text-3xl font-bold text-white mb-2">Välkommen till Parium</h1>
+              <p className="text-white/80">Framtiden börjar med ett swipe</p>
+            </div>
             {/* Glassmorphism card */}
             <div className="relative">
               {/* Card glow effect */}
@@ -400,15 +419,6 @@ const AuthDesktop = ({
               
               <Card className="relative bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-3xl overflow-hidden">
                 <CardContent className="p-12">
-                  <div className="text-center mb-8">
-                    <h2 className="text-3xl font-bold text-white mb-2">
-                      Välkommen till Parium
-                    </h2>
-                    <p className="text-white/80">
-                      Framtiden börjar med ett swipe
-                    </p>
-                  </div>
-                  
                    <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => {
                      setIsLogin(value === 'login');
                      setHasRegistered(false); // Låt upp knappen när användaren byter flik
