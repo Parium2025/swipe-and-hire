@@ -136,18 +136,18 @@ const getEmployerTemplate = (firstName: string, confirmationUrl: string) => `
         
         <!-- Benefits list for employers -->
         <div style="margin: 30px 0; text-align: left; max-width: 450px; margin-left: auto; margin-right: auto;">
-          <div style="margin-bottom: 15px; text-align: left;">
-            <span style="color: #1a237e; font-size: 18px; margin-right: 10px; line-height: 1.4;">•</span>
-            <span style="color: #333333; font-size: 16px; line-height: 1.4;">Kandidater med rätt kvalifikationer och driv</span>
-          </div>
-          <div style="margin-bottom: 15px; text-align: left;">
-            <span style="color: #1a237e; font-size: 18px; margin-right: 10px; line-height: 1.4;">•</span>
-            <span style="color: #333333; font-size: 16px; line-height: 1.4;">Smidiga rekryteringsverktyg för modern personalrekrytering</span>
-          </div>
-          <div style="margin-bottom: 30px; text-align: left;">
-            <span style="color: #1a237e; font-size: 18px; margin-right: 10px; line-height: 1.4;">•</span>
-            <span style="color: #333333; font-size: 16px; line-height: 1.4;">Direkt kontakt med potentiella medarbetare</span>
-          </div>
+           <div style="margin-bottom: 15px; text-align: left;">
+             <span style="color: #1a237e; font-size: 18px; margin-right: 10px; line-height: 1.4;">•</span>
+             <span style="color: #333333; font-size: 16px; line-height: 1.4;">En smidig rekryteringsprocess från start till mål</span>
+           </div>
+           <div style="margin-bottom: 15px; text-align: left;">
+             <span style="color: #1a237e; font-size: 18px; margin-right: 10px; line-height: 1.4;">•</span>
+             <span style="color: #333333; font-size: 16px; line-height: 1.4;">Direktkontakt med kandidater</span>
+           </div>
+           <div style="margin-bottom: 30px; text-align: left;">
+             <span style="color: #1a237e; font-size: 18px; margin-right: 10px; line-height: 1.4;">•</span>
+             <span style="color: #333333; font-size: 16px; line-height: 1.4;">Ett modernt gränssnitt anpassat för era krav</span>
+           </div>
         </div>
       
       <!-- Button -->

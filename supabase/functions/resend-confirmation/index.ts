@@ -140,9 +140,9 @@ const handler = async (req: Request): Promise<Response> => {
                 <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
                   <tr>
                     <td style="font-size: 16px; color: #111827; text-align: left;">
-                      <p style="margin: 0 0 12px 0; text-align: left;">• Kandidater med rätt kvalifikationer och driv</p>
-                      <p style="margin: 0 0 12px 0; text-align: left;">• Smidiga rekryteringsverktyg för modern personalrekrytering</p>
-                      <p style="margin: 0; text-align: left;">• Direkt kontakt med potentiella medarbetare</p>
+                       <p style="margin: 0 0 12px 0; text-align: left;">• En smidig rekryteringsprocess från start till mål</p>
+                       <p style="margin: 0 0 12px 0; text-align: left;">• Direktkontakt med kandidater</p>
+                       <p style="margin: 0; text-align: left;">• Ett modernt gränssnitt anpassat för era krav</p>
                   </td>
                 </tr>
               </table>
