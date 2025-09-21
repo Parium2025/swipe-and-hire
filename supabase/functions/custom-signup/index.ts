@@ -203,51 +203,51 @@ Parium Team`,
                          Förenkla er rekrytering och koppla upp er med de bästa kandidaterna.
                        </p>
                       
-                      <!-- Button with bulletproof mobile centering -->
-                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
-                        <tr>
-                          <td align="center" style="padding: 0;">
-                            <!--[if mso]>
-                            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" style="height:48px;v-text-anchor:middle;width:280px;" arcsize="21%" stroke="f" fillcolor="#1E3A8A">
-                            <w:anchorlock/>
-                            <center>
-                            <![endif]-->
-                            <a href="${confirmationUrl}" 
-                               style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none; mso-hide: all;">
-                              Bekräfta företagskonto
-                            </a>
-                            <!--[if mso]>
-                            </center>
-                            </v:roundrect>
-                            <![endif]-->
-                          </td>
-                        </tr>
-                      </table>
-                      
-                      <!-- Features list for employers -->
-                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
-                        <tr>
-                          <td style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827;">
-                            <p style="margin: 0 0 12px 0;">• Kvalificerade kandidater som matchar era behov</p>
-                            <p style="margin: 0 0 12px 0;">• Smidiga rekryteringsverktyg för modern personalrekrytering</p>
-                            <p style="margin: 0;">• Direkt kontakt med potentiella medarbetare</p>
-                          </td>
-                        </tr>
-                      </table>
-                      
-                      <!-- Alternative link -->
-                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
-                        <tr>
-                          <td style="background-color: #F9FAFB; padding: 20px; border-radius: 8px;">
-                            <p style="margin: 0 0 12px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #6B7280; text-align: center;">
-                              Fungerar inte knappen? Kopiera länken nedan:
-                            </p>
-                            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #1E3A8A; word-break: break-all; text-align: center;">
-                              ${confirmationUrl}
-                            </p>
-                          </td>
-                        </tr>
-                      </table>
+                       <!-- Features list for employers -->
+                       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
+                         <tr>
+                           <td style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827;">
+                             <p style="margin: 0 0 12px 0;">• Kvalificerade kandidater som matchar era behov</p>
+                             <p style="margin: 0 0 12px 0;">• Smidiga rekryteringsverktyg för modern personalrekrytering</p>
+                             <p style="margin: 0;">• Direkt kontakt med potentiella medarbetare</p>
+                           </td>
+                         </tr>
+                       </table>
+                       
+                       <!-- Button with bulletproof mobile centering -->
+                       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
+                         <tr>
+                           <td align="center" style="padding: 0;">
+                             <!--[if mso]>
+                             <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" style="height:48px;v-text-anchor:middle;width:280px;" arcsize="21%" stroke="f" fillcolor="#1E3A8A">
+                             <w:anchorlock/>
+                             <center>
+                             <![endif]-->
+                             <a href="${confirmationUrl}" 
+                                style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none; mso-hide: all;">
+                               Bekräfta företagskonto
+                             </a>
+                             <!--[if mso]>
+                             </center>
+                             </v:roundrect>
+                             <![endif]-->
+                           </td>
+                         </tr>
+                       </table>
+                       
+                       <!-- Alternative link -->
+                       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
+                         <tr>
+                           <td style="background-color: #F9FAFB; padding: 20px; border-radius: 8px;">
+                             <p style="margin: 0 0 12px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #6B7280; text-align: center;">
+                               Fungerar inte knappen? Kopiera länken nedan:
+                             </p>
+                             <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #1E3A8A; word-break: break-all; text-align: center;">
+                               ${confirmationUrl}
+                             </p>
+                           </td>
+                         </tr>
+                       </table>
                       
                     </td>
                   </tr>
@@ -312,6 +312,17 @@ Parium Team`,
                          Med Parium swipar du dig fram till möjligheter som faktiskt kan förändra din vardag.
                        </p>
                       
+                      <!-- Features list -->
+                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
+                        <tr>
+                          <td style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827;">
+                            <p style="margin: 0 0 12px 0;">• Matcha med jobb som passar dig</p>
+                            <p style="margin: 0 0 12px 0;">• Swipea, ansök och gå vidare på sekunder</p>
+                            <p style="margin: 0;">• Spara tid med smarta och effektiva verktyg</p>
+                          </td>
+                        </tr>
+                      </table>
+                      
                       <!-- Button with bulletproof mobile centering -->
                       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
                         <tr>
@@ -329,17 +340,6 @@ Parium Team`,
                             </center>
                             </v:roundrect>
                             <![endif]-->
-                          </td>
-                        </tr>
-                      </table>
-                      
-                      <!-- Features list -->
-                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
-                        <tr>
-                          <td style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827;">
-                            <p style="margin: 0 0 12px 0;">• Matcha med jobb som passar dig</p>
-                            <p style="margin: 0 0 12px 0;">• Swipea, ansök och gå vidare på sekunder</p>
-                            <p style="margin: 0;">• Spara tid med smarta och effektiva verktyg</p>
                           </td>
                         </tr>
                       </table>

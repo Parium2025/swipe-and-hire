@@ -80,7 +80,7 @@ interface AuthContextType {
   verifyOtp: (phone: string, otp: string) => Promise<{ error?: any }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error?: any }>;
-  resendConfirmation: (email: string, userRole?: string) => Promise<{ error?: any }>;
+  resendConfirmation: (email: string, userRole?: string, firstName?: string) => Promise<{ error?: any }>;
   resetPassword: (email: string) => Promise<{ error?: any }>;
   updatePassword: (newPassword: string) => Promise<{ error?: any }>;
   hasRole: (role: UserRole) => boolean;

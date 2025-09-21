@@ -29,7 +29,7 @@ const getJobSeekerTemplate = (firstName: string, confirmationUrl: string) => `
     
     <!-- Header -->
     <div style="background-color: #1a237e; padding: 40px 30px; text-align: center;">
-      <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Välkommen till Parium!</h1>
+      <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Parium</h1>
       <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 18px;">Framtiden börjar med ett swipe</p>
     </div>
     
@@ -63,7 +63,7 @@ const getJobSeekerTemplate = (firstName: string, confirmationUrl: string) => `
           <td align="center" style="padding: 0;">
             <a href="${confirmationUrl}" 
                style="background-color: #1a237e; border-radius: 5px; color: #ffffff; display: inline-block; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none; mso-hide: all;">
-              👉 Bekräfta mitt konto
+              Bekräfta mitt konto
             </a>
           </td>
         </tr>
@@ -120,7 +120,7 @@ const getEmployerTemplate = (firstName: string, confirmationUrl: string) => `
     
     <!-- Header -->
     <div style="background-color: #1a237e; padding: 40px 30px; text-align: center;">
-      <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Välkommen till Parium!</h1>
+      <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Parium</h1>
       <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 18px;">Hitta nästa generations talanger</p>
     </div>
     
@@ -154,7 +154,7 @@ const getEmployerTemplate = (firstName: string, confirmationUrl: string) => `
           <td align="center" style="padding: 0;">
             <a href="${confirmationUrl}" 
                style="background-color: #1a237e; border-radius: 5px; color: #ffffff; display: inline-block; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none; mso-hide: all;">
-              👉 Bekräfta företagskonto
+              Bekräfta företagskonto
             </a>
           </td>
         </tr>
