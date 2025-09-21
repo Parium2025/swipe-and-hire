@@ -349,7 +349,7 @@ const AuthMobile = ({
     const currentData = role === 'job_seeker' ? jobSeekerData : employerData;
     if (!currentData.email) return;
     setResendLoading(true);
-    await resendConfirmation(currentData.email);
+    await resendConfirmation(currentData.email, role);
     setResendLoading(false);
   };
 

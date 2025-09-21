@@ -80,7 +80,7 @@ interface AuthContextType {
   verifyOtp: (phone: string, otp: string) => Promise<{ error?: any }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error?: any }>;
-  resendConfirmation: (email: string) => Promise<{ error?: any }>;
+  resendConfirmation: (email: string, userRole?: string) => Promise<{ error?: any }>;
   resetPassword: (email: string) => Promise<{ error?: any }>;
   updatePassword: (newPassword: string) => Promise<{ error?: any }>;
   hasRole: (role: UserRole) => boolean;
@@ -554,28 +554,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const resendConfirmation = async (email: string) => {
+  const resendConfirmation = async (email: string, userRole?: string) => {
     try {
       console.log('Resending confirmation email using custom edge function for:', email);
       
-      // Hämta användarens profil för att få rollen
-      const { data: profiles, error: profileError } = await supabase
-        .from('profiles')
-        .select('role, first_name')
-        .eq('user_id', user?.id)
-        .single();
+      let profileRole = userRole;
+      let firstName = 'Användare';
       
-      if (profileError) {
-        console.error('Could not fetch user profile:', profileError);
-        throw new Error('Kunde inte hämta användarprofil');
+      // Om vi har en inloggad användare, försök hämta profilen
+      if (user?.id) {
+        const { data: profiles, error: profileError } = await supabase
+          .from('profiles')
+          .select('role, first_name')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (!profileError && profiles) {
+          profileRole = profiles.role;
+          firstName = profiles.first_name || 'Användare';
+        }
+      }
+      
+      // Om vi inte har roll, använd default baserat på context eller defaulta till job_seeker
+      if (!profileRole) {
+        profileRole = userRole || 'job_seeker';
       }
       
       // Använd vår custom edge function istället
       const { error } = await supabase.functions.invoke('send-confirmation-email', {
         body: {
           email: email,
-          role: profiles.role || 'job_seeker',
-          first_name: profiles.first_name || 'Användare',
+          role: profileRole,
+          first_name: firstName,
           confirmation_url: `${window.location.origin}/auth?confirmed=true`
         }
       });
