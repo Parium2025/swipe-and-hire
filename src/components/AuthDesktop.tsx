@@ -476,11 +476,14 @@ const AuthDesktop = ({
                         {/* User Role Selection - First */}
                         <div>
                           <Label className="text-lg text-white">Jag är:</Label>
-                          <RadioGroup 
-                            value={role} 
-                            onValueChange={(value: 'job_seeker' | 'employer') => setRole(value)}
-                            className="mt-2"
-                          >
+                           <RadioGroup 
+                             value={role} 
+                             onValueChange={(value: 'job_seeker' | 'employer') => {
+                               setRole(value);
+                               setHasRegistered(false); // Återställ när användaren byter roll
+                             }}
+                             className="mt-2"
+                           >
                             <div className="flex items-center space-x-2">
                               <RadioGroupItem value="job_seeker" id="job_seeker" />
                               <Label htmlFor="job_seeker" className="flex items-center cursor-pointer text-white">
