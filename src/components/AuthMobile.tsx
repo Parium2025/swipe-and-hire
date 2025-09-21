@@ -43,22 +43,25 @@ const AuthMobile = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [phoneError, setPhoneError] = useState('');
-  const [company, setCompany] = useState('');
-  const [jobTitle, setJobTitle] = useState('');
+  // Separate form data for each role
+  const [jobSeekerData, setJobSeekerData] = useState({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    phoneError: ''
+  });
+  const [employerData, setEmployerData] = useState({
+    firstName: '',
+    lastName: '',
+    companyName: '',
+    orgNumber: '',
+    industry: '',
+    address: '',
+    website: '',
+    companyDescription: '',
+    employeeCount: ''
+  });
   const [role, setRole] = useState<'job_seeker' | 'employer'>('job_seeker');
-  
-  // New employer-specific fields
-  const [companyName, setCompanyName] = useState('');
-  const [orgNumber, setOrgNumber] = useState('');
-  const [industry, setIndustry] = useState('');
-  const [address, setAddress] = useState('');
-  const [website, setWebsite] = useState('');
-  const [companyDescription, setCompanyDescription] = useState('');
-  const [employeeCount, setEmployeeCount] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -120,9 +123,12 @@ const AuthMobile = ({
   };
 
   const handlePhoneChange = (value: string) => {
-    setPhone(value);
     const validation = validatePhoneNumber(value);
-    setPhoneError(validation.error);
+    setJobSeekerData(prev => ({
+      ...prev,
+      phone: value,
+      phoneError: validation.error
+    }));
   };
 
   // Password strength calculation
@@ -164,24 +170,109 @@ const AuthMobile = ({
         }
       } else {
         // Validate all required fields
-        if (!firstName.trim()) {
-          toast({
-            title: "Förnamn krävs",
-            description: "Vänligen ange ditt förnamn",
-            variant: "destructive"
-          });
-          setLoading(false);
-          return;
+        if (role === 'job_seeker') {
+          if (!jobSeekerData.firstName.trim()) {
+            toast({
+              title: "Förnamn krävs",
+              description: "Vänligen ange ditt förnamn",
+              variant: "destructive"
+            });
+            setLoading(false);
+            return;
+          }
+
+          if (!jobSeekerData.lastName.trim()) {
+            toast({
+              title: "Efternamn krävs",
+              description: "Vänligen ange ditt efternamn",
+              variant: "destructive"
+            });
+            setLoading(false);
+            return;
+          }
+
+          if (!jobSeekerData.phone.trim()) {
+            toast({
+              title: "Telefonnummer krävs",
+              description: "Vänligen ange ditt telefonnummer",
+              variant: "destructive"
+            });
+            setLoading(false);
+            return;
+          }
         }
 
-        if (!lastName.trim()) {
-          toast({
-            title: "Efternamn krävs",
-            description: "Vänligen ange ditt efternamn",
-            variant: "destructive"
-          });
-          setLoading(false);
-          return;
+        // Employer specific validation
+        if (role === 'employer') {
+          if (!employerData.firstName.trim()) {
+            toast({
+              title: "Förnamn krävs",
+              description: "Vänligen ange ditt förnamn",
+              variant: "destructive"
+            });
+            setLoading(false);
+            return;
+          }
+
+          if (!employerData.lastName.trim()) {
+            toast({
+              title: "Efternamn krävs",
+              description: "Vänligen ange ditt efternamn",
+              variant: "destructive"
+            });
+            setLoading(false);
+            return;
+          }
+
+          if (!employerData.companyName.trim()) {
+            toast({
+              title: "Företagsnamn krävs",
+              description: "Vänligen ange företagsnamn",
+              variant: "destructive"
+            });
+            setLoading(false);
+            return;
+          }
+
+          if (!employerData.industry.trim()) {
+            toast({
+              title: "Bransch krävs",
+              description: "Vänligen välj bransch",
+              variant: "destructive"
+            });
+            setLoading(false);
+            return;
+          }
+
+          if (!employerData.employeeCount) {
+            toast({
+              title: "Anställda krävs",
+              description: "Vänligen välj antal anställda",
+              variant: "destructive"
+            });
+            setLoading(false);
+            return;
+          }
+
+          if (!employerData.address.trim()) {
+            toast({
+              title: "Adress krävs",
+              description: "Vänligen ange företagets adress",
+              variant: "destructive"
+            });
+            setLoading(false);
+            return;
+          }
+
+          if (!employerData.website.trim()) {
+            toast({
+              title: "Webbplats krävs", 
+              description: "Vänligen ange företagets webbplats",
+              variant: "destructive"
+            });
+            setLoading(false);
+            return;
+          }
         }
 
         if (!email.trim()) {
@@ -204,85 +295,20 @@ const AuthMobile = ({
           return;
         }
 
-        // Job seeker specific validation
-        if (role === 'job_seeker') {
-          if (!phone.trim()) {
-            toast({
-              title: "Telefonnummer krävs",
-              description: "Vänligen ange ditt telefonnummer",
-              variant: "destructive"
-            });
-            setLoading(false);
-            return;
-          }
-        }
-
-        // Employer specific validation
-        if (role === 'employer') {
-          if (!companyName.trim()) {
-            toast({
-              title: "Företagsnamn krävs",
-              description: "Vänligen ange företagsnamn",
-              variant: "destructive"
-            });
-            setLoading(false);
-            return;
-          }
-
-          if (!industry.trim()) {
-            toast({
-              title: "Bransch krävs",
-              description: "Vänligen välj bransch",
-              variant: "destructive"
-            });
-            setLoading(false);
-            return;
-          }
-
-          if (!employeeCount) {
-            toast({
-              title: "Anställda krävs",
-              description: "Vänligen välj antal anställda",
-              variant: "destructive"
-            });
-            setLoading(false);
-            return;
-          }
-
-          if (!address.trim()) {
-            toast({
-              title: "Adress krävs",
-              description: "Vänligen ange företagets adress",
-              variant: "destructive"
-            });
-            setLoading(false);
-            return;
-          }
-
-          if (!website.trim()) {
-            toast({
-              title: "Webbplats krävs", 
-              description: "Vänligen ange företagets webbplats",
-              variant: "destructive"
-            });
-            setLoading(false);
-            return;
-          }
-        }
-
+        const currentData = role === 'job_seeker' ? jobSeekerData : employerData;
         const result = await signUp(email, password, {
           role,
-          first_name: firstName,
-          last_name: lastName,
-          phone: phone,
+          first_name: currentData.firstName,
+          last_name: currentData.lastName,
+          ...(role === 'job_seeker' && { phone: jobSeekerData.phone }),
           ...(role === 'employer' && {
-            company_name: companyName,
-            org_number: orgNumber,
-            industry: industry,
-            address: address,
-            website: website,
-            company_description: companyDescription,
-            employee_count: employeeCount
+            company_name: employerData.companyName,
+            org_number: employerData.orgNumber,
+            industry: employerData.industry,
+            address: employerData.address,
+            website: employerData.website,
+            company_description: employerData.companyDescription,
+            employee_count: employerData.employeeCount
           })
         });
         
@@ -600,26 +626,38 @@ const AuthMobile = ({
                           )}
 
                          <div className="grid grid-cols-2 gap-2">
-                            <div>
-                              <Label htmlFor="firstName" className="text-white">Förnamn *</Label>
-                             <Input
-                               id="firstName"
-                               value={firstName}
-                               onChange={(e) => setFirstName(e.target.value)}
-                               required
-                               className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                             />
-                           </div>
-                            <div>
-                              <Label htmlFor="lastName" className="text-white">Efternamn *</Label>
-                             <Input
-                               id="lastName"
-                               value={lastName}
-                               onChange={(e) => setLastName(e.target.value)}
-                               required
-                               className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                             />
-                           </div>
+                             <div>
+                               <Label htmlFor="firstName" className="text-white">Förnamn *</Label>
+                              <Input
+                                id="firstName"
+                                value={role === 'job_seeker' ? jobSeekerData.firstName : employerData.firstName}
+                                onChange={(e) => {
+                                  if (role === 'job_seeker') {
+                                    setJobSeekerData(prev => ({ ...prev, firstName: e.target.value }));
+                                  } else {
+                                    setEmployerData(prev => ({ ...prev, firstName: e.target.value }));
+                                  }
+                                }}
+                                required
+                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                              />
+                            </div>
+                             <div>
+                               <Label htmlFor="lastName" className="text-white">Efternamn *</Label>
+                              <Input
+                                id="lastName"
+                                value={role === 'job_seeker' ? jobSeekerData.lastName : employerData.lastName}
+                                onChange={(e) => {
+                                  if (role === 'job_seeker') {
+                                    setJobSeekerData(prev => ({ ...prev, lastName: e.target.value }));
+                                  } else {
+                                    setEmployerData(prev => ({ ...prev, lastName: e.target.value }));
+                                  }
+                                }}
+                                required
+                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                              />
+                            </div>
                          </div>
                          
                          <div className="relative">
@@ -649,18 +687,18 @@ const AuthMobile = ({
                                   <Phone className="h-4 w-4 inline mr-2" />
                                   Telefon *
                                 </Label>
-                                 <Input
-                                   id="phone"
-                                   type="tel"
-                                   value={phone}
-                                   onChange={(e) => handlePhoneChange(e.target.value)}
-                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                                   placeholder="070-123 45 67"
-                                   required
-                                 />
-                                {phoneError && (
-                                  <p className="text-destructive text-xs mt-1">{phoneError}</p>
-                                )}
+                                  <Input
+                                    id="phone"
+                                    type="tel"
+                                    value={jobSeekerData.phone}
+                                    onChange={(e) => handlePhoneChange(e.target.value)}
+                                    className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                    placeholder="070-123 45 67"
+                                    required
+                                  />
+                                 {jobSeekerData.phoneError && (
+                                   <p className="text-destructive text-xs mt-1">{jobSeekerData.phoneError}</p>
+                                 )}
                               </div>
                            )}
                        </div>
@@ -674,17 +712,17 @@ const AuthMobile = ({
                                <Label className="text-white font-medium">Företagsinformation</Label>
                              </div>
                              
-                             <div>
-                               <Label htmlFor="companyName" className="text-white">Företagsnamn *</Label>
-                                <Input
-                                  id="companyName"
-                                  value={companyName}
-                                  onChange={(e) => setCompanyName(e.target.value)}
-                                  placeholder="Mitt Företag"
-                                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                                  required
-                                />
-                             </div>
+                              <div>
+                                <Label htmlFor="companyName" className="text-white">Företagsnamn *</Label>
+                                 <Input
+                                   id="companyName"
+                                   value={employerData.companyName}
+                                   onChange={(e) => setEmployerData(prev => ({ ...prev, companyName: e.target.value }))}
+                                   placeholder="Mitt Företag"
+                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                   required
+                                 />
+                              </div>
 
                               <div>
                                 <Label htmlFor="industry" className="text-white">Bransch *</Label>
@@ -695,9 +733,9 @@ const AuthMobile = ({
                                       variant="outline"
                                       className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
                                     >
-                                      <span className="truncate text-left flex-1 px-1">
-                                        {industry || 'Välj bransch'}
-                                      </span>
+                                       <span className="truncate text-left flex-1 px-1">
+                                         {employerData.industry || 'Välj bransch'}
+                                       </span>
                                       <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
                                     </Button>
                                   </DropdownMenuTrigger>
@@ -738,15 +776,15 @@ const AuthMobile = ({
                                            <DropdownMenuItem
                                              key={industryOption}
                                              onSelect={(e) => e.preventDefault()}
-                                              onClick={() => {
-                                                setIndustry(industryOption);
-                                                setSearchTerm('');
-                                                setIndustryMenuOpen(false);
-                                              }}
+                                               onClick={() => {
+                                                 setEmployerData(prev => ({ ...prev, industry: industryOption }));
+                                                 setSearchTerm('');
+                                                 setIndustryMenuOpen(false);
+                                               }}
                                              className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white flex items-center justify-between transition-colors touch-manipulation`}
                                            >
                                              <span className="flex-1 pr-2">{industryOption}</span>
-                                             {industry === industryOption && (
+                                             {employerData.industry === industryOption && (
                                                <Check className={`${isMobile ? 'h-4 w-4' : 'h-4 w-4'} text-green-400 flex-shrink-0`} />
                                              )}
                                            </DropdownMenuItem>
@@ -759,11 +797,11 @@ const AuthMobile = ({
                                         ) && (
                                          <DropdownMenuItem
                                            onSelect={(e) => e.preventDefault()}
-                                            onClick={() => {
-                                              setIndustry(searchTerm);
-                                              setSearchTerm('');
-                                              setIndustryMenuOpen(false);
-                                            }}
+                                             onClick={() => {
+                                               setEmployerData(prev => ({ ...prev, industry: searchTerm }));
+                                               setSearchTerm('');
+                                               setIndustryMenuOpen(false);
+                                             }}
                                            className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white border-t border-slate-600/30 transition-colors touch-manipulation`}
                                          >
                                            <span className="flex-1">Använd "{searchTerm}"</span>
@@ -793,9 +831,9 @@ const AuthMobile = ({
                                       variant="outline"
                                       className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
                                     >
-                                      <span className="truncate text-left flex-1 px-1">
-                                        {employeeCount || 'Antal'}
-                                      </span>
+                                       <span className="truncate text-left flex-1 px-1">
+                                         {employerData.employeeCount || 'Antal'}
+                                       </span>
                                       <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
                                     </Button>
                                   </DropdownMenuTrigger>
@@ -814,14 +852,14 @@ const AuthMobile = ({
                                         <DropdownMenuItem
                                           key={count}
                                           onSelect={(e) => e.preventDefault()}
-                                          onClick={() => {
-                                            setEmployeeCount(count);
-                                            setEmployeeMenuOpen(false);
-                                          }}
+                                           onClick={() => {
+                                             setEmployerData(prev => ({ ...prev, employeeCount: count }));
+                                             setEmployeeMenuOpen(false);
+                                           }}
                                           className={`cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white flex items-center justify-between transition-colors touch-manipulation`}
                                         >
                                           <span className="flex-1 pr-2">{count}</span>
-                                          {employeeCount === count && (
+                                          {employerData.employeeCount === count && (
                                             <Check className={`${isMobile ? 'h-4 w-4' : 'h-4 w-4'} text-green-400 flex-shrink-0`} />
                                           )}
                                         </DropdownMenuItem>
@@ -836,14 +874,14 @@ const AuthMobile = ({
                                   <MapPin className="h-4 w-4 inline mr-2" />
                                   Adress *
                                 </Label>
-                                <Input
-                                  id="address"
-                                  value={address}
-                                  onChange={(e) => setAddress(e.target.value)}
-                                  placeholder="Ange din adress"
-                                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                                  required
-                                />
+                                 <Input
+                                   id="address"
+                                   value={employerData.address}
+                                   onChange={(e) => setEmployerData(prev => ({ ...prev, address: e.target.value }))}
+                                   placeholder="Ange din adress"
+                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                   required
+                                 />
                               </div>
 
                                <div>
@@ -851,26 +889,26 @@ const AuthMobile = ({
                                   <Globe className="h-4 w-4 inline mr-2" />
                                   Webbplats *
                                 </Label>
-                                <Input
-                                  id="website"
-                                  value={website}
-                                  onChange={(e) => setWebsite(e.target.value)}
-                                  placeholder="https://exempel.se"
-                                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                                  required
-                                />
+                                 <Input
+                                   id="website"
+                                   value={employerData.website}
+                                   onChange={(e) => setEmployerData(prev => ({ ...prev, website: e.target.value }))}
+                                   placeholder="https://exempel.se"
+                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                   required
+                                 />
                               </div>
 
                              <div>
                                <Label htmlFor="companyDescription" className="text-white">Kort beskrivning</Label>
-                               <Textarea
-                                 id="companyDescription"
-                                 value={companyDescription}
-                                 onChange={(e) => setCompanyDescription(e.target.value)}
-                                 placeholder="Beskriv vad ert företag gör..."
-                                 className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 resize-none"
-                                 rows={2}
-                               />
+                                <Textarea
+                                  id="companyDescription"
+                                  value={employerData.companyDescription}
+                                  onChange={(e) => setEmployerData(prev => ({ ...prev, companyDescription: e.target.value }))}
+                                  placeholder="Beskriv vad ert företag gör..."
+                                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 resize-none"
+                                  rows={2}
+                                />
                              </div>
                            </div>
                          </>

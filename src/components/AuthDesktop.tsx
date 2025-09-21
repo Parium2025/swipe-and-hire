@@ -36,12 +36,19 @@ const AuthDesktop = ({
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [phoneError, setPhoneError] = useState('');
-  const [company, setCompany] = useState('');
-  const [jobTitle, setJobTitle] = useState('');
+  // Separate form data for each role
+  const [jobSeekerData, setJobSeekerData] = useState({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    phoneError: ''
+  });
+  const [employerData, setEmployerData] = useState({
+    firstName: '',
+    lastName: '',
+    company: '',
+    jobTitle: ''
+  });
   const [role, setRole] = useState<'job_seeker' | 'employer'>('job_seeker');
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
@@ -98,9 +105,12 @@ const AuthDesktop = ({
   };
 
   const handlePhoneChange = (value: string) => {
-    setPhone(value);
     const validation = validatePhoneNumber(value);
-    setPhoneError(validation.error);
+    setJobSeekerData(prev => ({
+      ...prev,
+      phone: value,
+      phoneError: validation.error
+    }));
   };
 
   // Password strength calculation
@@ -141,11 +151,16 @@ const AuthDesktop = ({
           navigate('/search-jobs', { replace: true });
         }
       } else {
+        const currentData = role === 'job_seeker' ? jobSeekerData : employerData;
         const result = await signUp(email, password, {
           role,
-          first_name: firstName,
-          last_name: lastName,
-          phone: phone
+          first_name: currentData.firstName,
+          last_name: currentData.lastName,
+          ...(role === 'job_seeker' && { phone: jobSeekerData.phone }),
+          ...(role === 'employer' && { 
+            company: employerData.company,
+            job_title: employerData.jobTitle
+          })
         });
         
         if (result.error) {
@@ -458,8 +473,14 @@ const AuthDesktop = ({
                             <Label htmlFor="firstName" className="text-lg text-white">Förnamn</Label>
                             <Input
                               id="firstName"
-                              value={firstName}
-                              onChange={(e) => setFirstName(e.target.value)}
+                              value={role === 'job_seeker' ? jobSeekerData.firstName : employerData.firstName}
+                              onChange={(e) => {
+                                if (role === 'job_seeker') {
+                                  setJobSeekerData(prev => ({ ...prev, firstName: e.target.value }));
+                                } else {
+                                  setEmployerData(prev => ({ ...prev, firstName: e.target.value }));
+                                }
+                              }}
                               required
                               className="mt-2 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                             />
@@ -468,8 +489,14 @@ const AuthDesktop = ({
                             <Label htmlFor="lastName" className="text-lg text-white">Efternamn</Label>
                             <Input
                               id="lastName"
-                              value={lastName}
-                              onChange={(e) => setLastName(e.target.value)}
+                              value={role === 'job_seeker' ? jobSeekerData.lastName : employerData.lastName}
+                              onChange={(e) => {
+                                if (role === 'job_seeker') {
+                                  setJobSeekerData(prev => ({ ...prev, lastName: e.target.value }));
+                                } else {
+                                  setEmployerData(prev => ({ ...prev, lastName: e.target.value }));
+                                }
+                              }}
                               required
                               className="mt-2 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                             />
@@ -489,17 +516,42 @@ const AuthDesktop = ({
                             {/* email suggestions removed for simpler UX */}
                           </div>
                         </div>
-                        <div>
-                          <Label htmlFor="phone" className="text-lg text-white">Telefon</Label>
-                          <Input
-                            id="phone"
-                            type="tel"
-                            value={phone}
-                            onChange={(e) => handlePhoneChange(e.target.value)}
-                            className="mt-2 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                          />
-                          {phoneError && <p className="text-red-500 text-sm mt-1">{phoneError}</p>}
-                        </div>
+                        {role === 'job_seeker' && (
+                          <div>
+                            <Label htmlFor="phone" className="text-lg text-white">Telefon</Label>
+                            <Input
+                              id="phone"
+                              type="tel"
+                              value={jobSeekerData.phone}
+                              onChange={(e) => handlePhoneChange(e.target.value)}
+                              className="mt-2 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                            />
+                            {jobSeekerData.phoneError && <p className="text-red-500 text-sm mt-1">{jobSeekerData.phoneError}</p>}
+                          </div>
+                        )}
+                        
+                        {role === 'employer' && (
+                          <>
+                            <div>
+                              <Label htmlFor="company" className="text-lg text-white">Företag</Label>
+                              <Input
+                                id="company"
+                                value={employerData.company}
+                                onChange={(e) => setEmployerData(prev => ({ ...prev, company: e.target.value }))}
+                                className="mt-2 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="jobTitle" className="text-lg text-white">Befattning</Label>
+                              <Input
+                                id="jobTitle"
+                                value={employerData.jobTitle}
+                                onChange={(e) => setEmployerData(prev => ({ ...prev, jobTitle: e.target.value }))}
+                                className="mt-2 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                              />
+                            </div>
+                          </>
+                        )}
                         <div>
                           <Label htmlFor="password" className="text-lg text-white">Lösenord</Label>
                           <div className="relative">
