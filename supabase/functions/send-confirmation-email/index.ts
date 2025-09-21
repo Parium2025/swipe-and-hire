@@ -122,7 +122,7 @@ const getEmployerTemplate = (firstName: string, confirmationUrl: string) => `
     <!-- Header -->
     <div style="background-color: #1a237e; padding: 40px 30px; text-align: center;">
       <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Parium</h1>
-      <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 18px;">Hitta nästa generations talanger</p>
+      <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 18px;">Hitta nästa generations talang/talanger</p>
     </div>
     
      <!-- Content -->

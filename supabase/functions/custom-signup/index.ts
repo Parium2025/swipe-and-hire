@@ -187,9 +187,9 @@ Parium Team`,
                       <h1 style="margin: 0 0 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 28px; font-weight: bold; color: #ffffff;">
                         Parium
                       </h1>
-                      <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #ffffff;">
-                        Hitta nästa generations talanger
-                      </p>
+                       <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #ffffff;">
+                         Hitta nästa generations talang/talanger
+                       </p>
                     </td>
                   </tr>
                   
