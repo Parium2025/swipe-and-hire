@@ -307,19 +307,20 @@ Parium Team`,
                   <tr>
                     <td style="padding: 40px 30px;">
                       
-                       <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
-                         Hej ${firstName}!<br><br>
-                         Du har just klivit in i nästa generation av jobbsök.<br>
-                         Med Parium swipar du dig fram till möjligheter som faktiskt kan förändra din vardag.
-                       </p>
+                        <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+                          Hej ${firstName}!
+                        </p>
+                        <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">
+                          Du har just klivit in i nästa generation av jobbsök. Med Parium swipar du dig fram till möjligheter som faktiskt kan förändra din vardag.
+                        </p>
                       
                       <!-- Features list -->
                       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
                         <tr>
-                          <td style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827;">
-                            <p style="margin: 0 0 12px 0;">• Matcha med jobb som passar dig</p>
-                            <p style="margin: 0 0 12px 0;">• Swipea, ansök och gå vidare på sekunder</p>
-                            <p style="margin: 0;">• Spara tid med smarta och effektiva verktyg</p>
+                           <td style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: left;">
+                             <p style="margin: 0 0 12px 0; text-align: left;">• Matcha med jobb som passar dig</p>
+                             <p style="margin: 0 0 12px 0; text-align: left;">• Swipea, ansök och gå vidare på sekunder</p>
+                             <p style="margin: 0; text-align: left;">• Spara tid med smarta och effektiva verktyg</p>
                           </td>
                         </tr>
                       </table>
