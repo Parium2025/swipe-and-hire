@@ -130,9 +130,9 @@ const Index = () => {
   // Show app intro tutorial after onboarding
   const showTourOverlay = showIntroTutorial;
   
-  // For employers, check if profile needs setup (basic info missing)
+  // For employers, check if profile needs setup (basic info missing) - except for admin
   const needsProfileSetup = !profile.bio && !profile.location && !profile.profile_image_url;
-  if (needsProfileSetup && userRole?.role === 'employer') {
+  if (needsProfileSetup && userRole?.role === 'employer' && user?.email !== 'fredrikandits@hotmail.com') {
     console.log('Showing ProfileSetup for employer');
     return <ProfileSetup />;
   }
