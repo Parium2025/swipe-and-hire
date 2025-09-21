@@ -62,6 +62,7 @@ const AuthDesktop = ({
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetPasswordSent, setResetPasswordSent] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
+  const [hasRegistered, setHasRegistered] = useState(false);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
@@ -145,6 +146,13 @@ const AuthDesktop = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Om användaren redan har registrerat sig och klickar på "Skicka igen"
+    if (hasRegistered) {
+      await handleResendConfirmation();
+      return;
+    }
+    
     setLoading(true);
     setShowResend(false);
     setShowResetPassword(false);
@@ -190,6 +198,7 @@ const AuthDesktop = ({
           }
         } else {
           setShowResend(true);
+          setHasRegistered(true);
         }
       }
     } catch (error) {
@@ -403,7 +412,10 @@ const AuthDesktop = ({
                     </p>
                   </div>
                   
-                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => setIsLogin(value === 'login')}>
+                   <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => {
+                     setIsLogin(value === 'login');
+                     setHasRegistered(false); // Återställ när användaren växlar tab
+                   }}>
                     <TabsList className="grid w-full grid-cols-2 mb-8 bg-transparent border-0">
                       <TabsTrigger value="login" className="text-lg font-medium text-white data-[state=active]:text-white">Logga in</TabsTrigger>
                       <TabsTrigger value="signup" className="text-lg font-medium text-white data-[state=active]:text-white">Registrera</TabsTrigger>
@@ -614,9 +626,15 @@ const AuthDesktop = ({
                           </div>
                         </div>
                         
-                        <Button type="submit" className="w-full py-3 text-lg" disabled={loading}>
-                          {loading ? 'Registrerar...' : 'Registrera'}
-                        </Button>
+                         <Button 
+                           type="submit" 
+                           className="w-full py-3 text-lg" 
+                           disabled={loading || resendLoading}
+                         >
+                           {loading ? 'Registrerar...' : 
+                            resendLoading ? 'Skickar igen...' :
+                            hasRegistered ? 'Skicka igen' : 'Registrera'}
+                         </Button>
                       </form>
                     </TabsContent>
                   </Tabs>

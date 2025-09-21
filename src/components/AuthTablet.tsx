@@ -57,6 +57,7 @@ const AuthTablet = ({
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetPasswordSent, setResetPasswordSent] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
+  const [hasRegistered, setHasRegistered] = useState(false);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
@@ -136,6 +137,13 @@ const AuthTablet = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Om användaren redan har registrerat sig och klickar på "Skicka igen"
+    if (hasRegistered) {
+      await handleResendConfirmation();
+      return;
+    }
+    
     setLoading(true);
     setShowResend(false);
     setShowResetPassword(false);
@@ -175,6 +183,7 @@ const AuthTablet = ({
           }
         } else {
           setShowResend(true);
+          setHasRegistered(true);
         }
       }
     } catch (error) {
@@ -301,7 +310,10 @@ const AuthTablet = ({
               
               <Card className="relative bg-white/10 backdrop-blur-sm border-white/20 shadow-xl rounded-2xl">
                 <CardContent className="p-6">
-                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => setIsLogin(value === 'login')}>
+                   <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => {
+                     setIsLogin(value === 'login');
+                     setHasRegistered(false); // Återställ när användaren växlar tab
+                   }}>
                     <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0">
                       <TabsTrigger 
                         value="login" 
@@ -557,9 +569,15 @@ const AuthTablet = ({
                           )}
                         </div>
                         
-                        <Button type="submit" className="w-full bg-parium-navy hover:bg-parium-navy/90 text-white" disabled={loading}>
-                          {loading ? "Registrerar..." : "Registrera"}
-                        </Button>
+                         <Button 
+                           type="submit" 
+                           className="w-full bg-parium-navy hover:bg-parium-navy/90 text-white" 
+                           disabled={loading || resendLoading}
+                         >
+                           {loading ? "Registrerar..." : 
+                            resendLoading ? "Skickar igen..." :
+                            hasRegistered ? "Skicka igen" : "Registrera"}
+                         </Button>
                       </form>
                     </TabsContent>
                   </Tabs>
