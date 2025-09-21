@@ -41,14 +41,14 @@ const AuthMobile = ({
   const [isLogin, setIsLogin] = useState(true);
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   // Separate form data for each role
   const [jobSeekerData, setJobSeekerData] = useState({
     firstName: '',
     lastName: '',
     phone: '',
-    phoneError: ''
+    phoneError: '',
+    email: '',
+    password: ''
   });
   const [employerData, setEmployerData] = useState({
     firstName: '',
@@ -59,7 +59,9 @@ const AuthMobile = ({
     address: '',
     website: '',
     companyDescription: '',
-    employeeCount: ''
+    employeeCount: '',
+    email: '',
+    password: ''
   });
   const [role, setRole] = useState<'job_seeker' | 'employer'>('job_seeker');
   const [showPassword, setShowPassword] = useState(false);
@@ -89,7 +91,11 @@ const AuthMobile = ({
 
   // Handle email input with suggestions
   const handleEmailChange = (value: string) => {
-    setEmail(value);
+    if (role === 'job_seeker') {
+      setJobSeekerData(prev => ({ ...prev, email: value }));
+    } else {
+      setEmployerData(prev => ({ ...prev, email: value }));
+    }
     
     if (value.includes('@')) {
       const [localPart, domainPart] = value.split('@');
@@ -143,7 +149,11 @@ const AuthMobile = ({
   };
 
   const handlePasswordChange = (newPassword: string) => {
-    setPassword(newPassword);
+    if (role === 'job_seeker') {
+      setJobSeekerData(prev => ({ ...prev, password: newPassword }));
+    } else {
+      setEmployerData(prev => ({ ...prev, password: newPassword }));
+    }
     setPasswordStrength(calculatePasswordStrength(newPassword));
   };
 
@@ -155,8 +165,12 @@ const AuthMobile = ({
     setResetPasswordSent(false);
 
     try {
+      const currentData = role === 'job_seeker' ? jobSeekerData : employerData;
+      const currentEmail = currentData.email;
+      const currentPassword = currentData.password;
+      
       if (isLogin) {
-        const result = await signIn(email, password);
+        const result = await signIn(currentEmail, currentPassword);
         
         if (result.error) {
           if (result.error.code === 'email_not_confirmed') {
@@ -275,7 +289,7 @@ const AuthMobile = ({
           }
         }
 
-        if (!email.trim()) {
+        if (!currentEmail.trim()) {
           toast({
             title: "E-post krävs",
             description: "Vänligen ange din e-postadress",
@@ -285,7 +299,7 @@ const AuthMobile = ({
           return;
         }
 
-        if (!password.trim()) {
+        if (!currentPassword.trim()) {
           toast({
             title: "Lösenord krävs",
             description: "Vänligen ange ett lösenord",
@@ -295,8 +309,7 @@ const AuthMobile = ({
           return;
         }
 
-        const currentData = role === 'job_seeker' ? jobSeekerData : employerData;
-        const result = await signUp(email, password, {
+        const result = await signUp(currentEmail, currentPassword, {
           role,
           first_name: currentData.firstName,
           last_name: currentData.lastName,
@@ -332,14 +345,16 @@ const AuthMobile = ({
   };
 
   const handleResendConfirmation = async () => {
-    if (!email) return;
+    const currentData = role === 'job_seeker' ? jobSeekerData : employerData;
+    if (!currentData.email) return;
     setLoading(true);
-    await resendConfirmation(email);
+    await resendConfirmation(currentData.email);
     setLoading(false);
   };
 
    const handleResetPasswordEmail = async () => {
-     if (!email) {
+     const currentData = role === 'job_seeker' ? jobSeekerData : employerData;
+     if (!currentData.email) {
        toast({
          title: "E-post krävs",
          description: "Ange din e-postadress först",
@@ -348,7 +363,7 @@ const AuthMobile = ({
        return;
      }
      setResetLoading(true);
-     const result = await resetPassword(email);
+     const result = await resetPassword(currentData.email);
      if (!result.error) {
        setResetPasswordSent(true);
      }
@@ -503,7 +518,7 @@ const AuthMobile = ({
                         <Input
                           id="email"
                           type="email"
-                          value={email}
+                          value={role === 'job_seeker' ? jobSeekerData.email : employerData.email}
                           onChange={(e) => handleEmailChange(e.target.value)}
                           required
                           name="email"
@@ -524,7 +539,7 @@ const AuthMobile = ({
                           <Input
                             id="password"
                             type={showPassword ? 'text' : 'password'}
-                            value={password}
+                            value={role === 'job_seeker' ? jobSeekerData.password : employerData.password}
                             onChange={(e) => handlePasswordChange(e.target.value)}
                             required
                             name="current-password"
@@ -668,7 +683,7 @@ const AuthMobile = ({
                            <Input
                              id="email"
                              type="email"
-                             value={email}
+                             value={role === 'job_seeker' ? jobSeekerData.email : employerData.email}
                              onChange={(e) => handleEmailChange(e.target.value)}
                              required
                              name="email"
@@ -922,7 +937,7 @@ const AuthMobile = ({
                           <Input
                             id="password"
                             type={showPassword ? 'text' : 'password'}
-                            value={password}
+                            value={role === 'job_seeker' ? jobSeekerData.password : employerData.password}
                             onChange={(e) => handlePasswordChange(e.target.value)}
                             required
                             name="new-password"
@@ -939,7 +954,7 @@ const AuthMobile = ({
                             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                           </Button>
                         </div>
-                        {password && (
+                        {(role === 'job_seeker' ? jobSeekerData.password : employerData.password) && (
                           <div className="mt-2">
                             <div className="flex items-center gap-1">
                               {[...Array(5)].map((_, i) => (

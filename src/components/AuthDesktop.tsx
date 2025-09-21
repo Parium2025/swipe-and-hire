@@ -41,13 +41,17 @@ const AuthDesktop = ({
     firstName: '',
     lastName: '',
     phone: '',
-    phoneError: ''
+    phoneError: '',
+    email: '',
+    password: ''
   });
   const [employerData, setEmployerData] = useState({
     firstName: '',
     lastName: '',
     company: '',
-    jobTitle: ''
+    jobTitle: '',
+    email: '',
+    password: ''
   });
   const [role, setRole] = useState<'job_seeker' | 'employer'>('job_seeker');
   const [showPassword, setShowPassword] = useState(false);
@@ -71,7 +75,12 @@ const AuthDesktop = ({
 
   // Handle email input with suggestions
   const handleEmailChange = (value: string) => {
-    setEmail(value);
+    const currentData = role === 'job_seeker' ? jobSeekerData : employerData;
+    if (role === 'job_seeker') {
+      setJobSeekerData(prev => ({ ...prev, email: value }));
+    } else {
+      setEmployerData(prev => ({ ...prev, email: value }));
+    }
     
     if (value.includes('@')) {
       const [localPart, domainPart] = value.split('@');
@@ -125,7 +134,11 @@ const AuthDesktop = ({
   };
 
   const handlePasswordChange = (newPassword: string) => {
-    setPassword(newPassword);
+    if (role === 'job_seeker') {
+      setJobSeekerData(prev => ({ ...prev, password: newPassword }));
+    } else {
+      setEmployerData(prev => ({ ...prev, password: newPassword }));
+    }
     setPasswordStrength(calculatePasswordStrength(newPassword));
   };
 
@@ -137,8 +150,12 @@ const AuthDesktop = ({
     setResetPasswordSent(false);
 
     try {
+      const currentData = role === 'job_seeker' ? jobSeekerData : employerData;
+      const currentEmail = currentData.email;
+      const currentPassword = currentData.password;
+      
       if (isLogin) {
-        const result = await signIn(email, password);
+        const result = await signIn(currentEmail, currentPassword);
         
         if (result.error) {
           if (result.error.code === 'email_not_confirmed') {
@@ -151,8 +168,7 @@ const AuthDesktop = ({
           navigate('/search-jobs', { replace: true });
         }
       } else {
-        const currentData = role === 'job_seeker' ? jobSeekerData : employerData;
-        const result = await signUp(email, password, {
+        const result = await signUp(currentEmail, currentPassword, {
           role,
           first_name: currentData.firstName,
           last_name: currentData.lastName,
@@ -183,14 +199,16 @@ const AuthDesktop = ({
   };
 
   const handleResendConfirmation = async () => {
-    if (!email) return;
+    const currentData = role === 'job_seeker' ? jobSeekerData : employerData;
+    if (!currentData.email) return;
     setLoading(true);
-    await resendConfirmation(email);
+    await resendConfirmation(currentData.email);
     setLoading(false);
   };
 
    const handleResetPassword = async () => {
-     if (!email) {
+     const currentData = role === 'job_seeker' ? jobSeekerData : employerData;
+     if (!currentData.email) {
        toast({
          title: "E-post krävs",
          description: "Ange din e-postadress först",
@@ -199,7 +217,7 @@ const AuthDesktop = ({
        return;
      }
      setResetLoading(true);
-     const result = await resetPassword(email);
+     const result = await resetPassword(currentData.email);
      if (!result.error) {
        setResetPasswordSent(true);
      }
@@ -398,7 +416,7 @@ const AuthDesktop = ({
                             <Input
                               id="email"
                               type="email"
-                              value={email}
+                              value={role === 'job_seeker' ? jobSeekerData.email : employerData.email}
                               onChange={(e) => handleEmailChange(e.target.value)}
                               required
                               name="email"
@@ -417,7 +435,7 @@ const AuthDesktop = ({
                             <Input
                               id="password"
                               type={showPassword ? 'text' : 'password'}
-                              value={password}
+                              value={role === 'job_seeker' ? jobSeekerData.password : employerData.password}
                               onChange={(e) => handlePasswordChange(e.target.value)}
                               required
                               name="current-password"
@@ -508,7 +526,7 @@ const AuthDesktop = ({
                             <Input
                               id="email"
                               type="email"
-                              value={email}
+                              value={role === 'job_seeker' ? jobSeekerData.email : employerData.email}
                               onChange={(e) => handleEmailChange(e.target.value)}
                               required
                               className="mt-2 w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
@@ -558,7 +576,7 @@ const AuthDesktop = ({
                             <Input
                                 id="password"
                                 type={showPassword ? 'text' : 'password'}
-                                value={password}
+                                value={role === 'job_seeker' ? jobSeekerData.password : employerData.password}
                                 onChange={(e) => handlePasswordChange(e.target.value)}
                                 required
                                 name="new-password"
