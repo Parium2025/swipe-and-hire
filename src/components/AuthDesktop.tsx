@@ -414,9 +414,19 @@ const AuthDesktop = ({
                      setHasRegistered(false); // Låt upp knappen när användaren byter flik
                      setShowResend(false); // Återställ meddelande när användaren byter flik
                    }}>
-                    <TabsList className="grid w-full grid-cols-2 mb-8 bg-transparent border-0">
-                      <TabsTrigger value="login" className="text-lg font-medium text-white data-[state=active]:text-white">Logga in</TabsTrigger>
-                      <TabsTrigger value="signup" className="text-lg font-medium text-white data-[state=active]:text-white">Registrera</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-2 mb-8 bg-transparent border-0 p-0 h-auto gap-2">
+                      <TabsTrigger 
+                        value="login" 
+                        className="text-white data-[state=active]:bg-parium-navy data-[state=active]:text-white rounded-md font-medium text-lg"
+                      >
+                        Logga in
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="signup"
+                        className="text-white data-[state=active]:bg-parium-navy data-[state=active]:text-white rounded-md font-medium text-lg"
+                      >
+                        Registrera
+                      </TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="login">

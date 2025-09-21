@@ -316,16 +316,16 @@ const AuthTablet = ({
                      setHasRegistered(false); // Låt upp knappen när användaren byter flik
                      setShowResend(false); // Återställ meddelande när användaren byter flik
                    }}>
-                    <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0">
+                    <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0 p-0 h-auto gap-2">
                       <TabsTrigger 
                         value="login" 
-                        className="text-white data-[state=active]:bg-parium-navy data-[state=active]:text-white"
+                        className="text-white data-[state=active]:bg-parium-navy data-[state=active]:text-white rounded-md font-medium"
                       >
                         Logga in
                       </TabsTrigger>
                       <TabsTrigger 
                         value="signup"
-                        className="text-white data-[state=active]:bg-parium-navy data-[state=active]:text-white"
+                        className="text-white data-[state=active]:bg-parium-navy data-[state=active]:text-white rounded-md font-medium"
                       >
                         Registrera
                       </TabsTrigger>
