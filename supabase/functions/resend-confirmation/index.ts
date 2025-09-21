@@ -138,7 +138,7 @@ const handler = async (req: Request): Promise<Response> => {
                </p>
                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
                  <tr>
-                   <td style="font-size: 16px; color: #111827;">
+                   <td style="font-size: 16px; color: #111827; text-align: center;">
                      <p style="margin: 0 0 12px 0;">• Kandidater med rätt kvalifikationer och driv</p>
                      <p style="margin: 0 0 12px 0;">• Smidiga rekryteringsverktyg för modern personalrekrytering</p>
                      <p style="margin: 0;">• Direkt kontakt med potentiella medarbetare</p>
