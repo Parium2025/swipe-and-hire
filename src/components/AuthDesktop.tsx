@@ -554,14 +554,15 @@ const AuthDesktop = ({
                     <div className="mt-6 p-4 bg-secondary/10 rounded-lg text-center border border-secondary/20">
                       <p className="text-sm mb-2 font-medium text-white">📧 Kolla din e-post för bekräftelselänk</p>
                       <div className="bg-orange-50 border border-orange-200 rounded p-2 mb-3">
-                        <p className="text-xs text-orange-800 font-medium">⚠️ VIKTIGT</p>
-                        <p className="text-xs text-orange-700">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.</p>
+                        <p className="text-xs text-orange-600 font-medium">⚠️ VIKTIGT</p>
+                        <p className="text-xs text-orange-600">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.</p>
                       </div>
                       <Button
-                        variant="outline"
+                        variant="secondary"
                         size="sm"
                         onClick={handleResendConfirmation}
                         disabled={loading}
+                        className="bg-white text-slate-900 hover:bg-gray-100"
                       >
                         Skicka igen
                       </Button>
@@ -586,14 +587,15 @@ const AuthDesktop = ({
                     <div className="mt-6 p-4 bg-secondary/10 rounded-lg text-center border border-secondary/20">
                       <p className="text-sm mb-2 font-medium text-white">📧 Återställningsmail skickat!</p>
                       <div className="bg-orange-50 border border-orange-200 rounded p-2 mb-3">
-                        <p className="text-xs text-orange-800 font-medium">⚠️ VIKTIGT</p>
-                        <p className="text-xs text-orange-700">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.</p>
+                        <p className="text-xs text-orange-600 font-medium">⚠️ VIKTIGT</p>
+                        <p className="text-xs text-orange-600">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där.</p>
                       </div>
                       <Button
-                        variant="outline"
+                        variant="secondary"
                         size="sm"
                         onClick={handleResetPassword}
                         disabled={resetLoading}
+                        className="bg-white text-slate-900 hover:bg-gray-100"
                       >
                         {resetLoading ? "Skickar..." : "Skicka igen"}
                       </Button>
