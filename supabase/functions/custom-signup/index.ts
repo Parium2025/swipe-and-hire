@@ -195,7 +195,7 @@ Parium Team`,
                   
                   <!-- Content -->
                   <tr>
-                    <td style="padding: 40px 30px;">
+                    <td align="left" style="padding: 40px 30px; text-align: left;">
                       
                         <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">
                           Hej ${firstName}!<br><br>
