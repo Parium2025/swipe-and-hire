@@ -126,27 +126,27 @@ const getEmployerTemplate = (firstName: string, confirmationUrl: string) => `
     
     <!-- Content -->
     <div style="padding: 40px 30px;">
-      <p style="color: #333333; margin: 0 0 20px 0; font-size: 18px; line-height: 1.6; text-align: center;">
-        Hej ${firstName}!<br><br>
-         Välkommen till Parium - plattformen där <strong>RS6</strong> hittar nästa generations talanger.<br>
-         Vi hjälper er att rekrytera enklare, snabbare och träffsäkrare.
-       </p>
-       
-       <!-- Benefits list for employers -->
-       <div style="margin: 30px 0; text-align: center; max-width: 450px; margin-left: auto; margin-right: auto;">
-         <div style="margin-bottom: 15px; text-align: center;">
-           <span style="color: #1a237e; font-size: 18px; margin-right: 5px; line-height: 1.4;">•</span>
-           <span style="color: #333333; font-size: 16px; line-height: 1.4;">Kandidater med rätt kvalifikationer och driv</span>
-         </div>
-         <div style="margin-bottom: 15px; text-align: center;">
-           <span style="color: #1a237e; font-size: 18px; margin-right: 5px; line-height: 1.4;">•</span>
-           <span style="color: #333333; font-size: 16px; line-height: 1.4;">Smidiga rekryteringsverktyg för modern personalrekrytering</span>
-         </div>
-         <div style="margin-bottom: 30px; text-align: center;">
-           <span style="color: #1a237e; font-size: 18px; margin-right: 5px; line-height: 1.4;">•</span>
-           <span style="color: #333333; font-size: 16px; line-height: 1.4;">Direkt kontakt med potentiella medarbetare</span>
-         </div>
-       </div>
+       <p style="color: #333333; margin: 0 0 20px 0; font-size: 18px; line-height: 1.6; text-align: left;">
+         Hej ${firstName}!<br><br>
+          Välkommen till Parium - plattformen där <strong>RS6</strong> hittar nästa generations talanger.<br>
+          Vi hjälper er att rekrytera enklare, snabbare och träffsäkrare.
+        </p>
+        
+        <!-- Benefits list for employers -->
+        <div style="margin: 30px 0; text-align: left; max-width: 450px; margin-left: auto; margin-right: auto;">
+          <div style="margin-bottom: 15px; text-align: left;">
+            <span style="color: #1a237e; font-size: 18px; margin-right: 10px; line-height: 1.4;">•</span>
+            <span style="color: #333333; font-size: 16px; line-height: 1.4;">Kandidater med rätt kvalifikationer och driv</span>
+          </div>
+          <div style="margin-bottom: 15px; text-align: left;">
+            <span style="color: #1a237e; font-size: 18px; margin-right: 10px; line-height: 1.4;">•</span>
+            <span style="color: #333333; font-size: 16px; line-height: 1.4;">Smidiga rekryteringsverktyg för modern personalrekrytering</span>
+          </div>
+          <div style="margin-bottom: 30px; text-align: left;">
+            <span style="color: #1a237e; font-size: 18px; margin-right: 10px; line-height: 1.4;">•</span>
+            <span style="color: #333333; font-size: 16px; line-height: 1.4;">Direkt kontakt med potentiella medarbetare</span>
+          </div>
+        </div>
       
       <!-- Button -->
       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">

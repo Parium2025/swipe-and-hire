@@ -197,19 +197,19 @@ Parium Team`,
                   <tr>
                     <td style="padding: 40px 30px;">
                       
-                       <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
-                         Hej ${firstName}!<br><br>
-                          Välkommen till Parium - plattformen där <strong>${companyName}</strong> hittar nästa generations talanger.<br>
-                          Vi hjälper er att rekrytera enklare, snabbare och träffsäkrare.
-                        </p>
-                       
-                        <!-- Features list for employers -->
-                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
-                          <tr>
-                            <td style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center;">
-                              <p style="margin: 0 0 12px 0; text-align: center;">• Kandidater med rätt kvalifikationer och driv</p>
-                              <p style="margin: 0 0 12px 0; text-align: center;">• Smidiga rekryteringsverktyg för modern personalrekrytering</p>
-                              <p style="margin: 0; text-align: center;">• Direkt kontakt med potentiella medarbetare</p>
+                        <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">
+                          Hej ${firstName}!<br><br>
+                           Välkommen till Parium - plattformen där <strong>${companyName}</strong> hittar nästa generations talanger.<br>
+                           Vi hjälper er att rekrytera enklare, snabbare och träffsäkrare.
+                         </p>
+                        
+                         <!-- Features list for employers -->
+                         <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
+                           <tr>
+                             <td style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: left;">
+                               <p style="margin: 0 0 12px 0; text-align: left;">• Kandidater med rätt kvalifikationer och driv</p>
+                               <p style="margin: 0 0 12px 0; text-align: left;">• Smidiga rekryteringsverktyg för modern personalrekrytering</p>
+                               <p style="margin: 0; text-align: left;">• Direkt kontakt med potentiella medarbetare</p>
                            </td>
                          </tr>
                        </table>
