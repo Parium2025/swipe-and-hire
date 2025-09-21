@@ -30,6 +30,8 @@ const handler = async (req: Request): Promise<Response> => {
     const { email, password, data }: SignupRequest = await req.json();
     
     const firstName = data?.first_name || 'där';
+    const isEmployer = data?.role === 'employer';
+    const companyName = data?.company_name || 'Ditt företag';
 
     console.log(`Attempting signup for email: ${email}`);
 
@@ -134,8 +136,25 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await resend.emails.send({
       from: "Parium <noreply@parium.se>",
       to: [email],
-      subject: "Bekräfta ditt konto – Parium",
-      text: `Hej ${firstName}!
+      subject: isEmployer ? "Välkommen till Parium – Bekräfta ditt företagskonto" : "Bekräfta ditt konto – Parium",
+      text: isEmployer ? 
+        `Hej ${firstName}!
+
+Välkommen till Parium - plattformen där ${companyName} hittar nästa generations talanger.
+
+Bekräfta ditt företagskonto genom att klicka på länken:
+${confirmationUrl}
+
+Med Parium får ni tillgång till:
+• Kvalificerade kandidater som matchar era behov
+• Smidiga rekryteringsverktyg
+• Direkt kontakt med potentiella medarbetare
+
+Om du inte skapade ett konto kan du ignorera detta meddelande.
+
+Parium Team` 
+      :
+        `Hej ${firstName}!
 
 Bekräfta ditt konto genom att klicka på länken:
 ${confirmationUrl}
@@ -143,7 +162,118 @@ ${confirmationUrl}
 Om du inte skapade ett konto kan du ignorera detta meddelande.
 
 Parium Team`,
-      html: `
+      html: isEmployer ? 
+        // Employer email template
+        `
+        <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+        <html xmlns="http://www.w3.org/1999/xhtml">
+        <head>
+          <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+          <title>Välkommen till Parium – Bekräfta ditt företagskonto</title>
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #F9FAFB; font-family: Arial, Helvetica, sans-serif;">
+          
+          <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F9FAFB;">
+            <tr>
+              <td align="center" style="padding: 40px 20px;">
+                
+                <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; max-width: 600px;">
+                  
+                  <!-- Header -->
+                  <tr>
+                    <td style="background-color: #1E3A8A; padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0;">
+                      
+                      <h1 style="margin: 0 0 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 28px; font-weight: bold; color: #ffffff;">
+                        Parium
+                      </h1>
+                      <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #ffffff;">
+                        Hitta nästa generations talanger
+                      </p>
+                    </td>
+                  </tr>
+                  
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 40px 30px;">
+                      
+                       <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+                         Hej ${firstName}!<br><br>
+                         Välkommen till Parium - plattformen där <strong>${companyName}</strong> hittar nästa generations talanger.<br>
+                         Förenkla er rekrytering och koppla upp er med de bästa kandidaterna.
+                       </p>
+                      
+                      <!-- Button with bulletproof mobile centering -->
+                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
+                        <tr>
+                          <td align="center" style="padding: 0;">
+                            <!--[if mso]>
+                            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" style="height:48px;v-text-anchor:middle;width:280px;" arcsize="21%" stroke="f" fillcolor="#1E3A8A">
+                            <w:anchorlock/>
+                            <center>
+                            <![endif]-->
+                            <a href="${confirmationUrl}" 
+                               style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none; mso-hide: all;">
+                              Bekräfta företagskonto
+                            </a>
+                            <!--[if mso]>
+                            </center>
+                            </v:roundrect>
+                            <![endif]-->
+                          </td>
+                        </tr>
+                      </table>
+                      
+                      <!-- Features list for employers -->
+                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
+                        <tr>
+                          <td style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827;">
+                            <p style="margin: 0 0 12px 0;">• Kvalificerade kandidater som matchar era behov</p>
+                            <p style="margin: 0 0 12px 0;">• Smidiga rekryteringsverktyg för modern personalrekrytering</p>
+                            <p style="margin: 0;">• Direkt kontakt med potentiella medarbetare</p>
+                          </td>
+                        </tr>
+                      </table>
+                      
+                      <!-- Alternative link -->
+                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
+                        <tr>
+                          <td style="background-color: #F9FAFB; padding: 20px; border-radius: 8px;">
+                            <p style="margin: 0 0 12px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #6B7280; text-align: center;">
+                              Fungerar inte knappen? Kopiera länken nedan:
+                            </p>
+                            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #1E3A8A; word-break: break-all; text-align: center;">
+                              ${confirmationUrl}
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                      
+                    </td>
+                  </tr>
+                  
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background-color: #F9FAFB; padding: 24px 30px; text-align: center; border-top: 1px solid #E5E7EB; border-radius: 0 0 12px 12px;">
+                      <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #6B7280;">
+                        Parium AB · Stockholm<br>
+                        Du får detta mail för att du registrerat ett företagskonto i Parium.
+                      </p>
+                    </td>
+                  </tr>
+                  
+                </table>
+                
+              </td>
+            </tr>
+          </table>
+          
+        </body>
+        </html>
+        `
+      :
+        // Job seeker email template (existing)
+        `
         <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
         <html xmlns="http://www.w3.org/1999/xhtml">
         <head>
@@ -249,7 +379,7 @@ Parium Team`,
           
         </body>
         </html>
-      `
+        `
     });
 
     console.log("Custom signup email sent:", emailResponse);
