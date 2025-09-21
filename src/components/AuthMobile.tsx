@@ -162,9 +162,8 @@ const AuthMobile = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Om användaren redan har registrerat sig och klickar på "Skicka igen"
+    // Förhindra submit om användaren redan har registrerat sig
     if (hasRegistered) {
-      await handleResendConfirmation();
       return;
     }
     
@@ -996,12 +995,10 @@ const AuthMobile = ({
                       
                        <Button 
                          type="submit" 
-                         className="w-full bg-parium-navy hover:bg-parium-navy/90 text-white" 
-                         disabled={loading || resendLoading}
+                         className={`w-full bg-parium-navy hover:bg-parium-navy/90 text-white ${hasRegistered ? 'opacity-50 cursor-not-allowed' : ''}`}
+                         disabled={loading || hasRegistered}
                        >
-                         {loading ? "Registrerar..." : 
-                          resendLoading ? "Skickar igen..." :
-                          hasRegistered ? "Skicka igen" : "Registrera"}
+                         {loading ? "Registrerar..." : "Registrera"}
                        </Button>
                     </form>
                   </TabsContent>
