@@ -493,8 +493,8 @@ const AuthMobile = ({
                           )}
 
                          <div className="grid grid-cols-2 gap-2">
-                           <div>
-                             <Label htmlFor="firstName" className="text-white">Förnamn</Label>
+                            <div>
+                              <Label htmlFor="firstName" className="text-white">Förnamn *</Label>
                              <Input
                                id="firstName"
                                value={firstName}
@@ -503,8 +503,8 @@ const AuthMobile = ({
                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                              />
                            </div>
-                           <div>
-                             <Label htmlFor="lastName" className="text-white">Efternamn</Label>
+                            <div>
+                              <Label htmlFor="lastName" className="text-white">Efternamn *</Label>
                              <Input
                                id="lastName"
                                value={lastName}
@@ -516,10 +516,10 @@ const AuthMobile = ({
                          </div>
                          
                          <div className="relative">
-                           <Label htmlFor="email" className="text-white">
-                             <Mail className="h-4 w-4 inline mr-2" />
-                             E-post
-                           </Label>
+                            <Label htmlFor="email" className="text-white">
+                              <Mail className="h-4 w-4 inline mr-2" />
+                              E-post *
+                            </Label>
                            <Input
                              id="email"
                              type="email"
@@ -767,10 +767,10 @@ const AuthMobile = ({
                          </>
                        )}
                       <div>
-                        <Label htmlFor="password" className="text-white">
-                          <Key className="h-4 w-4 inline mr-2" />
-                          Lösenord
-                        </Label>
+                         <Label htmlFor="password" className="text-white">
+                           <Key className="h-4 w-4 inline mr-2" />
+                           Lösenord *
+                         </Label>
                         <div className="relative mt-1">
                           <Input
                             id="password"
