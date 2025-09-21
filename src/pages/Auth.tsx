@@ -274,7 +274,7 @@ const Auth = () => {
       // Hantera bekräftelsestatusmeddelanden från redirect
       if (confirmed === 'success') {
         setConfirmationStatus('success');
-        setConfirmationMessage('🎉 Fantastiskt! Ditt konto har aktiverats och du kan nu logga in i Parium.');
+        setConfirmationMessage('Fantastiskt! Ditt konto har aktiverats och du kan nu logga in i Parium.');
         console.log('Showing success confirmation message');
       } else if (confirmed === 'already') {
         setConfirmationStatus('already-confirmed');
