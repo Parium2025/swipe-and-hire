@@ -19,6 +19,9 @@ import Subscription from '@/pages/Subscription';
 import Billing from '@/pages/Billing';
 import Support from '@/pages/Support';
 import SupportAdmin from '@/pages/SupportAdmin';
+import EmployerProfile from '@/pages/employer/EmployerProfile';
+import CompanyProfile from '@/pages/employer/CompanyProfile';
+import EmployerSettings from '@/pages/employer/EmployerSettings';
 import DeveloperControls from '@/components/DeveloperControls';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRightLeft } from 'lucide-react';
@@ -210,6 +213,30 @@ const Index = () => {
 
   // Show employer dashboard with sidebar for employers
   if (userRole?.role === 'employer') {
+    const renderEmployerContent = () => {
+      switch (location.pathname) {
+        case '/profile':
+          return <EmployerProfile />;
+        case '/company-profile':
+          return <CompanyProfile />;
+        case '/settings':
+          return <EmployerSettings />;
+        case '/billing':
+          return <Billing />;
+        case '/support':
+          return <Support />;
+        case '/admin':
+          if (user.email === 'fredrikandits@hotmail.com') {
+            return <SupportAdmin />;
+          } else {
+            navigate('/support');
+            return <Support />;
+          }
+        default:
+          return <EmployerDashboard />;
+      }
+    };
+
     return (
       <SidebarProvider>
         <div className="min-h-screen flex w-full overflow-x-hidden">
@@ -236,7 +263,7 @@ const Index = () => {
             </header>
             
             <main className="flex-1 overflow-y-auto overflow-x-hidden p-6">
-              <EmployerDashboard />
+              {renderEmployerContent()}
               {showTourOverlay && (
                 <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
               )}

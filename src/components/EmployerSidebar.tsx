@@ -81,8 +81,14 @@ const businessNavItems = [
 
 const supportNavItems = [
   {
-    title: "Inställningar",
+    title: "Min Profil",
     url: "/profile", 
+    icon: Settings,
+    group: "support"
+  },
+  {
+    title: "Inställningar",
+    url: "/settings", 
     icon: Settings,
     group: "support"
   },
