@@ -131,7 +131,7 @@ const getEmployerTemplate = (firstName: string, confirmationUrl: string) => `
          Hej ${firstName}!
        </p>
        <p style="color: #333333; margin: 0 0 20px 0; font-size: 18px; line-height: 1.6; text-align: left;">
-          Välkommen till Parium - plattformen där <strong>RS6</strong> hittar nästa generations talanger. Vi hjälper er att rekrytera enklare, snabbare och träffsäkrare.
+          Välkommen till Parium - plattformen där <strong>RS6</strong> hittar nästa generations talang/talanger. Vi hjälper er att rekrytera enklare, snabbare och träffsäkrare.
         </p>
         
         <!-- Benefits list for employers -->

@@ -135,7 +135,7 @@ const handler = async (req: Request): Promise<Response> => {
                  ${greet}
                </p>
                <p style="margin: 0 0 24px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">
-                  Välkommen till Parium - plattformen där <strong>${companyName}</strong> hittar nästa generations talanger. Vi hjälper er att rekrytera enklare, snabbare och träffsäkrare.
+                  Välkommen till Parium - plattformen där <strong>${companyName}</strong> hittar nästa generations talang/talanger. Vi hjälper er att rekrytera enklare, snabbare och träffsäkrare.
                 </p>
                 <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
                   <tr>
