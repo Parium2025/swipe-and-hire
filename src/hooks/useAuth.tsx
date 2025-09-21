@@ -572,7 +572,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       toast({
         title: "Ny bekräftelselänk skickad!",
-        description: "Kolla din e-post för den nya bekräftelselänken.",
+        description: "Kolla din e-post för den nya bekräftelselänken",
         duration: 8000
       });
 
