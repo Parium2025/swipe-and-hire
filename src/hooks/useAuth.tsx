@@ -32,6 +32,11 @@ interface Profile {
   phone?: string;
   company_name?: string;
   org_number?: string;
+  industry?: string;
+  address?: string;
+  website?: string;
+  company_description?: string;
+  employee_count?: string;
   bio?: string;
   location?: string;
   birth_date?: string;
@@ -56,7 +61,20 @@ interface AuthContextType {
   userRole: UserRoleData | null;
   organization: Organization | null;
   loading: boolean;
-  signUp: (email: string, password: string, userData: { role: UserRole; first_name: string; last_name: string; phone?: string; organization_id?: string }) => Promise<{ error?: any }>;
+  signUp: (email: string, password: string, userData: { 
+    role: UserRole; 
+    first_name: string; 
+    last_name: string; 
+    phone?: string; 
+    organization_id?: string;
+    company_name?: string;
+    org_number?: string;
+    industry?: string;
+    address?: string;
+    website?: string;
+    company_description?: string;
+    employee_count?: string;
+  }) => Promise<{ error?: any }>;
   signIn: (email: string, password: string) => Promise<{ error?: any }>;
   signInWithPhone: (phone: string) => Promise<{ error?: any }>;
   verifyOtp: (phone: string, otp: string) => Promise<{ error?: any }>;
@@ -209,7 +227,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, userData: { role: UserRole; first_name: string; last_name: string; phone?: string; organization_id?: string }) => {
+  const signUp = async (email: string, password: string, userData: { 
+    role: UserRole; 
+    first_name: string; 
+    last_name: string; 
+    phone?: string; 
+    organization_id?: string;
+    company_name?: string;
+    org_number?: string;
+    industry?: string;
+    address?: string;
+    website?: string;
+    company_description?: string;
+    employee_count?: string;
+  }) => {
     try {
       console.log('Starting custom signup with Resend for:', email);
       
