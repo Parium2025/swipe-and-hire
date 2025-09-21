@@ -413,7 +413,7 @@ const AuthDesktop = ({
                   
                    <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => {
                      setIsLogin(value === 'login');
-                     setHasRegistered(false); // Återställ när användaren växlar tab
+                     setHasRegistered(false); // Återställ bara registreringsstatus, inte showResend
                    }}>
                     <TabsList className="grid w-full grid-cols-2 mb-8 bg-transparent border-0">
                       <TabsTrigger value="login" className="text-lg font-medium text-white data-[state=active]:text-white">Logga in</TabsTrigger>
@@ -480,7 +480,7 @@ const AuthDesktop = ({
                              value={role} 
                              onValueChange={(value: 'job_seeker' | 'employer') => {
                                setRole(value);
-                               setHasRegistered(false); // Återställ när användaren byter roll
+                               setHasRegistered(false); // Återställ bara registreringsstatus, inte showResend
                              }}
                              className="mt-2"
                            >

@@ -503,7 +503,7 @@ const AuthMobile = ({
               <CardContent className="p-6">
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => {
                    setIsLogin(value === 'login');
-                   setHasRegistered(false); // Återställ när användaren växlar tab
+                   setHasRegistered(false); // Återställ bara registreringsstatus, inte showResend
                  }}>
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0 p-0 h-auto gap-2">
                     <TabsTrigger 
@@ -625,7 +625,7 @@ const AuthMobile = ({
                             value={role} 
                             onValueChange={(value: 'job_seeker' | 'employer') => {
                               setRole(value);
-                              setHasRegistered(false); // Återställ när användaren byter roll
+                              setHasRegistered(false); // Återställ bara registreringsstatus, inte showResend
                             }}
                             className="mt-2"
                           >
