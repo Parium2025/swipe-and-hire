@@ -504,6 +504,7 @@ const AuthMobile = ({
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => {
                    setIsLogin(value === 'login');
                    setHasRegistered(false); // Låt upp knappen när användaren byter flik
+                   setShowResend(false); // Återställ meddelande när användaren byter flik
                  }}>
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0 p-0 h-auto gap-2">
                     <TabsTrigger 

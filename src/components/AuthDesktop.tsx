@@ -414,6 +414,7 @@ const AuthDesktop = ({
                    <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => {
                      setIsLogin(value === 'login');
                      setHasRegistered(false); // Låt upp knappen när användaren byter flik
+                     setShowResend(false); // Återställ meddelande när användaren byter flik
                    }}>
                     <TabsList className="grid w-full grid-cols-2 mb-8 bg-transparent border-0">
                       <TabsTrigger value="login" className="text-lg font-medium text-white data-[state=active]:text-white">Logga in</TabsTrigger>
