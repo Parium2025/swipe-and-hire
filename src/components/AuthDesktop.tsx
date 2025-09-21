@@ -61,6 +61,7 @@ const AuthDesktop = ({
   const [showResend, setShowResend] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetPasswordSent, setResetPasswordSent] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
@@ -201,9 +202,9 @@ const AuthDesktop = ({
   const handleResendConfirmation = async () => {
     const currentData = role === 'job_seeker' ? jobSeekerData : employerData;
     if (!currentData.email) return;
-    setLoading(true);
-    await resendConfirmation(currentData.email);
-    setLoading(false);
+    setResendLoading(true);
+    await resendConfirmation(currentData.email, role);
+    setResendLoading(false);
   };
 
    const handleResetPassword = async () => {

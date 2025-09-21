@@ -88,127 +88,163 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const confirmationUrl = `https://rvtsfnaqlnggfkoqygbm.supabase.co/functions/v1/redirect-confirm?token=${newToken}`;
-    
-    // 5. Skicka nytt bekräftelsemejl
+
+    // Fetch profile to personalize and detect role
+    const { data: profile, error: profileErr } = await supabase
+      .from('profiles')
+      .select('first_name, role, company_name')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (profileErr) {
+      console.warn('Could not fetch profile for resend:', profileErr.message);
+    }
+
+    const firstName = (profile?.first_name || '').trim();
+    const greet = firstName ? `Hej ${firstName}!` : 'Hej!';
+    const isEmployer = (profile?.role || '').toLowerCase() === 'employer';
+    const companyName = profile?.company_name || 'ert företag';
+
+    const subject = isEmployer
+      ? 'Välkommen till Parium – Bekräfta ditt företagskonto'
+      : 'Bekräfta ditt konto – Parium';
+
+    // Build HTML identical to first email templates (button BELOW bullet list)
+    const html = isEmployer ? `
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Välkommen till Parium – Bekräfta ditt företagskonto</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #F9FAFB; font-family: Arial, Helvetica, sans-serif;">
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F9FAFB;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; max-width: 600px;">
+          <tr>
+            <td style="background-color: #1E3A8A; padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0;">
+              <h1 style="margin: 0 0 8px 0; font-size: 28px; font-weight: bold; color: #ffffff;">Parium</h1>
+              <p style="margin: 0; font-size: 16px; color: #ffffff;">Hitta nästa generations talanger</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 40px 30px;">
+              <p style="margin: 0 0 24px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+                ${greet}<br/><br/>
+                Välkommen till Parium - plattformen där <strong>${companyName}</strong> hittar nästa generations talanger.<br/>
+                Förenkla er rekrytering och koppla upp er med de bästa kandidaterna.
+              </p>
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
+                <tr>
+                  <td style="font-size: 16px; color: #111827;">
+                    <p style="margin: 0 0 12px 0;">• Kvalificerade kandidater som matchar era behov</p>
+                    <p style="margin: 0 0 12px 0;">• Smidiga rekryteringsverktyg för modern personalrekrytering</p>
+                    <p style="margin: 0;">• Direkt kontakt med potentiella medarbetare</p>
+                  </td>
+                </tr>
+              </table>
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
+                <tr>
+                  <td align="center" style="padding: 0;">
+                    <a href="${confirmationUrl}" style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none;">
+                      Bekräfta företagskonto
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
+                <tr>
+                  <td style="background-color: #F9FAFB; padding: 20px; border-radius: 8px;">
+                    <p style="margin: 0 0 12px 0; font-size: 14px; color: #6B7280; text-align: center;">Fungerar inte knappen? Kopiera länken nedan:</p>
+                    <p style="margin: 0; font-size: 12px; color: #1E3A8A; word-break: break-all; text-align: center;">${confirmationUrl}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color: #F9FAFB; padding: 24px 30px; text-align: center; border-top: 1px solid #E5E7EB; border-radius: 0 0 12px 12px;">
+              <p style="margin: 0; font-size: 14px; color: #6B7280;">Parium AB · Stockholm<br/>Du får detta mail för att du registrerat ett företagskonto i Parium.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+` : `
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bekräfta ditt konto – Parium</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #F9FAFB; font-family: Arial, Helvetica, sans-serif;">
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F9FAFB;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; max-width: 600px;">
+          <tr>
+            <td style="background-color: #1E3A8A; padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0;">
+              <h1 style="margin: 0 0 8px 0; font-size: 28px; font-weight: bold; color: #ffffff;">Parium</h1>
+              <p style="margin: 0; font-size: 16px; color: #ffffff;">Framtiden börjar med ett swipe</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 40px 30px;">
+              <p style="margin: 0 0 24px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+                ${greet}<br/><br/>
+                Du har just klivit in i nästa generation av jobbsök.<br/>
+                Med Parium swipar du dig fram till möjligheter som faktiskt kan förändra din vardag.
+              </p>
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
+                <tr>
+                  <td style="font-size: 16px; color: #111827;">
+                    <p style="margin: 0 0 12px 0;">• Matcha med jobb som passar dig</p>
+                    <p style="margin: 0 0 12px 0;">• Swipea, ansök och gå vidare på sekunder</p>
+                    <p style="margin: 0;">• Spara tid med smarta och effektiva verktyg</p>
+                  </td>
+                </tr>
+              </table>
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
+                <tr>
+                  <td align="center" style="padding: 0;">
+                    <a href="${confirmationUrl}" style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none;">Bekräfta mitt konto</a>
+                  </td>
+                </tr>
+              </table>
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
+                <tr>
+                  <td style="background-color: #F9FAFB; padding: 20px; border-radius: 8px;">
+                    <p style="margin: 0 0 12px 0; font-size: 14px; color: #6B7280; text-align: center;">Fungerar inte knappen? Kopiera länken nedan:</p>
+                    <p style="margin: 0; font-size: 12px; color: #1E3A8A; word-break: break-all; text-align: center;">${confirmationUrl}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color: #F9FAFB; padding: 24px 30px; text-align: center; border-top: 1px solid #E5E7EB; border-radius: 0 0 12px 12px;">
+              <p style="margin: 0; font-size: 14px; color: #6B7280;">Parium AB · Stockholm<br/>Du får detta mail för att du registrerat ett konto i Parium-appen.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`;
+
     const emailResponse = await resend.emails.send({
       from: "Parium <noreply@parium.se>",
       to: [email],
-      subject: "✨ Bekräfta ditt Parium-konto - Ny länk",
-      text: `Hej!
-
-Här är din nya bekräftelselänk:
-${confirmationUrl}
-
-Parium`,
-      html: `
-        <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-        <html xmlns="http://www.w3.org/1999/xhtml">
-        <head>
-          <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-          <title>Ny bekräftelselänk - Parium</title>
-        </head>
-        <body style="margin: 0; padding: 0; background-color: #F9FAFB; font-family: Arial, Helvetica, sans-serif;">
-          
-          <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F9FAFB;">
-            <tr>
-              <td align="center" style="padding: 40px 20px;">
-                
-                <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; max-width: 600px;">
-                  
-                  <!-- Header -->
-                  <tr>
-                    <td style="background-color: #1E3A8A; padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0;">
-                      
-                      <h1 style="margin: 0 0 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 28px; font-weight: bold; color: #ffffff;">
-                        Parium
-                      </h1>
-                      <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #ffffff;">
-                        Framtiden börjar med ett swipe
-                      </p>
-                    </td>
-                  </tr>
-                  
-                  <!-- Content -->
-                  <tr>
-                    <td style="padding: 40px 30px;">
-                      
-                      <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
-                        Du begärde en ny bekräftelselänk. Klicka på knappen nedan för att bekräfta din e-postadress och aktivera ditt Parium-konto.
-                      </p>
-                      
-                      <!-- Button with bulletproof mobile centering -->
-                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
-                        <tr>
-                          <td align="center" style="padding: 0;">
-                            <!--[if mso]>
-                            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" style="height:48px;v-text-anchor:middle;width:280px;" arcsize="21%" stroke="f" fillcolor="#1E3A8A">
-                            <w:anchorlock/>
-                            <center>
-                            <![endif]-->
-                            <a href="${confirmationUrl}" 
-                               style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none; mso-hide: all;">
-                              ✨ Bekräfta mitt konto
-                            </a>
-                            <!--[if mso]>
-                            </center>
-                            </v:roundrect>
-                            <![endif]-->
-                          </td>
-                        </tr>
-                      </table>
-                      
-                      <!-- Features list -->
-                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
-                        <tr>
-                          <td style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827;">
-                            <p style="margin: 0 0 12px 0;">🎯 Matcha med jobb som passar dig</p>
-                            <p style="margin: 0 0 12px 0;">⚡ Swipea, ansök och gå vidare på sekunder</p>
-                            <p style="margin: 0;">🚀 Spara tid med smarta och effektiva verktyg</p>
-                          </td>
-                        </tr>
-                      </table>
-                      
-                      <!-- Alternative link -->
-                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
-                        <tr>
-                          <td style="background-color: #F9FAFB; padding: 20px; border-radius: 8px;">
-                            <p style="margin: 0 0 12px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #6B7280; text-align: center;">
-                              Fungerar knappen inte? Kopiera denna länk:
-                            </p>
-                            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #1E3A8A; word-break: break-all; text-align: center;">
-                              ${confirmationUrl}
-                            </p>
-                          </td>
-                        </tr>
-                      </table>
-                      
-                      <p style="margin: 32px 0 0 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #9CA3AF; text-align: center;">
-                        🔓 Länken fungerar alltid – även om kontot redan är aktiverat får du rätt information.
-                      </p>
-                      
-                    </td>
-                  </tr>
-                  
-                  <!-- Footer -->
-                  <tr>
-                    <td style="background-color: #F9FAFB; padding: 24px 30px; text-align: center; border-top: 1px solid #E5E7EB; border-radius: 0 0 12px 12px;">
-                      <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #6B7280;">
-                        Parium AB · Stockholm<br>
-                        Du får detta mail för att du registrerat ett konto i Parium-appen.
-                      </p>
-                    </td>
-                  </tr>
-                  
-                </table>
-                
-              </td>
-            </tr>
-          </table>
-          
-        </body>
-        </html>
-      `,
+      subject,
+      html,
     });
 
     console.log("Resend confirmation email sent:", emailResponse);

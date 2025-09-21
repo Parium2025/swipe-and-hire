@@ -556,38 +556,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resendConfirmation = async (email: string, userRole?: string) => {
     try {
-      console.log('Resending confirmation email using custom edge function for:', email);
-      
-      let profileRole = userRole;
-      let firstName = 'Användare';
-      
-      // Om vi har en inloggad användare, försök hämta profilen
-      if (user?.id) {
-        const { data: profiles, error: profileError } = await supabase
-          .from('profiles')
-          .select('role, first_name')
-          .eq('user_id', user.id)
-          .single();
-        
-        if (!profileError && profiles) {
-          profileRole = profiles.role;
-          firstName = profiles.first_name || 'Användare';
-        }
-      }
-      
-      // Om vi inte har roll, använd default baserat på context eller defaulta till job_seeker
-      if (!profileRole) {
-        profileRole = userRole || 'job_seeker';
-      }
-      
-      // Använd vår custom edge function istället
-      const { error } = await supabase.functions.invoke('send-confirmation-email', {
-        body: {
-          email: email,
-          role: profileRole,
-          first_name: firstName,
-          confirmation_url: `${window.location.origin}/auth?confirmed=true`
-        }
+      console.log('Resending confirmation email via edge function for:', email);
+
+      // Use our token-generating edge function to ensure the link works for both roles
+      const { data, error } = await supabase.functions.invoke('resend-confirmation', {
+        body: { email }
       });
 
       if (error) {
@@ -599,7 +572,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       toast({
         title: "Ny bekräftelselänk skickad!",
-        description: "Kolla din e-post för den nya bekräftelselänken. Gmail-användare: kontrollera även skräpposten!",
+        description: "Kolla din e-post för den nya bekräftelselänken.",
         duration: 8000
       });
 
@@ -609,7 +582,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       let errorMessage = error.message || "Ett fel inträffade. Försök igen.";
       
-      // Hantera specifika felmeddelanden
       if (errorMessage.includes("Email rate limit")) {
         errorMessage = "För många e-postförfrågningar. Vänta en stund innan du försöker igen.";
       } else if (errorMessage.includes("User not found")) {
