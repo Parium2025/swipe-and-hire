@@ -163,8 +163,82 @@ const AuthMobile = ({
           navigate('/search-jobs', { replace: true });
         }
       } else {
-        // Validate required fields for employer
+        // Validate all required fields
+        if (!firstName.trim()) {
+          toast({
+            title: "Förnamn krävs",
+            description: "Vänligen ange ditt förnamn",
+            variant: "destructive"
+          });
+          setLoading(false);
+          return;
+        }
+
+        if (!lastName.trim()) {
+          toast({
+            title: "Efternamn krävs",
+            description: "Vänligen ange ditt efternamn",
+            variant: "destructive"
+          });
+          setLoading(false);
+          return;
+        }
+
+        if (!email.trim()) {
+          toast({
+            title: "E-post krävs",
+            description: "Vänligen ange din e-postadress",
+            variant: "destructive"
+          });
+          setLoading(false);
+          return;
+        }
+
+        if (!password.trim()) {
+          toast({
+            title: "Lösenord krävs",
+            description: "Vänligen ange ett lösenord",
+            variant: "destructive"
+          });
+          setLoading(false);
+          return;
+        }
+
+        // Job seeker specific validation
+        if (role === 'job_seeker') {
+          if (!phone.trim()) {
+            toast({
+              title: "Telefonnummer krävs",
+              description: "Vänligen ange ditt telefonnummer",
+              variant: "destructive"
+            });
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Employer specific validation
         if (role === 'employer') {
+          if (!companyName.trim()) {
+            toast({
+              title: "Företagsnamn krävs",
+              description: "Vänligen ange företagsnamn",
+              variant: "destructive"
+            });
+            setLoading(false);
+            return;
+          }
+
+          if (!industry.trim()) {
+            toast({
+              title: "Bransch krävs",
+              description: "Vänligen välj bransch",
+              variant: "destructive"
+            });
+            setLoading(false);
+            return;
+          }
+
           if (!employeeCount) {
             toast({
               title: "Anställda krävs",
@@ -174,7 +248,18 @@ const AuthMobile = ({
             setLoading(false);
             return;
           }
-          if (!website) {
+
+          if (!address.trim()) {
+            toast({
+              title: "Adress krävs",
+              description: "Vänligen ange företagets adress",
+              variant: "destructive"
+            });
+            setLoading(false);
+            return;
+          }
+
+          if (!website.trim()) {
             toast({
               title: "Webbplats krävs", 
               description: "Vänligen ange företagets webbplats",
@@ -558,25 +643,26 @@ const AuthMobile = ({
                            {/* email suggestions removed for simpler UX */}
                          </div>
                          
-                          {role === 'job_seeker' && (
-                            <div>
-                               <Label htmlFor="phone" className="text-white">
-                                 <Phone className="h-4 w-4 inline mr-2" />
-                                 Telefon (frivilligt)
-                               </Label>
-                                <Input
-                                  id="phone"
-                                  type="tel"
-                                  value={phone}
-                                  onChange={(e) => handlePhoneChange(e.target.value)}
-                                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                                  placeholder="070-123 45 67"
-                                />
-                               {phoneError && (
-                                 <p className="text-destructive text-xs mt-1">{phoneError}</p>
-                               )}
-                             </div>
-                          )}
+                           {role === 'job_seeker' && (
+                             <div>
+                                <Label htmlFor="phone" className="text-white">
+                                  <Phone className="h-4 w-4 inline mr-2" />
+                                  Telefon *
+                                </Label>
+                                 <Input
+                                   id="phone"
+                                   type="tel"
+                                   value={phone}
+                                   onChange={(e) => handlePhoneChange(e.target.value)}
+                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                   placeholder="070-123 45 67"
+                                   required
+                                 />
+                                {phoneError && (
+                                  <p className="text-destructive text-xs mt-1">{phoneError}</p>
+                                )}
+                              </div>
+                           )}
                        </div>
 
                        {/* Employer-specific fields */}
