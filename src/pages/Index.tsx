@@ -206,44 +206,42 @@ const Index = () => {
     );
   }
 
-  // Show employer dashboard for employers
+  // Show employer dashboard with sidebar for employers
   if (userRole?.role === 'employer') {
     return (
-      <div className="min-h-screen">
-        <header className="border-b border-white/20 bg-white/10 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-white">Parium</h1>
-              <p className="text-sm text-white/70">
-                Arbetsgivare: {profile.first_name} {profile.last_name}
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button 
-                onClick={() => navigate('/profile')}
-                variant="outline"
-                size="sm"
-                className="border-white/20 text-white hover:bg-white/20"
-              >
-                Min Profil
-              </Button>
-              {(user.email === 'fredrik.andits@icloud.com' || user.email === 'fredrikandits@hotmail.com') && (
-                <DeveloperControls 
-                  onViewChange={setDeveloperView}
-                  currentView={developerView}
-                />
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full overflow-x-hidden">
+          {uiReady ? <AppSidebar /> : null}
+          <div className="flex-1 flex flex-col overflow-x-hidden">
+            <header className="sticky top-0 z-40 h-16 flex items-center justify-between border-b bg-white/10 backdrop-blur-sm px-6">
+              <div className="flex items-center gap-4">
+                <SidebarTrigger className="text-white hover:bg-white/20" />
+                <div>
+                  <h1 className="text-xl font-bold text-white">Parium</h1>
+                  <p className="text-sm text-white/70">
+                    Arbetsgivare: {profile.first_name} {profile.last_name}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                {(user.email === 'fredrik.andits@icloud.com' || user.email === 'fredrikandits@hotmail.com') && (
+                  <DeveloperControls 
+                    onViewChange={setDeveloperView}
+                    currentView={developerView}
+                  />
+                )}
+              </div>
+            </header>
+            
+            <main className="flex-1 overflow-y-auto overflow-x-hidden p-6">
+              <EmployerDashboard />
+              {showTourOverlay && (
+                <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
               )}
-              <Button onClick={signOut} variant="outline" className="border-white/20 text-white hover:bg-white/20">
-                Logga ut
-              </Button>
-            </div>
+            </main>
           </div>
-        </header>
-        
-        <main className="max-w-7xl mx-auto px-4 py-8">
-          <EmployerDashboard />
-        </main>
-      </div>
+        </div>
+      </SidebarProvider>
     );
   }
 
