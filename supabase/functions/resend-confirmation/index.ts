@@ -131,8 +131,10 @@ const handler = async (req: Request): Promise<Response> => {
           </tr>
            <tr>
              <td align="left" style="padding: 40px 30px; text-align: left;">
+               <p style="margin: 0 0 24px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+                 ${greet}
+               </p>
                <p style="margin: 0 0 24px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">
-                 ${greet}<br/><br/>
                   Välkommen till Parium - plattformen där <strong>${companyName}</strong> hittar nästa generations talanger.<br/>
                  Vi hjälper er att rekrytera enklare, snabbare och träffsäkrare.
                 </p>

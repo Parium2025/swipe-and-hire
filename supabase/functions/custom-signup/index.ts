@@ -197,8 +197,10 @@ Parium Team`,
                   <tr>
                     <td align="left" style="padding: 40px 30px; text-align: left;">
                       
+                        <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+                          Hej ${firstName}!
+                        </p>
                         <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">
-                          Hej ${firstName}!<br><br>
                            Välkommen till Parium - plattformen där <strong>${companyName}</strong> hittar nästa generations talanger.<br>
                            Vi hjälper er att rekrytera enklare, snabbare och träffsäkrare.
                          </p>

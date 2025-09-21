@@ -126,8 +126,10 @@ const getEmployerTemplate = (firstName: string, confirmationUrl: string) => `
     
      <!-- Content -->
      <div style="padding: 40px 30px; text-align: left;">
+       <p style="color: #333333; margin: 0 0 20px 0; font-size: 18px; line-height: 1.6; text-align: center;">
+         Hej ${firstName}!
+       </p>
        <p style="color: #333333; margin: 0 0 20px 0; font-size: 18px; line-height: 1.6; text-align: left;">
-         Hej ${firstName}!<br><br>
           Välkommen till Parium - plattformen där <strong>RS6</strong> hittar nästa generations talanger.<br>
           Vi hjälper er att rekrytera enklare, snabbare och träffsäkrare.
         </p>
