@@ -42,12 +42,16 @@ const Index = () => {
       navigate('/auth');
       setIsInitializing(false);
     } else if (user && profile && location.pathname === '/') {
-      // Small delay to prevent flicker during navigation
+      // Navigate based on user role
       setTimeout(() => {
-        navigate('/search-jobs');
+        if ((userRole?.role as string) === 'employer') {
+          navigate('/dashboard'); // Employer dashboard
+        } else {
+          navigate('/search-jobs'); // Job seeker default
+        }
         setIsInitializing(false);
       }, 50);
-    } else if (user && profile && !location.pathname.startsWith('/profile') && !location.pathname.startsWith('/search-jobs') && !location.pathname.startsWith('/subscription') && !location.pathname.startsWith('/support') && !location.pathname.startsWith('/settings') && !location.pathname.startsWith('/billing') && !location.pathname.startsWith('/payment') && !location.pathname.startsWith('/consent')) {
+    } else if (user && profile && !location.pathname.startsWith('/profile') && !location.pathname.startsWith('/search-jobs') && !location.pathname.startsWith('/dashboard') && !location.pathname.startsWith('/company-profile') && !location.pathname.startsWith('/subscription') && !location.pathname.startsWith('/support') && !location.pathname.startsWith('/settings') && !location.pathname.startsWith('/billing') && !location.pathname.startsWith('/payment') && !location.pathname.startsWith('/consent')) {
       // Show profile selector only for admin (fredrikandits@hotmail.com)
       if (user.email === 'fredrikandits@hotmail.com') {
         setShowProfileSelector(true);
@@ -56,7 +60,7 @@ const Index = () => {
     } else if (user && profile) {
       setIsInitializing(false);
     }
-  }, [user, loading, navigate, profile, location.pathname]);
+  }, [user, loading, navigate, profile, location.pathname, userRole]);
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => setUiReady(true));
@@ -78,7 +82,11 @@ const Index = () => {
   }
 
   if (location.pathname === '/') {
-    return <Navigate to="/search-jobs" replace />;
+    if ((userRole?.role as string) === 'employer') {
+      return <Navigate to="/dashboard" replace />;
+    } else {
+      return <Navigate to="/search-jobs" replace />;
+    }
   }
 
   // Show profile selector first (admin only)
@@ -137,7 +145,7 @@ const Index = () => {
   // For employers, check if profile needs setup (basic info missing) - except for admin emails
   const needsProfileSetup = !profile.bio && !profile.location && !profile.profile_image_url;
   const isAdminEmail = user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com';
-  if (needsProfileSetup && userRole?.role === 'employer' && !isAdminEmail) {
+  if (needsProfileSetup && (userRole?.role as string) === 'employer' && !isAdminEmail) {
     console.log('Showing ProfileSetup for employer');
     return <ProfileSetup />;
   }
@@ -146,7 +154,12 @@ const Index = () => {
   const sidebarRoutes = ['/profile', '/search-jobs', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/consent'];
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
 
-  if (isSidebarRoute) {
+  if (isSidebarRoute && (userRole?.role as string) !== 'employer') {
+    // Redirect job seekers from employer routes
+    if (location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/company-profile')) {
+      return <Navigate to="/search-jobs" replace />;
+    }
+
     const renderSidebarContent = () => {
       switch (location.pathname) {
         case '/profile':
@@ -185,7 +198,7 @@ const Index = () => {
                 <div>
                   <h1 className="text-xl font-bold text-white">Parium</h1>
                   <p className="text-sm text-white/70">
-                    {userRole?.role === 'employer' ? 'Arbetsgivare' : 'Jobbsökare'}: {profile.first_name} {profile.last_name}
+                    {(userRole?.role as string) === 'employer' ? 'Arbetsgivare' : 'Jobbsökare'}: {profile.first_name} {profile.last_name}
                   </p>
                 </div>
               </div>
@@ -212,7 +225,12 @@ const Index = () => {
   }
 
   // Show employer dashboard with sidebar for employers
-  if (userRole?.role === 'employer') {
+  if ((userRole?.role as string) === 'employer') {
+    // Redirect employer from job seeker routes
+    if (location.pathname === '/search-jobs') {
+      return <Navigate to="/dashboard" replace />;
+    }
+
     const renderEmployerContent = () => {
       switch (location.pathname) {
         case '/profile':

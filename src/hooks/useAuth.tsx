@@ -2,8 +2,9 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { Database } from '@/integrations/supabase/types';
 
-export type UserRole = 'super_admin' | 'company_admin' | 'recruiter' | 'job_seeker' | 'employer';
+export type UserRole = Database['public']['Enums']['user_role'];
 
 interface UserRoleData {
   id: string;
