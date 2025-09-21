@@ -631,9 +631,9 @@ const AuthDesktop = ({
                         className="bg-parium-navy hover:bg-parium-navy/90 text-white"
                         size="sm"
                         onClick={handleResendConfirmation}
-                        disabled={loading}
+                        disabled={resendLoading}
                       >
-                        Skicka igen
+                        {resendLoading ? "Skickar..." : "Skicka igen"}
                       </Button>
                     </div>
                   )}
