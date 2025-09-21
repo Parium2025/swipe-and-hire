@@ -750,7 +750,7 @@ const AuthMobile = ({
                                    id="companyName"
                                    value={employerData.companyName}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, companyName: e.target.value }))}
-                                   placeholder="Mitt Företag"
+                                   placeholder="Mitt företag"
                                    className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                                    required
                                  />
