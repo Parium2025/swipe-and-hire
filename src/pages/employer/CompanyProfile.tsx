@@ -215,19 +215,6 @@ const CompanyProfile = () => {
           <CardDescription className="text-white/80 text-center">
             Ladda upp din företagslogga för att bygga kännedom och förtroende
           </CardDescription>
-          
-          {/* Logo icon display */}
-          <div className="flex items-center justify-center">
-            <div className="relative">
-              <div className="w-16 h-16 rounded-full border-4 border-white/20 p-2 bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-sm">
-                <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
-                </div>
-              </div>
-              <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
-                <Upload className="h-2 w-2 text-primary" />
-              </div>
-            </div>
-          </div>
         </CardHeader>
         <CardContent className="flex flex-col items-center space-y-4">
           <div className="relative">
