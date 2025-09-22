@@ -304,11 +304,18 @@ const CompanyProfile = () => {
                   id="org_number"
                   value={formData.org_number}
                   onChange={(e) => {
-                    const value = e.target.value.replace(/[^0-9-]/g, '');
+                    let value = e.target.value.replace(/[^0-9]/g, ''); // Remove everything except numbers
+                    
+                    // Auto-format with dash after 6 digits
+                    if (value.length > 6) {
+                      value = value.slice(0, 6) + '-' + value.slice(6, 10);
+                    }
+                    
                     setFormData({...formData, org_number: value});
                     
                     // Validate organization number
-                    if (value && value.replace(/-/g, '').length !== 10) {
+                    const digitsOnly = value.replace(/-/g, '');
+                    if (value && digitsOnly.length !== 10) {
                       setOrgNumberError('Organisationsnummer måste vara exakt 10 siffror');
                     } else {
                       setOrgNumberError('');
@@ -316,7 +323,7 @@ const CompanyProfile = () => {
                   }}
                   placeholder="XXXXXX-XXXX"
                   inputMode="numeric"
-                  pattern="[0-9-]*"
+                  maxLength={11} // 10 digits + 1 dash
                   className={`bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 ${orgNumberError ? 'border-red-500' : ''}`}
                 />
                 {orgNumberError && (
