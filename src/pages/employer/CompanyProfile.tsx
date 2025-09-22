@@ -203,7 +203,7 @@ const CompanyProfile = () => {
     <div className="space-y-6">
       <div className="text-center">
         <h1 className="text-3xl font-bold text-white">Företagsprofil</h1>
-        <p className="text-white/90">Hantera din företagsinformation och logga</p>
+        <p className="text-white/90">Hantera företagsinformation och logga</p>
       </div>
 
       {/* Företagslogga sektion */}
