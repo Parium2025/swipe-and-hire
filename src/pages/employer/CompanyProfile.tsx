@@ -4,13 +4,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { useSidebar } from '@/components/ui/sidebar';
 import ImageEditor from '@/components/ImageEditor';
-import { Upload, Building2, Edit, Camera } from 'lucide-react';
+import { Upload, Building2, Edit, Camera, ChevronDown, Search, Check } from 'lucide-react';
+import { SWEDISH_INDUSTRIES } from '@/lib/industries';
 import { supabase } from '@/integrations/supabase/client';
 import { createSignedUrl } from '@/utils/storageUtils';
 
@@ -24,6 +26,10 @@ const CompanyProfile = () => {
   // Image editor states
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
+  
+  // Industry dropdown states
+  const [industryMenuOpen, setIndustryMenuOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [formData, setFormData] = useState({
     company_name: profile?.company_name || '',
@@ -303,12 +309,99 @@ const CompanyProfile = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="industry" className="text-white">Bransch</Label>
-                <Input
-                  id="industry"
-                  value={formData.industry}
-                  onChange={(e) => setFormData({...formData, industry: e.target.value})}
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                />
+                <DropdownMenu modal={false} open={industryMenuOpen} onOpenChange={setIndustryMenuOpen}>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
+                    >
+                      <span className="truncate text-left flex-1 px-1">
+                        {formData.industry || 'Välj bransch'}
+                      </span>
+                      <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent 
+                    className="w-80 bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-96"
+                    side="bottom"
+                    align="center"
+                    alignOffset={0}
+                    sideOffset={8}
+                    avoidCollisions={false}
+                    onCloseAutoFocus={(e) => e.preventDefault()}
+                  >
+                    {/* Search input */}
+                    <div className="p-3 border-b border-slate-600/30 sticky top-0 bg-slate-700/95 backdrop-blur-md">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                        <Input
+                          placeholder="Sök bransch..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-10 pr-4 h-10 bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-lg"
+                          autoComplete="off"
+                          autoCapitalize="none"
+                          autoCorrect="off"
+                          onKeyDownCapture={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                    </div>
+                   
+                    {/* Industry options */}
+                    <div className="overflow-y-auto max-h-80 overscroll-contain">
+                      {SWEDISH_INDUSTRIES
+                        .filter(industryOption => 
+                          searchTerm.trim().length >= 2 ? industryOption.toLowerCase().includes(searchTerm.toLowerCase()) : true
+                        )
+                        .map((industryOption) => (
+                          <DropdownMenuItem
+                            key={industryOption}
+                            onSelect={(e) => e.preventDefault()}
+                            onClick={() => {
+                              setFormData(prev => ({ ...prev, industry: industryOption }));
+                              setSearchTerm('');
+                              setIndustryMenuOpen(false);
+                            }}
+                            className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 px-3 text-white flex items-center justify-between transition-colors touch-manipulation"
+                          >
+                            <span className="flex-1 pr-2">{industryOption}</span>
+                            {formData.industry === industryOption && (
+                              <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                            )}
+                          </DropdownMenuItem>
+                        ))}
+                      
+                      {/* Custom value option if no matches and search term exists */}
+                      {searchTerm.trim().length >= 2 &&
+                        !SWEDISH_INDUSTRIES.some(industryOption => 
+                          industryOption.toLowerCase().includes(searchTerm.toLowerCase())
+                        ) && (
+                        <DropdownMenuItem
+                          onSelect={(e) => e.preventDefault()}
+                          onClick={() => {
+                            setFormData(prev => ({ ...prev, industry: searchTerm }));
+                            setSearchTerm('');
+                            setIndustryMenuOpen(false);
+                          }}
+                          className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 px-3 text-white border-t border-slate-600/30 transition-colors touch-manipulation"
+                        >
+                          <span className="flex-1">Använd "{searchTerm}"</span>
+                        </DropdownMenuItem>
+                      )}
+                      
+                      {/* Show message if no results */}
+                      {searchTerm.trim().length >= 3 && 
+                        SWEDISH_INDUSTRIES.filter(industryOption => 
+                          industryOption.toLowerCase().includes(searchTerm.toLowerCase())
+                        ).length === 0 && (
+                        <div className="py-4 px-3 text-center text-white/60 italic">
+                          Inga resultat hittades för "{searchTerm}"
+                        </div>
+                      )}
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
               <div className="space-y-2">
