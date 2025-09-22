@@ -286,12 +286,17 @@ const CompanyProfile = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="org_number" className="text-white">Organisationsnummer</Label>
+                <Label htmlFor="org_number" className="text-white">Organisationsnummer (frivillig)</Label>
                 <Input
                   id="org_number"
                   value={formData.org_number}
-                  onChange={(e) => setFormData({...formData, org_number: e.target.value})}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9-]/g, '');
+                    setFormData({...formData, org_number: value});
+                  }}
                   placeholder="XXXXXX-XXXX"
+                  inputMode="numeric"
+                  pattern="[0-9-]*"
                   className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                 />
               </div>
