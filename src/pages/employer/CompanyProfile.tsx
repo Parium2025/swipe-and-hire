@@ -42,6 +42,9 @@ const CompanyProfile = () => {
     company_logo_url: (profile as any)?.company_logo_url || '',
   });
 
+  // Validation state
+  const [orgNumberError, setOrgNumberError] = useState('');
+
   // Update form data when profile changes
   useEffect(() => {
     if (profile) {
@@ -162,6 +165,16 @@ const CompanyProfile = () => {
   };
 
   const handleSave = async () => {
+    // Validate organization number before saving
+    if (formData.org_number && formData.org_number.replace(/-/g, '').length !== 10) {
+      toast({
+        title: "Valideringsfel",
+        description: "Organisationsnummer måste vara exakt 10 siffror eller lämnas tomt.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       setLoading(true);
       await updateProfile(formData as any);
@@ -293,12 +306,22 @@ const CompanyProfile = () => {
                   onChange={(e) => {
                     const value = e.target.value.replace(/[^0-9-]/g, '');
                     setFormData({...formData, org_number: value});
+                    
+                    // Validate organization number
+                    if (value && value.replace(/-/g, '').length !== 10) {
+                      setOrgNumberError('Organisationsnummer måste vara exakt 10 siffror');
+                    } else {
+                      setOrgNumberError('');
+                    }
                   }}
                   placeholder="XXXXXX-XXXX"
                   inputMode="numeric"
                   pattern="[0-9-]*"
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                  className={`bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 ${orgNumberError ? 'border-red-500' : ''}`}
                 />
+                {orgNumberError && (
+                  <p className="text-red-400 text-sm mt-1">{orgNumberError}</p>
+                )}
               </div>
 
               <div className="space-y-2">
