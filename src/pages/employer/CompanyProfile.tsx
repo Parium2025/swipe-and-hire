@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { useSidebar } from '@/components/ui/sidebar';
 import ImageEditor from '@/components/ImageEditor';
-import { Upload, Building2, Edit } from 'lucide-react';
+import { Upload, Building2, Edit, Camera } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { createSignedUrl } from '@/utils/storageUtils';
 
@@ -17,6 +17,7 @@ const CompanyProfile = () => {
   const { profile, updateProfile } = useAuth();
   const { setOpen } = useSidebar();
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   
   // Image editor states
@@ -110,6 +111,7 @@ const CompanyProfile = () => {
 
   const handleSave = async () => {
     try {
+      setLoading(true);
       await updateProfile(formData as any);
       setIsEditing(false);
       toast({
@@ -122,6 +124,8 @@ const CompanyProfile = () => {
         description: "Kunde inte uppdatera företagsprofilen.",
         variant: "destructive"
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -133,70 +137,65 @@ const CompanyProfile = () => {
       </div>
 
       {/* Företagslogga sektion */}
-      <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6">
-        <div className="flex items-center gap-4 mb-4">
-          <Building2 className="h-6 w-6 text-white" />
-          <div>
-            <h2 className="text-xl font-semibold text-white">Företagslogga</h2>
-            <p className="text-white/80">Ladda upp eller ändra din företagslogga</p>
+      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+        <CardHeader>
+          <CardTitle className="text-white text-center">
+            Företagslogga
+          </CardTitle>
+          <CardDescription className="text-white/80 text-center">
+            Ladda upp din företagslogga för att bygga kännedom och förtroende
+          </CardDescription>
+          
+          {/* Logo icon display */}
+          <div className="flex items-center justify-center">
+            <div className="relative">
+              <div className="w-16 h-16 rounded-full border-4 border-white/20 p-2 bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-sm">
+                <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
+                  <Building2 className="h-5 w-5 text-white" />
+                </div>
+              </div>
+              <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
+                <Upload className="h-2 w-2 text-primary" />
+              </div>
+            </div>
           </div>
-        </div>
-
-        <div className="flex items-center gap-6">
-          {formData.company_logo_url ? (
-            <div className="flex items-center gap-4">
-              <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-lg border-2 border-white/20 flex items-center justify-center overflow-hidden">
+        </CardHeader>
+        <CardContent className="flex flex-col items-center space-y-4">
+          <div className="relative">
+            {formData.company_logo_url ? (
+              <div className="w-24 h-24 rounded-lg overflow-hidden bg-white/10 backdrop-blur-sm border-2 border-white/20 flex items-center justify-center">
                 <img 
                   src={formData.company_logo_url} 
                   alt="Företagslogga" 
                   className="max-w-full max-h-full object-contain"
                 />
               </div>
-              <div className="space-y-2">
-                <p className="text-sm text-white font-medium">Nuvarande logga</p>
-                {isEditing && (
-                  <Button
-                    variant="outline"
-                    onClick={() => document.getElementById('logo-upload')?.click()}
-                    disabled={isUploadingLogo}
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:scale-105 transition-transform duration-200"
-                  >
-                    {isUploadingLogo ? (
-                      <>
-                        <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"></div>
-                        Laddar upp...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="h-4 w-4 mr-2" />
-                        Byt logga
-                      </>
-                    )}
-                  </Button>
-                )}
+            ) : (
+              <div className="w-24 h-24 rounded-lg bg-white/10 backdrop-blur-sm border-2 border-dashed border-white/40 flex items-center justify-center">
+                <Building2 className="h-8 w-8 text-white/60" />
               </div>
-            </div>
-          ) : (
-            <div 
-              className={`w-full max-w-md h-32 border-2 border-dashed border-white/20 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-white/40 hover:bg-white/5 transition-all duration-300 ${isEditing ? '' : 'pointer-events-none opacity-50'}`}
-              onClick={() => isEditing && document.getElementById('logo-upload')?.click()}
+            )}
+          </div>
+
+          {isEditing && (
+            <Button 
+              variant="outline" 
+              onClick={() => document.getElementById('logo-upload')?.click()}
+              disabled={isUploadingLogo}
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:scale-105 transition-transform duration-200"
             >
               {isUploadingLogo ? (
-                <div className="text-center">
-                  <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full mx-auto mb-2"></div>
-                  <p className="text-sm text-white">Laddar upp...</p>
-                </div>
+                <>
+                  <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"></div>
+                  Laddar upp...
+                </>
               ) : (
                 <>
-                  <Upload className="w-8 h-8 text-white mb-2" />
-                  <p className="text-sm text-white font-medium">Klicka för att ladda upp logga</p>
-                  <p className="text-xs text-white/60 mt-1">PNG, JPG eller GIF (max 10MB)</p>
-                  {!isEditing && (
-                    <p className="text-xs text-white/40 mt-2">Aktivera redigeringsläge för att ladda upp</p>
-                  )}
+                  <Camera className="h-4 w-4 mr-2" />
+                  {formData.company_logo_url ? 'Byt logga' : 'Ladda upp logga'}
                 </>
               )}
-            </div>
+            </Button>
           )}
 
           <input
@@ -207,135 +206,144 @@ const CompanyProfile = () => {
             className="hidden"
             disabled={isUploadingLogo || !isEditing}
           />
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Företagsinformation */}
-      <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-xl font-semibold text-white">Företagsinformation</h2>
-            <p className="text-white/80">Uppdatera din företagsprofil för att synas bättre för kandidater</p>
-          </div>
-          
-          <div className="flex gap-2">
-            {isEditing ? (
-              <>
-                <Button onClick={handleSave} className="bg-primary hover:bg-primary/90 text-white">
-                  Spara
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setIsEditing(false)}
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+        <CardHeader>
+          <CardTitle className="text-white">Företagsinformation</CardTitle>
+          <CardDescription className="text-white/80">
+            Uppdatera din företagsprofil för att synas bättre för kandidater
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="company_name" className="text-white">Företagsnamn</Label>
+                <Input
+                  id="company_name"
+                  value={formData.company_name}
+                  onChange={(e) => setFormData({...formData, company_name: e.target.value})}
+                  disabled={!isEditing}
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 disabled:bg-white/5 disabled:text-white/70"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="org_number" className="text-white">Organisationsnummer</Label>
+                <Input
+                  id="org_number"
+                  value={formData.org_number}
+                  onChange={(e) => setFormData({...formData, org_number: e.target.value})}
+                  disabled={!isEditing}
+                  placeholder="XXXXXX-XXXX"
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 disabled:bg-white/5 disabled:text-white/70"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="industry" className="text-white">Bransch</Label>
+                <Input
+                  id="industry"
+                  value={formData.industry}
+                  onChange={(e) => setFormData({...formData, industry: e.target.value})}
+                  disabled={!isEditing}
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 disabled:bg-white/5 disabled:text-white/70"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="employee_count" className="text-white">Antal anställda</Label>
+                <Select 
+                  value={formData.employee_count} 
+                  onValueChange={(value) => setFormData({...formData, employee_count: value})}
+                  disabled={!isEditing}
                 >
-                  Avbryt
+                  <SelectTrigger className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 disabled:bg-white/5 disabled:text-white/70">
+                    <SelectValue placeholder="Välj antal anställda" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1-10 anställda">1-10 anställda</SelectItem>
+                    <SelectItem value="11-50 anställda">11-50 anställda</SelectItem>
+                    <SelectItem value="51-200 anställda">51-200 anställda</SelectItem>
+                    <SelectItem value="201-1000 anställda">201-1000 anställda</SelectItem>
+                    <SelectItem value="1000+ anställda">1000+ anställda</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="md:col-span-2 space-y-2">
+                <Label htmlFor="address" className="text-white">Adress</Label>
+                <Input
+                  id="address"
+                  value={formData.address}
+                  onChange={(e) => setFormData({...formData, address: e.target.value})}
+                  disabled={!isEditing}
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 disabled:bg-white/5 disabled:text-white/70"
+                />
+              </div>
+
+              <div className="md:col-span-2 space-y-2">
+                <Label htmlFor="website" className="text-white">Webbsida</Label>
+                <Input
+                  id="website" 
+                  value={formData.website}
+                  onChange={(e) => setFormData({...formData, website: e.target.value})}
+                  disabled={!isEditing}
+                  placeholder="https://exempel.se"
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 disabled:bg-white/5 disabled:text-white/70"
+                />
+              </div>
+
+              <div className="md:col-span-2 space-y-2">
+                <Label htmlFor="company_description" className="text-white">Företagsbeskrivning</Label>
+                <Textarea
+                  id="company_description"
+                  value={formData.company_description}
+                  onChange={(e) => setFormData({...formData, company_description: e.target.value})}
+                  disabled={!isEditing}
+                  rows={4}
+                  placeholder="Beskriv ditt företag, kultur och värderingar..."
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 disabled:bg-white/5 disabled:text-white/70"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              {isEditing ? (
+                <>
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={loading}
+                  >
+                    {loading ? 'Sparar...' : 'Spara ändringar'}
+                  </Button>
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    onClick={() => setIsEditing(false)}
+                    className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  >
+                    Avbryt
+                  </Button>
+                </>
+              ) : (
+                <Button 
+                  type="button"
+                  onClick={() => setIsEditing(true)}
+                  className="w-full"
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Redigera profil
                 </Button>
-              </>
-            ) : (
-              <Button 
-                onClick={() => setIsEditing(true)}
-                className="bg-primary hover:bg-primary/90 text-white"
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Redigera
-              </Button>
-            )}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <Label htmlFor="company_name" className="text-white">Företagsnamn</Label>
-            <Input
-              id="company_name"
-              value={formData.company_name}
-              onChange={(e) => setFormData({...formData, company_name: e.target.value})}
-              disabled={!isEditing}
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 disabled:bg-white/5"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="org_number" className="text-white">Organisationsnummer</Label>
-            <Input
-              id="org_number"
-              value={formData.org_number}
-              onChange={(e) => setFormData({...formData, org_number: e.target.value})}
-              disabled={!isEditing}
-              placeholder="XXXXXX-XXXX"
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 disabled:bg-white/5"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="industry" className="text-white">Bransch</Label>
-            <Input
-              id="industry"
-              value={formData.industry}
-              onChange={(e) => setFormData({...formData, industry: e.target.value})}
-              disabled={!isEditing}
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 disabled:bg-white/5"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="employee_count" className="text-white">Antal anställda</Label>
-            <Select 
-              value={formData.employee_count} 
-              onValueChange={(value) => setFormData({...formData, employee_count: value})}
-              disabled={!isEditing}
-            >
-              <SelectTrigger className="bg-white/10 border-white/20 text-white disabled:bg-white/5">
-                <SelectValue placeholder="Välj antal anställda" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1-10 anställda">1-10 anställda</SelectItem>
-                <SelectItem value="11-50 anställda">11-50 anställda</SelectItem>
-                <SelectItem value="51-200 anställda">51-200 anställda</SelectItem>
-                <SelectItem value="201-1000 anställda">201-1000 anställda</SelectItem>
-                <SelectItem value="1000+ anställda">1000+ anställda</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="md:col-span-2">
-            <Label htmlFor="address" className="text-white">Adress</Label>
-            <Input
-              id="address"
-              value={formData.address}
-              onChange={(e) => setFormData({...formData, address: e.target.value})}
-              disabled={!isEditing}
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 disabled:bg-white/5"
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <Label htmlFor="website" className="text-white">Webbsida</Label>
-            <Input
-              id="website" 
-              value={formData.website}
-              onChange={(e) => setFormData({...formData, website: e.target.value})}
-              disabled={!isEditing}
-              placeholder="https://exempel.se"
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 disabled:bg-white/5"
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <Label htmlFor="company_description" className="text-white">Företagsbeskrivning</Label>
-            <Textarea
-              id="company_description"
-              value={formData.company_description}
-              onChange={(e) => setFormData({...formData, company_description: e.target.value})}
-              disabled={!isEditing}
-              rows={4}
-              placeholder="Beskriv ditt företag, kultur och värderingar..."
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 disabled:bg-white/5"
-            />
-          </div>
-        </div>
-      </div>
+              )}
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
       {/* Image Editor */}
       <ImageEditor
