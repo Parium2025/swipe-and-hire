@@ -213,7 +213,7 @@ const CompanyProfile = () => {
             Företagslogga
           </CardTitle>
           <CardDescription className="text-white/80 text-center">
-            Ladda upp din företagslogga för att bygga kännedom och förtroende
+            Hantera företagsinformation och logga
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center space-y-4">
