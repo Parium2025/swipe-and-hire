@@ -266,9 +266,9 @@ const CompanyProfile = () => {
       {/* Företagsinformation */}
       <Card className="bg-white/10 backdrop-blur-sm border-white/20">
         <CardHeader>
-          <CardTitle className="text-white">Företagsinformation</CardTitle>
-          <CardDescription className="text-white/80">
-            Uppdatera din företagsprofil för att synas bättre för kandidater
+          <CardTitle className="text-white text-center">Företagsinformation</CardTitle>
+          <CardDescription className="text-white/80 text-center">
+            Uppdatera företagsprofil för att synas bättre för kandidater
           </CardDescription>
         </CardHeader>
         <CardContent>
