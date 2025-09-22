@@ -587,6 +587,10 @@ export type Database = {
         Args: { employer_uuid: string; seeker_uuid: string }
         Returns: boolean
       }
+      check_password_strength: {
+        Args: { password: string }
+        Returns: boolean
+      }
       cleanup_expired_confirmations: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -675,6 +679,10 @@ export type Database = {
       is_support_admin: {
         Args: { user_uuid: string }
         Returns: boolean
+      }
+      log_password_security_event: {
+        Args: { details?: Json; event_type: string; user_id: string }
+        Returns: undefined
       }
       log_profile_access_attempt: {
         Args: {
