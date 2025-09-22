@@ -15,7 +15,6 @@ import { createSignedUrl } from '@/utils/storageUtils';
 
 const CompanyProfile = () => {
   const { profile, updateProfile } = useAuth();
-  const { setOpen } = useSidebar();
   const [loading, setLoading] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   
@@ -33,11 +32,6 @@ const CompanyProfile = () => {
     employee_count: profile?.employee_count || '',
     company_logo_url: (profile as any)?.company_logo_url || '',
   });
-
-  // Auto-collapse sidebar when component mounts
-  useEffect(() => {
-    setOpen(false);
-  }, [setOpen]);
 
   // Update form data when profile changes
   useEffect(() => {
