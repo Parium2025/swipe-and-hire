@@ -78,13 +78,16 @@ const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, cur
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-white/10" />
         
-        <DropdownMenuItem 
-          onClick={() => handleViewChange('welcome_tunnel')}
-          className="cursor-pointer hover:bg-white/10"
-        >
-          <UserCheck className="mr-2 h-4 w-4" />
-          Välkomsttunnel (Jobbsökare)
-        </DropdownMenuItem>
+        {/* Visa jobbsökar-alternativ endast när man inte är employer */}
+        {userRole?.role !== 'employer' && (
+          <DropdownMenuItem 
+            onClick={() => handleViewChange('welcome_tunnel')}
+            className="cursor-pointer hover:bg-white/10"
+          >
+            <UserCheck className="mr-2 h-4 w-4" />
+            Välkomsttunnel (Jobbsökare)
+          </DropdownMenuItem>
+        )}
         
         <DropdownMenuItem 
           onClick={() => handleViewChange('employer_welcome_tunnel')}
