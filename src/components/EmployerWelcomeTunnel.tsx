@@ -165,10 +165,6 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 <h3 className="text-white text-center font-semibold">Hitta rätt talang snabbt och enkelt</h3>
               </div>
             </div>
-
-            <div className="text-center mt-8">
-              <p className="text-lg md:text-xl text-white max-w-md mx-auto drop-shadow-sm font-semibold">Kom igång på några minuter</p>
-            </div>
           </div>
         );
 
