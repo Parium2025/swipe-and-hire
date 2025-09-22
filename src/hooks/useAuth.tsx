@@ -174,10 +174,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (profileError) {
         console.error('Error fetching profile:', profileError);
+        // Don't auto-logout on profile errors, just set profile to null
+        setProfile(null);
+        return;
       } else if (!profileData) {
-        console.log('Profile not found for user, logging out...');
-        // Om profilen inte finns, logga ut användaren
-        await signOut();
+        console.log('Profile not found for user, creating empty profile state...');
+        // Don't auto-logout, just set profile to null and let app handle it
+        setProfile(null);
         return;
       } else {
         // Convert JSONB interests to string array
