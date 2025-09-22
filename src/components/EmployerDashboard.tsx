@@ -165,8 +165,8 @@ const EmployerDashboard = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold">Mina jobbannonser</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-3xl font-bold text-white">Mina jobbannonser</h1>
+          <p className="text-white/90 mt-1">
             Hantera dina publicerade tjänster
           </p>
         </div>
@@ -175,24 +175,24 @@ const EmployerDashboard = () => {
 
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="pb-2">
-            <CardDescription>Totalt annonser</CardDescription>
-            <CardTitle className="text-2xl">{jobs.length}</CardTitle>
+            <CardDescription className="text-white/70">Totalt annonser</CardDescription>
+            <CardTitle className="text-2xl text-white">{jobs.length}</CardTitle>
           </CardHeader>
         </Card>
-        <Card>
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="pb-2">
-            <CardDescription>Aktiva annonser</CardDescription>
-            <CardTitle className="text-2xl">
+            <CardDescription className="text-white/70">Aktiva annonser</CardDescription>
+            <CardTitle className="text-2xl text-white">
               {jobs.filter(job => job.is_active).length}
             </CardTitle>
           </CardHeader>
         </Card>
-        <Card>
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="pb-2">
-            <CardDescription>Totala visningar</CardDescription>
-            <CardTitle className="text-2xl">
+            <CardDescription className="text-white/70">Totala visningar</CardDescription>
+            <CardTitle className="text-2xl text-white">
               {jobs.reduce((sum, job) => sum + job.views_count, 0)}
             </CardTitle>
           </CardHeader>
@@ -202,10 +202,10 @@ const EmployerDashboard = () => {
       {/* Job Listings */}
       <div className="space-y-4">
         {jobs.length === 0 ? (
-          <Card>
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardContent className="text-center py-12">
-              <h3 className="text-lg font-semibold mb-2">Inga annonser än</h3>
-              <p className="text-muted-foreground mb-4">
+              <h3 className="text-lg font-semibold mb-2 text-white">Inga annonser än</h3>
+              <p className="text-white/70 mb-4">
                 Skapa din första jobbannons för att komma igång med rekrytering.
               </p>
               <CreateJobDialog onJobCreated={fetchJobs} />
@@ -213,17 +213,17 @@ const EmployerDashboard = () => {
           </Card>
         ) : (
           jobs.map((job) => (
-            <Card key={job.id}>
+            <Card key={job.id} className="bg-white/10 backdrop-blur-sm border-white/20">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <CardTitle className="text-xl">{job.title}</CardTitle>
+                      <CardTitle className="text-xl text-white">{job.title}</CardTitle>
                       <Badge variant={job.is_active ? "default" : "secondary"}>
                         {job.is_active ? 'Aktiv' : 'Inaktiv'}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-4 text-sm text-white/70">
                       <div className="flex items-center gap-1">
                         <MapPin size={14} />
                         {job.location}
@@ -233,7 +233,7 @@ const EmployerDashboard = () => {
                         {new Date(job.created_at).toLocaleDateString('sv-SE')}
                       </div>
                       {job.employment_type && (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs bg-white/10 text-white border-white/20">
                           {getEmploymentTypeLabel(job.employment_type)}
                         </Badge>
                       )}
@@ -248,18 +248,18 @@ const EmployerDashboard = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                <p className="text-sm text-white/80 mb-4 line-clamp-2">
                   {job.description}
                 </p>
                 
                 {formatSalary(job.salary_min, job.salary_max) && (
-                  <p className="text-sm font-medium mb-4">
+                  <p className="text-sm font-medium mb-4 text-white">
                     {formatSalary(job.salary_min, job.salary_max)}
                   </p>
                 )}
 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-4 text-sm text-white/70">
                     <div className="flex items-center gap-1">
                       <Eye size={14} />
                       {job.views_count} visningar
@@ -275,6 +275,7 @@ const EmployerDashboard = () => {
                       variant="outline" 
                       size="sm"
                       onClick={() => handleEditJob(job)}
+                      className="bg-white/10 border-white/20 text-white hover:bg-white/20"
                     >
                       <Edit size={14} className="mr-1" />
                       Redigera
@@ -283,7 +284,7 @@ const EmployerDashboard = () => {
                       variant="outline" 
                       size="sm"
                       onClick={() => deleteJob(job.id)}
-                      className="text-destructive hover:text-destructive"
+                      className="bg-white/10 border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-100"
                     >
                       <Trash2 size={14} className="mr-1" />
                       Ta bort
