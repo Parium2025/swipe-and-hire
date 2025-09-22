@@ -185,17 +185,6 @@ const CompanyProfile = () => {
     }
   };
 
-  const handleCancel = () => {
-    // Reset form to original values
-    if (originalValues) {
-      setFormData({ ...originalValues });
-      setHasUnsavedChanges(false);
-      toast({
-        title: "Ändringar ångrades",
-        description: "Formuläret har återställts till sparade värden."
-      });
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -457,26 +446,14 @@ const CompanyProfile = () => {
               </div>
             </div>
 
-            <div className="flex gap-2 pt-4">
+            <div className="pt-4">
               <Button 
                 type="submit" 
-                className="flex-1" 
+                className="w-full" 
                 disabled={loading}
               >
                 {loading ? 'Sparar...' : 'Spara ändringar'}
               </Button>
-              
-              {hasUnsavedChanges && (
-                <Button 
-                  type="button"
-                  variant="outline" 
-                  onClick={handleCancel}
-                  disabled={loading}
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-                >
-                  Ångra
-                </Button>
-              )}
             </div>
           </form>
         </CardContent>
