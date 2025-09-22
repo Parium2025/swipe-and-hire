@@ -448,7 +448,7 @@ const CompanyProfile = () => {
               </div>
 
               <div className="md:col-span-2 space-y-2">
-                <Label htmlFor="address" className="text-white">Adress</Label>
+                <Label htmlFor="address" className="text-white">Huvudkontor</Label>
                 <Input
                   id="address"
                   value={formData.address}
