@@ -5,7 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
-import { useState, useEffect } from 'react';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { useSidebar } from '@/components/ui/sidebar';
 import ImageEditor from '@/components/ImageEditor';
@@ -15,8 +16,10 @@ import { createSignedUrl } from '@/utils/storageUtils';
 
 const CompanyProfile = () => {
   const { profile, updateProfile } = useAuth();
+  const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const [loading, setLoading] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [originalValues, setOriginalValues] = useState<any>({});
   
   // Image editor states
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
@@ -36,7 +39,7 @@ const CompanyProfile = () => {
   // Update form data when profile changes
   useEffect(() => {
     if (profile) {
-      setFormData({
+      const values = {
         company_name: profile.company_name || '',
         org_number: profile.org_number || '',
         industry: profile.industry || '',
@@ -45,9 +48,56 @@ const CompanyProfile = () => {
         company_description: profile.company_description || '',
         employee_count: profile.employee_count || '',
         company_logo_url: (profile as any)?.company_logo_url || '',
-      });
+      };
+      
+      setFormData(values);
+      setOriginalValues(values);
+      setHasUnsavedChanges(false);
     }
-  }, [profile]);
+  }, [profile, setHasUnsavedChanges]);
+
+  const checkForChanges = useCallback(() => {
+    if (!originalValues.company_name) return false; // Not loaded yet
+    
+    const hasChanges = Object.keys(formData).some(
+      key => formData[key] !== originalValues[key]
+    );
+
+    setHasUnsavedChanges(hasChanges);
+    return hasChanges;
+  }, [originalValues, formData, setHasUnsavedChanges]);
+
+  // Check for changes whenever form values change
+  useEffect(() => {
+    checkForChanges();
+  }, [checkForChanges]);
+
+  // Prevent leaving page with unsaved changes (browser/tab close)
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = 'Du har osparade ändringar. Är du säker på att du vill lämna sidan?';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [hasUnsavedChanges]);
+
+  // Reset form to original values when user confirms leaving without saving
+  useEffect(() => {
+    const onUnsavedConfirm = () => {
+      if (!originalValues) return;
+      setFormData({ ...originalValues });
+      setHasUnsavedChanges(false);
+    };
+    window.addEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
+    return () => window.removeEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
+  }, [originalValues, setHasUnsavedChanges]);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -86,9 +136,12 @@ const CompanyProfile = () => {
       setImageEditorOpen(false);
       setPendingImageSrc('');
       
+      // Mark as having unsaved changes
+      setHasUnsavedChanges(true);
+      
       toast({
         title: "Logga uppladdad!",
-        description: "Din företagslogga har uppdaterats."
+        description: "Tryck på \"Spara ändringar\" för att spara din företagslogga."
       });
     } catch (error) {
       console.error('Logo upload error:', error);
@@ -106,6 +159,11 @@ const CompanyProfile = () => {
     try {
       setLoading(true);
       await updateProfile(formData as any);
+      
+      // Update original values after successful save
+      setOriginalValues({ ...formData });
+      setHasUnsavedChanges(false);
+      
       toast({
         title: "Företagsprofil uppdaterad",
         description: "Din företagsprofil har uppdaterats framgångsrikt."
