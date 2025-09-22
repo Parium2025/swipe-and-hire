@@ -16,7 +16,6 @@ import { createSignedUrl } from '@/utils/storageUtils';
 const CompanyProfile = () => {
   const { profile, updateProfile } = useAuth();
   const { setOpen } = useSidebar();
-  const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   
@@ -113,7 +112,6 @@ const CompanyProfile = () => {
     try {
       setLoading(true);
       await updateProfile(formData as any);
-      setIsEditing(false);
       toast({
         title: "Företagsprofil uppdaterad",
         description: "Din företagsprofil har uppdaterats framgångsrikt."
@@ -177,26 +175,24 @@ const CompanyProfile = () => {
             )}
           </div>
 
-          {isEditing && (
-            <Button 
-              variant="outline" 
-              onClick={() => document.getElementById('logo-upload')?.click()}
-              disabled={isUploadingLogo}
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:scale-105 transition-transform duration-200"
-            >
-              {isUploadingLogo ? (
-                <>
-                  <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"></div>
-                  Laddar upp...
-                </>
-              ) : (
-                <>
-                  <Camera className="h-4 w-4 mr-2" />
-                  {formData.company_logo_url ? 'Byt logga' : 'Ladda upp logga'}
-                </>
-              )}
-            </Button>
-          )}
+          <Button 
+            variant="outline" 
+            onClick={() => document.getElementById('logo-upload')?.click()}
+            disabled={isUploadingLogo}
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:scale-105 transition-transform duration-200"
+          >
+            {isUploadingLogo ? (
+              <>
+                <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"></div>
+                Laddar upp...
+              </>
+            ) : (
+              <>
+                <Camera className="h-4 w-4 mr-2" />
+                {formData.company_logo_url ? 'Byt logga' : 'Ladda upp logga'}
+              </>
+            )}
+          </Button>
 
           <input
             id="logo-upload"
@@ -204,7 +200,7 @@ const CompanyProfile = () => {
             accept="image/*"
             onChange={handleLogoChange}
             className="hidden"
-            disabled={isUploadingLogo || !isEditing}
+            disabled={isUploadingLogo}
           />
         </CardContent>
       </Card>
@@ -226,8 +222,7 @@ const CompanyProfile = () => {
                   id="company_name"
                   value={formData.company_name}
                   onChange={(e) => setFormData({...formData, company_name: e.target.value})}
-                  disabled={!isEditing}
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 disabled:bg-white/5 disabled:text-white/70"
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                 />
               </div>
 
@@ -237,9 +232,8 @@ const CompanyProfile = () => {
                   id="org_number"
                   value={formData.org_number}
                   onChange={(e) => setFormData({...formData, org_number: e.target.value})}
-                  disabled={!isEditing}
                   placeholder="XXXXXX-XXXX"
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 disabled:bg-white/5 disabled:text-white/70"
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                 />
               </div>
 
@@ -249,8 +243,7 @@ const CompanyProfile = () => {
                   id="industry"
                   value={formData.industry}
                   onChange={(e) => setFormData({...formData, industry: e.target.value})}
-                  disabled={!isEditing}
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 disabled:bg-white/5 disabled:text-white/70"
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                 />
               </div>
 
@@ -259,9 +252,8 @@ const CompanyProfile = () => {
                 <Select 
                   value={formData.employee_count} 
                   onValueChange={(value) => setFormData({...formData, employee_count: value})}
-                  disabled={!isEditing}
                 >
-                  <SelectTrigger className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 disabled:bg-white/5 disabled:text-white/70">
+                  <SelectTrigger className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10">
                     <SelectValue placeholder="Välj antal anställda" />
                   </SelectTrigger>
                   <SelectContent>
@@ -280,8 +272,7 @@ const CompanyProfile = () => {
                   id="address"
                   value={formData.address}
                   onChange={(e) => setFormData({...formData, address: e.target.value})}
-                  disabled={!isEditing}
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 disabled:bg-white/5 disabled:text-white/70"
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                 />
               </div>
 
@@ -291,9 +282,8 @@ const CompanyProfile = () => {
                   id="website" 
                   value={formData.website}
                   onChange={(e) => setFormData({...formData, website: e.target.value})}
-                  disabled={!isEditing}
                   placeholder="https://exempel.se"
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 disabled:bg-white/5 disabled:text-white/70"
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                 />
               </div>
 
@@ -303,44 +293,20 @@ const CompanyProfile = () => {
                   id="company_description"
                   value={formData.company_description}
                   onChange={(e) => setFormData({...formData, company_description: e.target.value})}
-                  disabled={!isEditing}
                   rows={4}
                   placeholder="Beskriv ditt företag, kultur och värderingar..."
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 disabled:bg-white/5 disabled:text-white/70"
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                 />
               </div>
             </div>
 
-            <div className="flex gap-2 pt-4">
-              {isEditing ? (
-                <>
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={loading}
-                  >
-                    {loading ? 'Sparar...' : 'Spara ändringar'}
-                  </Button>
-                  <Button 
-                    type="button"
-                    variant="outline" 
-                    onClick={() => setIsEditing(false)}
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-                  >
-                    Avbryt
-                  </Button>
-                </>
-              ) : (
-                <Button 
-                  type="button"
-                  onClick={() => setIsEditing(true)}
-                  className="w-full"
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Redigera profil
-                </Button>
-              )}
-            </div>
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={loading}
+            >
+              {loading ? 'Sparar...' : 'Spara ändringar'}
+            </Button>
           </form>
         </CardContent>
       </Card>
