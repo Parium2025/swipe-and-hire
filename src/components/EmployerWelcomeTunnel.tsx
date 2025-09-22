@@ -256,7 +256,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
 
             <div className="space-y-4 max-w-md mx-auto">
               <div className="flex items-start space-x-4 p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 transition-all duration-300 hover:bg-white/15 hover:scale-105">
-                <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-bold">
+                <div className="text-2xl font-bold text-white">
                   1
                 </div>
                 <div>
@@ -268,7 +268,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               </div>
 
               <div className="flex items-start space-x-4 p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 transition-all duration-300 hover:bg-white/15 hover:scale-105">
-                <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-bold">
+                <div className="text-2xl font-bold text-white">
                   2
                 </div>
                 <div>
@@ -280,7 +280,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               </div>
 
               <div className="flex items-start space-x-4 p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 transition-all duration-300 hover:bg-white/15 hover:scale-105">
-                <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-bold">
+                <div className="text-2xl font-bold text-white">
                   3
                 </div>
                 <div>
