@@ -233,15 +233,15 @@ const CompanyProfile = () => {
         <CardContent className="flex flex-col items-center space-y-4">
           <div className="relative">
             {formData.company_logo_url ? (
-              <div className="w-24 h-24 rounded-lg overflow-hidden bg-white/10 backdrop-blur-sm border-2 border-white/20 flex items-center justify-center">
+              <div className="w-24 h-24 rounded-full overflow-hidden bg-white/10 backdrop-blur-sm border-2 border-white/20 flex items-center justify-center">
                 <img 
                   src={formData.company_logo_url} 
                   alt="Företagslogga" 
-                  className="max-w-full max-h-full object-contain"
+                  className="w-full h-full object-cover"
                 />
               </div>
             ) : (
-              <div className="w-24 h-24 rounded-lg bg-white/10 backdrop-blur-sm border-2 border-dashed border-white/40 flex items-center justify-center">
+              <div className="w-24 h-24 rounded-full bg-white/10 backdrop-blur-sm border-2 border-dashed border-white/40 flex items-center justify-center">
                 <Building2 className="h-8 w-8 text-white/60" />
               </div>
             )}
