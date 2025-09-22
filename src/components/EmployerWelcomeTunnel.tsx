@@ -315,6 +315,27 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 <strong className="text-white">Tips:</strong> Börja med att skapa din första jobbannons för att locka kvalificerade kandidater till ditt företag.
               </p>
             </div>
+
+            {/* Nu kör vi knapp */}
+            <div className="pt-4">
+              <Button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="py-4 px-8 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-lg focus:outline-none focus:ring-0"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"></div>
+                    <span>Sparar...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Nu kör vi!</span>
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         );
 
@@ -380,7 +401,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
         </div>
 
         {/* Navigation buttons */}
-        {currentStep < totalSteps - 1 && (
+        {currentStep < totalSteps - 1 && currentStep !== totalSteps - 1 && (
           <div className="w-full max-w-md mx-auto px-6 pb-8 relative z-10">
             <div className="flex gap-4">
               {currentStep > 0 && (
@@ -394,33 +415,13 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 </Button>
               )}
               
-              {currentStep === totalSteps - 1 ? (
-                <Button
-                  onClick={handleSubmit}
-                  disabled={isSubmitting}
-                  className="flex-1 py-4 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-lg focus:outline-none focus:ring-0"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"></div>
-                      <span>Sparar...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Slutför</span>
-                      <CheckCircle className="w-4 h-4 ml-2" />
-                    </>
-                  )}
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleNext}
-                  className="flex-1 py-4 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-lg focus:outline-none focus:ring-0"
-                >
-                  {currentStep === 0 ? 'Kom igång' : 'Nästa'}
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              )}
+              <Button
+                onClick={handleNext}
+                className="flex-1 py-4 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-lg focus:outline-none focus:ring-0"
+              >
+                {currentStep === 0 ? 'Kom igång' : 'Nästa'}
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
             </div>
           </div>
         )}
