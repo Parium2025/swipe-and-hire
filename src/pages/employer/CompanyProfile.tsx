@@ -465,7 +465,7 @@ const CompanyProfile = () => {
                   className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                 />
                 <div className="text-right">
-                  <span className="text-white/60 text-sm">
+                  <span className="text-white text-sm">
                     {formData.company_description.trim() === '' ? 0 : formData.company_description.trim().split(/\s+/).length} ord
                   </span>
                 </div>
