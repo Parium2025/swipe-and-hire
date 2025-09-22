@@ -144,7 +144,7 @@ const CompanyProfile = () => {
 
         <div className="flex items-center gap-6">
           {formData.company_logo_url ? (
-            <div className="relative">
+            <div className="flex items-center gap-4">
               <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-lg border-2 border-white/20 flex items-center justify-center overflow-hidden">
                 <img 
                   src={formData.company_logo_url} 
@@ -152,54 +152,61 @@ const CompanyProfile = () => {
                   className="max-w-full max-h-full object-contain"
                 />
               </div>
-              {isEditing && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-white/10 border-white/20 text-white hover:bg-white/20"
-                  onClick={() => document.getElementById('logo-upload')?.click()}
-                  disabled={isUploadingLogo}
-                >
-                  <Edit className="h-3 w-3" />
-                </Button>
-              )}
+              <div className="space-y-2">
+                <p className="text-sm text-white font-medium">Nuvarande logga</p>
+                {isEditing && (
+                  <Button
+                    variant="outline"
+                    onClick={() => document.getElementById('logo-upload')?.click()}
+                    disabled={isUploadingLogo}
+                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:scale-105 transition-transform duration-200"
+                  >
+                    {isUploadingLogo ? (
+                      <>
+                        <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"></div>
+                        Laddar upp...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Byt logga
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
             </div>
           ) : (
-            <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-lg border-2 border-dashed border-white/40 flex items-center justify-center">
-              <Building2 className="h-8 w-8 text-white/60" />
+            <div 
+              className={`w-full max-w-md h-32 border-2 border-dashed border-white/20 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-white/40 hover:bg-white/5 transition-all duration-300 ${isEditing ? '' : 'pointer-events-none opacity-50'}`}
+              onClick={() => isEditing && document.getElementById('logo-upload')?.click()}
+            >
+              {isUploadingLogo ? (
+                <div className="text-center">
+                  <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full mx-auto mb-2"></div>
+                  <p className="text-sm text-white">Laddar upp...</p>
+                </div>
+              ) : (
+                <>
+                  <Upload className="w-8 h-8 text-white mb-2" />
+                  <p className="text-sm text-white font-medium">Klicka för att ladda upp logga</p>
+                  <p className="text-xs text-white/60 mt-1">PNG, JPG eller GIF (max 10MB)</p>
+                  {!isEditing && (
+                    <p className="text-xs text-white/40 mt-2">Aktivera redigeringsläge för att ladda upp</p>
+                  )}
+                </>
+              )}
             </div>
           )}
 
-          {isEditing && (
-            <div>
-              <Button 
-                variant="outline" 
-                onClick={() => document.getElementById('logo-upload')?.click()}
-                disabled={isUploadingLogo}
-                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-              >
-                {isUploadingLogo ? (
-                  <>
-                    <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"></div>
-                    Laddar upp...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="h-4 w-4 mr-2" />
-                    {formData.company_logo_url ? 'Byt logga' : 'Ladda upp logga'}
-                  </>
-                )}
-              </Button>
-              <input
-                id="logo-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleLogoChange}
-                className="hidden"
-                disabled={isUploadingLogo}
-              />
-            </div>
-          )}
+          <input
+            id="logo-upload"
+            type="file"
+            accept="image/*"
+            onChange={handleLogoChange}
+            className="hidden"
+            disabled={isUploadingLogo || !isEditing}
+          />
         </div>
       </div>
 
