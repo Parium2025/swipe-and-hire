@@ -126,6 +126,21 @@ export function EmployerSidebar() {
     loadAvatarUrl();
   }, [profile?.profile_image_url]);
 
+  // Listen for unsaved changes cancel event to close sidebar
+  useEffect(() => {
+    const handleUnsavedCancel = () => {
+      console.log('Unsaved cancel event received - closing sidebar');
+      if (isMobile) {
+        setOpenMobile(false);
+      } else {
+        setOpen(false);
+      }
+    };
+
+    window.addEventListener('unsaved-cancel', handleUnsavedCancel);
+    return () => window.removeEventListener('unsaved-cancel', handleUnsavedCancel);
+  }, [isMobile, setOpenMobile, setOpen]);
+
   const handleNavigation = (href: string) => {
     if (checkBeforeNavigation(href)) {
       navigate(href);
