@@ -101,7 +101,7 @@ const supportNavItems = [
 ];
 
 export function EmployerSidebar() {
-  const { state, setOpenMobile, isMobile } = useSidebar();
+  const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
   const collapsed = state === 'collapsed';
   const { profile, signOut, user } = useAuth();
   const navigate = useNavigate();
@@ -129,6 +129,13 @@ export function EmployerSidebar() {
   const handleNavigation = (href: string) => {
     if (checkBeforeNavigation(href)) {
       navigate(href);
+      // Stäng sidebaren automatiskt efter navigation
+      if (isMobile) {
+        setOpenMobile(false);
+      } else {
+        // På desktop, kollapsa sidebaren
+        setOpen(false);
+      }
     }
   };
 
