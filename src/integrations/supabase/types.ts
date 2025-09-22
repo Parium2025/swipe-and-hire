@@ -656,6 +656,13 @@ export type Database = {
           working_hours: string
         }[]
       }
+      get_user_confirmation_status: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          has_pending: boolean
+          is_expired: boolean
+        }[]
+      }
       get_user_organization: {
         Args: { user_uuid: string }
         Returns: string
