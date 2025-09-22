@@ -163,14 +163,11 @@ const EmployerDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Mina jobbannonser</h1>
-          <p className="text-white/90 mt-1">
-            Hantera dina publicerade tjänster
-          </p>
-        </div>
-        <CreateJobDialog onJobCreated={fetchJobs} />
+      <div>
+        <h1 className="text-3xl font-bold text-white">Mina jobbannonser</h1>
+        <p className="text-white/90 mt-1">
+          Hantera dina publicerade tjänster
+        </p>
       </div>
 
       {/* Stats Overview */}
