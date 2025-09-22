@@ -34,6 +34,11 @@ const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, cur
       // Reset onboarding to show welcome tunnel
       await updateProfile({ onboarding_completed: false });
       window.location.reload();
+    } else if (view === 'employer_welcome_tunnel') {
+      // Reset onboarding for employer welcome tunnel
+      await switchRole('employer');
+      await updateProfile({ onboarding_completed: false });
+      window.location.reload();
     } else if (view === 'profile_setup') {
       // Clear profile data to show setup
       await updateProfile({ 
@@ -79,6 +84,14 @@ const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, cur
         >
           <UserCheck className="mr-2 h-4 w-4" />
           Välkomsttunnel (Jobbsökare)
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem 
+          onClick={() => handleViewChange('employer_welcome_tunnel')}
+          className="cursor-pointer hover:bg-white/10"
+        >
+          <Building className="mr-2 h-4 w-4" />
+          Välkomsttunnel (Arbetsgivare)
         </DropdownMenuItem>
         
         <DropdownMenuItem 

@@ -11,6 +11,7 @@ import JobSwipe from '@/components/JobSwipe';
 import ProfileSetup from '@/components/ProfileSetup';
 import ProfileSelector from '@/components/ProfileSelector';
 import WelcomeTunnel from '@/components/WelcomeTunnel';
+import EmployerWelcomeTunnel from '@/components/EmployerWelcomeTunnel';
 import AppOnboardingTour from '@/components/AppOnboardingTour';
 import Profile from '@/pages/Profile';
 import Consent from '@/pages/Consent';
@@ -116,6 +117,9 @@ const Index = () => {
     if (developerView === 'welcome_tunnel') {
       return <WelcomeTunnel onComplete={() => setDeveloperView('dashboard')} />;
     }
+    if (developerView === 'employer_welcome_tunnel') {
+      return <EmployerWelcomeTunnel onComplete={() => setDeveloperView('dashboard')} />;
+    }
     if (developerView === 'profile_setup') {
       return <ProfileSetup />;
     }
@@ -136,6 +140,20 @@ const Index = () => {
       
       // Navigate to search jobs page
       navigate('/search-jobs');
+    }} />;
+  }
+
+  // For employers, show EmployerWelcomeTunnel if onboarding not completed
+  if (needsOnboarding && (profile as any)?.role === 'employer') {
+    return <EmployerWelcomeTunnel onComplete={async () => {
+      // Mark onboarding as completed in background
+      supabase
+        .from('profiles')
+        .update({ onboarding_completed: true })
+        .eq('id', user.id);
+      
+      // Navigate to dashboard
+      navigate('/dashboard');
     }} />;
   }
 
