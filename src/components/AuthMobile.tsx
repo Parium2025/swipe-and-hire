@@ -159,6 +159,33 @@ const AuthMobile = ({
     setPasswordStrength(calculatePasswordStrength(newPassword));
   };
 
+  // Clear all form data when switching between login and registration
+  const clearFormData = () => {
+    setJobSeekerData({
+      firstName: '',
+      lastName: '',
+      phone: '',
+      phoneError: '',
+      email: '',
+      password: ''
+    });
+    setEmployerData({
+      firstName: '',
+      lastName: '',
+      companyName: '',
+      orgNumber: '',
+      industry: '',
+      address: '',
+      website: '',
+      companyDescription: '',
+      employeeCount: '',
+      email: '',
+      password: ''
+    });
+    setShowPassword(false);
+    setPasswordStrength(0);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -505,6 +532,7 @@ const AuthMobile = ({
                    setIsLogin(value === 'login');
                    setHasRegistered(false); // Låt upp knappen när användaren byter flik
                    setShowResend(false); // Återställ meddelande när användaren byter flik
+                   clearFormData(); // Rensa all formulärdata när man växlar flik
                  }}>
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0 p-0 h-auto gap-2">
                     <TabsTrigger 
