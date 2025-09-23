@@ -39,7 +39,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, {
       status: 302,
       headers: {
-        "Location": "https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth",
+        "Location": "https://swipe-and-hire.lovable.app/auth",
         ...corsHeaders,
       },
     });
