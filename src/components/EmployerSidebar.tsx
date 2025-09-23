@@ -164,13 +164,11 @@ export function EmployerSidebar() {
   const handleNavigation = (href: string) => {
     if (checkBeforeNavigation(href)) {
       navigate(href);
-      // Stäng sidebaren automatiskt efter navigation
+      // Stäng endast mobilsidebaren efter navigation
       if (isMobile) {
         setOpenMobile(false);
-      } else {
-        // På desktop, kollapsa sidebaren
-        setOpen(false);
       }
+      // På desktop behåller vi sidebarens nuvarande tillstånd
     }
   };
 
