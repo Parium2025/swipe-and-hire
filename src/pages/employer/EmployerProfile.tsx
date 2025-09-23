@@ -9,7 +9,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 
 const EmployerProfile = () => {
-  const { profile, updateProfile, user } = useAuth();
+  const { profile, updateProfile, user, userRole } = useAuth();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const [loading, setLoading] = useState(false);
   const [originalValues, setOriginalValues] = useState<any>({});
@@ -146,6 +146,16 @@ const EmployerProfile = () => {
               <Input
                 id="email"
                 value={user?.email || ''}
+                readOnly
+                className="bg-white/5 backdrop-blur-sm border-white/20 text-white/70 cursor-not-allowed"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="role" className="text-white">Roll</Label>
+              <Input
+                id="role"
+                value={userRole?.role === 'employer' ? 'Admin' : userRole?.role === 'recruiter' ? 'Rekryteringsadmin' : userRole?.role || 'Användare'}
                 readOnly
                 className="bg-white/5 backdrop-blur-sm border-white/20 text-white/70 cursor-not-allowed"
               />
