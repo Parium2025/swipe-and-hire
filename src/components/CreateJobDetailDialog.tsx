@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -6,28 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
-import { Plus, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import JobQuestionsManager from '@/components/JobQuestionsManager';
-import JobTemplateManager from '@/components/JobTemplateManager';
-
-interface JobFormData {
-  title: string;
-  description: string;
-  requirements: string;
-  location: string;
-  salary_min: string;
-  salary_max: string;
-  employment_type: string;
-  work_schedule: string;
-  contact_email: string;
-  application_instructions: string;
-}
 
 interface JobTemplate {
   id: string;
@@ -46,30 +31,68 @@ interface JobTemplate {
   is_default: boolean;
 }
 
-interface CreateJobDialogProps {
+interface JobFormData {
+  title: string;
+  description: string;
+  requirements: string;
+  location: string;
+  salary_min: string;
+  salary_max: string;
+  employment_type: string;
+  work_schedule: string;
+  contact_email: string;
+  application_instructions: string;
+}
+
+interface CreateJobDetailDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  jobTitle: string;
+  selectedTemplate: JobTemplate | null;
   onJobCreated: () => void;
 }
 
-const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
-  const [open, setOpen] = useState(false);
+const CreateJobDetailDialog = ({ 
+  open, 
+  onOpenChange, 
+  jobTitle, 
+  selectedTemplate, 
+  onJobCreated 
+}: CreateJobDetailDialogProps) => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("basic");
   const [createdJobId, setCreatedJobId] = useState<string | null>(null);
   const [formData, setFormData] = useState<JobFormData>({
-    title: '',
-    description: '',
-    requirements: '',
-    location: '',
-    salary_min: '',
-    salary_max: '',
-    employment_type: '',
-    work_schedule: '',
-    contact_email: '',
-    application_instructions: ''
+    title: jobTitle,
+    description: selectedTemplate?.description || '',
+    requirements: selectedTemplate?.requirements || '',
+    location: selectedTemplate?.location || '',
+    salary_min: selectedTemplate?.salary_min?.toString() || '',
+    salary_max: selectedTemplate?.salary_max?.toString() || '',
+    employment_type: selectedTemplate?.employment_type || '',
+    work_schedule: selectedTemplate?.work_schedule || '',
+    contact_email: selectedTemplate?.contact_email || '',
+    application_instructions: selectedTemplate?.application_instructions || ''
   });
 
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Update form data when props change
+  useEffect(() => {
+    setFormData({
+      title: jobTitle,
+      description: selectedTemplate?.description || '',
+      requirements: selectedTemplate?.requirements || '',
+      location: selectedTemplate?.location || '',
+      salary_min: selectedTemplate?.salary_min?.toString() || '',
+      salary_max: selectedTemplate?.salary_max?.toString() || '',
+      employment_type: selectedTemplate?.employment_type || '',
+      work_schedule: selectedTemplate?.work_schedule || '',
+      contact_email: selectedTemplate?.contact_email || '',
+      application_instructions: selectedTemplate?.application_instructions || ''
+    });
+  }, [jobTitle, selectedTemplate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,8 +143,6 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
         description: "Nu kan du lägga till ansökningsfrågor eller avsluta."
       });
 
-      setActiveTab("questions");
-
     } catch (error) {
       toast({
         title: "Ett fel uppstod",
@@ -149,7 +170,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
     });
     setCreatedJobId(null);
     setActiveTab("basic");
-    setOpen(false);
+    onOpenChange(false);
     onJobCreated();
   };
 
@@ -160,34 +181,13 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
     }));
   };
 
-  const handleSelectTemplate = (template: JobTemplate) => {
-    setFormData({
-      title: template.title,
-      description: template.description,
-      requirements: template.requirements || '',
-      location: template.location,
-      salary_min: template.salary_min?.toString() || '',
-      salary_max: template.salary_max?.toString() || '',
-      employment_type: template.employment_type || '',
-      work_schedule: template.work_schedule || '',
-      contact_email: template.contact_email || '',
-      application_instructions: template.application_instructions || ''
-    });
-  };
-
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="flex items-center gap-2">
-          <Plus size={16} />
-          Skapa ny annons
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gray-900/95 backdrop-blur-xl border-white/20 text-white">
         <DialogHeader>
-          <DialogTitle className="text-white">Skapa ny jobbannons</DialogTitle>
+          <DialogTitle className="text-white">Skapa jobbannons: {jobTitle}</DialogTitle>
           <DialogDescription className="text-white/70">
-            Fyll i informationen om tjänsten och lägg till ansökningsfrågor.
+            {selectedTemplate ? `Baserad på mallen "${selectedTemplate.name}"` : 'Tom annons utan mall'}
           </DialogDescription>
         </DialogHeader>
         
@@ -210,13 +210,6 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
           
           <TabsContent value="basic" className="space-y-4 mt-6">
             <form onSubmit={handleSubmit} className="space-y-4">
-              
-              {/* Job Template Manager */}
-              <JobTemplateManager 
-                onSelectTemplate={handleSelectTemplate}
-                currentFormData={formData}
-              />
-              
               <div className="space-y-2">
                 <Label htmlFor="title" className="text-white">Jobbtitel *</Label>
                 <Input
@@ -359,7 +352,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => setOpen(false)}
+                  onClick={() => onOpenChange(false)}
                   disabled={loading}
                   className="bg-white/10 border-white/20 text-white hover:bg-white/20"
                 >
@@ -399,4 +392,4 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
   );
 };
 
-export default CreateJobDialog;
+export default CreateJobDetailDialog;

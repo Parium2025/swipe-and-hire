@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2 } from 'lucide-react';
-import CreateJobDialog from '@/components/CreateJobDialog';
+import CreateJobSimpleDialog from '@/components/CreateJobSimpleDialog';
 import EditJobDialog from '@/components/EditJobDialog';
 
 interface JobPosting {
@@ -206,7 +206,7 @@ const EmployerDashboard = () => {
                 Skapa din första jobbannons för att komma igång med rekrytering.
               </p>
               <div className="flex justify-center">
-                <CreateJobDialog onJobCreated={fetchJobs} />
+                <CreateJobSimpleDialog onJobCreated={fetchJobs} />
               </div>
             </CardContent>
           </Card>
