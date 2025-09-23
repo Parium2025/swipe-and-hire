@@ -354,27 +354,33 @@ const EmployerProfile = () => {
               {formData.social_media_links.map((link, index) => {
                 const Icon = getPlatformIcon(link.platform);
                 return (
-                  <div key={index} className="flex items-center justify-between bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3">
-                    <div className="flex items-center gap-3">
-                      <Icon className="h-5 w-5 text-white" />
-                      <div>
+                  <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 gap-3">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <Icon className="h-5 w-5 text-white flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
                         <div className="text-white font-medium">{getPlatformLabel(link.platform)}</div>
                         <a 
                           href={link.url} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
+                          className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1 break-all max-w-full"
+                          onClick={(e) => e.stopPropagation()}
                         >
-                          {link.url.length > 40 ? `${link.url.substring(0, 40)}...` : link.url}
-                          <ExternalLink className="h-3 w-3" />
+                          <span className="truncate max-w-xs sm:max-w-sm md:max-w-md">
+                            {link.url}
+                          </span>
+                          <ExternalLink className="h-3 w-3 flex-shrink-0" />
                         </a>
                       </div>
                     </div>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => removeSocialLink(index)}
-                      className="bg-red-500/20 border-red-400/40 text-red-300 hover:bg-red-500/30"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeSocialLink(index);
+                      }}
+                      className="bg-red-500/20 border-red-400/40 text-red-300 hover:bg-red-500/30 flex-shrink-0"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
