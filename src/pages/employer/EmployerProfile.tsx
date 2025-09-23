@@ -13,7 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { Linkedin, Twitter, ExternalLink, Instagram, Trash2, Plus, Globe, ChevronDown, Search } from 'lucide-react';
+import { Linkedin, Twitter, ExternalLink, Instagram, Trash2, Plus, Globe, ChevronDown } from 'lucide-react';
 
 interface SocialMediaLink {
   platform: 'linkedin' | 'twitter' | 'instagram' | 'annat';
@@ -48,7 +48,6 @@ const EmployerProfile = () => {
   });
 
   const [platformMenuOpen, setPlatformMenuOpen] = useState(false);
-  const [platformSearchTerm, setPlatformSearchTerm] = useState('');
 
   // Update form data when profile changes
   useEffect(() => {
@@ -402,7 +401,7 @@ const EmployerProfile = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
-                  className="w-80 bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-96"
+                  className="w-80 bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden"
                   side="top"
                   align="center"
                   alignOffset={0}
@@ -410,55 +409,32 @@ const EmployerProfile = () => {
                   avoidCollisions={false}
                   onCloseAutoFocus={(e) => e.preventDefault()}
                 >
-                  {/* Search input */}
-                  <div className="p-3 border-b border-slate-600/30 sticky top-0 bg-slate-700/95 backdrop-blur-md">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
-                      <Input
-                        placeholder="Sök plattform..."
-                        value={platformSearchTerm}
-                        onChange={(e) => setPlatformSearchTerm(e.target.value)}
-                        className="pl-10 pr-4 h-10 bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-lg"
-                        autoComplete="off"
-                        autoCapitalize="none"
-                        autoCorrect="off"
-                        onKeyDownCapture={(e) => e.stopPropagation()}
-                        onKeyDown={(e) => e.stopPropagation()}
-                      />
-                    </div>
-                  </div>
-                 
                   {/* Platform options */}
-                  <div className="overflow-y-auto max-h-80 overscroll-contain">
-                    {SOCIAL_PLATFORMS
-                      .filter(platform => 
-                        platformSearchTerm.trim().length >= 2 ? platform.label.toLowerCase().includes(platformSearchTerm.toLowerCase()) : true
-                      )
-                      .map((platform) => {
-                        const isDisabled = formData.social_media_links.some(link => link.platform === platform.value);
-                        return (
-                          <DropdownMenuItem
-                            key={platform.value}
-                            onSelect={(e) => e.preventDefault()}
-                            className={`cursor-pointer hover:bg-white/10 active:bg-white/15 transition-colors px-3 py-2 focus:bg-white/10 ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            onClick={() => {
-                              if (!isDisabled) {
-                                setNewSocialLink({...newSocialLink, platform: platform.value as SocialMediaLink['platform']});
-                                setPlatformMenuOpen(false);
-                                setPlatformSearchTerm('');
-                              }
-                            }}
-                            disabled={isDisabled}
-                          >
-                            <div className="flex items-center gap-2 w-full">
-                              <platform.icon className="h-4 w-4 flex-shrink-0" />
-                              <span className="text-white text-sm">
-                                {platform.label} {isDisabled && '(redan tillagd)'}
-                              </span>
-                            </div>
-                          </DropdownMenuItem>
-                        );
-                      })}
+                  <div className="p-2">
+                    {SOCIAL_PLATFORMS.map((platform) => {
+                      const isDisabled = formData.social_media_links.some(link => link.platform === platform.value);
+                      return (
+                        <DropdownMenuItem
+                          key={platform.value}
+                          onSelect={(e) => e.preventDefault()}
+                          className={`cursor-pointer hover:bg-white/10 active:bg-white/15 transition-colors px-3 py-2 focus:bg-white/10 rounded-md ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          onClick={() => {
+                            if (!isDisabled) {
+                              setNewSocialLink({...newSocialLink, platform: platform.value as SocialMediaLink['platform']});
+                              setPlatformMenuOpen(false);
+                            }
+                          }}
+                          disabled={isDisabled}
+                        >
+                          <div className="flex items-center gap-2 w-full">
+                            <platform.icon className="h-4 w-4 flex-shrink-0" />
+                            <span className="text-white text-sm">
+                              {platform.label} {isDisabled && '(redan tillagd)'}
+                            </span>
+                          </div>
+                        </DropdownMenuItem>
+                      );
+                    })}
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
