@@ -314,8 +314,14 @@ const EmployerProfile = () => {
                 value={formData.bio}
                 onChange={(e) => setFormData({...formData, bio: e.target.value})}
                 rows={4}
+                placeholder="Beskriv dig själv, din erfarenhet och vad du är bra på..."
                 className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
               />
+              <div className="text-right">
+                <span className="text-white text-sm">
+                  {formData.bio.trim() === '' ? 0 : formData.bio.trim().split(/\s+/).length} ord
+                </span>
+              </div>
             </div>
 
             <div className="flex justify-center pt-4">
