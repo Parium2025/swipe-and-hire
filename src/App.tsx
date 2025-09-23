@@ -35,9 +35,9 @@ const App = () => {
       <Sonner />
       <BrowserRouter>
         <UnsavedChangesProvider>
-          <div className="min-h-screen bg-gradient-parium">
+          <div className="min-h-screen bg-parium-gradient safe-area-content">
             {/* Static animated background - identical to WelcomeTunnel */}
-            <div className="fixed inset-0 pointer-events-none z-0">
+            <div className="fixed inset-0 pointer-events-none z-0 bg-parium-gradient">
               <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
               
               {/* Soft fade at bottom to prevent hard edges */}

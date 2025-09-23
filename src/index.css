@@ -117,16 +117,36 @@ All colors MUST be HSL.
     margin-top: 0 !important;
   }
 
-  /* Remove iOS safe area padding */
+  /* Mobile fullscreen support - extend under status bar */
   html, body, #root {
-    padding-top: 0 !important;
-    padding-top: env(safe-area-inset-top, 0) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow-x: hidden;
   }
 
-  /* Make sure the app extends to the full screen */
-  .min-h-screen {
+  /* Make sure the app extends to the full screen including safe areas */
+  #root {
     min-height: 100vh !important;
-    min-height: calc(100vh - env(safe-area-inset-top, 0)) !important;
+    min-height: 100dvh !important; /* Dynamic viewport height */
+    min-height: -webkit-fill-available !important; /* iOS Safari support */
+  }
+
+  /* Background should cover the entire screen including safe areas */
+  .bg-parium-gradient, 
+  [style*="--gradient-parium"] {
+    padding-top: env(safe-area-inset-top, 0) !important;
+    margin-top: calc(-1 * env(safe-area-inset-top, 0)) !important;
+    min-height: calc(100vh + env(safe-area-inset-top, 0)) !important;
+  }
+
+  /* Ensure content respects safe areas while background extends fully */
+  .safe-area-content {
+    padding-top: env(safe-area-inset-top, 0);
+    padding-left: env(safe-area-inset-left, 0);
+    padding-right: env(safe-area-inset-right, 0);
+    padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
   /* Custom date input styling */
