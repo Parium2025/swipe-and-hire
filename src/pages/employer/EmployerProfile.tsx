@@ -19,6 +19,9 @@ const EmployerProfile = () => {
     last_name: profile?.last_name || '',
     bio: profile?.bio || '',
     location: profile?.location || '',
+    phone: profile?.phone || '',
+    linkedin_url: (profile as any)?.linkedin_url || '',
+    twitter_url: (profile as any)?.twitter_url || '',
   });
 
   // Update form data when profile changes
@@ -29,6 +32,9 @@ const EmployerProfile = () => {
         last_name: profile.last_name || '',
         bio: profile.bio || '',
         location: profile.location || '',
+        phone: profile.phone || '',
+        linkedin_url: (profile as any)?.linkedin_url || '',
+        twitter_url: (profile as any)?.twitter_url || '',
       };
       
       setFormData(values);
@@ -38,7 +44,7 @@ const EmployerProfile = () => {
   }, [profile, setHasUnsavedChanges]);
 
   const checkForChanges = useCallback(() => {
-    if (!originalValues.first_name && !originalValues.last_name && !originalValues.bio && !originalValues.location) return false; // Not loaded yet
+    if (!originalValues.first_name && !originalValues.last_name && !originalValues.bio && !originalValues.location && !originalValues.phone && !originalValues.linkedin_url && !originalValues.twitter_url) return false; // Not loaded yet
     
     const hasChanges = Object.keys(formData).some(
       key => formData[key] !== originalValues[key]
@@ -167,8 +173,43 @@ const EmployerProfile = () => {
                 id="location"
                 value={formData.location}
                 onChange={(e) => setFormData({...formData, location: e.target.value})}
+                placeholder="T.ex. Stockholm, Sverige"
                 className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="text-white">Telefonnummer (frivilligt)</Label>
+              <Input
+                id="phone"
+                value={formData.phone}
+                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                placeholder="T.ex. 070-123 45 67"
+                className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="linkedin_url" className="text-white">LinkedIn (frivilligt)</Label>
+                <Input
+                  id="linkedin_url"
+                  value={formData.linkedin_url}
+                  onChange={(e) => setFormData({...formData, linkedin_url: e.target.value})}
+                  placeholder="https://linkedin.com/in/dittnamn"
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="twitter_url" className="text-white">Twitter/X (frivilligt)</Label>
+                <Input
+                  id="twitter_url"
+                  value={formData.twitter_url}
+                  onChange={(e) => setFormData({...formData, twitter_url: e.target.value})}
+                  placeholder="https://twitter.com/dittnamn"
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
