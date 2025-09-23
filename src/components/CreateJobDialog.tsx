@@ -183,18 +183,27 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
           Skapa ny annons
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gray-900/95 backdrop-blur-xl border-white/20 text-white">
         <DialogHeader>
-          <DialogTitle>Skapa ny jobbannons</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-white">Skapa ny jobbannons</DialogTitle>
+          <DialogDescription className="text-white/70">
             Fyll i informationen om tjänsten och lägg till ansökningsfrågor.
           </DialogDescription>
         </DialogHeader>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="basic">Grundinformation</TabsTrigger>
-            <TabsTrigger value="questions" disabled={!createdJobId}>
+          <TabsList className="grid w-full grid-cols-2 bg-white/10 border-white/20">
+            <TabsTrigger 
+              value="basic" 
+              className="text-white data-[state=active]:bg-white/20 data-[state=active]:text-white"
+            >
+              Grundinformation
+            </TabsTrigger>
+            <TabsTrigger 
+              value="questions" 
+              disabled={!createdJobId}
+              className="text-white/70 data-[state=active]:bg-white/20 data-[state=active]:text-white disabled:text-white/40"
+            >
               Ansökningsfrågor
             </TabsTrigger>
           </TabsList>
@@ -209,7 +218,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
               />
               
               <div className="space-y-2">
-                <Label htmlFor="title">Jobbtitel *</Label>
+                <Label htmlFor="title" className="text-white">Jobbtitel *</Label>
                 <Input
                   id="title"
                   value={formData.title}
@@ -221,7 +230,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="location">Plats *</Label>
+                <Label htmlFor="location" className="text-white">Plats *</Label>
                 <Input
                   id="location"
                   value={formData.location}
@@ -234,7 +243,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="salary_min">Minimilön (kr/mån)</Label>
+                  <Label htmlFor="salary_min" className="text-white">Minimilön (kr/mån)</Label>
                   <Input
                     id="salary_min"
                     type="number"
@@ -245,7 +254,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="salary_max">Maxlön (kr/mån)</Label>
+                  <Label htmlFor="salary_max" className="text-white">Maxlön (kr/mån)</Label>
                   <Input
                     id="salary_max"
                     type="number"
@@ -258,7 +267,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="employment_type">Anställningsform</Label>
+                <Label htmlFor="employment_type" className="text-white">Anställningsform</Label>
                 <Select value={formData.employment_type} onValueChange={(value) => handleInputChange('employment_type', value)}>
                   <SelectTrigger className="bg-white/10 border-white/20 text-white">
                     <SelectValue placeholder="Välj anställningsform" />
@@ -278,7 +287,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="work_schedule">Arbetstider</Label>
+                <Label htmlFor="work_schedule" className="text-white">Arbetstider</Label>
                 <Input
                   id="work_schedule"
                   value={formData.work_schedule}
@@ -289,7 +298,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="contact_email">Kontakt-email *</Label>
+                <Label htmlFor="contact_email" className="text-white">Kontakt-email *</Label>
                 <Input
                   id="contact_email"
                   type="email"
@@ -302,7 +311,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Beskrivning *</Label>
+                <Label htmlFor="description" className="text-white">Beskrivning *</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
@@ -315,7 +324,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="requirements">Krav och kvalifikationer</Label>
+                <Label htmlFor="requirements" className="text-white">Krav och kvalifikationer</Label>
                 <Textarea
                   id="requirements"
                   value={formData.requirements}
@@ -327,7 +336,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="application_instructions">Ansökningsinstruktioner</Label>
+                <Label htmlFor="application_instructions" className="text-white">Ansökningsinstruktioner</Label>
                 <Textarea
                   id="application_instructions"
                   value={formData.application_instructions}
@@ -342,7 +351,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
                 <Button 
                   type="submit" 
                   disabled={loading}
-                  className="flex-1"
+                  className="flex-1 bg-white/20 hover:bg-white/30 text-white border border-white/20"
                 >
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {loading ? 'Skapar...' : 'Spara och fortsätt'}
@@ -352,6 +361,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
                   variant="outline" 
                   onClick={() => setOpen(false)}
                   disabled={loading}
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
                 >
                   Avbryt
                 </Button>
@@ -360,21 +370,24 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
           </TabsContent>
 
           <TabsContent value="questions" className="space-y-4 mt-6">
-            <JobQuestionsManager 
-              jobId={createdJobId} 
-              onQuestionsChange={() => {}} 
-            />
+            <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-4">
+              <JobQuestionsManager 
+                jobId={createdJobId} 
+                onQuestionsChange={() => {}} 
+              />
+            </div>
             
             <div className="flex gap-2 pt-4">
               <Button 
                 onClick={handleClose}
-                className="flex-1"
+                className="flex-1 bg-white/20 hover:bg-white/30 text-white border border-white/20"
               >
                 Avsluta och publicera
               </Button>
               <Button 
                 variant="outline" 
                 onClick={() => setActiveTab("basic")}
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
               >
                 Tillbaka
               </Button>
