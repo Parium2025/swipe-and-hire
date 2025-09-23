@@ -37,7 +37,7 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(null, {
         status: 302,
         headers: {
-          'Location': 'https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?confirmed=already',
+        'Location': 'https://swipe-and-hire.lovable.app/auth?confirmed=already',
         },
       });
     }
@@ -48,7 +48,7 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(null, {
         status: 302,
         headers: {
-          'Location': 'https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?confirmed=already',
+          'Location': 'https://swipe-and-hire.lovable.app/auth?confirmed=already',
         },
       });
     }
@@ -86,7 +86,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, {
       status: 302,
       headers: {
-        'Location': 'https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth?confirmed=success',
+        'Location': 'https://swipe-and-hire.lovable.app/auth?confirmed=success',
       },
     });
 
@@ -211,7 +211,7 @@ function getSuccessPage(message: string, alreadyConfirmed = false): string {
         </div>
         <p>Du kan nu logga in i Parium och börja swipa dig fram till din nästa jobbmöjlighet.</p>
         <p class="subtitle">Framtiden börjar med ett swipe 🚀</p>
-        <a href="https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth" class="button">
+        <a href="https://swipe-and-hire.lovable.app/auth" class="button">
           Logga in nu
         </a>
       </div>
@@ -285,7 +285,7 @@ function getErrorPage(message: string): string {
         <h2>Bekräftelsefel</h2>
         <p>${message}</p>
         <p>Du kan försöka registrera dig igen eller kontakta support om problemet kvarstår.</p>
-        <a href="https://09c4e686-17a9-467e-89b1-3cf832371d49.lovableproject.com/auth" class="button">
+        <a href="https://swipe-and-hire.lovable.app/auth" class="button">
           Tillbaka till inloggning
         </a>
       </div>
