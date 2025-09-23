@@ -106,25 +106,38 @@ export function EmployerSidebar() {
   const { profile, signOut, user } = useAuth();
   const navigate = useNavigate();
   const { checkBeforeNavigation } = useUnsavedChanges();
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null);
 
-  // Load and refresh avatar URL
+  // Helper function to get company initials
+  const getCompanyInitials = () => {
+    if (!profile?.company_name) return 'FA';
+    return profile.company_name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  // Load and refresh company logo URL
   useEffect(() => {
-    const loadAvatarUrl = async () => {
-      if (profile?.profile_image_url) {
+    const loadLogoUrl = async () => {
+      const logoUrl = (profile as any)?.company_logo_url;
+      if (logoUrl) {
         try {
-          const signedUrl = await convertToSignedUrl('job-applications', profile.profile_image_url, 86400);
-          if (signedUrl) {
-            setAvatarUrl(`${signedUrl}&t=${Date.now()}`);
-          }
+          // Company logos use public URLs, no need for signed URLs
+          setCompanyLogoUrl(`${logoUrl}&t=${Date.now()}`);
         } catch (error) {
-          console.error('Failed to get signed URL for avatar:', error);
+          console.error('Failed to load company logo:', error);
+          setCompanyLogoUrl(null);
         }
+      } else {
+        setCompanyLogoUrl(null);
       }
     };
 
-    loadAvatarUrl();
-  }, [profile?.profile_image_url]);
+    loadLogoUrl();
+  }, [(profile as any)?.company_logo_url]);
 
   // Listen for unsaved changes cancel event to close sidebar
   useEffect(() => {
@@ -177,9 +190,9 @@ export function EmployerSidebar() {
           <div className="p-4">
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10 ring-2 ring-white/20">
-                <AvatarImage src={avatarUrl || ''} />
+                <AvatarImage src={companyLogoUrl || ''} />
                 <AvatarFallback className="bg-white/10 text-white font-semibold">
-                  {profile?.first_name?.[0]}{profile?.last_name?.[0]}
+                  {getCompanyInitials()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">

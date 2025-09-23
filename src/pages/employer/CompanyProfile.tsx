@@ -11,7 +11,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { useSidebar } from '@/components/ui/sidebar';
 import ImageEditor from '@/components/ImageEditor';
-import { Upload, Building2, Edit, Camera, ChevronDown, Search, Check } from 'lucide-react';
+import { Upload, Building2, Edit, Camera, ChevronDown, Search, Check, Trash2 } from 'lucide-react';
 import { SWEDISH_INDUSTRIES } from '@/lib/industries';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -163,6 +163,16 @@ const CompanyProfile = () => {
     }
   };
 
+  const handleLogoDelete = () => {
+    setFormData(prev => ({ ...prev, company_logo_url: '' }));
+    setHasUnsavedChanges(true);
+    
+    toast({
+      title: "Logga borttagen",
+      description: "Tryck på \"Spara ändringar\" för att bekräfta borttagningen."
+    });
+  };
+
   const handleSave = async () => {
     // Validate organization number before saving
     if (formData.org_number && formData.org_number.replace(/-/g, '').length !== 10) {
@@ -227,29 +237,50 @@ const CompanyProfile = () => {
               </div>
             ) : (
               <div className="w-40 h-40 rounded-full bg-white/10 backdrop-blur-sm border-2 border-dashed border-white/40 flex items-center justify-center">
-                <Building2 className="h-8 w-8 text-white/60" />
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-white/80 mb-1">
+                    {formData.company_name ? 
+                      formData.company_name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2) : 
+                      'HM'
+                    }
+                  </div>
+                  <Building2 className="h-6 w-6 text-white/60 mx-auto" />
+                </div>
               </div>
             )}
           </div>
 
-          <Button 
-            variant="outline" 
-            onClick={() => document.getElementById('logo-upload')?.click()}
-            disabled={isUploadingLogo}
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:scale-105 transition-transform duration-200"
-          >
-            {isUploadingLogo ? (
-              <>
-                <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"></div>
-                Laddar upp...
-              </>
-            ) : (
-              <>
-                <Camera className="h-4 w-4 mr-2" />
-                {formData.company_logo_url ? 'Byt logga' : 'Ladda upp logga'}
-              </>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => document.getElementById('logo-upload')?.click()}
+              disabled={isUploadingLogo}
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:scale-105 transition-transform duration-200"
+            >
+              {isUploadingLogo ? (
+                <>
+                  <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"></div>
+                  Laddar upp...
+                </>
+              ) : (
+                <>
+                  <Camera className="h-4 w-4 mr-2" />
+                  {formData.company_logo_url ? 'Byt logga' : 'Ladda upp logga'}
+                </>
+              )}
+            </Button>
+
+            {formData.company_logo_url && (
+              <Button 
+                variant="outline" 
+                onClick={handleLogoDelete}
+                disabled={isUploadingLogo}
+                className="bg-red-500/20 border-red-400/40 text-red-100 hover:bg-red-500/30 hover:scale-105 transition-transform duration-200"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             )}
-          </Button>
+          </div>
 
           <input
             id="logo-upload"
