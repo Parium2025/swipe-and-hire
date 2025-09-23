@@ -27,7 +27,7 @@ interface WelcomeTunnelProps {
 }
 
 const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
-  const { profile, updateProfile, user } = useAuth();
+  const { profile, updateProfile, user, signOut } = useAuth();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(-1); // Start with SwipeIntro (-1)
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -1135,7 +1135,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   'Börja swipa'
                 )}
               </Button>
-              <div className="pt-4">
+              <div className="pt-4 flex gap-4 justify-center">
                 <Button
                   variant="outline"
                   onClick={handlePrevious}
@@ -1143,6 +1143,16 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Tillbaka
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    await signOut();
+                    window.location.href = '/auth';
+                  }}
+                  className="px-8 py-3 bg-red-500/80 border-red-400/50 text-white hover:bg-red-500 hover:scale-105 transition-transform duration-200 text-sm"
+                >
+                  Logga ut
                 </Button>
               </div>
             </div>
