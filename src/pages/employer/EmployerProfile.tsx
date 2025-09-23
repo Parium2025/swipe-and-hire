@@ -36,71 +36,89 @@ const EmployerProfile = () => {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="text-center">
         <h1 className="text-3xl font-bold text-white">Min Profil</h1>
-        <p className="text-white/70">Hantera din personliga information</p>
+        <p className="text-white/90">Hantera din personliga information</p>
       </div>
 
-      <Card>
+      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
         <CardHeader>
-          <CardTitle>Personlig Information</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-white text-center">Personlig Information</CardTitle>
+          <CardDescription className="text-white/80 text-center">
             Uppdatera din grundläggande profilinformation
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="first_name">Förnamn</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="first_name" className="text-white">Förnamn</Label>
               <Input
                 id="first_name"
                 value={formData.first_name}
                 onChange={(e) => setFormData({...formData, first_name: e.target.value})}
                 disabled={!isEditing}
+                className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
               />
             </div>
-            <div>
-              <Label htmlFor="last_name">Efternamn</Label>
+            <div className="space-y-2">
+              <Label htmlFor="last_name" className="text-white">Efternamn</Label>
               <Input
                 id="last_name"
                 value={formData.last_name}
                 onChange={(e) => setFormData({...formData, last_name: e.target.value})}
                 disabled={!isEditing}
+                className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
               />
             </div>
           </div>
           
-          <div>
-            <Label htmlFor="location">Plats</Label>
+          <div className="space-y-2">
+            <Label htmlFor="location" className="text-white">Plats</Label>
             <Input
               id="location"
               value={formData.location}
               onChange={(e) => setFormData({...formData, location: e.target.value})}
               disabled={!isEditing}
+              className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
             />
           </div>
 
-          <div>
-            <Label htmlFor="bio">Om mig</Label>
+          <div className="space-y-2">
+            <Label htmlFor="bio" className="text-white">Om mig</Label>
             <Textarea
               id="bio"
               value={formData.bio}
               onChange={(e) => setFormData({...formData, bio: e.target.value})}
               disabled={!isEditing}
               rows={4}
+              className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
             />
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 justify-center">
             {isEditing ? (
               <>
-                <Button onClick={handleSave}>Spara</Button>
-                <Button variant="outline" onClick={() => setIsEditing(false)}>
+                <Button 
+                  onClick={handleSave}
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                >
+                  Spara
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsEditing(false)}
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                >
                   Avbryt
                 </Button>
               </>
             ) : (
-              <Button onClick={() => setIsEditing(true)}>Redigera</Button>
+              <Button 
+                onClick={() => setIsEditing(true)}
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              >
+                Redigera
+              </Button>
             )}
           </div>
         </CardContent>
