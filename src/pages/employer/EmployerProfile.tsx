@@ -4,12 +4,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/hooks/useAuth';
-import { useState } from 'react';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 
 const EmployerProfile = () => {
   const { profile, updateProfile } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
+  const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
+  const [loading, setLoading] = useState(false);
+  const [originalValues, setOriginalValues] = useState<any>({});
+
   const [formData, setFormData] = useState({
     first_name: profile?.first_name || '',
     last_name: profile?.last_name || '',
@@ -17,10 +21,74 @@ const EmployerProfile = () => {
     location: profile?.location || '',
   });
 
+  // Update form data when profile changes
+  useEffect(() => {
+    if (profile) {
+      const values = {
+        first_name: profile.first_name || '',
+        last_name: profile.last_name || '',
+        bio: profile.bio || '',
+        location: profile.location || '',
+      };
+      
+      setFormData(values);
+      setOriginalValues(values);
+      setHasUnsavedChanges(false);
+    }
+  }, [profile, setHasUnsavedChanges]);
+
+  const checkForChanges = useCallback(() => {
+    if (!originalValues.first_name && !originalValues.last_name && !originalValues.bio && !originalValues.location) return false; // Not loaded yet
+    
+    const hasChanges = Object.keys(formData).some(
+      key => formData[key] !== originalValues[key]
+    );
+
+    setHasUnsavedChanges(hasChanges);
+    return hasChanges;
+  }, [originalValues, formData, setHasUnsavedChanges]);
+
+  // Check for changes whenever form values change
+  useEffect(() => {
+    checkForChanges();
+  }, [checkForChanges]);
+
+  // Prevent leaving page with unsaved changes (browser/tab close)
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = 'Du har osparade ändringar. Är du säker på att du vill lämna sidan?';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [hasUnsavedChanges]);
+
+  // Reset form to original values when user confirms leaving without saving
+  useEffect(() => {
+    const onUnsavedConfirm = () => {
+      if (!originalValues) return;
+      setFormData({ ...originalValues });
+      setHasUnsavedChanges(false);
+    };
+    window.addEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
+    return () => window.removeEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
+  }, [originalValues, setHasUnsavedChanges]);
+
   const handleSave = async () => {
     try {
-      await updateProfile(formData);
-      setIsEditing(false);
+      setLoading(true);
+      await updateProfile(formData as any);
+      
+      // Update original values after successful save
+      setOriginalValues({ ...formData });
+      setHasUnsavedChanges(false);
+      
       toast({
         title: "Profil uppdaterad",
         description: "Din profil har uppdaterats framgångsrikt."
@@ -31,6 +99,8 @@ const EmployerProfile = () => {
         description: "Kunde inte uppdatera profilen.",
         variant: "destructive"
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -49,78 +119,70 @@ const EmployerProfile = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="first_name" className="text-white">Förnamn</Label>
+                <Input
+                  id="first_name"
+                  value={formData.first_name}
+                  onChange={(e) => setFormData({...formData, first_name: e.target.value})}
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="last_name" className="text-white">Efternamn</Label>
+                <Input
+                  id="last_name"
+                  value={formData.last_name}
+                  onChange={(e) => setFormData({...formData, last_name: e.target.value})}
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                />
+              </div>
+            </div>
+            
             <div className="space-y-2">
-              <Label htmlFor="first_name" className="text-white">Förnamn</Label>
+              <Label htmlFor="location" className="text-white">Plats</Label>
               <Input
-                id="first_name"
-                value={formData.first_name}
-                onChange={(e) => setFormData({...formData, first_name: e.target.value})}
-                disabled={!isEditing}
+                id="location"
+                value={formData.location}
+                onChange={(e) => setFormData({...formData, location: e.target.value})}
                 className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
               />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="last_name" className="text-white">Efternamn</Label>
-              <Input
-                id="last_name"
-                value={formData.last_name}
-                onChange={(e) => setFormData({...formData, last_name: e.target.value})}
-                disabled={!isEditing}
+              <Label htmlFor="bio" className="text-white">Om mig</Label>
+              <Textarea
+                id="bio"
+                value={formData.bio}
+                onChange={(e) => setFormData({...formData, bio: e.target.value})}
+                rows={4}
                 className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
               />
             </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="location" className="text-white">Plats</Label>
-            <Input
-              id="location"
-              value={formData.location}
-              onChange={(e) => setFormData({...formData, location: e.target.value})}
-              disabled={!isEditing}
-              className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-            />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="bio" className="text-white">Om mig</Label>
-            <Textarea
-              id="bio"
-              value={formData.bio}
-              onChange={(e) => setFormData({...formData, bio: e.target.value})}
-              disabled={!isEditing}
-              rows={4}
-              className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-            />
-          </div>
-
-          <div className="flex gap-2 justify-center">
-            {isEditing ? (
-              <>
-                <Button 
-                  onClick={handleSave}
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-                >
-                  Spara
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setIsEditing(false)}
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-                >
-                  Avbryt
-                </Button>
-              </>
-            ) : (
+            <div className="flex justify-center">
               <Button 
-                onClick={() => setIsEditing(true)}
-                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                type="submit"
+                disabled={loading || !hasUnsavedChanges}
+                className={`px-8 py-2 font-medium transition-all duration-200 ${
+                  hasUnsavedChanges 
+                    ? 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl hover:scale-105' 
+                    : 'bg-white/10 border-white/20 text-white/50 cursor-not-allowed'
+                }`}
               >
-                Redigera
+                {loading ? (
+                  <>
+                    <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"></div>
+                    Sparar...
+                  </>
+                ) : (
+                  'Spara ändringar'
+                )}
               </Button>
-            )}
-          </div>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>
