@@ -175,6 +175,66 @@ export type Database = {
           },
         ]
       }
+      job_templates: {
+        Row: {
+          application_instructions: string | null
+          category: string | null
+          contact_email: string | null
+          created_at: string
+          description: string
+          employer_id: string
+          employment_type: string | null
+          id: string
+          is_default: boolean
+          location: string | null
+          name: string
+          requirements: string | null
+          salary_max: number | null
+          salary_min: number | null
+          title: string
+          updated_at: string
+          work_schedule: string | null
+        }
+        Insert: {
+          application_instructions?: string | null
+          category?: string | null
+          contact_email?: string | null
+          created_at?: string
+          description: string
+          employer_id: string
+          employment_type?: string | null
+          id?: string
+          is_default?: boolean
+          location?: string | null
+          name: string
+          requirements?: string | null
+          salary_max?: number | null
+          salary_min?: number | null
+          title: string
+          updated_at?: string
+          work_schedule?: string | null
+        }
+        Update: {
+          application_instructions?: string | null
+          category?: string | null
+          contact_email?: string | null
+          created_at?: string
+          description?: string
+          employer_id?: string
+          employment_type?: string | null
+          id?: string
+          is_default?: boolean
+          location?: string | null
+          name?: string
+          requirements?: string | null
+          salary_max?: number | null
+          salary_min?: number | null
+          title?: string
+          updated_at?: string
+          work_schedule?: string | null
+        }
+        Relationships: []
+      }
       organizations: {
         Row: {
           created_at: string

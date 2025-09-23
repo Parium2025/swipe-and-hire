@@ -14,6 +14,7 @@ import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { Plus, Loader2 } from 'lucide-react';
 import JobQuestionsManager from '@/components/JobQuestionsManager';
+import JobTemplateManager from '@/components/JobTemplateManager';
 
 interface JobFormData {
   title: string;
@@ -26,6 +27,23 @@ interface JobFormData {
   work_schedule: string;
   contact_email: string;
   application_instructions: string;
+}
+
+interface JobTemplate {
+  id: string;
+  name: string;
+  title: string;
+  description: string;
+  requirements?: string;
+  location: string;
+  employment_type?: string;
+  work_schedule?: string;
+  salary_min?: number;
+  salary_max?: number;
+  contact_email?: string;
+  application_instructions?: string;
+  category?: string;
+  is_default: boolean;
 }
 
 interface CreateJobDialogProps {
@@ -142,6 +160,21 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
     }));
   };
 
+  const handleSelectTemplate = (template: JobTemplate) => {
+    setFormData({
+      title: template.title,
+      description: template.description,
+      requirements: template.requirements || '',
+      location: template.location,
+      salary_min: template.salary_min?.toString() || '',
+      salary_max: template.salary_max?.toString() || '',
+      employment_type: template.employment_type || '',
+      work_schedule: template.work_schedule || '',
+      contact_email: template.contact_email || '',
+      application_instructions: template.application_instructions || ''
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -168,6 +201,13 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
           
           <TabsContent value="basic" className="space-y-4 mt-6">
             <form onSubmit={handleSubmit} className="space-y-4">
+              
+              {/* Job Template Manager */}
+              <JobTemplateManager 
+                onSelectTemplate={handleSelectTemplate}
+                currentFormData={formData}
+              />
+              
               <div className="space-y-2">
                 <Label htmlFor="title">Jobbtitel *</Label>
                 <Input
@@ -176,6 +216,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
                   onChange={(e) => handleInputChange('title', e.target.value)}
                   placeholder="t.ex. Lagerarbetare, Lastbilschaufför"
                   required
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                 />
               </div>
 
@@ -187,6 +228,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
                   onChange={(e) => handleInputChange('location', e.target.value)}
                   placeholder="t.ex. Stockholm, Göteborg"
                   required
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                 />
               </div>
 
@@ -199,6 +241,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
                     value={formData.salary_min}
                     onChange={(e) => handleInputChange('salary_min', e.target.value)}
                     placeholder="25000"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                   />
                 </div>
                 <div className="space-y-2">
@@ -209,6 +252,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
                     value={formData.salary_max}
                     onChange={(e) => handleInputChange('salary_max', e.target.value)}
                     placeholder="35000"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                   />
                 </div>
               </div>
@@ -216,12 +260,16 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
               <div className="space-y-2">
                 <Label htmlFor="employment_type">Anställningsform</Label>
                 <Select value={formData.employment_type} onValueChange={(value) => handleInputChange('employment_type', value)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
                     <SelectValue placeholder="Välj anställningsform" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-gray-800 border-gray-600">
                     {EMPLOYMENT_TYPES.map(type => (
-                      <SelectItem key={type.value} value={type.value}>
+                      <SelectItem 
+                        key={type.value} 
+                        value={type.value}
+                        className="text-white hover:bg-gray-700 focus:bg-gray-700"
+                      >
                         {type.label}
                       </SelectItem>
                     ))}
@@ -236,6 +284,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
                   value={formData.work_schedule}
                   onChange={(e) => handleInputChange('work_schedule', e.target.value)}
                   placeholder="t.ex. 08:00-17:00, Skiftarbete"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                 />
               </div>
 
@@ -248,6 +297,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
                   onChange={(e) => handleInputChange('contact_email', e.target.value)}
                   placeholder="kontakt@företag.se"
                   required
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                 />
               </div>
 
@@ -260,6 +310,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
                   placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
                   rows={4}
                   required
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                 />
               </div>
 
@@ -271,6 +322,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
                   onChange={(e) => handleInputChange('requirements', e.target.value)}
                   placeholder="Beskriv vilka krav och kvalifikationer som krävs för tjänsten..."
                   rows={3}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                 />
               </div>
 
@@ -282,6 +334,7 @@ const CreateJobDialog = ({ onJobCreated }: CreateJobDialogProps) => {
                   onChange={(e) => handleInputChange('application_instructions', e.target.value)}
                   placeholder="Hur ska kandidater ansöka? Via e-post, telefon eller webbsida?"
                   rows={3}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                 />
               </div>
 

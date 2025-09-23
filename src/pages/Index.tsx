@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
+import JobTemplatesOverview from '@/components/JobTemplatesOverview';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -168,8 +169,8 @@ const Index = () => {
     return <ProfileSetup />;
   }
 
-  // Render sidebar layout for profile pages
-  const sidebarRoutes = ['/profile', '/search-jobs', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/consent'];
+  // Render sidebar layout for profile pages and employer routes
+  const sidebarRoutes = ['/profile', '/search-jobs', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/consent', '/templates'];
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
 
   if (isSidebarRoute && (userRole?.role as string) !== 'employer') {
@@ -255,6 +256,8 @@ const Index = () => {
           return <EmployerProfile />;
         case '/company-profile':
           return <CompanyProfile />;
+        case '/templates':
+          return <JobTemplatesOverview />;
         case '/settings':
           return <EmployerSettings />;
         case '/billing':
