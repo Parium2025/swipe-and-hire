@@ -9,7 +9,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 
 const EmployerProfile = () => {
-  const { profile, updateProfile } = useAuth();
+  const { profile, updateProfile, user } = useAuth();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const [loading, setLoading] = useState(false);
   const [originalValues, setOriginalValues] = useState<any>({});
@@ -141,6 +141,16 @@ const EmployerProfile = () => {
               </div>
             </div>
             
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-white">E-post</Label>
+              <Input
+                id="email"
+                value={user?.email || ''}
+                readOnly
+                className="bg-white/5 backdrop-blur-sm border-white/20 text-white/70 cursor-not-allowed"
+              />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="location" className="text-white">Plats</Label>
               <Input
