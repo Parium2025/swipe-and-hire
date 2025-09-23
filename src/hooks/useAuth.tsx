@@ -529,20 +529,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user) return { error: 'No user logged in' };
 
     try {
+      console.log('Updating profile for user:', user.id);
+      console.log('Profile updates:', updates);
+      
       const { error } = await supabase
         .from('profiles')
         .update(updates)
         .eq('user_id', user.id);
 
+      console.log('Profile update result - error:', error);
+
       if (error) {
+        console.error('Supabase profile update error:', error);
         toast({
-          title: "Fel vid uppdatering",
+          title: "Fel vid uppdatering", 
           description: error.message,
           variant: "destructive"
         });
         return { error };
       }
 
+      console.log('Profile update successful, fetching updated data...');
       // Refresh profile
       await fetchUserData(user.id);
       
@@ -554,6 +561,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       return {};
     } catch (error) {
+      console.error('Profile update exception:', error);
       return { error };
     }
   };
