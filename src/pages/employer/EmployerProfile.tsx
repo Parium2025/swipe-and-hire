@@ -162,15 +162,11 @@ const EmployerProfile = () => {
               />
             </div>
 
-            <div className="flex justify-center">
+            <div className="flex justify-center pt-4">
               <Button 
                 type="submit"
                 disabled={loading || !hasUnsavedChanges}
-                className={`px-8 py-2 font-medium transition-all duration-200 ${
-                  hasUnsavedChanges 
-                    ? 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl hover:scale-105' 
-                    : 'bg-white/10 border-white/20 text-white/50 cursor-not-allowed'
-                }`}
+                className="w-full"
               >
                 {loading ? (
                   <>
