@@ -205,7 +205,9 @@ const EmployerDashboard = () => {
               <p className="text-white/70 mb-4">
                 Skapa din första jobbannons för att komma igång med rekrytering.
               </p>
-              <CreateJobDialog onJobCreated={fetchJobs} />
+              <div className="flex justify-center">
+                <CreateJobDialog onJobCreated={fetchJobs} />
+              </div>
             </CardContent>
           </Card>
         ) : (
