@@ -297,7 +297,6 @@ export type Database = {
           industry: string | null
           interests: Json | null
           last_name: string | null
-          linkedin_url: string | null
           location: string | null
           onboarding_completed: boolean
           org_number: string | null
@@ -306,7 +305,7 @@ export type Database = {
           postal_code: string | null
           profile_image_url: string | null
           role: Database["public"]["Enums"]["user_role"]
-          twitter_url: string | null
+          social_media_links: Json | null
           updated_at: string
           user_id: string
           video_url: string | null
@@ -333,7 +332,6 @@ export type Database = {
           industry?: string | null
           interests?: Json | null
           last_name?: string | null
-          linkedin_url?: string | null
           location?: string | null
           onboarding_completed?: boolean
           org_number?: string | null
@@ -342,7 +340,7 @@ export type Database = {
           postal_code?: string | null
           profile_image_url?: string | null
           role: Database["public"]["Enums"]["user_role"]
-          twitter_url?: string | null
+          social_media_links?: Json | null
           updated_at?: string
           user_id: string
           video_url?: string | null
@@ -369,7 +367,6 @@ export type Database = {
           industry?: string | null
           interests?: Json | null
           last_name?: string | null
-          linkedin_url?: string | null
           location?: string | null
           onboarding_completed?: boolean
           org_number?: string | null
@@ -378,7 +375,7 @@ export type Database = {
           postal_code?: string | null
           profile_image_url?: string | null
           role?: Database["public"]["Enums"]["user_role"]
-          twitter_url?: string | null
+          social_media_links?: Json | null
           updated_at?: string
           user_id?: string
           video_url?: string | null
