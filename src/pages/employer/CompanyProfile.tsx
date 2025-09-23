@@ -14,7 +14,7 @@ import ImageEditor from '@/components/ImageEditor';
 import { Upload, Building2, Edit, Camera, ChevronDown, Search, Check } from 'lucide-react';
 import { SWEDISH_INDUSTRIES } from '@/lib/industries';
 import { supabase } from '@/integrations/supabase/client';
-import { createSignedUrl } from '@/utils/storageUtils';
+
 
 const CompanyProfile = () => {
   const { profile, updateProfile } = useAuth();
@@ -128,18 +128,17 @@ const CompanyProfile = () => {
       const fileName = `${user.data.user.id}/${Date.now()}-company-logo.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('job-applications')
+        .from('company-logos')
         .upload(fileName, editedBlob);
 
       if (uploadError) throw uploadError;
 
-      // Use signed URL for secure access
-      const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
-      if (!signedUrl) {
-        throw new Error('Could not create secure access URL');
-      }
+      // Use public URL for company logos (no expiration)
+      const { data: { publicUrl } } = supabase.storage
+        .from('company-logos')
+        .getPublicUrl(fileName);
 
-      const logoUrl = `${signedUrl}&t=${Date.now()}`;
+      const logoUrl = `${publicUrl}?t=${Date.now()}`;
       
       setFormData(prev => ({ ...prev, company_logo_url: logoUrl }));
       setImageEditorOpen(false);
