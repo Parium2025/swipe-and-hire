@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
+import { Linkedin, Twitter, ExternalLink } from 'lucide-react';
 
 const EmployerProfile = () => {
   const { profile, updateProfile, user, userRole } = useAuth();
@@ -86,7 +87,37 @@ const EmployerProfile = () => {
     return () => window.removeEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
   }, [originalValues, setHasUnsavedChanges]);
 
+  // URL validation functions
+  const validateLinkedInUrl = (url: string) => {
+    if (!url) return true; // Optional field
+    return url.includes('linkedin.com/in/') || url.includes('linkedin.com/pub/');
+  };
+
+  const validateTwitterUrl = (url: string) => {
+    if (!url) return true; // Optional field  
+    return url.includes('twitter.com/') || url.includes('x.com/');
+  };
+
   const handleSave = async () => {
+    // Validate URLs before saving
+    if (!validateLinkedInUrl(formData.linkedin_url)) {
+      toast({
+        title: "Felaktig LinkedIn URL",
+        description: "Använd format: https://linkedin.com/in/dittnamn",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!validateTwitterUrl(formData.twitter_url)) {
+      toast({
+        title: "Felaktig Twitter URL", 
+        description: "Använd format: https://twitter.com/dittnamn eller https://x.com/dittnamn",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       setLoading(true);
       await updateProfile(formData as any);
@@ -242,6 +273,44 @@ const EmployerProfile = () => {
           </form>
         </CardContent>
       </Card>
+
+      {/* Social Media Links - Show if any are filled */}
+      {(formData.linkedin_url || formData.twitter_url) && (
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+          <CardHeader>
+            <CardTitle className="text-white text-center">Kontakt & Sociala medier</CardTitle>
+            <CardDescription className="text-white/80 text-center">
+              Dina sociala medier och kontaktlänkar
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-center gap-4">
+              {formData.linkedin_url && (
+                <Button
+                  variant="outline"
+                  onClick={() => window.open(formData.linkedin_url, '_blank')}
+                  className="bg-white/10 border-white/20 text-white hover:bg-blue-600/20 hover:border-blue-400/40 transition-colors"
+                >
+                  <Linkedin className="h-4 w-4 mr-2" />
+                  LinkedIn
+                  <ExternalLink className="h-3 w-3 ml-2" />
+                </Button>
+              )}
+              {formData.twitter_url && (
+                <Button
+                  variant="outline"
+                  onClick={() => window.open(formData.twitter_url, '_blank')}
+                  className="bg-white/10 border-white/20 text-white hover:bg-sky-600/20 hover:border-sky-400/40 transition-colors"
+                >
+                  <Twitter className="h-4 w-4 mr-2" />
+                  Twitter/X
+                  <ExternalLink className="h-3 w-3 ml-2" />
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
