@@ -134,13 +134,13 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white border border-white/20">
+          <Button className="flex items-center gap-2">
             <Plus size={16} />
             Skapa ny annons
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-md bg-white/10 backdrop-blur-sm border-white/20">
-          <Card className="bg-transparent border-none shadow-none">
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardHeader>
               <CardTitle className="text-white text-center">
                 Skapa jobb
@@ -222,7 +222,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 <Button 
                   onClick={handleCreateJob}
                   disabled={loading || !jobTitle.trim()}
-                  className="flex-1 bg-white/20 hover:bg-white/30 text-white border border-white/20"
+                  className="flex-1"
                 >
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Skapa jobb
