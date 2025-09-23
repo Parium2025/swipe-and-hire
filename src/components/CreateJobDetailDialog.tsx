@@ -183,7 +183,7 @@ const CreateJobDetailDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gray-900/95 backdrop-blur-xl border-white/20 text-white">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-parium-gradient border-white/20 text-white">
         <DialogHeader>
           <DialogTitle className="text-white">Skapa jobbannons: {jobTitle}</DialogTitle>
           <DialogDescription className="text-white/70">
