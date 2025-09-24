@@ -195,7 +195,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                         className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
                       >
                         <span className="truncate text-left flex-1 px-1">
-                          {selectedTemplate?.name || 'Ingen mall (tom annons)'}
+                          {selectedTemplate?.name || 'Ingen mall är vald'}
                         </span>
                         <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
                       </Button>
@@ -244,11 +244,11 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                         </DropdownMenuItem>
                         
                         <DropdownMenuItem
-                          onClick={() => handleTemplateSelect('none', 'Ingen mall (tom annons)')}
+                          onClick={() => handleTemplateSelect('none', 'Ingen mall är vald')}
                           className="px-4 py-3 text-white hover:bg-slate-700/80 cursor-pointer transition-colors border-b border-slate-600/20"
                         >
                           <div className="flex flex-col">
-                            <span className="font-medium">Ingen mall (tom annons)</span>
+                            <span className="font-medium">Ingen mall är vald</span>
                             <span className="text-xs text-white/60">Skapa en helt ny annons från början</span>
                           </div>
                         </DropdownMenuItem>
