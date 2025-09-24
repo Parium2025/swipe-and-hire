@@ -164,7 +164,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-              <CardDescription className="text-white/80 text-center">
+              <CardDescription className="text-white text-center">
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
               </CardDescription>
             </CardHeader>
