@@ -243,15 +243,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           </div>
                         </DropdownMenuItem>
                         
-                        <DropdownMenuItem
-                          onClick={() => handleTemplateSelect('none', 'Ingen mall är vald')}
-                          className="px-4 py-3 text-white hover:bg-slate-700/80 cursor-pointer transition-colors border-b border-slate-600/20"
-                        >
-                          <div className="flex flex-col">
-                            <span className="font-medium">Ingen mall är vald</span>
-                            <span className="text-xs text-white/60">Skapa en helt ny annons från början</span>
-                          </div>
-                        </DropdownMenuItem>
                         
                         {filteredTemplates.map((template) => (
                           <DropdownMenuItem
