@@ -176,18 +176,18 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     <SelectTrigger className="bg-white/10 border-white/20 text-white">
                       <SelectValue placeholder="Standardmall" />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-600">
+                    <SelectContent className="bg-gray-800 border-gray-600 min-w-[var(--radix-select-trigger-width)] w-full">
                       <SelectItem 
                         value="none" 
-                        className="text-white hover:bg-gray-700 focus:bg-gray-700"
+                        className="text-white hover:bg-gray-700 focus:bg-gray-700 flex justify-center items-center pl-2 pr-2"
                       >
-                        Ingen mall (tom annons)
+                        <div className="w-full text-center">Ingen mall (tom annons)</div>
                       </SelectItem>
                       {templates.map((template) => (
                         <SelectItem 
                           key={template.id} 
                           value={template.id}
-                          className="text-white hover:bg-gray-700 focus:bg-gray-700"
+                          className="text-white hover:bg-gray-700 focus:bg-gray-700 justify-center text-center"
                         >
                           <div className="flex items-center justify-between w-full">
                             <span>{template.name}</span>
