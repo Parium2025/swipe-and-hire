@@ -149,6 +149,15 @@ All colors MUST be HSL.
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
+  /* iOS Safari: force full-bleed gradient on html/body so status area isn't white */
+  @supports (padding: env(safe-area-inset-top)) {
+    html, body {
+      background: var(--gradient-parium) fixed;
+      background-size: cover;
+      background-attachment: fixed;
+    }
+  }
+
   /* Custom date input styling */
   .custom-date-input::placeholder {
     color: rgba(255, 255, 255, 0.6) !important;
