@@ -225,6 +225,24 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
 
                       {/* Template options */}
                       <div className="max-h-64 overflow-y-auto">
+                        {/* Create new template option */}
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setTemplateMenuOpen(false);
+                            // TODO: Open create template dialog
+                            toast({
+                              title: "Kommer snart",
+                              description: "Funktionen för att skapa nya mallar kommer snart!",
+                            });
+                          }}
+                          className="px-4 py-3 text-blue-300 hover:bg-slate-700/80 cursor-pointer transition-colors border-b border-slate-600/20"
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-medium">+ Skapa en ny mall</span>
+                            <span className="text-xs text-blue-200/60">Skapa en återanvändbar jobbmall</span>
+                          </div>
+                        </DropdownMenuItem>
+                        
                         <DropdownMenuItem
                           onClick={() => handleTemplateSelect('none', 'Ingen mall (tom annons)')}
                           className="px-4 py-3 text-white hover:bg-slate-700/80 cursor-pointer transition-colors border-b border-slate-600/20"
