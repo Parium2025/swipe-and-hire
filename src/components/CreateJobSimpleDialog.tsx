@@ -4,11 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, ChevronDown, Search } from 'lucide-react';
 import CreateJobDetailDialog from '@/components/CreateJobDetailDialog';
 
 interface JobTemplate {
@@ -40,6 +40,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const [selectedTemplate, setSelectedTemplate] = useState<JobTemplate | null>(null);
   const [jobTitle, setJobTitle] = useState('');
   const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [templateMenuOpen, setTemplateMenuOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -88,9 +90,10 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     }
   }, [user, open]);
 
-  const handleTemplateSelect = (templateId: string) => {
+  const handleTemplateSelect = (templateId: string, templateName: string) => {
     if (templateId === 'none') {
       setSelectedTemplate(null);
+      setTemplateMenuOpen(false);
       return;
     }
     
@@ -101,7 +104,13 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         setJobTitle(template.title);
       }
     }
+    setTemplateMenuOpen(false);
   };
+
+  // Filter templates based on search term
+  const filteredTemplates = templates.filter(template =>
+    template.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleCreateJob = () => {
     if (!jobTitle.trim()) {
@@ -169,36 +178,79 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     Laddar mallar...
                   </div>
                 ) : (
-                  <Select 
-                    value={selectedTemplate?.id || 'none'} 
-                    onValueChange={handleTemplateSelect}
-                  >
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                      <SelectValue placeholder="Standardmall" />
-                    </SelectTrigger>
-                    <SelectContent className="z-[9999] bg-gray-800 border-gray-600 min-w-[var(--radix-select-trigger-width)] w-full shadow-xl">
-                      <SelectItem 
-                        value="none" 
-                        className="text-white hover:bg-gray-700 focus:bg-gray-700"
+                  <DropdownMenu modal={false} open={templateMenuOpen} onOpenChange={setTemplateMenuOpen}>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
                       >
-                        Ingen mall (tom annons)
-                      </SelectItem>
-                      {templates.map((template) => (
-                        <SelectItem 
-                          key={template.id} 
-                          value={template.id}
-                          className="text-white hover:bg-gray-700 focus:bg-gray-700"
+                        <span className="truncate text-left flex-1 px-1">
+                          {selectedTemplate?.name || 'Ingen mall (tom annons)'}
+                        </span>
+                        <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent 
+                      className="w-80 bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-96"
+                      side="bottom"
+                      align="center"
+                      alignOffset={0}
+                      sideOffset={8}
+                      avoidCollisions={false}
+                      onCloseAutoFocus={(e) => e.preventDefault()}
+                    >
+                      {/* Search input */}
+                      <div className="p-3 border-b border-slate-600/30 sticky top-0 bg-slate-700/95 backdrop-blur-md">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                          <Input
+                            placeholder="Sök mall..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-10 pr-4 h-10 bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-lg"
+                            autoComplete="off"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Template options */}
+                      <div className="max-h-64 overflow-y-auto">
+                        <DropdownMenuItem
+                          onClick={() => handleTemplateSelect('none', 'Ingen mall (tom annons)')}
+                          className="px-4 py-3 text-white hover:bg-slate-700/80 cursor-pointer transition-colors border-b border-slate-600/20"
                         >
-                          <div className="flex items-center justify-between w-full">
-                            <span>{template.name}</span>
-                            {template.is_default && (
-                              <span className="text-xs text-blue-400 ml-2">Standard</span>
-                            )}
+                          <div className="flex flex-col">
+                            <span className="font-medium">Ingen mall (tom annons)</span>
+                            <span className="text-xs text-white/60">Skapa en helt ny annons från början</span>
                           </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                        </DropdownMenuItem>
+                        
+                        {filteredTemplates.map((template) => (
+                          <DropdownMenuItem
+                            key={template.id}
+                            onClick={() => handleTemplateSelect(template.id, template.name)}
+                            className="px-4 py-3 text-white hover:bg-slate-700/80 cursor-pointer transition-colors border-b border-slate-600/20 last:border-b-0"
+                          >
+                            <div className="flex flex-col w-full">
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium">{template.name}</span>
+                                {template.is_default && (
+                                  <span className="text-xs text-blue-400 ml-2">Standard</span>
+                                )}
+                              </div>
+                              <span className="text-xs text-white/60 mt-1">{template.title}</span>
+                            </div>
+                          </DropdownMenuItem>
+                        ))}
+                        
+                        {filteredTemplates.length === 0 && searchTerm && (
+                          <div className="px-4 py-6 text-center text-white/60">
+                            Ingen mall hittades
+                          </div>
+                        )}
+                      </div>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
               </div>
 
