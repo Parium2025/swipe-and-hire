@@ -138,7 +138,7 @@ const EmployerProfile = () => {
     }
   };
 
-  const addSocialLink = () => {
+  const addSocialLink = async () => {
     if (!newSocialLink.platform || !newSocialLink.url.trim()) {
       toast({
         title: "Ofullständig information",
@@ -168,17 +168,61 @@ const EmployerProfile = () => {
       return;
     }
 
-    setFormData({
+    const updatedLinks = [...formData.social_media_links, newSocialLink as SocialMediaLink];
+    const updatedFormData = {
       ...formData,
-      social_media_links: [...formData.social_media_links, newSocialLink as SocialMediaLink]
-    });
+      social_media_links: updatedLinks
+    };
 
-    setNewSocialLink({ platform: '', url: '' });
+    try {
+      // Save immediately to database
+      await updateProfile(updatedFormData as any);
+      
+      // Update local state
+      setFormData(updatedFormData);
+      setOriginalValues(updatedFormData);
+      setHasUnsavedChanges(false);
+      
+      setNewSocialLink({ platform: '', url: '' });
+      
+      toast({
+        title: "Länk tillagd",
+        description: `${SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label}-länken har lagts till`,
+      });
+    } catch (error) {
+      toast({
+        title: "Fel",
+        description: "Kunde inte spara länken. Försök igen.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const removeSocialLink = (index: number) => {
+  const removeSocialLink = async (index: number) => {
+    const linkToRemove = formData.social_media_links[index];
     const updatedLinks = formData.social_media_links.filter((_, i) => i !== index);
-    setFormData({ ...formData, social_media_links: updatedLinks });
+    const updatedFormData = { ...formData, social_media_links: updatedLinks };
+
+    try {
+      // Save immediately to database
+      await updateProfile(updatedFormData as any);
+      
+      // Update local state
+      setFormData(updatedFormData);
+      setOriginalValues(updatedFormData);
+      setHasUnsavedChanges(false);
+      
+      toast({
+        title: "Länk borttagen",
+        description: `${getPlatformLabel(linkToRemove.platform)}-länken har tagits bort`,
+      });
+    } catch (error) {
+      toast({
+        title: "Fel",
+        description: "Kunde inte ta bort länken. Försök igen.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleSave = async () => {
