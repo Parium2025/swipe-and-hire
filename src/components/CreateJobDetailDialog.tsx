@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
-import { Loader2 } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 import JobQuestionsManager from '@/components/JobQuestionsManager';
 
 interface JobTemplate {
@@ -183,13 +183,23 @@ const CreateJobDetailDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-parium-gradient border-white/20 text-white">
-        <DialogHeader>
-          <DialogTitle className="text-white">Skapa jobbannons: {jobTitle}</DialogTitle>
-          <DialogDescription className="text-white/70">
-            {selectedTemplate ? `Baserad på mallen "${selectedTemplate.name}"` : 'Tom annons utan mall'}
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-parium-gradient border-white/20 text-white [&>button]:hidden">
+        <div className="relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onOpenChange(false)}
+            className="absolute right-0 top-0 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10 z-10"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+          <DialogHeader>
+            <DialogTitle className="text-white pr-10">Skapa jobbannons: {jobTitle}</DialogTitle>
+            <DialogDescription className="text-white/70">
+              {selectedTemplate ? `Baserad på mallen "${selectedTemplate.name}"` : 'Tom annons utan mall'}
+            </DialogDescription>
+          </DialogHeader>
+        </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 bg-white/10 border-white/20">

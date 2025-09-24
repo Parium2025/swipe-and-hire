@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Loader2, ChevronDown, Search } from 'lucide-react';
+import { Plus, Loader2, ChevronDown, Search, X } from 'lucide-react';
 import CreateJobDetailDialog from '@/components/CreateJobDetailDialog';
 
 interface JobTemplate {
@@ -148,12 +148,22 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
             Skapa ny annons
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-md bg-parium-gradient">
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+        <DialogContent className="max-w-md bg-parium-gradient [&>button]:hidden">
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 relative">
             <CardHeader>
-              <CardTitle className="text-white text-center">
-                Skapa jobb
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-white flex-1 text-center">
+                  Skapa jobb
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleClose}
+                  className="absolute right-2 top-2 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
               <CardDescription className="text-white/80 text-center">
                 Namnge ditt jobb och välj en mall för att komma igång
               </CardDescription>
