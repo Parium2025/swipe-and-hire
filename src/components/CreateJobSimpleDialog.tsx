@@ -235,11 +235,11 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                               description: "Funktionen för att skapa nya mallar kommer snart!",
                             });
                           }}
-                          className="px-4 py-3 text-blue-300 hover:bg-slate-700/80 cursor-pointer transition-colors border-b border-slate-600/20"
+                          className="px-4 py-3 text-white hover:bg-slate-700/80 cursor-pointer transition-colors border-b border-slate-600/20"
                         >
                           <div className="flex flex-col">
                             <span className="font-medium">+ Skapa en ny mall</span>
-                            <span className="text-xs text-blue-200/60">Skapa en återanvändbar jobbmall</span>
+                            <span className="text-xs text-white/60">Skapa en återanvändbar jobbmall</span>
                           </div>
                         </DropdownMenuItem>
                         
