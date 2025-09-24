@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Loader2, ChevronDown, Search, X } from 'lucide-react';
-import CreateJobDetailDialog from '@/components/CreateJobDetailDialog';
+import MobileJobWizard from '@/components/MobileJobWizard';
 
 interface JobTemplate {
   id: string;
@@ -311,8 +311,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         </DialogContent>
       </Dialog>
 
-      {/* Detail Dialog */}
-      <CreateJobDetailDialog
+      {/* Mobile Job Wizard */}
+      <MobileJobWizard
         open={showDetailDialog}
         onOpenChange={setShowDetailDialog}
         jobTitle={jobTitle}
