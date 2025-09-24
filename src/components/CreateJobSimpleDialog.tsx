@@ -203,7 +203,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     <DropdownMenuContent 
                       className="w-80 bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-96"
                       side="bottom"
-                      align="end"
+                      align="center"
                       alignOffset={0}
                       sideOffset={8}
                       avoidCollisions={false}
