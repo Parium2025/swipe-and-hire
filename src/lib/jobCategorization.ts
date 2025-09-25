@@ -1,6 +1,6 @@
-// Utility function to automatically categorize jobs based on title and description
-export const categorizeJob = (title: string, description: string): string => {
-  const combinedText = `${title} ${description}`.toLowerCase();
+// Utility function to automatically categorize jobs based on title, description and occupation
+export const categorizeJob = (title: string, description: string, occupation?: string): string => {
+  const combinedText = `${title} ${description} ${occupation || ''}`.toLowerCase();
   
   // Job categories with keywords for automatic categorization
   const categories = [

@@ -226,7 +226,7 @@ const MobileJobWizard = ({
     setLoading(true);
 
     try {
-      const category = categorizeJob(formData.title, formData.description);
+      const category = categorizeJob(formData.title, formData.description, formData.occupation);
       
       const jobData = {
         employer_id: user.id,

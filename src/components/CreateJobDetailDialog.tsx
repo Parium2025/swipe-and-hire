@@ -11,7 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
-import { Loader2, X } from 'lucide-react';
+import { searchOccupations } from '@/lib/occupations';
+import { Loader2, X, ChevronDown } from 'lucide-react';
 import JobQuestionsManager from '@/components/JobQuestionsManager';
 
 interface JobTemplate {
@@ -36,6 +37,7 @@ interface JobFormData {
   description: string;
   requirements: string;
   location: string;
+  occupation: string;
   salary_min: string;
   salary_max: string;
   employment_type: string;
@@ -62,11 +64,14 @@ const CreateJobDetailDialog = ({
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("basic");
   const [createdJobId, setCreatedJobId] = useState<string | null>(null);
+  const [occupationSearchTerm, setOccupationSearchTerm] = useState('');
+  const [showOccupationDropdown, setShowOccupationDropdown] = useState(false);
   const [formData, setFormData] = useState<JobFormData>({
     title: jobTitle,
     description: selectedTemplate?.description || '',
     requirements: selectedTemplate?.requirements || '',
     location: selectedTemplate?.location || '',
+    occupation: '',
     salary_min: selectedTemplate?.salary_min?.toString() || '',
     salary_max: selectedTemplate?.salary_max?.toString() || '',
     employment_type: selectedTemplate?.employment_type || '',
@@ -85,6 +90,7 @@ const CreateJobDetailDialog = ({
       description: selectedTemplate?.description || '',
       requirements: selectedTemplate?.requirements || '',
       location: selectedTemplate?.location || '',
+      occupation: '',
       salary_min: selectedTemplate?.salary_min?.toString() || '',
       salary_max: selectedTemplate?.salary_max?.toString() || '',
       employment_type: selectedTemplate?.employment_type || '',
@@ -102,7 +108,7 @@ const CreateJobDetailDialog = ({
 
     try {
       // Automatically categorize the job based on title and description
-      const category = categorizeJob(formData.title, formData.description);
+      const category = categorizeJob(formData.title, formData.description, formData.occupation);
       
       const jobData = {
         employer_id: user.id,
@@ -161,6 +167,7 @@ const CreateJobDetailDialog = ({
       description: '',
       requirements: '',
       location: '',
+      occupation: '',
       salary_min: '',
       salary_max: '',
       employment_type: '',
@@ -180,6 +187,20 @@ const CreateJobDetailDialog = ({
       [field]: value
     }));
   };
+
+  const handleOccupationSearch = (value: string) => {
+    setOccupationSearchTerm(value);
+    handleInputChange('occupation', value);
+    setShowOccupationDropdown(value.length > 0);
+  };
+
+  const handleOccupationSelect = (occupation: string) => {
+    handleInputChange('occupation', occupation);
+    setOccupationSearchTerm(occupation);
+    setShowOccupationDropdown(false);
+  };
+
+  const filteredOccupations = occupationSearchTerm.length > 0 ? searchOccupations(occupationSearchTerm) : [];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -230,6 +251,59 @@ const CreateJobDetailDialog = ({
                   required
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="occupation" className="text-white">Yrke *</Label>
+                <div className="relative">
+                  <Input
+                    id="occupation"
+                    value={formData.occupation}
+                    onChange={(e) => handleOccupationSearch(e.target.value)}
+                    onFocus={() => setShowOccupationDropdown(occupationSearchTerm.length > 0)}
+                    placeholder="t.ex. Mjukvaru- och systemutvecklare"
+                    required
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 pr-10"
+                  />
+                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                  
+                  {/* Occupation Dropdown */}
+                  {showOccupationDropdown && (
+                    <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                      {/* Show filtered occupations */}
+                      {filteredOccupations.map((occupation, index) => (
+                        <button
+                          key={`${occupation}-${index}`}
+                          type="button"
+                          onClick={() => handleOccupationSelect(occupation)}
+                          className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                        >
+                          <div className="font-medium">{occupation}</div>
+                        </button>
+                      ))}
+                      
+                      {/* Custom value option if no matches and search term exists */}
+                      {occupationSearchTerm.trim().length >= 2 &&
+                       filteredOccupations.length === 0 && (
+                        <button
+                          type="button"
+                          onClick={() => handleOccupationSelect(occupationSearchTerm)}
+                          className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-t border-gray-700/30"
+                        >
+                          <span className="font-medium">Använd "{occupationSearchTerm}"</span>
+                          <div className="text-sm text-gray-400">Eget yrke</div>
+                        </button>
+                      )}
+                      
+                      {/* Show message if search is too short */}
+                      {occupationSearchTerm.trim().length > 0 && occupationSearchTerm.trim().length < 2 && (
+                        <div className="py-4 px-3 text-center text-gray-400 italic text-sm">
+                          Skriv minst 2 bokstäver för att söka
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-2">
