@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
+import { searchOccupations } from '@/lib/occupations';
 import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
@@ -36,6 +37,7 @@ interface JobFormData {
   description: string;
   requirements: string;
   location: string;
+  occupation: string;
   salary_min: string;
   salary_max: string;
   employment_type: string;
@@ -65,11 +67,14 @@ const MobileJobWizard = ({
   const [profile, setProfile] = useState<any>(null);
   const [citySearchTerm, setCitySearchTerm] = useState('');
   const [showCityDropdown, setShowCityDropdown] = useState(false);
+  const [occupationSearchTerm, setOccupationSearchTerm] = useState('');
+  const [showOccupationDropdown, setShowOccupationDropdown] = useState(false);
   const [formData, setFormData] = useState<JobFormData>({
     title: jobTitle,
     description: selectedTemplate?.description || '',
     requirements: selectedTemplate?.requirements || '',
     location: selectedTemplate?.location || '',
+    occupation: '',
     salary_min: selectedTemplate?.salary_min?.toString() || '',
     salary_max: selectedTemplate?.salary_max?.toString() || '',
     employment_type: selectedTemplate?.employment_type || '',
@@ -117,6 +122,7 @@ const MobileJobWizard = ({
       description: selectedTemplate?.description || '',
       requirements: selectedTemplate?.requirements || '',
       location: newLocation,
+      occupation: '',
       salary_min: selectedTemplate?.salary_min?.toString() || '',
       salary_max: selectedTemplate?.salary_max?.toString() || '',
       employment_type: selectedTemplate?.employment_type || '',
@@ -168,14 +174,27 @@ const MobileJobWizard = ({
     setShowCityDropdown(false);
   };
 
+  const handleOccupationSearch = (value: string) => {
+    setOccupationSearchTerm(value);
+    handleInputChange('occupation', value);
+    setShowOccupationDropdown(value.length > 0);
+  };
+
+  const handleOccupationSelect = (occupation: string) => {
+    handleInputChange('occupation', occupation);
+    setOccupationSearchTerm(occupation);
+    setShowOccupationDropdown(false);
+  };
+
   const filteredCities = citySearchTerm.length > 0 ? filterCities(citySearchTerm) : [];
+  const filteredOccupations = occupationSearchTerm.length > 0 ? searchOccupations(occupationSearchTerm) : [];
 
   const validateCurrentStep = () => {
     const currentStepFields = steps[currentStep].fields;
     
     // Required fields validation
     if (currentStep === 0) {
-      return formData.title.trim() && formData.location.trim() && formData.employment_type;
+      return formData.title.trim() && formData.location.trim() && formData.occupation.trim() && formData.employment_type;
     }
     
     if (currentStep === 1) {
@@ -262,6 +281,7 @@ const MobileJobWizard = ({
       description: '',
       requirements: '',
       location: '',
+      occupation: '',
       salary_min: '',
       salary_max: '',
       employment_type: '',
@@ -322,6 +342,57 @@ const MobileJobWizard = ({
                     placeholder="t.ex. Lagerarbetare"
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white font-medium">Yrke *</Label>
+                  <div className="relative">
+                    <Input
+                      value={formData.occupation}
+                      onChange={(e) => handleOccupationSearch(e.target.value)}
+                      onFocus={() => setShowOccupationDropdown(occupationSearchTerm.length > 0)}
+                      placeholder="t.ex. Mjukvaru- och systemutvecklare"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10"
+                    />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                    
+                    {/* Occupation Dropdown */}
+                    {showOccupationDropdown && (
+                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                        {/* Show filtered occupations */}
+                        {filteredOccupations.map((occupation, index) => (
+                          <button
+                            key={`${occupation}-${index}`}
+                            type="button"
+                            onClick={() => handleOccupationSelect(occupation)}
+                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                          >
+                            <div className="font-medium">{occupation}</div>
+                          </button>
+                        ))}
+                        
+                        {/* Custom value option if no matches and search term exists */}
+                        {occupationSearchTerm.trim().length >= 2 &&
+                         filteredOccupations.length === 0 && (
+                          <button
+                            type="button"
+                            onClick={() => handleOccupationSelect(occupationSearchTerm)}
+                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-t border-gray-700/30"
+                          >
+                            <span className="font-medium">Använd "{occupationSearchTerm}"</span>
+                            <div className="text-sm text-gray-400">Eget yrke</div>
+                          </button>
+                        )}
+                        
+                        {/* Show message if search is too short */}
+                        {occupationSearchTerm.trim().length > 0 && occupationSearchTerm.trim().length < 2 && (
+                          <div className="py-4 px-3 text-center text-gray-400 italic text-sm">
+                            Skriv minst 2 bokstäver för att söka
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
