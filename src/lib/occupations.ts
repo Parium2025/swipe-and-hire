@@ -113,6 +113,7 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
       'Kundtjänstpersonal',
       'Marknads- och försäljningsassistenter',
       'Marknadsanalytiker och marknadsförare m.fl.',
+      'Marknadspersonal',
       'Marknadsundersökare och intervjuare',
       'Optikerassistenter',
       'Ordersamordnare m.fl.',
@@ -233,9 +234,14 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
     label: 'Transport och Logistik', 
     keywords: ['lager', 'logistik', 'transport', 'distribution', 'chaufför', 'lastbil', 'gaffeltruck', 'leverans'],
     subcategories: [
+      'Arbetsledare inom lager och terminal',
+      'Bangårdspersonal',
       'Bilmekaniker och fordonsreparatörer',
+      'Brevbärare och postterminalbetjäre',
       'Buss- och spårvagnsförare',
       'Chaufförer och kurirer',
+      'Distributionschaufför',
+      'Fartygssbefäl m.fl.',
       'Flygledare m.fl.',
       'Fordonsförare m.fl.',
       'Godshanterare',
@@ -245,6 +251,7 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
       'Lokförare m.fl.',
       'Maskinoperatörer, lyft- och transportutrustning',
       'Post- och brevbärare',
+      'Renhållningsförare',
       'Trafiklärare'
     ]
   },
