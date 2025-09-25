@@ -128,7 +128,6 @@ const MobileJobWizard = ({
     
     // Update city search term when template location changes
     setCitySearchTerm(newLocation);
-    console.log('Updated citySearchTerm to:', newLocation);
   }, [jobTitle, selectedTemplate]);
 
   const steps = [
@@ -158,21 +157,18 @@ const MobileJobWizard = ({
   };
 
   const handleCitySearch = (value: string) => {
-    console.log('handleCitySearch called with:', value);
     setCitySearchTerm(value);
     handleInputChange('location', value);
     setShowCityDropdown(value.length > 0);
   };
 
   const handleCitySelect = (cityName: string) => {
-    console.log('handleCitySelect called with:', cityName);
     handleInputChange('location', cityName);
     setCitySearchTerm(cityName);
     setShowCityDropdown(false);
   };
 
   const filteredCities = citySearchTerm.length > 0 ? filterCities(citySearchTerm) : [];
-  console.log('filteredCities:', filteredCities, 'citySearchTerm:', citySearchTerm, 'showDropdown:', showCityDropdown);
 
   const validateCurrentStep = () => {
     const currentStepFields = steps[currentStep].fields;
