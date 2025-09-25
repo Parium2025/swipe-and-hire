@@ -41,6 +41,7 @@ const SearchJobs = () => {
   const [selectedEmploymentTypes, setSelectedEmploymentTypes] = useState<string[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [categorySearchTerm, setCategorySearchTerm] = useState('');
   const isMobile = useIsMobile();
   
   const dropdownAlignOffset = 0;
@@ -454,7 +455,7 @@ const SearchJobs = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
-                  className={`w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white ${isMobile ? 'max-h-[60vh]' : 'max-h-96'} overflow-y-auto overscroll-contain`}
+                  className={`w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-[70] rounded-lg text-white ${isMobile ? 'max-h-[60vh]' : 'max-h-96'} overflow-y-auto overscroll-contain`}
                   side="bottom"
                   align="center"
                   alignOffset={0}
@@ -462,6 +463,22 @@ const SearchJobs = () => {
                   avoidCollisions={false}
                   onCloseAutoFocus={(e) => e.preventDefault()}
                 >
+                  {/* Search input for occupations */}
+                  <div className="p-2 border-b border-slate-600/30 sticky top-0 bg-slate-700/95 z-[71]">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
+                      <Input
+                        placeholder="Sök yrke..."
+                        value={categorySearchTerm}
+                        onChange={(e) => setCategorySearchTerm(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        className="pl-10 bg-slate-600/50 border-slate-500/50 text-white placeholder:text-white/50"
+                      />
+                    </div>
+                  </div>
+
                   {/* Clear selection option */}
                   {(selectedCategory !== 'all-categories' || selectedSubcategories.length > 0) && (
                     <>
@@ -479,88 +496,116 @@ const SearchJobs = () => {
                     </>
                   )}
                   
-                  {/* Job categories with subcategory dropdowns */}
+                  {/* Job categories with subcategory dropdowns (filterable) */}
                   <div className="max-h-80 overflow-y-auto">
-                    {jobCategories.map((category) => (
-                      <div key={category.value}>
-                        <DropdownMenuItem
-                          onSelect={(e) => e.preventDefault()}
-                          onClick={() => {
-                            if (selectedCategory === category.value) {
-                              setSelectedCategory('all-categories');
-                              setSelectedSubcategories([]);
-                            } else {
-                              setSelectedCategory(category.value);
-                              setSelectedSubcategories([]);
-                            }
-                          }}
-                          className="font-medium cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white flex items-center justify-between border-b border-slate-600/30"
-                        >
-                          <div className="flex items-center gap-2">
-                            <span>{category.label}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {selectedCategory === category.value && (
-                              <Check className="h-4 w-4 text-white" />
-                            )}
-                            {category.subcategories.some(sub => selectedSubcategories.includes(sub)) && (
-                              <div className="w-2 h-2 bg-white rounded-full"></div>
-                            )}
-                          </div>
-                        </DropdownMenuItem>
-                        
-                        {/* Show subcategories if category is selected or has selected subcategories */}
-                        {(selectedCategory === category.value || category.subcategories.some(sub => selectedSubcategories.includes(sub))) && (
-                          <div className="bg-slate-800/50 border-l-2 border-slate-600/50 ml-4">
-                            <DropdownMenuItem
-                              onSelect={(e) => e.preventDefault()}
-                              onClick={() => {
-                                if (selectedSubcategories.length === category.subcategories.length && 
-                                    category.subcategories.every(sub => selectedSubcategories.includes(sub))) {
-                                  // All selected, deselect all from this category
-                                  setSelectedSubcategories(prev => prev.filter(sub => !category.subcategories.includes(sub)));
-                                } else {
-                                  // Select all from this category
-                                  setSelectedSubcategories(prev => {
-                                    const filtered = prev.filter(sub => !category.subcategories.includes(sub));
-                                    return [...filtered, ...category.subcategories];
-                                  });
-                                }
-                              }}
-                              className="text-sm cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white/90 italic"
-                            >
-                              <span className="ml-4">
-                                {category.subcategories.every(sub => selectedSubcategories.includes(sub))
-                                  ? 'Avmarkera alla'
-                                  : 'Välj alla'
-                                }
-                              </span>
-                            </DropdownMenuItem>
-                            {category.subcategories.map((subcategory) => (
+                    {jobCategories
+                      .filter((category) => {
+                        const term = categorySearchTerm.toLowerCase().trim();
+                        if (!term) return true;
+                        return (
+                          category.label.toLowerCase().includes(term) ||
+                          category.keywords.some(k => k.toLowerCase().includes(term)) ||
+                          category.subcategories.some(sub => sub.toLowerCase().includes(term))
+                        );
+                      })
+                      .map((category) => (
+                        <div key={category.value}>
+                          <DropdownMenuItem
+                            onSelect={(e) => e.preventDefault()}
+                            onClick={() => {
+                              if (selectedCategory === category.value) {
+                                setSelectedCategory('all-categories');
+                                setSelectedSubcategories([]);
+                              } else {
+                                setSelectedCategory(category.value);
+                                setSelectedSubcategories([]);
+                              }
+                            }}
+                            className="font-medium cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white flex items-center justify-between border-b border-slate-600/30"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span>{category.label}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {selectedCategory === category.value && (
+                                <Check className="h-4 w-4 text-white" />
+                              )}
+                              {category.subcategories.some(sub => selectedSubcategories.includes(sub)) && (
+                                <div className="w-2 h-2 bg-white rounded-full"></div>
+                              )}
+                            </div>
+                          </DropdownMenuItem>
+                          
+                          {/* Show subcategories if category is selected or has selected subcategories; when searching, show only matching subs */}
+                          {(selectedCategory === category.value || category.subcategories.some(sub => selectedSubcategories.includes(sub)) || categorySearchTerm.trim().length > 0) && (
+                            <div className="bg-slate-800/50 border-l-2 border-slate-600/50 ml-4">
                               <DropdownMenuItem
-                                key={subcategory}
                                 onSelect={(e) => e.preventDefault()}
                                 onClick={() => {
-                                  const isSelected = selectedSubcategories.includes(subcategory);
-                                  if (isSelected) {
-                                    setSelectedSubcategories(prev => prev.filter(s => s !== subcategory));
+                                  const subs = category.subcategories;
+                                  if (selectedSubcategories.length === subs.length && subs.every(sub => selectedSubcategories.includes(sub))) {
+                                    // All selected, deselect all from this category
+                                    setSelectedSubcategories(prev => prev.filter(sub => !subs.includes(sub)));
                                   } else {
-                                    setSelectedSubcategories(prev => [...prev, subcategory]);
-                                    setSelectedCategory(category.value);
+                                    // Select all from this category
+                                    setSelectedSubcategories(prev => {
+                                      const filtered = prev.filter(sub => !subs.includes(sub));
+                                      return [...filtered, ...subs];
+                                    });
                                   }
                                 }}
-                                className="text-sm cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white flex items-center justify-between"
+                                className="text-sm cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white/90 italic"
                               >
-                                <span className="ml-6">{subcategory}</span>
-                                {selectedSubcategories.includes(subcategory) && (
-                                  <Check className="h-4 w-4 text-white" />
-                                )}
+                                <span className="ml-4">
+                                  {category.subcategories.every(sub => selectedSubcategories.includes(sub))
+                                    ? 'Avmarkera alla'
+                                    : 'Välj alla'
+                                  }
+                                </span>
                               </DropdownMenuItem>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                              {(() => {
+                                const term = categorySearchTerm.toLowerCase().trim();
+                                const subsToShow = term
+                                  ? category.subcategories.filter(sub => sub.toLowerCase().includes(term))
+                                  : category.subcategories;
+                                return subsToShow.map((subcategory) => (
+                                  <DropdownMenuItem
+                                    key={subcategory}
+                                    onSelect={(e) => e.preventDefault()}
+                                    onClick={() => {
+                                      const isSelected = selectedSubcategories.includes(subcategory);
+                                      if (isSelected) {
+                                        setSelectedSubcategories(prev => prev.filter(s => s !== subcategory));
+                                      } else {
+                                        setSelectedSubcategories(prev => [...prev, subcategory]);
+                                        setSelectedCategory(category.value);
+                                      }
+                                    }}
+                                    className="text-sm cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white flex items-center justify-between"
+                                  >
+                                    <span className="ml-6">{subcategory}</span>
+                                    {selectedSubcategories.includes(subcategory) && (
+                                      <Check className="h-4 w-4 text-white" />
+                                    )}
+                                  </DropdownMenuItem>
+                                ));
+                              })()}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    {/* No results */}
+                    {jobCategories.filter((category) => {
+                      const term = categorySearchTerm.toLowerCase().trim();
+                      if (!term) return false;
+                      return (
+                        category.label.toLowerCase().includes(term) ||
+                        category.keywords.some(k => k.toLowerCase().includes(term)) ||
+                        category.subcategories.some(sub => sub.toLowerCase().includes(term))
+                      );
+                    }).length === 0 && categorySearchTerm.trim().length > 0 && (
+                      <div className="p-4 text-center text-white/50">Inga yrken hittades för "{categorySearchTerm}"</div>
+                    )}
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
