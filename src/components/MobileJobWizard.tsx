@@ -111,11 +111,12 @@ const MobileJobWizard = ({
 
   // Update form data when props change
   useEffect(() => {
+    const newLocation = selectedTemplate?.location || '';
     setFormData({
       title: jobTitle,
       description: selectedTemplate?.description || '',
       requirements: selectedTemplate?.requirements || '',
-      location: selectedTemplate?.location || '',
+      location: newLocation,
       salary_min: selectedTemplate?.salary_min?.toString() || '',
       salary_max: selectedTemplate?.salary_max?.toString() || '',
       employment_type: selectedTemplate?.employment_type || '',
@@ -126,9 +127,8 @@ const MobileJobWizard = ({
     });
     
     // Update city search term when template location changes
-    if (selectedTemplate?.location) {
-      setCitySearchTerm(selectedTemplate.location);
-    }
+    setCitySearchTerm(newLocation);
+    console.log('Updated citySearchTerm to:', newLocation);
   }, [jobTitle, selectedTemplate]);
 
   const steps = [
@@ -158,21 +158,21 @@ const MobileJobWizard = ({
   };
 
   const handleCitySearch = (value: string) => {
+    console.log('handleCitySearch called with:', value);
     setCitySearchTerm(value);
+    handleInputChange('location', value);
     setShowCityDropdown(value.length > 0);
-    if (value.length > 0) {
-      // Also update the form data as user types
-      handleInputChange('location', value);
-    }
   };
 
   const handleCitySelect = (cityName: string) => {
+    console.log('handleCitySelect called with:', cityName);
     handleInputChange('location', cityName);
     setCitySearchTerm(cityName);
     setShowCityDropdown(false);
   };
 
   const filteredCities = citySearchTerm.length > 0 ? filterCities(citySearchTerm) : [];
+  console.log('filteredCities:', filteredCities, 'citySearchTerm:', citySearchTerm, 'showDropdown:', showCityDropdown);
 
   const validateCurrentStep = () => {
     const currentStepFields = steps[currentStep].fields;
@@ -334,7 +334,7 @@ const MobileJobWizard = ({
                     <Input
                       value={formData.location}
                       onChange={(e) => handleCitySearch(e.target.value)}
-                      onFocus={() => setShowCityDropdown(formData.location.length > 0)}
+                      onFocus={() => setShowCityDropdown(citySearchTerm.length > 0)}
                       placeholder="t.ex. Stockholm"
                       className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10"
                     />
