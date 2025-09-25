@@ -410,35 +410,43 @@ const MobileJobWizard = ({
                     value={formData.description}
                     onChange={(e) => handleInputChange('description', e.target.value)}
                     placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
-                    rows={6}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 text-base resize-none"
+                    rows={4}
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 text-sm resize-none leading-relaxed"
                   />
+                  <div className="text-xs text-white/50">
+                    Tips: Beskriv huvuduppgifter, vad ni söker och vad ni erbjuder
+                  </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Kort pitch (valfritt)</Label>
-                  <div className="text-sm text-white/60 mb-2">
-                    En kort sammanfattning som lockar kandidater (max 200 tecken)
+                  <div className="text-xs text-white/60 mb-1">
+                    En kort sammanfattning som lockar kandidater
                   </div>
                   <Textarea
                     value={formData.pitch}
                     onChange={(e) => handleInputChange('pitch', e.target.value)}
                     placeholder="Vad gör detta jobb speciellt?"
                     maxLength={200}
-                    rows={3}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 text-base resize-none"
+                    rows={2}
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 text-sm resize-none"
                   />
-                  <div className="text-xs text-white/50 text-right">
-                    {formData.pitch.length}/200
+                  <div className="flex justify-between items-center">
+                    <div className="text-xs text-white/50">
+                      Ex: "Flexibla arbetstider och utvecklingsmöjligheter"
+                    </div>
+                    <div className="text-xs text-white/50">
+                      {formData.pitch.length}/200
+                    </div>
                   </div>
                 </div>
 
-                {/* Company Info Preview */}
-                {profile && (
+                {/* Company Info Preview - Compact Mobile Version */}
+                {profile && profile.company_description && (
                   <div className="bg-white/5 rounded-lg p-3 border border-white/20">
-                    <div className="text-sm text-white/70 mb-2">Om oss (från din företagsprofil):</div>
-                    <div className="text-sm text-white/90">
-                      {profile.company_description || "Ingen företagsbeskrivning tillgänglig ännu."}
+                    <div className="text-xs text-white/70 mb-1 font-medium">Om företaget:</div>
+                    <div className="text-xs text-white/80 line-clamp-3">
+                      {profile.company_description}
                     </div>
                   </div>
                 )}
