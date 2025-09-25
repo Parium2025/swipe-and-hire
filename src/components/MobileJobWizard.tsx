@@ -10,7 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/hooks/use-toast';
 import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X } from 'lucide-react';
+import { filterCities, swedishCities } from '@/lib/swedishCities';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 interface JobTemplate {
@@ -62,6 +63,8 @@ const MobileJobWizard = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
+  const [citySearchTerm, setCitySearchTerm] = useState('');
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [formData, setFormData] = useState<JobFormData>({
     title: jobTitle,
     description: selectedTemplate?.description || '',
@@ -121,6 +124,11 @@ const MobileJobWizard = ({
       application_instructions: selectedTemplate?.application_instructions || '',
       pitch: ''
     });
+    
+    // Update city search term when template location changes
+    if (selectedTemplate?.location) {
+      setCitySearchTerm(selectedTemplate.location);
+    }
   }, [jobTitle, selectedTemplate]);
 
   const steps = [
@@ -148,6 +156,23 @@ const MobileJobWizard = ({
       [field]: value
     }));
   };
+
+  const handleCitySearch = (value: string) => {
+    setCitySearchTerm(value);
+    setShowCityDropdown(value.length > 0);
+    if (value.length > 0) {
+      // Also update the form data as user types
+      handleInputChange('location', value);
+    }
+  };
+
+  const handleCitySelect = (cityName: string) => {
+    handleInputChange('location', cityName);
+    setCitySearchTerm(cityName);
+    setShowCityDropdown(false);
+  };
+
+  const filteredCities = citySearchTerm.length > 0 ? filterCities(citySearchTerm) : [];
 
   const validateCurrentStep = () => {
     const currentStepFields = steps[currentStep].fields;
@@ -305,12 +330,36 @@ const MobileJobWizard = ({
 
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Plats *</Label>
-                  <Input
-                    value={formData.location}
-                    onChange={(e) => handleInputChange('location', e.target.value)}
-                    placeholder="t.ex. Stockholm"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
-                  />
+                  <div className="relative">
+                    <Input
+                      value={formData.location}
+                      onChange={(e) => handleCitySearch(e.target.value)}
+                      onFocus={() => setShowCityDropdown(formData.location.length > 0)}
+                      placeholder="t.ex. Stockholm"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10"
+                    />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                    
+                    {/* City Dropdown */}
+                    {showCityDropdown && filteredCities.length > 0 && (
+                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                        {filteredCities.map((city, index) => (
+                          <button
+                            key={`${city.name}-${index}`}
+                            type="button"
+                            onClick={() => handleCitySelect(city.name)}
+                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                          >
+                            <div className="font-medium">{city.name}</div>
+                            <div className="text-sm text-gray-400">
+                              {city.postalCodes.slice(0, 3).join(', ')}
+                              {city.postalCodes.length > 3 && ` +${city.postalCodes.length - 3} mer`}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
