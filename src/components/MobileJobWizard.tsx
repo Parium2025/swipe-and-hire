@@ -337,8 +337,9 @@ const MobileJobWizard = ({
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
                     
                     {/* City Dropdown */}
-                    {showCityDropdown && filteredCities.length > 0 && (
+                    {showCityDropdown && (
                       <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                        {/* Show filtered cities */}
                         {filteredCities.map((city, index) => (
                           <button
                             key={`${city.name}-${index}`}
@@ -353,6 +354,26 @@ const MobileJobWizard = ({
                             </div>
                           </button>
                         ))}
+                        
+                        {/* Custom value option if no matches and search term exists */}
+                        {citySearchTerm.trim().length >= 2 &&
+                         filteredCities.length === 0 && (
+                          <button
+                            type="button"
+                            onClick={() => handleCitySelect(citySearchTerm)}
+                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-t border-gray-700/30"
+                          >
+                            <span className="font-medium">Använd "{citySearchTerm}"</span>
+                            <div className="text-sm text-gray-400">Egen plats</div>
+                          </button>
+                        )}
+                        
+                        {/* Show message if search is too short */}
+                        {citySearchTerm.trim().length > 0 && citySearchTerm.trim().length < 2 && (
+                          <div className="py-4 px-3 text-center text-gray-400 italic text-sm">
+                            Skriv minst 2 bokstäver för att söka
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
