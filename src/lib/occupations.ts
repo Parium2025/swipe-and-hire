@@ -83,7 +83,7 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
   { 
     value: 'management', 
     label: 'Chefer och Verksamhetsledare', 
-    keywords: ['chef', 'ledare', 'verksamhet', 'director', 'manager', 'vd', 'platschef', 'avdelningschef'],
+    keywords: ['chef', 'ledare', 'verksamhet', 'director', 'manager', 'vd', 'platschef', 'avdelningschef', 'teamledare', 'team leader'],
     subcategories: [
       'Chefer inom arkitekt- och ingenjörsverksamhet',
       'Chefer inom bank, finans och försäkring',
@@ -111,6 +111,7 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
       'Politiker',
       'Produktionschefer inom tillverkning',
       'Restaurang- och kökchefer',
+      'Teamledare',
       'Verkställande direktörer m.fl.',
       'Övriga administrations- och servicechefer',
       'Övriga chefer inom samhällsservice',
