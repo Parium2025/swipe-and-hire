@@ -243,7 +243,11 @@ const MobileJobWizard = ({
   };
 
   const handleWorkplaceLocationChange = (location: string) => {
-    handleInputChange('workplace_city', location);
+    setFormData(prev => ({
+      ...prev,
+      workplace_city: location,
+      location: location // Auto-update main location field from postal code
+    }));
   };
 
   const filteredCities = citySearchTerm.length > 0 ? filterCities(citySearchTerm) : [];
@@ -471,60 +475,6 @@ const MobileJobWizard = ({
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-white font-medium">Plats *</Label>
-                  <div className="relative">
-                    <Input
-                      value={formData.location}
-                      onChange={(e) => handleCitySearch(e.target.value)}
-                      onFocus={() => setShowCityDropdown(citySearchTerm.length > 0)}
-                      placeholder="t.ex. Stockholm"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10"
-                    />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
-                    
-                    {/* City Dropdown */}
-                    {showCityDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
-                        {/* Show filtered cities */}
-                        {filteredCities.map((city, index) => (
-                          <button
-                            key={`${city.name}-${index}`}
-                            type="button"
-                            onClick={() => handleCitySelect(city.name)}
-                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
-                          >
-                            <div className="font-medium">{city.name}</div>
-                            <div className="text-sm text-gray-400">
-                              {city.postalCodes.slice(0, 3).join(', ')}
-                              {city.postalCodes.length > 3 && ` +${city.postalCodes.length - 3} mer`}
-                            </div>
-                          </button>
-                        ))}
-                        
-                        {/* Custom value option if no matches and search term exists */}
-                        {citySearchTerm.trim().length >= 2 &&
-                         filteredCities.length === 0 && (
-                          <button
-                            type="button"
-                            onClick={() => handleCitySelect(citySearchTerm)}
-                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-t border-gray-700/30"
-                          >
-                            <span className="font-medium">Använd "{citySearchTerm}"</span>
-                            <div className="text-sm text-gray-400">Egen plats</div>
-                          </button>
-                        )}
-                        
-                        {/* Show message if search is too short */}
-                        {citySearchTerm.trim().length > 0 && citySearchTerm.trim().length < 2 && (
-                          <div className="py-4 px-3 text-center text-gray-400 italic text-sm">
-                            Skriv minst 2 bokstäver för att söka
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
 
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Anställningsform *</Label>
