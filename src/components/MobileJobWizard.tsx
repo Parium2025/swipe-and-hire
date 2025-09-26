@@ -392,7 +392,7 @@ const MobileJobWizard = ({
               <DialogTitle className="text-white text-lg">
                 {steps[currentStep].title}
               </DialogTitle>
-              <div className="text-sm text-white/70">
+              <div className="text-sm text-white">
                 Steg {currentStep + 1} av {steps.length}
               </div>
             </DialogHeader>
