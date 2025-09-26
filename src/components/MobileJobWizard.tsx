@@ -140,6 +140,11 @@ const MobileJobWizard = ({
 
   // Update form data when props change - preserve existing values
   useEffect(() => {
+    // Always use the latest jobTitle if provided
+    if (jobTitle && jobTitle !== formData.title) {
+      setFormData(prev => ({ ...prev, title: jobTitle }));
+    }
+    
     // Only reset form if it's completely empty or when a template is selected
     const isFormEmpty = !formData.title && !formData.location && !formData.occupation;
     const shouldUpdateFromTemplate = selectedTemplate && 
