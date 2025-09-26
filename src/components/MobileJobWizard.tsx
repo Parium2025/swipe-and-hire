@@ -192,15 +192,11 @@ const MobileJobWizard = ({
   const steps = [
     {
       title: "Grundinfo",
-      fields: ['title', 'location', 'employment_type', 'positions_count']
+      fields: ['title', 'occupation', 'description', 'employment_type', 'positions_count']
     },
     {
       title: "Var finns jobbet?",
       fields: ['work_location_type', 'remote_work_possible', 'workplace_name', 'workplace_address', 'workplace_postal_code', 'workplace_city']
-    },
-    {
-      title: "Beskrivning", 
-      fields: ['description', 'pitch']
     },
     {
       title: "Detaljer",
@@ -263,7 +259,7 @@ const MobileJobWizard = ({
     
     // Required fields validation
     if (currentStep === 0) {
-      return formData.title.trim() && formData.occupation.trim() && formData.employment_type;
+      return formData.title.trim() && formData.occupation.trim() && formData.description.trim() && formData.employment_type;
     }
     
     if (currentStep === 1) {
@@ -271,10 +267,6 @@ const MobileJobWizard = ({
     }
     
     if (currentStep === 2) {
-      return formData.description.trim();
-    }
-    
-    if (currentStep === 4) {
       return formData.contact_email.trim();
     }
     
@@ -479,6 +471,20 @@ const MobileJobWizard = ({
                   </div>
                 </div>
 
+                <div className="space-y-2">
+                  <Label className="text-white font-medium">Jobbeskrivning *</Label>
+                  <Textarea
+                    value={formData.description}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
+                    rows={4}
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 text-base resize-none leading-relaxed"
+                  />
+                  <div className="text-xs text-white/50">
+                    Tips: Beskriv huvuduppgifter, vad ni söker och vad ni erbjuder
+                  </div>
+                </div>
+
 
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Anställningsform *</Label>
@@ -592,60 +598,8 @@ const MobileJobWizard = ({
               </div>
             )}
 
-            {/* Step 3: Beskrivning */}
+            {/* Step 3: Detaljer */}
             {currentStep === 2 && (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-white font-medium">Jobbeskrivning *</Label>
-                  <Textarea
-                    value={formData.description}
-                    onChange={(e) => handleInputChange('description', e.target.value)}
-                    placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
-                    rows={4}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 text-sm resize-none leading-relaxed"
-                  />
-                  <div className="text-xs text-white/50">
-                    Tips: Beskriv huvuduppgifter, vad ni söker och vad ni erbjuder
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-white font-medium">Kort pitch (valfritt)</Label>
-                  <div className="text-xs text-white/60 mb-1">
-                    En kort sammanfattning som lockar kandidater
-                  </div>
-                  <Textarea
-                    value={formData.pitch}
-                    onChange={(e) => handleInputChange('pitch', e.target.value)}
-                    placeholder="Vad gör detta jobb speciellt?"
-                    maxLength={200}
-                    rows={2}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 text-sm resize-none"
-                  />
-                  <div className="flex justify-between items-center">
-                    <div className="text-xs text-white/50">
-                      Ex: "Flexibla arbetstider och utvecklingsmöjligheter"
-                    </div>
-                    <div className="text-xs text-white/50">
-                      {formData.pitch.length}/200
-                    </div>
-                  </div>
-                </div>
-
-                {/* Company Info Preview - Compact Mobile Version */}
-                {profile && profile.company_description && (
-                  <div className="bg-white/5 rounded-lg p-3 border border-white/20">
-                    <div className="text-xs text-white/70 mb-1 font-medium">Om företaget:</div>
-                    <div className="text-xs text-white/80 line-clamp-3">
-                      {profile.company_description}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Step 4: Detaljer */}
-            {currentStep === 3 && (
               <div className="space-y-4">
                 <div className="space-y-4">
                   <Label className="text-white font-medium">Lönespann (valfritt)</Label>
@@ -694,8 +648,8 @@ const MobileJobWizard = ({
               </div>
             )}
 
-            {/* Step 5: Kontakt */}
-            {currentStep === 4 && (
+            {/* Step 4: Kontakt */}
+            {currentStep === 3 && (
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Kontakt-email *</Label>
