@@ -531,6 +531,9 @@ const MobileJobWizard = ({
                       <SelectItem value="fältarbete" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
                         Fältarbete/ute
                       </SelectItem>
+                      <SelectItem value="utomlands" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
+                        Utomlands
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
