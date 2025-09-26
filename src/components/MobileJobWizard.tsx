@@ -496,7 +496,7 @@ const MobileJobWizard = ({
                     <SelectTrigger className="bg-white/10 border-white/20 text-white h-12 text-base">
                       <SelectValue placeholder="Välj anställningsform" />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-600">
+                    <SelectContent className="bg-gray-800 border-gray-600" side="bottom" align="start">
                       {EMPLOYMENT_TYPES.map(type => (
                         <SelectItem 
                           key={type.value} 
@@ -516,7 +516,7 @@ const MobileJobWizard = ({
                     <SelectTrigger className="bg-white/10 border-white/20 text-white h-12 text-base">
                       <SelectValue placeholder="Välj lönetyp" />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-600">
+                    <SelectContent className="bg-gray-800 border-gray-600" side="bottom" align="start">
                       <SelectItem 
                         value="fast"
                         className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10"
