@@ -43,6 +43,7 @@ interface JobFormData {
   salary_min: string;
   salary_max: string;
   employment_type: string;
+  salary_type: string;
   positions_count: string;
   work_location_type: string;
   remote_work_possible: string;
@@ -87,6 +88,7 @@ const MobileJobWizard = ({
     salary_min: selectedTemplate?.salary_min?.toString() || '',
     salary_max: selectedTemplate?.salary_max?.toString() || '',
     employment_type: selectedTemplate?.employment_type || '',
+    salary_type: '',
     positions_count: '1',
     work_location_type: 'på-plats',
     remote_work_possible: 'nej',
@@ -161,6 +163,7 @@ const MobileJobWizard = ({
         salary_min: selectedTemplate?.salary_min?.toString() || prev.salary_min,
         salary_max: selectedTemplate?.salary_max?.toString() || prev.salary_max,
         employment_type: selectedTemplate?.employment_type || prev.employment_type,
+        salary_type: prev.salary_type || '',
         positions_count: prev.positions_count || '1',
         work_location_type: prev.work_location_type || 'på-plats',
         remote_work_possible: prev.remote_work_possible || 'nej',
@@ -355,6 +358,7 @@ const MobileJobWizard = ({
       salary_min: '',
       salary_max: '',
       employment_type: '',
+      salary_type: '',
       positions_count: '1',
       work_location_type: 'på-plats',
       remote_work_possible: 'nej',
@@ -502,6 +506,35 @@ const MobileJobWizard = ({
                           {type.label}
                         </SelectItem>
                       ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white font-medium">Lönetyp</Label>
+                  <Select value={formData.salary_type} onValueChange={(value) => handleInputChange('salary_type', value)}>
+                    <SelectTrigger className="bg-white/10 border-white/20 text-white h-12 text-base">
+                      <SelectValue placeholder="Välj lönetyp" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-600">
+                      <SelectItem 
+                        value="fast"
+                        className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10"
+                      >
+                        Fast månads-, vecko- eller timlön
+                      </SelectItem>
+                      <SelectItem 
+                        value="rorlig"
+                        className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10"
+                      >
+                        Rörlig, ackord eller provisionslön
+                      </SelectItem>
+                      <SelectItem 
+                        value="fast-rorlig"
+                        className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10"
+                      >
+                        Fast och rörlig lön
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
