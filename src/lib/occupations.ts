@@ -553,7 +553,7 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
       'Fritidsledare m.fl.',
       'Kuratorer',
       'Pastorer m.fl.',
-      'Personliga assistenter',
+      'LSS-assistenter',
       'Präster',
       'Socialsekreterare',
       'Vårdare, boendestödjare',
