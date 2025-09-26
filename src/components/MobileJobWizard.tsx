@@ -12,7 +12,7 @@ import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown } from 'lucide-react';
+import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import { Progress } from '@/components/ui/progress';
 
 interface JobTemplate {
@@ -44,6 +44,10 @@ interface JobFormData {
   positions_count: string;
   work_location_type: string;
   remote_work_possible: string;
+  workplace_name: string;
+  workplace_address: string;
+  workplace_postal_code: string;
+  workplace_city: string;
   work_schedule: string;
   contact_email: string;
   application_instructions: string;
@@ -72,6 +76,7 @@ const MobileJobWizard = ({
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [occupationSearchTerm, setOccupationSearchTerm] = useState('');
   const [showOccupationDropdown, setShowOccupationDropdown] = useState(false);
+  const [postalCodeLoading, setPostalCodeLoading] = useState(false);
   const [formData, setFormData] = useState<JobFormData>({
     title: jobTitle,
     description: selectedTemplate?.description || '',
@@ -84,6 +89,10 @@ const MobileJobWizard = ({
     positions_count: '1',
     work_location_type: 'på-plats',
     remote_work_possible: 'nej',
+    workplace_name: '',
+    workplace_address: '',
+    workplace_postal_code: '',
+    workplace_city: '',
     work_schedule: selectedTemplate?.work_schedule || '',
     contact_email: selectedTemplate?.contact_email || '',
     application_instructions: selectedTemplate?.application_instructions || '',
@@ -135,6 +144,10 @@ const MobileJobWizard = ({
       positions_count: '1',
       work_location_type: 'på-plats',
       remote_work_possible: 'nej',
+      workplace_name: '',
+      workplace_address: '',
+      workplace_postal_code: '',
+      workplace_city: '',
       work_schedule: selectedTemplate?.work_schedule || '',
       contact_email: selectedTemplate?.contact_email || '',
       application_instructions: selectedTemplate?.application_instructions || '',
@@ -152,7 +165,7 @@ const MobileJobWizard = ({
     },
     {
       title: "Var finns jobbet?",
-      fields: ['work_location_type', 'remote_work_possible']
+      fields: ['work_location_type', 'remote_work_possible', 'workplace_name', 'workplace_address', 'workplace_postal_code', 'workplace_city']
     },
     {
       title: "Beskrivning", 
@@ -197,6 +210,27 @@ const MobileJobWizard = ({
     handleInputChange('occupation', occupation);
     setOccupationSearchTerm(occupation);
     setShowOccupationDropdown(false);
+  };
+
+  const handlePostalCodeChange = async (value: string) => {
+    const formatted = formatPostalCodeInput(value);
+    handleInputChange('workplace_postal_code', formatted);
+    
+    if (formatted.replace(/\s+/g, '').length === 5 && isValidSwedishPostalCode(formatted.replace(/\s+/g, ''))) {
+      setPostalCodeLoading(true);
+      try {
+        const location = await getCachedPostalCodeInfo(formatted);
+        if (location) {
+          handleInputChange('workplace_city', location.city);
+        }
+      } catch (error) {
+        console.error('Error fetching postal code:', error);
+      } finally {
+        setPostalCodeLoading(false);
+      }
+    } else if (formatted.length === 0) {
+      handleInputChange('workplace_city', '');
+    }
   };
 
   const filteredCities = citySearchTerm.length > 0 ? filterCities(citySearchTerm) : [];
@@ -258,6 +292,10 @@ const MobileJobWizard = ({
         work_schedule: formData.work_schedule || null,
         contact_email: formData.contact_email || null,
         application_instructions: formData.application_instructions || null,
+        workplace_name: formData.workplace_name || null,
+        workplace_address: formData.workplace_address || null,
+        workplace_postal_code: formData.workplace_postal_code || null,
+        workplace_city: formData.workplace_city || null,
         category
       };
 
@@ -306,6 +344,10 @@ const MobileJobWizard = ({
       positions_count: '1',
       work_location_type: 'på-plats',
       remote_work_possible: 'nej',
+      workplace_name: '',
+      workplace_address: '',
+      workplace_postal_code: '',
+      workplace_city: '',
       work_schedule: '',
       contact_email: '',
       application_instructions: '',
@@ -552,6 +594,56 @@ const MobileJobWizard = ({
                       </SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white font-medium">Arbetsplatsens namn</Label>
+                  <Input
+                    value={formData.workplace_name}
+                    onChange={(e) => handleInputChange('workplace_name', e.target.value)}
+                    placeholder="t.ex. IKEA Kungens Kurva"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white font-medium">Gatuadress (frivilligt)</Label>
+                  <Input
+                    value={formData.workplace_address}
+                    onChange={(e) => handleInputChange('workplace_address', e.target.value)}
+                    placeholder="t.ex. Modulvägen 1"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label className="text-white font-medium">Postnummer</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 z-10" />
+                      <Input
+                        value={formData.workplace_postal_code}
+                        onChange={(e) => handlePostalCodeChange(e.target.value)}
+                        placeholder="XXX XX"
+                        maxLength={6}
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pl-10"
+                      />
+                      {postalCodeLoading && (
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          <Loader2 className="h-4 w-4 animate-spin text-white/60" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-white font-medium">Ort/kommun</Label>
+                    <Input
+                      value={formData.workplace_city}
+                      onChange={(e) => handleInputChange('workplace_city', e.target.value)}
+                      placeholder="Fylls i automatiskt"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
+                    />
+                  </div>
                 </div>
               </div>
             )}

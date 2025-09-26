@@ -74,6 +74,10 @@ export type Database = {
           updated_at: string
           views_count: number
           work_schedule: string | null
+          workplace_address: string | null
+          workplace_city: string | null
+          workplace_name: string | null
+          workplace_postal_code: string | null
         }
         Insert: {
           application_instructions?: string | null
@@ -95,6 +99,10 @@ export type Database = {
           updated_at?: string
           views_count?: number
           work_schedule?: string | null
+          workplace_address?: string | null
+          workplace_city?: string | null
+          workplace_name?: string | null
+          workplace_postal_code?: string | null
         }
         Update: {
           application_instructions?: string | null
@@ -116,6 +124,10 @@ export type Database = {
           updated_at?: string
           views_count?: number
           work_schedule?: string | null
+          workplace_address?: string | null
+          workplace_city?: string | null
+          workplace_name?: string | null
+          workplace_postal_code?: string | null
         }
         Relationships: [
           {
