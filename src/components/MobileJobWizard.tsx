@@ -266,7 +266,11 @@ const MobileJobWizard = ({
     }
     
     if (currentStep === 1) {
-      return true; // Location details are optional
+      return formData.work_location_type && 
+             formData.remote_work_possible && 
+             formData.workplace_name.trim() && 
+             formData.workplace_postal_code.trim() && 
+             formData.workplace_city.trim();
     }
     
     if (currentStep === 2) {
@@ -583,7 +587,7 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium">Är distansarbete möjligt?</Label>
+                  <Label className="text-white font-medium">Är distansarbete möjligt? *</Label>
                   <Select value={formData.remote_work_possible} onValueChange={(value) => handleInputChange('remote_work_possible', value)}>
                     <SelectTrigger className="bg-white/10 border-white/20 text-white h-12 text-base">
                       <SelectValue placeholder="Välj alternativ" />
@@ -603,7 +607,7 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium">Arbetsplatsens namn</Label>
+                  <Label className="text-white font-medium">Arbetsplatsens namn *</Label>
                   <Input
                     value={formData.workplace_name}
                     onChange={(e) => handleInputChange('workplace_name', e.target.value)}
