@@ -235,7 +235,7 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
     keywords: ['sjuksköterska', 'läkare', 'vård', 'omsorg', 'tandläkare', 'fysioterapeut', 'undersköterska', 'vårdbiträde', 'nutrition', 'kostrådgivare', 'personal trainer', 'life coach'],
     subcategories: [
       'AT-läkare',
-      'Ambulanssjuksköterska m.fl.',
+      'Ambulanssjuksköterska',
       'Ambulanssjukvårdare',
       'Anestesisjuksköterska',
       'Apotekare',
@@ -523,7 +523,7 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
       'Skorstensfjejare',
       'Städare',
       'Städledare och husfruar',
-      'Övrig hemservicepersonal m.fl.'
+      'Övrig hemservicepersonal'
     ]
   },
   { 
