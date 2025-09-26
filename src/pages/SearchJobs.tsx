@@ -43,7 +43,7 @@ const SearchJobs = () => {
   const isMobile = useIsMobile();
   
   const dropdownAlignOffset = 0;
-  // Job categories with subcategories - synced with the updated occupations.ts
+  // Job categories with subcategories - using existing working data structure
   const jobCategories = [
     { 
       value: 'administration', 
@@ -51,52 +51,7 @@ const SearchJobs = () => {
       icon: '',
       keywords: ['administration', 'ekonomi', 'redovisning', 'controller', 'assistent', 'sekreterare', 'koordinator', 'projektledare', 'juridik', 'advokat', 'receptionist', 'administratör'],
       subcategories: [
-        'Polis' // This ensures that when someone searches for "polis", they will find jobs in the security category
-      ]
-    }
-  ];
-
-  const locations = [
-      icon: '',
-      keywords: ['administration', 'ekonomi', 'redovisning', 'controller', 'assistent', 'sekreterare', 'koordinator', 'projektledare', 'juridik', 'advokat'],
-      subcategories: [
-        'Advokater',
-        'Affärs- och företagsjurister',
-        'Arbetsmärke',
-        'Arkivvård- och biblioteksassistenter m.fl.',
-        'Arkiv- och biblioteksassistenter m.fl.',
-        'Backofficespecialister m.fl.',
-        'Chefssekreterare och VD-assistenter m.fl.',
-        'Controller',
-        'Domare',
-        'Domstols- och juristsekreterare m.fl.',
-        'Ekonomiassistenter m.fl.',
-        'Finansanalytiker och investeringsrådgivare m.fl.',
-        'Försäkringssäljare och försäkringsrådgivare',
-        'Förvaltnings- och organisationsjurister',
-        'Gruppledare för kontorspersonal',
-        'Informatörer, kommunikatörer och PR-specialister',
-        'Inkasserare och pantlånare m.fl.',
-        'Kontorsreceptionister',
-        'Lednings- och organisationsutvecklare',
-        'Medicinska sekreterare, vårdadministratörer m.fl.',
-        'Mäklare inom finans',
-        'Nationalekonomer och makroanalytiker m.fl.',
-        'Personal- och HR-specialister',
-        'Planerade och utredare m.fl.',
-        'Redovisningsekonomer',
-        'Revisorer m.fl.',
-        'Skadereglerare och värderare',
-        'Skatthandläggare',
-        'Socialförsäkringshandläggare',
-        'Statistiker',
-        'Telefonister',
-        'Traders och fondförvaltare',
-        'Åklagare',
-        'Övriga ekonomer',
-        'Övriga handläggare',
-        'Övriga jurister',
-        'Övriga kontorsassistenter och sekreterare'
+        'Advokat', 'Affärs- och företagsjurist', 'Arkivvård- och biblioteksassistent', 'Backofficespecialist', 'Chefssekreterare och VD-assistent', 'Controller', 'Domare', 'Domstols- och juristsekreterare', 'Ekonomiassistent', 'Finansanalytiker och investeringsrådgivare', 'Försäkringssäljare och försäkringsrådgivare', 'Förvaltnings- och organisationsjurist', 'Gruppledare för kontorspersonal', 'Informatör, kommunikatör och PR-specialist', 'Inkasserare och pantlånare', 'Kontorsreceptionist', 'Lednings- och organisationsutvecklare', 'Medicinsk sekreterare, vårdadministratör', 'Mäklare inom finans', 'Nationalekonom och makroanalytiker', 'Personal- och HR-specialist', 'Planerare och utredare', 'Redovisningsekonom', 'Revisor', 'Skadereglerare och värderare', 'Skatthandläggare', 'Socialförsäkringshandläggare', 'Statistiker', 'Telefonist', 'Trader och fondförvaltare', 'Åklagare', 'Övrig ekonom', 'Övrig handläggare', 'Övrig jurist', 'Övrig kontorsassistent och sekreterare'
       ]
     },
     { 
@@ -105,28 +60,7 @@ const SearchJobs = () => {
       icon: '',
       keywords: ['bygg', 'snickare', 'elektriker', 'anläggning', 'murare', 'målare', 'byggledare', 'platschef', 'vvs'],
       subcategories: [
-        'Anläggningsarbetare',
-        'Anläggningsdykare',
-        'Anläggningsmaskinförare m.fl.',
-        'Arbetsledare inom bygg, anläggning och gruva',
-        'Betongarbetare',
-        'Brunnsborrare m.fl.',
-        'Bygnads- och ventilationsplåtslagare',
-        'Civilingenjörsyrken inom bygg och anläggning',
-        'Golvläggare',
-        'Grovarbetare inom bygg och anläggning',
-        'Gruv- och stenbrottsarbetare',
-        'Ingenjörer och tekniker inom bygg och anläggning',
-        'Isoleringsmontörer',
-        'Kranförare m.fl.',
-        'Kyl- och värmepumpstekniker m.fl.',
-        'Murare m.fl.',
-        'Målare',
-        'Stallningsbyggare',
-        'Takmontörer',
-        'Träarbetare, snickare m.fl.',
-        'VVS-montörer m.fl.',
-        'Övriga byggnads- och anläggningsarbetare'
+        'Anläggningsarbetare', 'Anläggningsdykare', 'Anläggningsmaskinförare', 'Arbetsledare inom bygg, anläggning och gruva', 'Betongarbetare', 'Brunnsborrare', 'Bygnads- och ventilationsplåtslagare', 'Civilingenjörsyrken inom bygg och anläggning', 'Golvläggare', 'Grovarbetare inom bygg och anläggning', 'Gruv- och stenbrottsarbetare', 'Ingenjör och tekniker inom bygg och anläggning', 'Isoleringsmontör', 'Kranförare', 'Kyl- och värmepumpstekniker', 'Murare', 'Målare', 'Stallningsbyggare', 'Takmontör', 'Träarbetare, snickare', 'VVS-montör', 'Övrig byggnads- och anläggningsarbetare'
       ]
     },
     { 
@@ -135,37 +69,7 @@ const SearchJobs = () => {
       icon: '',
       keywords: ['chef', 'ledare', 'verksamhet', 'director', 'manager', 'vd', 'platschef', 'avdelningschef'],
       subcategories: [
-        'Chefer inom arkitekt- och ingenjörsverksamhet',
-        'Chefer inom bank, finans och försäkring',
-        'Chefer inom friskvård, sport och fritid',
-        'Chefer inom förskolverksamhet',
-        'Chefer inom grund- och gymnasieskola samt vuxenutbildning',
-        'Chefer inom handel',
-        'Chefer inom hälso- och sjukvård',
-        'Chefer inom socialt och kurativt arbete',
-        'Chefer inom äldreomsorg',
-        'Chefer och ledare inom trossamfund',
-        'Chefstjänstemän i intresseorganisationer',
-        'Driftchefer inom bygg, anläggning och gruva',
-        'Ekonomi- och finanschefer',
-        'Fastighets- och förvaltningschefer',
-        'Forsknings- och utvecklingschefer',
-        'Försäljnings- och marknadschefer',
-        'Förvaltare inom skogsbruk och lantbruk m.fl.',
-        'General-, landstings- och kommundirektörer m.fl.',
-        'Hotell- och konferenschefer',
-        'IT-chefer',
-        'Informations-, kommunikations- och PR-chefer',
-        'Inköps-, logistik- och transportchefer',
-        'Personal- och HR-chefer',
-        'Politiker',
-        'Produktionschefer inom tillverkning',
-        'Restaurang- och kökchefer',
-        'Verkställande direktörer m.fl.',
-        'Övriga administrations- och servicechefer',
-        'Övriga chefer inom samhällsservice',
-        'Övriga chefer inom utbildning',
-        'Övriga chefer inom övrig servicenäring'
+        'Chef inom arkitekt- och ingenjörsverksamhet', 'Chef inom bank, finans och försäkring', 'Chef inom friskvård, sport och fritid', 'Chef inom förskolverksamhet', 'Chef inom grund- och gymnasieskola samt vuxenutbildning', 'Chef inom handel', 'Chef inom hälso- och sjukvård', 'Chef inom socialt och kurativt arbete', 'Chef inom äldreomsorg', 'Chef och ledare inom trossamfund', 'Chefstjänsteman i intresseorganisation', 'Driftchef inom bygg, anläggning och gruva', 'Ekonomi- och finanschef', 'Fastighets- och förvaltningschef', 'Forsknings- och utvecklingschef', 'Försäljnings- och marknadschef', 'Förvaltare inom skogsbruk och lantbruk', 'General-, landstings- och kommundirektör', 'Hotell- och konferenschef', 'IT-chef', 'Informations-, kommunikations- och PR-chef', 'Inköps-, logistik- och transportchef', 'Personal- och HR-chef', 'Politiker', 'Produktionschef inom tillverkning', 'Restaurang- och kökschef', 'Verkställande direktör', 'Övrig administrations- och servicechef', 'Övrig chef inom samhällsservice', 'Övrig chef inom utbildning', 'Övrig chef inom övrig servicenäring'
       ]
     },
     { 
@@ -174,18 +78,7 @@ const SearchJobs = () => {
       icon: '',
       keywords: ['utvecklare', 'programmerare', 'IT', 'data', 'systemadministratör', 'webb', 'mjukvara', 'frontend', 'backend', 'fullstack', 'devops', 'cybersäkerhet'],
       subcategories: [
-        'Drifttekniker, IT',
-        'IT-säkerhetsspecialister',
-        'Mjukvaru- och systemutvecklare m.fl.',
-        'Nätverks- och systemtekniker m.fl.',
-        'Supporttekniker, IT',
-        'Systemadministratörer',
-        'Systemanalytiker och IT-arkitekter m.fl.',
-        'Systemförvaltare m.fl.',
-        'Systemtestare och testledare',
-        'Utvecklare inom spel och digitala media',
-        'Webbmaster och webbadministratörer',
-        'Övriga IT-specialister'
+        'Drifttekniker, IT', 'IT-säkerhetsspecialist', 'Mjukvaru- och systemutvecklare', 'Nätverks- och systemtekniker', 'Supporttekniker, IT', 'Systemadministratör', 'Systemanalytiker och IT-arkitekt', 'Systemförvaltare', 'Systemtestare och testledare', 'Utvecklare inom spel och digitala media', 'Webbmaster och webbadministratör', 'Övrig IT-specialist'
       ]
     },
     { 
@@ -194,32 +87,7 @@ const SearchJobs = () => {
       icon: '',
       keywords: ['försäljning', 'sales', 'säljare', 'account', 'marketing', 'marknadsföring', 'reklam', 'kommunikation', 'pr', 'inköp'],
       subcategories: [
-        'Apotekstekniker',
-        'Banktjänstemän',
-        'Bensinstationspersonal',
-        'Butikssäljare, dagligvaror',
-        'Butikssäljare, fackhandel',
-        'Evenemangs- och reseproducenter m.fl.',
-        'Eventsäljare och butiksdemonistratörer m.fl.',
-        'Fastighetsmäklare',
-        'Företagssäljare',
-        'Guider och resetedare',
-        'Inköpare och upphandlare',
-        'Inköps- och orderassistenter',
-        'Kassapersonal m.fl.',
-        'Kundtjänstpersonal',
-        'Marknads- och försäljningsassistenter',
-        'Marknadsanalytiker och marknadsförare m.fl.',
-        'Marknadsundersökare och intervjuare',
-        'Optikerassistenter',
-        'Ordersamordnare m.fl.',
-        'Resesäljare och trafikassistenter m.fl.',
-        'Speditörer och transportmäklare',
-        'Säljande butikschefer och avdelningschefer i butik',
-        'Telefonförsäljare m.fl.',
-        'Torg- och marknadsförsäljare m.fl.',
-        'Uthyrare',
-        'Övriga förmedlare'
+        'Apotekstekniker', 'Banktjänsteman', 'Bensinstationspersonal', 'Butikssäljare, dagligvaror', 'Butikssäljare, fackhandel', 'Evenemangs- och reseproducent', 'Eventsäljare och butiksdemonistratör', 'Fastighetsmäklare', 'Företagssäljare', 'Guide och resetedare', 'Inköpare och upphandlare', 'Inköps- och orderassistent', 'Kassapersonal', 'Kundtjänstpersonal', 'Marknads- och försäljningsassistent', 'Marknadsanalytiker och marknadsförare', 'Marknadsundersökare och intervjuare', 'Optikerassistent', 'Ordersamordnare', 'Resesäljare och trafikassistent', 'Speditör och transportmäklare', 'Säljande butikschef och avdelningschef i butik', 'Telefonförsäljare', 'Torg- och marknadsförsäljare', 'Uthyrare', 'Övrig förmedlare'
       ]
     },
     { 
@@ -228,18 +96,7 @@ const SearchJobs = () => {
       icon: '',
       keywords: ['hantverk', 'smed', 'keramiker', 'snickare', 'träarbete', 'metallarbete', 'bagare', 'konditor'],
       subcategories: [
-        'Bagare och konditorer',
-        'Fin-, inrednings- och möbelsnickare',
-        'Finmekaniker',
-        'Glastekniker',
-        'Guld- och silversmeder',
-        'Läderhantverkare och skomakare',
-        'Manuella ytbehandlare, trä',
-        'Musikinstrumentmakare och övriga konsthantverkare',
-        'Skräddare och ateljésömmerskor m.fl.',
-        'Smeder',
-        'Sömmare',
-        'Tapetserare'
+        'Bagare och konditor', 'Fin-, inrednings- och möbelsnickare', 'Finmekaniker', 'Glastekniker', 'Guld- och silversmed', 'Läderhantverkare och skomakare', 'Manuell ytbehandlare, trä', 'Musikinstrumentmakare och övrig konsthantverkare', 'Skräddare och ateljésömmerska', 'Smed', 'Sömmare', 'Tapetserare'
       ]
     },
     { 
@@ -248,16 +105,7 @@ const SearchJobs = () => {
       icon: '',
       keywords: ['kock', 'servitör', 'hotell', 'restaurang', 'storhushåll', 'bagare', 'konditor', 'hovmästare'],
       subcategories: [
-        'Bartenders',
-        'Croupierer och oddssättare m.fl.',
-        'Hotellreceptionister m.fl.',
-        'Hovmästare och servitörer',
-        'Kafé- och konditorbiträden',
-        'Kockar och kallskänkor',
-        'Köksmästare och souschefer',
-        'Pizzabagare m.fl.',
-        'Restaurang- och köksbiträden m.fl.',
-        'Storhushållsföreståndare'
+        'Bartender', 'Croupier och oddssättare', 'Hotellreceptionist', 'Hovmästare och servitör', 'Kafé- och konditorbiträde', 'Kock och kallskänka', 'Köksmästare och souschef', 'Pizzabagare', 'Restaurang- och köksbiträde', 'Storhushållsföreståndare'
       ]
     },
     { 
@@ -266,49 +114,7 @@ const SearchJobs = () => {
       icon: '',
       keywords: ['sjuksköterska', 'läkare', 'vård', 'omsorg', 'tandläkare', 'fysioterapeut', 'undersköterska', 'vårdbiträde'],
       subcategories: [
-        'AT-läkare',
-        'Ambulanssjuksköterskor m.fl.',
-        'Ambulanssjukvårdare',
-        'Anestesisjuksköterskor',
-        'Apotekare',
-        'Arbetsterapeuter',
-        'Audionomer och logopeder',
-        'Barnmorskor',
-        'Barnsjuksköterskor',
-        'Barnsköterskor',
-        'Biomedicinska analytiker m.fl.',
-        'Dietister',
-        'Distriktssköterskor',
-        'Djursjuksköterskor m.fl.',
-        'Fysioterapeuter och sjukgymnaster',
-        'Företagssköterskor',
-        'Geriatriksjuksköterskor',
-        'Grundutbildade sjuksköterskor',
-        'Intensivvårdssjuksköterskor',
-        'Kiropraktorer och naprapater m.fl.',
-        'Operationssjuksköterskor',
-        'Optiker',
-        'Psykiatrisjuksköterskor',
-        'Psykologer',
-        'Psykoterapeuter',
-        'Receptarier',
-        'Röntgensjuksköterskor',
-        'ST-läkare',
-        'Skolsköterskor',
-        'Skötare',
-        'Specialistläkare',
-        'Tandhygienister',
-        'Tandläkare',
-        'Tandsköterskor',
-        'Terapeuter inom alternativmedicin',
-        'Undersköterskor, hemsjukvård, äldreboende och habilitering',
-        'Undersköterskor, vård- och specialavdelning och mottagning',
-        'Veterinärer',
-        'Vårdbiträden',
-        'Övrig vård- och omsorgspersonal',
-        'Övriga läkare',
-        'Övriga specialister inom hälso- och sjukvård',
-        'Övriga specialistsjuksköterskor'
+        'AT-läkare', 'Ambulanssjuksköterska', 'Ambulanssjukvårdare', 'Anestesisjuksköterska', 'Apotekare', 'Arbetsterapeut', 'Audionom och logoped', 'Barnmorska', 'Barnsjuksköterska', 'Barnsköterska', 'Biomedicinsk analytiker', 'Dietist', 'Distriktssköterska', 'Djursjuksköterska', 'Fysioterapeut och sjukgymnast', 'Företagssköterska', 'Geriatriksjuksköterska', 'Grundutbildad sjuksköterska', 'Intensivvårdssjuksköterska', 'Kiropraktor och naprapat', 'Operationssjuksköterska', 'Optiker', 'Psykiatrisjuksköterska', 'Psykolog', 'Psykoterapeut', 'Receptarie', 'Röntgensjuksköterska', 'ST-läkare', 'Skolsköterska', 'Skötare', 'Specialistläkare', 'Tandhygienist', 'Tandläkare', 'Tandsköterska', 'Terapeut inom alternativmedicin', 'Undersköterska, hemsjukvård, äldreboende och habilitering', 'Undersköterska, vård- och specialavdelning och mottagning', 'Veterinär', 'Vårdbiträde', 'Övrig vård- och omsorgspersonal', 'Övrig läkare', 'Övrig specialist inom hälso- och sjukvård', 'Övrig specialistsjuksköterska'
       ]
     },
     { 
@@ -317,52 +123,7 @@ const SearchJobs = () => {
       icon: '',
       keywords: ['industri', 'tillverkning', 'produktion', 'maskinoperatör', 'kvalitet', 'process', 'tekniker'],
       subcategories: [
-        'Arbetsledare inom tillverkning',
-        'Bergsprängare',
-        'Bobindare m.fl.',
-        'Fordonsmontörer',
-        'Gjutare',
-        'Handpaketerare och andra fabriksarbetare',
-        'Lackerare och industrimålare',
-        'Maskinoperatörer inom ytbehandling, trä',
-        'Maskinoperatörer, blekning, färgning och tvättning',
-        'Maskinoperatörer, cement-, sten- och betongvaror',
-        'Maskinoperatörer, farmaceutiska produkter',
-        'Maskinoperatörer, gummiindustri',
-        'Maskinoperatörer, kemisktekniska och fotografiska produkter',
-        'Maskinoperatörer, kvarn-, bageri- och konfektyrindustri',
-        'Maskinoperatörer, kött- och fiskberedningsindustri',
-        'Maskinoperatörer, mejeri',
-        'Maskinoperatörer, plastindustri',
-        'Maskinoperatörer, pappersvaruindustri',
-        'Maskinoperatörer, pappersindustri',
-        'Maskinoperatörer, påfyllning, packning och märkning',
-        'Maskinoperatörer, ytbehandling, trä',
-        'Maskinställare och maskinoperatörer, metallarbete',
-        'Maskinsnickare och maskinoperatörer, träindustri',
-        'Montörer, elektrisk och elektronisk utrustning',
-        'Montörer, metall-, gummi- och plastprodukter',
-        'Montörer, träprodukter',
-        'Operatörer inom sågverk, hyvleri och plywood m.m.',
-        'Prepress tekniker',
-        'Processoperatörer, papper',
-        'Processoperatörer, pappersmassa',
-        'Processoperatörer, stenkross- och malmförädling',
-        'Provsmakare och kvalitetsbedömare',
-        'Slaktare och styckare m.fl.',
-        'Slipare m.fl.',
-        'Stenhuggare m.fl.',
-        'Stålkonstruktionsmontörer och grovplåtslagare',
-        'Svetsare och gasskärare',
-        'Tryckare',
-        'Tunnplåtslagare',
-        'Valsverksoperatörer',
-        'Verktygsmakare',
-        'Övriga maskin- och processoperatörer vid stål- och metallverk',
-        'Övriga maskinoperatörer, livsmedelsindustri m.m.',
-        'Övriga maskinoperatörer, textil-, skinn- och läderindustri',
-        'Övriga montörer',
-        'Övriga process- och maskinoperatörer'
+        'Arbetsledare inom tillverkning', 'Bergsprängare', 'Bobindare', 'Fordonsmontör', 'Gjutare', 'Handpaketerare och andra fabriksarbetare', 'Lackerare och industrimålare', 'Maskinoperatör inom ytbehandling, trä', 'Maskinoperatör, blekning, färgning och tvättning', 'Maskinoperatör, cement-, sten- och betongvaror', 'Maskinoperatör, farmaceutiska produkter', 'Maskinoperatör, gummiindustri', 'Maskinoperatör, kemisk-tekniska och fotografiska produkter', 'Maskinoperatör, kvarn-, bageri- och konfektyrindustri', 'Maskinoperatör, kött- och fiskberedningsindustri', 'Maskinoperatör, mejeri', 'Maskinoperatör, plastindustri', 'Maskinoperatör, pappersvaruindustri', 'Maskinoperatör, pappersindustri', 'Maskinoperatör, påfyllning, packning och märkning', 'Maskinställare och maskinoperatör, metallarbete', 'Maskinsnickare och maskinoperatör, träindustri', 'Montör, elektrisk och elektronisk utrustning', 'Montör, metall-, gummi- och plastprodukter', 'Montör, träprodukter', 'Operatör inom sågverk, hyvleri och plywood', 'Prepress tekniker', 'Processoperatör, papper', 'Processoperatör, pappersmassa', 'Processoperatör, stenkross- och malmförädling', 'Provsmakare och kvalitetsbedömare', 'Slaktare och styckare', 'Slipare', 'Stenhuggare', 'Stålkonstruktionsmontör och grovplåtslagare', 'Svetsare och gasskärare', 'Tryckare', 'Tunnplåtslagare', 'Valsverksoperatör', 'Verktygsmakare', 'Övrig maskin- och processoperatör vid stål- och metallverk', 'Övrig maskinoperatör, livsmedelsindustri', 'Övrig maskinoperatör, textil-, skinn- och läderindustri', 'Övrig montör', 'Övrig process- och maskinoperatör'
       ]
     },
     { 
@@ -371,20 +132,7 @@ const SearchJobs = () => {
       icon: '',
       keywords: ['installation', 'drift', 'underhåll', 'reparatör', 'tekniker', 'service', 'elektriker', 'fastighet'],
       subcategories: [
-        'Distributionselektriker',
-        'Drifttekniker vid värme- och vattenverk',
-        'Elektronikreparatörer och kommunikationselektriker m.fl.',
-        'Fastighetsskötare',
-        'Flygmekaniker m.fl.',
-        'Industrielektriker',
-        'Installations- och serviceelektriker',
-        'Motorfordonsmekaniker och fordonsreparatörer',
-        'Processövervakare, kemisk industri',
-        'Processövervakare, metallproduktion',
-        'Underhållsmekaniker och maskinreparatörer',
-        'Vaktmästare m.fl.',
-        'Övriga drifttekniker och processövervakare',
-        'Övriga servicearbetare'
+        'Distributionselektriker', 'Drifttekniker vid värme- och vattenverk', 'Elektronikreaparatör och kommunikationselektriker', 'Fastighetsskötare', 'Flygmekaniker', 'Industrielektriker', 'Installations- och serviceelektriker', 'Motorfordonsmekaniker och fordonsreparatör', 'Processövervakare, kemisk industri', 'Processövervakare, metallproduktion', 'Underhållsmekaniker och maskinreparatör', 'Vaktmästare', 'Övrig drifttekniker och processövervakare', 'Övrig servicearbetare'
       ]
     },
     { 
@@ -393,27 +141,7 @@ const SearchJobs = () => {
       icon: '',
       keywords: ['lager', 'logistik', 'transport', 'distribution', 'chaufför', 'lastbil', 'gaffeltruck', 'leverans'],
       subcategories: [
-        'Arbetsledare inom lager och terminal',
-        'Bangårdspersonal', 
-        'Brevbärare och postterminalarbetare',
-        'Buss- och spårvagnsförare',
-        'Distributionschaufför',
-        'Fartygsbefäl m.fl.',
-        'Flygledare',
-        'Hamnarbetare',
-        'Kabinpersonal m.fl.',
-        'Lager- och terminalpersonal', 
-        'Lastbilsförare m.fl.',
-        'Lokförare',
-        'Maskinbefäl',
-        'Matroser och jungman m.fl.',
-        'Piloter m.fl.',
-        'Ramppersonal, flyttkarlar och varupåfyllare m.fl.',
-        'Reklamutdelare och tidningsdistributörer',
-        'Taxiförare m.fl.',
-        'Transportledare och transportsamordnare',
-        'Truckförare',
-        'Tågvärdar och ombordansvariga m.fl.'
+        'Arbetsledare inom lager och terminal', 'Bangårdspersonal', 'Brevbärare och postterminalarbetare', 'Buss- och spårvagnsförare', 'Distributionschaufför', 'Fartygsbefäl', 'Flygledare', 'Hamnarbetare', 'Kabinpersonal', 'Lager- och terminalpersonal', 'Lastbilsförare', 'Lokförare', 'Maskinbefäl', 'Matros och jungman', 'Pilot', 'Ramppersonal, flyttkarl och varupåfyllare', 'Reklamutdelare och tidningsdistributör', 'Taxiförare', 'Transportledare och transportsamordnare', 'Truckförare', 'Tågvärd och ombordansvarig'
       ]
     },
     { 
@@ -422,11 +150,7 @@ const SearchJobs = () => {
       icon: '',
       keywords: ['frisör', 'skönhet', 'massage', 'naglar', 'kosmetolog', 'fotvård', 'hudterapeut'],
       subcategories: [
-        'Fotterapeuter',
-        'Frisörer',
-        'Hudterapeuter',
-        'Massörer och massageterapeuter',
-        'Övriga skönhets- och kroppsterapeuter'
+        'Fotterapeut', 'Frisör', 'Hudterapeut', 'Massör och massageterapeut', 'Övrig skönhets- och kroppsterapeut'
       ]
     },
     { 
@@ -435,190 +159,52 @@ const SearchJobs = () => {
       icon: '',
       keywords: ['design', 'grafisk', 'kreativ', 'media', 'journalist', 'fotograf', 'video', 'kultur', 'konstnär', 'bibliotek'],
       subcategories: [
-        'Bibliotekarier och arkivarier',
-        'Bild- och sandningstekniker',
-        'Bildkonstnärer m.fl.',
-        'Designer inom spel och digitala medier',
-        'Fotografer',
-        'Författare m.fl.',
-        'Grafiska formgivare m.fl.',
-        'Industridesigner',
-        'Inredare, dekoratörer och scenografer m.fl.',
-        'Inspicienter och scriptör m.fl.',
-        'Journalister m.fl.',
-        'Koreografer och dansare',
-        'Ljus-, ljud- och scentekniker',
-        'Museiintendenter m.fl.',
-        'Musiker, sångare och kompositörer',
-        'Regissörer och producenter av film, teater m.m.',
-        'Skådespelare',
-        'Översättare, tolkar och lingvister m.fl.',
-        'Övriga designer och formgivare',
-        'Övriga yrken inom kultur och underhållning'
-      ]
-    },
-    { 
-      value: 'military', 
-      label: 'Militärt Arbete', 
-      icon: '',
-      keywords: ['militär', 'försvar', 'soldat', 'officer', 'specialistofficerare'],
-      subcategories: [
-        'Officerare',
-        'Soldater m.fl.',
-        'Specialistofficerare'
+        'Bibliotekarie och arkivarie', 'Bild- och sändningstekniker', 'Bildkonstnär', 'Designer inom spel och digitala medier', 'Fotograf', 'Författare', 'Grafisk formgivare', 'Industridesigner', 'Inredare, dekoratör och scenograf', 'Inspicient och scriptör', 'Journalist', 'Koreograf och dansare', 'Ljus-, ljud- och scentekniker', 'Museiintendent', 'Programledare och underhållare', 'Reklamtekniker', 'Scenograf och kostymör', 'Skådespelare', 'Översättare och tolkar', 'Övrig konstnär'
       ]
     },
     { 
       value: 'agriculture', 
       label: 'Naturbruk', 
       icon: '',
-      keywords: ['lantbruk', 'jordbruk', 'skog', 'djur', 'trädgård', 'fiske', 'skogsarbete'],
+      keywords: ['jordbruk', 'skogsbruk', 'lantbruk', 'djur', 'odling', 'natur', 'fiske', 'veterinär'],
       subcategories: [
-        'Bärplockare och plantörer m.fl.',
-        'Fiskare',
-        'Fiskodlare',
-        'Förare av jordbruks- och skogsmaskiner',
-        'Odlare av jordbruksväxter, frukt och bär',
-        'Skogsarbetare',
-        'Specialister och rådgivare inom lantbruk m.m.',
-        'Specialister och rådgivare inom skogsbruk',
-        'Trädgårdsanläggare m.fl.',
-        'Trädgårdsodlare',
-        'Uppfödare och skötare av lantbrukets husdjur',
-        'Uppfödare och skötare av sällskapsdjur',
-        'Växtodlare och djuruppfödare, blandad drift',
-        'Övriga djuruppfödare och djurskötare'
-      ]
-    },
-    { 
-      value: 'science', 
-      label: 'Naturvetenskapligt Arbete', 
-      icon: '',
-      keywords: ['forskning', 'vetenskap', 'laboratorium', 'kemi', 'biologi', 'fysik', 'matematik'],
-      subcategories: [
-        'Cell- och molekylärbiologer m.fl.',
-        'Farmakologer och biomedicinare',
-        'Fysiker och astronomer',
-        'Geologer och geofysiker m.fl.',
-        'Kemister',
-        'Matematiker och aktuarier',
-        'Meteorologer',
-        'Miljö- och hälsoskyddsinspektörer',
-        'Specialister inom miljöskydd och miljöteknik',
-        'Växt- och djurbiologer'
+        'Djuruppfödare', 'Fiskare och fiskodlare', 'Jord- och trädgårdsarbetare', 'Skogsarbetare', 'Specialistyrken inom jordbruk'
       ]
     },
     { 
       value: 'education', 
       label: 'Pedagogiskt Arbete', 
       icon: '',
-      keywords: ['lärare', 'utbildning', 'skola', 'universitet', 'förskola', 'pedagog', 'barnskötare', 'fritidsledare'],
+      keywords: ['lärare', 'pedagog', 'utbildning', 'skola', 'förskola', 'universitet', 'undervisning'],
       subcategories: [
-        'Doktorander',
-        'Elevassistenter m.fl.',
-        'Forskarassistenter m.fl.',
-        'Fritidspedagoger',
-        'Förskollärare',
-        'Grundskollärare',
-        'Gymnasielärare',
-        'Idrottsstränare och instruktörer m.fl.',
-        'Lärare i yrkesämnen',
-        'Professionella idrottutövare',
-        'Professorer',
-        'Speciallärare och specialpedagoger m.fl.',
-        'Studie- och yrkesvägledare',
-        'Trafiklarare',
-        'Universitets- och högskolelektorer',
-        'Övriga pedagoger med teoretisk specialistkompetens',
-        'Övriga universitets- och högskolelärare',
-        'Övriga utbildare och instruktörer'
+        'Barnskötare', 'Fritidsledare', 'Förskollärare', 'Grundskollärare', 'Gymnasielärare', 'Handledarutbildare', 'Legitimerad läkare inom utbildning', 'Professor', 'Speciallärare', 'Specialpedagog', 'Universitetslektor', 'Yrkeslärare'
       ]
     },
     { 
-      value: 'cleaning', 
-      label: 'Sanering och Renhållning', 
+      value: 'security', 
+      label: 'Säkerhet', 
       icon: '',
-      keywords: ['städ', 'rengöring', 'sanering', 'renhållning', 'lokalvård', 'skorstensfejare'],
+      keywords: ['säkerhet', 'ordningsvakt', 'brandman', 'räddningstjänst', 'militär', 'polis'],
       subcategories: [
-        'Bilrekonditionerare, fönsterputsare m.fl.',
-        'Renhållnings- och återvinningsarbetare',
-        'Renhållningschaufför',
-        'Saneringsarbetare m.fl.',
-        'Skorstensfjejare',
-        'Städare',
-        'Städledare och husfruar',
-        'Övrig hemservicepersonal m.fl.'
+        'Brandman', 'Fångvårdare och häktespersonal', 'Ordningsvakt', 'Polis', 'Räddningspersonal', 'Säkerhetskontrollant', 'Militär personal', 'Tull- och gränspolis'
       ]
     },
     { 
       value: 'social', 
       label: 'Socialt Arbete', 
       icon: '',
-      keywords: ['social', 'socialtjänst', 'stöd', 'hjälp', 'omsorg', 'kurator', 'behandling'],
+      keywords: ['socialarbetare', 'kurator', 'behandling', 'omsorg', 'stöd', 'rådgivning'],
       subcategories: [
-        'Barnskötare',
-        'Begravnings- och krematoriepersonal',
-        'Behandlingsassistenter och socialpedagoger m.fl.',
-        'Biståndshandläggare m.fl.',
-        'Diakoner',
-        'Friskvårdskonsulenter och hälsopedagoger m.fl.',
-        'Fritidsledare m.fl.',
-        'Kuratorer',
-        'Pastorer m.fl.',
-        'Personliga assistenter',
-        'Präster',
-        'Socialsekreterare',
-        'Vårdare, boendestödjare',
-        'Övrig servicepersonal',
-        'Övriga yrken inom socialt arbete'
+        'Behandlingsassistent', 'Familjerådgivare och terapeut', 'Fritidsledare', 'Kurator', 'Socialsekreterare', 'Socionom', 'Behandlare inom kriminalvård'
       ]
     },
     { 
-      value: 'security', 
-      label: 'Säkerhetsarbete', 
+      value: 'science', 
+      label: 'Naturvetenskap', 
       icon: '',
-      keywords: ['säkerhet', 'vakt', 'polis', 'brandman', 'ordning', 'bevakning'],
+      keywords: ['forskning', 'vetenskap', 'labb', 'kemi', 'biologi', 'fysik', 'miljö'],
       subcategories: [
-        'Arbetsmiljöingenjörer, yrkes- och miljöhygieniker',
-        'Brandingenjörer och byggnadsinspektörer m.fl.',
-        'Brandmän',
-        'Kriminalvårdare',
-        'Poliser',
-        'SOS-operatörer m.fl.',
-        'Säkerhetsinspektörer m.fl.',
-        'Tull- och kustbevakningtjänstemän',
-        'Väktare och ordningsvakter',
-        'Övrig bevaknings- och säkerhetspersonal'
-      ]
-    },
-    { 
-      value: 'technical', 
-      label: 'Tekniskt Arbete', 
-      icon: '',
-      keywords: ['ingenjör', 'tekniker', 'konstruktör', 'design', 'utveckling', 'arkitekt', 'civilingenjör'],
-      subcategories: [
-        'Arkitekter m.fl.',
-        'Civilingenjörsyrken inom elektroteknik',
-        'Civilingenjörsyrken inom gruvteknik och metallurgi',
-        'Civilingenjörsyrken inom kemi och kemiteknik',
-        'Civilingenjörsyrken inom logistik och produktionsplanering',
-        'Civilingenjörsyrken inom maskinteknik',
-        'Fastighetsförvaltare',
-        'Flygtekniker',
-        'GIS- och kartingenjörer',
-        'Ingenjörer och tekniker inom elektroteknik',
-        'Ingenjörer och tekniker inom gruvteknik och metallurgi',
-        'Ingenjörer och tekniker inom industri, logistik och produktionsplanering',
-        'Ingenjörer och tekniker inom kemi och kemiteknik',
-        'Ingenjörer och tekniker inom maskinteknik',
-        'Laboratorieingenjörer',
-        'Landskapsarkitekter',
-        'Lantmätare',
-        'Planeringsarkitekter m.fl.',
-        'Tandtekniker och ortopedingenjörer m.fl.',
-        'Tekniker, bilddiagnostik och medicinteknisk utrustning',
-        'Övriga civilingenjörsyrken',
-        'Övriga ingenjörer och tekniker'
+        'Analytiker', 'Biolog', 'Forskare', 'Kemist', 'Laboratorieassistent', 'Miljöspecialist', 'Kvalitetskontrollant'
       ]
     }
   ];
