@@ -593,23 +593,13 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium">
-                    Arbetsplatsens namn
-                    {profile?.company_name && formData.workplace_name === profile.company_name && (
-                      <span className="text-xs text-green-300 ml-2">✓ Automatiskt ifyllt</span>
-                    )}
-                  </Label>
+                  <Label className="text-white font-medium">Arbetsplatsens namn</Label>
                   <Input
                     value={formData.workplace_name}
                     onChange={(e) => handleInputChange('workplace_name', e.target.value)}
                     placeholder={profile?.company_name ? `t.ex. ${profile.company_name}` : "t.ex. IKEA Kungens Kurva"}
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
                   />
-                  {profile?.company_name && formData.workplace_name === profile.company_name && (
-                    <p className="text-xs text-green-300">
-                      🏢 Hämtat från ditt företagsprofil: {profile.company_name}
-                    </p>
-                  )}
                 </div>
 
                 <div className="space-y-2">
