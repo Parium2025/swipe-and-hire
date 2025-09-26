@@ -85,7 +85,7 @@ const MobileJobWizard = ({
     positions_count: '1',
     work_location_type: 'på-plats',
     remote_work_possible: 'nej',
-    travel_requirements: '',
+    travel_requirements: 'ingen',
     work_schedule: selectedTemplate?.work_schedule || '',
     contact_email: selectedTemplate?.contact_email || '',
     application_instructions: selectedTemplate?.application_instructions || '',
@@ -137,7 +137,7 @@ const MobileJobWizard = ({
       positions_count: '1',
       work_location_type: 'på-plats',
       remote_work_possible: 'nej',
-      travel_requirements: '',
+      travel_requirements: 'ingen',
       work_schedule: selectedTemplate?.work_schedule || '',
       contact_email: selectedTemplate?.contact_email || '',
       application_instructions: selectedTemplate?.application_instructions || '',
@@ -309,7 +309,7 @@ const MobileJobWizard = ({
       positions_count: '1',
       work_location_type: 'på-plats',
       remote_work_possible: 'nej',
-      travel_requirements: '',
+      travel_requirements: 'ingen',
       work_schedule: '',
       contact_email: '',
       application_instructions: '',
@@ -562,7 +562,7 @@ const MobileJobWizard = ({
                       <SelectValue placeholder="Välj resekrav" />
                     </SelectTrigger>
                     <SelectContent className="bg-gray-800 border-gray-600">
-                      <SelectItem value="" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
+                      <SelectItem value="ingen" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
                         Inget krav
                       </SelectItem>
                       <SelectItem value="sällsynt" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
