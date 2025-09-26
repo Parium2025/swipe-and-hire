@@ -138,33 +138,50 @@ const MobileJobWizard = ({
     }
   };
 
-  // Update form data when props change
+  // Update form data when props change - preserve existing values
   useEffect(() => {
-    const newLocation = selectedTemplate?.location || '';
-    setFormData({
-      title: jobTitle,
-      description: selectedTemplate?.description || '',
-      requirements: selectedTemplate?.requirements || '',
-      location: newLocation,
-      occupation: '',
-      salary_min: selectedTemplate?.salary_min?.toString() || '',
-      salary_max: selectedTemplate?.salary_max?.toString() || '',
-      employment_type: selectedTemplate?.employment_type || '',
-      positions_count: '1',
-      work_location_type: 'på-plats',
-      remote_work_possible: 'nej',
-      workplace_name: profile?.company_name || '', // Auto-fill with company name from profile
-      workplace_address: '',
-      workplace_postal_code: '',
-      workplace_city: '',
-      work_schedule: selectedTemplate?.work_schedule || '',
-      contact_email: selectedTemplate?.contact_email || user?.email || '',
-      application_instructions: selectedTemplate?.application_instructions || '',
-      pitch: ''
-    });
+    // Only reset form if it's completely empty or when a template is selected
+    const isFormEmpty = !formData.title && !formData.location && !formData.occupation;
+    const shouldUpdateFromTemplate = selectedTemplate && 
+      (formData.title !== selectedTemplate.title || formData.description !== selectedTemplate.description);
     
-    // Update city search term when template location changes
-    setCitySearchTerm(newLocation);
+    if (isFormEmpty || shouldUpdateFromTemplate) {
+      const newLocation = selectedTemplate?.location || '';
+      setFormData(prev => ({
+        title: jobTitle || selectedTemplate?.title || prev.title,
+        description: selectedTemplate?.description || prev.description,
+        requirements: selectedTemplate?.requirements || prev.requirements,
+        location: newLocation || prev.location,
+        occupation: prev.occupation,
+        salary_min: selectedTemplate?.salary_min?.toString() || prev.salary_min,
+        salary_max: selectedTemplate?.salary_max?.toString() || prev.salary_max,
+        employment_type: selectedTemplate?.employment_type || prev.employment_type,
+        positions_count: prev.positions_count || '1',
+        work_location_type: prev.work_location_type || 'på-plats',
+        remote_work_possible: prev.remote_work_possible || 'nej',
+        workplace_name: prev.workplace_name || profile?.company_name || '',
+        workplace_address: prev.workplace_address || '',
+        workplace_postal_code: prev.workplace_postal_code || '',
+        workplace_city: prev.workplace_city || '',
+        work_schedule: selectedTemplate?.work_schedule || prev.work_schedule,
+        contact_email: prev.contact_email || selectedTemplate?.contact_email || user?.email || '',
+        application_instructions: selectedTemplate?.application_instructions || prev.application_instructions,
+        pitch: prev.pitch || ''
+      }));
+      
+      // Update city search term when template location changes
+      if (selectedTemplate?.location) {
+        setCitySearchTerm(selectedTemplate.location);
+      }
+    }
+    
+    // Update workplace name and contact email if they're empty but we have new data
+    if (!formData.workplace_name && profile?.company_name) {
+      setFormData(prev => ({ ...prev, workplace_name: profile.company_name }));
+    }
+    if (!formData.contact_email && user?.email) {
+      setFormData(prev => ({ ...prev, contact_email: user.email }));
+    }
   }, [jobTitle, selectedTemplate, profile?.company_name, user?.email]);
 
   const steps = [
