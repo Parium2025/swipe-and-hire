@@ -261,7 +261,7 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
       'Nutritionist',
       'Operationssjuksköterskor',
       'Optiker',
-      'Personal Trainer',
+      'Personlig tränare',
       'Psykiatrisjuksköterskor',
       'Psykologer',
       'Psykoterapeuter',
