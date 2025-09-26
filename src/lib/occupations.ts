@@ -17,7 +17,6 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
       'Affärs- och företagsjurister',
       'Affärscoach',
       'Arbetsmärke',
-      'Arkivvård- och biblioteksassistenter m.fl.',
       'Arkiv- och biblioteksassistenter m.fl.',
       'Backofficespecialister m.fl.',
       'Business Analyst',
@@ -310,7 +309,6 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
       'Maskinoperatörer, pappersvaruindustri',
       'Maskinoperatörer, pappersindustri',
       'Maskinoperatörer, påfyllning, packning och märkning',
-      'Maskinoperatörer, ytbehandling, trä',
       'Maskinställare och maskinoperatörer, metallarbete',
       'Maskinsnickare och maskinoperatörer, träindustri',
       'Montörer, elektrisk och elektronisk utrustning',
@@ -531,12 +529,19 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
   { 
     value: 'security', 
     label: 'Säkerhet och Skydd', 
-    keywords: ['säkerhet', 'vakt', 'väktare', 'brandman', 'skydd', 'bevakning'],
+    keywords: ['säkerhet', 'vakt', 'väktare', 'brandman', 'skydd', 'bevakning', 'polis', 'ordning'],
     subcategories: [
+      'Arbetsmiljöingenjörer, yrkes- och miljöhygieniker',
+      'Brandingenjörer och byggnadsinspektörer m.fl.',
       'Brandmän',
+      'Kriminalvårdare',
+      'Poliser',
+      'SOS-operatörer m.fl.',
+      'Säkerhetsinspektörer m.fl.',
       'Säkerhetsvakt',
-      'Väktare',
-      'Övrig säkerhetspersonal'
+      'Tull- och kustbevakningtjänstemän',
+      'Väktare och ordningsvakter',
+      'Övrig bevaknings- och säkerhetspersonal'
     ]
   },
   { 
@@ -562,25 +567,8 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
     ]
   },
   { 
-    value: 'security', 
-    label: 'Säkerhetsarbete', 
-    keywords: ['säkerhet', 'vakt', 'polis', 'brandman', 'ordning', 'bevakning'],
-    subcategories: [
-      'Arbetsmiljöingenjörer, yrkes- och miljöhygieniker',
-      'Brandingenjörer och byggnadsinspektörer m.fl.',
-      'Brandmän',
-      'Kriminalvårdare',
-      'Poliser',
-      'SOS-operatörer m.fl.',
-      'Säkerhetsinspektörer m.fl.',
-      'Tull- och kustbevakningtjänstemän',
-      'Väktare och ordningsvakter',
-      'Övrig bevaknings- och säkerhetspersonal'
-    ]
-  },
-  { 
     value: 'technical', 
-    label: 'Tekniskt Arbete', 
+    label: 'Tekniskt Arbete',
     keywords: ['ingenjör', 'tekniker', 'konstruktör', 'design', 'utveckling', 'arkitekt', 'civilingenjör'],
     subcategories: [
       'Arkitekter m.fl.',
