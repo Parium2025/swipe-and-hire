@@ -125,7 +125,7 @@ const WorkplacePostalCodeSelector = ({
 
       {/* Resultat-kort när location hittas */}
       {foundLocation && isValid && !isLoading && (
-        <Card className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 backdrop-blur-sm border-green-500/20 p-3">
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20 p-3">
           <div className="flex items-center space-x-2">
             <div className="flex-shrink-0">
               <div className="w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center">
@@ -133,10 +133,10 @@ const WorkplacePostalCodeSelector = ({
               </div>
             </div>
             <div className="flex-1">
-              <p className="text-sm text-white">
-                <span className="font-medium">{foundLocation.city}</span>
+              <p className="text-sm text-white font-medium">
+                <span className="font-semibold">{foundLocation.city}</span>
                 {foundLocation.county && (
-                  <span className="text-white/70">, {foundLocation.county}</span>
+                  <span className="text-white/90">, {foundLocation.county}</span>
                 )}
               </p>
               <p className="text-xs text-green-300 mt-0.5">
