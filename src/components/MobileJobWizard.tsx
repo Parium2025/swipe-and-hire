@@ -6,7 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+        // ... keep existing imports
+        import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
+        import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+        import FileUpload from '@/components/FileUpload';
 import { useToast } from '@/hooks/use-toast';
 import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
@@ -55,6 +58,7 @@ interface JobFormData {
   contact_email: string;
   application_instructions: string;
   pitch: string;
+  job_image_url: string;
 }
 
 interface MobileJobWizardProps {
@@ -79,6 +83,7 @@ const MobileJobWizard = ({
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [occupationSearchTerm, setOccupationSearchTerm] = useState('');
   const [showOccupationDropdown, setShowOccupationDropdown] = useState(false);
+  const [showJobPreview, setShowJobPreview] = useState(false);
   const [formData, setFormData] = useState<JobFormData>({
     title: jobTitle,
     description: selectedTemplate?.description || '',
@@ -99,7 +104,8 @@ const MobileJobWizard = ({
     work_schedule: selectedTemplate?.work_schedule || '',
     contact_email: selectedTemplate?.contact_email || '',
     application_instructions: selectedTemplate?.application_instructions || '',
-    pitch: ''
+    pitch: '',
+    job_image_url: ''
   });
 
   const { user } = useAuth();
@@ -174,7 +180,8 @@ const MobileJobWizard = ({
         work_schedule: selectedTemplate?.work_schedule || prev.work_schedule,
         contact_email: prev.contact_email || selectedTemplate?.contact_email || user?.email || '',
         application_instructions: selectedTemplate?.application_instructions || prev.application_instructions,
-        pitch: prev.pitch || ''
+        pitch: prev.pitch || '',
+        job_image_url: prev.job_image_url || ''
       }));
       
       // Update city search term when template location changes
@@ -366,14 +373,15 @@ const MobileJobWizard = ({
       positions_count: '1',
       work_location_type: 'på-plats',
       remote_work_possible: 'nej',
-      workplace_name: profile?.company_name || '', // Auto-fill with company name on reset
+      workplace_name: profile?.company_name || '',
       workplace_address: '',
       workplace_postal_code: '',
       workplace_city: '',
       work_schedule: '',
       contact_email: user?.email || '',
       application_instructions: '',
-      pitch: ''
+      pitch: '',
+      job_image_url: ''
     });
     onOpenChange(false);
     onJobCreated();
@@ -852,6 +860,86 @@ const MobileJobWizard = ({
             )}
           </div>
         </div>
+
+        {/* Job Preview Dialog */}
+        <Dialog open={showJobPreview} onOpenChange={setShowJobPreview}>
+          <DialogContent className="max-w-md bg-white text-gray-900">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold">
+                {formData.title || 'Jobbtitel'}
+              </DialogTitle>
+              <p className="text-gray-600">{profile?.company_name || 'Företagsnamn'}</p>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              {/* Job image if available */}
+              {formData.job_image_url && (
+                <div className="w-full h-48 rounded-lg overflow-hidden">
+                  <img 
+                    src={formData.job_image_url} 
+                    alt="Job image" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              
+              {/* Location and employment type */}
+              <div className="flex flex-wrap gap-2">
+                <div className="flex items-center text-gray-600 text-sm">
+                  <MapPin className="w-4 h-4 mr-1" />
+                  {formData.workplace_city || formData.location || 'Plats'}
+                </div>
+                {formData.employment_type && (
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label}
+                  </span>
+                )}
+              </div>
+
+              {/* Occupation */}
+              {formData.occupation && (
+                <div className="flex items-center text-gray-600 text-sm">
+                  <Briefcase className="w-4 h-4 mr-1" />
+                  {formData.occupation}
+                </div>
+              )}
+
+              {/* Salary */}
+              {(formData.salary_min || formData.salary_max) && (
+                <div className="flex items-center text-green-600 text-sm font-medium">
+                  💰 {formData.salary_min && formData.salary_max 
+                    ? `${parseInt(formData.salary_min).toLocaleString()} - ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
+                    : formData.salary_min 
+                      ? `Från ${parseInt(formData.salary_min).toLocaleString()} kr/mån`
+                      : `Upp till ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
+                  }
+                </div>
+              )}
+
+              {/* Full description */}
+              <div className="space-y-2">
+                <h4 className="font-semibold">Beskrivning</h4>
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                  {formData.description || 'Ingen beskrivning ännu...'}
+                </p>
+              </div>
+
+              {/* Contact email if available */}
+              {formData.contact_email && (
+                <div className="pt-4 border-t">
+                  <button 
+                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium py-3 px-4 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200"
+                    onClick={() => {
+                      window.open(`mailto:${formData.contact_email}?subject=Ansökan: ${formData.title}`, '_blank');
+                    }}
+                  >
+                    Ansök nu
+                  </button>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </DialogContent>
     </Dialog>
   );
