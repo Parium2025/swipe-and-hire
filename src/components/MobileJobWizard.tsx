@@ -645,103 +645,148 @@ const MobileJobWizard = ({
 
             {/* Step 3: Förhandsvisning */}
             {currentStep === 2 && (
-              <div className="space-y-4">
-                {/* Header text */}
-                <div className="text-center mb-6">
-                  <div className="text-white font-medium mb-2">Så här kommer din jobbannons att se ut:</div>
-                  <div className="text-xs text-white/60">Detta är exakt vad jobbsökare kommer att se</div>
-                </div>
+              <div className="space-y-6">
+                {/* Mobile Mockup Preview */}
+                <div 
+                  className="relative h-96 rounded-2xl overflow-hidden cursor-pointer group"
+                  style={{
+                    backgroundImage: `url(${modernMobileBg})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}
+                  onClick={() => setShowJobPreview(true)}
+                >
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                  
+                  {/* Phone mockup container */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="relative w-64 h-80 bg-white rounded-3xl shadow-2xl overflow-hidden border-8 border-gray-800 group-hover:scale-105 transition-transform duration-300">
+                      {/* Job image or gradient background */}
+                      <div 
+                        className="h-48 relative overflow-hidden"
+                        style={{
+                          backgroundImage: formData.job_image_url 
+                            ? `url(${formData.job_image_url})`
+                            : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                        }}
+                      >
+                        {/* Company logo overlay */}
+                        <div className="absolute top-4 left-4 right-4 flex items-start space-x-3">
+                          {profile?.company_logo_url ? (
+                            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
+                              <img 
+                                src={profile.company_logo_url} 
+                                alt="Company logo" 
+                                className="w-6 h-6 object-contain"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center flex-shrink-0">
+                              <Building className="w-5 h-5 text-white" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-bold text-white text-sm leading-tight drop-shadow-lg">
+                              {formData.title || 'Jobbtitel'}
+                            </h3>
+                            <p className="text-white/90 text-xs drop-shadow-lg">
+                              {profile?.company_name || 'Företagsnamn'}
+                            </p>
+                          </div>
+                        </div>
 
-                {/* Job Preview Card - Team Tailor Style */}
-                <div className="bg-white rounded-lg shadow-xl overflow-hidden mx-auto max-w-sm">
-                  {/* Header with company info */}
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-6 text-white">
-                    <div className="flex items-start space-x-3">
-                      {profile?.company_logo_url ? (
-                        <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
-                          <img 
-                            src={profile.company_logo_url} 
-                            alt="Company logo" 
-                            className="w-8 h-8 object-contain"
-                          />
+                        {/* Gradient overlay for text readability */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                      </div>
+
+                      {/* Job details */}
+                      <div className="p-3 h-32 flex flex-col justify-between">
+                        <div className="space-y-2">
+                          {/* Location and employment type */}
+                          <div className="flex items-center gap-2 text-xs">
+                            <MapPin className="w-3 h-3 text-gray-500" />
+                            <span className="text-gray-600 truncate">
+                              {formData.workplace_city || formData.location || 'Plats'}
+                            </span>
+                            {formData.employment_type && (
+                              <span className="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800 ml-auto">
+                                {EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Salary if available */}
+                          {(formData.salary_min || formData.salary_max) && (
+                            <div className="text-green-600 text-xs font-medium flex items-center">
+                              💰 {formData.salary_min && formData.salary_max 
+                                ? `${parseInt(formData.salary_min).toLocaleString()} - ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
+                                : formData.salary_min 
+                                  ? `Från ${parseInt(formData.salary_min).toLocaleString()} kr/mån`
+                                  : `Upp till ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
+                              }
+                            </div>
+                          )}
+
+                          {/* Description preview */}
+                          <p className="text-gray-700 text-xs leading-relaxed line-clamp-2">
+                            {formData.description || 'Jobbeskrivning visas här...'}
+                          </p>
                         </div>
-                      ) : (
-                        <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <Building className="w-6 h-6 text-white" />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-lg leading-tight">{formData.title || 'Jobbtitel'}</h3>
-                        <p className="text-blue-100 text-sm mt-1">{profile?.company_name || 'Företagsnamn'}</p>
+
+                        {/* Apply button */}
+                        <button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium py-2 px-3 rounded-lg text-xs hover:shadow-lg transition-all">
+                          Ansök nu
+                        </button>
                       </div>
                     </div>
                   </div>
 
-                  {/* Job details */}
-                  <div className="p-4 space-y-4">
-                    {/* Location and employment type */}
-                    <div className="flex flex-wrap gap-2">
-                      <div className="flex items-center text-gray-600 text-sm">
-                        <MapPin className="w-4 h-4 mr-1" />
-                        {formData.workplace_city || formData.location || 'Plats'}
-                      </div>
-                      {formData.employment_type && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                          {EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label}
-                        </span>
-                      )}
+                  {/* Tap to preview overlay */}
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                    <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium text-gray-800 shadow-lg group-hover:bg-white transition-colors">
+                      Tryck för att se hela beskrivningen
                     </div>
+                  </div>
+                </div>
 
-                    {/* Occupation */}
-                    {formData.occupation && (
-                      <div className="flex items-center text-gray-600 text-sm">
-                        <Briefcase className="w-4 h-4 mr-1" />
-                        {formData.occupation}
-                      </div>
-                    )}
-
-                    {/* Salary if available */}
-                    {(formData.salary_min || formData.salary_max) && (
-                      <div className="flex items-center text-green-600 text-sm font-medium">
-                        💰 {formData.salary_min && formData.salary_max 
-                          ? `${parseInt(formData.salary_min).toLocaleString()} - ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
-                          : formData.salary_min 
-                            ? `Från ${parseInt(formData.salary_min).toLocaleString()} kr/mån`
-                            : `Upp till ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
-                        }
-                      </div>
-                    )}
-
-                    {/* Description preview */}
-                    {formData.description && (
-                      <div className="text-gray-700 text-sm leading-relaxed">
-                        <p className="line-clamp-4">
-                          {formData.description.substring(0, 150)}
-                          {formData.description.length > 150 && '...'}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Apply button */}
-                    <div className="pt-4 border-t border-gray-100">
-                      <button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium py-3 px-4 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg">
-                        Ansök nu
+                {/* Image upload section */}
+                <div className="bg-white/5 rounded-lg p-4 border border-white/20">
+                  <div className="text-white font-medium mb-3">Jobbild (valfritt)</div>
+                  <p className="text-white/70 text-sm mb-4">
+                    Ladda upp en bild som representerar jobbet eller arbetsplatsen
+                  </p>
+                  
+                  <FileUpload
+                    onFileUploaded={(url, fileName) => {
+                      handleInputChange('job_image_url', url);
+                    }}
+                    acceptedFileTypes={['image/*']}
+                    maxFileSize={5 * 1024 * 1024}
+                  />
+                  
+                  {formData.job_image_url && (
+                    <div className="mt-3 relative">
+                      <img 
+                        src={formData.job_image_url} 
+                        alt="Job preview" 
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
+                      <button
+                        onClick={() => handleInputChange('job_image_url', '')}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
                       </button>
                     </div>
-
-                    {/* Quick info footer */}
-                    <div className="flex justify-between items-center text-xs text-gray-500 pt-2">
-                      <span>📅 Publicerad idag</span>
-                      {formData.positions_count && formData.positions_count !== '1' && (
-                        <span>👥 {formData.positions_count} platser</span>
-                      )}
-                    </div>
-                  </div>
+                  )}
                 </div>
 
-                {/* Optional fields quick edit */}
+                {/* Optional salary fields */}
                 <div className="bg-white/5 rounded-lg p-4 border border-white/20">
-                  <div className="text-sm text-white/70 mb-3">Valfria tillägg:</div>
+                  <div className="text-sm text-white/70 mb-3">Löneintervall och arbetstider (valfritt):</div>
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-3">
                       <div>
