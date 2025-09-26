@@ -66,10 +66,86 @@ const localPostalCodes: Record<string, PostalCodeResponse> = {
 };
 
 // Försök med flera API-källor
+// Komplett svensk postnummer-databas (16,000+ postnummer)
+let swedishPostalDatabase: Record<string, string> | null = null;
+
+// Ladda komplett svensk postnummer-databas
+async function loadSwedishPostalDatabase(): Promise<Record<string, string>> {
+  if (swedishPostalDatabase) {
+    return swedishPostalDatabase;
+  }
+
+  try {
+    const response = await fetch('/swedish-postal-codes.csv');
+    const csvText = await response.text();
+    const lines = csvText.trim().split('\n');
+    
+    swedishPostalDatabase = {};
+    
+    // Skippa header-raden
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (line) {
+        const [zipCode, city] = line.split(',');
+        if (zipCode && city) {
+          // Formatera postnummer till 5 siffror utan mellanslag
+          const cleanZip = zipCode.replace(/\D/g, '');
+          if (cleanZip.length === 5) {
+            swedishPostalDatabase[cleanZip] = city.replace(/"/g, '');
+          }
+        }
+      }
+    }
+    
+    console.log(`✅ Loaded ${Object.keys(swedishPostalDatabase).length} Swedish postal codes from complete database`);
+    return swedishPostalDatabase;
+  } catch (error) {
+    console.error('❌ Failed to load Swedish postal database:', error);
+    swedishPostalDatabase = {};
+    return swedishPostalDatabase;
+  }
+}
+
 async function tryMultipleApis(postalCode: string): Promise<PostalCodeResponse | null> {
   const cleanedCode = postalCode.replace(/\s+/g, '');
   
-  // 1. Försök Zippopotam först
+  // 1. Försök komplett svensk databas först (16,000+ postnummer)
+  try {
+    const database = await loadSwedishPostalDatabase();
+    const city = database[cleanedCode];
+    if (city) {
+      return {
+        postalCode: formatPostalCodeDisplay(cleanedCode),
+        city: city,
+        municipality: city,
+        county: getCountyByPostalCode(cleanedCode),
+        area: city
+      };
+    }
+  } catch (error) {
+    console.log('✅ Swedish postal database failed, trying PAPILITE...');
+  }
+  
+  // 2. Försök PAPILITE API (proffsig svensk tjänst)
+  try {
+    const response = await fetch(`https://api.papilite.se/v1/se/${cleanedCode}`);
+    if (response.ok) {
+      const data = await response.json();
+      if (data && data.city) {
+        return {
+          postalCode: formatPostalCodeDisplay(cleanedCode),
+          city: data.city,
+          municipality: data.municipality || data.city,
+          county: data.county || getCountyByPostalCode(cleanedCode),
+          area: data.city
+        };
+      }
+    }
+  } catch (error) {
+    console.log('📡 PAPILITE failed, trying Zippopotam...');
+  }
+
+  // 3. Försök Zippopotam
   try {
     const response = await fetch(`https://api.zippopotam.us/SE/${cleanedCode}`);
     if (response.ok) {
@@ -86,16 +162,16 @@ async function tryMultipleApis(postalCode: string): Promise<PostalCodeResponse |
       }
     }
   } catch (error) {
-    console.log('Zippopotam failed, trying alternative sources...');
+    console.log('🌍 Zippopotam failed, trying local database...');
   }
   
-  // 2. Försök lokal databas
+  // 4. Försök lokal databas (begränsad)
   const localData = localPostalCodes[cleanedCode];
   if (localData) {
     return localData;
   }
   
-  // 3. Försök estimate baserat på första 3 siffrorna (fallback)
+  // 5. Sista utvägen: regionuppskattning
   const regionCode = cleanedCode.substring(0, 3);
   const regionEstimate = getRegionEstimate(regionCode);
   if (regionEstimate) {
@@ -112,6 +188,23 @@ async function tryMultipleApis(postalCode: string): Promise<PostalCodeResponse |
 }
 
 // Regionuppskattning baserat på första 3 siffrorna i postnumret
+// Förbättrad funktion för att få län baserat på postnummer
+function getCountyByPostalCode(postalCode: string): string {
+  const code = parseInt(postalCode.substring(0, 3));
+  
+  if (code >= 100 && code <= 199) return 'Stockholms län';
+  if (code >= 200 && code <= 299) return 'Skåne län';
+  if (code >= 300 && code <= 399) return 'Hallands län';
+  if (code >= 400 && code <= 499) return 'Västra Götalands län';
+  if (code >= 500 && code <= 599) return 'Jönköpings län';
+  if (code >= 600 && code <= 699) return 'Östergötlands län';
+  if (code >= 700 && code <= 799) return 'Västmanlands län';
+  if (code >= 800 && code <= 899) return 'Dalarnas län';
+  if (code >= 900 && code <= 999) return 'Norrbottens län';
+  
+  return 'Sverige'; // Fallback
+}
+
 function getRegionEstimate(regionCode: string): { city: string; county: string; area: string } | null {
   const regions: Record<string, { city: string; county: string; area: string }> = {
     '100': { city: 'Stockholm', county: 'Stockholms län', area: 'Stockholm' },

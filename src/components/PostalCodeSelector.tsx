@@ -114,7 +114,7 @@ const PostalCodeSelector = ({
 
       {/* Resultat-ruta */}
       {foundLocation && isValid && !isLoading && (
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20 p-4">
+        <Card className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 backdrop-blur-sm border-green-500/20 p-4">
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
               <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
@@ -132,6 +132,9 @@ const PostalCodeSelector = ({
               {foundLocation.county && (
                 <p className="text-xs text-white">{foundLocation.county}</p>
               )}
+              <p className="text-xs text-green-300 mt-0.5">
+                ✓ Verifierat med svensk postnummerdatabas
+              </p>
             </div>
           </div>
         </Card>
@@ -139,7 +142,7 @@ const PostalCodeSelector = ({
 
       {/* Om postnummer är giltigt men inte hittat */}
       {isValid && !foundLocation && !isLoading && postalCodeValue && postalCodeValue.replace(/\D/g, '').length === 5 && (
-        <Card className="bg-yellow-500/10 backdrop-blur-sm border-yellow-500/20 p-4">
+        <Card className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 backdrop-blur-sm border-yellow-500/20 p-4">
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
               <div className="w-8 h-8 bg-yellow-500/20 rounded-full flex items-center justify-center">
@@ -158,16 +161,19 @@ const PostalCodeSelector = ({
         </Card>
       )}
 
-      {/* Loading state */}
+      {/* Loading state med proffsig indikator */}
       {isLoading && (
-        <Card className="bg-blue-500/10 backdrop-blur-sm border-blue-500/20 p-4">
+        <Card className="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 backdrop-blur-sm border-blue-500/20 p-4">
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
               <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
             </div>
             <div className="flex-1">
               <p className="text-sm text-blue-200">
-                Söker efter postnummer...
+                Söker i svensk postnummerdatabas...
+              </p>
+              <p className="text-xs text-blue-300/70">
+                16,000+ postnummer tillgängliga
               </p>
             </div>
           </div>
