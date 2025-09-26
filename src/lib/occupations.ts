@@ -233,7 +233,7 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
   { 
     value: 'healthcare', 
     label: 'Hälso- och Sjukvård', 
-    keywords: ['sjuksköterska', 'läkare', 'vård', 'omsorg', 'tandläkare', 'fysioterapeut', 'undersköterska', 'vårdbiträde', 'nutrition', 'kostrådgivare', 'personal trainer'],
+    keywords: ['sjuksköterska', 'läkare', 'vård', 'omsorg', 'tandläkare', 'fysioterapeut', 'undersköterska', 'vårdbiträde', 'nutrition', 'kostrådgivare', 'personal trainer', 'life coach'],
     subcategories: [
       'AT-läkare',
       'Ambulanssjuksköterskor m.fl.',
@@ -257,6 +257,7 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
       'Intensivvårdssjuksköterskor',
       'Kiropraktorer och naprapater m.fl.',
       'Kostrådgivare',
+      'Life Coach',
       'Nutritionist',
       'Operationssjuksköterskor',
       'Optiker',
@@ -361,7 +362,7 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
   { 
     value: 'logistics', 
     label: 'Transport', 
-    keywords: ['lager', 'logistik', 'transport', 'distribution', 'chaufför', 'lastbil', 'gaffeltruck', 'leverans', 'kurir', 'bud', 'uber'],
+    keywords: ['lager', 'logistik', 'transport', 'distribution', 'chaufför', 'lastbil', 'gaffeltruck', 'leverans', 'kurir', 'bud', 'uber', 'drönare', 'drone'],
     subcategories: [
       'Arbetsledare inom lager och terminal',
       'Bangårdspersonal', 
@@ -369,6 +370,7 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
       'Budbilsförare',
       'Buss- och spårvagnsförare',
       'Distributionschaufför',
+      'Drone Pilot',
       'Fartygsbefäl m.fl.',
       'Flygledare',
       'Hamnarbetare',
@@ -406,13 +408,14 @@ export const OCCUPATION_CATEGORIES: OccupationCategory[] = [
   { 
     value: 'creative', 
     label: 'Kultur, Media, Design', 
-    keywords: ['design', 'grafisk', 'kreativ', 'media', 'journalist', 'fotograf', 'video', 'kultur', 'konstnär', 'bibliotek', 'content', 'influencer', 'podcast', 'streaming'],
+    keywords: ['design', 'grafisk', 'kreativ', 'media', 'journalist', 'fotograf', 'video', 'kultur', 'konstnär', 'bibliotek', 'content', 'influencer', 'podcast', 'streaming', 'esport', 'gaming'],
     subcategories: [
       'Bibliotekarier och arkivarier',
       'Bild- och sandningstekniker',
       'Bildkonstnärer m.fl.',
       'Content Creator',
       'Designer inom spel och digitala medier',
+      'E-sports spelare',
       'Fotografer',
       'Författare m.fl.',
       'Grafiska formgivare m.fl.',
