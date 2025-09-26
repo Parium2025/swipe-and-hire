@@ -121,6 +121,14 @@ const MobileJobWizard = ({
     
     setProfile(data);
     
+    // Auto-fill workplace name with company name
+    if (data?.company_name && !formData.workplace_name) {
+      setFormData(prev => ({
+        ...prev,
+        workplace_name: data.company_name
+      }));
+    }
+    
     // Auto-fill contact email if not already set and use user email as fallback
     if (!formData.contact_email && user.email) {
       setFormData(prev => ({
@@ -145,19 +153,19 @@ const MobileJobWizard = ({
       positions_count: '1',
       work_location_type: 'på-plats',
       remote_work_possible: 'nej',
-      workplace_name: '',
+      workplace_name: profile?.company_name || '', // Auto-fill with company name from profile
       workplace_address: '',
       workplace_postal_code: '',
       workplace_city: '',
       work_schedule: selectedTemplate?.work_schedule || '',
-      contact_email: selectedTemplate?.contact_email || '',
+      contact_email: selectedTemplate?.contact_email || user?.email || '',
       application_instructions: selectedTemplate?.application_instructions || '',
       pitch: ''
     });
     
     // Update city search term when template location changes
     setCitySearchTerm(newLocation);
-  }, [jobTitle, selectedTemplate]);
+  }, [jobTitle, selectedTemplate, profile?.company_name, user?.email]);
 
   const steps = [
     {
@@ -332,12 +340,12 @@ const MobileJobWizard = ({
       positions_count: '1',
       work_location_type: 'på-plats',
       remote_work_possible: 'nej',
-      workplace_name: '',
+      workplace_name: profile?.company_name || '', // Auto-fill with company name on reset
       workplace_address: '',
       workplace_postal_code: '',
       workplace_city: '',
       work_schedule: '',
-      contact_email: '',
+      contact_email: user?.email || '',
       application_instructions: '',
       pitch: ''
     });
@@ -585,13 +593,23 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium">Arbetsplatsens namn</Label>
+                  <Label className="text-white font-medium">
+                    Arbetsplatsens namn
+                    {profile?.company_name && formData.workplace_name === profile.company_name && (
+                      <span className="text-xs text-green-300 ml-2">✓ Automatiskt ifyllt</span>
+                    )}
+                  </Label>
                   <Input
                     value={formData.workplace_name}
                     onChange={(e) => handleInputChange('workplace_name', e.target.value)}
-                    placeholder="t.ex. IKEA Kungens Kurva"
+                    placeholder={profile?.company_name ? `t.ex. ${profile.company_name}` : "t.ex. IKEA Kungens Kurva"}
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
                   />
+                  {profile?.company_name && formData.workplace_name === profile.company_name && (
+                    <p className="text-xs text-green-300">
+                      🏢 Hämtat från ditt företagsprofil: {profile.company_name}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
