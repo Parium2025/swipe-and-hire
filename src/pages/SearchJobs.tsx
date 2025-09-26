@@ -15,6 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { createSmartSearchConditions, expandSearchTerms } from '@/lib/smartSearch';
 import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { swedishCities } from '@/lib/swedishCities';
+import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 interface Job {
   id: string;
   title: string;
@@ -43,8 +44,11 @@ const SearchJobs = () => {
   const isMobile = useIsMobile();
   
   const dropdownAlignOffset = 0;
-  // Job categories with subcategories - based on AF structure
-  const jobCategories = [
+  // Job categories with subcategories - using centralized configuration from occupations.ts
+  const jobCategories = OCCUPATION_CATEGORIES.map(category => ({
+    ...category,
+    icon: '' // Add icon property that SearchJobs expects
+  }));
     { 
       value: 'administration', 
       label: 'Administration, Ekonomi, Juridik',
