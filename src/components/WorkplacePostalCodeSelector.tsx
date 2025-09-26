@@ -139,9 +139,6 @@ const WorkplacePostalCodeSelector = ({
                   <span className="text-white/90">, {foundLocation.county}</span>
                 )}
               </p>
-              <p className="text-xs text-green-300 mt-0.5">
-                ✓ Verifierat postnummer
-              </p>
             </div>
           </div>
         </Card>
