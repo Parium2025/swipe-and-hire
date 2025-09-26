@@ -12,7 +12,7 @@ import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Briefcase } from 'lucide-react';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { Progress } from '@/components/ui/progress';
@@ -199,8 +199,8 @@ const MobileJobWizard = ({
       fields: ['work_location_type', 'remote_work_possible', 'workplace_name', 'workplace_address', 'workplace_postal_code', 'workplace_city']
     },
     {
-      title: "Detaljer",
-      fields: ['salary_min', 'salary_max', 'work_schedule']
+      title: "Förhandsvisning",
+      fields: []
     },
     {
       title: "Kontakt",
@@ -598,52 +598,138 @@ const MobileJobWizard = ({
               </div>
             )}
 
-            {/* Step 3: Detaljer */}
+            {/* Step 3: Förhandsvisning */}
             {currentStep === 2 && (
               <div className="space-y-4">
-                <div className="space-y-4">
-                  <Label className="text-white font-medium">Lönespann (valfritt)</Label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Input
-                        type="number"
-                        value={formData.salary_min}
-                        onChange={(e) => handleInputChange('salary_min', e.target.value)}
-                        placeholder="Från kr/mån"
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
-                      />
+                {/* Header text */}
+                <div className="text-center mb-6">
+                  <div className="text-white font-medium mb-2">Så här kommer din jobbannons att se ut:</div>
+                  <div className="text-xs text-white/60">Detta är exakt vad jobbsökare kommer att se</div>
+                </div>
+
+                {/* Job Preview Card - Team Tailor Style */}
+                <div className="bg-white rounded-lg shadow-xl overflow-hidden mx-auto max-w-sm">
+                  {/* Header with company info */}
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-6 text-white">
+                    <div className="flex items-start space-x-3">
+                      {profile?.company_logo_url ? (
+                        <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+                          <img 
+                            src={profile.company_logo_url} 
+                            alt="Company logo" 
+                            className="w-8 h-8 object-contain"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Building className="w-6 h-6 text-white" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-lg leading-tight">{formData.title || 'Jobbtitel'}</h3>
+                        <p className="text-blue-100 text-sm mt-1">{profile?.company_name || 'Företagsnamn'}</p>
+                      </div>
                     </div>
-                    <div>
-                      <Input
-                        type="number"
-                        value={formData.salary_max}
-                        onChange={(e) => handleInputChange('salary_max', e.target.value)}
-                        placeholder="Till kr/mån"
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
-                      />
+                  </div>
+
+                  {/* Job details */}
+                  <div className="p-4 space-y-4">
+                    {/* Location and employment type */}
+                    <div className="flex flex-wrap gap-2">
+                      <div className="flex items-center text-gray-600 text-sm">
+                        <MapPin className="w-4 h-4 mr-1" />
+                        {formData.workplace_city || formData.location || 'Plats'}
+                      </div>
+                      {formData.employment_type && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Occupation */}
+                    {formData.occupation && (
+                      <div className="flex items-center text-gray-600 text-sm">
+                        <Briefcase className="w-4 h-4 mr-1" />
+                        {formData.occupation}
+                      </div>
+                    )}
+
+                    {/* Salary if available */}
+                    {(formData.salary_min || formData.salary_max) && (
+                      <div className="flex items-center text-green-600 text-sm font-medium">
+                        💰 {formData.salary_min && formData.salary_max 
+                          ? `${parseInt(formData.salary_min).toLocaleString()} - ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
+                          : formData.salary_min 
+                            ? `Från ${parseInt(formData.salary_min).toLocaleString()} kr/mån`
+                            : `Upp till ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
+                        }
+                      </div>
+                    )}
+
+                    {/* Description preview */}
+                    {formData.description && (
+                      <div className="text-gray-700 text-sm leading-relaxed">
+                        <p className="line-clamp-4">
+                          {formData.description.substring(0, 150)}
+                          {formData.description.length > 150 && '...'}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Apply button */}
+                    <div className="pt-4 border-t border-gray-100">
+                      <button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium py-3 px-4 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg">
+                        Ansök nu
+                      </button>
+                    </div>
+
+                    {/* Quick info footer */}
+                    <div className="flex justify-between items-center text-xs text-gray-500 pt-2">
+                      <span>📅 Publicerad idag</span>
+                      {formData.positions_count && formData.positions_count !== '1' && (
+                        <span>👥 {formData.positions_count} platser</span>
+                      )}
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-white font-medium">Arbetstider (valfritt)</Label>
-                  <Input
-                    value={formData.work_schedule}
-                    onChange={(e) => handleInputChange('work_schedule', e.target.value)}
-                    placeholder="t.ex. 08:00-17:00, Skiftarbete"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-white font-medium">Krav och kvalifikationer (valfritt)</Label>
-                  <Textarea
-                    value={formData.requirements}
-                    onChange={(e) => handleInputChange('requirements', e.target.value)}
-                    placeholder="Beskriv vilka krav som ställs..."
-                    rows={4}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 text-base resize-none"
-                  />
+                {/* Optional fields quick edit */}
+                <div className="bg-white/5 rounded-lg p-4 border border-white/20">
+                  <div className="text-sm text-white/70 mb-3">Valfria tillägg:</div>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-white text-xs">Från kr/mån</Label>
+                        <Input
+                          type="number"
+                          value={formData.salary_min}
+                          onChange={(e) => handleInputChange('salary_min', e.target.value)}
+                          placeholder="25000"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-10 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-white text-xs">Till kr/mån</Label>
+                        <Input
+                          type="number"
+                          value={formData.salary_max}
+                          onChange={(e) => handleInputChange('salary_max', e.target.value)}
+                          placeholder="35000"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-10 text-sm"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-white text-xs">Arbetstider</Label>
+                      <Input
+                        value={formData.work_schedule}
+                        onChange={(e) => handleInputChange('work_schedule', e.target.value)}
+                        placeholder="t.ex. 08:00-17:00, Skiftarbete"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-10 text-sm"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -663,6 +749,17 @@ const MobileJobWizard = ({
                 </div>
 
                 <div className="space-y-2">
+                  <Label className="text-white font-medium">Krav och kvalifikationer (valfritt)</Label>
+                  <Textarea
+                    value={formData.requirements}
+                    onChange={(e) => handleInputChange('requirements', e.target.value)}
+                    placeholder="Beskriv vilka krav som ställs..."
+                    rows={4}
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 text-base resize-none"
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <Label className="text-white font-medium">Ansökningsinstruktioner (valfritt)</Label>
                   <Textarea
                     value={formData.application_instructions}
@@ -671,25 +768,6 @@ const MobileJobWizard = ({
                     rows={4}
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/60 text-base resize-none"
                   />
-                </div>
-
-                {/* Summary Preview */}
-                <div className="bg-white/5 rounded-lg p-4 border border-white/20">
-                  <div className="text-sm text-white/70 mb-3">Förhandsvisning:</div>
-                  <div className="space-y-2">
-                    <div className="font-medium text-white">{formData.title}</div>
-                    <div className="text-sm text-white/80">{formData.location} • {EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label}</div>
-                    {(formData.salary_min || formData.salary_max) && (
-                      <div className="text-sm text-white/80">
-                        {formData.salary_min && formData.salary_max 
-                          ? `${parseInt(formData.salary_min).toLocaleString()} - ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
-                          : formData.salary_min 
-                            ? `Från ${parseInt(formData.salary_min).toLocaleString()} kr/mån`
-                            : `Upp till ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
-                        }
-                      </div>
-                    )}
-                  </div>
                 </div>
               </div>
             )}
