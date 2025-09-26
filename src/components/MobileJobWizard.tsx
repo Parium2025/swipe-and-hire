@@ -14,6 +14,7 @@ import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
 import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin } from 'lucide-react';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
+import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { Progress } from '@/components/ui/progress';
 
 interface JobTemplate {
@@ -77,7 +78,6 @@ const MobileJobWizard = ({
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [occupationSearchTerm, setOccupationSearchTerm] = useState('');
   const [showOccupationDropdown, setShowOccupationDropdown] = useState(false);
-  const [postalCodeLoading, setPostalCodeLoading] = useState(false);
   const [formData, setFormData] = useState<JobFormData>({
     title: jobTitle,
     description: selectedTemplate?.description || '',
@@ -213,25 +213,12 @@ const MobileJobWizard = ({
     setShowOccupationDropdown(false);
   };
 
-  const handlePostalCodeChange = async (value: string) => {
-    const formatted = formatPostalCodeInput(value);
-    handleInputChange('workplace_postal_code', formatted);
-    
-    if (formatted.replace(/\s+/g, '').length === 5 && isValidSwedishPostalCode(formatted.replace(/\s+/g, ''))) {
-      setPostalCodeLoading(true);
-      try {
-        const location = await getCachedPostalCodeInfo(formatted);
-        if (location) {
-          handleInputChange('workplace_city', location.city);
-        }
-      } catch (error) {
-        console.error('Error fetching postal code:', error);
-      } finally {
-        setPostalCodeLoading(false);
-      }
-    } else if (formatted.length === 0) {
-      handleInputChange('workplace_city', '');
-    }
+  const handleWorkplacePostalCodeChange = (postalCode: string) => {
+    handleInputChange('workplace_postal_code', postalCode);
+  };
+
+  const handleWorkplaceLocationChange = (location: string) => {
+    handleInputChange('workplace_city', location);
   };
 
   const filteredCities = citySearchTerm.length > 0 ? filterCities(citySearchTerm) : [];
@@ -617,35 +604,12 @@ const MobileJobWizard = ({
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label className="text-white font-medium">Postnummer</Label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 z-10" />
-                      <Input
-                        value={formData.workplace_postal_code}
-                        onChange={(e) => handlePostalCodeChange(e.target.value)}
-                        placeholder="XXX XX"
-                        maxLength={6}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pl-10"
-                      />
-                      {postalCodeLoading && (
-                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                          <Loader2 className="h-4 w-4 animate-spin text-white/60" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-white font-medium">Ort/kommun</Label>
-                    <Input
-                      value={formData.workplace_city}
-                      onChange={(e) => handleInputChange('workplace_city', e.target.value)}
-                      placeholder="Fylls i automatiskt"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
-                    />
-                  </div>
-                </div>
+                <WorkplacePostalCodeSelector
+                  postalCodeValue={formData.workplace_postal_code}
+                  cityValue={formData.workplace_city}
+                  onPostalCodeChange={handleWorkplacePostalCodeChange}
+                  onLocationChange={handleWorkplaceLocationChange}
+                />
               </div>
             )}
 
