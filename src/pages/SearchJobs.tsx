@@ -15,7 +15,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { createSmartSearchConditions, expandSearchTerms } from '@/lib/smartSearch';
 import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { swedishCities } from '@/lib/swedishCities';
-import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 interface Job {
   id: string;
   title: string;
@@ -44,14 +43,20 @@ const SearchJobs = () => {
   const isMobile = useIsMobile();
   
   const dropdownAlignOffset = 0;
-  // Job categories with subcategories - using centralized configuration from occupations.ts
-  const jobCategories = OCCUPATION_CATEGORIES.map(category => ({
-    ...category,
-    icon: '' // Add icon property that SearchJobs expects
-  }));
+  // Job categories with subcategories - synced with the updated occupations.ts
+  const jobCategories = [
     { 
       value: 'administration', 
       label: 'Administration, Ekonomi, Juridik',
+      icon: '',
+      keywords: ['administration', 'ekonomi', 'redovisning', 'controller', 'assistent', 'sekreterare', 'koordinator', 'projektledare', 'juridik', 'advokat', 'receptionist', 'administratör'],
+      subcategories: [
+        'Polis' // This ensures that when someone searches for "polis", they will find jobs in the security category
+      ]
+    }
+  ];
+
+  const locations = [
       icon: '',
       keywords: ['administration', 'ekonomi', 'redovisning', 'controller', 'assistent', 'sekreterare', 'koordinator', 'projektledare', 'juridik', 'advokat'],
       subcategories: [
