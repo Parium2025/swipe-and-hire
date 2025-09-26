@@ -44,7 +44,6 @@ interface JobFormData {
   positions_count: string;
   work_location_type: string;
   remote_work_possible: string;
-  travel_requirements: string;
   work_schedule: string;
   contact_email: string;
   application_instructions: string;
@@ -85,7 +84,6 @@ const MobileJobWizard = ({
     positions_count: '1',
     work_location_type: 'på-plats',
     remote_work_possible: 'nej',
-    travel_requirements: 'ingen',
     work_schedule: selectedTemplate?.work_schedule || '',
     contact_email: selectedTemplate?.contact_email || '',
     application_instructions: selectedTemplate?.application_instructions || '',
@@ -137,7 +135,6 @@ const MobileJobWizard = ({
       positions_count: '1',
       work_location_type: 'på-plats',
       remote_work_possible: 'nej',
-      travel_requirements: 'ingen',
       work_schedule: selectedTemplate?.work_schedule || '',
       contact_email: selectedTemplate?.contact_email || '',
       application_instructions: selectedTemplate?.application_instructions || '',
@@ -155,7 +152,7 @@ const MobileJobWizard = ({
     },
     {
       title: "Var finns jobbet?",
-      fields: ['work_location_type', 'remote_work_possible', 'travel_requirements']
+      fields: ['work_location_type', 'remote_work_possible']
     },
     {
       title: "Beskrivning", 
@@ -309,7 +306,6 @@ const MobileJobWizard = ({
       positions_count: '1',
       work_location_type: 'på-plats',
       remote_work_possible: 'nej',
-      travel_requirements: 'ingen',
       work_schedule: '',
       contact_email: '',
       application_instructions: '',
@@ -553,29 +549,6 @@ const MobileJobWizard = ({
                       </SelectItem>
                       <SelectItem value="ja" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
                         Ja, helt
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-white font-medium">Resekrav i tjänsten</Label>
-                  <Select value={formData.travel_requirements} onValueChange={(value) => handleInputChange('travel_requirements', value)}>
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white h-12 text-base">
-                      <SelectValue placeholder="Välj resekrav" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-600">
-                      <SelectItem value="ingen" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
-                        Inget krav
-                      </SelectItem>
-                      <SelectItem value="sällsynt" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
-                        Sällsynt (mindre än 25%)
-                      </SelectItem>
-                      <SelectItem value="måttlig" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
-                        Måttlig (25-50%)
-                      </SelectItem>
-                      <SelectItem value="omfattande" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
-                        Omfattande (över 50%)
                       </SelectItem>
                     </SelectContent>
                   </Select>
