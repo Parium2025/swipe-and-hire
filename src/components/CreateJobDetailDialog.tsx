@@ -41,6 +41,7 @@ interface JobFormData {
   salary_min: string;
   salary_max: string;
   employment_type: string;
+  positions_count: string;
   work_schedule: string;
   contact_email: string;
   application_instructions: string;
@@ -75,6 +76,7 @@ const CreateJobDetailDialog = ({
     salary_min: selectedTemplate?.salary_min?.toString() || '',
     salary_max: selectedTemplate?.salary_max?.toString() || '',
     employment_type: selectedTemplate?.employment_type || '',
+    positions_count: '1',
     work_schedule: selectedTemplate?.work_schedule || '',
     contact_email: selectedTemplate?.contact_email || '',
     application_instructions: selectedTemplate?.application_instructions || ''
@@ -94,6 +96,7 @@ const CreateJobDetailDialog = ({
       salary_min: selectedTemplate?.salary_min?.toString() || '',
       salary_max: selectedTemplate?.salary_max?.toString() || '',
       employment_type: selectedTemplate?.employment_type || '',
+      positions_count: '1',
       work_schedule: selectedTemplate?.work_schedule || '',
       contact_email: selectedTemplate?.contact_email || '',
       application_instructions: selectedTemplate?.application_instructions || ''
@@ -119,6 +122,7 @@ const CreateJobDetailDialog = ({
         salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         employment_type: formData.employment_type || null,
+        positions_count: formData.positions_count ? parseInt(formData.positions_count) : 1,
         work_schedule: formData.work_schedule || null,
         contact_email: formData.contact_email || null,
         application_instructions: formData.application_instructions || null,
@@ -171,6 +175,7 @@ const CreateJobDetailDialog = ({
       salary_min: '',
       salary_max: '',
       employment_type: '',
+      positions_count: '1',
       work_schedule: '',
       contact_email: '',
       application_instructions: ''
@@ -361,6 +366,19 @@ const CreateJobDetailDialog = ({
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="positions_count" className="text-white">Antal personer att rekrytera</Label>
+                <Input
+                  id="positions_count"
+                  type="number"
+                  min="1"
+                  value={formData.positions_count}
+                  onChange={(e) => handleInputChange('positions_count', e.target.value)}
+                  placeholder="1"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                />
               </div>
 
               <div className="space-y-2">
