@@ -465,7 +465,6 @@ const MobileJobWizard = ({
                             className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-t border-gray-700/30"
                           >
                             <span className="font-medium">Använd "{occupationSearchTerm}"</span>
-                            <div className="text-sm text-gray-400">Eget yrke</div>
                           </button>
                         )}
                         
