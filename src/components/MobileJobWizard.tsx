@@ -42,6 +42,9 @@ interface JobFormData {
   salary_max: string;
   employment_type: string;
   positions_count: string;
+  work_location_type: string;
+  remote_work_possible: string;
+  travel_requirements: string;
   work_schedule: string;
   contact_email: string;
   application_instructions: string;
@@ -80,6 +83,9 @@ const MobileJobWizard = ({
     salary_max: selectedTemplate?.salary_max?.toString() || '',
     employment_type: selectedTemplate?.employment_type || '',
     positions_count: '1',
+    work_location_type: 'på-plats',
+    remote_work_possible: 'nej',
+    travel_requirements: '',
     work_schedule: selectedTemplate?.work_schedule || '',
     contact_email: selectedTemplate?.contact_email || '',
     application_instructions: selectedTemplate?.application_instructions || '',
@@ -129,6 +135,9 @@ const MobileJobWizard = ({
       salary_max: selectedTemplate?.salary_max?.toString() || '',
       employment_type: selectedTemplate?.employment_type || '',
       positions_count: '1',
+      work_location_type: 'på-plats',
+      remote_work_possible: 'nej',
+      travel_requirements: '',
       work_schedule: selectedTemplate?.work_schedule || '',
       contact_email: selectedTemplate?.contact_email || '',
       application_instructions: selectedTemplate?.application_instructions || '',
@@ -143,6 +152,10 @@ const MobileJobWizard = ({
     {
       title: "Grundinfo",
       fields: ['title', 'location', 'employment_type', 'positions_count']
+    },
+    {
+      title: "Var finns jobbet?",
+      fields: ['work_location_type', 'remote_work_possible', 'travel_requirements']
     },
     {
       title: "Beskrivning", 
@@ -201,10 +214,14 @@ const MobileJobWizard = ({
     }
     
     if (currentStep === 1) {
+      return true; // Location details are optional
+    }
+    
+    if (currentStep === 2) {
       return formData.description.trim();
     }
     
-    if (currentStep === 3) {
+    if (currentStep === 4) {
       return formData.contact_email.trim();
     }
     
@@ -290,6 +307,9 @@ const MobileJobWizard = ({
       salary_max: '',
       employment_type: '',
       positions_count: '1',
+      work_location_type: 'på-plats',
+      remote_work_possible: 'nej',
+      travel_requirements: '',
       work_schedule: '',
       contact_email: '',
       application_instructions: '',
@@ -489,8 +509,79 @@ const MobileJobWizard = ({
               </div>
             )}
 
-            {/* Step 2: Beskrivning */}
+            {/* Step 2: Var finns jobbet? */}
             {currentStep === 1 && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-white font-medium">Var utförs arbetet? *</Label>
+                  <Select value={formData.work_location_type} onValueChange={(value) => handleInputChange('work_location_type', value)}>
+                    <SelectTrigger className="bg-white/10 border-white/20 text-white h-12 text-base">
+                      <SelectValue placeholder="Välj arbetsplats" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-600">
+                      <SelectItem value="på-plats" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
+                        På plats
+                      </SelectItem>
+                      <SelectItem value="hemarbete" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
+                        Hemarbete
+                      </SelectItem>
+                      <SelectItem value="hybridarbete" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
+                        Hybridarbete
+                      </SelectItem>
+                      <SelectItem value="fältarbete" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
+                        Fältarbete/ute
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white font-medium">Är distansarbete möjligt?</Label>
+                  <Select value={formData.remote_work_possible} onValueChange={(value) => handleInputChange('remote_work_possible', value)}>
+                    <SelectTrigger className="bg-white/10 border-white/20 text-white h-12 text-base">
+                      <SelectValue placeholder="Välj alternativ" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-600">
+                      <SelectItem value="nej" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
+                        Nej
+                      </SelectItem>
+                      <SelectItem value="delvis" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
+                        Delvis
+                      </SelectItem>
+                      <SelectItem value="ja" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
+                        Ja, helt
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white font-medium">Resekrav i tjänsten</Label>
+                  <Select value={formData.travel_requirements} onValueChange={(value) => handleInputChange('travel_requirements', value)}>
+                    <SelectTrigger className="bg-white/10 border-white/20 text-white h-12 text-base">
+                      <SelectValue placeholder="Välj resekrav" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-600">
+                      <SelectItem value="" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
+                        Inget krav
+                      </SelectItem>
+                      <SelectItem value="sällsynt" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
+                        Sällsynt (mindre än 25%)
+                      </SelectItem>
+                      <SelectItem value="måttlig" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
+                        Måttlig (25-50%)
+                      </SelectItem>
+                      <SelectItem value="omfattande" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
+                        Omfattande (över 50%)
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Beskrivning */}
+            {currentStep === 2 && (
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Jobbeskrivning *</Label>
@@ -541,8 +632,8 @@ const MobileJobWizard = ({
               </div>
             )}
 
-            {/* Step 3: Detaljer */}
-            {currentStep === 2 && (
+            {/* Step 4: Detaljer */}
+            {currentStep === 3 && (
               <div className="space-y-4">
                 <div className="space-y-4">
                   <Label className="text-white font-medium">Lönespann (valfritt)</Label>
@@ -591,8 +682,8 @@ const MobileJobWizard = ({
               </div>
             )}
 
-            {/* Step 4: Kontakt */}
-            {currentStep === 3 && (
+            {/* Step 5: Kontakt */}
+            {currentStep === 4 && (
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Kontakt-email *</Label>
