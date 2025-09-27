@@ -774,8 +774,8 @@ const MobileJobWizard = ({
                     <div className="relative w-full h-full rounded-[1.2rem] bg-slate-950 p-0.5 shadow-2xl ring-1 ring-black/30">
                       {/* Skärm */}
                       <div className="relative w-full h-full rounded-[0.9rem] overflow-hidden bg-black">
-                        {/* Notch/status */}
-                        <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black/60"></div>
+                        {/* Notch - helt svart utan vita kanter */}
+                        <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black"></div>
 
                         {/* Bakgrundsbild - heltäckande */}
                         {jobImageDisplayUrl ? (

@@ -150,9 +150,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       const radius = Math.min(CANVAS_WIDTH, CANVAS_HEIGHT) / 2 - 1;
       ctx.arc(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, radius, 0, Math.PI * 2);
       ctx.stroke();
-    } else {
-      ctx.strokeRect(1, 1, CANVAS_WIDTH - 2, CANVAS_HEIGHT - 2);
     }
+    // Ingen border för rektangulära bilder - ta bort de vita kanterna
   }, [scale, position, imageLoaded, isCircular]);
 
   // Redraw when properties change
@@ -269,7 +268,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
                 ref={canvasRef}
                 width={CANVAS_WIDTH}
                 height={CANVAS_HEIGHT}
-                className={`cursor-${isDragging ? 'grabbing' : 'grab'} bg-gray-50 ${isCircular ? 'rounded-full' : 'rounded-lg'}`}
+                className={`cursor-${isDragging ? 'grabbing' : 'grab'} ${isCircular ? 'rounded-full' : 'rounded-lg'}`}
+                style={{ backgroundColor: 'transparent' }}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
