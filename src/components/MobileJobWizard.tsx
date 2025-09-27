@@ -993,7 +993,7 @@ const MobileJobWizard = ({
                   <>
                     <div className="text-center space-y-2">
                       <h3 className="text-white font-medium text-lg">Ansökningsfrågor</h3>
-                      <p className="text-white/70 text-sm">
+                      <p className="text-white text-sm">
                         Skapa frågor som jobbsökarna ska besvara i sin ansökan
                       </p>
                     </div>
