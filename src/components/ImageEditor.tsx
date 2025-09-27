@@ -28,7 +28,9 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  const CANVAS_SIZE = 300;
+  const BASE_CANVAS_HEIGHT = 400; // Output canvas height in px
+  const CANVAS_HEIGHT = BASE_CANVAS_HEIGHT;
+  const CANVAS_WIDTH = Math.round(BASE_CANVAS_HEIGHT * aspectRatio);
   const MIN_SCALE = 0.5;
   const MAX_SCALE = 3;
 
@@ -42,18 +44,16 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       imageRef.current = img;
       
       // Calculate initial scale to fit the image properly
-      const containerSize = CANVAS_SIZE;
+      const containerWidth = CANVAS_WIDTH;
+      const containerHeight = CANVAS_HEIGHT;
       const imageAspect = img.width / img.height;
-      const containerAspect = aspectRatio;
+      const containerAspect = containerWidth / containerHeight;
       
-      let initialScale;
-      if (imageAspect > containerAspect) {
-        // Image is wider, fit by height
-        initialScale = containerSize / img.height;
-      } else {
-        // Image is taller, fit by width
-        initialScale = containerSize / img.width;
-      }
+      // Scale to cover the container
+      const initialScale = Math.max(
+        containerWidth / img.width,
+        containerHeight / img.height
+      );
       
       setScale(initialScale);
       setPosition({ x: 0, y: 0 });
@@ -80,13 +80,14 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     
     // Create clipping path
     if (isCircular) {
+      const radius = Math.min(CANVAS_WIDTH, CANVAS_HEIGHT) / 2 - 2;
       ctx.beginPath();
-      ctx.arc(CANVAS_SIZE / 2, CANVAS_SIZE / 2, CANVAS_SIZE / 2 - 2, 0, Math.PI * 2);
+      ctx.arc(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, radius, 0, Math.PI * 2);
       ctx.clip();
     } else {
       // Rectangular clipping
       ctx.beginPath();
-      ctx.rect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+      ctx.rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
       ctx.clip();
     }
     
@@ -94,8 +95,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     const scaledWidth = img.width * scale;
     const scaledHeight = img.height * scale;
     
-    const centerX = CANVAS_SIZE / 2;
-    const centerY = CANVAS_SIZE / 2;
+    const centerX = CANVAS_WIDTH / 2;
+    const centerY = CANVAS_HEIGHT / 2;
     
     const imageX = centerX - scaledWidth / 2 + position.x;
     const imageY = centerY - scaledHeight / 2 + position.y;
@@ -111,10 +112,11 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     ctx.lineWidth = 2;
     if (isCircular) {
       ctx.beginPath();
-      ctx.arc(CANVAS_SIZE / 2, CANVAS_SIZE / 2, CANVAS_SIZE / 2 - 1, 0, Math.PI * 2);
+      const radius = Math.min(CANVAS_WIDTH, CANVAS_HEIGHT) / 2 - 1;
+      ctx.arc(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, radius, 0, Math.PI * 2);
       ctx.stroke();
     } else {
-      ctx.strokeRect(1, 1, CANVAS_SIZE - 2, CANVAS_SIZE - 2);
+      ctx.strokeRect(1, 1, CANVAS_WIDTH - 2, CANVAS_HEIGHT - 2);
     }
   }, [scale, position, imageLoaded, isCircular]);
 
@@ -193,16 +195,14 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     setPosition({ x: 0, y: 0 });
     if (imageRef.current) {
       const img = imageRef.current;
-      const containerSize = CANVAS_SIZE;
-      const imageAspect = img.width / img.height;
-      const containerAspect = aspectRatio;
+      const containerWidth = CANVAS_WIDTH;
+      const containerHeight = CANVAS_HEIGHT;
       
-      let initialScale;
-      if (imageAspect > containerAspect) {
-        initialScale = containerSize / img.height;
-      } else {
-        initialScale = containerSize / img.width;
-      }
+      // Scale to cover the container
+      const initialScale = Math.max(
+        containerWidth / img.width,
+        containerHeight / img.height
+      );
       setScale(initialScale);
     }
   };
@@ -233,8 +233,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
             <div className="relative">
               <canvas
                 ref={canvasRef}
-                width={CANVAS_SIZE}
-                height={CANVAS_SIZE}
+                width={CANVAS_WIDTH}
+                height={CANVAS_HEIGHT}
                 className={`cursor-${isDragging ? 'grabbing' : 'grab'} bg-gray-50 ${isCircular ? 'rounded-full' : 'rounded-lg'}`}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}

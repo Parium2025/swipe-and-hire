@@ -1061,7 +1061,7 @@ const MobileJobWizard = ({
             imageSrc={editingImageUrl}
             onSave={handleImageEdit}
             isCircular={false}
-            aspectRatio={16/9} // Mobiltelefon aspect ratio för bakgrund
+            aspectRatio={1/2} // Telefonens skärmyta (w/h) för perfekt matchning
           />
         )}
       </DialogContent>
