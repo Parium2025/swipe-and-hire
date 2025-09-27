@@ -4,10 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { MapPin, Clock, Euro, Heart, X, Building2, Users, Mail, Info } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import JobApplicationDialog from './JobApplicationDialog';
+import { toast } from '@/hooks/use-toast';
 
 interface JobPosting {
   id: string;
@@ -34,9 +34,9 @@ const JobSwipe = () => {
   const [currentJobIndex, setCurrentJobIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [swiping, setSwiping] = useState(false);
+  const [showApplicationDialog, setShowApplicationDialog] = useState(false);
+  const [currentJobQuestions, setCurrentJobQuestions] = useState<any[]>([]);
   const { user } = useAuth();
-  const { toast } = useToast();
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchJobs();
@@ -84,8 +84,19 @@ const JobSwipe = () => {
 
     try {
       if (liked) {
-        // Navigate to application page
-        navigate(`/job-application/${jobId}`);
+        // When liked, fetch questions and show application dialog
+        const { data: questions, error } = await supabase
+          .from('job_questions')
+          .select('*')
+          .eq('job_id', jobId)
+          .order('order_index');
+
+        if (error) {
+          console.error('Error fetching questions:', error);
+        }
+
+        setCurrentJobQuestions(questions || []);
+        setShowApplicationDialog(true);
         setSwiping(false);
       } else {
         // Not interested, just move to next job
@@ -109,6 +120,48 @@ const JobSwipe = () => {
     }
   };
 
+  const handleApplicationSubmit = async (answers: Record<string, any>) => {
+    try {
+      // Here you would save the application to database
+      // For now, just show success message
+      toast({
+        title: "Ansökan skickad!",
+        description: "Din ansökan har skickats till arbetsgivaren"
+      });
+
+      // Move to next job
+      setTimeout(() => {
+        setCurrentJobIndex(prev => prev + 1);
+        setShowApplicationDialog(false);
+      }, 1000);
+    } catch (error) {
+      toast({
+        title: "Ett fel uppstod",
+        description: "Kunde inte skicka ansökan",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleCardClick = async () => {
+    try {
+      const { data: questions, error } = await supabase
+        .from('job_questions')
+        .select('*')
+        .eq('job_id', currentJob.id)
+        .order('order_index');
+      
+      if (!error) {
+        setCurrentJobQuestions(questions || []);
+      }
+      setShowApplicationDialog(true);
+    } catch (error) {
+      console.error('Error fetching questions:', error);
+      setCurrentJobQuestions([]);
+      setShowApplicationDialog(true);
+    }
+  };
+
   const formatSalary = (min?: number, max?: number) => {
     if (!min && !max) return 'Lön enligt överenskommelse';
     if (min && max) return `${min.toLocaleString()} - ${max.toLocaleString()} kr/mån`;
@@ -116,7 +169,6 @@ const JobSwipe = () => {
     if (max) return `Upp till ${max.toLocaleString()} kr/mån`;
     return '';
   };
-
 
   if (loading) {
     return (
@@ -175,7 +227,7 @@ const JobSwipe = () => {
       <div className="relative">
         <Card
           className={`overflow-hidden border-2 transition-all duration-300 ${swiping ? 'scale-95 opacity-50' : ''} cursor-pointer`}
-          onClick={() => navigate(`/job-application/${currentJob.id}`)}
+          onClick={handleCardClick}
         >
           <CardContent className="p-6">
             {/* Company info */}
@@ -250,7 +302,8 @@ const JobSwipe = () => {
                   variant="outline" 
                   size="sm" 
                   className="w-full"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     window.open(`mailto:${currentJob.contact_email}?subject=Fråga om tjänsten: ${currentJob.title}`, '_blank');
                   }}
                 >
@@ -292,6 +345,14 @@ const JobSwipe = () => {
           <p>Tryck ❤️ om du är intresserad eller ✕ för att passa</p>
         </div>
       </div>
+
+      <JobApplicationDialog
+        open={showApplicationDialog}
+        onOpenChange={setShowApplicationDialog}
+        job={currentJob}
+        questions={currentJobQuestions}
+        onSubmit={handleApplicationSubmit}
+      />
     </div>
   );
 };
