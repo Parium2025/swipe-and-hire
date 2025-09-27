@@ -1032,8 +1032,8 @@ const MobileJobWizard = ({
                       </div>
                       
                       {customQuestions.length === 0 ? (
-                        <div className="text-white/60 text-sm bg-white/5 rounded-lg p-3 border border-white/20">
-                          Inga anpassade frågor tillagda än. Klicka "Lägg till fråga" för att skapa din första fråga.
+                        <div className="text-white text-sm bg-white/5 rounded-lg p-3 border border-white/20">
+                          Om någon av ovanstående frågor inte passar in eller det saknas någonting, kan du trycka på "Lägg till fråga" för att skapa ytterligare frågor som jobbsökaren kommer svara på vid behov.
                         </div>
                       ) : (
                         <div className="space-y-3">
