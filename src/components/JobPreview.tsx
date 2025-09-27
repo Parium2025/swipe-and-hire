@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Clock, Euro, Building2, Users, Heart, X, FileText, Video, CheckSquare, List, ArrowLeft, ArrowRight } from 'lucide-react';
+import { MapPin, Clock, Euro, Building2, Users, Heart, X, FileText, Video, CheckSquare, List } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 
 interface JobQuestion {
@@ -45,12 +45,7 @@ interface JobPreviewProps {
 }
 
 const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewProps) => {
-  const [currentStep, setCurrentStep] = useState(0); // 0 = jobbinfo, 1+ = frågor
   const [answers, setAnswers] = useState<Record<string, any>>({});
-
-  // Total steg = jobbinfo + antal frågor
-  const totalSteps = 1 + jobData.questions.length;
-  const currentQuestion = currentStep > 0 ? jobData.questions[currentStep - 1] : null;
 
   const handleAnswerChange = (questionId: string, value: any) => {
     setAnswers(prev => ({
@@ -59,17 +54,6 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
     }));
   };
 
-  const handleNext = () => {
-    if (currentStep < totalSteps - 1) {
-      setCurrentStep(prev => prev + 1);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
-    }
-  };
 
   const formatSalary = (min?: string, max?: string) => {
     if (min && max) {
@@ -202,159 +186,161 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md h-[80vh] p-0 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 border-none overflow-hidden">
-        <div className="flex flex-col h-full relative">
-          {/* Header med steg-indikator */}
-          <div className="p-4 border-b border-white/20">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-white/80 text-sm">Förhandsvisning</div>
-              <div className="text-white/80 text-sm">{currentStep + 1} / {totalSteps}</div>
+      <DialogContent className="max-w-full max-h-full h-screen w-screen p-0 bg-gradient-to-br from-primary via-purple-600 to-pink-500 border-none overflow-hidden">
+        {/* Hinge-style fullscreen scrollable content */}
+        <div className="h-full overflow-y-auto snap-y snap-mandatory">
+          
+          {/* Första kortet: Jobbinfo (stora kort som täcker hela skärmen) */}
+          <div className="min-h-screen snap-start flex flex-col justify-center px-6 py-12 relative">
+            {/* Close button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onOpenChange(false)}
+              className="absolute top-4 right-4 z-10 text-white hover:bg-white/10"
+            >
+              <X className="h-6 w-6" />
+            </Button>
+
+            {/* Company header - klickbar */}
+            <div 
+              className="flex items-center space-x-4 cursor-pointer hover:bg-white/10 p-4 rounded-xl transition-colors mb-6"
+              onClick={onCompanyClick}
+            >
+              <div className="bg-white/20 rounded-full p-3">
+                <Building2 className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-xl">
+                  {jobData.company_name || 'Företagsnamn'}
+                </h3>
+                <div className="flex items-center text-white/80 text-sm">
+                  <Users className="h-4 w-4 mr-1" />
+                  Klicka för att se företagsprofil
+                </div>
+              </div>
             </div>
-            <div className="w-full bg-white/20 rounded-full h-2">
-              <div 
-                className="bg-white rounded-full h-2 transition-all duration-300"
-                style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
-              />
+
+            {/* Job title - stor och framträdande */}
+            <h1 className="text-white text-3xl font-bold mb-4 leading-tight">
+              {jobData.title}
+            </h1>
+
+            {/* Job details */}
+            <div className="space-y-3 mb-6">
+              <div className="flex items-center text-white/90 text-lg">
+                <MapPin className="h-5 w-5 mr-3" />
+                <span>{jobData.location}</span>
+              </div>
+
+              {jobData.employment_type && (
+                <div className="flex items-center text-white/90 text-lg">
+                  <Clock className="h-5 w-5 mr-3" />
+                  <span>{getEmploymentTypeLabel(jobData.employment_type)}</span>
+                </div>
+              )}
+
+              {(jobData.salary_min || jobData.salary_max) && (
+                <div className="flex items-center text-green-300 text-lg font-medium">
+                  <Euro className="h-5 w-5 mr-3" />
+                  <span>
+                    {formatSalary(jobData.salary_min, jobData.salary_max)}
+                  </span>
+                </div>
+              )}
             </div>
-          </div>
 
-          {/* Content */}
-          <div className="flex-1 p-6 overflow-y-auto">
-            {currentStep === 0 ? (
-              // Jobbinfo-kort
-              <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
-                <CardContent className="p-6 space-y-4">
-                  {/* Company header - klickbar */}
-                  <div 
-                    className="flex items-center space-x-3 cursor-pointer hover:bg-white/10 p-2 rounded-lg transition-colors"
-                    onClick={onCompanyClick}
-                  >
-                    <div className="bg-white/20 rounded-full p-2">
-                      <Building2 className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-white font-semibold text-lg">
-                        {jobData.company_name || 'Företagsnamn'}
-                      </h3>
-                      <div className="flex items-center text-white/80 text-sm">
-                        <Users className="h-4 w-4 mr-1" />
-                        Klicka för att se företagsprofil
-                      </div>
-                    </div>
-                  </div>
+            {/* Description */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8">
+              <h4 className="text-white font-semibold text-lg mb-3">Beskrivning</h4>
+              <p className="text-white/90 leading-relaxed whitespace-pre-wrap">
+                {jobData.description}
+              </p>
+            </div>
 
-                  {/* Job title */}
-                  <h2 className="text-white text-xl font-bold">{jobData.title}</h2>
+            {/* Actions */}
+            <div className="flex space-x-4">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="flex-1 border-white/40 text-white hover:bg-white/10 h-14 text-lg"
+              >
+                <X className="h-6 w-6 mr-2" />
+                Inte intresserad
+              </Button>
+              <Button 
+                size="lg" 
+                className="flex-1 bg-white/20 hover:bg-white/30 text-white h-14 text-lg backdrop-blur-sm"
+              >
+                <Heart className="h-6 w-6 mr-2" />
+                {jobData.questions.length > 0 ? 'Börja ansöka' : 'Intresserad'}
+              </Button>
+            </div>
 
-                  {/* Job details */}
-                  <div className="space-y-2">
-                    <div className="flex items-center text-white/90">
-                      <MapPin className="h-4 w-4 mr-2" />
-                      <span className="text-sm">{jobData.location}</span>
-                    </div>
-
-                    {jobData.employment_type && (
-                      <div className="flex items-center text-white/90">
-                        <Clock className="h-4 w-4 mr-2" />
-                        <span className="text-sm">{getEmploymentTypeLabel(jobData.employment_type)}</span>
-                      </div>
-                    )}
-
-                    {(jobData.salary_min || jobData.salary_max) && (
-                      <div className="flex items-center text-green-300">
-                        <Euro className="h-4 w-4 mr-2" />
-                        <span className="text-sm font-medium">
-                          {formatSalary(jobData.salary_min, jobData.salary_max)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Description */}
-                  <div className="space-y-2">
-                    <h4 className="text-white font-semibold">Beskrivning</h4>
-                    <p className="text-white/90 text-sm leading-relaxed whitespace-pre-wrap">
-                      {jobData.description}
-                    </p>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex space-x-3 pt-4">
-                    <Button 
-                      variant="outline" 
-                      size="lg" 
-                      className="flex-1 border-red-400 text-red-400 hover:bg-red-400/10"
-                    >
-                      <X className="h-5 w-5 mr-2" />
-                      Inte intresserad
-                    </Button>
-                    <Button 
-                      size="lg" 
-                      className="flex-1 bg-green-500 hover:bg-green-600 text-white"
-                      onClick={jobData.questions.length > 0 ? handleNext : undefined}
-                    >
-                      <Heart className="h-5 w-5 mr-2" />
-                      {jobData.questions.length > 0 ? 'Ansök' : 'Intresserad'}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              // Fråge-kort
-              currentQuestion && (
-                <Card className="bg-white/10 border-white/20 backdrop-blur-sm">
-                  <CardContent className="p-6 space-y-6">
-                    {/* Question header */}
-                    <div className="flex items-start space-x-3">
-                      <div className="bg-white/20 rounded-full p-2 mt-1">
-                        {getQuestionIcon(currentQuestion.question_type)}
-                        <span className="text-white text-xs">
-                          {/* Icon based on question type */}
-                        </span>
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-white text-lg font-semibold mb-2">
-                          {currentQuestion.question_text}
-                          {currentQuestion.is_required && (
-                            <span className="text-red-300 ml-1">*</span>
-                          )}
-                        </h3>
-                      </div>
-                    </div>
-
-                    {/* Question input */}
-                    <div className="space-y-4">
-                      {renderQuestionInput(currentQuestion)}
-                    </div>
-                  </CardContent>
-                </Card>
-              )
+            {/* Scroll hint */}
+            {jobData.questions.length > 0 && (
+              <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
+                <div className="text-white/70 text-sm text-center">
+                  <div className="animate-bounce mb-2">↓</div>
+                  Scrolla för att se frågorna
+                </div>
+              </div>
             )}
           </div>
 
-          {/* Navigation footer */}
-          <div className="p-4 border-t border-white/20">
-            <div className="flex justify-between">
-              <Button
-                variant="ghost"
-                onClick={handlePrevious}
-                disabled={currentStep === 0}
-                className="text-white hover:bg-white/10 disabled:opacity-50"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Tillbaka
-              </Button>
+          {/* Fråge-kort - ett kort per fråga i Hinge-stil */}
+          {jobData.questions.map((question, index) => {
+            const questionId = question.id || `temp_${question.order_index}`;
+            
+            return (
+              <div key={questionId} className="min-h-screen snap-start flex flex-col justify-center px-6 py-12">
+                
+                {/* Question card */}
+                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 space-y-6">
+                  
+                  {/* Question header */}
+                  <div className="flex items-start space-x-4">
+                    <div className="bg-white/20 rounded-full p-3 mt-1">
+                      {getQuestionIcon(question.question_type)}
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-white/80 text-sm mb-2">
+                        Fråga {index + 1} av {jobData.questions.length}
+                      </div>
+                      <h3 className="text-white text-xl font-bold leading-tight">
+                        {question.question_text}
+                        {question.is_required && (
+                          <span className="text-red-300 ml-1">*</span>
+                        )}
+                      </h3>
+                    </div>
+                  </div>
 
-              <Button
-                onClick={handleNext}
-                disabled={currentStep >= totalSteps - 1}
-                className="bg-white/20 hover:bg-white/30 text-white disabled:opacity-50"
-              >
-                {currentStep === totalSteps - 1 ? 'Skicka ansökan' : 'Nästa'}
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            </div>
-          </div>
+                  {/* Question input */}
+                  <div className="space-y-4">
+                    {renderQuestionInput(question)}
+                  </div>
+                </div>
+
+                {/* Navigation hint */}
+                <div className="text-center mt-8">
+                  {index < jobData.questions.length - 1 ? (
+                    <div className="text-white/70 text-sm">
+                      <div className="animate-bounce mb-2">↓</div>
+                      Nästa fråga
+                    </div>
+                  ) : (
+                    <Button
+                      size="lg"
+                      className="bg-green-500 hover:bg-green-600 text-white h-14 px-8 text-lg"
+                    >
+                      Skicka ansökan
+                    </Button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </DialogContent>
     </Dialog>
