@@ -652,6 +652,11 @@ const MobileJobWizard = ({
     setShowQuestionTypeDropdown(false);
   };
 
+  const handleQuestionTypeClick = () => {
+    setQuestionTypeSearchTerm(''); // Reset search to show all options
+    setShowQuestionTypeDropdown(!showQuestionTypeDropdown);
+  };
+
   const handleEmploymentTypeSearch = (value: string) => {
     setEmploymentTypeSearchTerm(value);
     setShowEmploymentTypeDropdown(value.length >= 0);
@@ -716,9 +721,11 @@ const MobileJobWizard = ({
     setShowRemoteWorkDropdown(!showRemoteWorkDropdown);
   };
 
-  const filteredQuestionTypes = questionTypes.filter(type => 
-    type.label.toLowerCase().includes(questionTypeSearchTerm.toLowerCase())
-  );
+  const filteredQuestionTypes = questionTypeSearchTerm.length > 0
+    ? questionTypes.filter(type => 
+        type.label.toLowerCase().includes(questionTypeSearchTerm.toLowerCase())
+      )
+    : questionTypes;
 
   const filteredEmploymentTypes = employmentTypeSearchTerm.length > 0 
     ? EMPLOYMENT_TYPES.filter(type => 
@@ -1313,7 +1320,7 @@ const MobileJobWizard = ({
                           <Input
                             value={questionTypeSearchTerm || (editingQuestion?.question_type ? questionTypes.find(t => t.value === editingQuestion.question_type)?.label || '' : '')}
                             onChange={(e) => handleQuestionTypeSearch(e.target.value)}
-                            onClick={() => setShowQuestionTypeDropdown(!showQuestionTypeDropdown)}
+                            onClick={handleQuestionTypeClick}
                             placeholder="Välj frågetyp"
                             className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer"
                             readOnly
