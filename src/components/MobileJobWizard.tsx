@@ -967,7 +967,7 @@ const MobileJobWizard = ({
                         <img 
                           src={jobImageDisplayUrl} 
                           alt="Job preview" 
-                          className="w-full h-48 object-cover rounded-lg"
+                          className="w-full h-48 object-contain rounded-lg"
                         />
                           <button
                             onClick={() => {
@@ -1101,7 +1101,7 @@ const MobileJobWizard = ({
                   <img 
                     src={jobImageDisplayUrl} 
                     alt="Job image" 
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 </div>
               )}
