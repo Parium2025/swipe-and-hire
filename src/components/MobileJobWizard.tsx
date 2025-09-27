@@ -15,13 +15,26 @@ import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES, getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Briefcase, Heart, Bookmark, Plus } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Briefcase, Heart, Bookmark, Plus, Trash2 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
 import ImageEditor from '@/components/ImageEditor';
 import { createSignedUrl } from '@/utils/storageUtils';
+
+interface JobQuestion {
+  id?: string;
+  question_text: string;
+  question_type: 'text' | 'yes_no' | 'multiple_choice' | 'number' | 'date' | 'file' | 'range' | 'video';
+  options?: string[];
+  is_required: boolean;
+  order_index: number;
+  min_value?: number;
+  max_value?: number;
+  placeholder_text?: string;
+}
 
 interface JobTemplate {
   id: string;
@@ -82,6 +95,9 @@ const MobileJobWizard = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
+  const [customQuestions, setCustomQuestions] = useState<JobQuestion[]>([]);
+  const [showQuestionForm, setShowQuestionForm] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState<JobQuestion | null>(null);
 
   // Utility function to truncate text for better display
   const truncateText = (text: string, maxLength: number = 35) => {
@@ -361,6 +377,97 @@ const MobileJobWizard = ({
         contact_email: user.email
       }));
     }
+  };
+
+  // Functions for handling custom questions
+  const addCustomQuestion = () => {
+    const newQuestion: JobQuestion = {
+      question_text: '',
+      question_type: 'text',
+      is_required: true,
+      order_index: customQuestions.length,
+      options: []
+    };
+    setEditingQuestion(newQuestion);
+    setShowQuestionForm(true);
+  };
+
+  const saveCustomQuestion = () => {
+    if (!editingQuestion?.question_text.trim()) return;
+    
+    if (editingQuestion.id) {
+      // Update existing question
+      setCustomQuestions(prev => 
+        prev.map(q => q.id === editingQuestion.id ? editingQuestion : q)
+      );
+    } else {
+      // Add new question
+      const newQuestion = {
+        ...editingQuestion,
+        id: `temp_${Date.now()}`,
+        order_index: customQuestions.length
+      };
+      setCustomQuestions(prev => [...prev, newQuestion]);
+    }
+    
+    setShowQuestionForm(false);
+    setEditingQuestion(null);
+  };
+
+  const deleteCustomQuestion = (questionId: string) => {
+    setCustomQuestions(prev => prev.filter(q => q.id !== questionId));
+  };
+
+  const editCustomQuestion = (question: JobQuestion) => {
+    setEditingQuestion(question);
+    setShowQuestionForm(true);
+  };
+
+  const updateQuestionField = (field: keyof JobQuestion, value: any) => {
+    if (!editingQuestion) return;
+    
+    let updatedQuestion = { ...editingQuestion, [field]: value };
+    
+    // Reset type-specific fields when question type changes
+    if (field === 'question_type') {
+      updatedQuestion = {
+        ...updatedQuestion,
+        options: value === 'multiple_choice' ? [''] : undefined,
+        min_value: ['range', 'number'].includes(value) ? undefined : undefined,
+        max_value: ['range', 'number'].includes(value) ? undefined : undefined,
+      };
+    }
+    
+    setEditingQuestion(updatedQuestion);
+  };
+
+  const addOption = () => {
+    if (!editingQuestion) return;
+    const newOptions = [...(editingQuestion.options || []), ''];
+    setEditingQuestion({
+      ...editingQuestion,
+      options: newOptions
+    });
+  };
+
+  const updateOption = (index: number, value: string) => {
+    if (!editingQuestion) return;
+    const newOptions = [...(editingQuestion.options || [])];
+    newOptions[index] = value;
+    setEditingQuestion({
+      ...editingQuestion,
+      options: newOptions
+    });
+  };
+
+  const removeOption = (index: number) => {
+    if (!editingQuestion) return;
+    const newOptions = [...(editingQuestion.options || [])];
+    newOptions.splice(index, 1);
+    setEditingQuestion({
+      ...editingQuestion,
+      options: newOptions
+    });
   };
 
   // Update form data when props change - preserve existing values
@@ -882,48 +989,264 @@ const MobileJobWizard = ({
             {/* Step 3: Ansökningsfrågor */}
             {currentStep === 2 && (
               <div className="space-y-6">
-                <div className="text-center space-y-2">
-                  <h3 className="text-white font-medium text-lg">Ansökningsfrågor</h3>
-                  <p className="text-white/70 text-sm">
-                    Skapa frågor som jobbsökarna ska besvara i sin ansökan
-                  </p>
-                </div>
+                {!showQuestionForm ? (
+                  <>
+                    <div className="text-center space-y-2">
+                      <h3 className="text-white font-medium text-lg">Ansökningsfrågor</h3>
+                      <p className="text-white/70 text-sm">
+                        Skapa frågor som jobbsökarna ska besvara i sin ansökan
+                      </p>
+                    </div>
 
-                {/* Automatiska frågor info */}
-                <div className="bg-white/5 rounded-lg p-4 border border-white/20">
-                  <h4 className="text-white font-medium mb-2 flex items-center">
-                    <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
-                    Automatiska frågor
-                  </h4>
-                  <div className="text-white/70 text-sm space-y-1">
-                    <p>• Namn (från profil)</p>
-                    <p>• E-post (från profil)</p>
-                    <p>• Telefonnummer (från profil)</p>
-                    <p>• CV (från profil)</p>
-                  </div>
-                  <p className="text-white/60 text-xs mt-2">
-                    Dessa frågor fylls automatiskt från jobbsökarens profil
-                  </p>
-                </div>
+                    {/* Automatiska frågor info */}
+                    <div className="bg-white/5 rounded-lg p-4 border border-white/20">
+                      <h4 className="text-white font-medium mb-2 flex items-center">
+                        <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                        Automatiska frågor
+                      </h4>
+                      <div className="text-white/70 text-sm space-y-1">
+                        <p>• Namn (från profil)</p>
+                        <p>• E-post (från profil)</p>
+                        <p>• Telefonnummer (från profil)</p>
+                        <p>• CV (från profil)</p>
+                      </div>
+                      <p className="text-white/60 text-xs mt-2">
+                        Dessa frågor fylls automatiskt från jobbsökarens profil
+                      </p>
+                    </div>
 
-                {/* Anpassade frågor */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-white font-medium">Anpassade frågor (valfritt)</h4>
-                    <Button
-                      onClick={() => {/* Lägg till fråga */}}
-                      size="sm"
-                      className="bg-primary hover:bg-primary/90 text-white"
-                    >
-                      <Plus className="h-4 w-4 mr-1" />
-                      Lägg till fråga
-                    </Button>
+                    {/* Anpassade frågor */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-white font-medium">Anpassade frågor (valfritt)</h4>
+                        <Button
+                          onClick={addCustomQuestion}
+                          size="sm"
+                          className="bg-primary hover:bg-primary/90 text-white"
+                        >
+                          <Plus className="h-4 w-4 mr-1" />
+                          Lägg till fråga
+                        </Button>
+                      </div>
+                      
+                      {customQuestions.length === 0 ? (
+                        <div className="text-white/60 text-sm bg-white/5 rounded-lg p-3 border border-white/20">
+                          Inga anpassade frågor tillagda än. Klicka "Lägg till fråga" för att skapa din första fråga.
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {customQuestions.map((question, index) => (
+                            <div key={question.id} className="bg-white/5 rounded-lg p-4 border border-white/20">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="text-white font-medium text-sm mb-1">
+                                    {question.question_text || 'Ingen frågetext'}
+                                  </div>
+                                  <div className="text-white/60 text-xs mb-2">
+                                    Typ: {question.question_type === 'text' ? 'Text' : 
+                                          question.question_type === 'yes_no' ? 'Ja/Nej' :
+                                          question.question_type === 'multiple_choice' ? 'Flervalsval' :
+                                          question.question_type === 'number' ? 'Siffra' :
+                                          question.question_type === 'date' ? 'Datum' :
+                                          question.question_type === 'file' ? 'Fil' :
+                                          question.question_type === 'range' ? 'Intervall' :
+                                          question.question_type === 'video' ? 'Video' : question.question_type}
+                                    {question.is_required && ' • Obligatorisk'}
+                                  </div>
+                                  {question.question_type === 'multiple_choice' && question.options && (
+                                    <div className="text-white/50 text-xs">
+                                      Alternativ: {question.options.filter(o => o.trim()).join(', ')}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex items-center space-x-2 ml-4">
+                                  <Button
+                                    onClick={() => editCustomQuestion(question)}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
+                                  >
+                                    ✏️
+                                  </Button>
+                                  <Button
+                                    onClick={() => deleteCustomQuestion(question.id!)}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 w-8 p-0"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  /* Question Form */
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-white font-medium text-lg">
+                        {editingQuestion?.id?.startsWith('temp_') ? 'Redigera fråga' : 'Ny fråga'}
+                      </h3>
+                      <Button
+                        onClick={() => {
+                          setShowQuestionForm(false);
+                          setEditingQuestion(null);
+                        }}
+                        variant="ghost"
+                        size="sm"
+                        className="text-white/70 hover:text-white hover:bg-white/10"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Question Text */}
+                      <div className="space-y-2">
+                        <Label className="text-white font-medium">Frågetext *</Label>
+                        <Textarea
+                          value={editingQuestion?.question_text || ''}
+                          onChange={(e) => updateQuestionField('question_text', e.target.value)}
+                          placeholder="Skriv din fråga här..."
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 resize-none"
+                          rows={2}
+                        />
+                      </div>
+
+                      {/* Question Type */}
+                      <div className="space-y-2">
+                        <Label className="text-white font-medium">Frågetyp *</Label>
+                        <Select
+                          value={editingQuestion?.question_type || 'text'}
+                          onValueChange={(value) => updateQuestionField('question_type', value)}
+                        >
+                          <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-gray-800 border-gray-600">
+                            <SelectItem value="text" className="text-white hover:bg-gray-700">Text</SelectItem>
+                            <SelectItem value="yes_no" className="text-white hover:bg-gray-700">Ja/Nej</SelectItem>
+                            <SelectItem value="multiple_choice" className="text-white hover:bg-gray-700">Flervalsval</SelectItem>
+                            <SelectItem value="number" className="text-white hover:bg-gray-700">Siffra</SelectItem>
+                            <SelectItem value="date" className="text-white hover:bg-gray-700">Datum</SelectItem>
+                            <SelectItem value="file" className="text-white hover:bg-gray-700">Fil</SelectItem>
+                            <SelectItem value="range" className="text-white hover:bg-gray-700">Intervall</SelectItem>
+                            <SelectItem value="video" className="text-white hover:bg-gray-700">Video</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Multiple Choice Options */}
+                      {editingQuestion?.question_type === 'multiple_choice' && (
+                        <div className="space-y-2">
+                          <Label className="text-white font-medium">Svarsalternativ</Label>
+                          <div className="space-y-2">
+                            {(editingQuestion.options || []).map((option, index) => (
+                              <div key={index} className="flex items-center space-x-2">
+                                <Input
+                                  value={option}
+                                  onChange={(e) => updateOption(index, e.target.value)}
+                                  placeholder={`Alternativ ${index + 1}`}
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                                />
+                                <Button
+                                  onClick={() => removeOption(index)}
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                            <Button
+                              onClick={addOption}
+                              variant="outline"
+                              size="sm"
+                              className="border-white/20 text-white hover:bg-white/10"
+                            >
+                              <Plus className="h-4 w-4 mr-1" />
+                              Lägg till alternativ
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Range/Number Options */}
+                      {(['range', 'number'].includes(editingQuestion?.question_type || '')) && (
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-white font-medium">Min värde</Label>
+                            <Input
+                              type="number"
+                              value={editingQuestion?.min_value || ''}
+                              onChange={(e) => updateQuestionField('min_value', e.target.value ? parseInt(e.target.value) : undefined)}
+                              placeholder="0"
+                              className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-white font-medium">Max värde</Label>
+                            <Input
+                              type="number"
+                              value={editingQuestion?.max_value || ''}
+                              onChange={(e) => updateQuestionField('max_value', e.target.value ? parseInt(e.target.value) : undefined)}
+                              placeholder="100"
+                              className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Placeholder Text */}
+                      {['text', 'number'].includes(editingQuestion?.question_type || '') && (
+                        <div className="space-y-2">
+                          <Label className="text-white font-medium">Platshållartext</Label>
+                          <Input
+                            value={editingQuestion?.placeholder_text || ''}
+                            onChange={(e) => updateQuestionField('placeholder_text', e.target.value)}
+                            placeholder="Exempeltext som visas i fältet..."
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                          />
+                        </div>
+                      )}
+
+                      {/* Required Toggle */}
+                      <div className="flex items-center space-x-3">
+                        <Switch
+                          checked={editingQuestion?.is_required || false}
+                          onCheckedChange={(checked) => updateQuestionField('is_required', checked)}
+                        />
+                        <Label className="text-white font-medium">Obligatorisk fråga</Label>
+                      </div>
+
+                      {/* Save Button */}
+                      <div className="flex justify-end space-x-2 pt-4">
+                        <Button
+                          onClick={() => {
+                            setShowQuestionForm(false);
+                            setEditingQuestion(null);
+                          }}
+                          variant="ghost"
+                          className="text-white/70 hover:text-white hover:bg-white/10"
+                        >
+                          Avbryt
+                        </Button>
+                        <Button
+                          onClick={saveCustomQuestion}
+                          disabled={!editingQuestion?.question_text?.trim()}
+                          className="bg-primary hover:bg-primary/90 text-white"
+                        >
+                          Spara fråga
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <div className="text-white/60 text-sm bg-white/5 rounded-lg p-3 border border-white/20">
-                    Inga anpassade frågor tillagda än. Klicka "Lägg till fråga" för att skapa din första fråga.
-                  </div>
-                </div>
+                )}
               </div>
             )}
 

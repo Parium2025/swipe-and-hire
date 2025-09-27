@@ -152,8 +152,11 @@ export type Database = {
           id: string
           is_required: boolean
           job_id: string
+          max_value: number | null
+          min_value: number | null
           options: Json | null
           order_index: number
+          placeholder_text: string | null
           question_text: string
           question_type: string
         }
@@ -162,8 +165,11 @@ export type Database = {
           id?: string
           is_required?: boolean
           job_id: string
+          max_value?: number | null
+          min_value?: number | null
           options?: Json | null
           order_index?: number
+          placeholder_text?: string | null
           question_text: string
           question_type: string
         }
@@ -172,8 +178,11 @@ export type Database = {
           id?: string
           is_required?: boolean
           job_id?: string
+          max_value?: number | null
+          min_value?: number | null
           options?: Json | null
           order_index?: number
+          placeholder_text?: string | null
           question_text?: string
           question_type?: string
         }
