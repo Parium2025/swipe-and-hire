@@ -659,7 +659,7 @@ const MobileJobWizard = ({
                         {/* Notch/status */}
                         <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black/60 border border-white/10"></div>
 
-                        {/* Bakgrundsbild */}
+                        {/* Bakgrundsbild - heltäckande */}
                         {formData.job_image_url ? (
                           <img
                             loading="eager"
