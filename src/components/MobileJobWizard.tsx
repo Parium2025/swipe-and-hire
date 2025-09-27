@@ -1008,6 +1008,7 @@ const MobileJobWizard = ({
                         <p>• Namn (från profil)</p>
                         <p>• E-post (från profil)</p>
                         <p>• Telefonnummer (från profil)</p>
+                        <p>• Ålder (från profil)</p>
                         <p>• CV (från profil)</p>
                       </div>
                       <p className="text-white/60 text-xs mt-2">
