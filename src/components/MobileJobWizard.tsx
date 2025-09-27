@@ -1490,172 +1490,157 @@ const MobileJobWizard = ({
                         {/* Notch - helt svart utan vita kanter */}
                         <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black"></div>
 
-                        {showHingePreview ? (
-                          /* Hinge-style preview INOM telefonen */
-                          <div className="absolute inset-0 overflow-y-auto bg-black">
-                            {/* Första kortet: Jobbinfo */}
-                            <div className="relative min-h-full">
-                              {/* Bakgrundsbild - heltäckande */}
-                              {jobImageDisplayUrl ? (
-                                <div 
-                                  className="absolute inset-0 w-full h-full bg-center bg-cover bg-no-repeat"
-                                  style={{
-                                    backgroundImage: `url(${jobImageDisplayUrl})`,
-                                    backgroundSize: 'cover',
-                                    backgroundPosition: bgPosition
-                                  }}
-                                />
-                              ) : (
-                                <div className="absolute inset-0 bg-gradient-to-br from-primary via-purple-600 to-pink-500" />
-                              )}
+                         {showHingePreview ? (
+                           /* Hinge-style preview INOM telefonen - swipe kort */
+                           <div className="absolute inset-0 flex flex-col bg-background">
+                             {/* Parium bakgrund */}
+                             <div 
+                               className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
+                               style={{
+                                 backgroundImage: `url(${modernMobileBg})`
+                               }}
+                             />
+                             
+                             {/* Header - kompakt */}
+                             <div className="relative z-10 flex items-center justify-between p-2 bg-background/80 backdrop-blur-sm">
+                               <div className="text-xs font-medium text-foreground">Förhandsvisning</div>
+                               <button
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   setShowHingePreview(false);
+                                 }}
+                                 className="w-5 h-5 rounded-full bg-muted/80 flex items-center justify-center hover:bg-muted"
+                               >
+                                 <X className="h-3 w-3 text-foreground" />
+                               </button>
+                             </div>
 
-                              {/* Gradient overlay för läsbarhet */}
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                             {/* Main content area - Hinge style */}
+                             <div className="flex-1 relative overflow-hidden">
+                               {/* Company profile card */}
+                               <div className="absolute top-4 left-2 right-2 z-20">
+                                 <div className="bg-card/95 backdrop-blur-sm border border-border rounded-lg p-2 shadow-sm">
+                                   <div className="flex items-center space-x-2">
+                                     <div className="bg-primary/10 rounded-full p-1">
+                                       <Building2 className="h-3 w-3 text-primary" />
+                                     </div>
+                                     <div>
+                                       <div className="font-semibold text-xs text-foreground">
+                                         {profile?.company_name || 'Företagsnamn'}
+                                       </div>
+                                       <div className="text-[10px] text-muted-foreground">
+                                         Klicka för företagsprofil
+                                       </div>
+                                     </div>
+                                   </div>
+                                 </div>
+                               </div>
 
-                              {/* Close button */}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setShowHingePreview(false);
-                                }}
-                                className="absolute top-2 right-2 z-30 w-6 h-6 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
+                               {/* Main job card - Hinge style */}
+                               <div className="absolute top-16 left-2 right-2 bottom-16">
+                                 <div className="bg-card/95 backdrop-blur-sm border border-border rounded-xl p-4 shadow-lg h-full flex flex-col">
+                                   <div className="text-center mb-3">
+                                     <h2 className="font-bold text-sm text-foreground mb-1">
+                                       {formData.title}
+                                     </h2>
+                                     <div className="flex items-center justify-center space-x-2 text-[10px] text-muted-foreground">
+                                       <div className="flex items-center">
+                                         <MapPin className="h-2.5 w-2.5 mr-1" />
+                                         {formData.workplace_city || formData.location}
+                                       </div>
+                                       {formData.employment_type && (
+                                         <>
+                                           <span>•</span>
+                                           <div className="flex items-center">
+                                             <Clock className="h-2.5 w-2.5 mr-1" />
+                                             {EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label}
+                                           </div>
+                                         </>
+                                       )}
+                                     </div>
+                                   </div>
 
-                              {/* Scrollable content container */}
-                              <div className="absolute inset-0 overflow-y-auto pt-8">
-                                <div className="space-y-4 pb-16">
-                                  
-                                  {/* Company header card */}
-                                  <div className="mx-2 bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                                    <div className="flex items-center space-x-2">
-                                      <div className="bg-white/20 rounded-full p-1">
-                                        <Building2 className="h-3 w-3 text-white" />
-                                      </div>
-                                      <div>
-                                        <div className="text-white font-semibold text-xs">
-                                          {profile?.company_name || 'Företagsnamn'}
-                                        </div>
-                                        <div className="text-white/80 text-[10px]">
-                                          Klicka för profil
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
+                                   {/* Main content */}
+                                   <div className="flex-1 space-y-3 overflow-y-auto">
+                                     {/* Description */}
+                                     <div className="bg-muted/30 rounded-lg p-3">
+                                       <h4 className="font-semibold text-xs text-foreground mb-1">Om jobbet</h4>
+                                       <p className="text-[10px] leading-relaxed text-muted-foreground">
+                                         {formData.description.length > 100 ? 
+                                           formData.description.substring(0, 100) + '...' : 
+                                           formData.description
+                                         }
+                                       </p>
+                                     </div>
 
-                                  {/* Job info card */}
-                                  <div className="mx-2 bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                                    <h2 className="text-white font-bold text-sm mb-2">
-                                      {formData.title}
-                                    </h2>
-                                    <div className="space-y-1 text-[10px] text-white/90">
-                                      <div className="flex items-center">
-                                        <MapPin className="h-2.5 w-2.5 mr-1" />
-                                        {formData.workplace_city || formData.location}
-                                      </div>
-                                      {formData.employment_type && (
-                                        <div className="flex items-center">
-                                          <Clock className="h-2.5 w-2.5 mr-1" />
-                                          {EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label}
-                                        </div>
-                                      )}
-                                      {(formData.salary_min || formData.salary_max) && (
-                                        <div className="flex items-center text-green-300">
-                                          <Euro className="h-2.5 w-2.5 mr-1" />
-                                          {formData.salary_min && formData.salary_max 
-                                            ? `${parseInt(formData.salary_min).toLocaleString()} - ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
-                                            : formData.salary_min 
-                                              ? `Från ${parseInt(formData.salary_min).toLocaleString()} kr/mån`
-                                              : `Upp till ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
-                                          }
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
+                                     {/* Salary if available */}
+                                     {(formData.salary_min || formData.salary_max) && (
+                                       <div className="bg-primary/5 border border-primary/20 rounded-lg p-3">
+                                         <div className="flex items-center text-primary">
+                                           <Euro className="h-3 w-3 mr-2" />
+                                           <span className="font-medium text-xs">
+                                             {formData.salary_min && formData.salary_max 
+                                               ? `${parseInt(formData.salary_min).toLocaleString()} - ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
+                                               : formData.salary_min 
+                                                 ? `Från ${parseInt(formData.salary_min).toLocaleString()} kr/mån`
+                                                 : `Upp till ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
+                                             }
+                                           </span>
+                                         </div>
+                                       </div>
+                                     )}
 
-                                  {/* Description card */}
-                                  <div className="mx-2 bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                                    <h4 className="text-white font-semibold text-xs mb-2">Beskrivning</h4>
-                                    <p className="text-white/90 text-[10px] leading-relaxed">
-                                      {formData.description.substring(0, 150)}{formData.description.length > 150 ? '...' : ''}
-                                    </p>
-                                  </div>
+                                     {/* Questions preview */}
+                                     {customQuestions.length > 0 && (
+                                       <div className="bg-secondary/30 rounded-lg p-3">
+                                         <h4 className="font-semibold text-xs text-foreground mb-2 flex items-center">
+                                           <CheckSquare className="h-3 w-3 mr-1 text-primary" />
+                                           Frågor ({customQuestions.length})
+                                         </h4>
+                                         <div className="space-y-1">
+                                           {customQuestions.slice(0, 2).map((question, index) => (
+                                             <div key={index} className="text-[9px] text-muted-foreground flex items-start">
+                                               <span className="mr-1 text-primary">•</span>
+                                               <span className="flex-1">
+                                                 {question.question_text.length > 50 ? 
+                                                   question.question_text.substring(0, 50) + '...' : 
+                                                   question.question_text
+                                                 }
+                                               </span>
+                                             </div>
+                                           ))}
+                                           {customQuestions.length > 2 && (
+                                             <div className="text-[8px] text-center text-muted-foreground pt-1">
+                                               +{customQuestions.length - 2} fler frågor
+                                             </div>
+                                           )}
+                                         </div>
+                                       </div>
+                                     )}
+                                   </div>
+                                 </div>
+                               </div>
 
-                                  {/* Question cards - Hinge style */}
-                                  {customQuestions.map((question, index) => (
-                                    <div key={question.id || index} className="mx-2 bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                                      <div className="flex items-start space-x-2 mb-2">
-                                        <div className="bg-white/20 rounded-full p-1 mt-0.5">
-                                          {question.question_type === 'text' && <FileText className="h-2.5 w-2.5 text-white" />}
-                                          {question.question_type === 'yes_no' && <CheckSquare className="h-2.5 w-2.5 text-white" />}
-                                          {question.question_type === 'multiple_choice' && <List className="h-2.5 w-2.5 text-white" />}
-                                          {question.question_type === 'video' && <Video className="h-2.5 w-2.5 text-white" />}
-                                        </div>
-                                        <div className="flex-1">
-                                          <div className="text-white/70 text-[9px] mb-1">
-                                            Fråga {index + 1}
-                                          </div>
-                                          <h3 className="text-white font-semibold text-xs">
-                                            {question.question_text}
-                                            {question.is_required && (
-                                              <span className="text-red-300 ml-1">*</span>
-                                            )}
-                                          </h3>
-                                        </div>
-                                      </div>
-
-                                      {/* Simplified input preview */}
-                                      <div className="mt-2">
-                                        {question.question_type === 'text' && (
-                                          <div className="bg-white/10 rounded p-2 border border-white/20">
-                                            <div className="text-white/60 text-[9px]">
-                                              {question.placeholder_text || 'Skriv ditt svar här...'}
-                                            </div>
-                                          </div>
-                                        )}
-                                        {question.question_type === 'yes_no' && (
-                                          <div className="space-y-1">
-                                            <div className="bg-white/10 rounded p-1.5 border border-white/20">
-                                              <div className="text-white text-[9px]">○ Ja</div>
-                                            </div>
-                                            <div className="bg-white/10 rounded p-1.5 border border-white/20">
-                                              <div className="text-white text-[9px]">○ Nej</div>
-                                            </div>
-                                          </div>
-                                        )}
-                                        {question.question_type === 'multiple_choice' && (
-                                          <div className="space-y-1">
-                                            {question.options?.slice(0, 2).map((option, idx) => (
-                                              <div key={idx} className="bg-white/10 rounded p-1.5 border border-white/20">
-                                                <div className="text-white text-[9px]">○ {option}</div>
-                                              </div>
-                                            ))}
-                                            {question.options && question.options.length > 2 && (
-                                              <div className="text-white/60 text-[8px] text-center">
-                                                +{question.options.length - 2} fler alternativ
-                                              </div>
-                                            )}
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  ))}
-
-                                  {/* Action buttons */}
-                                  <div className="mx-2 flex space-x-2">
-                                    <button className="flex-1 bg-red-500/80 text-white rounded-lg py-2 text-[10px] font-medium">
-                                      <X className="h-3 w-3 mx-auto" />
-                                    </button>
-                                    <button className="flex-1 bg-green-500/80 text-white rounded-lg py-2 text-[10px] font-medium">
-                                      <Heart className="h-3 w-3 mx-auto" />
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ) : (
+                               {/* Action buttons - Hinge style */}
+                               <div className="absolute bottom-4 left-2 right-2">
+                                 <div className="flex space-x-3 justify-center">
+                                   <button className="w-12 h-12 rounded-full bg-destructive/90 shadow-lg flex items-center justify-center hover:bg-destructive transition-colors">
+                                     <X className="h-5 w-5 text-destructive-foreground" />
+                                   </button>
+                                   <button className="w-12 h-12 rounded-full bg-primary/90 shadow-lg flex items-center justify-center hover:bg-primary transition-colors">
+                                     <Heart className="h-5 w-5 text-primary-foreground" />
+                                   </button>
+                                 </div>
+                                 <div className="text-center mt-1">
+                                   <div className="text-[8px] text-muted-foreground">
+                                     {customQuestions.length > 0 ? 'Gilla för att börja ansöka' : 'Gilla för att visa intresse'}
+                                   </div>
+                                 </div>
+                               </div>
+                             </div>
+                           </div>
+                         )
+ : (
                           /* Original job card preview */
                           <>
                             {/* Bakgrundsbild - heltäckande */}
