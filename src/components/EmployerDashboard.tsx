@@ -174,13 +174,13 @@ const EmployerDashboard = () => {
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="pb-2">
-            <CardDescription className="text-white/70">Totalt annonser</CardDescription>
+            <CardDescription className="text-white">Totalt annonser</CardDescription>
             <CardTitle className="text-2xl text-white">{jobs.length}</CardTitle>
           </CardHeader>
         </Card>
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="pb-2">
-            <CardDescription className="text-white/70">Aktiva annonser</CardDescription>
+            <CardDescription className="text-white">Aktiva annonser</CardDescription>
             <CardTitle className="text-2xl text-white">
               {jobs.filter(job => job.is_active).length}
             </CardTitle>
@@ -188,7 +188,7 @@ const EmployerDashboard = () => {
         </Card>
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="pb-2">
-            <CardDescription className="text-white/70">Totala visningar</CardDescription>
+            <CardDescription className="text-white">Totala visningar</CardDescription>
             <CardTitle className="text-2xl text-white">
               {jobs.reduce((sum, job) => sum + job.views_count, 0)}
             </CardTitle>
@@ -202,8 +202,8 @@ const EmployerDashboard = () => {
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardContent className="text-center py-12">
               <h3 className="text-lg font-semibold mb-2 text-white">Inga annonser än</h3>
-              <p className="text-white/70 mb-4">
-                Skapa din första jobbannons för att komma igång med rekrytering.
+              <p className="text-white mb-4">
+                Skapa din första jobbannons för att komma igång med rekrytering
               </p>
               <div className="flex justify-center">
                 <CreateJobSimpleDialog onJobCreated={fetchJobs} />
