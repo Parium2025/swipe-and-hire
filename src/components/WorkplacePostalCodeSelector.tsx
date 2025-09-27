@@ -146,11 +146,11 @@ const WorkplacePostalCodeSelector = ({
 
       {/* Om postnummer är giltigt men inte hittat */}
       {isValid && !foundLocation && !isLoading && postalCodeValue && postalCodeValue.replace(/\D/g, '').length === 5 && (
-        <Card className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 backdrop-blur-sm border-yellow-500/20 p-3">
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20 p-3">
           <div className="flex items-center space-x-2">
             <div className="flex-shrink-0">
-              <div className="w-6 h-6 bg-yellow-500/20 rounded-full flex items-center justify-center">
-                <MapPin className="w-3 h-3 text-yellow-400" />
+              <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                <MapPin className="w-3 h-3 text-white/60" />
               </div>
             </div>
             <div className="flex-1">
