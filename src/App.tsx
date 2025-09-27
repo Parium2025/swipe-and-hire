@@ -11,6 +11,7 @@ import EmailRedirect from "./pages/EmailRedirect";
 import ResetRedirect from "./pages/ResetRedirect";
 import EmailVerification from "./pages/EmailVerification";
 import ProfilePreview from "./pages/ProfilePreview";
+import JobApplication from "./pages/JobApplication";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/hooks/useAuth";
 import { UnsavedChangesProvider } from "@/hooks/useUnsavedChanges";
@@ -84,6 +85,7 @@ const App = () => {
                   <Route path="/billing" element={<Index />} />
                   <Route path="/payment" element={<Index />} />
                   <Route path="/dashboard" element={<Index />} />
+                  <Route path="/job-application/:jobId" element={<JobApplication />} />
                   <Route path="/company-profile" element={<Index />} />
                   <Route path="/reset-redirect" element={<ResetRedirect />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

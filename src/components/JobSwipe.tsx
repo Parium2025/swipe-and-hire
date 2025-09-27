@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { MapPin, Clock, Euro, Heart, X, Building2, Users, Mail, Info } from 'lucide-react';
-import JobApplicationDialog from './JobApplicationDialog';
+import { useNavigate } from 'react-router-dom';
 
 interface JobPosting {
   id: string;
@@ -34,10 +34,9 @@ const JobSwipe = () => {
   const [currentJobIndex, setCurrentJobIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [swiping, setSwiping] = useState(false);
-  const [showApplicationDialog, setShowApplicationDialog] = useState(false);
-  const [currentJobQuestions, setCurrentJobQuestions] = useState<any[]>([]);
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchJobs();
@@ -85,22 +84,8 @@ const JobSwipe = () => {
 
     try {
       if (liked) {
-        // When liked, fetch questions and show application dialog
-        const { data: questions, error } = await supabase
-          .from('job_questions')
-          .select('*')
-          .eq('job_id', jobId)
-          .order('order_index');
-
-        if (error) {
-          console.error('Error fetching questions:', error);
-        }
-
-        console.log('Fetched questions for job:', jobId, questions);
-        console.log('Questions with options:', questions?.filter(q => q.question_type === 'multiple_choice'));
-
-        setCurrentJobQuestions(questions || []);
-        setShowApplicationDialog(true);
+        // Navigate to application page
+        navigate(`/job-application/${jobId}`);
         setSwiping(false);
       } else {
         // Not interested, just move to next job
@@ -119,28 +104,6 @@ const JobSwipe = () => {
       toast({
         title: "Ett fel uppstod",
         description: "Kunde inte registrera ditt val.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleApplicationSubmit = async (answers: Record<string, any>) => {
-    try {
-      // Here you would save the application to database
-      // For now, just show success message
-      toast({
-        title: "Ansökan skickad!",
-        description: "Din ansökan har skickats till arbetsgivaren"
-      });
-
-      // Move to next job
-      setTimeout(() => {
-        setCurrentJobIndex(prev => prev + 1);
-      }, 1000);
-    } catch (error) {
-      toast({
-        title: "Ett fel uppstod",
-        description: "Kunde inte skicka ansökan",
         variant: "destructive"
       });
     }
@@ -326,14 +289,6 @@ const JobSwipe = () => {
           <p>Tryck ❤️ om du är intresserad eller ✕ för att passa</p>
         </div>
       </div>
-
-      <JobApplicationDialog
-        open={showApplicationDialog}
-        onOpenChange={setShowApplicationDialog}
-        job={currentJob}
-        questions={currentJobQuestions}
-        onSubmit={handleApplicationSubmit}
-      />
     </div>
   );
 };
