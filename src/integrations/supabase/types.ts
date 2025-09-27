@@ -53,6 +53,74 @@ export type Database = {
         }
         Relationships: []
       }
+      job_applications: {
+        Row: {
+          age: number | null
+          applicant_id: string
+          applied_at: string | null
+          availability: string | null
+          bio: string | null
+          custom_answers: Json | null
+          cv_url: string | null
+          email: string | null
+          employment_status: string | null
+          first_name: string | null
+          id: string
+          job_id: string
+          last_name: string | null
+          location: string | null
+          phone: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          age?: number | null
+          applicant_id: string
+          applied_at?: string | null
+          availability?: string | null
+          bio?: string | null
+          custom_answers?: Json | null
+          cv_url?: string | null
+          email?: string | null
+          employment_status?: string | null
+          first_name?: string | null
+          id?: string
+          job_id: string
+          last_name?: string | null
+          location?: string | null
+          phone?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          age?: number | null
+          applicant_id?: string
+          applied_at?: string | null
+          availability?: string | null
+          bio?: string | null
+          custom_answers?: Json | null
+          cv_url?: string | null
+          email?: string | null
+          employment_status?: string | null
+          first_name?: string | null
+          id?: string
+          job_id?: string
+          last_name?: string | null
+          location?: string | null
+          phone?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_postings: {
         Row: {
           application_instructions: string | null
