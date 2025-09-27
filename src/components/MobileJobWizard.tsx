@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
         import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
         import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
         import FileUpload from '@/components/FileUpload';
+import JobPreview from '@/components/JobPreview';
 import { useToast } from '@/hooks/use-toast';
 import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES, getEmploymentTypeLabel } from '@/lib/employmentTypes';
@@ -163,6 +164,7 @@ const MobileJobWizard = ({
   const [remoteWorkSearchTerm, setRemoteWorkSearchTerm] = useState('');
   const [showRemoteWorkDropdown, setShowRemoteWorkDropdown] = useState(false);
   const [showJobPreview, setShowJobPreview] = useState(false);
+  const [showHingePreview, setShowHingePreview] = useState(false);
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
   const [bgPosition, setBgPosition] = useState<string>('center 50%');
@@ -1476,10 +1478,13 @@ const MobileJobWizard = ({
                 <div className="flex flex-col items-center space-y-4">
                   <h3 className="text-white font-medium">Så kommer din annons att se ut:</h3>
                   
-                  {/* Phone mockup with JobAdCard design */}
+                   {/* Phone mockup with JobAdCard design - nu klickbar */}
                   <section aria-label="Jobbannonskort förhandsvisning" className="relative w-[140px] h-[280px] mx-auto">
                     {/* Telefonram */}
-                    <div className="relative w-full h-full rounded-[1.2rem] bg-slate-950 p-0.5 shadow-2xl ring-1 ring-black/30">
+                    <div 
+                      className="relative w-full h-full rounded-[1.2rem] bg-slate-950 p-0.5 shadow-2xl ring-1 ring-black/30 cursor-pointer hover:scale-105 transition-transform duration-200"
+                      onClick={() => setShowHingePreview(true)}
+                    >
                       {/* Skärm */}
                       <div className="relative w-full h-full rounded-[0.9rem] overflow-hidden bg-black">
                         {/* Notch - helt svart utan vita kanter */}
@@ -1545,7 +1550,7 @@ const MobileJobWizard = ({
                   </section>
                   
                   <p className="text-white text-sm text-center max-w-sm">
-                    Detta är hur din annons kommer att visas för jobbsökare. Klicka på knapparna för att testa interaktionen
+                    Detta är hur din annons kommer att visas för jobbsökare. <strong>Klicka på telefonen</strong> för att se hela ansökningsflödet med Hinge-stil.
                   </p>
                 </div>
 
@@ -1731,6 +1736,29 @@ const MobileJobWizard = ({
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Hinge-style Preview Dialog */}
+        <JobPreview
+          open={showHingePreview}
+          onOpenChange={setShowHingePreview}
+          jobData={{
+            title: formData.title,
+            description: formData.description,
+            location: formData.workplace_city || formData.location,
+            salary_min: formData.salary_min,
+            salary_max: formData.salary_max,
+            employment_type: formData.employment_type,
+            work_schedule: formData.work_schedule,
+            contact_email: formData.contact_email,
+            application_instructions: formData.application_instructions,
+            company_name: profile?.company_name,
+            questions: customQuestions
+          }}
+          onCompanyClick={() => {
+            // Här kan vi senare lägga till företagsprofilsvisning
+            console.log('Klick på företagsprofil - implementera senare');
+          }}
+        />
 
         {/* Image Editor Dialog */}
         {editingImageUrl && (
