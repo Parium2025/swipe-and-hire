@@ -826,14 +826,23 @@ const MobileJobWizard = ({
 
                         {/* Textinnehåll - närmare toppen */}
                         <div className="absolute inset-0 flex flex-col justify-start items-center pt-6 px-2 text-white text-center">
-                          <h3 className={`font-extrabold drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)] ${getSmartTextStyle(formData.title).fontSize} ${getSmartTextStyle(formData.title).lineHeight}`}>
+                          <h3 className={`font-extrabold drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)] ${getSmartTextStyle(formData.title).fontSize} ${getSmartTextStyle(formData.title).lineHeight} mb-2`}>
                             {formData.title || 'Jobbtitel'}
                           </h3>
-                          <div className="mt-1 text-white/95 text-sm drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
-                            {profile?.company_name || 'Företagsnamn'}
-                          </div>
-                          <div className="text-white/80 text-xs drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]">
-                            {formData.workplace_city || 'Plats'}
+                          <div className="text-white/95 text-sm drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)] flex items-center gap-1">
+                            <span>{profile?.company_name || 'Företagsnamn'}</span>
+                            {formData.employment_type && (
+                              <>
+                                <span>•</span>
+                                <span>{formData.employment_type}</span>
+                              </>
+                            )}
+                            {formData.workplace_city && (
+                              <>
+                                <span>•</span>
+                                <span>{formData.workplace_city}</span>
+                              </>
+                            )}
                           </div>
                         </div>
 
