@@ -154,6 +154,10 @@ const MobileJobWizard = ({
   const [showOccupationDropdown, setShowOccupationDropdown] = useState(false);
   const [questionTypeSearchTerm, setQuestionTypeSearchTerm] = useState('');
   const [showQuestionTypeDropdown, setShowQuestionTypeDropdown] = useState(false);
+  const [employmentTypeSearchTerm, setEmploymentTypeSearchTerm] = useState('');
+  const [showEmploymentTypeDropdown, setShowEmploymentTypeDropdown] = useState(false);
+  const [salaryTypeSearchTerm, setSalaryTypeSearchTerm] = useState('');
+  const [showSalaryTypeDropdown, setShowSalaryTypeDropdown] = useState(false);
   const [showJobPreview, setShowJobPreview] = useState(false);
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
@@ -584,11 +588,17 @@ const MobileJobWizard = ({
       if (showOccupationDropdown && !(event.target as Element).closest('.occupation-dropdown')) {
         setShowOccupationDropdown(false);
       }
+      if (showEmploymentTypeDropdown && !(event.target as Element).closest('.employment-type-dropdown')) {
+        setShowEmploymentTypeDropdown(false);
+      }
+      if (showSalaryTypeDropdown && !(event.target as Element).closest('.salary-type-dropdown')) {
+        setShowSalaryTypeDropdown(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showQuestionTypeDropdown, showOccupationDropdown]);
+  }, [showQuestionTypeDropdown, showOccupationDropdown, showEmploymentTypeDropdown, showSalaryTypeDropdown]);
   const questionTypes = [
     { value: 'text', label: 'Text' },
     { value: 'yes_no', label: 'Ja/Nej' },
@@ -596,6 +606,13 @@ const MobileJobWizard = ({
     { value: 'number', label: 'Siffra' },
     { value: 'date', label: 'Datum' },
     { value: 'range', label: 'Intervall' }
+  ];
+
+  // Salary type options
+  const salaryTypes = [
+    { value: 'fast', label: 'Fast månads-, vecko- eller timlön' },
+    { value: 'rorlig', label: 'Rörlig, ackord eller provisionslön' },
+    { value: 'fast-rorlig', label: 'Fast och rörlig lön' }
   ];
 
   const handleQuestionTypeSearch = (value: string) => {
@@ -609,8 +626,38 @@ const MobileJobWizard = ({
     setShowQuestionTypeDropdown(false);
   };
 
+  const handleEmploymentTypeSearch = (value: string) => {
+    setEmploymentTypeSearchTerm(value);
+    setShowEmploymentTypeDropdown(value.length >= 0);
+  };
+
+  const handleEmploymentTypeSelect = (type: { value: string, label: string }) => {
+    handleInputChange('employment_type', type.value);
+    setEmploymentTypeSearchTerm(type.label);
+    setShowEmploymentTypeDropdown(false);
+  };
+
+  const handleSalaryTypeSearch = (value: string) => {
+    setSalaryTypeSearchTerm(value);
+    setShowSalaryTypeDropdown(value.length >= 0);
+  };
+
+  const handleSalaryTypeSelect = (type: { value: string, label: string }) => {
+    handleInputChange('salary_type', type.value);
+    setSalaryTypeSearchTerm(type.label);
+    setShowSalaryTypeDropdown(false);
+  };
+
   const filteredQuestionTypes = questionTypes.filter(type => 
     type.label.toLowerCase().includes(questionTypeSearchTerm.toLowerCase())
+  );
+
+  const filteredEmploymentTypes = EMPLOYMENT_TYPES.filter(type => 
+    type.label.toLowerCase().includes(employmentTypeSearchTerm.toLowerCase())
+  );
+
+  const filteredSalaryTypes = salaryTypes.filter(type => 
+    type.label.toLowerCase().includes(salaryTypeSearchTerm.toLowerCase())
   );
 
   const handleWorkplacePostalCodeChange = (postalCode: string) => {
@@ -876,51 +923,64 @@ const MobileJobWizard = ({
 
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Anställningsform *</Label>
-                  <Select value={formData.employment_type} onValueChange={(value) => handleInputChange('employment_type', value)}>
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white h-12 text-base">
-                      <SelectValue placeholder="Välj anställningsform" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-600" side="bottom" align="start">
-                      {EMPLOYMENT_TYPES.map(type => (
-                        <SelectItem 
-                          key={type.value} 
-                          value={type.value}
-                          className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10"
-                        >
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="relative employment-type-dropdown">
+                    <Input
+                      value={employmentTypeSearchTerm || (formData.employment_type ? EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label || '' : '')}
+                      onChange={(e) => handleEmploymentTypeSearch(e.target.value)}
+                      onClick={() => setShowEmploymentTypeDropdown(!showEmploymentTypeDropdown)}
+                      placeholder="Välj anställningsform"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer"
+                      readOnly
+                    />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    
+                    {/* Employment Type Dropdown */}
+                    {showEmploymentTypeDropdown && (
+                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                        {filteredEmploymentTypes.map((type) => (
+                          <button
+                            key={type.value}
+                            type="button"
+                            onClick={() => handleEmploymentTypeSelect(type)}
+                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                          >
+                            <div className="font-medium">{type.label}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Lönetyp</Label>
-                  <Select value={formData.salary_type} onValueChange={(value) => handleInputChange('salary_type', value)}>
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white h-12 text-base">
-                      <SelectValue placeholder="Välj lönetyp" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-600" side="bottom" align="start">
-                      <SelectItem 
-                        value="fast"
-                        className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10"
-                      >
-                        Fast månads-, vecko- eller timlön
-                      </SelectItem>
-                      <SelectItem 
-                        value="rorlig"
-                        className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10"
-                      >
-                        Rörlig, ackord eller provisionslön
-                      </SelectItem>
-                      <SelectItem 
-                        value="fast-rorlig"
-                        className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10"
-                      >
-                        Fast och rörlig lön
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="relative salary-type-dropdown">
+                    <Input
+                      value={salaryTypeSearchTerm || (formData.salary_type ? salaryTypes.find(t => t.value === formData.salary_type)?.label || '' : '')}
+                      onChange={(e) => handleSalaryTypeSearch(e.target.value)}
+                      onClick={() => setShowSalaryTypeDropdown(!showSalaryTypeDropdown)}
+                      placeholder="Välj lönetyp"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer"
+                      readOnly
+                    />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    
+                    {/* Salary Type Dropdown */}
+                    {showSalaryTypeDropdown && (
+                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                        {filteredSalaryTypes.map((type) => (
+                          <button
+                            key={type.value}
+                            type="button"
+                            onClick={() => handleSalaryTypeSelect(type)}
+                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                          >
+                            <div className="font-medium">{type.label}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
