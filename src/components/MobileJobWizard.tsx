@@ -784,43 +784,6 @@ const MobileJobWizard = ({
                   )}
                 </div>
 
-                {/* Optional salary fields */}
-                <div className="bg-white/5 rounded-lg p-4 border border-white/20">
-                  <div className="text-sm text-white/70 mb-3">Löneintervall och arbetstider (valfritt):</div>
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-white text-xs">Från kr/mån</Label>
-                        <Input
-                          type="number"
-                          value={formData.salary_min}
-                          onChange={(e) => handleInputChange('salary_min', e.target.value)}
-                          placeholder="25000"
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-10 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-white text-xs">Till kr/mån</Label>
-                        <Input
-                          type="number"
-                          value={formData.salary_max}
-                          onChange={(e) => handleInputChange('salary_max', e.target.value)}
-                          placeholder="35000"
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-10 text-sm"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-white text-xs">Arbetstider</Label>
-                      <Input
-                        value={formData.work_schedule}
-                        onChange={(e) => handleInputChange('work_schedule', e.target.value)}
-                        placeholder="t.ex. 08:00-17:00, Skiftarbete"
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-10 text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
               </div>
             )}
 
