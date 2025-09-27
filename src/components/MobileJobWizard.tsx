@@ -658,11 +658,6 @@ const MobileJobWizard = ({
                     placeholder="t.ex. Lagerarbetare"
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
                   />
-                  {formData.title.length > 50 && (
-                    <p className="text-blue-400 text-sm">
-                      💡 Lång titel kommer att anpassas automatiskt i förhandsvisningen
-                    </p>
-                  )}
                 </div>
 
                 <div className="space-y-2">
