@@ -1984,10 +1984,22 @@ const MobileJobWizard = ({
                 {/* Footer */}
                 <div className="p-4 border-t bg-muted/20">
                   <div className="flex space-x-3">
-                    <button className="flex-1 bg-muted text-muted-foreground py-3 rounded-lg font-medium">
+                    <button 
+                      onClick={() => setShowApplicationForm(false)}
+                      className="flex-1 bg-muted text-muted-foreground py-3 rounded-lg font-medium hover:bg-muted/80 transition-colors"
+                    >
                       Avbryt
                     </button>
-                    <button className="flex-1 bg-primary text-primary-foreground py-3 rounded-lg font-medium">
+                    <button 
+                      onClick={() => {
+                        toast({
+                          title: "Ansökan skickad!",
+                          description: "Din ansökan har skickats framgångsrikt",
+                        });
+                        setShowApplicationForm(false);
+                      }}
+                      className="flex-1 bg-primary text-primary-foreground py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                    >
                       Skicka ansökan
                     </button>
                   </div>
