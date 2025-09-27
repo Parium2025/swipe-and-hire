@@ -261,9 +261,9 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 border-slate-700">
         <DialogHeader>
-          <DialogTitle className="text-center">
+          <DialogTitle className="text-center text-white">
             Anpassa din {isCircular ? 'profilbild' : 'bild'}
           </DialogTitle>
         </DialogHeader>
@@ -296,6 +296,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               size="sm"
               onClick={zoomOut}
               disabled={scale <= minScale}
+              className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-50"
             >
               <ZoomOut className="h-4 w-4" />
             </Button>
@@ -304,6 +305,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               variant="outline"
               size="sm"
               onClick={resetPosition}
+              className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white"
             >
               <RotateCcw className="h-4 w-4" />
             </Button>
@@ -313,21 +315,22 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               size="sm"
               onClick={zoomIn}
               disabled={scale >= MAX_SCALE}
+              className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-50"
             >
               <ZoomIn className="h-4 w-4" />
             </Button>
           </div>
 
-          <p className="text-sm text-muted-foreground text-center">
+          <p className="text-sm text-slate-300 text-center">
             Dra för att flytta bilden, använd knapparna för att zooma
           </p>
 
           {/* Action buttons */}
           <div className="flex space-x-2">
-            <Button variant="outline" onClick={onClose} className="flex-1">
+            <Button variant="outline" onClick={onClose} className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white">
               Avbryt
             </Button>
-            <Button onClick={handleSave} className="flex-1">
+            <Button onClick={handleSave} className="flex-1 bg-blue-600 hover:bg-blue-700">
               Spara
             </Button>
           </div>
