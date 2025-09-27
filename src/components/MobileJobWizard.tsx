@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
         import FileUpload from '@/components/FileUpload';
 import { useToast } from '@/hooks/use-toast';
 import { categorizeJob } from '@/lib/jobCategorization';
-import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
+import { EMPLOYMENT_TYPES, getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
 import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Briefcase, Heart, Bookmark } from 'lucide-react';
@@ -107,6 +107,22 @@ const MobileJobWizard = ({
     }
   };
   
+  // Format city to Title Case
+  const formatCity = (value?: string) => {
+    if (!value) return '';
+    return value
+      .toLowerCase()
+      .split(' ')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+  };
+
+  // Build meta line: "Deltid • Tyresö"
+  const getMetaLine = (employment?: string, city?: string) => {
+    const emp = getEmploymentTypeLabel(employment);
+    const c = formatCity(city || '');
+    return [emp, c].filter(Boolean).join(' • ');
+  };
   const [citySearchTerm, setCitySearchTerm] = useState('');
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [occupationSearchTerm, setOccupationSearchTerm] = useState('');
@@ -836,18 +852,10 @@ const MobileJobWizard = ({
                           </div>
                           
                           {/* Anställningstyp och plats */}
-                          <div className="text-white/90 text-xs drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)] flex items-center gap-2">
-                            {formData.employment_type && (
-                              <span className="bg-white/20 px-2 py-1 rounded-full font-medium">
-                                {formData.employment_type}
-                              </span>
-                            )}
-                            {formData.workplace_city && (
-                              <span className="bg-white/20 px-2 py-1 rounded-full font-medium">
-                                {formData.workplace_city}
-                              </span>
-                            )}
+                          <div className="text-white/90 text-xs drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]">
+                            {getMetaLine(formData.employment_type, formData.workplace_city) || 'Anställning • Plats'}
                           </div>
+                        </div>
                         </div>
 
                         {/* Handlingsknappar */}
