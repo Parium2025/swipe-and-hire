@@ -498,12 +498,13 @@ const MobileJobWizard = ({
       return formData.work_location_type && 
              formData.remote_work_possible && 
              formData.workplace_name.trim() && 
+             formData.contact_email.trim() && 
              formData.workplace_postal_code.trim() && 
              formData.workplace_city.trim();
     }
     
     if (currentStep === 2) {
-      return formData.contact_email.trim();
+      return true; // Kontakt flyttat till steg 2, så inga krav här
     }
     
     if (currentStep === 3) {
@@ -844,6 +845,17 @@ const MobileJobWizard = ({
                     value={formData.workplace_name}
                     onChange={(e) => handleInputChange('workplace_name', e.target.value)}
                     placeholder={profile?.company_name ? `t.ex. ${profile.company_name}` : "t.ex. IKEA Kungens Kurva"}
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white font-medium">Kontakt e-mail *</Label>
+                  <Input
+                    type="email"
+                    value={formData.contact_email}
+                    onChange={(e) => handleInputChange('contact_email', e.target.value)}
+                    placeholder={user?.email || "kontakt@företag.se"}
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
                   />
                 </div>
