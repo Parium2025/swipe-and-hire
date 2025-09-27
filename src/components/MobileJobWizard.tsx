@@ -506,6 +506,10 @@ const MobileJobWizard = ({
       return formData.contact_email.trim();
     }
     
+    if (currentStep === 3) {
+      return true; // Förhandsvisning kräver ingen validering
+    }
+    
     return true;
   };
 
@@ -863,8 +867,34 @@ const MobileJobWizard = ({
               </div>
             )}
 
-            {/* Step 3: Förhandsvisning */}
+            {/* Step 3: Kontakt */}
             {currentStep === 2 && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-white font-medium">Kontakt-email *</Label>
+                  <Input
+                    type="email"
+                    value={formData.contact_email}
+                    onChange={(e) => handleInputChange('contact_email', e.target.value)}
+                    placeholder="kontakt@företag.se"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white font-medium">Ansökningsinstruktioner</Label>
+                  <Textarea
+                    value={formData.application_instructions}
+                    onChange={(e) => handleInputChange('application_instructions', e.target.value)}
+                    placeholder="Skicka din ansökan till..."
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Step 4: Förhandsvisning */}
+            {currentStep === 3 && (
               <div className="space-y-6">
                 {/* Mobile Mockup Preview - JobAdCard Style */}
                 <div className="flex flex-col items-center space-y-4">
@@ -1003,7 +1033,7 @@ const MobileJobWizard = ({
             )}
 
             {/* Step 4: Kontakt */}
-            {currentStep === 3 && (
+            {currentStep === 2 && (
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Kontakt-email *</Label>
