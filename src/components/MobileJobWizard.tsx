@@ -823,13 +823,15 @@ const MobileJobWizard = ({
                     Ladda upp en bild som representerar jobbet eller arbetsplatsen
                   </p>
                   
-                  <FileUpload
-                    onFileUploaded={(url, fileName) => {
-                      handleInputChange('job_image_url', url);
-                    }}
-                    acceptedFileTypes={['image/*']}
-                    maxFileSize={5 * 1024 * 1024}
-                  />
+                  {!jobImageDisplayUrl && (
+                    <FileUpload
+                      onFileUploaded={(url, fileName) => {
+                        handleInputChange('job_image_url', url);
+                      }}
+                      acceptedFileTypes={['image/*']}
+                      maxFileSize={5 * 1024 * 1024}
+                    />
+                  )}
                   
                   {jobImageDisplayUrl && (
                     <>
@@ -874,7 +876,7 @@ const MobileJobWizard = ({
                             }}
                             className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium"
                           >
-                            🎨 Justera bild
+                            Justera bild
                           </button>
                         </div>
                         <p className="text-xs text-white/60 text-center">
