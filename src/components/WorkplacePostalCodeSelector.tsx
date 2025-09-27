@@ -154,10 +154,10 @@ const WorkplacePostalCodeSelector = ({
               </div>
             </div>
             <div className="flex-1">
-              <p className="text-sm text-yellow-200">
+              <p className="text-sm text-white font-medium">
                 Postnummer {postalCodeValue} hittades inte
               </p>
-              <p className="text-xs text-yellow-300/70 mt-0.5">
+              <p className="text-xs text-white/70 mt-0.5">
                 Du kan ange orten manuellt ovan
               </p>
             </div>
