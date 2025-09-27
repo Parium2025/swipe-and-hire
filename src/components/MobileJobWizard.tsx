@@ -1005,11 +1005,16 @@ const MobileJobWizard = ({
                         Automatiska frågor
                       </h4>
                       <div className="text-white/70 text-sm space-y-1">
-                        <p>• Namn (från profil)</p>
+                        <p>• Namn och efternamn (från profil)</p>
+                        <p>• Födelsedatum (från profil)</p>
                         <p>• E-post (från profil)</p>
                         <p>• Telefonnummer (från profil)</p>
-                        <p>• Ålder (från profil)</p>
+                        <p>• Ort/stad (från profil)</p>
+                        <p>• Presentation (från profil)</p>
                         <p>• CV (från profil)</p>
+                        <p>• Nuvarande anställningsform (från profil)</p>
+                        <p>• Arbetstid (från profil)</p>
+                        <p>• Tillgänglighet (från profil)</p>
                       </div>
                       <p className="text-white/60 text-xs mt-2">
                         Dessa frågor fylls automatiskt från jobbsökarens profil
