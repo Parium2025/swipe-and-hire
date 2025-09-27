@@ -1066,44 +1066,6 @@ const MobileJobWizard = ({
 
               </div>
             )}
-
-            {/* Step 4: Kontakt */}
-            {currentStep === 2 && (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-white font-medium">Kontakt-email *</Label>
-                  <Input
-                    type="email"
-                    value={formData.contact_email}
-                    onChange={(e) => handleInputChange('contact_email', e.target.value)}
-                    placeholder="kontakt@företag.se"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-white font-medium">Krav och kvalifikationer (valfritt)</Label>
-                  <Textarea
-                    value={formData.requirements}
-                    onChange={(e) => handleInputChange('requirements', e.target.value)}
-                    placeholder="Beskriv vilka krav som ställs..."
-                    rows={4}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 text-base resize-none"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-white font-medium">Ansökningsinstruktioner (valfritt)</Label>
-                  <Textarea
-                    value={formData.application_instructions}
-                    onChange={(e) => handleInputChange('application_instructions', e.target.value)}
-                    placeholder="Hur ska kandidater ansöka? Via e-post, telefon eller webbsida?"
-                    rows={4}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 text-base resize-none"
-                  />
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Navigation */}
