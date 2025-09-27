@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { Database } from '@/integrations/supabase/types';
 
 export type UserRole = Database['public']['Enums']['user_role'];
@@ -102,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<UserRoleData | null>(null);
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  
 
   useEffect(() => {
     let mounted = true;

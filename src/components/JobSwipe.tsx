@@ -173,7 +173,10 @@ const JobSwipe = () => {
       </div>
 
       <div className="relative">
-        <Card className={`overflow-hidden border-2 transition-all duration-300 ${swiping ? 'scale-95 opacity-50' : ''}`}>
+        <Card
+          className={`overflow-hidden border-2 transition-all duration-300 ${swiping ? 'scale-95 opacity-50' : ''} cursor-pointer`}
+          onClick={() => navigate(`/job-application/${currentJob.id}`)}
+        >
           <CardContent className="p-6">
             {/* Company info */}
             <div className="flex items-center gap-2 mb-4">
@@ -268,7 +271,7 @@ const JobSwipe = () => {
             variant="outline"
             size="lg"
             className="rounded-full w-16 h-16 border-2 border-red-200 hover:border-red-300 hover:bg-red-50"
-            onClick={() => handleSwipe(currentJob.id, false)}
+            onClick={(e) => { e.stopPropagation(); handleSwipe(currentJob.id, false); }}
             disabled={swiping}
           >
             <X className="h-6 w-6 text-red-500" />
@@ -277,7 +280,7 @@ const JobSwipe = () => {
           <Button
             size="lg"
             className="rounded-full w-16 h-16 bg-green-500 hover:bg-green-600 border-0"
-            onClick={() => handleSwipe(currentJob.id, true)}
+            onClick={(e) => { e.stopPropagation(); handleSwipe(currentJob.id, true); }}
             disabled={swiping}
           >
             <Heart className="h-6 w-6 text-white" />
