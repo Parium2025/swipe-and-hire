@@ -27,11 +27,11 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [minScale, setMinScale] = useState(0.1);
 
   const BASE_CANVAS_HEIGHT = 400; // Output canvas height in px
   const CANVAS_HEIGHT = BASE_CANVAS_HEIGHT;
   const CANVAS_WIDTH = Math.round(BASE_CANVAS_HEIGHT * aspectRatio);
-  const MIN_SCALE = 0.1; // Tillåt mycket mer utzooming
   const MAX_SCALE = 3;
 
   // Load and setup image
@@ -57,6 +57,10 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           const scaleX = containerWidth / img.width;
           const scaleY = containerHeight / img.height;
           const initialScale = Math.max(scaleX, scaleY);
+          
+          // Beräkna minScale för att visa hela bilden (contain)
+          const containScale = Math.min(scaleX, scaleY);
+          setMinScale(containScale);
           
           setScale(initialScale);
           setPosition({ x: 0, y: 0 });
@@ -85,6 +89,10 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           const scaleX = containerWidth / img.width;
           const scaleY = containerHeight / img.height;
           const initialScale = Math.max(scaleX, scaleY);
+          
+          // Beräkna minScale för att visa hela bilden (contain)
+          const containScale = Math.min(scaleX, scaleY);
+          setMinScale(containScale);
           
           setScale(initialScale);
           setPosition({ x: 0, y: 0 });
@@ -222,7 +230,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   };
 
   const zoomOut = () => {
-    setScale(prev => Math.max(prev - 0.2, MIN_SCALE));
+    setScale(prev => Math.max(prev - 0.2, minScale));
   };
 
   const resetPosition = () => {
@@ -287,7 +295,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               variant="outline"
               size="sm"
               onClick={zoomOut}
-              disabled={scale <= MIN_SCALE}
+              disabled={scale <= minScale}
             >
               <ZoomOut className="h-4 w-4" />
             </Button>
