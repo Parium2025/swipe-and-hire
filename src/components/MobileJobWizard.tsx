@@ -1483,7 +1483,7 @@ const MobileJobWizard = ({
                     {/* Telefonram */}
                     <div 
                       className="relative w-full h-full rounded-[1.2rem] bg-slate-950 p-0.5 shadow-2xl ring-1 ring-black/30 cursor-pointer hover:scale-105 transition-transform duration-200"
-                      onClick={() => setShowApplicationForm(true)}
+                      onClick={() => setShowHingePreview(true)}
                     >
                       {/* Skärm */}
                       <div className="relative w-full h-full rounded-[0.9rem] overflow-hidden bg-black">
