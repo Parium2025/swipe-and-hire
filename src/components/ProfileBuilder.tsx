@@ -363,7 +363,7 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
               <Button
                 onClick={handleNext}
                 disabled={!isStepValid()}
-                className="bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                className="bg-primary hover:bg-primary/90 text-white"
               >
                 Nästa
                 <ArrowRight className="h-4 w-4 ml-2" />
