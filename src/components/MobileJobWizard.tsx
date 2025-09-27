@@ -20,6 +20,7 @@ import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCod
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
+import ImageEditor from '@/components/ImageEditor';
 import { createSignedUrl } from '@/utils/storageUtils';
 
 interface JobTemplate {
@@ -89,6 +90,8 @@ const MobileJobWizard = ({
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
   const [bgPosition, setBgPosition] = useState<string>('center 50%');
   const [manualFocus, setManualFocus] = useState<number | null>(null);
+  const [showImageEditor, setShowImageEditor] = useState(false);
+  const [editingImageUrl, setEditingImageUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState<JobFormData>({
     title: jobTitle,
     description: selectedTemplate?.description || '',
@@ -160,6 +163,34 @@ const MobileJobWizard = ({
     img.src = jobImageDisplayUrl;
     return () => { cancelled = true; };
   }, [jobImageDisplayUrl, manualFocus]);
+
+  const handleImageEdit = async (editedImageBlob: Blob) => {
+    try {
+      // Skapa en temporary URL för den redigerade bilden
+      const editedImageUrl = URL.createObjectURL(editedImageBlob);
+      setJobImageDisplayUrl(editedImageUrl);
+      
+      // Här skulle vi normalt ladda upp den redigerade bilden till servern
+      // För nu använder vi bara den lokala blob-URL:en
+      handleInputChange('job_image_url', editedImageUrl);
+      setManualFocus(null); // Återställ manuell fokus efter redigering
+      
+      setShowImageEditor(false);
+      setEditingImageUrl(null);
+      
+      toast({
+        title: "Bild justerad",
+        description: "Din bild har justerats framgångsrikt",
+      });
+    } catch (error) {
+      console.error('Error saving edited image:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte spara den redigerade bilden",
+        variant: "destructive",
+      });
+    }
+  };
 
   const fetchProfile = async () => {
     if (!user) return;
@@ -790,43 +821,47 @@ const MobileJobWizard = ({
                           alt="Job preview" 
                           className="w-full h-32 object-cover rounded-lg"
                         />
-                        <button
-                          onClick={() => {
-                            handleInputChange('job_image_url', '');
-                            setManualFocus(null);
-                          }}
-                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
+                          <button
+                            onClick={() => {
+                              handleInputChange('job_image_url', '');
+                              setManualFocus(null);
+                            }}
+                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setEditingImageUrl(jobImageDisplayUrl);
+                              setShowImageEditor(true);
+                            }}
+                            className="absolute bottom-2 right-2 bg-blue-500 text-white rounded-full p-2 hover:bg-blue-600 transition-colors"
+                            title="Justera bild"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                          </button>
                       </div>
                       
-                      {/* Fokus-slider */}
+                      {/* Bildkontroller */}
                       <div className="mt-4 space-y-3">
-                        <div className="text-white/90 text-sm font-medium">Bildfokus</div>
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-xs text-white/60">
-                            <span>Toppen</span>
-                            <span>Mitten</span>
-                            <span>Botten</span>
-                          </div>
-                          <Slider
-                            value={[manualFocus ?? 50]}
-                            onValueChange={([value]) => setManualFocus(value)}
-                            max={100}
-                            min={0}
-                            step={5}
-                            className="w-full"
-                          />
-                          <div className="flex justify-center">
-                            <button
-                              onClick={() => setManualFocus(null)}
-                              className="text-xs text-white/60 hover:text-white transition-colors underline"
-                            >
-                              Återställ till auto
-                            </button>
-                          </div>
+                        <div className="flex justify-center">
+                          <button
+                            onClick={() => {
+                              if (jobImageDisplayUrl) {
+                                setEditingImageUrl(jobImageDisplayUrl);
+                                setShowImageEditor(true);
+                              }
+                            }}
+                            className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium"
+                          >
+                            🎨 Justera bild
+                          </button>
                         </div>
+                        <p className="text-xs text-white/60 text-center">
+                          Klicka för att zooma, panorera och justera bilden
+                        </p>
                       </div>
                     </>
                   )}
@@ -996,6 +1031,21 @@ const MobileJobWizard = ({
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Image Editor Dialog */}
+        {editingImageUrl && (
+          <ImageEditor
+            isOpen={showImageEditor}
+            onClose={() => {
+              setShowImageEditor(false);
+              setEditingImageUrl(null);
+            }}
+            imageSrc={editingImageUrl}
+            onSave={handleImageEdit}
+            isCircular={false}
+            aspectRatio={16/9} // Mobiltelefon aspect ratio för bakgrund
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
