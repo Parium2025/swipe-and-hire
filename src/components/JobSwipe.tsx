@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { MapPin, Clock, Euro, Heart, X, Building2, Users, Mail, Info } from 'lucide-react';
-import JobApplicationDialog from './JobApplicationDialog';
+import SmartJobApplicationDialog from './SmartJobApplicationDialog';
 
 interface JobPosting {
   id: string;
@@ -327,7 +327,7 @@ const JobSwipe = () => {
         </div>
       </div>
 
-      <JobApplicationDialog
+      <SmartJobApplicationDialog
         open={showApplicationDialog}
         onOpenChange={setShowApplicationDialog}
         job={currentJob}
