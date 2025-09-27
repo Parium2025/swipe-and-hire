@@ -312,7 +312,13 @@ const MobileJobWizard = ({
     
     // Required fields validation
     if (currentStep === 0) {
-      return formData.title.trim() && formData.occupation.trim() && formData.description.trim() && formData.employment_type;
+      return formData.title.trim() && 
+             formData.occupation.trim() && 
+             formData.description.trim() && 
+             formData.employment_type &&
+             formData.salary_type &&
+             (formData.salary_min.trim() || formData.salary_max.trim()) &&
+             formData.positions_count.trim();
     }
     
     if (currentStep === 1) {
