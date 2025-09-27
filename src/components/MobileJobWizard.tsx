@@ -946,7 +946,7 @@ const MobileJobWizard = ({
                 {/* Image upload section */}
                 <div className="bg-white/5 rounded-lg p-4 border border-white/20">
                   <div className="text-white font-medium mb-3">Jobbild (valfritt)</div>
-                  <p className="text-white/70 text-sm mb-4">
+                  <p className="text-white text-sm mb-4">
                     Ladda upp en bild som representerar jobbet eller arbetsplatsen
                   </p>
                   
@@ -991,7 +991,7 @@ const MobileJobWizard = ({
                             Justera bild
                           </button>
                         </div>
-                        <p className="text-xs text-white/60 text-center">
+                        <p className="text-xs text-white text-center">
                           Klicka för att zooma, panorera och justera bilden
                         </p>
                       </div>
