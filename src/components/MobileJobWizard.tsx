@@ -82,6 +82,13 @@ const MobileJobWizard = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
+
+  // Utility function to truncate text for better display
+  const truncateText = (text: string, maxLength: number = 35) => {
+    if (!text) return text;
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength).trim() + '...';
+  };
   const [citySearchTerm, setCitySearchTerm] = useState('');
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [occupationSearchTerm, setOccupationSearchTerm] = useState('');
@@ -797,7 +804,7 @@ const MobileJobWizard = ({
                         {/* Textinnehåll - centrerat */}
                         <div className="absolute inset-0 flex flex-col justify-center items-center p-2 text-white text-center">
                           <h3 className="text-base font-extrabold leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)]">
-                            {formData.title || 'Jobbtitel'}
+                            {truncateText(formData.title) || 'Jobbtitel'}
                           </h3>
                           <div className="mt-1 text-white/95 text-sm drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
                             {profile?.company_name || 'Företagsnamn'}
@@ -983,7 +990,7 @@ const MobileJobWizard = ({
           <DialogContent className="max-w-md bg-white text-gray-900">
             <DialogHeader>
               <DialogTitle className="text-xl font-bold">
-                {formData.title || 'Jobbtitel'}
+                {truncateText(formData.title, 50) || 'Jobbtitel'}
               </DialogTitle>
               <p className="text-gray-600">{profile?.company_name || 'Företagsnamn'}</p>
             </DialogHeader>
