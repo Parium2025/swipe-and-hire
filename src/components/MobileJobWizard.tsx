@@ -1012,7 +1012,6 @@ const MobileJobWizard = ({
                         <p>• Presentation</p>
                         <p>• CV</p>
                         <p>• Nuvarande anställningsform</p>
-                        <p>• Anställningsinformation</p>
                         <p>• Tillgänglighet</p>
                       </div>
                     </div>
