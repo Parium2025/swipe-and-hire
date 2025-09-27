@@ -19,6 +19,7 @@ import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Bu
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { Progress } from '@/components/ui/progress';
+import { createSignedUrl } from '@/utils/storageUtils';
 
 interface JobTemplate {
   id: string;
@@ -84,6 +85,7 @@ const MobileJobWizard = ({
   const [occupationSearchTerm, setOccupationSearchTerm] = useState('');
   const [showOccupationDropdown, setShowOccupationDropdown] = useState(false);
   const [showJobPreview, setShowJobPreview] = useState(false);
+  const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState<JobFormData>({
     title: jobTitle,
     description: selectedTemplate?.description || '',
@@ -117,6 +119,19 @@ const MobileJobWizard = ({
       fetchProfile();
     }
   }, [user, open]);
+
+  // Resolve signed URL for uploaded job image preview
+  useEffect(() => {
+    const url = formData.job_image_url;
+    let cancelled = false;
+    (async () => {
+      if (!url) { setJobImageDisplayUrl(null); return; }
+      if (url.startsWith('http')) { setJobImageDisplayUrl(url); return; }
+      const signed = await createSignedUrl('job-applications', url, 86400);
+      if (!cancelled) setJobImageDisplayUrl(signed);
+    })();
+    return () => { cancelled = true; };
+  }, [formData.job_image_url]);
 
   const fetchProfile = async () => {
     if (!user) return;
@@ -660,12 +675,12 @@ const MobileJobWizard = ({
                         <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black/60 border border-white/10"></div>
 
                         {/* Bakgrundsbild - heltäckande */}
-                        {formData.job_image_url ? (
+                        {jobImageDisplayUrl ? (
                           <img
                             loading="eager"
                             fetchPriority="high"
                             decoding="async"
-                            src={formData.job_image_url}
+                            src={jobImageDisplayUrl}
                             alt={`${formData.title || 'Jobbtitel'} hos ${profile?.company_name || 'företaget'}`}
                             className="absolute inset-0 w-full h-full object-cover"
                             draggable={false}
@@ -735,10 +750,10 @@ const MobileJobWizard = ({
                     maxFileSize={5 * 1024 * 1024}
                   />
                   
-                  {formData.job_image_url && (
+                  {jobImageDisplayUrl && (
                     <div className="mt-3 relative">
                       <img 
-                        src={formData.job_image_url} 
+                        src={jobImageDisplayUrl} 
                         alt="Job preview" 
                         className="w-full h-32 object-cover rounded-lg"
                       />
@@ -849,10 +864,10 @@ const MobileJobWizard = ({
             
             <div className="space-y-4">
               {/* Job image if available */}
-              {formData.job_image_url && (
+              {jobImageDisplayUrl && (
                 <div className="w-full h-48 rounded-lg overflow-hidden">
                   <img 
-                    src={formData.job_image_url} 
+                    src={jobImageDisplayUrl} 
                     alt="Job image" 
                     className="w-full h-full object-cover"
                   />
