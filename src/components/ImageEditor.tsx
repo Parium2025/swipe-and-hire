@@ -359,8 +359,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               onClick={handleSaveClick}
               className={`flex-1 transition-all duration-200 ${
                 activeButton === 'save'
-                  ? 'bg-slate-900 text-white border-slate-900' 
-                  : 'bg-transparent border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white'
+                  ? 'bg-slate-800 text-white border-slate-800' 
+                  : 'bg-slate-900 text-white border-slate-900 hover:bg-slate-800'
               }`}
               variant="outline"
             >
