@@ -317,8 +317,7 @@ const MobileJobWizard = ({
              formData.description.trim() && 
              formData.employment_type &&
              formData.salary_type &&
-             (formData.salary_min.trim() || formData.salary_max.trim()) &&
-             formData.positions_count && parseInt(formData.positions_count) > 0;
+             parseInt(formData.positions_count) > 0;
     }
     
     if (currentStep === 1) {
