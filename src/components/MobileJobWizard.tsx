@@ -383,7 +383,7 @@ const MobileJobWizard = ({
   const addCustomQuestion = () => {
     const newQuestion: JobQuestion = {
       question_text: '',
-      question_type: 'text',
+      question_type: 'text', // Default to text but we'll make user choose
       is_required: true,
       order_index: customQuestions.length,
       options: []
@@ -1109,11 +1109,11 @@ const MobileJobWizard = ({
                       <div className="space-y-2">
                         <Label className="text-white font-medium">Frågetyp *</Label>
                         <Select
-                          value={editingQuestion?.question_type || 'text'}
+                          value={editingQuestion?.question_type || ''}
                           onValueChange={(value) => updateQuestionField('question_type', value)}
                         >
                           <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                            <SelectValue />
+                            <SelectValue placeholder="Välj frågetyp" />
                           </SelectTrigger>
                           <SelectContent className="bg-gray-800 border-gray-600">
                             <SelectItem value="text" className="text-white hover:bg-gray-700">Text</SelectItem>
@@ -1121,24 +1121,24 @@ const MobileJobWizard = ({
                             <SelectItem value="multiple_choice" className="text-white hover:bg-gray-700">Flervalsval</SelectItem>
                             <SelectItem value="number" className="text-white hover:bg-gray-700">Siffra</SelectItem>
                             <SelectItem value="date" className="text-white hover:bg-gray-700">Datum</SelectItem>
-                            <SelectItem value="file" className="text-white hover:bg-gray-700">Fil</SelectItem>
                             <SelectItem value="range" className="text-white hover:bg-gray-700">Intervall</SelectItem>
-                            <SelectItem value="video" className="text-white hover:bg-gray-700">Video</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
 
-                      {/* Question Text */}
-                      <div className="space-y-2">
-                        <Label className="text-white font-medium">Frågetext *</Label>
-                        <Textarea
-                          value={editingQuestion?.question_text || ''}
-                          onChange={(e) => updateQuestionField('question_text', e.target.value)}
-                          placeholder="Skriv din fråga här..."
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 resize-none"
-                          rows={2}
-                        />
-                      </div>
+                      {/* Question Text - only show after question type is selected */}
+                      {editingQuestion?.question_type && (
+                        <div className="space-y-2">
+                          <Label className="text-white font-medium">Frågetext *</Label>
+                          <Textarea
+                            value={editingQuestion?.question_text || ''}
+                            onChange={(e) => updateQuestionField('question_text', e.target.value)}
+                            placeholder="Skriv din fråga här..."
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 resize-none"
+                            rows={2}
+                          />
+                        </div>
+                      )}
 
                       {/* Multiple Choice Options */}
                       {editingQuestion?.question_type === 'multiple_choice' && (
