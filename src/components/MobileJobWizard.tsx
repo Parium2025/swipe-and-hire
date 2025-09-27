@@ -1000,6 +1000,9 @@ const MobileJobWizard = ({
 
                     {/* Automatiska frågor info */}
                     <div className="bg-white/5 rounded-lg p-4 border border-white/20">
+                      <p className="text-white/90 text-sm font-medium mb-3 text-center">
+                        Dessa frågor fylls automatiskt från jobbsökarens profil
+                      </p>
                       <h4 className="text-white font-medium mb-2 flex items-center">
                         <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
                         Automatiska frågor
@@ -1016,9 +1019,6 @@ const MobileJobWizard = ({
                         <p>• Arbetstid</p>
                         <p>• Tillgänglighet</p>
                       </div>
-                      <p className="text-white/60 text-xs mt-2">
-                        Dessa frågor fylls automatiskt från jobbsökarens profil
-                      </p>
                     </div>
 
                     {/* Anpassade frågor */}
