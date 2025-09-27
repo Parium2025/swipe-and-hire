@@ -637,6 +637,11 @@ const MobileJobWizard = ({
     setShowEmploymentTypeDropdown(false);
   };
 
+  const handleEmploymentTypeClick = () => {
+    setEmploymentTypeSearchTerm(''); // Reset search to show all options
+    setShowEmploymentTypeDropdown(!showEmploymentTypeDropdown);
+  };
+
   const handleSalaryTypeSearch = (value: string) => {
     setSalaryTypeSearchTerm(value);
     setShowSalaryTypeDropdown(value.length >= 0);
@@ -648,17 +653,26 @@ const MobileJobWizard = ({
     setShowSalaryTypeDropdown(false);
   };
 
+  const handleSalaryTypeClick = () => {
+    setSalaryTypeSearchTerm(''); // Reset search to show all options
+    setShowSalaryTypeDropdown(!showSalaryTypeDropdown);
+  };
+
   const filteredQuestionTypes = questionTypes.filter(type => 
     type.label.toLowerCase().includes(questionTypeSearchTerm.toLowerCase())
   );
 
-  const filteredEmploymentTypes = EMPLOYMENT_TYPES.filter(type => 
-    type.label.toLowerCase().includes(employmentTypeSearchTerm.toLowerCase())
-  );
+  const filteredEmploymentTypes = employmentTypeSearchTerm.length > 0 
+    ? EMPLOYMENT_TYPES.filter(type => 
+        type.label.toLowerCase().includes(employmentTypeSearchTerm.toLowerCase())
+      )
+    : EMPLOYMENT_TYPES;
 
-  const filteredSalaryTypes = salaryTypes.filter(type => 
-    type.label.toLowerCase().includes(salaryTypeSearchTerm.toLowerCase())
-  );
+  const filteredSalaryTypes = salaryTypeSearchTerm.length > 0
+    ? salaryTypes.filter(type => 
+        type.label.toLowerCase().includes(salaryTypeSearchTerm.toLowerCase())
+      )
+    : salaryTypes;
 
   const handleWorkplacePostalCodeChange = (postalCode: string) => {
     handleInputChange('workplace_postal_code', postalCode);
@@ -927,7 +941,7 @@ const MobileJobWizard = ({
                     <Input
                       value={employmentTypeSearchTerm || (formData.employment_type ? EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label || '' : '')}
                       onChange={(e) => handleEmploymentTypeSearch(e.target.value)}
-                      onClick={() => setShowEmploymentTypeDropdown(!showEmploymentTypeDropdown)}
+                      onClick={handleEmploymentTypeClick}
                       placeholder="Välj anställningsform"
                       className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer"
                       readOnly
@@ -958,7 +972,7 @@ const MobileJobWizard = ({
                     <Input
                       value={salaryTypeSearchTerm || (formData.salary_type ? salaryTypes.find(t => t.value === formData.salary_type)?.label || '' : '')}
                       onChange={(e) => handleSalaryTypeSearch(e.target.value)}
-                      onClick={() => setShowSalaryTypeDropdown(!showSalaryTypeDropdown)}
+                      onClick={handleSalaryTypeClick}
                       placeholder="Välj lönetyp"
                       className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer"
                       readOnly
