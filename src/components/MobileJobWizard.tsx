@@ -86,6 +86,7 @@ const MobileJobWizard = ({
   const [showOccupationDropdown, setShowOccupationDropdown] = useState(false);
   const [showJobPreview, setShowJobPreview] = useState(false);
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
+  const [bgPosition, setBgPosition] = useState<string>('center 50%');
   const [formData, setFormData] = useState<JobFormData>({
     title: jobTitle,
     description: selectedTemplate?.description || '',
@@ -132,6 +133,29 @@ const MobileJobWizard = ({
     })();
     return () => { cancelled = true; };
   }, [formData.job_image_url]);
+
+  // Auto-justera beskärning baserat på bildens aspektförhållande
+  useEffect(() => {
+    if (!jobImageDisplayUrl) { setBgPosition('center 50%'); return; }
+    const img = new Image();
+    let cancelled = false;
+    img.onload = () => {
+      if (cancelled) return;
+      const w = img.naturalWidth || (img as any).width;
+      const h = img.naturalHeight || (img as any).height;
+      const ratio = w / h; // >1 = liggande, <1 = stående
+
+      let posY = 50;
+      if (ratio < 0.6) posY = 36;         // extremt stående (t.ex. telefon-screens)
+      else if (ratio < 0.85) posY = 40;   // stående
+      else if (ratio < 1.1) posY = 48;    // nära kvadrat
+      else posY = 50;                     // liggande
+
+      setBgPosition(`center ${posY}%`);
+    };
+    img.src = jobImageDisplayUrl;
+    return () => { cancelled = true; };
+  }, [jobImageDisplayUrl]);
 
   const fetchProfile = async () => {
     if (!user) return;
@@ -681,7 +705,7 @@ const MobileJobWizard = ({
                             style={{
                               backgroundImage: `url(${jobImageDisplayUrl})`,
                               backgroundSize: 'cover',
-                              backgroundPosition: 'center center'
+                              backgroundPosition: bgPosition
                             }}
                           />
                         ) : (
