@@ -90,17 +90,26 @@ const MobileJobWizard = ({
     return text.substring(0, maxLength).trim() + '...';
   };
 
-  // Smart text sizing for mobile preview based on content length
+  // AI-optimized title state
+  const [optimizedTitle, setOptimizedTitle] = useState<string>('');
+  const [isOptimizing, setIsOptimizing] = useState(false);
+
+  // Smart text sizing for mobile preview based on content length and visual impact
   const getSmartTextStyle = (text: string) => {
-    if (!text) return { fontSize: 'text-base', lineHeight: 'leading-tight' };
+    if (!text) return { fontSize: 'text-lg', lineHeight: 'leading-tight' };
     
     const length = text.length;
     
-    if (length <= 25) {
+    // More aggressive sizing for maximum visual impact
+    if (length <= 15) {
+      return { fontSize: 'text-xl', lineHeight: 'leading-tight' };
+    } else if (length <= 25) {
+      return { fontSize: 'text-lg', lineHeight: 'leading-tight' };
+    } else if (length <= 35) {
       return { fontSize: 'text-base', lineHeight: 'leading-tight' };
-    } else if (length <= 40) {
+    } else if (length <= 50) {
       return { fontSize: 'text-sm', lineHeight: 'leading-tight' };
-    } else if (length <= 60) {
+    } else if (length <= 70) {
       return { fontSize: 'text-xs', lineHeight: 'leading-tight' };
     } else {
       return { fontSize: 'text-xs', lineHeight: 'leading-none' };
@@ -157,6 +166,61 @@ const MobileJobWizard = ({
     pitch: '',
     job_image_url: ''
   });
+
+  // AI-powered title optimization
+  const optimizeTitle = async (title: string) => {
+    if (!title || title.length <= 30 || isOptimizing) return title;
+    
+    setIsOptimizing(true);
+    try {
+      const response = await fetch('/api/functions/v1/optimize-job-title', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          title: title,
+          maxLength: 35 // Optimal length for mobile display
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.optimizedTitle && data.wasOptimized) {
+          return data.optimizedTitle;
+        }
+      }
+    } catch (error) {
+      console.error('Title optimization failed:', error);
+    } finally {
+      setIsOptimizing(false);
+    }
+    return title;
+  };
+
+  // Auto-optimize title when it changes
+  useEffect(() => {
+    const autoOptimize = async () => {
+      if (formData.title && formData.title.length > 30) {
+        const optimized = await optimizeTitle(formData.title);
+        if (optimized !== formData.title) {
+          setOptimizedTitle(optimized);
+        } else {
+          setOptimizedTitle('');
+        }
+      } else {
+        setOptimizedTitle('');
+      }
+    };
+
+    const timeoutId = setTimeout(autoOptimize, 1000); // Debounce
+    return () => clearTimeout(timeoutId);
+  }, [formData.title]);
+
+  // Get display title (optimized or original)
+  const getDisplayTitle = () => {
+    return optimizedTitle || formData.title || 'Jobbtitel';
+  };
 
   const { user } = useAuth();
   const { toast } = useToast();
@@ -842,8 +906,9 @@ const MobileJobWizard = ({
 
                         {/* Textinnehåll - närmare toppen */}
                         <div className="absolute inset-0 flex flex-col justify-start items-center pt-6 px-2 text-white text-center">
-                          <h3 className={`font-extrabold drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)] ${getSmartTextStyle(formData.title).fontSize} ${getSmartTextStyle(formData.title).lineHeight} mb-2`}>
-                            {formData.title || 'Jobbtitel'}
+                          <h3 className={`font-extrabold drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)] ${getSmartTextStyle(getDisplayTitle()).fontSize} ${getSmartTextStyle(getDisplayTitle()).lineHeight} mb-2 ${isOptimizing ? 'opacity-75' : ''}`}>
+                            {getDisplayTitle()}
+                            {isOptimizing && <span className="ml-1 animate-pulse">✨</span>}
                           </h3>
                           
                           {/* Företagsnamn */}
