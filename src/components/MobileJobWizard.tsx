@@ -15,7 +15,7 @@ import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Briefcase } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Briefcase, Heart, Bookmark } from 'lucide-react';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { Progress } from '@/components/ui/progress';
@@ -646,110 +646,78 @@ const MobileJobWizard = ({
             {/* Step 3: Förhandsvisning */}
             {currentStep === 2 && (
               <div className="space-y-6">
-                {/* Mobile Mockup Preview */}
-                <div 
-                  className="relative h-96 rounded-2xl overflow-hidden cursor-pointer group"
-                  style={{
-                    backgroundImage: `url(${modernMobileBg})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                  }}
-                  onClick={() => setShowJobPreview(true)}
-                >
-                  {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                {/* Mobile Mockup Preview - JobAdCard Style */}
+                <div className="flex flex-col items-center space-y-4">
+                  <h3 className="text-white font-medium">Så kommer din annons att se ut:</h3>
                   
-                  {/* Phone mockup container */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="relative w-64 h-80 bg-white rounded-3xl shadow-2xl overflow-hidden border-8 border-gray-800 group-hover:scale-105 transition-transform duration-300">
-                      {/* Job image or gradient background */}
-                      <div 
-                        className="h-48 relative overflow-hidden"
-                        style={{
-                          backgroundImage: formData.job_image_url 
-                            ? `url(${formData.job_image_url})`
-                            : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                        }}
-                      >
-                        {/* Company logo overlay */}
-                        <div className="absolute top-4 left-4 right-4 flex items-start space-x-3">
-                          {profile?.company_logo_url ? (
-                            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
-                              <img 
-                                src={profile.company_logo_url} 
-                                alt="Company logo" 
-                                className="w-6 h-6 object-contain"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center flex-shrink-0">
-                              <Building className="w-5 h-5 text-white" />
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-white text-sm leading-tight drop-shadow-lg">
-                              {formData.title || 'Jobbtitel'}
-                            </h3>
-                            <p className="text-white/90 text-xs drop-shadow-lg">
-                              {profile?.company_name || 'Företagsnamn'}
-                            </p>
+                  {/* Phone mockup with JobAdCard design */}
+                  <section aria-label="Jobbannonskort förhandsvisning" className="relative w-[140px] h-[280px] mx-auto">
+                    {/* Telefonram */}
+                    <div className="relative w-full h-full rounded-[1.2rem] bg-slate-950 p-0.5 shadow-2xl ring-1 ring-black/30">
+                      {/* Skärm */}
+                      <div className="relative w-full h-full rounded-[0.9rem] overflow-hidden bg-black">
+                        {/* Notch/status */}
+                        <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black/60 border border-white/10"></div>
+
+                        {/* Bakgrundsbild */}
+                        {formData.job_image_url ? (
+                          <img
+                            loading="eager"
+                            fetchPriority="high"
+                            decoding="async"
+                            src={formData.job_image_url}
+                            alt={`${formData.title || 'Jobbtitel'} hos ${profile?.company_name || 'företaget'}`}
+                            className="absolute inset-0 w-full h-full object-cover"
+                            draggable={false}
+                          />
+                        ) : (
+                          <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800" />
+                        )}
+
+                        {/* Nedre gradient för läsbarhet */}
+                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
+
+                        {/* Textinnehåll - centrerat */}
+                        <div className="absolute inset-0 flex flex-col justify-center items-center p-2 text-white text-center">
+                          <h3 className="text-base font-extrabold leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)]">
+                            {formData.title || 'Jobbtitel'}
+                          </h3>
+                          <div className="mt-1 text-white/95 text-sm drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
+                            {profile?.company_name || 'Företagsnamn'}
+                          </div>
+                          <div className="text-white/80 text-xs drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]">
+                            {formData.workplace_city || 'Plats'}
                           </div>
                         </div>
 
-                        {/* Gradient overlay for text readability */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                      </div>
-
-                      {/* Job details */}
-                      <div className="p-3 h-32 flex flex-col justify-between">
-                        <div className="space-y-2">
-                          {/* Location and employment type */}
-                          <div className="flex items-center gap-2 text-xs">
-                            <MapPin className="w-3 h-3 text-gray-500" />
-                            <span className="text-gray-600 truncate">
-                              {formData.workplace_city || formData.location || 'Plats'}
-                            </span>
-                            {formData.employment_type && (
-                              <span className="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800 ml-auto">
-                                {EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label}
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Salary if available */}
-                          {(formData.salary_min || formData.salary_max) && (
-                            <div className="text-green-600 text-xs font-medium flex items-center">
-                              💰 {formData.salary_min && formData.salary_max 
-                                ? `${parseInt(formData.salary_min).toLocaleString()} - ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
-                                : formData.salary_min 
-                                  ? `Från ${parseInt(formData.salary_min).toLocaleString()} kr/mån`
-                                  : `Upp till ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
-                              }
-                            </div>
-                          )}
-
-                          {/* Description preview */}
-                          <p className="text-gray-700 text-xs leading-relaxed line-clamp-2">
-                            {formData.description || 'Jobbeskrivning visas här...'}
-                          </p>
+                        {/* Handlingsknappar */}
+                        <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center gap-2">
+                          <button
+                            aria-label="Nej tack"
+                            className="w-7 h-7 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors"
+                          >
+                            <X className="h-3.5 w-3.5 text-white" />
+                          </button>
+                          <button
+                            aria-label="Spara jobb"
+                            className="w-7 h-7 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors"
+                          >
+                            <Bookmark className="h-3.5 w-3.5 text-white" />
+                          </button>
+                          <button
+                            aria-label="Gilla jobbet"
+                            className="w-7 h-7 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors"
+                          >
+                            <Heart className="h-3.5 w-3.5 text-white fill-white" />
+                          </button>
                         </div>
-
-                        {/* Apply button */}
-                        <button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium py-2 px-3 rounded-lg text-xs hover:shadow-lg transition-all">
-                          Ansök nu
-                        </button>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Tap to preview overlay */}
-                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-                    <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium text-gray-800 shadow-lg group-hover:bg-white transition-colors">
-                      Tryck för att se hela beskrivningen
-                    </div>
-                  </div>
+                  </section>
+                  
+                  <p className="text-white/70 text-sm text-center max-w-sm">
+                    Detta är hur din annons kommer att visas för jobbsökare. Klicka på knapparna för att testa interaktionen.
+                  </p>
                 </div>
 
                 {/* Image upload section */}
