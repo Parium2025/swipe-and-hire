@@ -19,6 +19,7 @@ import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Bu
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { Progress } from '@/components/ui/progress';
+import { Slider } from '@/components/ui/slider';
 import { createSignedUrl } from '@/utils/storageUtils';
 
 interface JobTemplate {
@@ -87,6 +88,7 @@ const MobileJobWizard = ({
   const [showJobPreview, setShowJobPreview] = useState(false);
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
   const [bgPosition, setBgPosition] = useState<string>('center 50%');
+  const [manualFocus, setManualFocus] = useState<number | null>(null);
   const [formData, setFormData] = useState<JobFormData>({
     title: jobTitle,
     description: selectedTemplate?.description || '',
@@ -151,11 +153,13 @@ const MobileJobWizard = ({
       else if (ratio < 1.1) posY = 48;    // nära kvadrat
       else posY = 50;                     // liggande
 
-      setBgPosition(`center ${posY}%`);
+      // Använd manuell justering om den är satt
+      const finalY = manualFocus !== null ? manualFocus : posY;
+      setBgPosition(`center ${finalY}%`);
     };
     img.src = jobImageDisplayUrl;
     return () => { cancelled = true; };
-  }, [jobImageDisplayUrl]);
+  }, [jobImageDisplayUrl, manualFocus]);
 
   const fetchProfile = async () => {
     if (!user) return;
@@ -774,19 +778,52 @@ const MobileJobWizard = ({
                   />
                   
                   {jobImageDisplayUrl && (
-                    <div className="mt-3 relative">
-                      <img 
-                        src={jobImageDisplayUrl} 
-                        alt="Job preview" 
-                        className="w-full h-32 object-cover rounded-lg"
-                      />
-                      <button
-                        onClick={() => handleInputChange('job_image_url', '')}
-                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <>
+                      <div className="mt-3 relative">
+                        <img 
+                          src={jobImageDisplayUrl} 
+                          alt="Job preview" 
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                        <button
+                          onClick={() => {
+                            handleInputChange('job_image_url', '');
+                            setManualFocus(null);
+                          }}
+                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      
+                      {/* Fokus-slider */}
+                      <div className="mt-4 space-y-3">
+                        <div className="text-white/90 text-sm font-medium">Bildfokus</div>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs text-white/60">
+                            <span>Toppen</span>
+                            <span>Mitten</span>
+                            <span>Botten</span>
+                          </div>
+                          <Slider
+                            value={[manualFocus ?? 50]}
+                            onValueChange={([value]) => setManualFocus(value)}
+                            max={100}
+                            min={0}
+                            step={5}
+                            className="w-full"
+                          />
+                          <div className="flex justify-center">
+                            <button
+                              onClick={() => setManualFocus(null)}
+                              className="text-xs text-white/60 hover:text-white transition-colors underline"
+                            >
+                              Återställ till auto
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </>
                   )}
                 </div>
 
