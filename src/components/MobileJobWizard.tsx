@@ -906,9 +906,8 @@ const MobileJobWizard = ({
 
                         {/* Textinnehåll - närmare toppen */}
                         <div className="absolute inset-0 flex flex-col justify-start items-center pt-6 px-2 text-white text-center">
-                          <h3 className={`font-extrabold drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)] ${getSmartTextStyle(getDisplayTitle()).fontSize} ${getSmartTextStyle(getDisplayTitle()).lineHeight} mb-2 ${isOptimizing ? 'opacity-75' : ''}`}>
+                          <h3 className={`font-extrabold drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)] ${getSmartTextStyle(getDisplayTitle()).fontSize} ${getSmartTextStyle(getDisplayTitle()).lineHeight} mb-2`}>
                             {getDisplayTitle()}
-                            {isOptimizing && <span className="ml-1 animate-pulse">✨</span>}
                           </h3>
                           
                           {/* Företagsnamn */}
