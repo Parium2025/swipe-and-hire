@@ -338,8 +338,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
             </Button>
           </div>
 
-          <p className="text-sm text-slate-300 text-center">
-            Dra för att flytta bilden, använd knapparna för att zooma
+          <p className="text-sm text-white text-center font-medium">
+            Dra för att flytta bild och använd knapparna för att zooma in eller ut
           </p>
 
           {/* Action buttons */}
@@ -359,8 +359,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               onClick={handleSaveClick}
               className={`flex-1 transition-all duration-200 ${
                 activeButton === 'save'
-                  ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700' 
-                  : 'bg-transparent border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white'
+                  ? 'bg-slate-900 text-white border-slate-900' 
+                  : 'bg-transparent border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white'
               }`}
               variant="outline"
             >
