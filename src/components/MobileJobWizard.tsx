@@ -1491,61 +1491,74 @@ const MobileJobWizard = ({
                         <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black"></div>
 
                              {showHingePreview ? (
-                           /* TeamTailor-inspirerad ren design INOM telefonen */
+                           /* Clean mobile app design INOM telefonen */
                            <div className="absolute inset-0 flex flex-col bg-white">
-                             {/* Clean header */}
-                             <div className="relative z-10 flex items-center justify-between p-3 bg-white border-b border-gray-100">
-                               <div className="text-sm font-semibold text-gray-900">Parium</div>
+                             {/* Status bar simulation */}
+                             <div className="h-2 bg-black"></div>
+                             
+                             {/* App header */}
+                             <div className="flex items-center justify-between px-3 py-2 bg-white border-b border-gray-100">
+                               <div className="text-sm font-bold text-gray-900">Parium</div>
                                <button
                                  onClick={(e) => {
                                    e.stopPropagation();
                                    setShowHingePreview(false);
                                  }}
-                                 className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200"
+                                 className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center"
                                >
                                  <X className="h-3 w-3 text-gray-600" />
                                </button>
                              </div>
 
-                             {/* Main job card - Clean TeamTailor style */}
-                             <div className="flex-1 p-3 bg-gray-50">
-                               <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                                 {/* Job header */}
-                                 <div className="p-4 bg-white">
-                                   <div className="flex items-start justify-between mb-3">
-                                     <div className="flex-1">
-                                       <h3 className="text-base font-semibold text-gray-900 leading-tight mb-1">
-                                         {formData.title}
-                                       </h3>
-                                       <p className="text-sm text-gray-600 mb-2">
-                                         {profile?.company_name || 'Företagsnamn'}
-                                       </p>
-                                       <div className="flex items-center text-xs text-gray-500 space-x-3">
-                                         <div className="flex items-center">
-                                           <MapPin className="h-3 w-3 mr-1" />
-                                           {formData.workplace_city || formData.location}
-                                         </div>
-                                         {formData.employment_type && (
-                                           <div className="flex items-center">
-                                             <Clock className="h-3 w-3 mr-1" />
-                                             {EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label}
-                                           </div>
-                                         )}
-                                       </div>
+                             {/* Job card */}
+                             <div className="flex-1 p-2 bg-gray-50">
+                               <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full flex flex-col">
+                                 {/* Company info */}
+                                 <div className="flex items-center p-3 border-b border-gray-100">
+                                   <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                     <Building2 className="h-4 w-4 text-blue-600" />
+                                   </div>
+                                   <div className="flex-1 min-w-0">
+                                     <div className="text-xs font-semibold text-gray-900 truncate">
+                                       {profile?.company_name || 'Företagsnamn'}
                                      </div>
-                                     <div className="ml-3">
-                                       <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
-                                         <Building2 className="h-6 w-6 text-blue-600" />
+                                     <div className="text-xs text-gray-500">
+                                       {formData.workplace_city || formData.location || 'Stockholm'}
+                                     </div>
+                                   </div>
+                                 </div>
+
+                                 {/* Job details */}
+                                 <div className="flex-1 p-3 space-y-3">
+                                   {/* Title */}
+                                   <div>
+                                     <h3 className="text-sm font-bold text-gray-900 leading-tight mb-1">
+                                       {formData.title.length > 40 ? 
+                                         formData.title.substring(0, 40) + '...' : 
+                                         formData.title
+                                       }
+                                     </h3>
+                                     
+                                     {/* Meta info */}
+                                     <div className="flex items-center text-xs text-gray-500 space-x-2">
+                                       {formData.employment_type && (
+                                         <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">
+                                           {EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label}
+                                         </span>
+                                       )}
+                                       <div className="flex items-center">
+                                         <MapPin className="h-3 w-3 mr-1" />
+                                         {formData.workplace_city || formData.location}
                                        </div>
                                      </div>
                                    </div>
 
                                    {/* Salary */}
                                    {(formData.salary_min || formData.salary_max) && (
-                                     <div className="bg-green-50 border border-green-200 rounded-md p-2 mb-3">
+                                     <div className="bg-green-50 rounded-md p-2 border border-green-100">
                                        <div className="flex items-center text-green-700">
-                                         <Euro className="h-3 w-3 mr-2" />
-                                         <span className="text-sm font-medium">
+                                         <Euro className="h-3 w-3 mr-1" />
+                                         <span className="text-xs font-semibold">
                                            {formData.salary_min && formData.salary_max 
                                              ? `${parseInt(formData.salary_min).toLocaleString()} - ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
                                              : formData.salary_min 
@@ -1557,38 +1570,35 @@ const MobileJobWizard = ({
                                      </div>
                                    )}
 
-                                   {/* Description */}
-                                   <div className="text-sm text-gray-700 mb-3 leading-relaxed">
-                                     {formData.description.length > 120 ? 
-                                       formData.description.substring(0, 120) + '...' : 
+                                   {/* Description snippet */}
+                                   <div className="text-xs text-gray-700 leading-relaxed">
+                                     {formData.description.length > 80 ? 
+                                       formData.description.substring(0, 80) + '...' : 
                                        formData.description
                                      }
                                    </div>
 
                                    {/* Questions indicator */}
                                    {customQuestions.length > 0 && (
-                                     <div className="bg-blue-50 border border-blue-200 rounded-md p-2">
-                                       <div className="flex items-center text-blue-700 mb-1">
-                                         <CheckSquare className="h-3 w-3 mr-2" />
+                                     <div className="bg-orange-50 rounded-md p-2 border border-orange-100">
+                                       <div className="flex items-center text-orange-700">
+                                         <CheckSquare className="h-3 w-3 mr-1" />
                                          <span className="text-xs font-medium">
-                                           {customQuestions.length} anpassade frågor
+                                           {customQuestions.length} frågor att besvara
                                          </span>
-                                       </div>
-                                       <div className="text-xs text-blue-600">
-                                         Tryck för att se frågorna
                                        </div>
                                      </div>
                                    )}
                                  </div>
 
-                                 {/* Action button */}
-                                 <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
+                                 {/* Apply button */}
+                                 <div className="p-3 border-t border-gray-100">
                                    <button 
-                                     className="w-full bg-blue-600 text-white rounded-md py-2 text-sm font-medium hover:bg-blue-700 transition-colors"
+                                     className="w-full bg-blue-600 text-white rounded-md py-2 text-xs font-bold hover:bg-blue-700 transition-colors"
                                      onClick={(e) => {
                                        e.stopPropagation();
-                                       // Here we would open the new JobApplicationDialog
-                                       console.log('Would open application with questions:', customQuestions);
+                                       // Would trigger JobApplicationDialog here
+                                       console.log('Open application with questions:', customQuestions);
                                      }}
                                    >
                                      Ansök nu
@@ -1596,6 +1606,9 @@ const MobileJobWizard = ({
                                  </div>
                                </div>
                              </div>
+
+                             {/* Bottom safe area */}
+                             <div className="h-2 bg-white"></div>
                            </div>
                          )
  : (
