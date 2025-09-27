@@ -824,8 +824,8 @@ const MobileJobWizard = ({
                         {/* Nedre gradient för läsbarhet */}
                         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
 
-                        {/* Textinnehåll - centrerat */}
-                        <div className="absolute inset-0 flex flex-col justify-center items-center p-2 text-white text-center">
+                        {/* Textinnehåll - närmare toppen */}
+                        <div className="absolute inset-0 flex flex-col justify-start items-center pt-6 px-2 text-white text-center">
                           <h3 className={`font-extrabold drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)] ${getSmartTextStyle(formData.title).fontSize} ${getSmartTextStyle(formData.title).lineHeight}`}>
                             {formData.title || 'Jobbtitel'}
                           </h3>
