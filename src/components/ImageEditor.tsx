@@ -38,29 +38,64 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   useEffect(() => {
     if (!imageSrc || !isOpen) return;
 
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      imageRef.current = img;
-      
-      // Calculate initial scale to fit the image properly
-      const containerWidth = CANVAS_WIDTH;
-      const containerHeight = CANVAS_HEIGHT;
-      const imageAspect = img.width / img.height;
-      const containerAspect = containerWidth / containerHeight;
-      
-      // Scale to cover the container
-      const initialScale = Math.max(
-        containerWidth / img.width,
-        containerHeight / img.height
-      );
-      
-      setScale(initialScale);
-      setPosition({ x: 0, y: 0 });
-      setImageLoaded(true);
+    const loadImage = async () => {
+      try {
+        // Try to fetch the image as blob first to avoid CORS issues
+        const response = await fetch(imageSrc);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        
+        const img = new Image();
+        img.onload = () => {
+          imageRef.current = img;
+          
+          // Calculate initial scale to cover the container completely
+          const containerWidth = CANVAS_WIDTH;
+          const containerHeight = CANVAS_HEIGHT;
+          
+          // Scale to cover the container (like CSS background-size: cover)
+          const scaleX = containerWidth / img.width;
+          const scaleY = containerHeight / img.height;
+          const initialScale = Math.max(scaleX, scaleY);
+          
+          setScale(initialScale);
+          setPosition({ x: 0, y: 0 });
+          setImageLoaded(true);
+          
+          // Clean up blob URL
+          URL.revokeObjectURL(blobUrl);
+        };
+        
+        img.onerror = (error) => {
+          console.error('Image failed to load from blob:', error);
+          URL.revokeObjectURL(blobUrl);
+        };
+        
+        img.src = blobUrl;
+      } catch (error) {
+        console.error('Failed to fetch image:', error);
+        // Fallback to direct loading
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          imageRef.current = img;
+          
+          const containerWidth = CANVAS_WIDTH;
+          const containerHeight = CANVAS_HEIGHT;
+          const scaleX = containerWidth / img.width;
+          const scaleY = containerHeight / img.height;
+          const initialScale = Math.max(scaleX, scaleY);
+          
+          setScale(initialScale);
+          setPosition({ x: 0, y: 0 });
+          setImageLoaded(true);
+        };
+        img.src = imageSrc;
+      }
     };
-    img.src = imageSrc;
-  }, [imageSrc, isOpen, aspectRatio]);
+
+    loadImage();
+  }, [imageSrc, isOpen, CANVAS_WIDTH, CANVAS_HEIGHT]);
 
   // Draw canvas
   const drawCanvas = useCallback(() => {
@@ -198,11 +233,10 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       const containerWidth = CANVAS_WIDTH;
       const containerHeight = CANVAS_HEIGHT;
       
-      // Scale to cover the container
-      const initialScale = Math.max(
-        containerWidth / img.width,
-        containerHeight / img.height
-      );
+      // Scale to cover the container (like CSS background-size: cover)
+      const scaleX = containerWidth / img.width;
+      const scaleY = containerHeight / img.height;
+      const initialScale = Math.max(scaleX, scaleY);
       setScale(initialScale);
     }
   };
