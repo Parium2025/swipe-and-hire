@@ -278,7 +278,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 border-slate-700">
+      <DialogContent className="max-w-md bg-white/5 border-white/20 backdrop-blur-sm">
         <DialogHeader>
           <DialogTitle className="text-center text-white">
             Anpassa din {isCircular ? 'profilbild' : 'bild'}
