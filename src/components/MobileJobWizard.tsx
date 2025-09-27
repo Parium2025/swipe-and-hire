@@ -158,6 +158,10 @@ const MobileJobWizard = ({
   const [showEmploymentTypeDropdown, setShowEmploymentTypeDropdown] = useState(false);
   const [salaryTypeSearchTerm, setSalaryTypeSearchTerm] = useState('');
   const [showSalaryTypeDropdown, setShowSalaryTypeDropdown] = useState(false);
+  const [workLocationSearchTerm, setWorkLocationSearchTerm] = useState('');
+  const [showWorkLocationDropdown, setShowWorkLocationDropdown] = useState(false);
+  const [remoteWorkSearchTerm, setRemoteWorkSearchTerm] = useState('');
+  const [showRemoteWorkDropdown, setShowRemoteWorkDropdown] = useState(false);
   const [showJobPreview, setShowJobPreview] = useState(false);
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
@@ -594,11 +598,17 @@ const MobileJobWizard = ({
       if (showSalaryTypeDropdown && !(event.target as Element).closest('.salary-type-dropdown')) {
         setShowSalaryTypeDropdown(false);
       }
+      if (showWorkLocationDropdown && !(event.target as Element).closest('.work-location-dropdown')) {
+        setShowWorkLocationDropdown(false);
+      }
+      if (showRemoteWorkDropdown && !(event.target as Element).closest('.remote-work-dropdown')) {
+        setShowRemoteWorkDropdown(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showQuestionTypeDropdown, showOccupationDropdown, showEmploymentTypeDropdown, showSalaryTypeDropdown]);
+  }, [showQuestionTypeDropdown, showOccupationDropdown, showEmploymentTypeDropdown, showSalaryTypeDropdown, showWorkLocationDropdown, showRemoteWorkDropdown]);
   const questionTypes = [
     { value: 'text', label: 'Text' },
     { value: 'yes_no', label: 'Ja/Nej' },
@@ -613,6 +623,22 @@ const MobileJobWizard = ({
     { value: 'fast', label: 'Fast månads-, vecko- eller timlön' },
     { value: 'rorlig', label: 'Rörlig, ackord eller provisionslön' },
     { value: 'fast-rorlig', label: 'Fast och rörlig lön' }
+  ];
+
+  // Work location type options
+  const workLocationTypes = [
+    { value: 'på-plats', label: 'På plats' },
+    { value: 'hemarbete', label: 'Hemarbete' },
+    { value: 'hybridarbete', label: 'Hybridarbete' },
+    { value: 'fältarbete', label: 'Fältarbete/ute' },
+    { value: 'utomlands', label: 'Utomlands' }
+  ];
+
+  // Remote work options
+  const remoteWorkOptions = [
+    { value: 'nej', label: 'Nej' },
+    { value: 'delvis', label: 'Delvis' },
+    { value: 'ja', label: 'Ja, helt' }
   ];
 
   const handleQuestionTypeSearch = (value: string) => {
@@ -658,6 +684,38 @@ const MobileJobWizard = ({
     setShowSalaryTypeDropdown(!showSalaryTypeDropdown);
   };
 
+  const handleWorkLocationSearch = (value: string) => {
+    setWorkLocationSearchTerm(value);
+    setShowWorkLocationDropdown(value.length >= 0);
+  };
+
+  const handleWorkLocationSelect = (type: { value: string, label: string }) => {
+    handleInputChange('work_location_type', type.value);
+    setWorkLocationSearchTerm(type.label);
+    setShowWorkLocationDropdown(false);
+  };
+
+  const handleWorkLocationClick = () => {
+    setWorkLocationSearchTerm('');
+    setShowWorkLocationDropdown(!showWorkLocationDropdown);
+  };
+
+  const handleRemoteWorkSearch = (value: string) => {
+    setRemoteWorkSearchTerm(value);
+    setShowRemoteWorkDropdown(value.length >= 0);
+  };
+
+  const handleRemoteWorkSelect = (type: { value: string, label: string }) => {
+    handleInputChange('remote_work_possible', type.value);
+    setRemoteWorkSearchTerm(type.label);
+    setShowRemoteWorkDropdown(false);
+  };
+
+  const handleRemoteWorkClick = () => {
+    setRemoteWorkSearchTerm('');
+    setShowRemoteWorkDropdown(!showRemoteWorkDropdown);
+  };
+
   const filteredQuestionTypes = questionTypes.filter(type => 
     type.label.toLowerCase().includes(questionTypeSearchTerm.toLowerCase())
   );
@@ -673,6 +731,18 @@ const MobileJobWizard = ({
         type.label.toLowerCase().includes(salaryTypeSearchTerm.toLowerCase())
       )
     : salaryTypes;
+
+  const filteredWorkLocationTypes = workLocationSearchTerm.length > 0
+    ? workLocationTypes.filter(type => 
+        type.label.toLowerCase().includes(workLocationSearchTerm.toLowerCase())
+      )
+    : workLocationTypes;
+
+  const filteredRemoteWorkOptions = remoteWorkSearchTerm.length > 0
+    ? remoteWorkOptions.filter(type => 
+        type.label.toLowerCase().includes(remoteWorkSearchTerm.toLowerCase())
+      )
+    : remoteWorkOptions;
 
   const handleWorkplacePostalCodeChange = (postalCode: string) => {
     handleInputChange('workplace_postal_code', postalCode);
@@ -1016,48 +1086,64 @@ const MobileJobWizard = ({
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Var utförs arbetet? *</Label>
-                  <Select value={formData.work_location_type} onValueChange={(value) => handleInputChange('work_location_type', value)}>
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white h-12 text-base">
-                      <SelectValue placeholder="Välj arbetsplats" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-600">
-                      <SelectItem value="på-plats" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
-                        På plats
-                      </SelectItem>
-                      <SelectItem value="hemarbete" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
-                        Hemarbete
-                      </SelectItem>
-                      <SelectItem value="hybridarbete" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
-                        Hybridarbete
-                      </SelectItem>
-                      <SelectItem value="fältarbete" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
-                        Fältarbete/ute
-                      </SelectItem>
-                      <SelectItem value="utomlands" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
-                        Utomlands
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="relative work-location-dropdown">
+                    <Input
+                      value={workLocationSearchTerm || (formData.work_location_type ? workLocationTypes.find(t => t.value === formData.work_location_type)?.label || '' : '')}
+                      onChange={(e) => handleWorkLocationSearch(e.target.value)}
+                      onClick={handleWorkLocationClick}
+                      placeholder="Välj arbetsplats"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer"
+                      readOnly
+                    />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    
+                    {/* Work Location Dropdown */}
+                    {showWorkLocationDropdown && (
+                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                        {filteredWorkLocationTypes.map((type) => (
+                          <button
+                            key={type.value}
+                            type="button"
+                            onClick={() => handleWorkLocationSelect(type)}
+                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                          >
+                            <div className="font-medium">{type.label}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Är distansarbete möjligt? *</Label>
-                  <Select value={formData.remote_work_possible} onValueChange={(value) => handleInputChange('remote_work_possible', value)}>
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white h-12 text-base">
-                      <SelectValue placeholder="Välj alternativ" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-600">
-                      <SelectItem value="nej" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
-                        Nej
-                      </SelectItem>
-                      <SelectItem value="delvis" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
-                        Delvis
-                      </SelectItem>
-                      <SelectItem value="ja" className="text-white hover:bg-gray-700 focus:bg-gray-700 h-10">
-                        Ja, helt
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="relative remote-work-dropdown">
+                    <Input
+                      value={remoteWorkSearchTerm || (formData.remote_work_possible ? remoteWorkOptions.find(t => t.value === formData.remote_work_possible)?.label || '' : '')}
+                      onChange={(e) => handleRemoteWorkSearch(e.target.value)}
+                      onClick={handleRemoteWorkClick}
+                      placeholder="Välj alternativ"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer"
+                      readOnly
+                    />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    
+                    {/* Remote Work Dropdown */}
+                    {showRemoteWorkDropdown && (
+                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                        {filteredRemoteWorkOptions.map((type) => (
+                          <button
+                            key={type.value}
+                            type="button"
+                            onClick={() => handleRemoteWorkSelect(type)}
+                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                          >
+                            <div className="font-medium">{type.label}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
