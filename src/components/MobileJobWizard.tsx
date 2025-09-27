@@ -676,15 +676,21 @@ const MobileJobWizard = ({
 
                         {/* Bakgrundsbild - heltäckande */}
                         {jobImageDisplayUrl ? (
-                          <img
-                            loading="eager"
-                            fetchPriority="high"
-                            decoding="async"
-                            src={jobImageDisplayUrl}
-                            alt={`${formData.title || 'Jobbtitel'} hos ${profile?.company_name || 'företaget'}`}
-                            className="absolute inset-0 w-full h-full object-contain bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800"
-                            draggable={false}
-                          />
+                          <div className="absolute inset-0 w-full h-full overflow-hidden">
+                            <img
+                              loading="eager"
+                              fetchPriority="high"
+                              decoding="async"
+                              src={jobImageDisplayUrl}
+                              alt={`${formData.title || 'Jobbtitel'} hos ${profile?.company_name || 'företaget'}`}
+                              className="w-full h-full object-cover object-center"
+                              style={{
+                                minWidth: '100%',
+                                minHeight: '100%'
+                              }}
+                              draggable={false}
+                            />
+                          </div>
                         ) : (
                           <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800" />
                         )}
