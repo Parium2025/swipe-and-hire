@@ -1105,18 +1105,6 @@ const MobileJobWizard = ({
                     </div>
 
                     <div className="space-y-4">
-                      {/* Question Text */}
-                      <div className="space-y-2">
-                        <Label className="text-white font-medium">Frågetext *</Label>
-                        <Textarea
-                          value={editingQuestion?.question_text || ''}
-                          onChange={(e) => updateQuestionField('question_text', e.target.value)}
-                          placeholder="Skriv din fråga här..."
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 resize-none"
-                          rows={2}
-                        />
-                      </div>
-
                       {/* Question Type */}
                       <div className="space-y-2">
                         <Label className="text-white font-medium">Frågetyp *</Label>
@@ -1138,6 +1126,18 @@ const MobileJobWizard = ({
                             <SelectItem value="video" className="text-white hover:bg-gray-700">Video</SelectItem>
                           </SelectContent>
                         </Select>
+                      </div>
+
+                      {/* Question Text */}
+                      <div className="space-y-2">
+                        <Label className="text-white font-medium">Frågetext *</Label>
+                        <Textarea
+                          value={editingQuestion?.question_text || ''}
+                          onChange={(e) => updateQuestionField('question_text', e.target.value)}
+                          placeholder="Skriv din fråga här..."
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 resize-none"
+                          rows={2}
+                        />
                       </div>
 
                       {/* Multiple Choice Options */}
