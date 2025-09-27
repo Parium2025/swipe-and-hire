@@ -912,9 +912,8 @@ const MobileJobWizard = ({
                     <h4 className="text-white font-medium">Anpassade frågor (valfritt)</h4>
                     <Button
                       onClick={() => {/* Lägg till fråga */}}
-                      variant="outline"
                       size="sm"
-                      className="border-white/20 text-white hover:bg-white/10"
+                      className="bg-primary hover:bg-primary/90 text-white"
                     >
                       <Plus className="h-4 w-4 mr-1" />
                       Lägg till fråga
