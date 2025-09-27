@@ -1003,7 +1003,7 @@ const MobileJobWizard = ({
                       <p className="text-white/90 text-sm font-medium mb-3 text-center">
                         Dessa frågor fylls automatiskt från jobbsökarens profil
                       </p>
-                      <div className="text-white/70 text-sm space-y-1">
+                      <div className="text-white text-sm space-y-1">
                         <p>• Namn och efternamn</p>
                         <p>• Födelsedatum</p>
                         <p>• E-post</p>
