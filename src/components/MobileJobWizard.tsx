@@ -682,7 +682,7 @@ const MobileJobWizard = ({
                             decoding="async"
                             src={jobImageDisplayUrl}
                             alt={`${formData.title || 'Jobbtitel'} hos ${profile?.company_name || 'företaget'}`}
-                            className="absolute inset-0 w-full h-full object-cover"
+                            className="absolute inset-0 w-full h-full object-contain bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800"
                             draggable={false}
                           />
                         ) : (
