@@ -88,6 +88,7 @@ const MobileJobWizard = ({
   const [showOccupationDropdown, setShowOccupationDropdown] = useState(false);
   const [showJobPreview, setShowJobPreview] = useState(false);
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
+  const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
   const [bgPosition, setBgPosition] = useState<string>('center 50%');
   const [manualFocus, setManualFocus] = useState<number | null>(null);
   const [showImageEditor, setShowImageEditor] = useState(false);
@@ -480,6 +481,7 @@ const MobileJobWizard = ({
       pitch: '',
       job_image_url: ''
     });
+    setOriginalImageUrl(null);
     onOpenChange(false);
     onJobCreated();
   };
@@ -754,7 +756,7 @@ const MobileJobWizard = ({
                       {/* Skärm */}
                       <div className="relative w-full h-full rounded-[0.9rem] overflow-hidden bg-black">
                         {/* Notch/status */}
-                        <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black/60 border border-white/10"></div>
+                        <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black/60"></div>
 
                         {/* Bakgrundsbild - heltäckande */}
                         {jobImageDisplayUrl ? (
@@ -827,6 +829,7 @@ const MobileJobWizard = ({
                     <FileUpload
                       onFileUploaded={(url, fileName) => {
                         handleInputChange('job_image_url', url);
+                        setOriginalImageUrl(url); // Spara originalbilden
                       }}
                       acceptedFileTypes={['image/*']}
                       maxFileSize={5 * 1024 * 1024}
@@ -844,6 +847,7 @@ const MobileJobWizard = ({
                           <button
                             onClick={() => {
                               handleInputChange('job_image_url', '');
+                              setOriginalImageUrl(null);
                               setManualFocus(null);
                             }}
                             className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
@@ -857,8 +861,8 @@ const MobileJobWizard = ({
                         <div className="flex justify-center">
                           <button
                             onClick={() => {
-                              if (jobImageDisplayUrl) {
-                                setEditingImageUrl(jobImageDisplayUrl);
+                              if (originalImageUrl) {
+                                setEditingImageUrl(originalImageUrl); // Använd alltid originalbilden
                                 setShowImageEditor(true);
                               }
                             }}
