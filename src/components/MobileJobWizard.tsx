@@ -1490,151 +1490,109 @@ const MobileJobWizard = ({
                         {/* Notch - helt svart utan vita kanter */}
                         <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black"></div>
 
-                         {showHingePreview ? (
-                           /* Hinge-style preview INOM telefonen - swipe kort */
-                           <div className="absolute inset-0 flex flex-col bg-background">
-                             {/* Parium bakgrund */}
-                             <div 
-                               className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
-                               style={{
-                                 backgroundImage: `url(${modernMobileBg})`
-                               }}
-                             />
-                             
-                             {/* Header - kompakt */}
-                             <div className="relative z-10 flex items-center justify-between p-2 bg-background/80 backdrop-blur-sm">
-                               <div className="text-xs font-medium text-foreground">Förhandsvisning</div>
+                             {showHingePreview ? (
+                           /* TeamTailor-inspirerad ren design INOM telefonen */
+                           <div className="absolute inset-0 flex flex-col bg-white">
+                             {/* Clean header */}
+                             <div className="relative z-10 flex items-center justify-between p-3 bg-white border-b border-gray-100">
+                               <div className="text-sm font-semibold text-gray-900">Parium</div>
                                <button
                                  onClick={(e) => {
                                    e.stopPropagation();
                                    setShowHingePreview(false);
                                  }}
-                                 className="w-5 h-5 rounded-full bg-muted/80 flex items-center justify-center hover:bg-muted"
+                                 className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200"
                                >
-                                 <X className="h-3 w-3 text-foreground" />
+                                 <X className="h-3 w-3 text-gray-600" />
                                </button>
                              </div>
 
-                             {/* Main content area - Hinge style */}
-                             <div className="flex-1 relative overflow-hidden">
-                               {/* Company profile card */}
-                               <div className="absolute top-4 left-2 right-2 z-20">
-                                 <div className="bg-card/95 backdrop-blur-sm border border-border rounded-lg p-2 shadow-sm">
-                                   <div className="flex items-center space-x-2">
-                                     <div className="bg-primary/10 rounded-full p-1">
-                                       <Building2 className="h-3 w-3 text-primary" />
-                                     </div>
-                                     <div>
-                                       <div className="font-semibold text-xs text-foreground">
+                             {/* Main job card - Clean TeamTailor style */}
+                             <div className="flex-1 p-3 bg-gray-50">
+                               <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                 {/* Job header */}
+                                 <div className="p-4 bg-white">
+                                   <div className="flex items-start justify-between mb-3">
+                                     <div className="flex-1">
+                                       <h3 className="text-base font-semibold text-gray-900 leading-tight mb-1">
+                                         {formData.title}
+                                       </h3>
+                                       <p className="text-sm text-gray-600 mb-2">
                                          {profile?.company_name || 'Företagsnamn'}
-                                       </div>
-                                       <div className="text-[10px] text-muted-foreground">
-                                         Klicka för företagsprofil
-                                       </div>
-                                     </div>
-                                   </div>
-                                 </div>
-                               </div>
-
-                               {/* Main job card - Hinge style */}
-                               <div className="absolute top-16 left-2 right-2 bottom-16">
-                                 <div className="bg-card/95 backdrop-blur-sm border border-border rounded-xl p-4 shadow-lg h-full flex flex-col">
-                                   <div className="text-center mb-3">
-                                     <h2 className="font-bold text-sm text-foreground mb-1">
-                                       {formData.title}
-                                     </h2>
-                                     <div className="flex items-center justify-center space-x-2 text-[10px] text-muted-foreground">
-                                       <div className="flex items-center">
-                                         <MapPin className="h-2.5 w-2.5 mr-1" />
-                                         {formData.workplace_city || formData.location}
-                                       </div>
-                                       {formData.employment_type && (
-                                         <>
-                                           <span>•</span>
+                                       </p>
+                                       <div className="flex items-center text-xs text-gray-500 space-x-3">
+                                         <div className="flex items-center">
+                                           <MapPin className="h-3 w-3 mr-1" />
+                                           {formData.workplace_city || formData.location}
+                                         </div>
+                                         {formData.employment_type && (
                                            <div className="flex items-center">
-                                             <Clock className="h-2.5 w-2.5 mr-1" />
+                                             <Clock className="h-3 w-3 mr-1" />
                                              {EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label}
                                            </div>
-                                         </>
-                                       )}
+                                         )}
+                                       </div>
+                                     </div>
+                                     <div className="ml-3">
+                                       <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+                                         <Building2 className="h-6 w-6 text-blue-600" />
+                                       </div>
                                      </div>
                                    </div>
 
-                                   {/* Main content */}
-                                   <div className="flex-1 space-y-3 overflow-y-auto">
-                                     {/* Description */}
-                                     <div className="bg-muted/30 rounded-lg p-3">
-                                       <h4 className="font-semibold text-xs text-foreground mb-1">Om jobbet</h4>
-                                       <p className="text-[10px] leading-relaxed text-muted-foreground">
-                                         {formData.description.length > 100 ? 
-                                           formData.description.substring(0, 100) + '...' : 
-                                           formData.description
-                                         }
-                                       </p>
+                                   {/* Salary */}
+                                   {(formData.salary_min || formData.salary_max) && (
+                                     <div className="bg-green-50 border border-green-200 rounded-md p-2 mb-3">
+                                       <div className="flex items-center text-green-700">
+                                         <Euro className="h-3 w-3 mr-2" />
+                                         <span className="text-sm font-medium">
+                                           {formData.salary_min && formData.salary_max 
+                                             ? `${parseInt(formData.salary_min).toLocaleString()} - ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
+                                             : formData.salary_min 
+                                               ? `Från ${parseInt(formData.salary_min).toLocaleString()} kr/mån`
+                                               : `Upp till ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
+                                           }
+                                         </span>
+                                       </div>
                                      </div>
+                                   )}
 
-                                     {/* Salary if available */}
-                                     {(formData.salary_min || formData.salary_max) && (
-                                       <div className="bg-primary/5 border border-primary/20 rounded-lg p-3">
-                                         <div className="flex items-center text-primary">
-                                           <Euro className="h-3 w-3 mr-2" />
-                                           <span className="font-medium text-xs">
-                                             {formData.salary_min && formData.salary_max 
-                                               ? `${parseInt(formData.salary_min).toLocaleString()} - ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
-                                               : formData.salary_min 
-                                                 ? `Från ${parseInt(formData.salary_min).toLocaleString()} kr/mån`
-                                                 : `Upp till ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
-                                             }
-                                           </span>
-                                         </div>
-                                       </div>
-                                     )}
-
-                                     {/* Questions preview */}
-                                     {customQuestions.length > 0 && (
-                                       <div className="bg-secondary/30 rounded-lg p-3">
-                                         <h4 className="font-semibold text-xs text-foreground mb-2 flex items-center">
-                                           <CheckSquare className="h-3 w-3 mr-1 text-primary" />
-                                           Frågor ({customQuestions.length})
-                                         </h4>
-                                         <div className="space-y-1">
-                                           {customQuestions.slice(0, 2).map((question, index) => (
-                                             <div key={index} className="text-[9px] text-muted-foreground flex items-start">
-                                               <span className="mr-1 text-primary">•</span>
-                                               <span className="flex-1">
-                                                 {question.question_text.length > 50 ? 
-                                                   question.question_text.substring(0, 50) + '...' : 
-                                                   question.question_text
-                                                 }
-                                               </span>
-                                             </div>
-                                           ))}
-                                           {customQuestions.length > 2 && (
-                                             <div className="text-[8px] text-center text-muted-foreground pt-1">
-                                               +{customQuestions.length - 2} fler frågor
-                                             </div>
-                                           )}
-                                         </div>
-                                       </div>
-                                     )}
+                                   {/* Description */}
+                                   <div className="text-sm text-gray-700 mb-3 leading-relaxed">
+                                     {formData.description.length > 120 ? 
+                                       formData.description.substring(0, 120) + '...' : 
+                                       formData.description
+                                     }
                                    </div>
-                                 </div>
-                               </div>
 
-                               {/* Action buttons - Hinge style */}
-                               <div className="absolute bottom-4 left-2 right-2">
-                                 <div className="flex space-x-3 justify-center">
-                                   <button className="w-12 h-12 rounded-full bg-destructive/90 shadow-lg flex items-center justify-center hover:bg-destructive transition-colors">
-                                     <X className="h-5 w-5 text-destructive-foreground" />
-                                   </button>
-                                   <button className="w-12 h-12 rounded-full bg-primary/90 shadow-lg flex items-center justify-center hover:bg-primary transition-colors">
-                                     <Heart className="h-5 w-5 text-primary-foreground" />
-                                   </button>
+                                   {/* Questions indicator */}
+                                   {customQuestions.length > 0 && (
+                                     <div className="bg-blue-50 border border-blue-200 rounded-md p-2">
+                                       <div className="flex items-center text-blue-700 mb-1">
+                                         <CheckSquare className="h-3 w-3 mr-2" />
+                                         <span className="text-xs font-medium">
+                                           {customQuestions.length} anpassade frågor
+                                         </span>
+                                       </div>
+                                       <div className="text-xs text-blue-600">
+                                         Tryck för att se frågorna
+                                       </div>
+                                     </div>
+                                   )}
                                  </div>
-                                 <div className="text-center mt-1">
-                                   <div className="text-[8px] text-muted-foreground">
-                                     {customQuestions.length > 0 ? 'Gilla för att börja ansöka' : 'Gilla för att visa intresse'}
-                                   </div>
+
+                                 {/* Action button */}
+                                 <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
+                                   <button 
+                                     className="w-full bg-blue-600 text-white rounded-md py-2 text-sm font-medium hover:bg-blue-700 transition-colors"
+                                     onClick={(e) => {
+                                       e.stopPropagation();
+                                       // Here we would open the new JobApplicationDialog
+                                       console.log('Would open application with questions:', customQuestions);
+                                     }}
+                                   >
+                                     Ansök nu
+                                   </button>
                                  </div>
                                </div>
                              </div>
