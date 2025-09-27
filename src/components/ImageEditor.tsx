@@ -28,6 +28,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
   const [minScale, setMinScale] = useState(0.1);
+  const [activeButton, setActiveButton] = useState<'cancel' | 'save' | null>(null);
 
   const BASE_CANVAS_HEIGHT = 400; // Output canvas height in px
   const CANVAS_HEIGHT = BASE_CANVAS_HEIGHT;
@@ -259,6 +260,22 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     }, 'image/png', 1.0);
   };
 
+  const handleCancelClick = () => {
+    setActiveButton('cancel');
+    setTimeout(() => {
+      onClose();
+      setActiveButton(null);
+    }, 150);
+  };
+
+  const handleSaveClick = () => {
+    setActiveButton('save');
+    setTimeout(() => {
+      handleSave();
+      setActiveButton(null);
+    }, 150);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 border-slate-700">
@@ -296,7 +313,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               size="sm"
               onClick={zoomOut}
               disabled={scale <= minScale}
-              className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-50"
+              className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:hover:bg-slate-800"
             >
               <ZoomOut className="h-4 w-4" />
             </Button>
@@ -305,7 +322,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               variant="outline"
               size="sm"
               onClick={resetPosition}
-              className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white"
+              className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700"
             >
               <RotateCcw className="h-4 w-4" />
             </Button>
@@ -315,7 +332,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               size="sm"
               onClick={zoomIn}
               disabled={scale >= MAX_SCALE}
-              className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-50"
+              className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:hover:bg-slate-800"
             >
               <ZoomIn className="h-4 w-4" />
             </Button>
@@ -327,10 +344,26 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
 
           {/* Action buttons */}
           <div className="flex space-x-2">
-            <Button variant="outline" onClick={onClose} className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white">
+            <Button 
+              onClick={handleCancelClick}
+              className={`flex-1 transition-all duration-200 ${
+                activeButton === 'cancel'
+                  ? 'bg-slate-700 text-white border-slate-600' 
+                  : 'bg-transparent border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white'
+              }`}
+              variant="outline"
+            >
               Avbryt
             </Button>
-            <Button onClick={handleSave} className="flex-1 bg-blue-600 hover:bg-blue-700">
+            <Button 
+              onClick={handleSaveClick}
+              className={`flex-1 transition-all duration-200 ${
+                activeButton === 'save'
+                  ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700' 
+                  : 'bg-transparent border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white'
+              }`}
+              variant="outline"
+            >
               Spara
             </Button>
           </div>
