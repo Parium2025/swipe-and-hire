@@ -1033,7 +1033,7 @@ const MobileJobWizard = ({
                       
                       {customQuestions.length === 0 ? (
                         <div className="text-white text-sm bg-white/5 rounded-lg p-3 border border-white/20">
-                          Om någon av ovanstående frågor inte passar in eller det saknas någonting, kan du trycka på "Lägg till fråga" för att skapa ytterligare frågor som jobbsökaren kommer svara på vid behov.
+                          Saknas något? Klicka på "Lägg till fråga" och skapa de frågor du vill att kandidaten ska svara på
                         </div>
                       ) : (
                         <div className="space-y-3">
