@@ -166,13 +166,31 @@ const MobileJobWizard = ({
 
   const handleImageEdit = async (editedImageBlob: Blob) => {
     try {
-      // Skapa en temporary URL för den redigerade bilden
-      const editedImageUrl = URL.createObjectURL(editedImageBlob);
-      setJobImageDisplayUrl(editedImageUrl);
-      
-      // Här skulle vi normalt ladda upp den redigerade bilden till servern
-      // För nu använder vi bara den lokala blob-URL:en
-      handleInputChange('job_image_url', editedImageUrl);
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) {
+        throw new Error('Du måste vara inloggad för att ladda upp filer');
+      }
+
+      // Skapa ett unikt filnamn för den redigerade bilden
+      const fileExt = 'png'; // ImageEditor sparar alltid som PNG
+      const fileName = `${user.data.user.id}/${Date.now()}-edited-job-image.${fileExt}`;
+
+      // Ladda upp den redigerade bilden till Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('job-applications')
+        .upload(fileName, editedImageBlob);
+
+      if (uploadError) throw uploadError;
+
+      // Skapa signed URL och uppdatera formuläret
+      const signedUrl = await createSignedUrl('job-applications', fileName, 86400);
+      if (!signedUrl) {
+        throw new Error('Could not create secure access URL');
+      }
+
+      // Uppdatera med storage path (fileName) istället för blob URL
+      handleInputChange('job_image_url', fileName);
+      setJobImageDisplayUrl(signedUrl);
       setManualFocus(null); // Återställ manuell fokus efter redigering
       
       setShowImageEditor(false);
@@ -180,13 +198,13 @@ const MobileJobWizard = ({
       
       toast({
         title: "Bild justerad",
-        description: "Din bild har justerats framgångsrikt",
+        description: "Din bild har justerats och sparats framgångsrikt",
       });
     } catch (error) {
       console.error('Error saving edited image:', error);
       toast({
         title: "Fel",
-        description: "Kunde inte spara den redigerade bilden",
+        description: error instanceof Error ? error.message : "Kunde inte spara den redigerade bilden",
         variant: "destructive",
       });
     }
