@@ -192,7 +192,8 @@ const MobileJobWizard = ({
       // Uppdatera med storage path (fileName) istället för blob URL
       handleInputChange('job_image_url', fileName);
       setJobImageDisplayUrl(signedUrl);
-      setManualFocus(null); // Återställ manuell fokus efter redigering
+      // Behåll originalImageUrl oförändrad så vi alltid kan fortsätta redigera från originalet
+      setManualFocus(null);
       
       setShowImageEditor(false);
       setEditingImageUrl(null);
@@ -208,6 +209,24 @@ const MobileJobWizard = ({
         description: error instanceof Error ? error.message : "Kunde inte spara den redigerade bilden",
         variant: "destructive",
       });
+    }
+  };
+
+  // Öppna editor med originalbildens signerade URL
+  const openImageEditor = async () => {
+    try {
+      const source = originalImageUrl || formData.job_image_url || jobImageDisplayUrl;
+      if (!source) return;
+
+      let urlToEdit = source;
+      if (!source.startsWith('http')) {
+        const signed = await createSignedUrl('job-applications', source, 86400);
+        if (signed) urlToEdit = signed;
+      }
+      setEditingImageUrl(urlToEdit);
+      setShowImageEditor(true);
+    } catch (e) {
+      console.error('Failed to open editor', e);
     }
   };
 
@@ -860,12 +879,7 @@ const MobileJobWizard = ({
                       <div className="mt-4 space-y-3">
                         <div className="flex justify-center">
                           <button
-                            onClick={() => {
-                              if (originalImageUrl) {
-                                setEditingImageUrl(originalImageUrl); // Använd alltid originalbilden
-                                setShowImageEditor(true);
-                              }
-                            }}
+                            onClick={openImageEditor}
                             className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium"
                           >
                             Justera bild
