@@ -938,7 +938,7 @@ const MobileJobWizard = ({
                     </div>
                   </section>
                   
-                  <p className="text-white/70 text-sm text-center max-w-sm">
+                  <p className="text-white text-sm text-center max-w-sm">
                     Detta är hur din annons kommer att visas för jobbsökare. Klicka på knapparna för att testa interaktionen.
                   </p>
                 </div>
