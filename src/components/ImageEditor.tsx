@@ -31,7 +31,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const BASE_CANVAS_HEIGHT = 400; // Output canvas height in px
   const CANVAS_HEIGHT = BASE_CANVAS_HEIGHT;
   const CANVAS_WIDTH = Math.round(BASE_CANVAS_HEIGHT * aspectRatio);
-  const MIN_SCALE = 0.5;
+  const MIN_SCALE = 0.1; // Tillåt mycket mer utzooming
   const MAX_SCALE = 3;
 
   // Load and setup image
