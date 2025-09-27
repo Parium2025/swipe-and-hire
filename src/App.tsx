@@ -16,14 +16,11 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { UnsavedChangesProvider } from "@/hooks/useUnsavedChanges";
 import { Header } from "@/components/Header";
 import AuthTokenBridge from "./components/AuthTokenBridge";
-import { useStatusBar } from "@/hooks/useStatusBar";
 import { useDevice } from "@/hooks/use-device";
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  // Konfigurera statusbaren för mobila appar
-  useStatusBar();
   const device = useDevice();
   const showHeader = false; // Header removed for cleaner UI
 
