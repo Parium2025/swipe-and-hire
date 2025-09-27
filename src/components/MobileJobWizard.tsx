@@ -15,7 +15,7 @@ import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES, getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Briefcase, Heart, Bookmark } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Briefcase, Heart, Bookmark, Plus } from 'lucide-react';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { Progress } from '@/components/ui/progress';
@@ -879,28 +879,51 @@ const MobileJobWizard = ({
               </div>
             )}
 
-            {/* Step 3: Kontakt */}
+            {/* Step 3: Ansökningsfrågor */}
             {currentStep === 2 && (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-white font-medium">Kontakt-email *</Label>
-                  <Input
-                    type="email"
-                    value={formData.contact_email}
-                    onChange={(e) => handleInputChange('contact_email', e.target.value)}
-                    placeholder="kontakt@företag.se"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                  />
+              <div className="space-y-6">
+                <div className="text-center space-y-2">
+                  <h3 className="text-white font-medium text-lg">Ansökningsfrågor</h3>
+                  <p className="text-white/70 text-sm">
+                    Skapa frågor som jobbsökarna ska besvara i sin ansökan
+                  </p>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-white font-medium">Ansökningsinstruktioner</Label>
-                  <Textarea
-                    value={formData.application_instructions}
-                    onChange={(e) => handleInputChange('application_instructions', e.target.value)}
-                    placeholder="Skicka din ansökan till..."
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                  />
+                {/* Automatiska frågor info */}
+                <div className="bg-white/5 rounded-lg p-4 border border-white/20">
+                  <h4 className="text-white font-medium mb-2 flex items-center">
+                    <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                    Automatiska frågor
+                  </h4>
+                  <div className="text-white/70 text-sm space-y-1">
+                    <p>• Namn (från profil)</p>
+                    <p>• E-post (från profil)</p>
+                    <p>• Telefonnummer (från profil)</p>
+                    <p>• CV (från profil)</p>
+                  </div>
+                  <p className="text-white/60 text-xs mt-2">
+                    Dessa frågor fylls automatiskt från jobbsökarens profil
+                  </p>
+                </div>
+
+                {/* Anpassade frågor */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-white font-medium">Anpassade frågor (valfritt)</h4>
+                    <Button
+                      onClick={() => {/* Lägg till fråga */}}
+                      variant="outline"
+                      size="sm"
+                      className="border-white/20 text-white hover:bg-white/10"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Lägg till fråga
+                    </Button>
+                  </div>
+                  
+                  <div className="text-white/60 text-sm bg-white/5 rounded-lg p-3 border border-white/20">
+                    Inga anpassade frågor tillagda än. Klicka "Lägg till fråga" för att skapa din första fråga.
+                  </div>
                 </div>
               </div>
             )}
