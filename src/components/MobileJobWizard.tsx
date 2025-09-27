@@ -90,28 +90,23 @@ const MobileJobWizard = ({
     return text.substring(0, maxLength).trim() + '...';
   };
 
-  // AI-powered title optimization
-  const optimizeJobTitle = async (title: string, maxLength: number = 35) => {
-    if (!title || title.length <= maxLength) return title;
+  // Smart text sizing for mobile preview based on content length
+  const getSmartTextStyle = (text: string) => {
+    if (!text) return { fontSize: 'text-base', lineHeight: 'leading-tight' };
     
-    try {
-      const { data, error } = await supabase.functions.invoke('optimize-job-title', {
-        body: { title, maxLength }
-      });
-      
-      if (error) {
-        console.error('Error optimizing job title:', error);
-        return truncateText(title, maxLength); // Fallback
-      }
-      
-      return data?.optimizedTitle || truncateText(title, maxLength);
-    } catch (error) {
-      console.error('Error calling optimize-job-title:', error);
-      return truncateText(title, maxLength); // Fallback
+    const length = text.length;
+    
+    if (length <= 25) {
+      return { fontSize: 'text-base', lineHeight: 'leading-tight' };
+    } else if (length <= 40) {
+      return { fontSize: 'text-sm', lineHeight: 'leading-tight' };
+    } else if (length <= 60) {
+      return { fontSize: 'text-xs', lineHeight: 'leading-tight' };
+    } else {
+      return { fontSize: 'text-xs', lineHeight: 'leading-none' };
     }
   };
   
-  const [optimizingTitle, setOptimizingTitle] = useState(false);
   const [citySearchTerm, setCitySearchTerm] = useState('');
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [occupationSearchTerm, setOccupationSearchTerm] = useState('');
@@ -360,33 +355,11 @@ const MobileJobWizard = ({
     }
   ];
 
-  const handleInputChange = async (field: keyof JobFormData, value: string) => {
+  const handleInputChange = (field: keyof JobFormData, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
-    
-    // Auto-optimize title if it's too long
-    if (field === 'title' && value.length > 35) {
-      setOptimizingTitle(true);
-      try {
-        const optimizedTitle = await optimizeJobTitle(value, 35);
-        if (optimizedTitle !== value) {
-          setFormData(prev => ({
-            ...prev,
-            title: optimizedTitle
-          }));
-          toast({
-            title: "Titel optimerad",
-            description: "AI har kortat ner din titel för bättre visning",
-          });
-        }
-      } catch (error) {
-        console.error('Error optimizing title:', error);
-      } finally {
-        setOptimizingTitle(false);
-      }
-    }
   };
 
   const handleCitySearch = (value: string) => {
@@ -598,24 +571,16 @@ const MobileJobWizard = ({
             {currentStep === 0 && (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-white font-medium">
-                    Jobbtitel * 
-                    {optimizingTitle && (
-                      <span className="text-blue-400 text-sm ml-2">
-                        🤖 AI optimerar...
-                      </span>
-                    )}
-                  </Label>
+                  <Label className="text-white font-medium">Jobbtitel *</Label>
                   <Input
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
                     placeholder="t.ex. Lagerarbetare"
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
-                    disabled={optimizingTitle}
                   />
-                  {formData.title.length > 35 && !optimizingTitle && (
-                    <p className="text-yellow-400 text-sm">
-                      💡 Tips: Titeln är för lång ({formData.title.length} tecken). AI kommer att korta ner den automatiskt.
+                  {formData.title.length > 50 && (
+                    <p className="text-blue-400 text-sm">
+                      💡 Lång titel kommer att anpassas automatiskt i förhandsvisningen
                     </p>
                   )}
                 </div>
@@ -861,7 +826,7 @@ const MobileJobWizard = ({
 
                         {/* Textinnehåll - centrerat */}
                         <div className="absolute inset-0 flex flex-col justify-center items-center p-2 text-white text-center">
-                          <h3 className="text-base font-extrabold leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)]">
+                          <h3 className={`font-extrabold drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)] ${getSmartTextStyle(formData.title).fontSize} ${getSmartTextStyle(formData.title).lineHeight}`}>
                             {formData.title || 'Jobbtitel'}
                           </h3>
                           <div className="mt-1 text-white/95 text-sm drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
