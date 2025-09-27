@@ -856,7 +856,6 @@ const MobileJobWizard = ({
                             {getMetaLine(formData.employment_type, formData.workplace_city) || 'Anställning • Plats'}
                           </div>
                         </div>
-                        </div>
 
                         {/* Handlingsknappar */}
                         <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center gap-2">
