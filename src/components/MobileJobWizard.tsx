@@ -829,19 +829,23 @@ const MobileJobWizard = ({
                           <h3 className={`font-extrabold drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)] ${getSmartTextStyle(formData.title).fontSize} ${getSmartTextStyle(formData.title).lineHeight} mb-2`}>
                             {formData.title || 'Jobbtitel'}
                           </h3>
-                          <div className="text-white/95 text-sm drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)] flex items-center gap-1">
-                            <span>{profile?.company_name || 'Företagsnamn'}</span>
+                          
+                          {/* Företagsnamn */}
+                          <div className="text-white/95 text-sm font-medium drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)] mb-1">
+                            {profile?.company_name || 'Företagsnamn'}
+                          </div>
+                          
+                          {/* Anställningstyp och plats */}
+                          <div className="text-white/90 text-xs drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)] flex items-center gap-2">
                             {formData.employment_type && (
-                              <>
-                                <span>•</span>
-                                <span>{formData.employment_type}</span>
-                              </>
+                              <span className="bg-white/20 px-2 py-1 rounded-full font-medium">
+                                {formData.employment_type}
+                              </span>
                             )}
                             {formData.workplace_city && (
-                              <>
-                                <span>•</span>
-                                <span>{formData.workplace_city}</span>
-                              </>
+                              <span className="bg-white/20 px-2 py-1 rounded-full font-medium">
+                                {formData.workplace_city}
+                              </span>
                             )}
                           </div>
                         </div>
