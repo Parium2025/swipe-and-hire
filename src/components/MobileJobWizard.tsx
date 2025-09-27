@@ -719,9 +719,6 @@ const MobileJobWizard = ({
                     rows={4}
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/60 text-base resize-none leading-relaxed"
                   />
-                  <div className="text-xs text-white/50">
-                    Tips: Beskriv huvuduppgifter, vad ni söker och vad ni erbjuder
-                  </div>
                 </div>
 
 
