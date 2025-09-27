@@ -46,6 +46,7 @@ function redirectAuthTokensIfNeeded() {
 
 const redirected = redirectAuthTokensIfNeeded();
 if (!redirected) {
-  createRoot(document.getElementById("root")!).render(<App />);
+  const root = createRoot(document.getElementById("root")!);
+  root.render(<App />);
 }
 
