@@ -1005,14 +1005,14 @@ const MobileJobWizard = ({
                       </p>
                       <div className="text-white text-sm space-y-1">
                         <p>• Namn och efternamn</p>
-                        <p>• Födelsedatum</p>
+                        <p>• Ålder</p>
                         <p>• E-post</p>
                         <p>• Telefonnummer</p>
                         <p>• Ort/stad</p>
                         <p>• Presentation</p>
                         <p>• CV</p>
                         <p>• Nuvarande anställningsform</p>
-                        <p>• Arbetstid</p>
+                        <p>• Anställningsinformation</p>
                         <p>• Tillgänglighet</p>
                       </div>
                     </div>
