@@ -152,6 +152,8 @@ const MobileJobWizard = ({
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [occupationSearchTerm, setOccupationSearchTerm] = useState('');
   const [showOccupationDropdown, setShowOccupationDropdown] = useState(false);
+  const [questionTypeSearchTerm, setQuestionTypeSearchTerm] = useState('');
+  const [showQuestionTypeDropdown, setShowQuestionTypeDropdown] = useState(false);
   const [showJobPreview, setShowJobPreview] = useState(false);
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
@@ -573,6 +575,44 @@ const MobileJobWizard = ({
     setShowOccupationDropdown(false);
   };
 
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showQuestionTypeDropdown && !(event.target as Element).closest('.question-type-dropdown')) {
+        setShowQuestionTypeDropdown(false);
+      }
+      if (showOccupationDropdown && !(event.target as Element).closest('.occupation-dropdown')) {
+        setShowOccupationDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showQuestionTypeDropdown, showOccupationDropdown]);
+  const questionTypes = [
+    { value: 'text', label: 'Text' },
+    { value: 'yes_no', label: 'Ja/Nej' },
+    { value: 'multiple_choice', label: 'Flervalsval' },
+    { value: 'number', label: 'Siffra' },
+    { value: 'date', label: 'Datum' },
+    { value: 'range', label: 'Intervall' }
+  ];
+
+  const handleQuestionTypeSearch = (value: string) => {
+    setQuestionTypeSearchTerm(value);
+    setShowQuestionTypeDropdown(value.length >= 0);
+  };
+
+  const handleQuestionTypeSelect = (type: { value: string, label: string }) => {
+    updateQuestionField('question_type', type.value);
+    setQuestionTypeSearchTerm(type.label);
+    setShowQuestionTypeDropdown(false);
+  };
+
+  const filteredQuestionTypes = questionTypes.filter(type => 
+    type.label.toLowerCase().includes(questionTypeSearchTerm.toLowerCase())
+  );
+
   const handleWorkplacePostalCodeChange = (postalCode: string) => {
     handleInputChange('workplace_postal_code', postalCode);
   };
@@ -772,9 +812,9 @@ const MobileJobWizard = ({
                   />
                 </div>
 
-                <div className="space-y-2">
+                 <div className="space-y-2">
                   <Label className="text-white font-medium">Yrke *</Label>
-                  <div className="relative">
+                  <div className="relative occupation-dropdown">
                     <Input
                       value={formData.occupation}
                       onChange={(e) => handleOccupationSearch(e.target.value)}
@@ -1109,22 +1149,33 @@ const MobileJobWizard = ({
                       {/* Question Type */}
                       <div className="space-y-2">
                         <Label className="text-white font-medium">Frågetyp *</Label>
-                        <Select
-                          value={editingQuestion?.question_type || ''}
-                          onValueChange={(value) => updateQuestionField('question_type', value)}
-                        >
-                          <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                            <SelectValue placeholder="Välj frågetyp" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-gray-800 border-gray-600">
-                            <SelectItem value="text" className="text-white hover:bg-gray-700">Text</SelectItem>
-                            <SelectItem value="yes_no" className="text-white hover:bg-gray-700">Ja/Nej</SelectItem>
-                            <SelectItem value="multiple_choice" className="text-white hover:bg-gray-700">Flervalsval</SelectItem>
-                            <SelectItem value="number" className="text-white hover:bg-gray-700">Siffra</SelectItem>
-                            <SelectItem value="date" className="text-white hover:bg-gray-700">Datum</SelectItem>
-                            <SelectItem value="range" className="text-white hover:bg-gray-700">Intervall</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <div className="relative question-type-dropdown">
+                          <Input
+                            value={questionTypeSearchTerm || (editingQuestion?.question_type ? questionTypes.find(t => t.value === editingQuestion.question_type)?.label || '' : '')}
+                            onChange={(e) => handleQuestionTypeSearch(e.target.value)}
+                            onClick={() => setShowQuestionTypeDropdown(!showQuestionTypeDropdown)}
+                            placeholder="Välj frågetyp"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer"
+                            readOnly
+                          />
+                          <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                          
+                          {/* Question Type Dropdown */}
+                          {showQuestionTypeDropdown && (
+                            <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                              {filteredQuestionTypes.map((type) => (
+                                <button
+                                  key={type.value}
+                                  type="button"
+                                  onClick={() => handleQuestionTypeSelect(type)}
+                                  className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                                >
+                                  <div className="font-medium">{type.label}</div>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       {/* Question Text - only show after question type is selected */}
