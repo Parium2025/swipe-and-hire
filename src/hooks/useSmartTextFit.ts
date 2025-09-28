@@ -2,9 +2,9 @@ import { useEffect, useRef } from "react";
 
 export default function useSmartTextFit<T extends HTMLElement>(
   text: string,
-  options: { minScale?: number; maxLines?: number } = {}
+  options: { minFontPx?: number } = {}
 ) {
-  const { minScale = 0.7, maxLines = 1 } = options;
+  const { minFontPx = 10 } = options;
   const ref = useRef<T | null>(null);
 
   useEffect(() => {
@@ -16,49 +16,57 @@ export default function useSmartTextFit<T extends HTMLElement>(
       el.style.transform = 'none';
       el.style.transformOrigin = '';
       el.style.whiteSpace = '';
-      
-      // Låt texten flöda naturligt först
+      el.style.fontSize = '';
+
       requestAnimationFrame(() => {
-        const container = el.closest('.bg-white\\/10') as HTMLElement;
+        // Hitta närmaste kort-container (har paddings som påverkar bredden)
+        const container = (el.closest('.bg-white\\/10') || el.parentElement) as HTMLElement | null;
         if (!container) return;
-        
-        // Mät containerbredd (tillgängligt utrymme)
-        const containerStyles = getComputedStyle(container);
-        const safety = 12; // extra buffert så sista bokstaven inte klipps
-        const availableWidth = container.offsetWidth 
-          - parseFloat(containerStyles.paddingLeft) 
-          - parseFloat(containerStyles.paddingRight) - safety;
-        
-        // Testa faktisk enkelrad-bredd
+
+        // Tillgänglig bredd i containern
+        const cStyles = getComputedStyle(container);
+        const availableWidth = container.clientWidth
+          - parseFloat(cStyles.paddingLeft)
+          - parseFloat(cStyles.paddingRight)
+          - 4; // liten säkerhetsmarginal
+
+        // Mät faktisk enkelrad-bredd
+        const originalWhiteSpace = el.style.whiteSpace;
+        const originalFont = getComputedStyle(el).fontSize;
+        let currentFont = parseFloat(originalFont) || 12;
+
         el.style.whiteSpace = 'nowrap';
-        const singleLineWidth = el.scrollWidth;
-        el.style.whiteSpace = '';
-        
-        // Om texten är bredare än tillgängligt utrymme, krymp den lite extra för säkerhet
-        if (singleLineWidth > availableWidth) {
-          const scale = Math.max(minScale, (availableWidth - 6) / singleLineWidth) * 0.96; // extra säkerhetsmarginal
-          el.style.whiteSpace = 'nowrap';
-          el.style.transform = `scaleX(${scale})`;
-          el.style.transformOrigin = 'left center';
-          el.style.paddingRight = '6px';
-          el.style.willChange = 'transform';
+        let singleLineWidth = el.scrollWidth;
+
+        if (singleLineWidth <= availableWidth) {
+          // Får redan plats, återställ white-space
+          el.style.whiteSpace = originalWhiteSpace;
+          return;
         }
+
+        // Krymp font-size stegvis tills det får plats
+        while (singleLineWidth > availableWidth && currentFont > minFontPx) {
+          currentFont -= 0.25;
+          el.style.fontSize = `${currentFont}px`;
+          singleLineWidth = el.scrollWidth;
+        }
+
+        // Säkerställ enkelrad och att inget klipps
+        el.style.whiteSpace = 'nowrap';
+        el.style.overflow = 'visible';
       });
     };
 
     // Kör efter kort delay för att säkerställa rendering
     const timeout = setTimeout(fit, 50);
-    
-    const resizeObserver = new ResizeObserver(() => {
-      setTimeout(fit, 10);
-    });
+    const resizeObserver = new ResizeObserver(() => setTimeout(fit, 10));
     resizeObserver.observe(el);
 
     return () => {
       resizeObserver.disconnect();
       clearTimeout(timeout);
     };
-  }, [text, minScale, maxLines]);
+  }, [text, minFontPx]);
 
   return ref;
 }

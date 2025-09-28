@@ -352,8 +352,8 @@ const MobileJobWizard = ({
     job_image_url: ''
   });
 
-  // Smart text fit for occupation - uses break-words but scales down if text breaks across lines
-  const occupationRef = useSmartTextFit<HTMLDivElement>(formData.occupation || '', { minScale: 0.7, maxLines: 1 });
+  // Smart text fit for occupation - uses break-words but reduces font-size if it would wrap
+  const occupationRef = useSmartTextFit<HTMLDivElement>(formData.occupation || '', { minFontPx: 10 });
 
   // Visningsnamn: visa alltid användarens titel (inte AI-förslag)
   const getDisplayTitle = () => {
