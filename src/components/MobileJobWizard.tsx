@@ -1708,213 +1708,257 @@ const MobileJobWizard = ({
                         {/* Notch */}
                         <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black"></div>
 
-                        {/* Mobilansökningsformulär med korrekt Parium bakgrund */}
+                        {/* Mobilvy med korrekt Parium-bakgrund */}
                         <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}>
                           {/* Status bar */}
                           <div className="h-1 bg-black relative z-10"></div>
-                          
-                          {/* Header */}
-                          <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 backdrop-blur-sm border-b border-white/20 relative z-10">
-                            <div className="text-xs font-bold text-white">Ansökningsformulär</div>
-                            <button 
-                              onClick={() => {
-                                setShowApplicationForm(false);
-                                setHingeMode('ad'); // Switch back to ad view
-                              }}
-                              className="text-xs text-white/80 hover:text-white"
-                            >
-                              ✕
-                            </button>
-                          </div>
 
-                          {/* Scrollable content */}
-                          <div className="px-2 py-2 h-full overflow-y-auto relative z-10">
-                            <div className="space-y-3">
-                              
-                              {/* Job header med Parium styling */}
-                              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                                <div className="flex items-center mb-1">
-                                  <div className="w-4 h-4 bg-primary/20 rounded mr-1 flex items-center justify-center">
-                                    <Building2 className="h-2 w-2 text-primary-foreground" />
-                                  </div>
-                                  <div>
-                                    <div className="text-xs font-bold text-white">{profile?.company_name || 'Företagsnamn'}</div>
-                                  </div>
-                                </div>
-                                <h3 className="text-xs font-bold text-white mb-1">{formData.title}</h3>
-                                <div className="text-xs text-white/70">{formData.workplace_city || formData.location || 'Stockholm'}</div>
+                          {showApplicationForm ? (
+                            <>
+                              {/* Header – Ansökningsformulär */}
+                              <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 backdrop-blur-sm border-b border-white/20 relative z-10">
+                                <div className="text-xs font-bold text-white">Ansökningsformulär</div>
+                                <button 
+                                  onClick={() => setShowApplicationForm(false)}
+                                  className="text-xs text-white/80 hover:text-white pointer-events-auto"
+                                >
+                                  ✕
+                                </button>
                               </div>
 
-                              {/* Automatiska profilfält med pre-filled styling */}
-                              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                                <h4 className="text-xs font-semibold text-white mb-2 flex items-center">
-                                  <CheckSquare className="h-3 w-3 mr-1 text-green-400" />
-                                  Automatiskt ifyllda fält
-                                </h4>
-                                
-                                <div className="space-y-2">
-                                  <div className="grid grid-cols-2 gap-1">
-                                    <div className="space-y-1">
-                                      <label className="text-xs text-white/60">Förnamn</label>
-                                      <div className="bg-green-500/20 border border-green-400/30 rounded p-1 text-xs text-green-200 flex items-center">
-                                        <CheckSquare className="h-2 w-2 mr-1" />
-                                        Anna
-                                      </div>
-                                    </div>
-                                    <div className="space-y-1">
-                                      <label className="text-xs text-white/60">Efternamn</label>
-                                      <div className="bg-green-500/20 border border-green-400/30 rounded p-1 text-xs text-green-200 flex items-center">
-                                        <CheckSquare className="h-2 w-2 mr-1" />
-                                        Johansson
-                                      </div>
-                                    </div>
-                                  </div>
+                              {/* Scrollbart innehåll – FORMULÄR */}
+                              <div className="px-2 py-2 h-full overflow-y-auto relative z-10">
+                                <div className="space-y-3">
                                   
-                                  <div className="space-y-1">
-                                    <label className="text-xs text-white/60">E-post</label>
-                                    <div className="bg-green-500/20 border border-green-400/30 rounded p-1 text-xs text-green-200 flex items-center">
-                                      <CheckSquare className="h-2 w-2 mr-1" />
-                                      anna.johansson@email.com
-                                    </div>
-                                  </div>
-                                  
-                                  <div className="grid grid-cols-2 gap-1">
-                                    <div className="space-y-1">
-                                      <label className="text-xs text-white/60">Telefon</label>
-                                      <div className="bg-green-500/20 border border-green-400/30 rounded p-1 text-xs text-green-200 flex items-center">
-                                        <CheckSquare className="h-2 w-2 mr-1" />
-                                        070-123 45 67
+                                  {/* Job header med Parium styling */}
+                                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+                                    <div className="flex items-center mb-1">
+                                      <div className="w-4 h-4 bg-primary/20 rounded mr-1 flex items-center justify-center">
+                                        <Building2 className="h-2 w-2 text-primary-foreground" />
+                                      </div>
+                                      <div>
+                                        <div className="text-xs font-bold text-white">{profile?.company_name || 'Företagsnamn'}</div>
                                       </div>
                                     </div>
-                                    <div className="space-y-1">
-                                      <label className="text-xs text-white/60">Ålder</label>
-                                      <div className="bg-green-500/20 border border-green-400/30 rounded p-1 text-xs text-green-200 flex items-center">
-                                        <CheckSquare className="h-2 w-2 mr-1" />
-                                        28 år
-                                      </div>
-                                    </div>
+                                    <h3 className="text-xs font-bold text-white mb-1">{formData.title}</h3>
+                                    <div className="text-xs text-white/70">{formData.workplace_city || formData.location || 'Stockholm'}</div>
                                   </div>
-                                  
-                                  <div className="space-y-1">
-                                    <label className="text-xs text-white/60">CV</label>
-                                    <div className="bg-green-500/20 border border-green-400/30 rounded p-1 text-xs text-green-200 flex items-center">
-                                      <FileText className="h-2 w-2 mr-1" />
-                                      anna_cv_2024.pdf
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
 
-                              {/* Anpassade frågor med Parium styling */}
-                              {customQuestions.length > 0 && (
-                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                                  <h4 className="text-xs font-semibold text-white mb-2 flex items-center">
-                                    <CheckSquare className="h-3 w-3 mr-1 text-secondary" />
-                                    Anpassade frågor ({customQuestions.length})
-                                  </h4>
-                                  
-                                  <div className="space-y-2">
-                                    {customQuestions.slice(0, 3).map((question, index) => (
-                                      <div key={question.id || index} className="space-y-1">
-                                        <label className="text-xs text-white flex items-start">
-                                          <span className="mr-1 text-secondary font-medium">Q{index + 1}.</span>
-                                          <span className="flex-1 leading-tight">
-                                            {question.question_text.length > 40 ? 
-                                              question.question_text.substring(0, 40) + '...' : 
-                                              question.question_text
-                                            }
-                                            {question.is_required && <span className="text-red-400 ml-1">*</span>}
-                                          </span>
-                                        </label>
-                                        
-                                        {/* Input förhandsvisning baserat på frågetyp */}
-                                        {question.question_type === 'text' && (
-                                          <textarea
-                                            className="w-full border border-white/20 bg-white/10 backdrop-blur-sm rounded p-1 text-xs text-white placeholder:text-white/60 resize-none"
-                                            placeholder={question.placeholder_text || 'Skriv ditt svar...'}
-                                            rows={2}
-                                            disabled
-                                          />
-                                        )}
-                                        
-                                        {question.question_type === 'yes_no' && (
-                                          <div className="flex space-x-2">
-                                            <div className="flex items-center space-x-1">
-                                              <input type="radio" className="w-2 h-2 accent-secondary" disabled />
-                                              <label className="text-xs text-white">Ja</label>
-                                            </div>
-                                            <div className="flex items-center space-x-1">
-                                              <input type="radio" className="w-2 h-2 accent-secondary" disabled />
-                                              <label className="text-xs text-white">Nej</label>
-                                            </div>
-                                          </div>
-                                        )}
-                                        
-                                        {question.question_type === 'multiple_choice' && (
-                                          <div className="space-y-1">
-                                            {question.options?.slice(0, 2).map((option, optIndex) => (
-                                              <div key={optIndex} className="flex items-center space-x-1">
-                                                <input type="radio" className="w-2 h-2 accent-secondary" disabled />
-                                                <label className="text-xs text-white">
-                                                  {option.length > 20 ? option.substring(0, 20) + '...' : option}
-                                                </label>
-                                              </div>
-                                            ))}
-                                            {question.options && question.options.length > 2 && (
-                                              <div className="text-xs text-white/60">+ {question.options.length - 2} fler</div>
-                                            )}
-                                          </div>
-                                        )}
-                                        
-                                        {(question.question_type === 'number' || question.question_type === 'date') && (
-                                          <input
-                                            type={question.question_type}
-                                            className="w-full border border-white/20 bg-white/10 backdrop-blur-sm rounded p-1 text-xs text-white placeholder:text-white/60"
-                                            placeholder={question.placeholder_text}
-                                            disabled
-                                          />
-                                        )}
-                                        
-                                        {(question.question_type === 'file' || question.question_type === 'video') && (
-                                          <div className="border-2 border-dashed border-white/30 rounded p-2 text-center bg-white/5">
-                                            {question.question_type === 'file' ? (
-                                              <FileText className="h-4 w-4 mx-auto mb-1 text-white/60" />
-                                            ) : (
-                                              <Video className="h-4 w-4 mx-auto mb-1 text-white/60" />
-                                            )}
-                                            <p className="text-xs text-white/60">
-                                              {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
-                                            </p>
-                                          </div>
-                                        )}
-                                      </div>
-                                    ))}
+                                  {/* Automatiska profilfält med pre-filled styling */}
+                                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+                                    <h4 className="text-xs font-semibold text-white mb-2 flex items-center">
+                                      <CheckSquare className="h-3 w-3 mr-1 text-green-400" />
+                                      Automatiskt ifyllda fält
+                                    </h4>
                                     
-                                    {customQuestions.length > 3 && (
-                                      <div className="text-xs text-white/60 text-center py-1">
-                                        + {customQuestions.length - 3} fler frågor...
+                                    <div className="space-y-2">
+                                      <div className="grid grid-cols-2 gap-1">
+                                        <div className="space-y-1">
+                                          <label className="text-xs text-white/60">Förnamn</label>
+                                          <div className="bg-green-500/20 border border-green-400/30 rounded p-1 text-xs text-green-200 flex items-center">
+                                            <CheckSquare className="h-2 w-2 mr-1" />
+                                            Anna
+                                          </div>
+                                        </div>
+                                        <div className="space-y-1">
+                                          <label className="text-xs text-white/60">Efternamn</label>
+                                          <div className="bg-green-500/20 border border-green-400/30 rounded p-1 text-xs text-green-200 flex items-center">
+                                            <CheckSquare className="h-2 w-2 mr-1" />
+                                            Johansson
+                                          </div>
+                                        </div>
+                                      </div>
+                                      
+                                      <div className="space-y-1">
+                                        <label className="text-xs text-white/60">E-post</label>
+                                        <div className="bg-green-500/20 border border-green-400/30 rounded p-1 text-xs text-green-200 flex items-center">
+                                          <CheckSquare className="h-2 w-2 mr-1" />
+                                          anna.johansson@email.com
+                                        </div>
+                                      </div>
+                                      
+                                      <div className="grid grid-cols-2 gap-1">
+                                        <div className="space-y-1">
+                                          <label className="text-xs text-white/60">Telefon</label>
+                                          <div className="bg-green-500/20 border border-green-400/30 rounded p-1 text-xs text-green-200 flex items-center">
+                                            <CheckSquare className="h-2 w-2 mr-1" />
+                                            070-123 45 67
+                                          </div>
+                                        </div>
+                                        <div className="space-y-1">
+                                          <label className="text-xs text-white/60">Ålder</label>
+                                          <div className="bg-green-500/20 border border-green-400/30 rounded p-1 text-xs text-green-200 flex items-center">
+                                            <CheckSquare className="h-2 w-2 mr-1" />
+                                            28 år
+                                          </div>
+                                        </div>
+                                      </div>
+                                      
+                                      <div className="space-y-1">
+                                        <label className="text-xs text-white/60">CV</label>
+                                        <div className="bg-green-500/20 border border-green-400/30 rounded p-1 text-xs text-green-200 flex items-center">
+                                          <FileText className="h-2 w-2 mr-1" />
+                                          anna_cv_2024.pdf
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Anpassade frågor med Parium styling */}
+                                  {customQuestions.length > 0 && (
+                                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+                                      <h4 className="text-xs font-semibold text-white mb-2 flex items-center">
+                                        <CheckSquare className="h-3 w-3 mr-1 text-secondary" />
+                                        Anpassade frågor ({customQuestions.length})
+                                      </h4>
+                                      
+                                      <div className="space-y-2">
+                                        {customQuestions.slice(0, 3).map((question, index) => (
+                                          <div key={question.id || index} className="space-y-1">
+                                            <label className="text-xs text-white flex items-start">
+                                              <span className="mr-1 text-secondary font-medium">Q{index + 1}.</span>
+                                              <span className="flex-1 leading-tight">
+                                                {question.question_text.length > 40 ? 
+                                                  question.question_text.substring(0, 40) + '...' : 
+                                                  question.question_text
+                                                }
+                                                {question.is_required && <span className="text-red-400 ml-1">*</span>}
+                                              </span>
+                                            </label>
+                                            
+                                            {/* Input förhandsvisning baserat på frågetyp */}
+                                            {question.question_type === 'text' && (
+                                              <textarea
+                                                className="w-full border border-white/20 bg-white/10 backdrop-blur-sm rounded p-1 text-xs text-white placeholder:text-white/60 resize-none"
+                                                placeholder={question.placeholder_text || 'Skriv ditt svar...'}
+                                                rows={2}
+                                                disabled
+                                              />
+                                            )}
+                                            
+                                            {question.question_type === 'yes_no' && (
+                                              <div className="flex space-x-2">
+                                                <div className="flex items-center space-x-1">
+                                                  <input type="radio" className="w-2 h-2 accent-secondary" disabled />
+                                                  <label className="text-xs text-white">Ja</label>
+                                                </div>
+                                                <div className="flex items-center space-x-1">
+                                                  <input type="radio" className="w-2 h-2 accent-secondary" disabled />
+                                                  <label className="text-xs text-white">Nej</label>
+                                                </div>
+                                              </div>
+                                            )}
+                                            
+                                            {question.question_type === 'multiple_choice' && (
+                                              <div className="space-y-1">
+                                                {question.options?.slice(0, 2).map((option, optIndex) => (
+                                                  <div key={optIndex} className="flex items-center space-x-1">
+                                                    <input type="radio" className="w-2 h-2 accent-secondary" disabled />
+                                                    <label className="text-xs text-white">
+                                                      {option.length > 20 ? option.substring(0, 20) + '...' : option}
+                                                    </label>
+                                                  </div>
+                                                ))}
+                                                {question.options && question.options.length > 2 && (
+                                                  <div className="text-xs text-white/60">+ {question.options.length - 2} fler</div>
+                                                )}
+                                              </div>
+                                            )}
+                                            
+                                            {(question.question_type === 'number' || question.question_type === 'date') && (
+                                              <input
+                                                type={question.question_type}
+                                                className="w-full border border-white/20 bg-white/10 backdrop-blur-sm rounded p-1 text-xs text-white placeholder:text-white/60"
+                                                placeholder={question.placeholder_text}
+                                                disabled
+                                              />
+                                            )}
+                                            
+                                            {(question.question_type === 'file' || question.question_type === 'video') && (
+                                              <div className="border-2 border-dashed border-white/30 rounded p-2 text-center bg-white/5">
+                                                {question.question_type === 'file' ? (
+                                                  <FileText className="h-4 w-4 mx-auto mb-1 text-white/60" />
+                                                ) : (
+                                                  <Video className="h-4 w-4 mx-auto mb-1 text-white/60" />
+                                                )}
+                                                <p className="text-xs text-white/60">
+                                                  {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
+                                                </p>
+                                              </div>
+                                            )}
+                                          </div>
+                                        ))}
+                                        
+                                        {customQuestions.length > 3 && (
+                                          <div className="text-xs text-white/60 text-center py-1">
+                                            + {customQuestions.length - 3} fler frågor...
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Swipe-info istället för submit button */}
+                                  <div className="bg-secondary/20 backdrop-blur-sm rounded-lg p-2 border border-secondary/30">
+                                    <div className="flex items-center justify-center space-x-2 py-1">
+                                      <Heart className="h-4 w-4 text-green-400" />
+                                      <span className="text-xs font-medium text-white">Swipe för att ansöka</span>
+                                      <X className="h-4 w-4 text-red-400" />
+                                    </div>
+                                    <p className="text-xs text-white/70 text-center mt-1">
+                                      Jobbsökare swipar höger för att ansöka
+                                    </p>
+                                  </div>
+
+                                  {/* Extra space for scrolling */}
+                                  <div className="h-4"></div>
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              {/* Header – Jobbannons */}
+                              <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 backdrop-blur-sm border-b border-white/20 relative z-10">
+                                <div className="text-xs font-bold text-white">Jobbannons</div>
+                                <button 
+                                  onClick={() => setShowApplicationForm(true)}
+                                  className="text-[10px] px-2 py-0.5 rounded bg-white/10 text-white hover:bg-white/20 pointer-events-auto"
+                                >
+                                  Öppna formulär
+                                </button>
+                              </div>
+
+                              {/* Scrollbart innehåll – ANNONS */}
+                              <div className="px-2 py-2 h-full overflow-y-auto relative z-10">
+                                <div className="space-y-3">
+                                  <div className="rounded-lg overflow-hidden border border-white/20 bg-white/5">
+                                    {jobImageDisplayUrl ? (
+                                      <div
+                                        className="h-20 bg-cover bg-center"
+                                        style={{ 
+                                          backgroundImage: `url(${jobImageDisplayUrl})`,
+                                          backgroundPosition: bgPosition
+                                        }}
+                                      />
+                                    ) : (
+                                      <div className="h-20 bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
+                                        <Building2 className="h-6 w-6 text-white/60" />
                                       </div>
                                     )}
+                                    <div className="p-2">
+                                      <div className="text-[10px] text-white/70">{profile?.company_name || 'Företagsnamn'}</div>
+                                      <div className={`font-bold text-white ${getSmartTextStyle(getDisplayTitle()).fontSize}`}>
+                                        {getDisplayTitle()}
+                                      </div>
+                                      <div className="text-[10px] text-white/70 mt-0.5">
+                                        {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
-                              )}
-
-                              {/* Swipe-info istället för submit button */}
-                              <div className="bg-secondary/20 backdrop-blur-sm rounded-lg p-2 border border-secondary/30">
-                                <div className="flex items-center justify-center space-x-2 py-1">
-                                  <Heart className="h-4 w-4 text-green-400" />
-                                  <span className="text-xs font-medium text-white">Swipe för att ansöka</span>
-                                  <X className="h-4 w-4 text-red-400" />
-                                </div>
-                                <p className="text-xs text-white/70 text-center mt-1">
-                                  Jobbsökare swipar höger för att ansöka
-                                </p>
                               </div>
-
-                              {/* Extra space for scrolling */}
-                              <div className="h-4"></div>
-                            </div>
-                          </div>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
