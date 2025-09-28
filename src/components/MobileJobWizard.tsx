@@ -776,7 +776,7 @@ const MobileJobWizard = ({
     
     // Add remote work info if relevant
     if (formData.remote_work_possible === 'ja') {
-      displayText += ', distans möjligt';
+      displayText += ', distans helt möjligt';
     } else if (formData.remote_work_possible === 'delvis') {
       displayText += ', delvis distans';
     }
