@@ -1731,6 +1731,19 @@ const MobileJobWizard = ({
                               )}
 
 
+                                {/* Yrke */}
+                                {formData.occupation && (
+                                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 mb-2">
+                                    <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                      <Briefcase className="h-2 w-2 mr-1 text-white" />
+                                      Yrke
+                                    </h5>
+                                    <div className="text-xs text-white">
+                                      <div className="font-medium">{formData.occupation}</div>
+                                    </div>
+                                  </div>
+                                )}
+
                                 {/* Arbetsplats */}
                                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
                                   <h5 className="text-xs font-medium text-white mb-1 flex items-center">
