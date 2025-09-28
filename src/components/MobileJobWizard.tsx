@@ -1895,7 +1895,10 @@ const MobileJobWizard = ({
                                  
                                  <div className="space-y-1.5">
                                    <div className="text-xs">
-                                     <span className="text-white whitespace-nowrap">• Namn och efternamn</span>
+                                     <span className="text-white">• Namn</span>
+                                   </div>
+                                   <div className="text-xs">
+                                     <span className="text-white">• Efternamn</span>
                                    </div>
                                    <div className="text-xs">
                                      <span className="text-white">• Ålder</span>
