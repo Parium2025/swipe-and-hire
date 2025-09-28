@@ -748,7 +748,7 @@ const MobileJobWizard = ({
   // Salary type options
   const salaryTypes = [
     { value: 'fast', label: 'Fast månads- vecko- eller timlön' },
-    { value: 'rorlig', label: 'Rörlig, ackord eller provisionslön' },
+    { value: 'rorlig', label: 'Rörlig ackord- eller provisionslön' },
     { value: 'fast-rorlig', label: 'Fast och rörlig lön' }
   ];
 
