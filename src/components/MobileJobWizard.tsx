@@ -1875,7 +1875,7 @@ const MobileJobWizard = ({
                             ) : null}
                             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                             <div 
-                              className="absolute inset-0 flex flex-col justify-start items-center pt-6 p-3 text-white text-center cursor-pointer"
+                              className="absolute inset-0 flex flex-col justify-start items-center pt-10 p-3 text-white text-center cursor-pointer"
                               onClick={() => setShowApplicationForm(true)}
                             >
                               <div className="text-sm text-white font-medium mb-1">{profile?.company_name || 'Företag'}</div>
