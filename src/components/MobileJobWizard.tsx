@@ -1917,42 +1917,40 @@ const MobileJobWizard = ({
                             </>
                           ) : (
                             <>
-                              {/* Header – Jobbannons */}
-                              <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 backdrop-blur-sm border-b border-white/20 relative z-10">
-                                <div className="text-xs font-bold text-white">Jobbannons</div>
-                                <button 
-                                  onClick={() => setShowApplicationForm(true)}
-                                  className="text-[10px] px-2 py-0.5 rounded bg-white/10 text-white hover:bg-white/20 pointer-events-auto"
-                                >
-                                  Öppna formulär
-                                </button>
-                              </div>
-
-                              {/* Scrollbart innehåll – ANNONS */}
-                              <div className="px-2 py-2 h-full overflow-y-auto relative z-10">
-                                <div className="space-y-3">
-                                  <div className="rounded-lg overflow-hidden border border-white/20 bg-white/5">
-                                    {jobImageDisplayUrl ? (
-                                      <div
-                                        className="h-20 bg-cover bg-center"
-                                        style={{ 
-                                          backgroundImage: `url(${jobImageDisplayUrl})`,
-                                          backgroundPosition: bgPosition
-                                        }}
-                                      />
-                                    ) : (
-                                      <div className="h-20 bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
-                                        <Building2 className="h-6 w-6 text-white/60" />
-                                      </div>
-                                    )}
-                                    <div className="p-2">
-                                      <div className="text-[10px] text-white/70">{profile?.company_name || 'Företagsnamn'}</div>
-                                      <div className={`font-bold text-white ${getSmartTextStyle(getDisplayTitle()).fontSize}`}>
-                                        {getDisplayTitle()}
-                                      </div>
-                                      <div className="text-[10px] text-white/70 mt-0.5">
-                                        {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
-                                      </div>
+                              {/* Jobbannons med full bild - KLICKBAR */}
+                              <div 
+                                onClick={() => setShowApplicationForm(true)}
+                                className="absolute inset-0 cursor-pointer pointer-events-auto"
+                                style={{ 
+                                  backgroundImage: jobImageDisplayUrl ? `url(${jobImageDisplayUrl})` : 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)',
+                                  backgroundSize: 'cover',
+                                  backgroundPosition: bgPosition || 'center'
+                                }}
+                              >
+                                {/* Gradient overlay för läsbarhet */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                                
+                                {/* Innehåll längst ner */}
+                                <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+                                  <div className="space-y-1">
+                                    <div className="text-[10px] text-white/80">{profile?.company_name || 'Företagsnamn'}</div>
+                                    <div className={`font-bold ${getSmartTextStyle(getDisplayTitle()).fontSize} ${getSmartTextStyle(getDisplayTitle()).lineHeight}`}>
+                                      {getDisplayTitle()}
+                                    </div>
+                                    <div className="text-[11px] text-white/90 flex items-center space-x-1">
+                                      <MapPin className="h-3 w-3" />
+                                      <span>{getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}</span>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Swipe ikoner längst ner */}
+                                  <div className="flex justify-center items-center space-x-8 mt-4 pt-2">
+                                    <div className="w-12 h-12 rounded-full bg-red-500/80 flex items-center justify-center">
+                                      <X className="h-6 w-6 text-white" />
+                                    </div>
+                                    <div className="text-xs text-white/60 font-medium">Tryck för att ansöka</div>
+                                    <div className="w-12 h-12 rounded-full bg-green-500/80 flex items-center justify-center">
+                                      <Heart className="h-6 w-6 text-white" />
                                     </div>
                                   </div>
                                 </div>
