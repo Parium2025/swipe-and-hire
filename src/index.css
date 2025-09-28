@@ -136,7 +136,9 @@ All colors MUST be HSL.
     margin: 0 !important;
     width: 100% !important;
     height: 100% !important;
-    overflow-x: hidden;
+    overflow-x: hidden !important;
+    overscroll-behavior-x: none;
+    touch-action: pan-y;
   }
 
   /* Make sure the app extends to the full screen including safe areas */
