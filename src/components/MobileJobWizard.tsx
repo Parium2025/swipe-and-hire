@@ -1986,18 +1986,6 @@ const MobileJobWizard = ({
                                 </div>
                               )}
 
-                              {/* Swipe-info istället för submit button */}
-                              <div className="bg-secondary/20 backdrop-blur-sm rounded-lg p-2 border border-secondary/30">
-                                <div className="flex items-center justify-center space-x-2 py-1">
-                                  <Heart className="h-4 w-4 text-green-400" />
-                                  <span className="text-xs font-medium text-white">Swipe för att ansöka</span>
-                                  <X className="h-4 w-4 text-red-400" />
-                                </div>
-                                <p className="text-xs text-white/70 text-center mt-1">
-                                  Jobbsökare swipar höger för att ansöka
-                                </p>
-                              </div>
-
                               {/* Extra space for scrolling */}
                               <div className="h-4"></div>
                             </div>
@@ -2047,7 +2035,7 @@ const MobileJobWizard = ({
                     </section>
                   
                   <p className="text-white text-sm text-center max-w-md">
-                    Detta är hur ansökningsformuläret ser ut på mobilen. Jobbsökare har redan sina uppgifter ifyllda och använder swipe-funktionen för att ansöka.
+                    Detta är hur ansökningsformuläret ser ut på mobilen. Jobbsökare har redan sina uppgifter ifyllda.
                   </p>
                 </div>
 
