@@ -2028,11 +2028,11 @@ const MobileJobWizard = ({
                               className="absolute inset-0 flex flex-col justify-start items-center pt-10 p-3 text-white text-center cursor-pointer"
                               onClick={() => setShowApplicationForm(true)}
                             >
-                              <div className="text-sm text-white font-medium mb-1">{profile?.company_name || 'Företag'}</div>
-                              <h3 className="text-base font-extrabold leading-tight mb-1">{getDisplayTitle()}</h3>
-                              <div className="text-xs text-white">
-                                {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
-                              </div>
+              <div className="text-sm text-white font-medium mb-1">{profile?.company_name || 'Företag'}</div>
+              <h3 className="text-sm font-bold leading-tight mb-1">{getDisplayTitle()}</h3>
+              <div className="text-sm text-white/90">
+                {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
+              </div>
                             </div>
                             <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2 pointer-events-none">
                               <button aria-label="Nej tack" className="w-6 h-6 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
