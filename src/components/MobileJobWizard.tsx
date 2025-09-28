@@ -158,8 +158,87 @@ const MobileJobWizard = ({
   // Build meta line: "Deltid • Tyresö"
   const getMetaLine = (employment?: string, city?: string) => {
     const emp = getEmploymentTypeLabel(employment);
-    const c = formatCity(city || '');
+    const c = formatCityWithMainCity(city || '');
     return [emp, c].filter(Boolean).join(' • ');
+  };
+
+  // Smart location formatting with main city
+  const formatCityWithMainCity = (city: string) => {
+    if (!city) return '';
+    
+    const formattedCity = formatCity(city);
+    
+    // Check if we have postal code info to get the main city
+    const postalCode = formData.workplace_postal_code;
+    if (postalCode) {
+      // Try to get city info from postal code
+      const mainCity = getMainCityFromPostalCode(postalCode);
+      if (mainCity && mainCity.toLowerCase() !== formattedCity.toLowerCase()) {
+        return `${formattedCity}, ${mainCity}`;
+      }
+    }
+    
+    // Fallback: Smart mapping of common suburbs to main cities
+    const cityMappings: Record<string, string> = {
+      'vega': 'Stockholm',
+      'haninge': 'Stockholm', 
+      'tyresö': 'Stockholm',
+      'nacka': 'Stockholm',
+      'solna': 'Stockholm',
+      'sundbyberg': 'Stockholm',
+      'huddinge': 'Stockholm',
+      'järfälla': 'Stockholm',
+      'täby': 'Stockholm',
+      'danderyd': 'Stockholm',
+      'lidingö': 'Stockholm',
+      'värmdö': 'Stockholm',
+      'botkyrka': 'Stockholm',
+      'salem': 'Stockholm',
+      'nykvarn': 'Stockholm',
+      'södertälje': 'Stockholm',
+      'nynäshamn': 'Stockholm',
+      'mölndal': 'Göteborg',
+      'partille': 'Göteborg',
+      'härryda': 'Göteborg',
+      'lerum': 'Göteborg',
+      'alingsås': 'Göteborg',
+      'kungsbacka': 'Göteborg',
+      'ale': 'Göteborg',
+      'lilla edet': 'Göteborg',
+      'stenungsund': 'Göteborg',
+      'öckerö': 'Göteborg',
+      'malmö': 'Malmö',
+      'lund': 'Malmö',
+      'helsingborg': 'Malmö',
+      'landskrona': 'Malmö',
+      'eslöv': 'Malmö',
+      'höganäs': 'Malmö',
+      'kävlinge': 'Malmö',
+      'lomma': 'Malmö',
+      'staffanstorp': 'Malmö',
+      'svedala': 'Malmö',
+      'trelleborg': 'Malmö',
+      'vellinge': 'Malmö'
+    };
+    
+    const mainCity = cityMappings[formattedCity.toLowerCase()];
+    if (mainCity && mainCity.toLowerCase() !== formattedCity.toLowerCase()) {
+      return `${formattedCity}, ${mainCity}`;
+    }
+    
+    return formattedCity;
+  };
+
+  const getMainCityFromPostalCode = (postalCode: string): string | null => {
+    // Import postal code data if needed
+    try {
+      const cleanedCode = postalCode.replace(/\s/g, '');
+      // This would need the actual postal code lookup - for now return null
+      // In a real implementation, you'd use the postalCodeAPI here
+      return null;
+    } catch {
+      return null;
+    }
   };
 
   // Smart text sizing based on content length and hierarchy
