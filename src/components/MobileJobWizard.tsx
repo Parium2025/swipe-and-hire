@@ -1718,18 +1718,7 @@ const MobileJobWizard = ({
                                    )}
                                    <div className="text-xs font-bold text-white">{profile?.company_name || 'Företagsnamn'}</div>
                                  </div>
-                               </div>
-
-                              {/* Jobbeskrivning */}
-                              {formData.description && (
-                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 mb-2">
-                                  <h5 className="text-xs font-medium text-white mb-1">Jobbeskrivning</h5>
-                                  <p className="text-xs text-white leading-relaxed whitespace-pre-wrap break-words">
-                                    {formData.description}
-                                  </p>
                                 </div>
-                              )}
-
 
                                 {/* Yrke */}
                                 {formData.occupation && (
@@ -1743,6 +1732,17 @@ const MobileJobWizard = ({
                                     </div>
                                   </div>
                                 )}
+
+                               {/* Jobbeskrivning */}
+                              {formData.description && (
+                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 mb-2">
+                                  <h5 className="text-xs font-medium text-white mb-1">Jobbeskrivning</h5>
+                                  <p className="text-xs text-white leading-relaxed whitespace-pre-wrap break-words">
+                                    {formData.description}
+                                  </p>
+                                </div>
+                              )}
+
 
                                 {/* Arbetsplats */}
                                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
