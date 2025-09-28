@@ -25,5 +25,12 @@ export default defineConfig(({ mode }) => ({
       "react/jsx-dev-runtime",
     ],
   },
-  optimizeDeps: {},
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react/jsx-runtime',
+      'react/jsx-dev-runtime'
+    ],
+  },
 }));
