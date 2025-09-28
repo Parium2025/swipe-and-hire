@@ -16,7 +16,7 @@ import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES, getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Trash2, Clock, Euro, FileText, CheckSquare, List, Video } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Trash2, Clock, Euro, FileText, CheckSquare, List, Video, Sparkles } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
@@ -110,6 +110,11 @@ const MobileJobWizard = ({
   // AI-optimized title state
   const [optimizedTitle, setOptimizedTitle] = useState<string>('');
   const [isOptimizing, setIsOptimizing] = useState(false);
+  
+  // AI-optimized content state
+  const [optimizedDescription, setOptimizedDescription] = useState<string>('');
+  const [isOptimizingContent, setIsOptimizingContent] = useState(false);
+  const [showOptimizedSuggestions, setShowOptimizedSuggestions] = useState(false);
 
   // Smart text sizing for mobile preview based on content length and visual impact
   const getSmartTextStyle = (text: string) => {
@@ -244,6 +249,71 @@ const MobileJobWizard = ({
       setIsOptimizing(false);
     }
     return title;
+  };
+
+  // AI-powered content optimization (title + description)
+  const optimizeJobContent = async () => {
+    if (!formData.title || !formData.description || isOptimizingContent) return;
+    
+    setIsOptimizingContent(true);
+    try {
+      // Simulera AI-optimering för demo (senare kan vi skapa en riktig edge function)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Exempel på förbättrad titel och beskrivning
+      const optimizedTitleExample = formData.title
+        .replace(/söker/gi, 'Vi söker')
+        .replace(/\b(vi|Vi)\s+(söker|behöver)\s+/gi, 'Vi söker erfaren ')
+        .substring(0, 40);
+        
+      const optimizedDescriptionExample = formData.description
+        .replace(/\. /g, '.\n\n')
+        .replace(/Vi söker/gi, '🔍 Vi söker')
+        .replace(/Vi erbjuder/gi, '💼 Vi erbjuder')
+        .replace(/Kvalifikationer/gi, '✅ Kvalifikationer')
+        .replace(/Ansök/gi, '📝 Ansök');
+      
+      setOptimizedTitle(optimizedTitleExample);
+      setOptimizedDescription(optimizedDescriptionExample);
+      setShowOptimizedSuggestions(true);
+      
+      toast({
+        title: "✨ AI-optimering klar!",
+        description: "Vi har förbättrat din jobbtitel och beskrivning för bättre synlighet.",
+      });
+      
+    } catch (error) {
+      console.error('Content optimization failed:', error);
+      toast({
+        title: "Optimering misslyckades",
+        description: "Kunde inte optimera innehållet just nu. Försök igen senare.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsOptimizingContent(false);
+    }
+  };
+
+  // Apply optimized suggestions
+  const applyOptimizedContent = () => {
+    if (optimizedTitle) {
+      handleInputChange('title', optimizedTitle);
+    }
+    if (optimizedDescription) {
+      handleInputChange('description', optimizedDescription);
+    }
+    setShowOptimizedSuggestions(false);
+    toast({
+      title: "✅ Optimerat innehåll tillämpat",
+      description: "Din jobbannons har uppdaterats med AI-förbättringar.",
+    });
+  };
+
+  // Reject optimized suggestions
+  const rejectOptimizedContent = () => {
+    setOptimizedTitle('');
+    setOptimizedDescription('');
+    setShowOptimizedSuggestions(false);
   };
 
   // Auto-optimize title when it changes
@@ -1033,6 +1103,87 @@ const MobileJobWizard = ({
                   />
                 </div>
 
+                {/* AI Content Optimization */}
+                {(formData.title.length > 10 && formData.description.length > 20) && (
+                  <div className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 backdrop-blur-sm rounded-lg p-3 border border-purple-400/30">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <Sparkles className="h-4 w-4 text-purple-300" />
+                        <span className="text-sm font-medium text-white">AI-optimering</span>
+                      </div>
+                      <Button
+                        onClick={optimizeJobContent}
+                        disabled={isOptimizingContent}
+                        size="sm"
+                        className="bg-purple-600/80 hover:bg-purple-600 text-white border-0 h-8 px-3"
+                      >
+                        {isOptimizingContent ? (
+                          <>
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                            Optimerar...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            Förbättra
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-purple-100">
+                      Låt AI förbättra din jobbtitel och beskrivning för högre synlighet och fler ansökningar.
+                    </p>
+                  </div>
+                )}
+
+                {/* AI Optimization Suggestions */}
+                {showOptimizedSuggestions && (
+                  <div className="bg-green-500/20 backdrop-blur-sm rounded-lg p-3 border border-green-400/30 space-y-3">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <CheckCircle className="h-4 w-4 text-green-300" />
+                      <span className="text-sm font-medium text-white">AI-förbättringar klara!</span>
+                    </div>
+                    
+                    {optimizedTitle && (
+                      <div className="space-y-1">
+                        <p className="text-xs text-green-200 font-medium">Förbättrad titel:</p>
+                        <div className="bg-green-500/10 border border-green-400/20 rounded p-2">
+                          <p className="text-sm text-white">{optimizedTitle}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {optimizedDescription && (
+                      <div className="space-y-1">
+                        <p className="text-xs text-green-200 font-medium">Förbättrad beskrivning:</p>
+                        <div className="bg-green-500/10 border border-green-400/20 rounded p-2 max-h-32 overflow-y-auto">
+                          <p className="text-sm text-white whitespace-pre-line">{optimizedDescription}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="flex space-x-2 pt-2">
+                      <Button
+                        onClick={applyOptimizedContent}
+                        size="sm"
+                        className="bg-green-600/80 hover:bg-green-600 text-white flex-1 h-8"
+                      >
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Använd förbättringar
+                      </Button>
+                      <Button
+                        onClick={rejectOptimizedContent}
+                        size="sm"
+                        variant="ghost"
+                        className="text-white/70 hover:text-white hover:bg-white/10 h-8"
+                      >
+                        <X className="h-3 w-3 mr-1" />
+                        Avvisa
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
 
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Anställningsform *</Label>
@@ -1507,22 +1658,8 @@ const MobileJobWizard = ({
                         {/* Notch */}
                         <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black"></div>
 
-                        {/* Mobilansökningsformulär med Parium design */}
-                        <div className="absolute inset-0 bg-parium-gradient">
-                          {/* Animerade cirklar som bakgrund */}
-                          <div className="circles absolute inset-0">
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                          </div>
-
+                        {/* Mobilansökningsformulär med korrekt Parium bakgrund */}
+                        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}>
                           {/* Status bar */}
                           <div className="h-1 bg-black relative z-10"></div>
                           
@@ -1548,17 +1685,6 @@ const MobileJobWizard = ({
                                 </div>
                                 <h3 className="text-xs font-bold text-white mb-1">{formData.title}</h3>
                                 <div className="text-xs text-white/70">{formData.workplace_city || formData.location || 'Stockholm'}</div>
-                              </div>
-
-                              {/* Info för arbetsgivare */}
-                              <div className="bg-orange-500/20 backdrop-blur-sm rounded-lg p-2 border border-orange-400/30">
-                                <div className="flex items-center mb-1">
-                                  <div className="w-3 h-3 bg-orange-400 rounded-full mr-1"></div>
-                                  <div className="text-xs font-semibold text-orange-200">För arbetsgivare</div>
-                                </div>
-                                <p className="text-xs text-orange-100 leading-relaxed">
-                                  Detta är vad du ser. Jobbsökare har redan sina uppgifter ifyllda automatiskt.
-                                </p>
                               </div>
 
                               {/* Automatiska profilfält med pre-filled styling */}
@@ -1737,7 +1863,7 @@ const MobileJobWizard = ({
                   </section>
                   
                   <p className="text-white text-sm text-center max-w-md">
-                    <strong>För arbetsgivare:</strong> Detta är hur ansökningsformuläret ser ut på mobilen. Jobbsökare har redan sina uppgifter ifyllda och använder swipe-funktionen för att ansöka.
+                    Detta är hur ansökningsformuläret ser ut på mobilen. Jobbsökare har redan sina uppgifter ifyllda och använder swipe-funktionen för att ansöka.
                   </p>
                 </div>
 
