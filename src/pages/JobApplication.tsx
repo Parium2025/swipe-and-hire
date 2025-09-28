@@ -364,7 +364,7 @@ const JobApplication = () => {
       <div className="p-4 pb-24">
         {/* Job Description */}
         <div className="text-center text-white mb-8">
-          <p className="text-blue-100 text-sm leading-relaxed px-4">
+          <p className="text-blue-100 text-sm leading-relaxed px-4 whitespace-pre-wrap">
             {job.description}
           </p>
         </div>
