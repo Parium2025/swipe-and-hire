@@ -16,7 +16,7 @@ import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES, getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Trash2, Clock, Euro, FileText, CheckSquare, List, Video, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Trash2, Clock, Euro, FileText, CheckSquare, List, Video, Sparkles, Mail } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
@@ -1782,50 +1782,60 @@ const MobileJobWizard = ({
                                 </div>
                               )}
 
-                               {/* Distansarbete & Flexibilitet */}
-                               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                                 <h4 className="text-xs font-semibold text-white mb-1 flex items-center">
-                                   <Briefcase className="h-2 w-2 mr-1 text-white" />
-                                   Distansarbete & Flexibilitet
-                                 </h4>
-                                 <div className="text-xs text-white space-y-0.5">
-                                   <div className="flex items-center space-x-2">
-                                     <span>{formData.work_location_type || 'På plats'}</span>
-                                     {formData.remote_work_possible === 'ja' && (
-                                       <span className="bg-green-500/20 text-green-300 px-1 py-0.5 rounded text-[10px]">
-                                         Distans möjligt
-                                       </span>
-                                     )}
-                                     {formData.remote_work_possible === 'delvis' && (
-                                       <span className="bg-yellow-500/20 text-yellow-300 px-1 py-0.5 rounded text-[10px]">
-                                         Delvis distans
-                                       </span>
-                                     )}
-                                   </div>
-                                 </div>
-                               </div>
+                                {/* Distans & Flexibilitet */}
+                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                                  <h4 className="text-sm font-medium text-white mb-2 flex items-center">
+                                    <Briefcase className="h-3 w-3 mr-2 text-white" />
+                                    Distans & Flexibilitet
+                                  </h4>
+                                  <div className="text-sm text-white/90 space-y-1">
+                                    <div className="flex items-center space-x-2">
+                                      <span className="font-medium">{formData.work_location_type || 'På plats'}</span>
+                                      {formData.remote_work_possible === 'ja' && (
+                                        <span className="bg-green-500/30 text-green-200 px-2 py-1 rounded-full text-xs font-medium">
+                                          Distans möjligt
+                                        </span>
+                                      )}
+                                      {formData.remote_work_possible === 'delvis' && (
+                                        <span className="bg-yellow-500/30 text-yellow-200 px-2 py-1 rounded-full text-xs font-medium">
+                                          Delvis distans
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
 
-                               {/* Arbetsplats & Kontakt */}
-                               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                                 <h4 className="text-xs font-semibold text-white mb-1 flex items-center">
-                                   <MapPin className="h-2 w-2 mr-1 text-white" />
-                                   Arbetsplats & Kontakt
-                                 </h4>
-                                 <div className="text-xs text-white space-y-0.5">
-                                   {formData.workplace_name && (
-                                     <div className="font-medium">{formData.workplace_name}</div>
-                                   )}
-                                   {formData.workplace_address && (
-                                     <div>{formData.workplace_address}</div>
-                                   )}
-                                   {formData.workplace_city && formData.workplace_postal_code && (
-                                     <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
-                                   )}
-                                   {formData.contact_email && (
-                                     <div className="text-blue-300">{formData.contact_email}</div>
-                                   )}
-                                 </div>
-                               </div>
+                                {/* Arbetsplats */}
+                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                                  <h4 className="text-sm font-medium text-white mb-2 flex items-center">
+                                    <MapPin className="h-3 w-3 mr-2 text-white" />
+                                    Arbetsplats
+                                  </h4>
+                                  <div className="text-sm text-white/90 space-y-1">
+                                    {formData.workplace_name && (
+                                      <div className="font-medium">{formData.workplace_name}</div>
+                                    )}
+                                    {formData.workplace_address && (
+                                      <div className="text-white/80">{formData.workplace_address}</div>
+                                    )}
+                                    {formData.workplace_city && formData.workplace_postal_code && (
+                                      <div className="text-white/80">{formData.workplace_postal_code} {formData.workplace_city}</div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Kontakt */}
+                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                                  <h4 className="text-sm font-medium text-white mb-2 flex items-center">
+                                    <Mail className="h-3 w-3 mr-2 text-white" />
+                                    Kontakt
+                                  </h4>
+                                  <div className="text-sm text-white/90">
+                                    {formData.contact_email && (
+                                      <div className="text-blue-300 font-medium">{formData.contact_email}</div>
+                                    )}
+                                  </div>
+                                </div>
 
                               {/* Krav och kvalifikationer */}
                               {formData.requirements && (
