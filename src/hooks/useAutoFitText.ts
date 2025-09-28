@@ -16,7 +16,7 @@ export default function useAutoFitText<T extends HTMLElement>(
   text: string,
   options: AutoFitOptions = {}
 ) {
-  const { min = 8, max = 14, step = 0.25 } = options;
+  const { min = 6, max = 14, step = 0.1 } = options;
   const ref = useRef<T | null>(null);
 
   useEffect(() => {
@@ -27,6 +27,7 @@ export default function useAutoFitText<T extends HTMLElement>(
 
     // Säkerställ enradig text för korrekt mätning
     el.style.whiteSpace = "nowrap";
+    el.style.display = "inline-block"; // gör att elementets bredd motsvarar textens bredd
 
     const fit = () => {
       if (!el || !parent) return;
@@ -35,13 +36,15 @@ export default function useAutoFitText<T extends HTMLElement>(
       let size = max;
       el.style.fontSize = `${size}px`;
 
-      // Skydda mot osedvanliga mätningar vid display:none
-      const parentWidth = parent.clientWidth || parent.getBoundingClientRect().width;
+      // Mät med transform-skala inräknad
+      const parentWidth = parent.getBoundingClientRect().width;
       if (!parentWidth) return;
 
-      // Minska gradvis vid overflow
-      let guard = 200; // förhindra oändliga loopar
-      while (size > min && el.scrollWidth > parentWidth && guard-- > 0) {
+      // Minska gradvis vid overflow (jämför faktiska rektanglar)
+      let guard = 300; // förhindra oändliga loopar
+      while (size > min) {
+        const textWidth = el.getBoundingClientRect().width;
+        if (textWidth <= parentWidth || guard-- <= 0) break;
         size = Math.max(min, size - step);
         el.style.fontSize = `${size}px`;
       }
