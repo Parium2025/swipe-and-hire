@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -165,6 +165,26 @@ const MobileJobWizard = ({
   const [showRemoteWorkDropdown, setShowRemoteWorkDropdown] = useState(false);
   const [showHingePreview, setShowHingePreview] = useState(false);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
+  const [hingeMode, setHingeMode] = useState<'ad' | 'apply'>('ad');
+  const screenRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const BASE_WIDTH = 360;
+  const BASE_HEIGHT = 720;
+
+  useEffect(() => {
+    if (!showHingePreview) return;
+    const recalc = () => {
+      const el = screenRef.current;
+      if (!el) return;
+      const w = el.clientWidth;
+      const h = el.clientHeight;
+      const s = Math.min(w / BASE_WIDTH, h / BASE_HEIGHT);
+      setScale(s);
+    };
+    recalc();
+    window.addEventListener('resize', recalc);
+    return () => window.removeEventListener('resize', recalc);
+  }, [showHingePreview]);
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
   const [bgPosition, setBgPosition] = useState<string>('center 50%');
