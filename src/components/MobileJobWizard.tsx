@@ -25,7 +25,7 @@ import { Slider } from '@/components/ui/slider';
 import ImageEditor from '@/components/ImageEditor';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
-import useAutoFitText from '@/hooks/useAutoFitText';
+import useSmartTextFit from '@/hooks/useSmartTextFit';
 
 interface JobQuestion {
   id?: string;
@@ -351,6 +351,9 @@ const MobileJobWizard = ({
     pitch: '',
     job_image_url: ''
   });
+
+  // Smart text fit for occupation - uses break-words but scales down if text breaks across lines
+  const occupationRef = useSmartTextFit<HTMLDivElement>(formData.occupation || '', { minScale: 0.7, maxLines: 1 });
 
   // Visningsnamn: visa alltid användarens titel (inte AI-förslag)
   const getDisplayTitle = () => {
@@ -1788,7 +1791,12 @@ const MobileJobWizard = ({
                                       Yrke
                                     </h5>
                                      <div className="text-white">
-                                       <div className="text-xs leading-relaxed break-words">{formData.occupation}</div>
+                                       <div 
+                                         ref={occupationRef}
+                                         className="text-xs leading-relaxed break-words"
+                                       >
+                                         {formData.occupation}
+                                       </div>
                                      </div>
                                   </div>
                                 )}
