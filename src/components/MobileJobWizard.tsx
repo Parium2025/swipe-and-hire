@@ -823,6 +823,17 @@ const MobileJobWizard = ({
     }
   };
 
+  // Smart email text sizing based on email length
+  const getEmailTextSize = (email: string) => {
+    if (!email) return 'text-xs';
+    
+    const length = email.length;
+    if (length <= 15) return 'text-xs'; // Short emails get normal size
+    if (length <= 25) return 'text-[10px]'; // Medium emails get smaller
+    if (length <= 35) return 'text-[9px]'; // Long emails get even smaller
+    return 'text-[8px]'; // Very long emails get tiny
+  };
+
   const handleQuestionTypeSearch = (value: string) => {
     setQuestionTypeSearchTerm(value);
     setShowQuestionTypeDropdown(value.length >= 0);
@@ -1836,11 +1847,13 @@ const MobileJobWizard = ({
                                     <Mail className="h-2 w-2 mr-1 text-white" />
                                     Kontakt
                                   </h5>
-                                  <div className="text-xs text-white">
-                                    {formData.contact_email && (
-                                      <div className="text-blue-300">{formData.contact_email}</div>
-                                    )}
-                                  </div>
+                                   <div className="text-xs text-white">
+                                     {formData.contact_email && (
+                                       <div className={`text-blue-300 font-medium break-all ${getEmailTextSize(formData.contact_email)}`}>
+                                         {formData.contact_email}
+                                       </div>
+                                     )}
+                                   </div>
                                 </div>
 
                               {/* Krav och kvalifikationer */}
