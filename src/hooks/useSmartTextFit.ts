@@ -24,7 +24,7 @@ export default function useSmartTextFit<T extends HTMLElement>(
         
         // Mät containerbredd (tillgängligt utrymme)
         const containerStyles = getComputedStyle(container);
-        const safety = 8; // extra buffert så sista bokstaven inte klipps
+        const safety = 12; // extra buffert så sista bokstaven inte klipps
         const availableWidth = container.offsetWidth 
           - parseFloat(containerStyles.paddingLeft) 
           - parseFloat(containerStyles.paddingRight) - safety;
@@ -36,11 +36,11 @@ export default function useSmartTextFit<T extends HTMLElement>(
         
         // Om texten är bredare än tillgängligt utrymme, krymp den lite extra för säkerhet
         if (singleLineWidth > availableWidth) {
-          const scale = Math.max(minScale, (availableWidth - 3) / singleLineWidth) * 0.97; // extra säkerhetsmarginal
+          const scale = Math.max(minScale, (availableWidth - 6) / singleLineWidth) * 0.96; // extra säkerhetsmarginal
           el.style.whiteSpace = 'nowrap';
           el.style.transform = `scaleX(${scale})`;
           el.style.transformOrigin = 'left center';
-          el.style.paddingRight = '3px';
+          el.style.paddingRight = '6px';
           el.style.willChange = 'transform';
         }
       });

@@ -1793,7 +1793,7 @@ const MobileJobWizard = ({
                                      <div className="text-white">
                                        <div 
                                          ref={occupationRef}
-                                         className="text-xs leading-relaxed break-words"
+                                         className="text-xs leading-relaxed break-words inline-block pr-2 overflow-visible"
                                        >
                                          {formData.occupation}
                                        </div>
