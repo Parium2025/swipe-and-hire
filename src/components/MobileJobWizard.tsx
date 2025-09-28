@@ -16,7 +16,7 @@ import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES, getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Trash2, Clock, Coins, FileText, CheckSquare, List, Video, Mail, Users } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
@@ -1783,7 +1783,7 @@ const MobileJobWizard = ({
                                {(formData.salary_min || formData.salary_max || formData.salary_type) && (
                                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 mb-2">
                                    <h5 className="text-xs font-medium text-white mb-1 flex items-center">
-                                     <Coins className="h-2 w-2 mr-1 text-white" />
+                                     <Banknote className="h-2 w-2 mr-1 text-white" />
                                      Lön
                                    </h5>
                                    <div className="text-xs text-white space-y-0.5">
