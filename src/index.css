@@ -119,7 +119,7 @@ All colors MUST be HSL.
   
   /* Prevent any element from causing horizontal overflow */
   *:not(html):not(body) {
-    overflow-x: visible !important;
+    overflow-x: clip !important;
   }
 
   body {
