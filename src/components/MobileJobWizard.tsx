@@ -1812,11 +1812,11 @@ const MobileJobWizard = ({
                                      <Banknote className="h-2 w-2 mr-1 text-white" />
                                      Lön
                                    </h5>
-                                   <div className="text-xs text-white space-y-0.5">
-                                     {formatSalaryInfo().map((info, index) => (
-                                       <div key={index} className="font-medium">{info}</div>
-                                     ))}
-                                   </div>
+                                    <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
+                                      {formatSalaryInfo().map((info, index) => (
+                                        <div key={index} className="font-medium">{info}</div>
+                                      ))}
+                                    </div>
                                  </div>
                                )}
 
@@ -1827,20 +1827,20 @@ const MobileJobWizard = ({
                                     <MapPin className="h-2 w-2 mr-1 text-white" />
                                     Arbetsplats
                                   </h5>
-                                  <div className="text-xs text-white space-y-0.5">
-                                    {formData.workplace_name && (
-                                      <div className="font-medium">{formData.workplace_name}</div>
-                                    )}
-                                    {formData.workplace_address && (
-                                      <div>{formData.workplace_address}</div>
-                                    )}
-                                    {formData.workplace_city && formData.workplace_postal_code && (
-                                      <div>
-                                        <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
-                                        <div>{getWorkLocationDisplayText()}</div>
-                                      </div>
-                                    )}
-                                  </div>
+                                   <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
+                                     {formData.workplace_name && (
+                                       <div className="font-medium">{formData.workplace_name}</div>
+                                     )}
+                                     {formData.workplace_address && (
+                                       <div>{formData.workplace_address}</div>
+                                     )}
+                                     {formData.workplace_city && formData.workplace_postal_code && (
+                                       <div>
+                                         <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
+                                         <div>{getWorkLocationDisplayText()}</div>
+                                       </div>
+                                     )}
+                                   </div>
                                  </div>
 
                                  {/* Antal rekryteringar */}
@@ -1850,9 +1850,9 @@ const MobileJobWizard = ({
                                        <Users className="h-2 w-2 mr-1 text-white" />
                                        Antal rekryteringar
                                      </h5>
-                                     <div className="text-xs text-white">
-                                       <div className="font-medium">{formatPositionsCount()}</div>
-                                     </div>
+                                      <div className="text-xs text-white leading-relaxed break-words">
+                                        <div className="font-medium">{formatPositionsCount()}</div>
+                                      </div>
                                    </div>
                                  )}
 
@@ -1862,16 +1862,16 @@ const MobileJobWizard = ({
                                     <Mail className="h-2 w-2 mr-1 text-white" />
                                     Kontakt
                                   </h5>
-                                   <div className="text-xs text-white">
-                                     {formData.contact_email && (
-                                       <a 
-                                         href={`mailto:${formData.contact_email}`}
-                                         className={`text-blue-300 font-medium break-all hover:text-blue-200 underline cursor-pointer ${getEmailTextSize(formData.contact_email)}`}
-                                       >
-                                         {formData.contact_email}
-                                       </a>
-                                     )}
-                                   </div>
+                                    <div className="text-xs text-white leading-relaxed break-words">
+                                      {formData.contact_email && (
+                                        <a 
+                                          href={`mailto:${formData.contact_email}`}
+                                          className={`text-blue-300 font-medium break-all hover:text-blue-200 underline cursor-pointer ${getEmailTextSize(formData.contact_email)}`}
+                                        >
+                                          {formData.contact_email}
+                                        </a>
+                                      )}
+                                    </div>
                                 </div>
 
                               {/* Krav och kvalifikationer */}
