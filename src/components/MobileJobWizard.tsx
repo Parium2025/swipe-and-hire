@@ -1752,25 +1752,25 @@ const MobileJobWizard = ({
                            >
                              <div className="space-y-3 pb-16">{/* Extra padding för scrollning */}
                               
-                              {/* Företagsinformation */}
-                              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                                <div className="flex items-center">
-                                  {profile?.company_logo_url ? (
-                                    <div className="w-4 h-4 rounded mr-1 overflow-hidden">
-                                      <img 
-                                        src={profile.company_logo_url} 
-                                        alt="Företagslogotyp" 
-                                        className="w-full h-full object-cover"
-                                      />
-                                    </div>
-                                  ) : (
-                                    <div className="w-4 h-4 bg-primary/20 rounded mr-1 flex items-center justify-center">
-                                      <Building2 className="h-2 w-2 text-primary-foreground" />
-                                    </div>
-                                  )}
-                                  <div className="text-xs font-bold text-white">{profile?.company_name || 'Företagsnamn'}</div>
-                                </div>
-                              </div>
+                               {/* Företagsinformation */}
+                               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+                                 <div className="flex items-center">
+                                   {profile?.company_logo_url ? (
+                                     <div className="w-4 h-4 rounded-full mr-1 overflow-hidden">
+                                       <img 
+                                         src={profile.company_logo_url} 
+                                         alt="Företagslogotyp" 
+                                         className="w-full h-full object-cover"
+                                       />
+                                     </div>
+                                   ) : (
+                                     <div className="w-4 h-4 bg-primary/20 rounded-full mr-1 flex items-center justify-center">
+                                       <Building2 className="h-2 w-2 text-primary-foreground" />
+                                     </div>
+                                   )}
+                                   <div className="text-xs font-bold text-white">{profile?.company_name || 'Företagsnamn'}</div>
+                                 </div>
+                               </div>
 
                               {/* Om jobbet */}
                               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
