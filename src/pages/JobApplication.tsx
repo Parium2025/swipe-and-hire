@@ -362,6 +362,13 @@ const JobApplication = () => {
 
       {/* Content */}
       <div className="p-4 pb-24">
+        {/* Job Title */}
+        <div className="text-center text-white mb-8">
+          <h2 className="text-2xl font-bold mb-2">{job.title}</h2>
+          <p className="text-blue-100 text-sm leading-relaxed px-4">
+            {job.description}
+          </p>
+        </div>
 
         {/* Form */}
         <div className="space-y-6">
