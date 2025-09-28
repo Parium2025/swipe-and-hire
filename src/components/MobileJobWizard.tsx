@@ -1739,16 +1739,16 @@ const MobileJobWizard = ({
                           {/* Status bar */}
                           <div className="h-1 bg-black relative z-10"></div>
                           
-                          {/* Form container (toggle) */}
-                          <div className={showApplicationForm ? 'block' : 'hidden'}>
-                            <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 backdrop-blur-sm border-b border-white/20 relative z-10">
-                              <div className="text-xs font-bold text-white">Ansökningsformulär</div>
-                              <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white/80 hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
-                            </div>
+                           {/* Form container (toggle) */}
+                           <div className={showApplicationForm ? 'flex flex-col h-full' : 'hidden'}>
+                             <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 backdrop-blur-sm border-b border-white/20 relative z-10 flex-shrink-0">
+                               <div className="text-xs font-bold text-white">Ansökningsformulär</div>
+                               <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white/80 hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
+                             </div>
 
                              {/* Scrollable content */}
                            <div 
-                             className="px-2 py-2 h-full overflow-y-auto relative z-10 custom-scrollbar"
+                             className="px-2 py-2 overflow-y-auto relative z-10 custom-scrollbar flex-1"
                            >
                              <div className="space-y-3 pb-16">{/* Extra padding för scrollning */}
                               
