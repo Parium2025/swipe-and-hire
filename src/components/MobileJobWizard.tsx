@@ -1890,7 +1890,7 @@ const MobileJobWizard = ({
                                {/* Följande information samlas automatiskt in från alla kandidater */}
                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
                                  <p className="text-xs text-white mb-3 leading-relaxed">
-                                   Följande information samlas automatiskt in från alla kandidater:
+                                   Följande information samlas automatiskt in från alla kandidater som har sökt:
                                  </p>
                                  
                                  <div className="space-y-1.5">
