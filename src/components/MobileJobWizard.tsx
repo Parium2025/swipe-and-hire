@@ -1651,12 +1651,12 @@ const MobileJobWizard = ({
                   
                   {/* Phone mockup med ansökningsformulär */}
                   <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px] mx-auto">
-                    {/* Telefonram */}
-                    <div className="relative w-full h-full rounded-[1.2rem] bg-slate-950 p-0.5 shadow-2xl ring-1 ring-black/30">
+                    {/* iPhone-stil telefonram */}
+                    <div className="relative w-full h-full rounded-[2rem] bg-black p-1 shadow-2xl">
                       {/* Skärm */}
-                      <div className="relative w-full h-full rounded-[0.9rem] overflow-hidden bg-black">
-                        {/* Notch */}
-                        <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black"></div>
+                      <div className="relative w-full h-full rounded-[1.6rem] overflow-hidden bg-black">
+                        {/* iPhone notch */}
+                        <div className="absolute top-1 left-1/2 -translate-x-1/2 z-20 h-1 w-8 rounded-full bg-black border border-gray-800"></div>
 
                         {/* Mobilansökningsformulär med korrekt Parium bakgrund */}
                         <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}>
