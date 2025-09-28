@@ -1878,9 +1878,9 @@ const MobileJobWizard = ({
                               className="absolute inset-0 flex flex-col justify-start items-center pt-6 p-3 text-white text-center cursor-pointer"
                               onClick={() => setShowApplicationForm(true)}
                             >
-                              <div className="text-sm text-white/90 font-medium mb-1">{profile?.company_name || 'Företag'}</div>
+                              <div className="text-sm text-white font-medium mb-1">{profile?.company_name || 'Företag'}</div>
                               <h3 className="text-base font-extrabold leading-tight mb-1">{getDisplayTitle()}</h3>
-                              <div className="text-xs text-white/80">
+                              <div className="text-xs text-white">
                                 {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
                               </div>
                             </div>
