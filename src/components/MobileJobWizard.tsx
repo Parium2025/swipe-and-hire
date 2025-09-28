@@ -352,9 +352,6 @@ const MobileJobWizard = ({
     job_image_url: ''
   });
 
-  // Auto-fit text ref for occupation 
-  const occupationRef = useAutoFitText<HTMLDivElement>(formData.occupation || '', { min: 8, max: 12, step: 0.2 });
-
   // Visningsnamn: visa alltid användarens titel (inte AI-förslag)
   const getDisplayTitle = () => {
     return formData.title || 'Jobbtitel';
@@ -1791,12 +1788,7 @@ const MobileJobWizard = ({
                                       Yrke
                                     </h5>
                                      <div className="text-white">
-                                       <div 
-                                         ref={occupationRef}
-                                         className="leading-relaxed"
-                                       >
-                                         {formData.occupation}
-                                       </div>
+                                       <div className="text-xs leading-relaxed break-words">{formData.occupation}</div>
                                      </div>
                                   </div>
                                 )}
