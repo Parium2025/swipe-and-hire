@@ -24,6 +24,7 @@ import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
 import ImageEditor from '@/components/ImageEditor';
 import { createSignedUrl } from '@/utils/storageUtils';
+import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 
 interface JobQuestion {
   id?: string;
@@ -99,6 +100,12 @@ const MobileJobWizard = ({
   const [customQuestions, setCustomQuestions] = useState<JobQuestion[]>([]);
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<JobQuestion | null>(null);
+  
+  // Unsaved changes tracking
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [pendingClose, setPendingClose] = useState(false);
+  const [initialFormData, setInitialFormData] = useState<JobFormData | null>(null);
 
   // Utility function to truncate text for better display
   const truncateText = (text: string, maxLength: number = 35) => {
@@ -349,6 +356,25 @@ const MobileJobWizard = ({
       fetchProfile();
     }
   }, [user, open]);
+  
+  // Set initial form data for unsaved changes tracking
+  useEffect(() => {
+    if (open && !initialFormData) {
+      setInitialFormData({ ...formData });
+      setHasUnsavedChanges(false);
+    }
+  }, [open, formData, initialFormData]);
+  
+  // Track form changes
+  useEffect(() => {
+    if (!initialFormData || !open) return;
+    
+    const hasChanges = Object.keys(formData).some(key => {
+      return formData[key as keyof JobFormData] !== initialFormData[key as keyof JobFormData];
+    }) || customQuestions.length > 0;
+    
+    setHasUnsavedChanges(hasChanges);
+  }, [formData, customQuestions, initialFormData, open]);
 
   // Resolve signed URL for uploaded job image preview
   useEffect(() => {
@@ -903,6 +929,86 @@ const MobileJobWizard = ({
     }
   };
 
+  const handleClose = () => {
+    if (hasUnsavedChanges) {
+      setPendingClose(true);
+      setShowUnsavedDialog(true);
+    } else {
+      // Reset form state
+      setCurrentStep(0);
+      setFormData({
+        title: jobTitle,
+        description: selectedTemplate?.description || '',
+        requirements: selectedTemplate?.requirements || '',
+        location: selectedTemplate?.location || '',
+        occupation: '',
+        salary_min: selectedTemplate?.salary_min?.toString() || '',
+        salary_max: selectedTemplate?.salary_max?.toString() || '',
+        employment_type: selectedTemplate?.employment_type || '',
+        salary_type: '',
+        positions_count: '1',
+        work_location_type: 'på-plats',
+        remote_work_possible: 'nej',
+        workplace_name: '',
+        workplace_address: '',
+        workplace_postal_code: '',
+        workplace_city: '',
+        work_schedule: selectedTemplate?.work_schedule || '',
+        contact_email: selectedTemplate?.contact_email || '',
+        application_instructions: selectedTemplate?.application_instructions || '',
+        pitch: '',
+        job_image_url: ''
+      });
+      setCustomQuestions([]);
+      setJobImageDisplayUrl(null);
+      setOriginalImageUrl(null);
+      setInitialFormData(null);
+      setHasUnsavedChanges(false);
+      onOpenChange(false);
+    }
+  };
+
+  const handleConfirmClose = () => {
+    // Reset everything and close
+    setCurrentStep(0);
+    setFormData({
+      title: jobTitle,
+      description: selectedTemplate?.description || '',
+      requirements: selectedTemplate?.requirements || '',
+      location: selectedTemplate?.location || '',
+      occupation: '',
+      salary_min: selectedTemplate?.salary_min?.toString() || '',
+      salary_max: selectedTemplate?.salary_max?.toString() || '',
+      employment_type: selectedTemplate?.employment_type || '',
+      salary_type: '',
+      positions_count: '1',
+      work_location_type: 'på-plats',
+      remote_work_possible: 'nej',
+      workplace_name: '',
+      workplace_address: '',
+      workplace_postal_code: '',
+      workplace_city: '',
+      work_schedule: selectedTemplate?.work_schedule || '',
+      contact_email: selectedTemplate?.contact_email || '',
+      application_instructions: selectedTemplate?.application_instructions || '',
+      pitch: '',
+      job_image_url: ''
+    });
+    setCustomQuestions([]);
+    setJobImageDisplayUrl(null);
+    setOriginalImageUrl(null);
+    setInitialFormData(null);
+    setHasUnsavedChanges(false);
+    setShowUnsavedDialog(false);
+    setPendingClose(false);
+    onOpenChange(false);
+  };
+
+  const handleCancelClose = () => {
+    setShowUnsavedDialog(false);
+    setPendingClose(false);
+  };
+
   const handleSubmit = async () => {
     if (!user || !validateCurrentStep()) return;
 
@@ -960,36 +1066,6 @@ const MobileJobWizard = ({
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleClose = () => {
-    setCurrentStep(0);
-    setFormData({
-      title: '',
-      description: '',
-      requirements: '',
-      location: '',
-      occupation: '',
-      salary_min: '',
-      salary_max: '',
-      employment_type: '',
-      salary_type: '',
-      positions_count: '1',
-      work_location_type: 'på-plats',
-      remote_work_possible: 'nej',
-      workplace_name: profile?.company_name || '',
-      workplace_address: '',
-      workplace_postal_code: '',
-      workplace_city: '',
-      work_schedule: '',
-      contact_email: user?.email || '',
-      application_instructions: '',
-      pitch: '',
-      job_image_url: ''
-    });
-    setOriginalImageUrl(null);
-    onOpenChange(false);
-    onJobCreated();
   };
 
   const progress = ((currentStep + 1) / steps.length) * 100;
@@ -2024,6 +2100,14 @@ const MobileJobWizard = ({
             aspectRatio={1/2} // Telefonens skärmyta (w/h) för perfekt matchning
           />
         )}
+
+        {/* Unsaved Changes Dialog */}
+        <UnsavedChangesDialog
+          open={showUnsavedDialog}
+          onOpenChange={setShowUnsavedDialog}
+          onConfirm={handleConfirmClose}
+          onCancel={handleCancelClose}
+        />
       </DialogContent>
     </Dialog>
   );
