@@ -1772,40 +1772,18 @@ const MobileJobWizard = ({
                                  </div>
                                </div>
 
-                              {/* Om jobbet */}
-                              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                                <h4 className="text-xs font-semibold text-white mb-1">Om jobbet</h4>
-                                
-                                {/* Jobbtitel */}
-                                <h3 className="text-xs font-bold text-white mb-1">{getDisplayTitle()}</h3>
-                                
-                                {/* Anställningsform och plats */}
-                                <div className="text-xs text-white space-y-0.5 mb-2">
-                                  <div>{getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}</div>
-                                  {formData.salary_min && formData.salary_max && (
-                                    <div className="flex items-center">
-                                      <Euro className="h-2 w-2 mr-1" />
-                                      {formData.salary_min} - {formData.salary_max} kr/mån
-                                    </div>
-                                  )}
-                                  {formData.positions_count && parseInt(formData.positions_count) > 1 && (
-                                    <div>{formData.positions_count} personer att rekrytera</div>
-                                  )}
+                              {/* Jobbeskrivning */}
+                              {formData.description && (
+                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 mb-2">
+                                  <h5 className="text-xs font-medium text-white mb-1">Jobbeskrivning</h5>
+                                  <p className="text-xs text-white leading-relaxed">
+                                    {formData.description.length > 150 
+                                      ? formData.description.substring(0, 150) + '...' 
+                                      : formData.description
+                                    }
+                                  </p>
                                 </div>
-
-                                {/* Jobbeskrivning */}
-                                {formData.description && (
-                                  <div>
-                                    <h5 className="text-xs font-medium text-white mb-1">Jobbeskrivning</h5>
-                                    <p className="text-xs text-white leading-relaxed">
-                                      {formData.description.length > 150 
-                                        ? formData.description.substring(0, 150) + '...' 
-                                        : formData.description
-                                      }
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
+                              )}
 
                               {/* Arbetsplats information */}
                               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
