@@ -1736,7 +1736,7 @@ const MobileJobWizard = ({
                 <div className="flex flex-col items-center space-y-4">
                   <h3 className="text-white font-medium">Så kommer ansökningsformuläret att se ut på mobil:</h3>
                   
-                  {/* Phone mockup med ansökningsformulär */}
+                  {/* Phone mockup med iPhone-stil annonskort */}
                   <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px] mx-auto">
                     {/* Telefonram */}
                     <div className="relative w-full h-full rounded-[1.2rem] bg-slate-950 p-0.5 shadow-2xl ring-1 ring-black/30">
@@ -1954,47 +1954,54 @@ const MobileJobWizard = ({
                             </>
                           ) : (
                             <>
-                              {/* Jobbannons - ENKEL stil som i bilden */}
-                              <div 
-                                onClick={() => setShowApplicationForm(true)}
-                                className="absolute inset-0 cursor-pointer pointer-events-auto"
-                                style={{ 
-                                  backgroundImage: jobImageDisplayUrl ? `url(${jobImageDisplayUrl})` : 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)',
-                                  backgroundSize: 'cover',
-                                  backgroundPosition: bgPosition || 'center'
-                                }}
-                              >
-                                {/* Gradient overlay - ENKEL */}
-                                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60"></div>
-                                
-                                {/* Centralt innehåll enligt referensbild */}
-                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                  <div className="text-center px-6">
-                                    <div className="text-white uppercase font-extrabold tracking-wide text-[10px] leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
-                                      {formData.title || 'Jobbtitel'}
-                                      {formData.workplace_city ? ` i ${formData.workplace_city}` : ''}
-                                      {formData.employment_type && ` (${getEmploymentTypeLabel(formData.employment_type)})`}
-                                    </div>
+                              {/* iPhone-stil jobbannons KORT enligt referensbild */}
+                              <div className="absolute inset-1 flex items-center justify-center p-1">
+                                <div
+                                  onClick={() => setShowApplicationForm(true)}
+                                  className="relative w-full h-full rounded-xl overflow-hidden shadow-xl border border-white/20 cursor-pointer"
+                                >
+                                  {/* Bakgrundsbild i kortet */}
+                                  <div
+                                    className="absolute inset-0 bg-cover bg-center"
+                                    style={{
+                                      backgroundImage: jobImageDisplayUrl
+                                        ? `url(${jobImageDisplayUrl})`
+                                        : 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)',
+                                      backgroundPosition: bgPosition || 'center'
+                                    }}
+                                  />
+                                  {/* Gradient overlay för läsbarhet */}
+                                  <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/70" />
 
-                                    <div className="mt-2 text-white font-semibold text-[10px] drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
-                                      {profile?.company_name || 'Företagsnamn'}
-                                    </div>
-                                    <div className="text-white/90 text-[9px] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-                                      {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
+                                  {/* Centrerat textblock enligt referensbild */}
+                                  <div className="absolute inset-0 flex items-center justify-center px-4">
+                                    <div className="text-center">
+                                      <div className="text-white font-extrabold uppercase tracking-wide text-[9px] leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+                                        {formData.title || 'Vi söker medarbetare'}
+                                        {formData.workplace_city ? ` i ${formData.workplace_city}` : ''}
+                                      </div>
+                                      {formData.employment_type && (
+                                        <div className="mt-0.5 text-white/90 text-[8px] font-semibold drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
+                                          {`(${getEmploymentTypeLabel(formData.employment_type)})`}
+                                        </div>
+                                      )}
+                                      <div className="mt-1 text-white text-[8px] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                                        {profile?.company_name || 'Företagsnamn'}
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
 
-                                {/* Action-knappar enligt referens, endast visuella */}
-                                <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center space-x-6 pointer-events-none">
-                                  <div className="w-12 h-12 rounded-full bg-red-500 flex items-center justify-center shadow-md">
-                                    <X className="h-6 w-6 text-white" />
-                                  </div>
-                                  <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center shadow-md">
-                                    <span className="text-white font-bold text-base">i</span>
-                                  </div>
-                                  <div className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center shadow-md">
-                                    <Heart className="h-6 w-6 text-white" />
+                                  {/* Knappar nederkant enligt referensbild */}
+                                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center space-x-4 pointer-events-none">
+                                    <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center shadow-lg">
+                                      <X className="h-4 w-4 text-white" />
+                                    </div>
+                                    <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center shadow-lg">
+                                      <span className="text-white font-bold text-xs">i</span>
+                                    </div>
+                                    <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center shadow-lg">
+                                      <Heart className="h-4 w-4 text-white" />
+                                    </div>
                                   </div>
                                 </div>
                               </div>
