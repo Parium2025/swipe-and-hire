@@ -1339,106 +1339,116 @@ const MobileJobWizard = ({
 
             {/* Step 2: Var finns jobbet? */}
             {currentStep === 1 && (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-white font-medium">Var utförs arbetet? *</Label>
-                  <div className="relative work-location-dropdown">
-                    <Input
-                      value={workLocationSearchTerm || (formData.work_location_type ? workLocationTypes.find(t => t.value === formData.work_location_type)?.label || '' : '')}
-                      onChange={(e) => handleWorkLocationSearch(e.target.value)}
-                      onClick={handleWorkLocationClick}
-                      placeholder="Välj arbetsplats"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer"
-                      readOnly
-                    />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
-                    
-                    {/* Work Location Dropdown */}
-                    {showWorkLocationDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
-                        {filteredWorkLocationTypes.map((type) => (
-                          <button
-                            key={type.value}
-                            type="button"
-                            onClick={() => handleWorkLocationSelect(type)}
-                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
-                          >
-                            <div className="font-medium">{type.label}</div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
+              <div className="space-y-6">
+                {/* Distansarbete & Flexibilitet kort */}
+                <div className="bg-white/5 rounded-lg p-4 border border-white/20 space-y-4">
+                  <h3 className="text-white font-semibold text-lg">Distansarbete & Flexibilitet</h3>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-white font-medium">Var utförs arbetet? *</Label>
+                    <div className="relative work-location-dropdown">
+                      <Input
+                        value={workLocationSearchTerm || (formData.work_location_type ? workLocationTypes.find(t => t.value === formData.work_location_type)?.label || '' : '')}
+                        onChange={(e) => handleWorkLocationSearch(e.target.value)}
+                        onClick={handleWorkLocationClick}
+                        placeholder="Välj arbetsplats"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer"
+                        readOnly
+                      />
+                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                      
+                      {/* Work Location Dropdown */}
+                      {showWorkLocationDropdown && (
+                        <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                          {filteredWorkLocationTypes.map((type) => (
+                            <button
+                              key={type.value}
+                              type="button"
+                              onClick={() => handleWorkLocationSelect(type)}
+                              className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                            >
+                              <div className="font-medium">{type.label}</div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-white font-medium">Är distansarbete möjligt? *</Label>
+                    <div className="relative remote-work-dropdown">
+                      <Input
+                        value={remoteWorkSearchTerm || (formData.remote_work_possible ? remoteWorkOptions.find(t => t.value === formData.remote_work_possible)?.label || '' : '')}
+                        onChange={(e) => handleRemoteWorkSearch(e.target.value)}
+                        onClick={handleRemoteWorkClick}
+                        placeholder="Välj alternativ"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer"
+                        readOnly
+                      />
+                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                      
+                      {/* Remote Work Dropdown */}
+                      {showRemoteWorkDropdown && (
+                        <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                          {filteredRemoteWorkOptions.map((type) => (
+                            <button
+                              key={type.value}
+                              type="button"
+                              onClick={() => handleRemoteWorkSelect(type)}
+                              className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                            >
+                              <div className="font-medium">{type.label}</div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-white font-medium">Är distansarbete möjligt? *</Label>
-                  <div className="relative remote-work-dropdown">
+                {/* Arbetsplats & Kontakt kort */}
+                <div className="bg-white/5 rounded-lg p-4 border border-white/20 space-y-4">
+                  <h3 className="text-white font-semibold text-lg">Arbetsplats & Kontakt</h3>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-white font-medium">Arbetsplatsens namn *</Label>
                     <Input
-                      value={remoteWorkSearchTerm || (formData.remote_work_possible ? remoteWorkOptions.find(t => t.value === formData.remote_work_possible)?.label || '' : '')}
-                      onChange={(e) => handleRemoteWorkSearch(e.target.value)}
-                      onClick={handleRemoteWorkClick}
-                      placeholder="Välj alternativ"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer"
-                      readOnly
+                      value={formData.workplace_name}
+                      onChange={(e) => handleInputChange('workplace_name', e.target.value)}
+                      placeholder={profile?.company_name ? `t.ex. ${profile.company_name}` : "t.ex. IKEA Kungens Kurva"}
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
                     />
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
-                    
-                    {/* Remote Work Dropdown */}
-                    {showRemoteWorkDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
-                        {filteredRemoteWorkOptions.map((type) => (
-                          <button
-                            key={type.value}
-                            type="button"
-                            onClick={() => handleRemoteWorkSelect(type)}
-                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
-                          >
-                            <div className="font-medium">{type.label}</div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label className="text-white font-medium">Arbetsplatsens namn *</Label>
-                  <Input
-                    value={formData.workplace_name}
-                    onChange={(e) => handleInputChange('workplace_name', e.target.value)}
-                    placeholder={profile?.company_name ? `t.ex. ${profile.company_name}` : "t.ex. IKEA Kungens Kurva"}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
+                  <div className="space-y-2">
+                    <Label className="text-white font-medium">Kontakt e-mail *</Label>
+                    <Input
+                      type="email"
+                      value={formData.contact_email}
+                      onChange={(e) => handleInputChange('contact_email', e.target.value)}
+                      placeholder={user?.email || "kontakt@företag.se"}
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-white font-medium">Gatuadress (frivilligt)</Label>
+                    <Input
+                      value={formData.workplace_address}
+                      onChange={(e) => handleInputChange('workplace_address', e.target.value)}
+                      placeholder="t.ex. Modulvägen 1"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
+                    />
+                  </div>
+
+                  <WorkplacePostalCodeSelector
+                    postalCodeValue={formData.workplace_postal_code}
+                    cityValue={formData.workplace_city}
+                    onPostalCodeChange={handleWorkplacePostalCodeChange}
+                    onLocationChange={handleWorkplaceLocationChange}
                   />
                 </div>
-
-                <div className="space-y-2">
-                  <Label className="text-white font-medium">Kontakt e-mail *</Label>
-                  <Input
-                    type="email"
-                    value={formData.contact_email}
-                    onChange={(e) => handleInputChange('contact_email', e.target.value)}
-                    placeholder={user?.email || "kontakt@företag.se"}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-white font-medium">Gatuadress (frivilligt)</Label>
-                  <Input
-                    value={formData.workplace_address}
-                    onChange={(e) => handleInputChange('workplace_address', e.target.value)}
-                    placeholder="t.ex. Modulvägen 1"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
-                  />
-                </div>
-
-                <WorkplacePostalCodeSelector
-                  postalCodeValue={formData.workplace_postal_code}
-                  cityValue={formData.workplace_city}
-                  onPostalCodeChange={handleWorkplacePostalCodeChange}
-                  onLocationChange={handleWorkplaceLocationChange}
-                />
               </div>
             )}
 
