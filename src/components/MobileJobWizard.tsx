@@ -1895,10 +1895,10 @@ const MobileJobWizard = ({
                                  
                                  <div className="space-y-1.5">
                                    <div className="text-xs">
-                                     <span className="text-white">Förnamn</span>
+                                     <span className="text-white">Namn och efternamn</span>
                                    </div>
                                    <div className="text-xs">
-                                     <span className="text-white">Efternamn</span>
+                                     <span className="text-white">Ålder</span>
                                    </div>
                                    <div className="text-xs">
                                      <span className="text-white">E-post</span>
@@ -1907,25 +1907,19 @@ const MobileJobWizard = ({
                                      <span className="text-white">Telefonnummer</span>
                                    </div>
                                    <div className="text-xs">
-                                     <span className="text-white">CV</span>
-                                   </div>
-                                   <div className="text-xs">
-                                     <span className="text-white">Ålder</span>
-                                   </div>
-                                   <div className="text-xs">
-                                     <span className="text-white">Ort/Stad</span>
+                                     <span className="text-white">Ort/stad</span>
                                    </div>
                                    <div className="text-xs">
                                      <span className="text-white">Presentation</span>
                                    </div>
                                    <div className="text-xs">
-                                     <span className="text-white">Nuvarande anställning</span>
+                                     <span className="text-white">CV</span>
+                                   </div>
+                                   <div className="text-xs">
+                                     <span className="text-white">Nuvarande anställningsform</span>
                                    </div>
                                    <div className="text-xs">
                                      <span className="text-white">Tillgänglighet</span>
-                                   </div>
-                                   <div className="text-xs">
-                                     <span className="text-white">Personligt brev</span>
                                    </div>
                                  </div>
                                </div>
