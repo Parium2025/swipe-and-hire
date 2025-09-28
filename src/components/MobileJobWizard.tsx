@@ -353,7 +353,8 @@ const MobileJobWizard = ({
   });
 
   // Auto-fit för yrkesraden i mobilförhandsvisningen
-  const occupationFitRef = useAutoFitText<HTMLDivElement>(formData.occupation || '', { min: 2, max: 14, step: 0.05 });
+  const occupationContainerRef = useRef<HTMLDivElement | null>(null);
+  const occupationFitRef = useAutoFitText<HTMLDivElement>(formData.occupation || '', { min: 4, max: 14, step: 0.1 }, occupationContainerRef);
 
   // Visningsnamn: visa alltid användarens titel (inte AI-förslag)
   const getDisplayTitle = () => {
@@ -1778,8 +1779,8 @@ const MobileJobWizard = ({
                                       <Briefcase className="h-2 w-2 mr-1 text-white" />
                                       Yrke
                                     </h5>
-                                    <div className="text-white">
-                                      <div ref={occupationFitRef} className="font-medium leading-tight whitespace-nowrap">{formData.occupation}</div>
+                                    <div ref={occupationContainerRef} className="text-white w-full">
+                                      <div ref={occupationFitRef} className="font-medium leading-tight whitespace-nowrap inline-block max-w-full">{formData.occupation}</div>
                                     </div>
                                   </div>
                                 )}

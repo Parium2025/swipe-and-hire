@@ -2,9 +2,9 @@ import { useEffect, useRef } from "react";
 
 /**
  * useAutoFitText
- * Dynamiskt skalar texten ned (en rad) så att den ryms inom sin förälder.
- * - Behåller hela ordet (ingen avstavning eller radbrytning)
- * - Reagerar på text- och storleksförändringar via ResizeObserver
+ * Skalar ned texten (en rad) så att den ryms inom en given container.
+ * - Väljer containerRef om den skickas in, annars används elementets förälder
+ * - Mäter innehållsbredd (exkl. padding) och justerar font-size/scaleX
  */
 export type AutoFitOptions = {
   min?: number; // px
@@ -14,65 +14,65 @@ export type AutoFitOptions = {
 
 export default function useAutoFitText<T extends HTMLElement>(
   text: string,
-  options: AutoFitOptions = {}
+  options: AutoFitOptions = {},
+  containerRef?: React.RefObject<HTMLElement>
 ) {
   const { min = 4, max = 14, step = 0.1 } = options;
   const ref = useRef<T | null>(null);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
-    const parent = el.parentElement;
-    if (!parent) return;
+    const container = (containerRef?.current as HTMLElement | null) || el?.parentElement || null;
+    if (!el || !container) return;
 
-    // Säkerställ enradig text för korrekt mätning
+    // Enradig mätning
     el.style.whiteSpace = "nowrap";
-    el.style.display = "inline-block"; // gör att elementets bredd motsvarar textens bredd
+    el.style.display = "inline-block";
     el.style.transformOrigin = "left center";
+    el.style.maxWidth = "100%";
+
+    const getContentWidth = (node: HTMLElement) => {
+      const rect = node.getBoundingClientRect();
+      const styles = window.getComputedStyle(node);
+      const padL = parseFloat(styles.paddingLeft || "0");
+      const padR = parseFloat(styles.paddingRight || "0");
+      return Math.max(0, rect.width - padL - padR);
+    };
 
     const fit = () => {
-      if (!el || !parent) return;
-
-      // Nollställ ev. tidigare transform
+      // Nollställ
       el.style.transform = "none";
-
-      // Starta på max och minska tills det får plats eller når min
       let size = max;
       el.style.fontSize = `${size}px`;
 
-      const parentWidth = parent.getBoundingClientRect().width;
-      if (!parentWidth) return;
+      const targetWidth = getContentWidth(container);
+      if (!targetWidth) return;
 
-      // Minska gradvis vid overflow (jämför faktiska rektanglar)
-      let guard = 400; // förhindra oändliga loopar
+      // Minska font-size tills det får plats
+      let guard = 500;
       while (size > min) {
-        const textWidth = el.getBoundingClientRect().width;
-        if (textWidth <= parentWidth || guard-- <= 0) break;
+        const w = el.getBoundingClientRect().width;
+        if (w <= targetWidth || guard-- <= 0) break;
         size = Math.max(min, size - step);
         el.style.fontSize = `${size}px`;
       }
 
-      // Om det fortfarande är för brett, använd en mer aggressiv horisontell skala
-      const textWidthFinal = el.getBoundingClientRect().width;
-      if (textWidthFinal > parentWidth) {
-        const scale = Math.max(0.5, parentWidth / textWidthFinal);
+      // Om det fortfarande inte får plats -> scaleX
+      const wFinal = el.getBoundingClientRect().width;
+      if (wFinal > targetWidth) {
+        const scale = Math.max(0.5, targetWidth / wFinal);
         el.style.transform = `scaleX(${scale})`;
       }
     };
 
-    // Kör initialt
+    // Init och observers
     fit();
 
-    // Observers för storleks- och innehållsförändringar
     const ro = new ResizeObserver(() => fit());
-    ro.observe(parent);
+    ro.observe(container);
 
-    // Lyssna på window-resize (t.ex. panelskalning)
     const onWin = () => fit();
     window.addEventListener("resize", onWin);
-
-    // Kör igen när text ändras (t.ex. nytt yrke)
-    // Timeout för att vänta in rendering
     const t = setTimeout(fit, 0);
 
     return () => {
@@ -80,7 +80,7 @@ export default function useAutoFitText<T extends HTMLElement>(
       window.removeEventListener("resize", onWin);
       clearTimeout(t);
     };
-  }, [text, min, max, step]);
+  }, [text, min, max, step, containerRef]);
 
   return ref;
 }
