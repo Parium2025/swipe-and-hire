@@ -24,21 +24,24 @@ export default function useSmartTextFit<T extends HTMLElement>(
         
         // Mät containerbredd (tillgängligt utrymme)
         const containerStyles = getComputedStyle(container);
+        const safety = 8; // extra buffert så sista bokstaven inte klipps
         const availableWidth = container.offsetWidth 
           - parseFloat(containerStyles.paddingLeft) 
-          - parseFloat(containerStyles.paddingRight) - 16; // Öka marginal för säkerhet
+          - parseFloat(containerStyles.paddingRight) - safety;
         
-        // Testa om texten bryts genom att sätta nowrap och jämföra
+        // Testa faktisk enkelrad-bredd
         el.style.whiteSpace = 'nowrap';
         const singleLineWidth = el.scrollWidth;
         el.style.whiteSpace = '';
         
-        // Om texten är bredare än tillgängligt utrymme, krympa den
+        // Om texten är bredare än tillgängligt utrymme, krymp den lite extra för säkerhet
         if (singleLineWidth > availableWidth) {
-          const scale = Math.max(minScale, availableWidth / singleLineWidth);
+          const scale = Math.max(minScale, (availableWidth - 3) / singleLineWidth) * 0.97; // extra säkerhetsmarginal
           el.style.whiteSpace = 'nowrap';
           el.style.transform = `scaleX(${scale})`;
           el.style.transformOrigin = 'left center';
+          el.style.paddingRight = '3px';
+          el.style.willChange = 'transform';
         }
       });
     };
