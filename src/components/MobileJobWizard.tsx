@@ -1801,15 +1801,35 @@ const MobileJobWizard = ({
                                   </div>
                                 )}
 
-                               {/* Jobbeskrivning */}
-                               {formData.description && (
-                                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 mb-2">
-                                   <h5 className="text-xs font-medium text-white mb-1">Jobbeskrivning</h5>
-                                   <p className="text-xs text-white leading-relaxed whitespace-pre-wrap break-words">
-                                     {formData.description}
-                                   </p>
-                                 </div>
-                               )}
+                                {/* Jobbeskrivning */}
+                                {formData.description && (
+                                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 mb-2">
+                                    <h5 className="text-xs font-medium text-white mb-1">Jobbeskrivning</h5>
+                                    <div className="text-xs text-white leading-relaxed whitespace-pre-wrap break-words [&>*]:mb-1 [&>*:last-child]:mb-0">
+                                      {formData.description.split('\n').map((line, index) => {
+                                        const trimmedLine = line.trim();
+                                        // Detect bullet points (•, -, *, numbers with dots/parentheses)
+                                        const bulletMatch = trimmedLine.match(/^([•\-\*]|\d+[\.\)])\s*(.*)$/);
+                                        
+                                        if (bulletMatch) {
+                                          const [, bullet, text] = bulletMatch;
+                                          return (
+                                            <div key={index} className="flex">
+                                              <span className="flex-shrink-0 mr-1">{bullet}</span>
+                                              <span className="flex-1 break-words">{text}</span>
+                                            </div>
+                                          );
+                                        }
+                                        
+                                        return trimmedLine ? (
+                                          <div key={index}>{trimmedLine}</div>
+                                        ) : (
+                                          <div key={index} className="h-3"></div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
 
                                {/* Lön */}
                                {(formData.salary_min || formData.salary_max || formData.salary_type) && (
