@@ -768,6 +768,23 @@ const MobileJobWizard = ({
     { value: 'ja', label: 'Ja, helt' }
   ];
 
+  // Get display text for work location and remote work
+  const getWorkLocationDisplayText = () => {
+    const locationType = workLocationTypes.find(t => t.value === formData.work_location_type);
+    const remoteOption = remoteWorkOptions.find(r => r.value === formData.remote_work_possible);
+    
+    let displayText = locationType?.label || 'På plats';
+    
+    // Add remote work info if relevant
+    if (formData.remote_work_possible === 'ja') {
+      displayText += ', distans möjligt';
+    } else if (formData.remote_work_possible === 'delvis') {
+      displayText += ', delvis distans';
+    }
+    
+    return `(${displayText.toLowerCase()})`;
+  };
+
   const handleQuestionTypeSearch = (value: string) => {
     setQuestionTypeSearchTerm(value);
     setShowQuestionTypeDropdown(value.length >= 0);
@@ -1728,7 +1745,7 @@ const MobileJobWizard = ({
                                     {formData.workplace_city && formData.workplace_postal_code && (
                                       <div>
                                         <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
-                                        <div>(på plats)</div>
+                                        <div>{getWorkLocationDisplayText()}</div>
                                       </div>
                                     )}
                                   </div>
