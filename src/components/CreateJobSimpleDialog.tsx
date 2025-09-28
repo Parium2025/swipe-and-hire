@@ -141,7 +141,15 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
 
   return (
     <>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) {
+          // Rensa data när dialogen stängs
+          setJobTitle('');
+          setSelectedTemplate(null);
+          setSearchTerm('');
+        }
+      }}>
         <DialogTrigger asChild>
           <Button className="flex items-center gap-2">
             <Plus size={16} />
@@ -314,7 +322,14 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       {/* Mobile Job Wizard */}
       <MobileJobWizard
         open={showDetailDialog}
-        onOpenChange={setShowDetailDialog}
+        onOpenChange={(isOpen) => {
+          setShowDetailDialog(isOpen);
+          if (!isOpen) {
+            // Rensa data när wizard stängs
+            setJobTitle('');
+            setSelectedTemplate(null);
+          }
+        }}
         jobTitle={jobTitle}
         selectedTemplate={selectedTemplate}
         onJobCreated={handleJobCreated}
