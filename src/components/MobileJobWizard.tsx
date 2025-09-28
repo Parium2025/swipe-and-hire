@@ -1779,8 +1779,8 @@ const MobileJobWizard = ({
                                       <Briefcase className="h-2 w-2 mr-1 text-white" />
                                       Yrke
                                     </h5>
-                                    <div ref={occupationContainerRef} className="text-white w-full">
-                                      <div ref={occupationFitRef} className="font-medium leading-tight whitespace-nowrap inline-block max-w-full">{formData.occupation}</div>
+                                    <div ref={occupationContainerRef} className="text-white w-full overflow-visible">
+                                      <div ref={occupationFitRef} className="font-medium leading-tight whitespace-nowrap inline-block max-w-full will-change-transform">{formData.occupation}</div>
                                     </div>
                                   </div>
                                 )}

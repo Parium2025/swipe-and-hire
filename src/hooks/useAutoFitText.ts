@@ -32,11 +32,11 @@ export default function useAutoFitText<T extends HTMLElement>(
     el.style.maxWidth = "100%";
 
     const getContentWidth = (node: HTMLElement) => {
-      const rect = node.getBoundingClientRect();
       const styles = window.getComputedStyle(node);
       const padL = parseFloat(styles.paddingLeft || "0");
       const padR = parseFloat(styles.paddingRight || "0");
-      return Math.max(0, rect.width - padL - padR);
+      const cw = node.clientWidth; // opåverkad av CSS-transform
+      return Math.max(0, cw - padL - padR);
     };
 
     const fit = () => {
@@ -44,27 +44,27 @@ export default function useAutoFitText<T extends HTMLElement>(
       el.style.transform = "none";
       let size = max;
       el.style.fontSize = `${size}px`;
+      el.style.maxWidth = "100%";
 
       const targetWidth = getContentWidth(container);
       if (!targetWidth) return;
 
-      // Minska font-size tills det får plats
+      // Minska font-size tills dess att scrollWidth ryms i targetWidth
       let guard = 500;
       while (size > min) {
-        const w = el.getBoundingClientRect().width;
+        const w = el.scrollWidth; // opåverkat av transform
         if (w <= targetWidth || guard-- <= 0) break;
         size = Math.max(min, size - step);
         el.style.fontSize = `${size}px`;
       }
 
       // Om det fortfarande inte får plats -> scaleX
-      const wFinal = el.getBoundingClientRect().width;
+      const wFinal = el.scrollWidth;
       if (wFinal > targetWidth) {
         const scale = Math.max(0.5, targetWidth / wFinal);
         el.style.transform = `scaleX(${scale})`;
       }
     };
-
     // Init och observers
     fit();
 
