@@ -1920,36 +1920,23 @@ const MobileJobWizard = ({
                                  </p>
                                  
                                  <div className="space-y-1.5">
-                                   <div className="text-xs">
-                                     <span className="text-white">• Namn</span>
-                                   </div>
-                                   <div className="text-xs">
-                                     <span className="text-white">• Efternamn</span>
-                                   </div>
-                                   <div className="text-xs">
-                                     <span className="text-white">• Ålder</span>
-                                   </div>
-                                   <div className="text-xs">
-                                     <span className="text-white">• E-post</span>
-                                   </div>
-                                   <div className="text-xs">
-                                     <span className="text-white">• Telefonnummer</span>
-                                   </div>
-                                   <div className="text-xs">
-                                     <span className="text-white">• Ort/stad</span>
-                                   </div>
-                                   <div className="text-xs">
-                                     <span className="text-white">• Presentation</span>
-                                   </div>
-                                   <div className="text-xs">
-                                     <span className="text-white">• CV</span>
-                                   </div>
-                                   <div className="text-xs">
-                                     <span className="text-white">• Nuvarande anställningsform</span>
-                                   </div>
-                                   <div className="text-xs">
-                                     <span className="text-white">• Tillgänglighet</span>
-                                   </div>
+                                   {[
+                                     'Namn',
+                                     'Efternamn',
+                                     'Ålder',
+                                     'E-post',
+                                     'Telefonnummer',
+                                     'Ort/stad',
+                                     'Presentation',
+                                     'CV',
+                                     'Nuvarande anställningsform',
+                                     'Tillgänglighet',
+                                   ].map((label, idx) => (
+                                     <div key={idx} className="text-xs flex">
+                                       <span className="flex-shrink-0 mr-1 text-white">•</span>
+                                       <span className="flex-1 text-white leading-tight break-words">{label}</span>
+                                     </div>
+                                   ))}
                                  </div>
                                </div>
 
