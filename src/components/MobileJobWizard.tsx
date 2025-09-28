@@ -1717,7 +1717,10 @@ const MobileJobWizard = ({
                           <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 backdrop-blur-sm border-b border-white/20 relative z-10">
                             <div className="text-xs font-bold text-white">Ansökningsformulär</div>
                             <button 
-                              onClick={() => setShowApplicationForm(false)}
+                              onClick={() => {
+                                setShowApplicationForm(false);
+                                setHingeMode('ad'); // Switch back to ad view
+                              }}
                               className="text-xs text-white/80 hover:text-white"
                             >
                               ✕
