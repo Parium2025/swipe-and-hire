@@ -168,38 +168,43 @@ const MobileJobWizard = ({
     const jobTitle = getDisplayTitle();
     const metaLine = getMetaLine(formData.employment_type, formData.workplace_city || formData.location);
 
-    // Calculate optimal sizes based on content length
+    // Calculate optimal sizes based on content length and visual balance
     const companyLength = companyName.length;
     const titleLength = jobTitle.length;
     const metaLength = metaLine.length;
 
-    // Base sizes - maintain hierarchy: company < title, meta should be readable
-    let companySizeClass = 'text-sm';
-    let titleSizeClass = 'text-base';
-    let metaSizeClass = 'text-sm';
+    // More aggressive sizing for better visual balance
+    let companySizeClass = 'text-xs'; // Start smaller for company
+    let titleSizeClass = 'text-lg';   // Make title more prominent 
+    let metaSizeClass = 'text-sm';    // Readable meta info
 
-    // Adjust company name size
-    if (companyLength > 20) companySizeClass = 'text-xs';
-    else if (companyLength < 10) companySizeClass = 'text-base';
-
-    // Adjust title size based on length - this is the main content
-    if (titleLength > 60) titleSizeClass = 'text-sm';
-    else if (titleLength > 40) titleSizeClass = 'text-base';
-    else if (titleLength < 20) titleSizeClass = 'text-lg';
-
-    // Adjust meta size for readability
-    if (metaLength > 25) metaSizeClass = 'text-xs';
-    else if (metaLength < 15) metaSizeClass = 'text-base';
-
-    // Ensure visual balance - if title is very long, reduce other elements
+    // Adjust title size based on length - this is the hero element
     if (titleLength > 50) {
+      titleSizeClass = 'text-base';
       companySizeClass = 'text-xs';
       metaSizeClass = 'text-xs';
+    } else if (titleLength > 30) {
+      titleSizeClass = 'text-lg';
+      companySizeClass = 'text-xs';
+      metaSizeClass = 'text-sm';
+    } else if (titleLength < 20) {
+      titleSizeClass = 'text-xl';
+      companySizeClass = 'text-sm';
+      metaSizeClass = 'text-base';
     }
 
-    // Ensure hierarchy is maintained (company should never be larger than title)
-    if (companySizeClass === 'text-lg' && titleSizeClass === 'text-sm') {
-      companySizeClass = 'text-base';
+    // Adjust company name - keep it subtle but readable
+    if (companyLength > 15) {
+      companySizeClass = 'text-xs';
+    } else if (companyLength < 8) {
+      companySizeClass = 'text-sm';
+    }
+
+    // Ensure meta info is always readable
+    if (metaLength > 20) {
+      metaSizeClass = 'text-xs';
+    } else if (metaLength < 10) {
+      metaSizeClass = 'text-sm';
     }
 
     return {
