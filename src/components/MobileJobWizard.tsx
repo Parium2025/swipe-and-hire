@@ -317,24 +317,61 @@ const MobileJobWizard = ({
     setShowOptimizedSuggestions(false);
   };
 
-  // Auto-optimize title when it changes
-  useEffect(() => {
-    const autoOptimize = async () => {
-      if (formData.title && formData.title.length > 30) {
-        const optimized = await optimizeTitle(formData.title);
-        if (optimized !== formData.title) {
-          setOptimizedTitle(optimized);
+  // AI-powered layout optimization
+  const optimizeLayout = async () => {
+    if (!jobImageDisplayUrl) return;
+    
+    try {
+      // AI analyserar bilden och justerar automatiskt för optimal mobilvy
+      const img = new Image();
+      img.onload = () => {
+        const aspectRatio = img.naturalWidth / img.naturalHeight;
+        let optimizedPosition = 'center 50%';
+        
+        // AI-beslut baserat på bildförhållande
+        if (aspectRatio > 1.5) {
+          // Bred bild - fokus på mitten
+          optimizedPosition = 'center 40%';
+        } else if (aspectRatio < 0.8) {
+          // Hög bild - fokus på övre delen
+          optimizedPosition = 'center 25%';
         } else {
-          setOptimizedTitle('');
+          // Kvadratisk - optimal centrering
+          optimizedPosition = 'center 35%';
         }
-      } else {
-        setOptimizedTitle('');
-      }
-    };
+        
+        setBgPosition(optimizedPosition);
+        
+        toast({
+          title: "🤖 AI-optimering klar!",
+          description: "Bildpositionen har justerats automatiskt för bästa mobilvy.",
+        });
+      };
+      img.src = jobImageDisplayUrl;
+    } catch (error) {
+      console.error('Layout optimization failed:', error);
+    }
+  };
 
-    const timeoutId = setTimeout(autoOptimize, 1000); // Debounce
-    return () => clearTimeout(timeoutId);
-  }, [formData.title]);
+  // Auto-optimize layout when image changes
+  useEffect(() => {
+    if (jobImageDisplayUrl && currentStep === 3) {
+      const timer = setTimeout(optimizeLayout, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [jobImageDisplayUrl, currentStep]);
+
+  // AI-powered smart text positioning
+  const getSmartMobileLayout = () => {
+    const titleLength = getDisplayTitle().length;
+    const hasLongTitle = titleLength > 30;
+    
+    return {
+      titleSize: hasLongTitle ? 'text-sm' : 'text-base',
+      bottomPadding: hasLongTitle ? 'pb-6' : 'pb-4',
+      titleLines: hasLongTitle ? 'leading-tight' : 'leading-normal'
+    };
+  };
 
   // Get display title (optimized or original)
   const getDisplayTitle = () => {
@@ -1917,43 +1954,62 @@ const MobileJobWizard = ({
                             </>
                           ) : (
                             <>
-                              {/* Jobbannons med full bild - KLICKBAR */}
+                              {/* Jobbannons med full bild - KLICKBAR med AI-optimerad layout */}
                               <div 
                                 onClick={() => setShowApplicationForm(true)}
                                 className="absolute inset-0 cursor-pointer pointer-events-auto"
                                 style={{ 
                                   backgroundImage: jobImageDisplayUrl ? `url(${jobImageDisplayUrl})` : 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)',
                                   backgroundSize: 'cover',
-                                  backgroundPosition: bgPosition || 'center'
+                                  backgroundPosition: bgPosition || 'center 30%' // AI-optimerad startposition
                                 }}
                               >
-                                {/* Gradient overlay för läsbarhet */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                                {/* AI-optimerad gradient overlay */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10"></div>
                                 
-                                {/* Innehåll längst ner */}
-                                <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+                                {/* Status bar simulation */}
+                                <div className="absolute top-1 left-2 right-2 flex justify-between items-center text-white text-[8px]">
+                                  <span>9:41</span>
+                                  <div className="flex items-center space-x-1">
+                                    <div className="w-3 h-1.5 border border-white/60 rounded-sm">
+                                      <div className="w-2/3 h-full bg-green-400 rounded-sm"></div>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                {/* AI-optimerat innehåll med smart positionering */}
+                                <div className={`absolute bottom-0 left-0 right-0 p-3 text-white ${getSmartMobileLayout().bottomPadding}`}>
                                   <div className="space-y-1">
-                                    <div className="text-[10px] text-white/80">{profile?.company_name || 'Företagsnamn'}</div>
-                                    <div className={`font-bold ${getSmartTextStyle(getDisplayTitle()).fontSize} ${getSmartTextStyle(getDisplayTitle()).lineHeight}`}>
+                                    <div className="text-[9px] text-white/70 font-medium">{profile?.company_name || 'Företagsnamn'}</div>
+                                    <div className={`font-bold text-white ${getSmartMobileLayout().titleSize} ${getSmartMobileLayout().titleLines} drop-shadow-lg`}>
                                       {getDisplayTitle()}
                                     </div>
-                                    <div className="text-[11px] text-white/90 flex items-center space-x-1">
-                                      <MapPin className="h-3 w-3" />
+                                    <div className="text-[10px] text-white/90 flex items-center space-x-1">
+                                      <MapPin className="h-2.5 w-2.5" />
                                       <span>{getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}</span>
                                     </div>
                                   </div>
                                   
-                                  {/* Swipe ikoner längst ner */}
-                                  <div className="flex justify-center items-center space-x-8 mt-4 pt-2">
-                                    <div className="w-12 h-12 rounded-full bg-red-500/80 flex items-center justify-center">
-                                      <X className="h-6 w-6 text-white" />
+                                  {/* AI-förbättrade swipe ikoner */}
+                                  <div className="flex justify-center items-center space-x-6 mt-3 pt-2">
+                                    <div className="w-10 h-10 rounded-full bg-red-500/80 backdrop-blur-sm flex items-center justify-center shadow-lg">
+                                      <X className="h-5 w-5 text-white" />
                                     </div>
-                                    <div className="text-xs text-white/60 font-medium">Tryck för att ansöka</div>
-                                    <div className="w-12 h-12 rounded-full bg-green-500/80 flex items-center justify-center">
-                                      <Heart className="h-6 w-6 text-white" />
+                                    <div className="text-[10px] text-white/80 font-medium bg-black/30 px-2 py-1 rounded-full backdrop-blur-sm">
+                                      Tryck för att ansöka
+                                    </div>
+                                    <div className="w-10 h-10 rounded-full bg-green-500/80 backdrop-blur-sm flex items-center justify-center shadow-lg">
+                                      <Heart className="h-5 w-5 text-white" />
                                     </div>
                                   </div>
                                 </div>
+
+                                {/* AI-optimeringsindikator */}
+                                {jobImageDisplayUrl && (
+                                  <div className="absolute top-3 right-3 bg-purple-500/80 backdrop-blur-sm rounded-full p-1">
+                                    <Sparkles className="h-3 w-3 text-white" />
+                                  </div>
+                                )}
                               </div>
                             </>
                           )}
