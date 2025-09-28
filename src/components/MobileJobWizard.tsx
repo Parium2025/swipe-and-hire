@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -342,6 +343,32 @@ const MobileJobWizard = ({
 
   const { user } = useAuth();
   const { toast } = useToast();
+  const { hasUnsavedChanges, setHasUnsavedChanges, checkBeforeNavigation } = useUnsavedChanges();
+  
+  // Initial form data to compare changes
+  const [initialFormData] = useState<JobFormData>({
+    title: jobTitle,
+    description: selectedTemplate?.description || '',
+    requirements: selectedTemplate?.requirements || '',
+    location: selectedTemplate?.location || '',
+    occupation: '',
+    salary_min: selectedTemplate?.salary_min?.toString() || '',
+    salary_max: selectedTemplate?.salary_max?.toString() || '',
+    employment_type: selectedTemplate?.employment_type || '',
+    salary_type: '',
+    positions_count: '1',
+    work_location_type: 'på-plats',
+    remote_work_possible: 'nej',
+    workplace_name: '',
+    workplace_address: '',
+    workplace_postal_code: '',
+    workplace_city: '',
+    work_schedule: selectedTemplate?.work_schedule || '',
+    contact_email: selectedTemplate?.contact_email || '',
+    application_instructions: selectedTemplate?.application_instructions || '',
+    pitch: '',
+    job_image_url: ''
+  });
 
   // Load user profile for company info
   useEffect(() => {
@@ -649,6 +676,11 @@ const MobileJobWizard = ({
       ...prev,
       [field]: value
     }));
+    
+    // Check if form has changed from initial state
+    const updatedForm = { ...formData, [field]: value };
+    const hasChanges = JSON.stringify(updatedForm) !== JSON.stringify(initialFormData);
+    setHasUnsavedChanges(hasChanges);
   };
 
   const handleCitySearch = (value: string) => {
@@ -963,7 +995,24 @@ const MobileJobWizard = ({
   };
 
   const handleClose = () => {
+    if (hasUnsavedChanges && !checkBeforeNavigation('/close')) {
+      return; // Don't close if user cancels unsaved changes dialog
+    }
+    
+    // Reset all state
     setCurrentStep(0);
+    setCustomQuestions([]);
+    setShowQuestionForm(false);
+    setEditingQuestion(null);
+    setOptimizedTitle('');
+    setOptimizedDescription('');
+    setShowOptimizedSuggestions(false);
+    setJobImageDisplayUrl(null);
+    setOriginalImageUrl(null);
+    setManualFocus(null);
+    setShowApplicationForm(false);
+    setHingeMode('ad');
+    
     setFormData({
       title: '',
       description: '',
@@ -977,17 +1026,18 @@ const MobileJobWizard = ({
       positions_count: '1',
       work_location_type: 'på-plats',
       remote_work_possible: 'nej',
-      workplace_name: profile?.company_name || '',
+      workplace_name: '',
       workplace_address: '',
       workplace_postal_code: '',
       workplace_city: '',
       work_schedule: '',
-      contact_email: user?.email || '',
+      contact_email: '',
       application_instructions: '',
       pitch: '',
       job_image_url: ''
     });
-    setOriginalImageUrl(null);
+    
+    setHasUnsavedChanges(false);
     onOpenChange(false);
     onJobCreated();
   };
@@ -1666,7 +1716,12 @@ const MobileJobWizard = ({
                           {/* Header */}
                           <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 backdrop-blur-sm border-b border-white/20 relative z-10">
                             <div className="text-xs font-bold text-white">Ansökningsformulär</div>
-                            <button className="text-xs text-white/80 hover:text-white">✕</button>
+                            <button 
+                              onClick={() => setShowApplicationForm(false)}
+                              className="text-xs text-white/80 hover:text-white"
+                            >
+                              ✕
+                            </button>
                           </div>
 
                           {/* Scrollable content */}
