@@ -121,6 +121,10 @@ All colors MUST be HSL.
   *:not(html):not(body) {
     overflow-x: clip !important;
   }
+  /* Allow focus rings to render fully on interactive/form elements */
+  input, textarea, select, button, [role="button"], .focus-ring-allow {
+    overflow: visible !important;
+  }
 
   body {
     @apply bg-background text-foreground;
