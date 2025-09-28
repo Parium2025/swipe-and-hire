@@ -771,7 +771,6 @@ const MobileJobWizard = ({
   // Get display text for work location and remote work
   const getWorkLocationDisplayText = () => {
     const locationType = workLocationTypes.find(t => t.value === formData.work_location_type);
-    const remoteOption = remoteWorkOptions.find(r => r.value === formData.remote_work_possible);
     
     let displayText = locationType?.label || 'På plats';
     
@@ -782,7 +781,10 @@ const MobileJobWizard = ({
       displayText += ', delvis distans';
     }
     
-    return `(${displayText.toLowerCase()})`;
+    // Capitalize first letter and make rest lowercase
+    const capitalizedText = displayText.charAt(0).toUpperCase() + displayText.slice(1).toLowerCase();
+    
+    return `(${capitalizedText})`;
   };
 
   const handleQuestionTypeSearch = (value: string) => {
