@@ -1875,12 +1875,14 @@ const MobileJobWizard = ({
                             ) : null}
                             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                             <div 
-                              className="absolute inset-0 flex flex-col justify-center items-center p-3 text-white text-center cursor-pointer"
+                              className="absolute inset-0 flex flex-col justify-start items-center pt-12 p-3 text-white text-center cursor-pointer"
                               onClick={() => setShowApplicationForm(true)}
                             >
-                              <h3 className="text-sm font-extrabold leading-tight">{formData.title || 'Jobbtitel'}</h3>
-                              <div className="text-xs text-white/90 mt-0.5">{profile?.company_name || 'Företag'}</div>
-                              <div className="text-[10px] text-white/70">{formData.workplace_city || formData.location || 'Stockholm'}</div>
+                              <h3 className="text-base font-extrabold leading-tight mb-1">{getDisplayTitle()}</h3>
+                              <div className="text-xs text-white/90">{profile?.company_name || 'Företag'}</div>
+                              <div className="text-xs text-white/80 mt-1">
+                                {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
+                              </div>
                             </div>
                             <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2 pointer-events-none">
                               <button aria-label="Nej tack" className="w-6 h-6 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
