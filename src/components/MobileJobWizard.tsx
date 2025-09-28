@@ -1750,9 +1750,9 @@ const MobileJobWizard = ({
                           <div className="px-2 py-2 h-full overflow-y-auto relative z-10">
                             <div className="space-y-3">
                               
-                              {/* Job header med Parium styling */}
+                              {/* Företagsinformation */}
                               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                                <div className="flex items-center mb-1">
+                                <div className="flex items-center">
                                   {profile?.company_logo_url ? (
                                     <div className="w-4 h-4 rounded mr-1 overflow-hidden">
                                       <img 
@@ -1766,12 +1766,19 @@ const MobileJobWizard = ({
                                       <Building2 className="h-2 w-2 text-primary-foreground" />
                                     </div>
                                   )}
-                                  <div>
-                                    <div className="text-xs font-bold text-white">{profile?.company_name || 'Företagsnamn'}</div>
-                                  </div>
+                                  <div className="text-xs font-bold text-white">{profile?.company_name || 'Företagsnamn'}</div>
                                 </div>
+                              </div>
+
+                              {/* Om jobbet */}
+                              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+                                <h4 className="text-xs font-semibold text-white mb-1">Om jobbet</h4>
+                                
+                                {/* Jobbtitel */}
                                 <h3 className="text-xs font-bold text-white mb-1">{getDisplayTitle()}</h3>
-                                <div className="text-xs text-white/70 space-y-0.5">
+                                
+                                {/* Anställningsform och plats */}
+                                <div className="text-xs text-white/70 space-y-0.5 mb-2">
                                   <div>{getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}</div>
                                   {formData.salary_min && formData.salary_max && (
                                     <div className="flex items-center">
@@ -1783,20 +1790,20 @@ const MobileJobWizard = ({
                                     <div>{formData.positions_count} personer att rekrytera</div>
                                   )}
                                 </div>
-                              </div>
 
-                              {/* Jobbbeskrivning */}
-                              {formData.description && (
-                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                                  <h4 className="text-xs font-semibold text-white mb-1">Om jobbet</h4>
-                                  <p className="text-xs text-white/80 leading-relaxed">
-                                    {formData.description.length > 150 
-                                      ? formData.description.substring(0, 150) + '...' 
-                                      : formData.description
-                                    }
-                                  </p>
-                                </div>
-                              )}
+                                {/* Jobbeskrivning */}
+                                {formData.description && (
+                                  <div>
+                                    <h5 className="text-xs font-medium text-white mb-1">Jobbeskrivning</h5>
+                                    <p className="text-xs text-white/80 leading-relaxed">
+                                      {formData.description.length > 150 
+                                        ? formData.description.substring(0, 150) + '...' 
+                                        : formData.description
+                                      }
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
 
                               {/* Arbetsplats information */}
                               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
