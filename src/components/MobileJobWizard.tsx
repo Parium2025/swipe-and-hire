@@ -1887,63 +1887,45 @@ const MobileJobWizard = ({
                                 </div>
                               )}
 
-                               {/* Personlig information - visar standardfrågor för kandidater */}
+                               {/* Följande information samlas automatiskt in från alla kandidater */}
                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                                 <h4 className="text-xs font-semibold text-white mb-2 flex items-center">
-                                   <Users className="h-3 w-3 mr-1 text-blue-400" />
-                                   Personlig information
-                                 </h4>
                                  <p className="text-xs text-white/70 mb-3 leading-relaxed">
                                    Följande information samlas automatiskt in från alla kandidater:
                                  </p>
                                  
                                  <div className="space-y-1.5">
-                                   {/* Obligatoriska fält */}
-                                   <div className="flex items-center justify-between text-xs">
+                                   <div className="text-xs">
                                      <span className="text-white">Förnamn</span>
-                                     <span className="bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded text-xs">Obligatorisk</span>
                                    </div>
-                                   <div className="flex items-center justify-between text-xs">
+                                   <div className="text-xs">
                                      <span className="text-white">Efternamn</span>
-                                     <span className="bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded text-xs">Obligatorisk</span>
                                    </div>
-                                   <div className="flex items-center justify-between text-xs">
+                                   <div className="text-xs">
                                      <span className="text-white">E-post</span>
-                                     <span className="bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded text-xs">Obligatorisk</span>
                                    </div>
-                                   <div className="flex items-center justify-between text-xs">
+                                   <div className="text-xs">
                                      <span className="text-white">Telefonnummer</span>
-                                     <span className="bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded text-xs">Obligatorisk</span>
                                    </div>
-                                   <div className="flex items-center justify-between text-xs">
+                                   <div className="text-xs">
                                      <span className="text-white">CV</span>
-                                     <span className="bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded text-xs">Obligatorisk</span>
                                    </div>
-                                   
-                                   {/* Frivilliga fält */}
-                                   <div className="flex items-center justify-between text-xs">
+                                   <div className="text-xs">
                                      <span className="text-white">Ålder</span>
-                                     <span className="bg-green-500/20 text-green-300 px-1.5 py-0.5 rounded text-xs">Frivilligt</span>
                                    </div>
-                                   <div className="flex items-center justify-between text-xs">
+                                   <div className="text-xs">
                                      <span className="text-white">Ort/Stad</span>
-                                     <span className="bg-green-500/20 text-green-300 px-1.5 py-0.5 rounded text-xs">Frivilligt</span>
                                    </div>
-                                   <div className="flex items-center justify-between text-xs">
+                                   <div className="text-xs">
                                      <span className="text-white">Presentation</span>
-                                     <span className="bg-green-500/20 text-green-300 px-1.5 py-0.5 rounded text-xs">Frivilligt</span>
                                    </div>
-                                   <div className="flex items-center justify-between text-xs">
+                                   <div className="text-xs">
                                      <span className="text-white">Nuvarande anställning</span>
-                                     <span className="bg-green-500/20 text-green-300 px-1.5 py-0.5 rounded text-xs">Frivilligt</span>
                                    </div>
-                                   <div className="flex items-center justify-between text-xs">
+                                   <div className="text-xs">
                                      <span className="text-white">Tillgänglighet</span>
-                                     <span className="bg-green-500/20 text-green-300 px-1.5 py-0.5 rounded text-xs">Frivilligt</span>
                                    </div>
-                                   <div className="flex items-center justify-between text-xs">
+                                   <div className="text-xs">
                                      <span className="text-white">Personligt brev</span>
-                                     <span className="bg-green-500/20 text-green-300 px-1.5 py-0.5 rounded text-xs">Frivilligt</span>
                                    </div>
                                  </div>
                                </div>
