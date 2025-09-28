@@ -481,3 +481,11 @@ All colors MUST be HSL.
     background: transparent;
   }
 }
+
+@layer utilities {
+  /* Auto-sizing text för långa yrken */
+  .text-auto-fit {
+    font-size: clamp(0.625rem, 4vw, 0.75rem);
+    line-height: 1.2;
+  }
+}
