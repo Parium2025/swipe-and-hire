@@ -1711,28 +1711,6 @@ const MobileJobWizard = ({
                                 </div>
                               )}
 
-                                {/* Distans & Flexibilitet */}
-                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                                  <h5 className="text-xs font-medium text-white mb-1 flex items-center">
-                                    <Briefcase className="h-2 w-2 mr-1 text-white" />
-                                    Distans & Flexibilitet
-                                  </h5>
-                                  <div className="text-xs text-white space-y-0.5">
-                                    <div className="flex items-center space-x-2">
-                                      <span>{formData.work_location_type || 'På plats'}</span>
-                                      {formData.remote_work_possible === 'ja' && (
-                                        <span className="bg-green-500/20 text-green-300 px-1 py-0.5 rounded text-[10px]">
-                                          Distans möjligt
-                                        </span>
-                                      )}
-                                      {formData.remote_work_possible === 'delvis' && (
-                                        <span className="bg-yellow-500/20 text-yellow-300 px-1 py-0.5 rounded text-[10px]">
-                                          Delvis distans
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
 
                                 {/* Arbetsplats */}
                                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
@@ -1748,7 +1726,7 @@ const MobileJobWizard = ({
                                       <div>{formData.workplace_address}</div>
                                     )}
                                     {formData.workplace_city && formData.workplace_postal_code && (
-                                      <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
+                                      <div>{formData.workplace_postal_code} {formData.workplace_city} (på plats)</div>
                                     )}
                                   </div>
                                 </div>
