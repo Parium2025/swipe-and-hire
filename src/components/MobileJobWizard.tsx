@@ -352,8 +352,7 @@ const MobileJobWizard = ({
     job_image_url: ''
   });
 
-  // Auto-fit för yrkesraden i mobilförhandsvisningen
-  const occupationFitRef = useAutoFitText<HTMLDivElement>(formData.occupation || '', { min: 6, max: 14, step: 0.2 });
+  // Auto-fit inte längre behövs för yrke - vi använder naturlig radbrytning istället
 
   // Visningsnamn: visa alltid användarens titel (inte AI-förslag)
   const getDisplayTitle = () => {
@@ -1779,7 +1778,7 @@ const MobileJobWizard = ({
                                       Yrke
                                     </h5>
                                     <div className="text-white">
-                                      <div ref={occupationFitRef} className="font-medium leading-tight">{formData.occupation}</div>
+                                      <div className="text-xs leading-relaxed break-words">{formData.occupation}</div>
                                     </div>
                                   </div>
                                 )}
