@@ -342,9 +342,9 @@ const MobileJobWizard = ({
     return () => clearTimeout(timeoutId);
   }, [formData.title]);
 
-  // Get display title (optimized or original)
+  // Visningsnamn: visa alltid användarens titel (inte AI-förslag)
   const getDisplayTitle = () => {
-    return optimizedTitle || formData.title || 'Jobbtitel';
+    return formData.title || 'Jobbtitel';
   };
 
   const { user } = useAuth();
@@ -600,8 +600,8 @@ const MobileJobWizard = ({
 
   // Update form data when props change - preserve existing values
   useEffect(() => {
-    // Always use the latest jobTitle if provided
-    if (jobTitle && jobTitle !== formData.title) {
+    // Initiera titel från jobTitle ENDAST om fältet är tomt (skriven text ska inte överskrivas)
+    if (jobTitle && !formData.title) {
       setFormData(prev => ({ ...prev, title: jobTitle }));
     }
     
@@ -613,7 +613,7 @@ const MobileJobWizard = ({
     if (isFormEmpty || shouldUpdateFromTemplate) {
       const newLocation = selectedTemplate?.location || '';
       setFormData(prev => ({
-        title: jobTitle || selectedTemplate?.title || prev.title,
+        title: (!prev.title || prev.title === selectedTemplate?.title ? (jobTitle || selectedTemplate?.title || prev.title) : prev.title),
         description: selectedTemplate?.description || prev.description,
         requirements: selectedTemplate?.requirements || prev.requirements,
         location: newLocation || prev.location,
