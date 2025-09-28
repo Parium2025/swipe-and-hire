@@ -1726,7 +1726,10 @@ const MobileJobWizard = ({
                                       <div>{formData.workplace_address}</div>
                                     )}
                                     {formData.workplace_city && formData.workplace_postal_code && (
-                                      <div>{formData.workplace_postal_code} {formData.workplace_city} (på plats)</div>
+                                      <div>
+                                        <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
+                                        <div>(på plats)</div>
+                                      </div>
                                     )}
                                   </div>
                                 </div>
