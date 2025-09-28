@@ -1810,7 +1810,7 @@ const MobileJobWizard = ({
                               {/* Arbetsplats information */}
                               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
                                 <h4 className="text-xs font-semibold text-white mb-1 flex items-center">
-                                  <MapPin className="h-2 w-2 mr-1" />
+                                  <MapPin className="h-2 w-2 mr-1 text-white" />
                                   Arbetsplats
                                 </h4>
                                 <div className="text-xs text-white space-y-0.5">
