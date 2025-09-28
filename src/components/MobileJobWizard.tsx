@@ -1770,9 +1770,83 @@ const MobileJobWizard = ({
                                     <div className="text-xs font-bold text-white">{profile?.company_name || 'Företagsnamn'}</div>
                                   </div>
                                 </div>
-                                <h3 className="text-xs font-bold text-white mb-1">{formData.title}</h3>
-                                <div className="text-xs text-white/70">{formData.workplace_city || formData.location || 'Stockholm'}</div>
+                                <h3 className="text-xs font-bold text-white mb-1">{getDisplayTitle()}</h3>
+                                <div className="text-xs text-white/70 space-y-0.5">
+                                  <div>{getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}</div>
+                                  {formData.salary_min && formData.salary_max && (
+                                    <div className="flex items-center">
+                                      <Euro className="h-2 w-2 mr-1" />
+                                      {formData.salary_min} - {formData.salary_max} kr/mån
+                                    </div>
+                                  )}
+                                  {formData.positions_count && parseInt(formData.positions_count) > 1 && (
+                                    <div>{formData.positions_count} personer att rekrytera</div>
+                                  )}
+                                </div>
                               </div>
+
+                              {/* Jobbbeskrivning */}
+                              {formData.description && (
+                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+                                  <h4 className="text-xs font-semibold text-white mb-1">Om jobbet</h4>
+                                  <p className="text-xs text-white/80 leading-relaxed">
+                                    {formData.description.length > 150 
+                                      ? formData.description.substring(0, 150) + '...' 
+                                      : formData.description
+                                    }
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Arbetsplats information */}
+                              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+                                <h4 className="text-xs font-semibold text-white mb-1 flex items-center">
+                                  <MapPin className="h-2 w-2 mr-1" />
+                                  Arbetsplats
+                                </h4>
+                                <div className="text-xs text-white/80 space-y-0.5">
+                                  {formData.workplace_name && (
+                                    <div className="font-medium">{formData.workplace_name}</div>
+                                  )}
+                                  {formData.workplace_address && (
+                                    <div>{formData.workplace_address}</div>
+                                  )}
+                                  {formData.workplace_city && formData.workplace_postal_code && (
+                                    <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
+                                  )}
+                                  <div className="flex items-center space-x-2">
+                                    <span>{formData.work_location_type || 'På plats'}</span>
+                                    {formData.remote_work_possible === 'ja' && (
+                                      <span className="bg-green-500/20 text-green-300 px-1 py-0.5 rounded text-[10px]">
+                                        Distans möjligt
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Kontaktinformation */}
+                              {formData.contact_email && (
+                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+                                  <h4 className="text-xs font-semibold text-white mb-1">Kontakt</h4>
+                                  <div className="text-xs text-white/80">
+                                    {formData.contact_email}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Krav och kvalifikationer */}
+                              {formData.requirements && (
+                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+                                  <h4 className="text-xs font-semibold text-white mb-1">Kvalifikationer</h4>
+                                  <p className="text-xs text-white/80 leading-relaxed">
+                                    {formData.requirements.length > 100 
+                                      ? formData.requirements.substring(0, 100) + '...' 
+                                      : formData.requirements
+                                    }
+                                  </p>
+                                </div>
+                              )}
 
                               {/* Automatiska profilfält med pre-filled styling */}
                               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
