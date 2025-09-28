@@ -163,16 +163,16 @@ const PostalCodeSelector = ({
 
       {/* Loading state med proffsig indikator */}
       {isLoading && (
-        <Card className="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 backdrop-blur-sm border-blue-500/20 p-4">
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20 p-4">
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
-              <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
+              <Loader2 className="h-5 w-5 animate-spin text-white/60" />
             </div>
             <div className="flex-1">
-              <p className="text-sm text-blue-200">
+              <p className="text-sm text-white font-medium">
                 Söker i svensk postnummerdatabas...
               </p>
-              <p className="text-xs text-blue-300/70">
+              <p className="text-xs text-white/70">
                 16,000+ postnummer tillgängliga
               </p>
             </div>
