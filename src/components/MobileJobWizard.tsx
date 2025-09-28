@@ -1756,11 +1756,11 @@ const MobileJobWizard = ({
                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
                                  <div className="flex items-center">
                                    {profile?.company_logo_url ? (
-                                     <div className="w-4 h-4 rounded-full mr-1 overflow-hidden">
+                                     <div className="w-4 h-4 rounded-full mr-1 overflow-hidden bg-white/10 flex items-center justify-center">
                                        <img 
                                          src={profile.company_logo_url} 
                                          alt="Företagslogotyp" 
-                                         className="w-full h-full object-cover"
+                                         className="w-full h-full object-contain"
                                        />
                                      </div>
                                    ) : (
