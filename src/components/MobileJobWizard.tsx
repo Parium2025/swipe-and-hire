@@ -787,6 +787,32 @@ const MobileJobWizard = ({
     return `(${capitalizedText})`;
   };
 
+  // Format salary information for display
+  const formatSalaryInfo = () => {
+    const parts = [];
+    
+    // Add salary range if provided
+    if (formData.salary_min || formData.salary_max) {
+      if (formData.salary_min && formData.salary_max) {
+        parts.push(`${parseInt(formData.salary_min).toLocaleString()} - ${parseInt(formData.salary_max).toLocaleString()} kr/mån`);
+      } else if (formData.salary_min) {
+        parts.push(`Från ${parseInt(formData.salary_min).toLocaleString()} kr/mån`);
+      } else if (formData.salary_max) {
+        parts.push(`Upp till ${parseInt(formData.salary_max).toLocaleString()} kr/mån`);
+      }
+    }
+    
+    // Add salary type if provided
+    if (formData.salary_type) {
+      const salaryType = salaryTypes.find(t => t.value === formData.salary_type);
+      if (salaryType) {
+        parts.push(salaryType.label);
+      }
+    }
+    
+    return parts;
+  };
+
   const handleQuestionTypeSearch = (value: string) => {
     setQuestionTypeSearchTerm(value);
     setShowQuestionTypeDropdown(value.length >= 0);
@@ -1734,14 +1760,29 @@ const MobileJobWizard = ({
                                 )}
 
                                {/* Jobbeskrivning */}
-                              {formData.description && (
-                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 mb-2">
-                                  <h5 className="text-xs font-medium text-white mb-1">Jobbeskrivning</h5>
-                                  <p className="text-xs text-white leading-relaxed whitespace-pre-wrap break-words">
-                                    {formData.description}
-                                  </p>
-                                </div>
-                              )}
+                               {formData.description && (
+                                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 mb-2">
+                                   <h5 className="text-xs font-medium text-white mb-1">Jobbeskrivning</h5>
+                                   <p className="text-xs text-white leading-relaxed whitespace-pre-wrap break-words">
+                                     {formData.description}
+                                   </p>
+                                 </div>
+                               )}
+
+                               {/* Lön */}
+                               {(formData.salary_min || formData.salary_max || formData.salary_type) && (
+                                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 mb-2">
+                                   <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                     <Euro className="h-2 w-2 mr-1 text-white" />
+                                     Lön
+                                   </h5>
+                                   <div className="text-xs text-white space-y-0.5">
+                                     {formatSalaryInfo().map((info, index) => (
+                                       <div key={index} className="font-medium">{info}</div>
+                                     ))}
+                                   </div>
+                                 </div>
+                               )}
 
 
                                 {/* Arbetsplats */}
