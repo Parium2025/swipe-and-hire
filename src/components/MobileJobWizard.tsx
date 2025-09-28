@@ -25,6 +25,7 @@ import { Slider } from '@/components/ui/slider';
 import ImageEditor from '@/components/ImageEditor';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
+import useAutoFitText from '@/hooks/useAutoFitText';
 
 interface JobQuestion {
   id?: string;
@@ -336,6 +337,7 @@ const MobileJobWizard = ({
     salary_max: selectedTemplate?.salary_max?.toString() || '',
     employment_type: selectedTemplate?.employment_type || '',
     salary_type: '',
+  
     positions_count: '1',
     work_location_type: 'på-plats',
     remote_work_possible: 'nej',
@@ -350,6 +352,8 @@ const MobileJobWizard = ({
     job_image_url: ''
   });
 
+  // Auto-fit för yrkesraden i mobilförhandsvisningen
+  const occupationFitRef = useAutoFitText<HTMLDivElement>(formData.occupation || '', { min: 8, max: 14, step: 0.25 });
 
   // Visningsnamn: visa alltid användarens titel (inte AI-förslag)
   const getDisplayTitle = () => {
@@ -1774,9 +1778,9 @@ const MobileJobWizard = ({
                                       <Briefcase className="h-2 w-2 mr-1 text-white" />
                                       Yrke
                                     </h5>
-                                     <div className="text-white">
-                                       <div className="font-medium text-auto-fit">{formData.occupation}</div>
-                                     </div>
+                                    <div className="text-white">
+                                      <div ref={occupationFitRef} className="font-medium leading-tight whitespace-nowrap">{formData.occupation}</div>
+                                    </div>
                                   </div>
                                 )}
 
