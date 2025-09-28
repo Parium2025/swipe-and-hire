@@ -1776,11 +1776,8 @@ const MobileJobWizard = ({
                               {formData.description && (
                                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 mb-2">
                                   <h5 className="text-xs font-medium text-white mb-1">Jobbeskrivning</h5>
-                                  <p className="text-xs text-white leading-relaxed">
-                                    {formData.description.length > 150 
-                                      ? formData.description.substring(0, 150) + '...' 
-                                      : formData.description
-                                    }
+                                  <p className="text-xs text-white leading-relaxed whitespace-pre-wrap break-words">
+                                    {formData.description}
                                   </p>
                                 </div>
                               )}
