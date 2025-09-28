@@ -1874,19 +1874,22 @@ const MobileJobWizard = ({
                               />
                             ) : null}
                             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                            <div className="absolute inset-0 flex flex-col justify-center items-center p-3 text-white text-center">
+                            <div 
+                              className="absolute inset-0 flex flex-col justify-center items-center p-3 text-white text-center cursor-pointer"
+                              onClick={() => setShowApplicationForm(true)}
+                            >
                               <h3 className="text-sm font-extrabold leading-tight">{formData.title || 'Jobbtitel'}</h3>
                               <div className="text-xs text-white/90 mt-0.5">{profile?.company_name || 'Företag'}</div>
                               <div className="text-[10px] text-white/70">{formData.workplace_city || formData.location || 'Stockholm'}</div>
                             </div>
-                            <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2">
-                              <button aria-label="Nej tack" className="w-6 h-6 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors">
+                            <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2 pointer-events-none">
+                              <button aria-label="Nej tack" className="w-6 h-6 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
                                 <X className="h-3 w-3 text-white" />
                               </button>
-                              <button aria-label="Spara" className="w-6 h-6 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors">
+                              <button aria-label="Spara" className="w-6 h-6 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto">
                                 <Bookmark className="h-3 w-3 text-white" />
                               </button>
-                              <button onClick={() => setShowApplicationForm(true)} aria-label="Ansök" className="w-6 h-6 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors">
+                              <button onClick={() => setShowApplicationForm(true)} aria-label="Ansök" className="w-6 h-6 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
                                 <Heart className="h-3 w-3 text-white fill-white" />
                               </button>
                             </div>
