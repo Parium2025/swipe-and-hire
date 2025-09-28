@@ -16,7 +16,7 @@ import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES, getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Trash2, Clock, Euro, FileText, CheckSquare, List, Video, Mail } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Trash2, Clock, Euro, FileText, CheckSquare, List, Video, Mail, Users } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
@@ -811,6 +811,16 @@ const MobileJobWizard = ({
     }
     
     return parts;
+  };
+
+  // Format positions count for display
+  const formatPositionsCount = () => {
+    const count = parseInt(formData.positions_count) || 1;
+    if (count === 1) {
+      return '1 person';
+    } else {
+      return `${count} personer`;
+    }
   };
 
   const handleQuestionTypeSearch = (value: string) => {
@@ -1805,9 +1815,22 @@ const MobileJobWizard = ({
                                       </div>
                                     )}
                                   </div>
-                                </div>
+                                 </div>
 
-                                {/* Kontakt */}
+                                 {/* Antal rekryteringar */}
+                                 {formData.positions_count && parseInt(formData.positions_count) > 0 && (
+                                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 mb-2">
+                                     <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                       <Users className="h-2 w-2 mr-1 text-white" />
+                                       Antal rekryteringar
+                                     </h5>
+                                     <div className="text-xs text-white">
+                                       <div className="font-medium">{formatPositionsCount()}</div>
+                                     </div>
+                                   </div>
+                                 )}
+
+                                 {/* Kontakt */}
                                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
                                   <h5 className="text-xs font-medium text-white mb-1 flex items-center">
                                     <Mail className="h-2 w-2 mr-1 text-white" />
