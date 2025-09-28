@@ -2040,7 +2040,7 @@ const MobileJobWizard = ({
                   <>
                     <div className={`${textSizes.company} text-white font-medium mb-1`}>{profile?.company_name || 'Företag'}</div>
                     <h3 className={`${textSizes.title} text-white font-bold leading-tight mb-1`}>{getDisplayTitle()}</h3>
-                    <div className={`${textSizes.meta} text-white/90`}>
+                    <div className={`${textSizes.meta} text-white`}>
                       {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
                     </div>
                   </>
