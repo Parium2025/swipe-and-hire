@@ -1820,12 +1820,9 @@ const MobileJobWizard = ({
                                  {/* Antal rekryteringar */}
                                  {formData.positions_count && parseInt(formData.positions_count) > 0 && (
                                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 mb-2">
-                                     <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                     <div className="text-xs text-white flex items-center">
                                        <Users className="h-2 w-2 mr-1 text-white" />
-                                       Antal rekryteringar
-                                     </h5>
-                                     <div className="text-xs text-white">
-                                       <div className="font-medium">{formatPositionsCount()}</div>
+                                       <span className="font-medium">Antal rekryteringar: {formatPositionsCount()}</span>
                                      </div>
                                    </div>
                                  )}
