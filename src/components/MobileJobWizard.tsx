@@ -353,7 +353,7 @@ const MobileJobWizard = ({
   });
 
   // Auto-fit för yrkesraden i mobilförhandsvisningen
-  const occupationFitRef = useAutoFitText<HTMLDivElement>(formData.occupation || '', { min: 8, max: 14, step: 0.25 });
+  const occupationFitRef = useAutoFitText<HTMLDivElement>(formData.occupation || '', { min: 2, max: 14, step: 0.05 });
 
   // Visningsnamn: visa alltid användarens titel (inte AI-förslag)
   const getDisplayTitle = () => {

@@ -52,11 +52,11 @@ export default function useAutoFitText<T extends HTMLElement>(
         el.style.fontSize = `${size}px`;
       }
 
-      // Om det fortfarande är för brett, använd en lätt horisontell skala
+      // Om det fortfarande är för brett, använd en mer aggressiv horisontell skala
       const textWidthFinal = el.getBoundingClientRect().width;
       if (textWidthFinal > parentWidth) {
-        const scale = Math.max(0.75, parentWidth / textWidthFinal);
-        el.style.transform = `scale(${scale})`;
+        const scale = Math.max(0.5, parentWidth / textWidthFinal);
+        el.style.transform = `scaleX(${scale})`;
       }
     };
 
