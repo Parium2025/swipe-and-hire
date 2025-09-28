@@ -1663,13 +1663,14 @@ const MobileJobWizard = ({
                           {/* Status bar */}
                           <div className="h-1 bg-black relative z-10"></div>
                           
-                          {/* Header */}
-                          <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 backdrop-blur-sm border-b border-white/20 relative z-10">
-                            <div className="text-xs font-bold text-white">Ansökningsformulär</div>
-                            <button className="text-xs text-white/80 hover:text-white">✕</button>
-                          </div>
+                          {/* Form container (toggle) */}
+                          <div className={showApplicationForm ? 'block' : 'hidden'}>
+                            <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 backdrop-blur-sm border-b border-white/20 relative z-10">
+                              <div className="text-xs font-bold text-white">Ansökningsformulär</div>
+                              <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white/80 hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
+                            </div>
 
-                          {/* Scrollable content */}
+                            {/* Scrollable content */}
                           <div className="px-2 py-2 h-full overflow-y-auto relative z-10">
                             <div className="space-y-3">
                               
@@ -1858,9 +1859,43 @@ const MobileJobWizard = ({
                             </div>
                           </div>
                         </div>
+                        </div>
+
+                        {/* Ad view when form is closed */}
+                        {!showApplicationForm && (
+                          <div className="absolute inset-0 z-10">
+                            {jobImageDisplayUrl ? (
+                              <img
+                                src={jobImageDisplayUrl}
+                                alt={`Jobbbild för ${formData.title}`}
+                                className="absolute inset-0 w-full h-full object-cover select-none"
+                                loading="eager"
+                                decoding="async"
+                              />
+                            ) : null}
+                            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                            <div className="absolute inset-0 flex flex-col justify-center items-center p-3 text-white text-center">
+                              <h3 className="text-sm font-extrabold leading-tight">{formData.title || 'Jobbtitel'}</h3>
+                              <div className="text-xs text-white/90 mt-0.5">{profile?.company_name || 'Företag'}</div>
+                              <div className="text-[10px] text-white/70">{formData.workplace_city || formData.location || 'Stockholm'}</div>
+                            </div>
+                            <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2">
+                              <button aria-label="Nej tack" className="w-6 h-6 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors">
+                                <X className="h-3 w-3 text-white" />
+                              </button>
+                              <button aria-label="Spara" className="w-6 h-6 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors">
+                                <Bookmark className="h-3 w-3 text-white" />
+                              </button>
+                              <button onClick={() => setShowApplicationForm(true)} aria-label="Ansök" className="w-6 h-6 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors">
+                                <Heart className="h-3 w-3 text-white fill-white" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
                       </div>
-                    </div>
-                  </section>
+                      </div>
+                    </section>
                   
                   <p className="text-white text-sm text-center max-w-md">
                     Detta är hur ansökningsformuläret ser ut på mobilen. Jobbsökare har redan sina uppgifter ifyllda och använder swipe-funktionen för att ansöka.
