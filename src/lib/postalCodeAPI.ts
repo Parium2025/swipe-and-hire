@@ -87,13 +87,13 @@ async function loadSwedishPostalDatabase(): Promise<Record<string, string>> {
       const line = lines[i].trim();
       if (line) {
         const [zipCode, city] = line.split(',');
-        if (zipCode && city) {
-          // Formatera postnummer till 5 siffror utan mellanslag
-          const cleanZip = zipCode.replace(/\D/g, '');
-          if (cleanZip.length === 5) {
-            swedishPostalDatabase[cleanZip] = city.replace(/"/g, '');
+          if (zipCode && city) {
+            // Formatera postnummer till 5 siffror utan mellanslag
+            const cleanZip = zipCode.replace(/\D/g, '');
+            if (cleanZip.length === 5) {
+              swedishPostalDatabase[cleanZip] = formatCityName(city.replace(/"/g, ''));
+            }
           }
-        }
       }
     }
     
@@ -116,10 +116,10 @@ async function tryMultipleApis(postalCode: string): Promise<PostalCodeResponse |
     if (city) {
       return {
         postalCode: formatPostalCodeDisplay(cleanedCode),
-        city: city,
-        municipality: city,
+        city: formatCityName(city),
+        municipality: formatCityName(city),
         county: getCountyByPostalCode(cleanedCode),
-        area: city
+        area: formatCityName(city)
       };
     }
   } catch (error) {
@@ -134,10 +134,10 @@ async function tryMultipleApis(postalCode: string): Promise<PostalCodeResponse |
       if (data && data.city) {
         return {
           postalCode: formatPostalCodeDisplay(cleanedCode),
-          city: data.city,
-          municipality: data.municipality || data.city,
+          city: formatCityName(data.city),
+          municipality: formatCityName(data.municipality || data.city),
           county: data.county || getCountyByPostalCode(cleanedCode),
-          area: data.city
+          area: formatCityName(data.city)
         };
       }
     }
@@ -154,10 +154,10 @@ async function tryMultipleApis(postalCode: string): Promise<PostalCodeResponse |
         const place = data.places[0];
         return {
           postalCode: formatPostalCodeDisplay(data['post code']),
-          city: place['place name'],
-          municipality: place['place name'],
+          city: formatCityName(place['place name']),
+          municipality: formatCityName(place['place name']),
           county: place['state'],
-          area: place['place name']
+          area: formatCityName(place['place name'])
         };
       }
     }
@@ -177,10 +177,10 @@ async function tryMultipleApis(postalCode: string): Promise<PostalCodeResponse |
   if (regionEstimate) {
     return {
       postalCode: formatPostalCodeDisplay(cleanedCode),
-      city: regionEstimate.city,
-      municipality: regionEstimate.city,
+      city: formatCityName(regionEstimate.city),
+      municipality: formatCityName(regionEstimate.city),
       county: regionEstimate.county,
-      area: regionEstimate.area
+      area: formatCityName(regionEstimate.area)
     };
   }
   
@@ -420,6 +420,23 @@ export const formatPostalCodeDisplay = (code: string): string => {
     return `${digits.slice(0, 3)} ${digits.slice(3)}`;
   }
   return code;
+};
+
+// Hjälpfunktion för att formatera ortnamn till Title Case
+export const formatCityName = (cityName: string): string => {
+  if (!cityName) return cityName;
+  
+  return cityName
+    .toLowerCase()
+    .split(' ')
+    .map(word => {
+      // Hantera svenska specialfall
+      if (word === 'i' || word === 'på' || word === 'av' || word === 'och' || word === 'under') {
+        return word; // Behåll dessa ord i lowercase (om de inte är första ordet)
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(' ');
 };
 
 export const getCachedPostalCodeInfo = async (postalCode: string): Promise<PostalCodeResponse | null> => {
