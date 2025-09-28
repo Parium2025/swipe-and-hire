@@ -1849,9 +1849,12 @@ const MobileJobWizard = ({
                                   </h5>
                                    <div className="text-xs text-white">
                                      {formData.contact_email && (
-                                       <div className={`text-blue-300 font-medium break-all ${getEmailTextSize(formData.contact_email)}`}>
+                                       <a 
+                                         href={`mailto:${formData.contact_email}`}
+                                         className={`text-blue-300 font-medium break-all hover:text-blue-200 underline cursor-pointer ${getEmailTextSize(formData.contact_email)}`}
+                                       >
                                          {formData.contact_email}
-                                       </div>
+                                       </a>
                                      )}
                                    </div>
                                 </div>
