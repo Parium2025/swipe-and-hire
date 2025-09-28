@@ -1,11 +1,5 @@
 import { useEffect, useRef } from "react";
 
-/**
- * useAutoFitText
- * Skalar ned texten (en rad) så att den ryms inom en given container.
- * - Väljer containerRef om den skickas in, annars används elementets förälder
- * - Mäter innehållsbredd (exkl. padding) och justerar font-size/scaleX
- */
 export type AutoFitOptions = {
   min?: number; // px
   max?: number; // px
@@ -14,73 +8,60 @@ export type AutoFitOptions = {
 
 export default function useAutoFitText<T extends HTMLElement>(
   text: string,
-  options: AutoFitOptions = {},
-  containerRef?: React.RefObject<HTMLElement>
+  options: AutoFitOptions = {}
 ) {
-  const { min = 4, max = 14, step = 0.1 } = options;
+  const { min = 6, max = 14, step = 0.2 } = options;
   const ref = useRef<T | null>(null);
 
   useEffect(() => {
     const el = ref.current;
-    const container = (containerRef?.current as HTMLElement | null) || el?.parentElement || null;
-    if (!el || !container) return;
-
-    // Enradig mätning
-    el.style.whiteSpace = "nowrap";
-    el.style.display = "inline-block";
-    el.style.transformOrigin = "left center";
-    el.style.maxWidth = "100%";
-
-    const getContentWidth = (node: HTMLElement) => {
-      const styles = window.getComputedStyle(node);
-      const padL = parseFloat(styles.paddingLeft || "0");
-      const padR = parseFloat(styles.paddingRight || "0");
-      const cw = node.clientWidth; // opåverkad av CSS-transform
-      return Math.max(0, cw - padL - padR);
-    };
+    if (!el || !text) return;
+    
+    // Hitta containern (förälderns förälder som har fast bredd)
+    const container = el.closest('.bg-white\\/10') as HTMLElement;
+    if (!container) return;
 
     const fit = () => {
-      // Nollställ
-      el.style.transform = "none";
-      let size = max;
-      el.style.fontSize = `${size}px`;
-      el.style.maxWidth = "100%";
-
-      const targetWidth = getContentWidth(container);
-      if (!targetWidth) return;
-
-      // Minska font-size tills dess att scrollWidth ryms i targetWidth
-      let guard = 500;
-      while (size > min) {
-        const w = el.scrollWidth; // opåverkat av transform
-        if (w <= targetWidth || guard-- <= 0) break;
-        size = Math.max(min, size - step);
-        el.style.fontSize = `${size}px`;
+      // Återställ
+      el.style.fontSize = `${max}px`;
+      el.style.transform = 'none';
+      el.style.whiteSpace = 'nowrap';
+      
+      // Mät tillgänglig bredd (minus padding/margin)
+      const containerStyles = getComputedStyle(container);
+      const containerWidth = container.offsetWidth 
+        - parseFloat(containerStyles.paddingLeft) 
+        - parseFloat(containerStyles.paddingRight);
+      
+      // Minska font-size tills texten får plats
+      let currentSize = max;
+      while (currentSize > min && el.scrollWidth > containerWidth * 0.95) {
+        currentSize = Math.max(min, currentSize - step);
+        el.style.fontSize = `${currentSize}px`;
       }
-
-      // Om det fortfarande inte får plats -> scaleX
-      const wFinal = el.scrollWidth;
-      if (wFinal > targetWidth) {
-        const scale = Math.max(0.5, targetWidth / wFinal);
-        el.style.transform = `scaleX(${scale})`;
+      
+      // Om fortfarande för bred, använd horizontal scaling
+      if (el.scrollWidth > containerWidth * 0.95) {
+        const scale = (containerWidth * 0.95) / el.scrollWidth;
+        el.style.transform = `scaleX(${Math.max(0.6, scale)})`;
+        el.style.transformOrigin = 'left center';
       }
     };
-    // Init och observers
+
+    // Kör direkt och vid ändringar
     fit();
-
-    const ro = new ResizeObserver(() => fit());
-    ro.observe(container);
-
-    const onWin = () => fit();
-    window.addEventListener("resize", onWin);
-    const t = setTimeout(fit, 0);
+    
+    const resizeObserver = new ResizeObserver(fit);
+    resizeObserver.observe(container);
+    
+    // Kör igen efter kort delay för att säkerställa rendering
+    const timeout = setTimeout(fit, 10);
 
     return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", onWin);
-      clearTimeout(t);
+      resizeObserver.disconnect();
+      clearTimeout(timeout);
     };
-  }, [text, min, max, step, containerRef]);
+  }, [text, min, max, step]);
 
   return ref;
 }
