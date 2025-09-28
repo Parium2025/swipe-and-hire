@@ -1746,9 +1746,11 @@ const MobileJobWizard = ({
                               <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white/80 hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
                             </div>
 
-                            {/* Scrollable content */}
-                          <div className="px-2 py-2 h-full overflow-y-auto relative z-10">
-                            <div className="space-y-3">
+                             {/* Scrollable content */}
+                           <div 
+                             className="px-2 py-2 h-full overflow-y-auto relative z-10 custom-scrollbar"
+                           >
+                             <div className="space-y-3 pb-16">{/* Extra padding för scrollning */}
                               
                               {/* Företagsinformation */}
                               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
