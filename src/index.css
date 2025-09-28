@@ -423,9 +423,10 @@ All colors MUST be HSL.
     animation: slide-up 0.3s ease-out;
   }
 
-  /* Tunn scrollbar för mobilpreview */
+  /* Osynlig scrollbar för mobilpreview */
   .custom-scrollbar::-webkit-scrollbar {
-    width: 4px; /* Lite bredare för desktop */
+    width: 0px; /* Helt osynlig */
+    background: transparent;
   }
   
   .custom-scrollbar::-webkit-scrollbar-track {
@@ -433,17 +434,11 @@ All colors MUST be HSL.
   }
   
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.4);
-    border-radius: 10px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255, 255, 255, 0.7); /* Mer synlig vid hover */
+    background: transparent;
   }
 
   /* Firefox */
   .custom-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+    scrollbar-width: none; /* Helt osynlig i Firefox */
   }
 }
