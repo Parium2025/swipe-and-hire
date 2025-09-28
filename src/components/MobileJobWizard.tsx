@@ -1954,62 +1954,43 @@ const MobileJobWizard = ({
                             </>
                           ) : (
                             <>
-                              {/* Jobbannons med full bild - KLICKBAR med AI-optimerad layout */}
+                              {/* Jobbannons - ENKEL stil som i bilden */}
                               <div 
                                 onClick={() => setShowApplicationForm(true)}
                                 className="absolute inset-0 cursor-pointer pointer-events-auto"
                                 style={{ 
                                   backgroundImage: jobImageDisplayUrl ? `url(${jobImageDisplayUrl})` : 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)',
                                   backgroundSize: 'cover',
-                                  backgroundPosition: bgPosition || 'center 30%' // AI-optimerad startposition
+                                  backgroundPosition: bgPosition || 'center'
                                 }}
                               >
-                                {/* AI-optimerad gradient overlay */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10"></div>
+                                {/* Gradient overlay - ENKEL */}
+                                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60"></div>
                                 
-                                {/* Status bar simulation */}
-                                <div className="absolute top-1 left-2 right-2 flex justify-between items-center text-white text-[8px]">
-                                  <span>9:41</span>
-                                  <div className="flex items-center space-x-1">
-                                    <div className="w-3 h-1.5 border border-white/60 rounded-sm">
-                                      <div className="w-2/3 h-full bg-green-400 rounded-sm"></div>
-                                    </div>
-                                  </div>
-                                </div>
-                                
-                                {/* AI-optimerat innehåll med smart positionering */}
-                                <div className={`absolute bottom-0 left-0 right-0 p-3 text-white ${getSmartMobileLayout().bottomPadding}`}>
-                                  <div className="space-y-1">
-                                    <div className="text-[9px] text-white/70 font-medium">{profile?.company_name || 'Företagsnamn'}</div>
-                                    <div className={`font-bold text-white ${getSmartMobileLayout().titleSize} ${getSmartMobileLayout().titleLines} drop-shadow-lg`}>
-                                      {getDisplayTitle()}
-                                    </div>
-                                    <div className="text-[10px] text-white/90 flex items-center space-x-1">
-                                      <MapPin className="h-2.5 w-2.5" />
-                                      <span>{getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}</span>
-                                    </div>
+                                {/* Innehåll längst ner - EXAKT som bilden */}
+                                <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                                  {/* Company name */}
+                                  <div className="text-lg font-bold text-center mb-2">{profile?.company_name || 'Företagsnamn'}</div>
+                                  
+                                  {/* Job description - centrerad */}
+                                  <div className="text-sm text-center text-white/90 mb-6 px-4 leading-relaxed">
+                                    {formData.title} {formData.workplace_city ? `i ${formData.workplace_city}` : ''} 
+                                    {formData.employment_type && `(${getEmploymentTypeLabel(formData.employment_type)})`}
                                   </div>
                                   
-                                  {/* AI-förbättrade swipe ikoner */}
-                                  <div className="flex justify-center items-center space-x-6 mt-3 pt-2">
-                                    <div className="w-10 h-10 rounded-full bg-red-500/80 backdrop-blur-sm flex items-center justify-center shadow-lg">
-                                      <X className="h-5 w-5 text-white" />
+                                  {/* Action buttons - EXAKT som bilden */}
+                                  <div className="flex justify-center items-center space-x-6 mb-4">
+                                    <div className="w-14 h-14 rounded-full bg-red-500 flex items-center justify-center">
+                                      <X className="h-7 w-7 text-white" />
                                     </div>
-                                    <div className="text-[10px] text-white/80 font-medium bg-black/30 px-2 py-1 rounded-full backdrop-blur-sm">
-                                      Tryck för att ansöka
+                                    <div className="w-14 h-14 rounded-full bg-blue-500 flex items-center justify-center">
+                                      <span className="text-white font-bold text-lg">i</span>
                                     </div>
-                                    <div className="w-10 h-10 rounded-full bg-green-500/80 backdrop-blur-sm flex items-center justify-center shadow-lg">
-                                      <Heart className="h-5 w-5 text-white" />
+                                    <div className="w-14 h-14 rounded-full bg-green-500 flex items-center justify-center">
+                                      <Heart className="h-7 w-7 text-white" />
                                     </div>
                                   </div>
                                 </div>
-
-                                {/* AI-optimeringsindikator */}
-                                {jobImageDisplayUrl && (
-                                  <div className="absolute top-3 right-3 bg-purple-500/80 backdrop-blur-sm rounded-full p-1">
-                                    <Sparkles className="h-3 w-3 text-white" />
-                                  </div>
-                                )}
                               </div>
                             </>
                           )}
