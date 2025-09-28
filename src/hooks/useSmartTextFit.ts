@@ -26,7 +26,7 @@ export default function useSmartTextFit<T extends HTMLElement>(
         const containerStyles = getComputedStyle(container);
         const availableWidth = container.offsetWidth 
           - parseFloat(containerStyles.paddingLeft) 
-          - parseFloat(containerStyles.paddingRight) - 8; // Margin för säkerhet
+          - parseFloat(containerStyles.paddingRight) - 16; // Öka marginal för säkerhet
         
         // Testa om texten bryts genom att sätta nowrap och jämföra
         el.style.whiteSpace = 'nowrap';
