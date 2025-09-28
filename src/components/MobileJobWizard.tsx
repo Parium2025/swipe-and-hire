@@ -1789,9 +1789,14 @@ const MobileJobWizard = ({
                                       <Briefcase className="h-2 w-2 mr-1 text-white" />
                                       Yrke
                                     </h5>
-                                    <div className="text-white">
-                                      <div className="text-xs leading-relaxed break-words">{formData.occupation}</div>
-                                    </div>
+                                     <div className="text-white">
+                                       <div 
+                                         ref={useAutoFitText(formData.occupation, { min: 8, max: 12, step: 0.2 })}
+                                         className="leading-relaxed"
+                                       >
+                                         {formData.occupation}
+                                       </div>
+                                     </div>
                                   </div>
                                 )}
 
