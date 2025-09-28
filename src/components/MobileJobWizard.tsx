@@ -1007,6 +1007,18 @@ const MobileJobWizard = ({
     }
   };
 
+  // Scroll to top när steget ändras
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  }, [currentStep]);
+
   const handleClose = () => {
     if (hasUnsavedChanges) {
       setPendingClose(true);
@@ -1182,7 +1194,7 @@ const MobileJobWizard = ({
           </div>
 
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
             {/* Step 1: Grundinfo */}
             {currentStep === 0 && (
               <div className="space-y-4">
