@@ -161,6 +161,53 @@ const MobileJobWizard = ({
     const c = formatCity(city || '');
     return [emp, c].filter(Boolean).join(' • ');
   };
+
+  // Smart text sizing based on content length and hierarchy
+  const getSmartTextSizes = () => {
+    const companyName = profile?.company_name || 'Företag';
+    const jobTitle = getDisplayTitle();
+    const metaLine = getMetaLine(formData.employment_type, formData.workplace_city || formData.location);
+
+    // Calculate optimal sizes based on content length
+    const companyLength = companyName.length;
+    const titleLength = jobTitle.length;
+    const metaLength = metaLine.length;
+
+    // Base sizes - maintain hierarchy: company < title, meta should be readable
+    let companySizeClass = 'text-sm';
+    let titleSizeClass = 'text-base';
+    let metaSizeClass = 'text-sm';
+
+    // Adjust company name size
+    if (companyLength > 20) companySizeClass = 'text-xs';
+    else if (companyLength < 10) companySizeClass = 'text-base';
+
+    // Adjust title size based on length - this is the main content
+    if (titleLength > 60) titleSizeClass = 'text-sm';
+    else if (titleLength > 40) titleSizeClass = 'text-base';
+    else if (titleLength < 20) titleSizeClass = 'text-lg';
+
+    // Adjust meta size for readability
+    if (metaLength > 25) metaSizeClass = 'text-xs';
+    else if (metaLength < 15) metaSizeClass = 'text-base';
+
+    // Ensure visual balance - if title is very long, reduce other elements
+    if (titleLength > 50) {
+      companySizeClass = 'text-xs';
+      metaSizeClass = 'text-xs';
+    }
+
+    // Ensure hierarchy is maintained (company should never be larger than title)
+    if (companySizeClass === 'text-lg' && titleSizeClass === 'text-sm') {
+      companySizeClass = 'text-base';
+    }
+
+    return {
+      company: companySizeClass,
+      title: titleSizeClass,
+      meta: metaSizeClass
+    };
+  };
   const [citySearchTerm, setCitySearchTerm] = useState('');
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [occupationSearchTerm, setOccupationSearchTerm] = useState('');
@@ -2028,11 +2075,18 @@ const MobileJobWizard = ({
                               className="absolute inset-0 flex flex-col justify-start items-center pt-10 p-3 text-white text-center cursor-pointer"
                               onClick={() => setShowApplicationForm(true)}
                             >
-              <div className="text-sm text-white font-medium mb-1">{profile?.company_name || 'Företag'}</div>
-              <h3 className="text-sm font-bold leading-tight mb-1">{getDisplayTitle()}</h3>
-              <div className="text-sm text-white/90">
-                {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
-              </div>
+              {(() => {
+                const textSizes = getSmartTextSizes();
+                return (
+                  <>
+                    <div className={`${textSizes.company} text-white font-medium mb-1`}>{profile?.company_name || 'Företag'}</div>
+                    <h3 className={`${textSizes.title} font-bold leading-tight mb-1`}>{getDisplayTitle()}</h3>
+                    <div className={`${textSizes.meta} text-white/90`}>
+                      {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
+                    </div>
+                  </>
+                );
+              })()}
                             </div>
                             <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2 pointer-events-none">
                               <button aria-label="Nej tack" className="w-6 h-6 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
