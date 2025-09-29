@@ -502,12 +502,12 @@ const AuthTablet = ({
           <div className="text-center mb-8">
             <div className="mb-2">
               <div className="relative mx-auto w-fit">
-                {/* Transparent glow that blends with background */}
-                <div aria-hidden="true" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] rounded-full blur-[130px] bg-secondary/20 mix-blend-screen"></div>
+                {/* Blue glow matching the corner lights */}
+                <div aria-hidden="true" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-88 h-88 bg-secondary/40 rounded-full blur-[110px]"></div>
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
-                  className="relative h-40 w-auto md:h-44 mix-blend-screen"
+                  className="relative h-40 w-auto md:h-44"
                   width="400"
                   height="160"
                   loading="eager"
