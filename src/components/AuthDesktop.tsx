@@ -502,8 +502,10 @@ const AuthDesktop = ({
           <div className="text-center mb-8">
             <div className="mb-2">
               <div className="relative mx-auto w-fit">
-                {/* Subtle circular glow only behind logo */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 lg:w-48 lg:h-48 blur-[60px] bg-secondary/30 rounded-full"></div>
+                {/* Multi-layer circular glow */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 blur-[120px] bg-secondary/40 rounded-full"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 blur-[80px] bg-secondary/50 rounded-full"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 blur-[50px] bg-secondary/60 rounded-full"></div>
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 

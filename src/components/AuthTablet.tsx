@@ -502,8 +502,10 @@ const AuthTablet = ({
           <div className="text-center mb-8">
             <div className="mb-2">
               <div className="relative mx-auto w-fit">
-                {/* Subtle circular glow only behind logo */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-36 h-36 md:w-44 md:h-44 blur-[55px] bg-secondary/30 rounded-full"></div>
+                {/* Multi-layer circular glow */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 blur-[110px] bg-secondary/40 rounded-full"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 blur-[70px] bg-secondary/50 rounded-full"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 blur-[45px] bg-secondary/60 rounded-full"></div>
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
