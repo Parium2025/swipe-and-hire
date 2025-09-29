@@ -127,73 +127,77 @@ All colors MUST be HSL.
     overflow: visible !important;
   }
 
+  /* Force dark blue background on everything */
+  html {
+    background: hsl(215 100% 8%) !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    min-height: -webkit-fill-available !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow-x: hidden;
+    /* Critical for iOS - extend below home indicator */
+    padding-bottom: 0 !important;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+  }
+
   body {
     @apply bg-background text-foreground;
     padding: 0 !important;
     margin: 0 !important;
     overflow-x: hidden !important;
+    overflow-y: auto;
     max-width: 100vw !important;
     min-height: 100vh !important;
     min-height: 100dvh !important;
     min-height: -webkit-fill-available !important;
     /* Force Parium background color everywhere */
     background: hsl(215 100% 8%) !important;
-    padding-top: env(safe-area-inset-top, 0);
-    padding-bottom: env(safe-area-inset-bottom, 0);
+    /* Critical: Extend under home indicator */
+    padding-bottom: env(safe-area-inset-bottom, 0) !important;
+    position: relative;
+    width: 100%;
+    height: 100%;
   }
 
   /* Mobile fullscreen support */
-  html, body, #root {
+  #root {
     padding: 0 !important;
     margin: 0 !important;
     width: 100% !important;
     overflow-x: hidden !important;
-    overscroll-behavior-x: none;
-    overscroll-behavior-y: none;
+    overscroll-behavior: none;
     touch-action: pan-y;
     position: relative;
-    height: 100% !important;
     min-height: 100vh !important;
     min-height: 100dvh !important;
     min-height: -webkit-fill-available !important;
     /* Force dark blue background */
     background: hsl(215 100% 8%) !important;
-  }
-
-  /* Prevent white space on iOS */
-  html {
-    background: hsl(215 100% 8%) !important;
+    /* Extend under home indicator */
     padding-bottom: env(safe-area-inset-bottom, 0) !important;
   }
 
-  /* Make sure the app extends to the full screen */
-  #root {
-    min-height: 100vh !important;
-    min-height: 100dvh !important;
-    min-height: -webkit-fill-available !important;
-    padding-top: 0 !important;
-    padding-bottom: env(safe-area-inset-bottom, 0) !important;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    position: relative;
-    z-index: 0;
-    background: hsl(215 100% 8%) !important;
-  }
-
-  /* Background covers entire viewport including status bar and home indicator area */
+  /* Background covers entire viewport including all safe areas */
   .bg-parium-gradient, 
   [style*="--gradient-parium"] {
     min-height: 100vh !important;
     min-height: 100dvh !important;
     min-height: -webkit-fill-available !important;
-    /* Cover entire screen including safe areas */
+    /* CRITICAL: Cover entire screen including top notch AND bottom home indicator */
     min-height: calc(100vh + env(safe-area-inset-top, 0) + env(safe-area-inset-bottom, 0)) !important;
+    min-height: calc(100dvh + env(safe-area-inset-top, 0) + env(safe-area-inset-bottom, 0)) !important;
     padding-top: env(safe-area-inset-top, 0) !important;
     padding-bottom: env(safe-area-inset-bottom, 0) !important;
     margin-top: calc(-1 * env(safe-area-inset-top, 0)) !important;
     margin-bottom: calc(-1 * env(safe-area-inset-bottom, 0)) !important;
     position: relative;
-    z-index: -1;
+    z-index: 0;
+    /* Ensure no white gaps */
+    width: 100%;
+    overflow-x: hidden;
   }
 
   /* Content respects safe areas */
