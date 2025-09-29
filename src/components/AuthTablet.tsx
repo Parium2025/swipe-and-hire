@@ -505,18 +505,17 @@ const AuthTablet = ({
                 <div
                   className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
                   style={{
-                    width: 'clamp(17rem, 50vw, 34rem)',
-                    height: 'clamp(17rem, 50vw, 34rem)',
+                    width: 'clamp(18rem, 50vw, 34rem)',
+                    height: 'clamp(18rem, 50vw, 34rem)',
                     backgroundImage:
-                      'radial-gradient(circle at center, hsl(var(--secondary) / 0.28) 0%, hsl(var(--secondary) / 0.16) 25%, transparent 70%)',
-                    filter: 'blur(27px)',
+                      'radial-gradient(circle at center, hsl(var(--secondary) / 0.35) 0%, hsl(var(--secondary) / 0.22) 18%, hsl(var(--secondary) / 0.10) 38%, hsl(var(--secondary) / 0.04) 58%, transparent 80%)',
+                    mixBlendMode: 'screen',
+                    opacity: 0.9,
                     borderRadius: '50%',
-                    maskImage: 'radial-gradient(circle at center, black 60%, transparent 85%)',
-                    WebkitMaskImage: 'radial-gradient(circle at center, black 60%, transparent 85%)',
                   }}
                 />
                 <img 
-                  src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
+                  src="/lovable-uploads/parium-logo-transparent.png" 
                   alt="Parium" 
                   className="relative h-40 w-auto md:h-44"
                   width="400"
