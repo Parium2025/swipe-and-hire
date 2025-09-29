@@ -502,7 +502,13 @@ const AuthDesktop = ({
           <div className="text-center mb-8">
             <div className="mb-2">
               <div className="relative mx-auto w-fit">
-                <div className="absolute inset-0 blur-2xl bg-white/10 scale-110"></div>
+                <div
+                  className="absolute inset-0 rounded-full pointer-events-none blur-lg scale-110"
+                  style={{
+                    background:
+                      'radial-gradient(closest-side, hsla(0 0% 100% / 0.18), hsla(0 0% 100% / 0.08) 60%, hsla(0 0% 100% / 0) 100%)',
+                  }}
+                />
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
