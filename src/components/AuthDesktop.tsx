@@ -16,6 +16,7 @@ import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
 import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { searchAddresses } from '@/lib/addressSearch';
+import LogoWithGlow from '@/components/LogoWithGlow';
 
 interface AuthDesktopProps {
   isPasswordReset: boolean;
@@ -502,17 +503,7 @@ const AuthDesktop = ({
           <div className="text-center mb-8">
             <div className="mb-2">
               <div className="relative mx-auto w-fit">
-                <img 
-                  src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
-                  alt="Parium" 
-                  className="relative h-40 w-auto lg:h-48"
-                  style={{ filter: 'drop-shadow(0 0 24px hsl(var(--secondary) / 0.55)) drop-shadow(0 0 56px hsl(var(--secondary) / 0.25))' }}
-                  width="400"
-                  height="160"
-                  loading="eager"
-                  decoding="sync"
-                  fetchPriority="high"
-                />
+                <LogoWithGlow className="h-40 w-auto lg:h-48" />
               </div>
             </div>
             
