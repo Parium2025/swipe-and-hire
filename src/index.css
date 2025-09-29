@@ -50,14 +50,8 @@ All colors MUST be HSL.
 
     /* Parium Brand Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(215 100% 12%), hsl(200 100% 60%));
-    /* Gradient that starts with exact theme-color to blend seamlessly with status bar */
-    --gradient-parium: linear-gradient(135deg,
-      #233853 0%,                /* exact match with theme-color */
-      #233853 8%,                /* hold flat color longer */
-      hsl(215 90% 15%) 25%,
-      hsl(200 70% 25%) 75%,
-      hsl(200 100% 60%) 100%
-    );
+    /* Original Parium gradient - let it extend naturally under status bar */
+    --gradient-parium: linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%);
     --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(200 100% 98%));
     --gradient-glass: linear-gradient(135deg, hsla(0 0% 100% / 0.1), hsla(0 0% 100% / 0.05));
 
@@ -139,10 +133,11 @@ All colors MUST be HSL.
     margin: 0 !important;
     overflow-x: hidden !important;
     max-width: 100vw !important;
-    /* Force full height and remove any browser UI spacing */
     min-height: 100vh !important;
     min-height: 100dvh !important;
     min-height: -webkit-fill-available !important;
+    /* Extend body under status bar */
+    padding-top: env(safe-area-inset-top, 0);
   }
 
   /* Mobile fullscreen support - extend under status bar */
@@ -154,30 +149,30 @@ All colors MUST be HSL.
     overflow-x: hidden !important;
     overscroll-behavior-x: none;
     touch-action: pan-y;
-    /* Force content to extend behind status bar */
     position: relative;
   }
 
   /* Make sure the app extends to the full screen including safe areas */
   #root {
     min-height: 100vh !important;
-    min-height: 100dvh !important; /* Dynamic viewport height */
-    min-height: -webkit-fill-available !important; /* iOS Safari support */
-    /* Extend content under status bar */
+    min-height: 100dvh !important;
+    min-height: -webkit-fill-available !important;
+    /* Critical: extend content under the notch/status bar */
     padding-top: 0 !important;
+    margin-top: 0 !important;
   }
 
   /* Background should cover the entire screen including safe areas */
   .bg-parium-gradient, 
   [style*="--gradient-parium"] {
-    /* Extend background under status bar */
+    /* Make background start from absolute top including status bar area */
     min-height: calc(100vh + env(safe-area-inset-top, 0)) !important;
+    min-height: calc(100dvh + env(safe-area-inset-top, 0)) !important;
     padding-top: env(safe-area-inset-top, 0) !important;
     margin-top: calc(-1 * env(safe-area-inset-top, 0)) !important;
-    /* For browsers that don't support env() */
-    min-height: 100vh !important;
-    min-height: 100dvh !important;
     position: relative;
+    /* Force background to paint behind status bar */
+    background-attachment: fixed;
   }
 
   /* Ensure content respects safe areas while background extends fully */
