@@ -509,7 +509,8 @@ const AuthTablet = ({
                       width: '20rem',
                       height: '20rem',
                       background: 'radial-gradient(closest-side, hsl(var(--secondary) / 0.26) 0%, hsl(var(--secondary) / 0.14) 45%, hsl(var(--secondary) / 0) 75%)',
-                      filter: 'blur(17px)'
+                      filter: 'blur(17px)',
+                      transform: 'rotate(90deg)'
                     }}
                   />
                 </div>

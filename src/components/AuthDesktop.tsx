@@ -509,7 +509,8 @@ const AuthDesktop = ({
                       width: '22rem',
                       height: '22rem',
                       background: 'radial-gradient(closest-side, hsl(var(--secondary) / 0.26) 0%, hsl(var(--secondary) / 0.14) 45%, hsl(var(--secondary) / 0) 75%)',
-                      filter: 'blur(18px)'
+                      filter: 'blur(18px)',
+                      transform: 'rotate(90deg)'
                     }}
                   />
                 </div>

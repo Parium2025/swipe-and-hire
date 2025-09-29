@@ -509,7 +509,8 @@ const AuthMobile = ({
                       width: '18rem',
                       height: '18rem',
                       background: 'radial-gradient(closest-side, hsl(var(--secondary) / 0.26) 0%, hsl(var(--secondary) / 0.14) 45%, hsl(var(--secondary) / 0) 75%)',
-                      filter: 'blur(16px)'
+                      filter: 'blur(16px)',
+                      transform: 'rotate(90deg)'
                     }}
                   />
                 </div>
