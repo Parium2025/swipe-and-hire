@@ -502,12 +502,12 @@ const AuthDesktop = ({
           <div className="text-center mb-8">
             <div className="mb-2">
               <div className="relative mx-auto w-fit">
-                {/* Radial gradient glow (round, no rectangular edges) */}
-                <div aria-hidden="true" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 lg:w-80 lg:h-80 rounded-full bg-[radial-gradient(circle_at_center,hsl(var(--secondary)/0.5)_0%,hsl(var(--secondary)/0.2)_40%,transparent_70%)]"></div>
+                {/* Transparent glow that blends with background */}
+                <div aria-hidden="true" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[140px] bg-secondary/20 mix-blend-screen"></div>
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
-                  className="relative h-40 w-auto lg:h-48"
+                  className="relative h-40 w-auto lg:h-48 mix-blend-screen"
                   width="400"
                   height="160"
                   loading="eager"
