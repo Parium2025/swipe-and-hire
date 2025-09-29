@@ -474,58 +474,18 @@ const AuthMobile = ({
         {/* Soft fade at bottom to prevent hard edges */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary-dark via-primary-dark/80 to-transparent"></div>
         
-        {/* Enhanced animated floating elements with glowing effects */}
-        <div className="absolute top-0 left-10 w-6 h-6 rounded-full animate-bounce" 
-             style={{ 
-               background: 'radial-gradient(circle, rgba(0, 150, 255, 0.6) 0%, rgba(0, 150, 255, 0.2) 70%, transparent 100%)',
-               boxShadow: '0 0 20px rgba(0, 150, 255, 0.5)',
-               animationDuration: '2s' 
-             }}></div>
-        <div className="absolute top-10 left-16 w-3 h-3 rounded-full animate-bounce" 
-             style={{ 
-               background: 'radial-gradient(circle, rgba(0, 200, 255, 0.7) 0%, rgba(0, 200, 255, 0.3) 70%, transparent 100%)',
-               boxShadow: '0 0 15px rgba(0, 200, 255, 0.4)',
-               animationDuration: '2.5s' 
-             }}></div>
-        <div className="absolute top-5 left-20 w-4 h-4 rounded-full animate-bounce" 
-             style={{ 
-               background: 'radial-gradient(circle, rgba(0, 180, 255, 0.5) 0%, rgba(0, 180, 255, 0.2) 70%, transparent 100%)',
-               boxShadow: '0 0 18px rgba(0, 180, 255, 0.3)',
-               animationDuration: '3s' 
-             }}></div>
+        {/* Animated floating elements - now stable */}
+        <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce" style={{ animationDuration: '2s' }}></div>
+        <div className="absolute top-32 left-16 w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDuration: '2.5s' }}></div>
+        <div className="absolute top-24 left-20 w-3 h-3 bg-secondary/20 rounded-full animate-bounce" style={{ animationDuration: '3s' }}></div>
         
-        <div className="absolute top-0 right-20 w-7 h-7 rounded-full animate-bounce" 
-             style={{ 
-               background: 'radial-gradient(circle, rgba(0, 150, 255, 0.6) 0%, rgba(0, 150, 255, 0.2) 70%, transparent 100%)',
-               boxShadow: '0 0 25px rgba(0, 150, 255, 0.5)',
-               animationDuration: '2.2s' 
-             }}></div>
-        <div className="absolute top-8 right-16 w-4 h-4 rounded-full animate-bounce" 
-             style={{ 
-               background: 'radial-gradient(circle, rgba(0, 200, 255, 0.5) 0%, rgba(0, 200, 255, 0.2) 70%, transparent 100%)',
-               boxShadow: '0 0 16px rgba(0, 200, 255, 0.4)',
-               animationDuration: '2.8s' 
-             }}></div>
-        <div className="absolute top-3 right-24 w-3 h-3 rounded-full animate-bounce" 
-             style={{ 
-               background: 'radial-gradient(circle, rgba(0, 180, 255, 0.7) 0%, rgba(0, 180, 255, 0.3) 70%, transparent 100%)',
-               boxShadow: '0 0 12px rgba(0, 180, 255, 0.4)',
-               animationDuration: '2.3s' 
-             }}></div>
+        <div className="absolute bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full animate-bounce" style={{ animationDuration: '2.2s' }}></div>
+        <div className="absolute bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full animate-bounce" style={{ animationDuration: '2.8s' }}></div>
+        <div className="absolute bottom-36 right-24 w-2 h-2 bg-accent/35 rounded-full animate-bounce" style={{ animationDuration: '2.3s' }}></div>
         
-        {/* Additional glowing elements for more depth */}
-        <div className="absolute top-0 right-10 w-4 h-4 rounded-full animate-pulse" 
-             style={{ 
-               background: 'radial-gradient(circle, rgba(0, 150, 255, 0.8) 0%, rgba(0, 150, 255, 0.3) 70%, transparent 100%)',
-               boxShadow: '0 0 20px rgba(0, 150, 255, 0.6)',
-               animationDuration: '1.5s' 
-             }}></div>
-        <div className="absolute top-6 right-30 w-2 h-2 rounded-full animate-pulse" 
-             style={{ 
-               background: 'radial-gradient(circle, rgba(0, 200, 255, 0.9) 0%, rgba(0, 200, 255, 0.4) 70%, transparent 100%)',
-               boxShadow: '0 0 10px rgba(0, 200, 255, 0.5)',
-               animationDuration: '2s' 
-             }}></div>
+        {/* Pulsing lights */}
+        <div className="absolute top-10 right-10 w-3 h-3 bg-secondary/40 rounded-full animate-pulse" style={{ animationDuration: '1.5s' }}></div>
+        <div className="absolute top-16 right-20 w-2 h-2 bg-accent/30 rounded-full animate-pulse" style={{ animationDuration: '2s' }}></div>
         <div className="absolute top-12 left-8 w-3 h-3 bg-accent/40 rounded-full animate-pulse" style={{ animationDuration: '1.8s' }}></div>
         
         {/* Small stars */}
