@@ -417,7 +417,7 @@ const AuthMobile = ({
 
   if (isPasswordReset) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-4 auth-dark">
+      <div className="min-h-screen bg-gradient-parium flex items-center justify-center p-4 auth-dark safe-area-content">
         <Card className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="text-center">
             <CardTitle className="text-white">Nytt lösenord</CardTitle>
@@ -466,7 +466,7 @@ const AuthMobile = ({
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex flex-col relative auth-dark">
+    <div className="min-h-screen bg-gradient-parium flex flex-col relative auth-dark safe-area-content">
       {/* Static animated background - won't re-render */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>

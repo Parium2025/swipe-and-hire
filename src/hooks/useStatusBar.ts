@@ -7,8 +7,8 @@ export const useStatusBar = () => {
         const { StatusBar } = await import('@capacitor/status-bar');
         const { Capacitor } = await import('@capacitor/core');
         if (Capacitor.isNativePlatform()) {
-          // Set status bar to be transparent so the Parium gradient shows through
-          await StatusBar.setBackgroundColor({ color: '#0c1e2e' }); // Dark blue matching gradient start
+          // Set status bar to be completely transparent so Parium gradient extends to top
+          await StatusBar.setBackgroundColor({ color: 'transparent' });
           await StatusBar.setStyle({ style: 'LIGHT' as any });
           await StatusBar.show();
         }

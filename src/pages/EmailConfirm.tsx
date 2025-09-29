@@ -59,7 +59,7 @@ const EmailConfirm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-parium flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-parium flex items-center justify-center p-4 safe-area-content">
       <Card className="w-full max-w-md bg-background/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-3xl">
         <CardContent className="p-8 text-center">
           {status === 'loading' && (

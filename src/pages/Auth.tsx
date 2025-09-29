@@ -866,7 +866,7 @@ const Auth = () => {
     }
     
     return (
-      <div className="min-h-screen bg-gradient-parium flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-parium flex items-center justify-center p-4 safe-area-content">
         <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
           <CardContent className="p-8 text-center space-y-4">
             <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
@@ -910,7 +910,7 @@ const Auth = () => {
   // Visa bekräftelsestatus om det finns en
   if (confirmationStatus !== 'none') {
     return (
-      <div className="min-h-screen bg-gradient-parium flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-parium flex items-center justify-center p-4 safe-area-content">
         <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
           <CardContent className="p-8 text-center">
             {confirmationStatus === 'success' && (
@@ -1018,7 +1018,7 @@ const Auth = () => {
             sessionStorage.removeItem('parium-pending-recovery');
             // Använd ett annat approach - sätt bara expired status direkt
             return (
-              <div className="min-h-screen bg-gradient-parium flex items-center justify-center p-4">
+              <div className="min-h-screen bg-gradient-parium flex items-center justify-center p-4 safe-area-content">
                 <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
                   <CardContent className="p-8 text-center space-y-4">
                     <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
