@@ -502,26 +502,16 @@ const AuthMobile = ({
           <div className="text-center mb-8">
             <div className="mb-2">
               <div className="relative mx-auto w-fit">
-                <div
-                  className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-                  style={{
-                    width: 'clamp(16rem, 60vw, 30rem)',
-                    height: 'clamp(16rem, 60vw, 30rem)',
-                    backgroundImage:
-                      'radial-gradient(circle at center, hsl(var(--secondary) / 0.35) 0%, hsl(var(--secondary) / 0.22) 18%, hsl(var(--secondary) / 0.10) 38%, hsl(var(--secondary) / 0.04) 58%, transparent 80%)',
-                    mixBlendMode: 'screen',
-                    opacity: 0.9,
-                    borderRadius: '50%',
-                  }}
-                />
                 <img 
                   src="/lovable-uploads/parium-logo-transparent.png" 
                   alt="Parium" 
                   className="relative h-40 w-auto"
+                  style={{ filter: 'drop-shadow(0 0 20px hsl(var(--secondary) / 0.55)) drop-shadow(0 0 48px hsl(var(--secondary) / 0.25))' }}
                   width="400"
                   height="160"
                   loading="eager"
                   decoding="sync"
+                
                   fetchPriority="high"
                 />
               </div>
