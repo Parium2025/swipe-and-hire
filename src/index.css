@@ -186,16 +186,8 @@ All colors MUST be HSL.
     min-height: 100vh !important;
     min-height: 100dvh !important;
     min-height: -webkit-fill-available !important;
-    /* CRITICAL: Cover entire screen including top notch AND bottom home indicator */
-    min-height: calc(100vh + env(safe-area-inset-top, 0) + env(safe-area-inset-bottom, 0)) !important;
-    min-height: calc(100dvh + env(safe-area-inset-top, 0) + env(safe-area-inset-bottom, 0)) !important;
-    padding-top: env(safe-area-inset-top, 0) !important;
-    padding-bottom: env(safe-area-inset-bottom, 0) !important;
-    margin-top: calc(-1 * env(safe-area-inset-top, 0)) !important;
-    margin-bottom: calc(-1 * env(safe-area-inset-bottom, 0)) !important;
     position: relative;
     z-index: 0;
-    /* Ensure no white gaps */
     width: 100%;
     overflow-x: hidden;
   }
