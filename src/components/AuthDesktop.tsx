@@ -502,17 +502,7 @@ const AuthDesktop = ({
           <div className="text-center mb-8">
             <div className="mb-2">
               <div className="relative mx-auto w-fit">
-                <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -z-10">
-                  <div
-                    style={{
-                      width: '30rem',
-                      height: '30rem',
-                      background: 'radial-gradient(circle at center, hsl(var(--secondary) / 0.18) 0%, hsl(var(--secondary) / 0.1) 25%, hsl(var(--secondary) / 0.04) 45%, hsl(var(--secondary) / 0.02) 65%, hsl(var(--secondary) / 0.01) 80%, transparent 100%)',
-                      filter: 'blur(32px)',
-                      borderRadius: '50%'
-                    }}
-                  />
-                </div>
+                <div className="absolute inset-0 blur-xl bg-secondary/30 rounded-full"></div>
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
@@ -521,9 +511,11 @@ const AuthDesktop = ({
                   height="160"
                   loading="eager"
                   decoding="sync"
+                  fetchPriority="high"
                 />
               </div>
             </div>
+            
             <h1 className="text-2xl lg:text-3xl font-semibold text-white mb-2">
               Välkommen till Parium
             </h1>
