@@ -1196,7 +1196,7 @@ const MobileJobWizard = ({
             />
           </div>
 
-          {/* Scrollable Content */}
+
           {/* Scrollable Content */}
           <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
             {/* Step 1: Grundinfo */}
