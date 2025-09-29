@@ -8,14 +8,19 @@ interface LogoWithGlowProps {
 export const LogoWithGlow: React.FC<LogoWithGlowProps> = ({ className = "h-40 w-auto" }) => {
   return (
     <div className="relative mx-auto w-fit">
-      {/* Very subtle blue glow - barely visible, matching original */}
+      {/* Circular blue glow behind the logo - perfectly round */}
       <div
         aria-hidden
         className="pointer-events-none absolute -z-10 rounded-full"
         style={{
-          inset: `-40px`,
-          background: "radial-gradient(circle at 50% 50%, hsl(var(--secondary) / 0.08) 0%, hsl(var(--secondary) / 0.04) 40%, transparent 60%)",
-          filter: "blur(20px)",
+          width: 'clamp(180px, 24vw, 320px)',
+          height: 'clamp(180px, 24vw, 320px)',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          background:
+            'radial-gradient(circle at 50% 50%, hsl(var(--secondary) / 0.34) 0%, hsl(var(--secondary) / 0.18) 32%, hsl(var(--secondary) / 0.08) 55%, transparent 72%)',
+          filter: 'blur(26px)',
         }}
       />
       
