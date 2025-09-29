@@ -133,12 +133,13 @@ All colors MUST be HSL.
     margin: 0 !important;
     overflow-x: hidden !important;
     max-width: 100vw !important;
-    /* Use dynamic viewport height for mobile */
     min-height: 100vh !important;
     min-height: 100dvh !important;
     min-height: -webkit-fill-available !important;
-    /* Extend under status bar on mobile */
+    /* Force Parium background color everywhere */
+    background: hsl(215 100% 8%) !important;
     padding-top: env(safe-area-inset-top, 0);
+    padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
   /* Mobile fullscreen support */
@@ -148,13 +149,21 @@ All colors MUST be HSL.
     width: 100% !important;
     overflow-x: hidden !important;
     overscroll-behavior-x: none;
+    overscroll-behavior-y: none;
     touch-action: pan-y;
     position: relative;
-    /* Force full height including status bar area */
     height: 100% !important;
     min-height: 100vh !important;
     min-height: 100dvh !important;
     min-height: -webkit-fill-available !important;
+    /* Force dark blue background */
+    background: hsl(215 100% 8%) !important;
+  }
+
+  /* Prevent white space on iOS */
+  html {
+    background: hsl(215 100% 8%) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0) !important;
   }
 
   /* Make sure the app extends to the full screen */
@@ -163,25 +172,27 @@ All colors MUST be HSL.
     min-height: 100dvh !important;
     min-height: -webkit-fill-available !important;
     padding-top: 0 !important;
+    padding-bottom: env(safe-area-inset-bottom, 0) !important;
     margin-top: 0 !important;
-    /* Ensure app starts from absolute top */
+    margin-bottom: 0 !important;
     position: relative;
     z-index: 0;
+    background: hsl(215 100% 8%) !important;
   }
 
-  /* Background covers entire viewport including status bar area */
+  /* Background covers entire viewport including status bar and home indicator area */
   .bg-parium-gradient, 
   [style*="--gradient-parium"] {
-    /* Extend to cover status bar area */
     min-height: 100vh !important;
     min-height: 100dvh !important;
     min-height: -webkit-fill-available !important;
-    /* Use env() values for devices with notches/status bars */
-    min-height: calc(100vh + env(safe-area-inset-top, 0)) !important;
+    /* Cover entire screen including safe areas */
+    min-height: calc(100vh + env(safe-area-inset-top, 0) + env(safe-area-inset-bottom, 0)) !important;
     padding-top: env(safe-area-inset-top, 0) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0) !important;
     margin-top: calc(-1 * env(safe-area-inset-top, 0)) !important;
+    margin-bottom: calc(-1 * env(safe-area-inset-bottom, 0)) !important;
     position: relative;
-    /* Ensure background paints behind everything */
     z-index: -1;
   }
 
@@ -193,6 +204,8 @@ All colors MUST be HSL.
     padding-bottom: env(safe-area-inset-bottom, 0);
     position: relative;
     z-index: 1;
+    min-height: 100vh;
+    min-height: 100dvh;
   }
 
   /* iOS Safari: force full-bleed gradient on html/body so status area isn't white */
