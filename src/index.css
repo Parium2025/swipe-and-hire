@@ -110,6 +110,72 @@ All colors MUST be HSL.
     --sidebar-ring: 200 100% 60%;
 }
 
+/* Automatic responsive optimization - känner av enhet automatiskt */
+:root {
+  /* Default values */
+  --input-height: 2.75rem;
+  --button-height: 2.75rem;
+  --spacing: 1.5rem;
+  --text-size: 0.875rem;
+  --border-radius: 0.5rem;
+}
+
+/* Auto-responsive input styling - appliceras automatiskt */
+@layer components {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="password"],
+  textarea,
+  select {
+    height: var(--input-height) !important;
+    font-size: var(--text-size) !important;
+    border-radius: var(--border-radius) !important;
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+  
+  button:not([class*="icon"]) {
+    min-height: var(--button-height) !important;
+    font-size: var(--text-size) !important;
+    border-radius: var(--border-radius) !important;
+  }
+}
+
+/* Device-specific optimizations - aktiveras automatiskt */
+.is-mobile {
+  /* Mobile gets larger touch targets */
+  input, button, select, textarea {
+    transition: all 0.2s ease;
+  }
+  
+  /* Larger spacing on mobile */
+  .space-y-2 > * + * {
+    margin-top: 0.75rem !important;
+  }
+  
+  .space-y-4 > * + * {
+    margin-top: 1.5rem !important;
+  }
+}
+
+.is-tablet {
+  /* Tablet optimization */
+  .max-w-md {
+    max-width: 36rem !important;
+  }
+}
+
+.is-desktop {
+  /* Desktop stays compact */
+}
+
+/* Notch/Dynamic Island support - automatiskt */
+.has-notch {
+  padding-top: env(safe-area-inset-top) !important;
+}
+
 /* Lovable-inspired mobile optimization classes */
 @layer utilities {
   /* Perfect centering like Lovable */
