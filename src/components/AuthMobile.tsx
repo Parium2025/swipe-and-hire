@@ -503,7 +503,7 @@ const AuthMobile = ({
             <div className="mb-2">
               <div className="relative mx-auto w-fit">
                 <img 
-                  src="/lovable-uploads/parium-logo-transparent.png" 
+                  src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
                   className="relative h-40 w-auto"
                   style={{ filter: 'drop-shadow(0 0 20px hsl(var(--secondary) / 0.55)) drop-shadow(0 0 48px hsl(var(--secondary) / 0.25))' }}
@@ -511,7 +511,7 @@ const AuthMobile = ({
                   height="160"
                   loading="eager"
                   decoding="sync"
-                
+                 
                   fetchPriority="high"
                 />
               </div>
