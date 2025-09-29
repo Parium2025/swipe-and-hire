@@ -1214,8 +1214,9 @@ const MobileJobWizard = ({
                     onChange={(e) => handleInputChange('title', e.target.value)}
                     placeholder="t.ex. Lagerarbetare"
                     maxLength={100}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                    className="lovable-input"
                   />
+                </div>
                 </div>
 
                  <div className="space-y-2">

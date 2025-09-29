@@ -108,7 +108,58 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 215 50% 15%;
     --sidebar-ring: 200 100% 60%;
+}
+
+/* Lovable-inspired mobile optimization classes */
+@layer utilities {
+  /* Perfect centering like Lovable */
+  .lovable-center {
+    @apply min-h-screen flex flex-col justify-center items-center px-4 py-8;
   }
+  
+  /* Content areas with optimal spacing */
+  .lovable-content {
+    @apply w-full max-w-sm mx-auto space-y-8 text-center;
+  }
+  
+  /* Beautiful headers */
+  .lovable-header {
+    @apply text-3xl font-bold text-white mb-4;
+  }
+  
+  .lovable-subtitle {
+    @apply text-lg text-white/70 leading-relaxed;
+  }
+  
+  /* Touch-optimized inputs */
+  .lovable-input {
+    @apply w-full h-14 px-6 text-lg rounded-2xl border-2 border-white/20 bg-white/10 text-white placeholder:text-white/60 focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all duration-300;
+  }
+  
+  /* Perfect buttons */
+  .lovable-button {
+    @apply w-full h-14 text-lg font-semibold rounded-2xl bg-primary hover:bg-primary/90 text-white shadow-xl active:scale-98 transition-all duration-200;
+  }
+  
+  .lovable-button-secondary {
+    @apply w-full h-14 text-lg font-medium rounded-2xl border-2 border-white/20 text-white hover:bg-white/10 transition-all duration-200;
+  }
+  
+  /* Glass cards */
+  .lovable-card {
+    @apply w-full p-8 rounded-3xl bg-white/10 backdrop-blur-lg border border-white/20 shadow-2xl;
+  }
+  
+  /* Responsive spacing */
+  .lovable-spacing {
+    @apply space-y-8 md:space-y-12 lg:space-y-16;
+  }
+  
+  /* Navigation optimization */
+  .lovable-nav {
+    @apply w-full flex items-center justify-between p-6 border-t border-white/20 bg-black/20 backdrop-blur-sm;
+  }
+}
 }
 
 @layer base {
