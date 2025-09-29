@@ -156,40 +156,38 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
             Skapa ny annons
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-md bg-parium-gradient [&>button]:hidden">
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 relative">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-white flex-1 text-center">
-                  Skapa jobb
-                </CardTitle>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleClose}
-                  className="absolute right-2 top-2 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-              <CardDescription className="text-white text-center">
+        <DialogContent className="max-w-md bg-parium-gradient [&>button]:hidden sm:max-w-md w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto flex items-center justify-center p-0 sm:p-6">
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 relative w-full m-4 sm:m-0">
+            <CardHeader className="relative pb-3 pt-4 px-4 sm:pt-6 sm:px-6">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleClose}
+                className="absolute right-2 top-2 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10 z-10"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+              <CardTitle className="text-white text-center text-xl sm:text-2xl pr-8">
+                Skapa jobb
+              </CardTitle>
+              <CardDescription className="text-white/90 text-center text-sm sm:text-base mt-2">
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4 sm:space-y-6 px-4 pb-4 sm:px-6 sm:pb-6">
               <div className="space-y-2">
-                <Label htmlFor="job-title" className="text-white">Titel</Label>
+                <Label htmlFor="job-title" className="text-white text-sm sm:text-base">Titel</Label>
                 <Input
                   id="job-title"
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-11 sm:h-12 text-base"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="job-template" className="text-white">Jobbmall</Label>
+                <Label htmlFor="job-template" className="text-white text-sm sm:text-base">Jobbmall</Label>
                 {loadingTemplates ? (
                   <div className="flex items-center gap-2 text-sm text-white/70 py-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -200,7 +198,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
+                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left h-11 sm:h-12 text-base"
                       >
                         <span className="truncate text-left flex-1 px-1">
                           {selectedTemplate?.name || 'Ingen mall är vald'}
@@ -282,7 +280,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
               </div>
 
               {templates.length > 0 && (
-                <div className="text-center">
+                <div className="text-center pt-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -290,18 +288,18 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       setOpen(false);
                       // TODO: Open template management
                     }}
-                    className="bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:text-white text-xs"
+                    className="bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:text-white text-xs h-9"
                   >
                     Lägg till en ny mall
                   </Button>
                 </div>
               )}
 
-              <div className="flex gap-2 pt-4">
+              <div className="flex gap-2 pt-4 sm:pt-6">
                 <Button 
                   onClick={handleCreateJob}
                   disabled={loading || !jobTitle.trim()}
-                  className="flex-1"
+                  className="flex-1 h-11 sm:h-12 text-base"
                 >
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Skapa jobb
@@ -309,7 +307,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 <Button 
                   variant="outline" 
                   onClick={handleClose}
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20 h-11 sm:h-12 text-base"
                 >
                   Avbryt
                 </Button>
