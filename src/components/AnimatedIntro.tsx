@@ -40,7 +40,19 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
         }`}>
           <div className="relative">
             {/* Glow effect behind logo */}
-            <div className="absolute inset-0 blur-xl bg-secondary/40 rounded-full animate-pulse"></div>
+            <div
+              className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse"
+              style={{
+                width: '22rem',
+                height: '22rem',
+                backgroundImage:
+                  'radial-gradient(circle at center, hsl(var(--secondary) / 0.28) 0%, hsl(var(--secondary) / 0.18) 22%, transparent 70%)',
+                filter: 'blur(28px)',
+                borderRadius: '50%',
+                maskImage: 'radial-gradient(circle at center, black 65%, transparent 85%)',
+                WebkitMaskImage: 'radial-gradient(circle at center, black 65%, transparent 85%)',
+              }}
+            />
             
             {/* Logo image */}
             <img 
