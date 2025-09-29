@@ -501,11 +501,12 @@ const AuthDesktop = ({
         <div className="flex-1 flex flex-col justify-center items-center px-6 pt-12 pb-6">
           <div className="text-center mb-8">
             <div className="mb-2">
-              <div className="mx-auto w-fit">
+              <div className="relative mx-auto w-fit">
+                <div className="absolute inset-0 blur-2xl bg-white/10 scale-110"></div>
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
-                  className="h-40 w-auto lg:h-48"
+                  className="relative h-40 w-auto lg:h-48"
                   width="400"
                   height="160"
                   loading="eager"
