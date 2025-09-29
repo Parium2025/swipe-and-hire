@@ -502,7 +502,19 @@ const AuthTablet = ({
           <div className="text-center mb-8">
             <div className="mb-2">
               <div className="relative mx-auto w-fit">
-                <div className="absolute inset-0 blur-xl bg-secondary/30 rounded-full"></div>
+                <div
+                  className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                  style={{
+                    width: 'clamp(17rem, 50vw, 34rem)',
+                    height: 'clamp(17rem, 50vw, 34rem)',
+                    backgroundImage:
+                      'radial-gradient(circle at center, hsl(var(--secondary) / 0.28) 0%, hsl(var(--secondary) / 0.16) 25%, transparent 70%)',
+                    filter: 'blur(27px)',
+                    borderRadius: '50%',
+                    maskImage: 'radial-gradient(circle at center, black 60%, transparent 85%)',
+                    WebkitMaskImage: 'radial-gradient(circle at center, black 60%, transparent 85%)',
+                  }}
+                />
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 

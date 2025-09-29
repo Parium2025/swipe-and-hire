@@ -28,7 +28,7 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
   return (
     <div className="fixed inset-0 z-50 bg-primary flex items-center justify-center overflow-hidden">
       {/* Background gradient effect */}
-      <div className="absolute inset-0 bg-gradient-radial from-primary-glow/20 via-primary to-primary animate-pulse"></div>
+      <div className="absolute inset-0 bg-gradient-radial from-primary-glow/20 via-primary/95 to-primary"></div>
       
       {/* Main logo container */}
       <div className="relative z-10 flex flex-col items-center">
@@ -92,7 +92,7 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
         }`}>
           <div className="w-3 h-3 bg-secondary rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
           <div className="w-3 h-3 bg-secondary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-          <div className="w-3 h-3 bg-secondary rounded-full" style={{ animationDelay: '0.4s' }}></div>
+          <div className="w-3 h-3 bg-secondary rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
         </div>
       </div>
       
