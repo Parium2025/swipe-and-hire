@@ -1,0 +1,27 @@
+{
+  "name": "Parium",
+  "short_name": "Parium",
+  "description": "Din karriärresa börjar här",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0c1e2e",
+  "theme_color": "#0c1e2e",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png", 
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "sv-SE"
+}
