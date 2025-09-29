@@ -103,7 +103,7 @@ const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, cur
     }, 500);
   };
 
-  if (user?.email !== 'fredrikandits@hotmail.com' && user?.email !== 'pariumab2025@hotmail.com') {
+  if (user?.email !== 'fredrikandits@hotmail.com' && user?.email !== 'pariumab2025@hotmail.com' && user?.email !== 'fredrik.andits@icloud.com') {
     return null;
   }
 
