@@ -502,7 +502,9 @@ const AuthTablet = ({
           <div className="text-center mb-8">
             <div className="mb-2">
               <div className="relative mx-auto w-fit">
-                <div className="absolute inset-0 blur-xl bg-secondary/30 rounded-full"></div>
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none -z-10">
+                  <div className="w-[18rem] h-[18rem] rounded-full bg-secondary/30 blur-2xl"></div>
+                </div>
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
