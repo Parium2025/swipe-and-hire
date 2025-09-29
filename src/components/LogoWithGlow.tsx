@@ -11,17 +11,17 @@ interface LogoWithGlowProps {
 export const LogoWithGlow: React.FC<LogoWithGlowProps> = ({ className = "h-40 w-auto", glowSize = 120 }) => {
   return (
     <div className="relative mx-auto w-fit">
-      {/* Radial glow behind the logo */}
+      {/* Subtle radial glow behind the logo - matching original design */}
       <div
         aria-hidden
         className="pointer-events-none absolute -z-10 rounded-full"
         style={{
-          // Expand beyond the image bounds to avoid any hard edges
-          inset: `-${glowSize}px`,
+          // Much smaller expansion for subtlety
+          inset: `-60px`,
           background:
-            // Smooth circular falloff using semantic token --secondary
-            "radial-gradient(circle at 50% 50%, hsl(var(--secondary) / 0.55) 0%, hsl(var(--secondary) / 0.35) 28%, hsl(var(--secondary) / 0.18) 48%, hsl(var(--secondary) / 0.08) 62%, transparent 75%)",
-          filter: "blur(14px)",
+            // Very subtle circular falloff - much lower opacity to match original
+            "radial-gradient(circle at 50% 50%, hsl(var(--secondary) / 0.15) 0%, hsl(var(--secondary) / 0.08) 35%, hsl(var(--secondary) / 0.04) 55%, transparent 70%)",
+          filter: "blur(24px)",
         }}
       />
 
