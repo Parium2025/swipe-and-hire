@@ -156,8 +156,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
             Skapa ny annons
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-md bg-parium-gradient [&>button]:hidden sm:max-w-md w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto flex items-center justify-center p-0 sm:p-6">
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 relative w-full m-4 sm:m-0">
+        <DialogContent className="max-w-md bg-parium-gradient [&>button]:hidden w-[calc(100vw-2rem)] sm:max-w-md flex items-center justify-center p-4 sm:p-6">
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 relative w-full">
             <CardHeader className="relative pb-3 pt-4 px-4 sm:pt-6 sm:px-6">
               <Button
                 variant="ghost"
@@ -174,7 +174,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 sm:space-y-6 px-4 pb-4 sm:px-6 sm:pb-6">
+            <CardContent className="space-y-5 px-4 pb-4 sm:px-6 sm:pb-6">
               <div className="space-y-2">
                 <Label htmlFor="job-title" className="text-white text-sm sm:text-base">Titel</Label>
                 <Input
@@ -295,7 +295,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 </div>
               )}
 
-              <div className="flex gap-2 pt-4 sm:pt-6">
+              <div className="flex gap-2 pt-2">
                 <Button 
                   onClick={handleCreateJob}
                   disabled={loading || !jobTitle.trim()}
