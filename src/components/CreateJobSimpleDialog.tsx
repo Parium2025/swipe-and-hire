@@ -158,7 +158,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         </DialogTrigger>
         <DialogContent className="max-w-md bg-parium-gradient [&>button]:hidden w-[calc(100vw-2rem)] sm:max-w-md flex items-center justify-center p-4 sm:p-6">
           <Card className="bg-white/10 backdrop-blur-sm border-white/20 relative w-full">
-            <CardHeader className="relative pb-3 pt-4 px-4 sm:pt-6 sm:px-6">
+            <CardHeader className="relative pb-6 px-6 pt-6">
               <Button
                 variant="ghost"
                 size="icon"
@@ -167,27 +167,27 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
               >
                 <X className="h-4 w-4" />
               </Button>
-              <CardTitle className="text-white text-center text-xl sm:text-2xl pr-8">
+              <CardTitle className="text-white text-center pr-8">
                 Skapa jobb
               </CardTitle>
-              <CardDescription className="text-white/90 text-center text-sm sm:text-base mt-2">
+              <CardDescription className="text-white/90 text-center mt-2">
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-5 px-4 pb-4 sm:px-6 sm:pb-6">
+            <CardContent className="space-y-6 px-6 pb-6">
               <div className="space-y-2">
-                <Label htmlFor="job-title" className="text-white text-sm sm:text-base">Titel</Label>
+                <Label htmlFor="job-title" className="text-white">Titel</Label>
                 <Input
                   id="job-title"
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-11 sm:h-12 text-base"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="job-template" className="text-white text-sm sm:text-base">Jobbmall</Label>
+                <Label htmlFor="job-template" className="text-white">Jobbmall</Label>
                 {loadingTemplates ? (
                   <div className="flex items-center gap-2 text-sm text-white/70 py-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -198,7 +198,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left h-11 sm:h-12 text-base"
+                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
                       >
                         <span className="truncate text-left flex-1 px-1">
                           {selectedTemplate?.name || 'Ingen mall är vald'}
@@ -280,7 +280,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
               </div>
 
               {templates.length > 0 && (
-                <div className="text-center pt-2">
+                <div className="text-center">
                   <Button
                     variant="outline"
                     size="sm"
@@ -288,18 +288,18 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       setOpen(false);
                       // TODO: Open template management
                     }}
-                    className="bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:text-white text-xs h-9"
+                    className="bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:text-white text-xs"
                   >
                     Lägg till en ny mall
                   </Button>
                 </div>
               )}
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-2 pt-4">
                 <Button 
                   onClick={handleCreateJob}
                   disabled={loading || !jobTitle.trim()}
-                  className="flex-1 h-11 sm:h-12 text-base"
+                  className="flex-1"
                 >
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Skapa jobb
@@ -307,7 +307,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 <Button 
                   variant="outline" 
                   onClick={handleClose}
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20 h-11 sm:h-12 text-base"
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
                 >
                   Avbryt
                 </Button>
