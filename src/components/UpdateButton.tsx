@@ -61,10 +61,10 @@ export const UpdateButton = () => {
         onClick={handleApplyUpdate}
         variant="default"
         size="sm"
-        className="bg-green-600 hover:bg-green-700 text-white"
+        className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 h-8 text-xs"
       >
-        <Download className="h-4 w-4 mr-2" />
-        Uppdatera nu
+        <Download className="h-3 w-3 mr-1" />
+        Uppdatera
       </Button>
     );
   }
@@ -75,10 +75,10 @@ export const UpdateButton = () => {
       variant="outline"
       size="sm"
       disabled={checking}
-      className="border-white/20 text-white hover:bg-white/20 bg-white/5"
+      className="border-white/20 text-white hover:bg-white/20 bg-white/5 px-2 py-1 h-8 text-xs"
     >
-      <RefreshCw className={`h-4 w-4 mr-2 ${checking ? 'animate-spin' : ''}`} />
-      {checking ? 'Kollar...' : 'Sök uppdatering'}
+      <RefreshCw className={`h-3 w-3 mr-1 ${checking ? 'animate-spin' : ''}`} />
+      {checking ? 'Kollar...' : 'Uppdatera'}
     </Button>
   );
 };
