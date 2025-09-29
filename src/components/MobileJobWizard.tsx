@@ -1166,8 +1166,8 @@ const MobileJobWizard = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md bg-parium-gradient border-white/20 text-white [&>button]:hidden p-0 flex flex-col h-[90vh]" style={{ marginTop: 'env(safe-area-inset-top, 0px)' }}>
-        <div className="flex flex-col h-full justify-between">
+      <DialogContent className="max-w-md bg-parium-gradient border-white/20 text-white [&>button]:hidden p-0 flex flex-col" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))', marginTop: 'env(safe-area-inset-top, 0px)' }}>
+        <div className="flex flex-col h-full">
           {/* Header with proper safe area */}
           <div className="flex items-center justify-between p-4 border-b border-white/20 flex-shrink-0" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))' }}>
             <DialogHeader className="flex-1">
@@ -1197,18 +1197,13 @@ const MobileJobWizard = ({
           </div>
 
           {/* Scrollable Content */}
-          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-4 py-8 flex items-center justify-center">
-            <div className="w-full max-w-sm mx-auto space-y-6">
+          {/* Scrollable Content */}
+          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
             {/* Step 1: Grundinfo */}
             {currentStep === 0 && (
-              <div className="space-y-6 text-center">
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold text-white mb-2">Skapa ditt jobb</h2>
-                  <p className="text-white/70 text-sm">Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång</p>
-                </div>
-                
-                <div className="space-y-4 text-left">
-                  <Label className="text-white font-medium text-left block">Jobbtitel *</Label>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-white font-medium">Jobbtitel *</Label>
                   <Input
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
@@ -1356,17 +1351,12 @@ const MobileJobWizard = ({
                   />
                 </div>
               </div>
-            )}
+              )}
 
             {/* Step 2: Var finns jobbet? */}
             {currentStep === 1 && (
-              <div className="space-y-6 text-center">
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold text-white mb-2">Var finns jobbet?</h2>
-                  <p className="text-white/70 text-sm">Beskriv var arbetet utförs och hur man kan söka</p>
-                </div>
-                
-                <div className="space-y-4 text-left">
+              <div className="space-y-4">
+                <div className="space-y-2">
                   <Label className="text-white font-medium">Var utförs arbetet? *</Label>
                   <div className="relative work-location-dropdown">
                     <Input
@@ -2170,7 +2160,6 @@ const MobileJobWizard = ({
 
               </div>
             )}
-            </div>
           </div>
 
           {/* Navigation */}
