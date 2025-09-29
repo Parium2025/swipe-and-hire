@@ -20,7 +20,6 @@ import { Header } from "@/components/Header";
 import AuthTokenBridge from "./components/AuthTokenBridge";
 import { useDevice } from "@/hooks/use-device";
 import { useStatusBar } from "@/hooks/useStatusBar";
-import { AutoResponsiveWrapper } from "@/components/AutoResponsiveWrapper";
 
 const queryClient = new QueryClient();
 
@@ -100,15 +99,13 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
-          <AutoResponsiveWrapper>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <UnsavedChangesProvider>
-                <AppContent />
-              </UnsavedChangesProvider>
-            </BrowserRouter>
-          </AutoResponsiveWrapper>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <UnsavedChangesProvider>
+              <AppContent />
+            </UnsavedChangesProvider>
+          </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>
