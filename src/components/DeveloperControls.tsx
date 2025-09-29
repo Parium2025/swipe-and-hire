@@ -113,11 +113,11 @@ const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, cur
         <Button 
           variant="outline" 
           size="sm"
-          className="border-white/20 text-white hover:bg-white/20 bg-white/5"
+          className="border-white/20 text-white hover:bg-white/20 bg-white/5 px-2 py-1 h-8 text-xs"
         >
-          <Code className="mr-2 h-4 w-4" />
-          {updateAvailable && <Download className="mr-1 h-3 w-3 text-green-400" />}
-          Utvecklarvy
+          <Code className="h-3 w-3 mr-1" />
+          {updateAvailable && <Download className="h-3 w-3 ml-1 text-green-400" />}
+          Dev
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
