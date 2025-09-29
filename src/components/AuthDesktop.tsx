@@ -506,11 +506,10 @@ const AuthDesktop = ({
                   <div
                     className="rounded-full"
                     style={{
-                      width: '22rem',
-                      height: '22rem',
-                      background: 'radial-gradient(closest-side, hsl(var(--secondary) / 0.26) 0%, hsl(var(--secondary) / 0.14) 45%, hsl(var(--secondary) / 0) 75%)',
-                      filter: 'blur(18px)',
-                      transform: 'rotate(90deg)'
+                      width: '24rem',
+                      height: '24rem',
+                      background: 'radial-gradient(ellipse at center, hsl(var(--secondary) / 0.22) 0%, hsl(var(--secondary) / 0.12) 35%, hsl(var(--secondary) / 0.06) 55%, hsl(var(--secondary) / 0) 80%)',
+                      filter: 'blur(24px)'
                     }}
                   />
                 </div>

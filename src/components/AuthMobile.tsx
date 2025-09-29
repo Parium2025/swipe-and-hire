@@ -506,11 +506,10 @@ const AuthMobile = ({
                   <div
                     className="rounded-full"
                     style={{
-                      width: '18rem',
-                      height: '18rem',
-                      background: 'radial-gradient(closest-side, hsl(var(--secondary) / 0.26) 0%, hsl(var(--secondary) / 0.14) 45%, hsl(var(--secondary) / 0) 75%)',
-                      filter: 'blur(16px)',
-                      transform: 'rotate(90deg)'
+                      width: '20rem',
+                      height: '20rem',
+                      background: 'radial-gradient(ellipse at center, hsl(var(--secondary) / 0.22) 0%, hsl(var(--secondary) / 0.12) 35%, hsl(var(--secondary) / 0.06) 55%, hsl(var(--secondary) / 0) 80%)',
+                      filter: 'blur(20px)'
                     }}
                   />
                 </div>
