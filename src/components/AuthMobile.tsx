@@ -502,8 +502,8 @@ const AuthMobile = ({
           <div className="text-center mb-8">
             <div className="mb-2">
               <div className="relative mx-auto w-fit">
-                <div className="absolute inset-0 blur-3xl bg-secondary/50 rounded-full scale-110"></div>
-                <img
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 blur-3xl bg-secondary/60 rounded-full"></div>
+                <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
                   className="relative h-40 w-auto"
