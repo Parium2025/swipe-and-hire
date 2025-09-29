@@ -502,9 +502,6 @@ const AuthTablet = ({
           <div className="text-center mb-8">
             <div className="mb-2">
               <div className="relative mx-auto w-fit">
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none -z-10">
-                  <div className="w-[18rem] h-[18rem] rounded-full bg-secondary/30 blur-2xl"></div>
-                </div>
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
@@ -513,6 +510,7 @@ const AuthTablet = ({
                   height="160"
                   loading="eager"
                   decoding="sync"
+                  style={{ filter: 'drop-shadow(0 0 26px hsla(0 0% 100% / 0.24)) drop-shadow(0 0 66px hsl(var(--secondary) / 0.18))' }}
                 />
               </div>
             </div>
