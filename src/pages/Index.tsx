@@ -216,9 +216,9 @@ const Index = () => {
             <header className="sticky top-0 z-40 flex items-center justify-between border-b bg-white/10 backdrop-blur-sm px-6" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top, 1rem))', height: 'calc(4rem + env(safe-area-inset-top, 0))' }}>
               <div className="flex items-center gap-4">
                 <SidebarTrigger className="text-white hover:bg-white/20" />
-                <div>
+                <div className="flex-1 min-w-0">
                   <h1 className="text-xl font-bold text-white">Parium</h1>
-                  <p className="text-sm text-white/70">
+                  <p className="text-sm text-white/70 truncate">
                     {(userRole?.role as string) === 'employer' ? 'Arbetsgivare' : 'Jobbsökare'}: {profile.first_name} {profile.last_name}
                   </p>
                 </div>
@@ -286,9 +286,9 @@ const Index = () => {
             <header className="sticky top-0 z-40 flex items-center justify-between border-b bg-white/10 backdrop-blur-sm px-6" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top, 1rem))', height: 'calc(4rem + env(safe-area-inset-top, 0))' }}>
               <div className="flex items-center gap-4">
                 <SidebarTrigger className="text-white hover:bg-white/20" />
-                <div>
+                <div className="flex-1 min-w-0">
                   <h1 className="text-xl font-bold text-white">Parium</h1>
-                  <p className="text-sm text-white/70">
+                  <p className="text-sm text-white/70 truncate">
                     Arbetsgivare: {profile.first_name} {profile.last_name}
                   </p>
                 </div>
@@ -320,9 +320,9 @@ const Index = () => {
     <div className="min-h-screen">
       <header className="border-b border-white/20 bg-white/10 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div>
+          <div className="flex-1 min-w-0">
             <h1 className="text-2xl font-bold text-white">Parium</h1>
-            <p className="text-sm text-white/70">
+            <p className="text-sm text-white/70 truncate">
               Jobbsökare: {profile.first_name} {profile.last_name}
             </p>
           </div>
