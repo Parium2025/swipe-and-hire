@@ -7,10 +7,7 @@ export const useStatusBar = () => {
         const { StatusBar } = await import('@capacitor/status-bar');
         const { Capacitor } = await import('@capacitor/core');
         if (Capacitor.isNativePlatform()) {
-          // Set status bar to be completely transparent so Parium gradient extends to top
-          await StatusBar.setBackgroundColor({ color: 'transparent' });
-          await StatusBar.setStyle({ style: 'LIGHT' as any });
-          await StatusBar.show();
+          await StatusBar.hide();
         }
       }
     } catch (error) {
@@ -52,5 +49,5 @@ export const useStatusBar = () => {
     }
   };
 
-  return { setupStatusBar, hideStatusBar, showStatusBar };
+  return { hideStatusBar, showStatusBar };
 };

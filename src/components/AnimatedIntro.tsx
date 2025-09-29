@@ -28,7 +28,7 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
   return (
     <div className="fixed inset-0 z-50 bg-primary flex items-center justify-center overflow-hidden">
       {/* Background gradient effect */}
-      <div className="absolute inset-0 bg-gradient-radial from-primary-glow/20 via-primary/95 to-primary"></div>
+      <div className="absolute inset-0 bg-gradient-radial from-primary-glow/20 via-primary to-primary animate-pulse"></div>
       
       {/* Main logo container */}
       <div className="relative z-10 flex flex-col items-center">
@@ -38,12 +38,17 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
             ? 'scale-50 opacity-0 translate-y-10' 
             : 'scale-100 opacity-100 translate-y-0'
         }`}>
-          {/* Logo image */}
-          <img 
-            src="/lovable-uploads/ad982286-50f2-4efc-946c-c3b288ff2553.png" 
-            alt="Parium" 
-            className="h-24 md:h-32 w-auto"
-          />
+          <div className="relative">
+            {/* Glow effect behind logo */}
+            <div className="absolute inset-0 blur-xl bg-secondary/40 rounded-full animate-pulse"></div>
+            
+            {/* Logo image */}
+            <img 
+              src="/lovable-uploads/ad982286-50f2-4efc-946c-c3b288ff2553.png" 
+              alt="Parium" 
+              className="relative h-24 md:h-32 w-auto"
+            />
+          </div>
         </div>
         
         {/* Animated text */}
@@ -75,7 +80,7 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
         }`}>
           <div className="w-3 h-3 bg-secondary rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
           <div className="w-3 h-3 bg-secondary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-          <div className="w-3 h-3 bg-secondary rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+          <div className="w-3 h-3 bg-secondary rounded-full" style={{ animationDelay: '0.4s' }}></div>
         </div>
       </div>
       

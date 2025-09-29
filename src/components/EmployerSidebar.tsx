@@ -189,7 +189,7 @@ export function EmployerSidebar() {
       className={`bg-parium-gradient border-r-0 ${collapsed ? 'w-16' : 'w-64'}`}
       collapsible="icon"
     >
-      <SidebarContent className="gap-0" style={{ paddingTop: 'env(safe-area-inset-top, 0)' }}>
+      <SidebarContent className="gap-0">
         {/* User Profile Section - only show when not collapsed */}
         {!collapsed && (
           <div className="p-4">

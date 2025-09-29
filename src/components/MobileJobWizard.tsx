@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useDeviceDetection } from '@/hooks/useDeviceDetection';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -96,7 +95,6 @@ const MobileJobWizard = ({
   selectedTemplate, 
   onJobCreated 
 }: MobileJobWizardProps) => {
-  const deviceInfo = useDeviceDetection();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
@@ -1166,15 +1164,15 @@ const MobileJobWizard = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md w-[calc(100vw-2rem)] bg-parium-gradient border-white/20 text-white [&>button]:hidden p-0 flex flex-col overflow-hidden h-[85vh] sm:h-[90vh]">
-        <div className="flex flex-col h-full overflow-hidden">
-          {/* Header with proper safe area */}
-          <div className="flex items-center justify-between p-4 border-b border-white/20 flex-shrink-0" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))' }}>
+      <DialogContent className="max-w-md h-[90vh] bg-parium-gradient border-white/20 text-white [&>button]:hidden p-0 flex flex-col">
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-white/20 flex-shrink-0">
             <DialogHeader className="flex-1">
               <DialogTitle className="text-white text-lg">
                 {steps[currentStep].title}
               </DialogTitle>
-              <div className="text-sm text-white/70">
+              <div className="text-sm text-white">
                 Steg {currentStep + 1} av {steps.length}
               </div>
             </DialogHeader>
@@ -1182,9 +1180,9 @@ const MobileJobWizard = ({
               variant="ghost"
               size="icon"
               onClick={handleClose}
-              className="h-10 w-10 text-white hover:text-white hover:bg-white/20 flex-shrink-0"
+              className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </Button>
           </div>
 
@@ -1195,7 +1193,6 @@ const MobileJobWizard = ({
               className="h-1 bg-white/20 [&>div]:bg-white"
             />
           </div>
-
 
           {/* Scrollable Content */}
           <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -1208,12 +1205,11 @@ const MobileJobWizard = ({
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
                     placeholder="t.ex. Lagerarbetare"
-                    maxLength={100}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
                 </div>
 
-                <div className="space-y-2">
+                 <div className="space-y-2">
                   <Label className="text-white font-medium">Yrke *</Label>
                   <div className="relative occupation-dropdown">
                     <Input
@@ -1221,7 +1217,7 @@ const MobileJobWizard = ({
                       onChange={(e) => handleOccupationSearch(e.target.value)}
                       onFocus={() => setShowOccupationDropdown(occupationSearchTerm.length > 0)}
                       placeholder="t.ex. Mjukvaru- och systemutvecklare"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 pr-10"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
                     
@@ -1270,7 +1266,7 @@ const MobileJobWizard = ({
                     onChange={(e) => handleInputChange('description', e.target.value)}
                     placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
                     rows={4}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 resize-none leading-relaxed"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 text-base resize-none leading-relaxed focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
                 </div>
 
@@ -1284,7 +1280,7 @@ const MobileJobWizard = ({
                       onChange={(e) => handleEmploymentTypeSearch(e.target.value)}
                       onClick={handleEmploymentTypeClick}
                       placeholder="Välj anställningsform"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 pr-10 cursor-pointer"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
@@ -1315,7 +1311,7 @@ const MobileJobWizard = ({
                       onChange={(e) => handleSalaryTypeSearch(e.target.value)}
                       onClick={handleSalaryTypeClick}
                       placeholder="Välj lönetyp"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 pr-10 cursor-pointer"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
@@ -1346,7 +1342,7 @@ const MobileJobWizard = ({
                     value={formData.positions_count}
                     onChange={(e) => handleInputChange('positions_count', e.target.value)}
                     placeholder="1"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
                 </div>
               </div>
@@ -1363,7 +1359,7 @@ const MobileJobWizard = ({
                       onChange={(e) => handleWorkLocationSearch(e.target.value)}
                       onClick={handleWorkLocationClick}
                       placeholder="Välj arbetsplats"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 pr-10 cursor-pointer"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
@@ -1394,7 +1390,7 @@ const MobileJobWizard = ({
                       onChange={(e) => handleRemoteWorkSearch(e.target.value)}
                       onClick={handleRemoteWorkClick}
                       placeholder="Välj alternativ"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 pr-10 cursor-pointer"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
@@ -1423,7 +1419,7 @@ const MobileJobWizard = ({
                     value={formData.workplace_name}
                     onChange={(e) => handleInputChange('workplace_name', e.target.value)}
                     placeholder={profile?.company_name ? `t.ex. ${profile.company_name}` : "t.ex. IKEA Kungens Kurva"}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
                 </div>
 
@@ -1434,7 +1430,7 @@ const MobileJobWizard = ({
                     value={formData.contact_email}
                     onChange={(e) => handleInputChange('contact_email', e.target.value)}
                     placeholder={user?.email || "kontakt@företag.se"}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
                 </div>
 
@@ -1444,7 +1440,7 @@ const MobileJobWizard = ({
                     value={formData.workplace_address}
                     onChange={(e) => handleInputChange('workplace_address', e.target.value)}
                     placeholder="t.ex. Modulvägen 1"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
                 </div>
 
@@ -1586,7 +1582,7 @@ const MobileJobWizard = ({
                             onChange={(e) => handleQuestionTypeSearch(e.target.value)}
                             onClick={handleQuestionTypeClick}
                             placeholder="Välj frågetyp"
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 pr-10 cursor-pointer"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                             readOnly
                           />
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />

@@ -132,7 +132,7 @@ export function AppSidebar() {
       className={`${collapsed ? 'w-14' : 'w-64'} sticky top-0 h-screen overflow-y-auto transition-all duration-200 ease-in-out`}
       collapsible="icon"
     >
-      <SidebarContent className="p-4" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0))' }}>
+      <SidebarContent className="p-4">
         {/* User Profile Section */}
         {!collapsed && (
           <div className="mb-6 animate-fade-in">

@@ -16,7 +16,6 @@ import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
 import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { searchAddresses } from '@/lib/addressSearch';
-import LogoWithGlow from '@/components/LogoWithGlow';
 
 interface AuthTabletProps {
   isPasswordReset: boolean;
@@ -417,7 +416,7 @@ const AuthTablet = ({
 
   if (isPasswordReset) {
     return (
-      <div className="min-h-screen bg-gradient-parium flex items-center justify-center p-4 auth-dark safe-area-content">
+      <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-4 auth-dark">
         <Card className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="text-center">
             <CardTitle className="text-white">Nytt lösenord</CardTitle>
@@ -466,7 +465,7 @@ const AuthTablet = ({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-parium flex flex-col relative auth-dark safe-area-content">
+    <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex flex-col relative auth-dark">
       {/* Static animated background - won't re-render */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
@@ -499,18 +498,28 @@ const AuthTablet = ({
 
       <div className="relative z-10 flex flex-col min-h-[calc(100vh-4rem)]">
         {/* Header med logo och text */}
-        <div className="flex-1 flex flex-col justify-center items-center px-4 pt-0 pb-6">
-          <div className="text-center mb-3">
-            <div className="mb-0">
+        <div className="flex-1 flex flex-col justify-center items-center px-6 pt-12 pb-6">
+          <div className="text-center mb-8">
+            <div className="mb-2">
               <div className="relative mx-auto w-fit">
-                <LogoWithGlow className="h-52 w-auto md:h-56" />
+                <div className="absolute inset-0 blur-xl bg-secondary/30 rounded-full"></div>
+                <img 
+                  src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
+                  alt="Parium" 
+                  className="relative h-40 w-auto md:h-44"
+                  width="400"
+                  height="160"
+                  loading="eager"
+                  decoding="sync"
+                  fetchPriority="high"
+                />
               </div>
             </div>
             
-            <h1 className="text-2xl md:text-3xl font-semibold text-white mb-1">
+            <h1 className="text-2xl md:text-3xl font-semibold text-white mb-2">
               Välkommen till Parium
             </h1>
-            <p className="text-white/90 text-base md:text-lg mb-2">
+            <p className="text-white/90 text-base md:text-lg mb-4">
               Framtiden börjar med ett swipe
             </p>
           </div>

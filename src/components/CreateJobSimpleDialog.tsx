@@ -156,25 +156,27 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
             Skapa ny annons
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-md bg-parium-gradient [&>button]:hidden w-[calc(100vw-2rem)] sm:max-w-md flex items-center justify-center p-4 sm:p-6">
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 relative w-full">
-            <CardHeader className="relative pb-6 px-6 pt-6">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleClose}
-                className="absolute right-2 top-2 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10 z-10"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-              <CardTitle className="text-white text-center pr-8">
-                Skapa jobb
-              </CardTitle>
-              <CardDescription className="text-white/90 text-center mt-2">
+        <DialogContent className="max-w-md bg-parium-gradient [&>button]:hidden">
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 relative">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-white flex-1 text-center">
+                  Skapa jobb
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleClose}
+                  className="absolute right-2 top-2 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <CardDescription className="text-white text-center">
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6 px-6 pb-6">
+            <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="job-title" className="text-white">Titel</Label>
                 <Input

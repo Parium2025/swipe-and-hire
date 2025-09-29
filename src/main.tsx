@@ -2,7 +2,6 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
 import './index.css'
-import { registerServiceWorker } from './utils/registerServiceWorker'
 
 function redirectAuthTokensIfNeeded() {
   if (typeof window === 'undefined') return false;
@@ -53,8 +52,5 @@ if (!redirected) {
       <App />
     </StrictMode>
   );
-  
-  // Register service worker for auto-updates
-  registerServiceWorker();
 }
 
