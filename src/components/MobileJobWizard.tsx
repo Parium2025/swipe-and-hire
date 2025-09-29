@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useDeviceDetection } from '@/hooks/useDeviceDetection';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -95,6 +96,7 @@ const MobileJobWizard = ({
   selectedTemplate, 
   onJobCreated 
 }: MobileJobWizardProps) => {
+  const deviceInfo = useDeviceDetection();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
@@ -1164,15 +1166,15 @@ const MobileJobWizard = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md h-[90vh] bg-parium-gradient border-white/20 text-white [&>button]:hidden p-0 flex flex-col">
+      <DialogContent className="max-w-md bg-parium-gradient border-white/20 text-white [&>button]:hidden p-0 flex flex-col" style={{ maxHeight: 'calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))', marginTop: 'env(safe-area-inset-top, 0px)' }}>
         <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-white/20 flex-shrink-0">
+          {/* Header with proper safe area */}
+          <div className="flex items-center justify-between p-4 border-b border-white/20 flex-shrink-0" style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))' }}>
             <DialogHeader className="flex-1">
               <DialogTitle className="text-white text-lg">
                 {steps[currentStep].title}
               </DialogTitle>
-              <div className="text-sm text-white">
+              <div className="text-sm text-white/70">
                 Steg {currentStep + 1} av {steps.length}
               </div>
             </DialogHeader>
@@ -1180,9 +1182,9 @@ const MobileJobWizard = ({
               variant="ghost"
               size="icon"
               onClick={handleClose}
-              className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+              className="h-10 w-10 text-white hover:text-white hover:bg-white/20 flex-shrink-0"
             >
-              <X className="h-4 w-4" />
+              <X className="h-5 w-5" />
             </Button>
           </div>
 
@@ -1205,7 +1207,8 @@ const MobileJobWizard = ({
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
                     placeholder="t.ex. Lagerarbetare"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                    maxLength={100}
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
                 </div>
 

@@ -26,6 +26,7 @@ import CompanyProfile from '@/pages/employer/CompanyProfile';
 import EmployerSettings from '@/pages/employer/EmployerSettings';
 import DeveloperControls from '@/components/DeveloperControls';
 import { UpdateButton } from '@/components/UpdateButton';
+import { useDeviceDetection } from '@/hooks/useDeviceDetection';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRightLeft } from 'lucide-react';
 
