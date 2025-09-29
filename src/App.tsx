@@ -30,7 +30,7 @@ const AppContent = () => {
   React.useEffect(() => { setupStatusBar(); }, []);
 
   return (
-    <div className="min-h-screen bg-parium-gradient overflow-x-hidden w-full max-w-full" style={{ paddingTop: 'env(safe-area-inset-top, 0)', paddingBottom: 'env(safe-area-inset-bottom, 0)' }}>
+    <div className="min-h-screen bg-parium-gradient overflow-x-hidden w-full max-w-full">
       {/* Static animated background - identical to WelcomeTunnel */}
       <div className="fixed inset-0 pointer-events-none z-0 bg-parium-gradient overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>

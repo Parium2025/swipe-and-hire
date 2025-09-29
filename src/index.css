@@ -127,20 +127,12 @@ All colors MUST be HSL.
     overflow: visible !important;
   }
 
-  /* Force dark blue background on everything */
+  /* Clean mobile setup - no position:fixed tricks */
   html {
     background: hsl(215 100% 8%) !important;
     min-height: 100vh !important;
-    min-height: 100dvh !important;
-    min-height: -webkit-fill-available !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow-x: hidden;
-    /* Critical for iOS - extend below home indicator */
-    padding-bottom: 0 !important;
-    position: fixed;
     width: 100%;
-    height: 100%;
+    overflow-x: hidden;
   }
 
   body {
@@ -148,60 +140,33 @@ All colors MUST be HSL.
     padding: 0 !important;
     margin: 0 !important;
     overflow-x: hidden !important;
-    overflow-y: auto;
-    max-width: 100vw !important;
-    min-height: 100vh !important;
-    min-height: 100dvh !important;
-    min-height: -webkit-fill-available !important;
-    /* Force Parium background color everywhere */
-    background: hsl(215 100% 8%) !important;
-    /* Critical: Extend under home indicator */
-    padding-bottom: env(safe-area-inset-bottom, 0) !important;
-    position: relative;
     width: 100%;
-    height: 100%;
+    min-height: 100vh !important;
+    background: hsl(215 100% 8%) !important;
   }
 
-  /* Mobile fullscreen support */
   #root {
     padding: 0 !important;
     margin: 0 !important;
     width: 100% !important;
-    overflow-x: hidden !important;
-    overscroll-behavior: none;
-    touch-action: pan-y;
-    position: relative;
     min-height: 100vh !important;
-    min-height: 100dvh !important;
-    min-height: -webkit-fill-available !important;
-    /* Force dark blue background */
+    overflow-x: hidden !important;
     background: hsl(215 100% 8%) !important;
-    /* Extend under home indicator */
-    padding-bottom: env(safe-area-inset-bottom, 0) !important;
   }
 
-  /* Background covers entire viewport including all safe areas */
+  /* Simple gradient - no complex calculations */
   .bg-parium-gradient, 
   [style*="--gradient-parium"] {
     min-height: 100vh !important;
-    min-height: 100dvh !important;
-    min-height: -webkit-fill-available !important;
-    position: relative;
-    z-index: 0;
     width: 100%;
     overflow-x: hidden;
   }
 
-  /* Content respects safe areas */
+  /* Safe areas only for actual content padding */
   .safe-area-content {
     padding-top: env(safe-area-inset-top, 0);
-    padding-left: env(safe-area-inset-left, 0);
-    padding-right: env(safe-area-inset-right, 0);
     padding-bottom: env(safe-area-inset-bottom, 0);
-    position: relative;
-    z-index: 1;
     min-height: 100vh;
-    min-height: 100dvh;
   }
 
   /* iOS Safari: force full-bleed gradient on html/body so status area isn't white */
