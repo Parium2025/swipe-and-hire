@@ -1350,14 +1350,13 @@ const MobileJobWizard = ({
                   />
                 </div>
               </div>
-              )}
+            )}
 
             {/* Step 2: Var finns jobbet? */}
             {currentStep === 1 && (
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Var utförs arbetet? *</Label>
-                  <div className="relative work-location-dropdown">
                   <div className="relative work-location-dropdown">
                     <Input
                       value={workLocationSearchTerm || (formData.work_location_type ? workLocationTypes.find(t => t.value === formData.work_location_type)?.label || '' : '')}
