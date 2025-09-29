@@ -502,6 +502,17 @@ const AuthDesktop = ({
           <div className="text-center mb-8">
             <div className="mb-2">
               <div className="relative mx-auto w-fit">
+                <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -z-10">
+                  <div
+                    className="rounded-full"
+                    style={{
+                      width: '22rem',
+                      height: '22rem',
+                      background: 'radial-gradient(closest-side, hsl(var(--secondary) / 0.26) 0%, hsl(var(--secondary) / 0.14) 45%, hsl(var(--secondary) / 0) 75%)',
+                      filter: 'blur(18px)'
+                    }}
+                  />
+                </div>
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
@@ -510,7 +521,6 @@ const AuthDesktop = ({
                   height="160"
                   loading="eager"
                   decoding="sync"
-                  style={{ filter: 'drop-shadow(0 0 28px hsla(0 0% 100% / 0.24)) drop-shadow(0 0 72px hsl(var(--secondary) / 0.18))' }}
                 />
               </div>
             </div>
