@@ -499,7 +499,7 @@ const AuthTablet = ({
 
       <div className="relative z-10 flex flex-col min-h-[calc(100vh-4rem)]">
         {/* Header med logo och text */}
-        <div className="flex-1 flex flex-col justify-center items-center px-6 pt-2 pb-6">
+        <div className="flex-1 flex flex-col justify-center items-center px-4 pt-0 pb-6">
           <div className="text-center mb-3">
             <div className="mb-0">
               <div className="relative mx-auto w-fit">
