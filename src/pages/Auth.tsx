@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
 import { useToast } from '@/hooks/use-toast';
+import { useStatusBar } from '@/hooks/useStatusBar';
 import AnimatedIntro from '@/components/AnimatedIntro';
 import AuthMobile from '@/components/AuthMobile';
 import AuthTablet from '@/components/AuthTablet';
@@ -61,6 +62,12 @@ const Auth = () => {
   const navigate = useNavigate();
   const device = useDevice();
   const { toast } = useToast();
+  const { setupStatusBar } = useStatusBar();
+
+  // Setup status bar with Parium colors on component mount
+  useEffect(() => {
+    setupStatusBar();
+  }, []);
 
   useEffect(() => {
     const handleAuthFlow = async () => {
