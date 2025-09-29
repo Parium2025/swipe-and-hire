@@ -503,10 +503,10 @@ const AuthDesktop = ({
             <div className="mb-2">
               <div className="relative mx-auto w-fit">
                 <div
-                  className="absolute inset-0 rounded-full pointer-events-none blur-lg scale-110"
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none -z-10 w-[120%] h-[70%] rounded-full"
                   style={{
                     background:
-                      'radial-gradient(closest-side, hsla(0 0% 100% / 0.18), hsla(0 0% 100% / 0.08) 60%, hsla(0 0% 100% / 0) 100%)',
+                      'radial-gradient(ellipse at center, hsla(0 0% 100% / 0.22) 0%, hsla(0 0% 100% / 0.12) 40%, hsla(0 0% 100% / 0) 70%)',
                   }}
                 />
                 <img 
