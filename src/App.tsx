@@ -19,12 +19,15 @@ import { UnsavedChangesProvider } from "@/hooks/useUnsavedChanges";
 import { Header } from "@/components/Header";
 import AuthTokenBridge from "./components/AuthTokenBridge";
 import { useDevice } from "@/hooks/use-device";
+import { useStatusBar } from "@/hooks/useStatusBar";
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
   const device = useDevice();
   const showHeader = false; // Header removed for cleaner UI
+  const { setupStatusBar } = useStatusBar();
+  React.useEffect(() => { setupStatusBar(); }, []);
 
   return (
     <div className="min-h-screen bg-parium-gradient safe-area-content overflow-x-hidden w-full max-w-full">
