@@ -503,7 +503,7 @@ const AuthTablet = ({
           <div className="text-center mb-8">
             <div className="mb-2">
               <div className="relative mx-auto w-fit">
-                <LogoWithGlow className="h-40 w-auto md:h-44" />
+                <LogoWithGlow className="h-52 w-auto md:h-56" />
               </div>
             </div>
             

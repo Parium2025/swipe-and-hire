@@ -503,7 +503,7 @@ const AuthMobile = ({
           <div className="text-center mb-8">
             <div className="mb-2">
               <div className="relative mx-auto w-fit">
-                <LogoWithGlow className="h-40 w-auto" />
+                <LogoWithGlow className="h-48 w-auto" />
               </div>
             </div>
             

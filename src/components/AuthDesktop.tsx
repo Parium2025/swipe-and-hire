@@ -503,7 +503,7 @@ const AuthDesktop = ({
           <div className="text-center mb-8">
             <div className="mb-2">
               <div className="relative mx-auto w-fit">
-                <LogoWithGlow className="h-40 w-auto lg:h-48" />
+                <LogoWithGlow className="h-56 w-auto lg:h-64" />
               </div>
             </div>
             
