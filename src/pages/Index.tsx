@@ -25,6 +25,7 @@ import EmployerProfile from '@/pages/employer/EmployerProfile';
 import CompanyProfile from '@/pages/employer/CompanyProfile';
 import EmployerSettings from '@/pages/employer/EmployerSettings';
 import DeveloperControls from '@/components/DeveloperControls';
+import { UpdateButton } from '@/components/UpdateButton';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRightLeft } from 'lucide-react';
 
@@ -222,6 +223,7 @@ const Index = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3">
+                <UpdateButton />
                 {(user.email === 'fredrik.andits@icloud.com' || user.email === 'fredrikandits@hotmail.com' || user.email === 'pariumab2025@hotmail.com') && (
                   <DeveloperControls 
                     onViewChange={setDeveloperView}
@@ -292,6 +294,7 @@ const Index = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3">
+                <UpdateButton />
                 {(user.email === 'fredrik.andits@icloud.com' || user.email === 'fredrikandits@hotmail.com' || user.email === 'pariumab2025@hotmail.com') && (
                   <DeveloperControls 
                     onViewChange={setDeveloperView}
