@@ -504,12 +504,12 @@ const AuthDesktop = ({
               <div className="relative mx-auto w-fit">
                 <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -z-10">
                   <div
-                    className="rounded-full"
                     style={{
-                      width: '24rem',
-                      height: '24rem',
-                      background: 'radial-gradient(ellipse at center, hsl(var(--secondary) / 0.22) 0%, hsl(var(--secondary) / 0.12) 35%, hsl(var(--secondary) / 0.06) 55%, hsl(var(--secondary) / 0) 80%)',
-                      filter: 'blur(24px)'
+                      width: '30rem',
+                      height: '30rem',
+                      background: 'radial-gradient(circle at center, hsl(var(--secondary) / 0.18) 0%, hsl(var(--secondary) / 0.1) 25%, hsl(var(--secondary) / 0.04) 45%, hsl(var(--secondary) / 0.02) 65%, hsl(var(--secondary) / 0.01) 80%, transparent 100%)',
+                      filter: 'blur(32px)',
+                      borderRadius: '50%'
                     }}
                   />
                 </div>

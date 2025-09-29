@@ -504,12 +504,12 @@ const AuthTablet = ({
               <div className="relative mx-auto w-fit">
                 <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -z-10">
                   <div
-                    className="rounded-full"
                     style={{
-                      width: '22rem',
-                      height: '22rem',
-                      background: 'radial-gradient(ellipse at center, hsl(var(--secondary) / 0.22) 0%, hsl(var(--secondary) / 0.12) 35%, hsl(var(--secondary) / 0.06) 55%, hsl(var(--secondary) / 0) 80%)',
-                      filter: 'blur(22px)'
+                      width: '28rem',
+                      height: '28rem',
+                      background: 'radial-gradient(circle at center, hsl(var(--secondary) / 0.18) 0%, hsl(var(--secondary) / 0.1) 25%, hsl(var(--secondary) / 0.04) 45%, hsl(var(--secondary) / 0.02) 65%, hsl(var(--secondary) / 0.01) 80%, transparent 100%)',
+                      filter: 'blur(30px)',
+                      borderRadius: '50%'
                     }}
                   />
                 </div>
