@@ -511,7 +511,6 @@ const AuthTablet = ({
                   height="160"
                   loading="eager"
                   decoding="sync"
-                  fetchPriority="high"
                 />
               </div>
             </div>
