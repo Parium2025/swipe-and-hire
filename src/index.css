@@ -271,6 +271,7 @@ All colors MUST be HSL.
 
 @layer utilities {
   .bg-parium-gradient { background: var(--gradient-parium); }
+  .bg-gradient-parium { background: var(--gradient-parium); } /* alias for legacy usage */
   .bg-primary-gradient { background: var(--gradient-primary); }
   .bg-glass-surface { background: var(--gradient-glass); }
 }
