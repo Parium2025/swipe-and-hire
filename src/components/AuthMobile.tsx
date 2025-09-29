@@ -499,18 +499,18 @@ const AuthMobile = ({
 
       <div className="relative z-10 flex flex-col min-h-[calc(100vh-4rem)]">
         {/* Header med logo och text */}
-        <div className="flex-1 flex flex-col justify-center items-center px-6 pt-6 pb-6">
-          <div className="text-center mb-6">
-            <div className="mb-1">
+        <div className="flex-1 flex flex-col justify-center items-center px-6 pt-2 pb-6">
+          <div className="text-center mb-3">
+            <div className="mb-0">
               <div className="relative mx-auto w-fit">
                 <LogoWithGlow className="h-48 w-auto" />
               </div>
             </div>
             
-            <h1 className="text-2xl font-semibold text-white mb-2">
+            <h1 className="text-2xl font-semibold text-white mb-1">
               Välkommen till Parium
             </h1>
-            <p className="text-white/90 text-base mb-4">
+            <p className="text-white/90 text-base mb-2">
               Framtiden börjar med ett swipe
             </p>
           </div>
