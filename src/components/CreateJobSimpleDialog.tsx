@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -10,6 +8,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Loader2, ChevronDown, Search, X } from 'lucide-react';
 import MobileJobWizard from '@/components/MobileJobWizard';
+import { OptimizedInput } from '@/components/OptimizedInput';
+import { OptimizedButton } from '@/components/OptimizedButton';
 
 interface JobTemplate {
   id: string;
@@ -151,35 +151,37 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         }
       }}>
         <DialogTrigger asChild>
-          <Button className="flex items-center gap-2">
+          <OptimizedButton className="flex items-center gap-2">
             <Plus size={16} />
             Skapa ny annons
-          </Button>
+          </OptimizedButton>
         </DialogTrigger>
-        <DialogContent className="max-w-md bg-parium-gradient [&>button]:hidden">
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 relative">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-white flex-1 text-center">
-                  Skapa jobb
-                </CardTitle>
-                <Button
+        <DialogContent className="sm:max-w-md w-[calc(100%-2rem)] mx-auto bg-parium-gradient [&>button]:hidden">
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 relative"
+                style={{ padding: 'var(--optimized-padding)' }}>
+            <CardHeader className="text-center space-y-3">
+              <div className="relative">
+                <OptimizedButton
                   variant="ghost"
                   size="icon"
                   onClick={handleClose}
-                  className="absolute right-2 top-2 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+                  className="absolute right-0 top-0 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
                 >
                   <X className="h-4 w-4" />
-                </Button>
+                </OptimizedButton>
+                <CardTitle className="text-white text-xl">
+                  Skapa jobb
+                </CardTitle>
               </div>
-              <CardDescription className="text-white text-center">
+              <CardDescription className="text-white/80 text-sm">
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6"
+                         style={{ padding: 'var(--optimized-padding)' }}>
               <div className="space-y-2">
-                <Label htmlFor="job-title" className="text-white">Titel</Label>
-                <Input
+                <Label htmlFor="job-title" className="text-white text-base">Titel</Label>
+                <OptimizedInput
                   id="job-title"
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
@@ -189,7 +191,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="job-template" className="text-white">Jobbmall</Label>
+                <Label htmlFor="job-template" className="text-white text-base">Jobbmall</Label>
                 {loadingTemplates ? (
                   <div className="flex items-center gap-2 text-sm text-white/70 py-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -198,15 +200,15 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 ) : (
                   <DropdownMenu modal={false} open={templateMenuOpen} onOpenChange={setTemplateMenuOpen}>
                     <DropdownMenuTrigger asChild>
-                      <Button
+                      <OptimizedButton
                         variant="outline"
-                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
+                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between text-left"
                       >
                         <span className="truncate text-left flex-1 px-1">
                           {selectedTemplate?.name || 'Ingen mall är vald'}
                         </span>
                         <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
-                      </Button>
+                      </OptimizedButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent 
                       className="w-80 bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-96"
@@ -221,11 +223,11 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       <div className="p-3 border-b border-slate-600/30 sticky top-0 bg-slate-700/95 backdrop-blur-md">
                         <div className="relative">
                           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
-                          <Input
+                          <OptimizedInput
                             placeholder="Sök mall..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 pr-4 h-10 bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-lg"
+                            className="pl-10 pr-4 bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-lg"
                             autoComplete="off"
                           />
                         </div>
@@ -283,7 +285,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
 
               {templates.length > 0 && (
                 <div className="text-center">
-                  <Button
+                  <OptimizedButton
                     variant="outline"
                     size="sm"
                     onClick={() => {
@@ -293,26 +295,26 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     className="bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:text-white text-xs"
                   >
                     Lägg till en ny mall
-                  </Button>
+                  </OptimizedButton>
                 </div>
               )}
 
-              <div className="flex gap-2 pt-4">
-                <Button 
+              <div className="flex gap-3 pt-4">
+                <OptimizedButton 
                   onClick={handleCreateJob}
                   disabled={loading || !jobTitle.trim()}
-                  className="flex-1"
+                  className="flex-1 bg-primary hover:bg-primary/90"
                 >
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Skapa jobb
-                </Button>
-                <Button 
+                </OptimizedButton>
+                <OptimizedButton 
                   variant="outline" 
                   onClick={handleClose}
                   className="bg-white/10 border-white/20 text-white hover:bg-white/20"
                 >
                   Avbryt
-                </Button>
+                </OptimizedButton>
               </div>
             </CardContent>
           </Card>
