@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -8,9 +8,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Settings, UserCheck, Building, Users, ArrowRightLeft, Code, Lightbulb } from 'lucide-react';
+import { Settings, UserCheck, Building, Users, ArrowRightLeft, Code, Lightbulb, RefreshCw, Download } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { checkForUpdates, applyUpdate, onUpdateAvailable } from '@/utils/registerServiceWorker';
+import { toast } from 'sonner';
 
 interface DeveloperControlsProps {
   onViewChange: (view: string) => void;
@@ -20,7 +22,19 @@ interface DeveloperControlsProps {
 const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, currentView }) => {
   const { user, userRole, switchRole, updateProfile } = useAuth();
   const [switching, setSwitching] = useState(false);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [checking, setChecking] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Listen for updates
+    onUpdateAvailable(() => {
+      setUpdateAvailable(true);
+      toast.success('Ny version tillgänglig!', {
+        description: 'Tryck på utvecklarvy för att uppdatera.'
+      });
+    });
+  }, []);
 
   const handleRoleSwitch = async (newRole: 'job_seeker' | 'employer') => {
     setSwitching(true);
@@ -53,6 +67,42 @@ const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, cur
     }
   };
 
+  const handleCheckForUpdates = async () => {
+    setChecking(true);
+    toast.info('Kollar efter uppdateringar...', {
+      description: 'Detta kan ta några sekunder'
+    });
+
+    try {
+      await checkForUpdates();
+      
+      setTimeout(() => {
+        if (!updateAvailable) {
+          toast.success('Appen är redan uppdaterad!', {
+            description: 'Du har den senaste versionen'
+          });
+        }
+        setChecking(false);
+      }, 2000);
+    } catch (error) {
+      toast.error('Kunde inte kolla efter uppdateringar', {
+        description: 'Försök igen om en stund'
+      });
+      setChecking(false);
+    }
+  };
+
+  const handleApplyUpdate = () => {
+    toast.success('Uppdaterar appen...', {
+      description: 'Appen kommer att laddas om'
+    });
+    
+    setTimeout(() => {
+      applyUpdate();
+      window.location.reload();
+    }, 500);
+  };
+
   if (user?.email !== 'fredrikandits@hotmail.com' && user?.email !== 'pariumab2025@hotmail.com') {
     return null;
   }
@@ -66,6 +116,7 @@ const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, cur
           className="border-white/20 text-white hover:bg-white/20 bg-white/5"
         >
           <Code className="mr-2 h-4 w-4" />
+          {updateAvailable && <Download className="mr-1 h-3 w-3 text-green-400" />}
           Utvecklarvy
         </Button>
       </DropdownMenuTrigger>
@@ -152,6 +203,27 @@ const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, cur
           <Settings className="mr-2 h-4 w-4" />
           Profilsida
         </DropdownMenuItem>
+        
+        <DropdownMenuSeparator className="bg-white/10" />
+        
+        {updateAvailable ? (
+          <DropdownMenuItem 
+            onClick={handleApplyUpdate}
+            className="cursor-pointer hover:bg-white/10 text-green-400"
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Uppdatera nu
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem 
+            onClick={handleCheckForUpdates}
+            disabled={checking}
+            className="cursor-pointer hover:bg-white/10"
+          >
+            <RefreshCw className={`mr-2 h-4 w-4 ${checking ? 'animate-spin' : ''}`} />
+            {checking ? 'Kollar...' : 'Sök uppdatering'}
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
