@@ -38,29 +38,12 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
             ? 'scale-50 opacity-0 translate-y-10' 
             : 'scale-100 opacity-100 translate-y-0'
         }`}>
-          <div className="relative">
-            {/* Glow effect behind logo */}
-            <div
-              className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse"
-              style={{
-                width: '22rem',
-                height: '22rem',
-                backgroundImage:
-                  'radial-gradient(circle at center, hsl(var(--secondary) / 0.28) 0%, hsl(var(--secondary) / 0.18) 22%, transparent 70%)',
-                filter: 'blur(28px)',
-                borderRadius: '50%',
-                maskImage: 'radial-gradient(circle at center, black 65%, transparent 85%)',
-                WebkitMaskImage: 'radial-gradient(circle at center, black 65%, transparent 85%)',
-              }}
-            />
-            
-            {/* Logo image */}
-            <img 
-              src="/lovable-uploads/ad982286-50f2-4efc-946c-c3b288ff2553.png" 
-              alt="Parium" 
-              className="relative h-24 md:h-32 w-auto"
-            />
-          </div>
+          {/* Logo image */}
+          <img 
+            src="/lovable-uploads/ad982286-50f2-4efc-946c-c3b288ff2553.png" 
+            alt="Parium" 
+            className="h-24 md:h-32 w-auto"
+          />
         </div>
         
         {/* Animated text */}
