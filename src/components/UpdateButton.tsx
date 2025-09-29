@@ -75,7 +75,7 @@ export const UpdateButton = () => {
       variant="outline"
       size="sm"
       disabled={checking}
-      className="border-white/20 text-white hover:bg-white/20"
+      className="border-white/20 text-white hover:bg-white/20 bg-white/5"
     >
       <RefreshCw className={`h-4 w-4 mr-2 ${checking ? 'animate-spin' : ''}`} />
       {checking ? 'Kollar...' : 'Sök uppdatering'}
