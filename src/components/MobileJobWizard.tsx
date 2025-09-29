@@ -1209,12 +1209,11 @@ const MobileJobWizard = ({
                     onChange={(e) => handleInputChange('title', e.target.value)}
                     placeholder="t.ex. Lagerarbetare"
                     maxLength={100}
-                    className="lovable-input"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
                 </div>
-                </div>
 
-                 <div className="space-y-2">
+                <div className="space-y-2">
                   <Label className="text-white font-medium">Yrke *</Label>
                   <div className="relative occupation-dropdown">
                     <Input
@@ -1359,6 +1358,7 @@ const MobileJobWizard = ({
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Var utförs arbetet? *</Label>
                   <div className="relative work-location-dropdown">
+                  <div className="relative work-location-dropdown">
                     <Input
                       value={workLocationSearchTerm || (formData.work_location_type ? workLocationTypes.find(t => t.value === formData.work_location_type)?.label || '' : '')}
                       onChange={(e) => handleWorkLocationSearch(e.target.value)}
@@ -1460,12 +1460,14 @@ const MobileJobWizard = ({
 
             {/* Step 3: Ansökningsfrågor */}
             {currentStep === 2 && (
-              <div className="space-y-6 text-center">
+              <div className="space-y-6">
                 {!showQuestionForm ? (
                   <>
-                    <div className="mb-8">
-                      <h2 className="text-2xl font-bold text-white mb-2">Ansökningsfrågor</h2>
-                      <p className="text-white/70 text-sm">Skapa frågor som jobbsökarna ska besvara i sin ansökan</p>
+                    <div className="text-center space-y-2">
+                      <h3 className="text-white font-medium text-lg">Ansökningsfrågor</h3>
+                      <p className="text-white text-sm">
+                        Skapa frågor som jobbsökarna ska besvara i sin ansökan
+                      </p>
                     </div>
 
                     {/* Automatiska frågor info */}
@@ -1734,13 +1736,8 @@ const MobileJobWizard = ({
 
             {/* Step 4: Förhandsvisning */}
             {currentStep === 3 && (
-              <div className="space-y-6 text-center">
+              <div className="space-y-6">
                 {/* Mobile Mockup Preview - Mobilansökningsformulär */}
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold text-white mb-2">Förhandsvisning</h2>
-                  <p className="text-white/70 text-sm">Se hur ditt jobb kommer att se ut för jobbsökarna</p>
-                </div>
-                
                 <div className="flex flex-col items-center space-y-4">
                   <h3 className="text-white font-medium">Så kommer ansökningsformuläret att se ut på mobil:</h3>
                   
