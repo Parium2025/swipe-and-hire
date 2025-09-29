@@ -1,29 +1,29 @@
 import React from 'react';
 import { Button, ButtonProps } from '@/components/ui/button';
-import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 import { cn } from '@/lib/utils';
 
 interface OptimizedButtonProps extends ButtonProps {
   fullWidth?: boolean;
-  optimized?: boolean;
+  // No need for optimized prop anymore - it's always automatic
 }
 
 export const OptimizedButton: React.FC<OptimizedButtonProps> = ({ 
   children, 
   className,
   fullWidth = false,
-  optimized = true,
+  style,
   ...props 
 }) => {
-  const layout = useResponsiveLayout();
-
   return (
     <Button
       className={cn(
-        optimized && layout.buttonClasses,
         fullWidth && 'w-full',
         className
       )}
+      style={{
+        minHeight: 'var(--optimized-button-height)',
+        ...style
+      }}
       {...props}
     >
       {children}

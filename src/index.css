@@ -110,6 +110,38 @@ All colors MUST be HSL.
     --sidebar-ring: 200 100% 60%;
 }
 
+/* Automatic size optimization - känner av enhet automatiskt */
+:root {
+  /* Default values - uppdateras automatiskt av AutoResponsiveWrapper */
+  --optimized-input-height: 2.5rem;
+  --optimized-button-height: 2.5rem;
+  --optimized-spacing: 0.75rem;
+  --optimized-padding: 1rem;
+}
+
+/* Auto-responsive sizing - appliceras automatiskt på alla inputs och buttons */
+@layer components {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="password"],
+  input[type="date"],
+  textarea,
+  select {
+    min-height: var(--optimized-input-height);
+  }
+  
+  button:not([class*="icon-only"]):not([class*="p-2"]):not([class*="h-8"]):not([class*="h-9"]):not([class*="h-10"]) {
+    min-height: var(--optimized-button-height);
+  }
+  
+  /* Card padding optimization */
+  .card {
+    padding: var(--optimized-padding);
+  }
+}
+
 /* Lovable-inspired mobile optimization classes */
 @layer utilities {
   /* Perfect centering like Lovable */
