@@ -1042,17 +1042,17 @@ const MobileJobWizard = ({
       setPendingClose(true);
       setShowUnsavedDialog(true);
     } else {
-      // Reset form state
+      // Reset everything completely
       setCurrentStep(0);
       setFormData({
-        title: jobTitle,
-        description: selectedTemplate?.description || '',
-        requirements: selectedTemplate?.requirements || '',
-        location: selectedTemplate?.location || '',
+        title: '',
+        description: '',
+        requirements: '',
+        location: '',
         occupation: '',
-        salary_min: selectedTemplate?.salary_min?.toString() || '',
-        salary_max: selectedTemplate?.salary_max?.toString() || '',
-        employment_type: selectedTemplate?.employment_type || '',
+        salary_min: '',
+        salary_max: '',
+        employment_type: '',
         salary_type: '',
         positions_count: '1',
         work_location_type: 'på-plats',
@@ -1061,9 +1061,9 @@ const MobileJobWizard = ({
         workplace_address: '',
         workplace_postal_code: '',
         workplace_city: '',
-        work_schedule: selectedTemplate?.work_schedule || '',
-        contact_email: selectedTemplate?.contact_email || '',
-        application_instructions: selectedTemplate?.application_instructions || '',
+        work_schedule: '',
+        contact_email: '',
+        application_instructions: '',
         pitch: '',
         job_image_url: ''
       });
@@ -1077,17 +1077,17 @@ const MobileJobWizard = ({
   };
 
   const handleConfirmClose = () => {
-    // Reset everything and close
+    // Reset everything completely and close
     setCurrentStep(0);
     setFormData({
-      title: jobTitle,
-      description: selectedTemplate?.description || '',
-      requirements: selectedTemplate?.requirements || '',
-      location: selectedTemplate?.location || '',
+      title: '',
+      description: '',
+      requirements: '',
+      location: '',
       occupation: '',
-      salary_min: selectedTemplate?.salary_min?.toString() || '',
-      salary_max: selectedTemplate?.salary_max?.toString() || '',
-      employment_type: selectedTemplate?.employment_type || '',
+      salary_min: '',
+      salary_max: '',
+      employment_type: '',
       salary_type: '',
       positions_count: '1',
       work_location_type: 'på-plats',
@@ -1096,9 +1096,9 @@ const MobileJobWizard = ({
       workplace_address: '',
       workplace_postal_code: '',
       workplace_city: '',
-      work_schedule: selectedTemplate?.work_schedule || '',
-      contact_email: selectedTemplate?.contact_email || '',
-      application_instructions: selectedTemplate?.application_instructions || '',
+      work_schedule: '',
+      contact_email: '',
+      application_instructions: '',
       pitch: '',
       job_image_url: ''
     });
