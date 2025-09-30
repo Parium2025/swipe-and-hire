@@ -39,34 +39,22 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
             : 'scale-100 opacity-100 translate-y-0'
         }`}>
           <div className="relative">
-            {/* Logo image */}
+            {/* Logo image - same size as auth page */}
             <img 
-              src="/lovable-uploads/ad982286-50f2-4efc-946c-c3b288ff2553.png" 
+              src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
               alt="Parium" 
-              className="relative h-24 md:h-32 w-auto"
+              className="relative h-40 w-auto scale-125"
             />
           </div>
         </div>
         
-        {/* Animated text */}
+        {/* Subtitle text */}
         <div className={`mt-8 transform transition-all duration-1000 delay-500 ease-out ${
           phase === 'loading' 
             ? 'scale-90 opacity-0 translate-y-5' 
             : 'scale-100 opacity-100 translate-y-0'
         }`}>
-          <h1 className="text-3xl md:text-4xl font-bold text-primary-foreground text-center tracking-wider">
-            <span className="inline-block opacity-0 animate-fade-in" style={{ animationDelay: '1s', animationDuration: '0.8s', animationFillMode: 'forwards' }}>P</span>
-            <span className="inline-block opacity-0 animate-fade-in" style={{ animationDelay: '1.2s', animationDuration: '0.8s', animationFillMode: 'forwards' }}>A</span>
-            <span className="inline-block opacity-0 animate-fade-in" style={{ animationDelay: '1.4s', animationDuration: '0.8s', animationFillMode: 'forwards' }}>R</span>
-            <span className="inline-block opacity-0 animate-fade-in" style={{ animationDelay: '1.6s', animationDuration: '0.8s', animationFillMode: 'forwards' }}>I</span>
-            <span className="inline-block opacity-0 animate-fade-in" style={{ animationDelay: '1.8s', animationDuration: '0.8s', animationFillMode: 'forwards' }}>U</span>
-            <span className="inline-block opacity-0 animate-fade-in" style={{ animationDelay: '2.0s', animationDuration: '0.8s', animationFillMode: 'forwards' }}>M</span>
-          </h1>
-          
-          {/* Subtitle */}
-          <p className={`text-primary-foreground/80 text-center mt-4 text-lg transition-all duration-1000 delay-1000 ${
-            phase === 'loading' ? 'opacity-0' : 'opacity-100'
-          }`}>
+          <p className="text-white text-center text-xl md:text-2xl font-medium">
             Din karriärresa börjar här
           </p>
         </div>
