@@ -39,10 +39,17 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
             : 'scale-100 opacity-100 translate-y-0'
         }`}>
           <div className="relative">
+            {/* Glow layers behind logo */}
+            <div className="absolute inset-0 -inset-x-8 -inset-y-4 flex items-center justify-center">
+              <div className="absolute w-48 h-32 bg-primary-glow/25 rounded-full blur-3xl"></div>
+              <div className="absolute w-36 h-20 bg-primary-glow/20 rounded-full blur-2xl"></div>
+            </div>
+            
+            {/* Logo */}
             <img 
               src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
               alt="Parium" 
-              className="relative h-56 md:h-64 w-auto"
+              className="relative h-56 md:h-64 w-auto z-10"
             />
           </div>
         </div>
