@@ -42,13 +42,13 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
             <img 
               src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
               alt="Parium" 
-              className="relative h-32 md:h-40 w-auto"
+              className="relative h-48 md:h-56 w-auto"
             />
           </div>
         </div>
         
         {/* Subtitle text - crisp white with symmetrical spacing */}
-        <div className={`mt-12 transform transition-all duration-1000 delay-500 ease-out ${
+        <div className={`mt-6 transform transition-all duration-1000 delay-500 ease-out ${
           phase === 'loading' 
             ? 'scale-90 opacity-0 translate-y-5' 
             : 'scale-100 opacity-100 translate-y-0'
