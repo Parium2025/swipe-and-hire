@@ -498,7 +498,7 @@ const AuthDesktop = ({
 
       <div className="relative z-10 flex flex-col min-h-[calc(100vh-4rem)]">
         {/* Header med logo och text */}
-        <div className="flex-1 flex flex-col justify-center items-center px-6 pt-12 pb-6">
+        <div className="flex-1 flex flex-col justify-center items-center px-6 pt-8 pb-6">
           <div className="text-center mb-8">
             <div className="mb-0 -mb-16">
               <div className="relative mx-auto w-fit">
