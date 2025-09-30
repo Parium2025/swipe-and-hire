@@ -505,7 +505,7 @@ const AuthMobile = ({
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
-                  className="relative h-40 w-auto"
+                  className="relative h-52 w-auto"
                   width="400"
                   height="160"
                   loading="eager"
