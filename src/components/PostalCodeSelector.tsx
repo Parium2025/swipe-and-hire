@@ -122,7 +122,7 @@ const PostalCodeSelector = ({
               </div>
             </div>
             <div className="flex-1">
-              <p className="text-sm text-white/70">Din plats:</p>
+              <p className="text-sm text-white">Din plats:</p>
               <p className="text-lg font-semibold text-white">
                 {foundLocation.city}
                 {foundLocation.area && foundLocation.area !== foundLocation.city && (
@@ -130,11 +130,8 @@ const PostalCodeSelector = ({
                 )}
               </p>
               {foundLocation.county && (
-                <p className="text-xs text-white/70">{foundLocation.county}</p>
+                <p className="text-xs text-white">{foundLocation.county}</p>
               )}
-              <p className="text-xs text-white/60 mt-0.5">
-                ✓ Verifierat med svensk postnummerdatabas
-              </p>
             </div>
           </div>
         </Card>
