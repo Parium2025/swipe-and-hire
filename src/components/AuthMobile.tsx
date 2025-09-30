@@ -515,7 +515,7 @@ const AuthMobile = ({
               </div>
             </div>
             
-            <h1 className="text-2xl font-semibold text-white mb-4">
+            <h1 className="text-2xl font-semibold text-white mb-2">
               Framtiden börjar med ett swipe
             </h1>
           </div>
