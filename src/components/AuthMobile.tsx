@@ -502,12 +502,12 @@ const AuthMobile = ({
           <div className="text-center mb-8">
             <div className="-mb-7">
               <div className="relative mx-auto w-fit">
-                {/* Glow effect bakom loggan - intensivare med flera lager */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-56 h-56 bg-primary-glow/70 rounded-full blur-[80px]"></div>
+                {/* Glow effect bakom loggan - kompakt och koncentrerad */}
+                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
+                  <div className="w-40 h-40 bg-primary-glow/50 rounded-full blur-[50px]"></div>
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-40 h-40 bg-primary-glow/50 rounded-full blur-[60px]"></div>
+                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
+                  <div className="w-28 h-28 bg-primary-glow/40 rounded-full blur-[40px]"></div>
                 </div>
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
