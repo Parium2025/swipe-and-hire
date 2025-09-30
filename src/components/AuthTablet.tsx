@@ -505,7 +505,7 @@ const AuthTablet = ({
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
-                  className="relative h-44 w-auto md:h-48"
+                  className="relative h-44 w-auto md:h-48 scale-125"
                   width="400"
                   height="160"
                   loading="eager"
