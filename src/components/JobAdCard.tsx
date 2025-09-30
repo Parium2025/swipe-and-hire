@@ -41,7 +41,7 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
           {imageUrl ? (
             <img
               loading="eager"
-              fetchPriority="high"
+              
               decoding="async"
               src={imageUrl}
               alt={imageAlt || `${title} hos ${company}`}
