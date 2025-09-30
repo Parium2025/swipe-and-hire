@@ -370,6 +370,23 @@ const MobileJobWizard = ({
     }
   }, [user, open]);
   
+  // Update form data when jobTitle or selectedTemplate changes
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      title: jobTitle,
+      description: selectedTemplate?.description || prev.description,
+      requirements: selectedTemplate?.requirements || prev.requirements,
+      location: selectedTemplate?.location || prev.location,
+      salary_min: selectedTemplate?.salary_min?.toString() || prev.salary_min,
+      salary_max: selectedTemplate?.salary_max?.toString() || prev.salary_max,
+      employment_type: selectedTemplate?.employment_type || prev.employment_type,
+      work_schedule: selectedTemplate?.work_schedule || prev.work_schedule,
+      contact_email: selectedTemplate?.contact_email || prev.contact_email,
+      application_instructions: selectedTemplate?.application_instructions || prev.application_instructions,
+    }));
+  }, [jobTitle, selectedTemplate]);
+  
   // Set initial form data for unsaved changes tracking
   useEffect(() => {
     if (open && !initialFormData) {
