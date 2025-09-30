@@ -500,7 +500,7 @@ const AuthMobile = ({
         {/* Header med logo och text */}
         <div className="flex-1 flex flex-col justify-center items-center px-6 pt-2 pb-6">
           <div className="text-center mb-8">
-            <div className="mb-8">
+            <div className="mb-2">
               <div className="relative mx-auto w-fit">
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
