@@ -98,11 +98,14 @@ const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, cur
         </DropdownMenuItem>
         
         <DropdownMenuItem 
-          onClick={() => handleViewChange('intro_tutorial')}
+          onClick={() => {
+            localStorage.removeItem('parium-intro-shown');
+            window.location.reload();
+          }}
           className="cursor-pointer hover:bg-white/10"
         >
           <Lightbulb className="mr-2 h-4 w-4" />
-          Introduktionssekvens
+          Visa Introfilm
         </DropdownMenuItem>
         
         <DropdownMenuItem 
