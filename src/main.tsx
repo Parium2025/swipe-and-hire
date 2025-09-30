@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
 import './index.css'
+import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 
 function redirectAuthTokensIfNeeded() {
   if (typeof window === 'undefined') return false;
@@ -49,7 +50,9 @@ if (!redirected) {
   const root = createRoot(document.getElementById("root")!);
   root.render(
     <StrictMode>
-      <App />
+      <GlobalErrorBoundary>
+        <App />
+      </GlobalErrorBoundary>
     </StrictMode>
   );
 }
