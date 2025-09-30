@@ -31,25 +31,24 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
       <div className="absolute inset-0 bg-gradient-radial from-primary-glow/20 via-primary to-primary animate-pulse"></div>
       
       {/* Main logo container */}
-      <div className="relative z-10 flex flex-col items-center">
-        {/* Logo */}
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen">
+        {/* Logo - much bigger */}
         <div className={`transform transition-all duration-1000 ease-out ${
           phase === 'loading' 
             ? 'scale-50 opacity-0 translate-y-10' 
             : 'scale-100 opacity-100 translate-y-0'
         }`}>
           <div className="relative">
-            {/* Logo image - same size as auth page */}
             <img 
               src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
               alt="Parium" 
-              className="relative h-40 w-auto scale-125"
+              className="relative h-32 md:h-40 w-auto"
             />
           </div>
         </div>
         
-        {/* Subtitle text */}
-        <div className={`mt-8 transform transition-all duration-1000 delay-500 ease-out ${
+        {/* Subtitle text - crisp white with symmetrical spacing */}
+        <div className={`mt-12 transform transition-all duration-1000 delay-500 ease-out ${
           phase === 'loading' 
             ? 'scale-90 opacity-0 translate-y-5' 
             : 'scale-100 opacity-100 translate-y-0'
