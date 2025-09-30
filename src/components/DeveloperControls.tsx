@@ -99,7 +99,8 @@ const DeveloperControls: React.FC<DeveloperControlsProps> = ({ onViewChange, cur
         
         <DropdownMenuItem 
           onClick={() => {
-            localStorage.removeItem('parium-intro-shown');
+            sessionStorage.removeItem('parium-intro-seen');
+            navigate('/auth');
             window.location.reload();
           }}
           className="cursor-pointer hover:bg-white/10"
