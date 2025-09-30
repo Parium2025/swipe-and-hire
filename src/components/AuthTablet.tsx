@@ -502,6 +502,10 @@ const AuthTablet = ({
           <div className="text-center mb-8">
             <div className="mb-4">
               <div className="relative mx-auto w-fit">
+                {/* Glow effect bakom loggan */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-52 h-52 bg-primary-glow/20 rounded-full blur-3xl"></div>
+                </div>
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
