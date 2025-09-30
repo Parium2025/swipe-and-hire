@@ -512,17 +512,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
-    setProfile(null);
-    setUserRole(null);
-    setOrganization(null);
-    toast({
-      title: "Utloggad",
-      description: "Du har loggats ut",
-      duration: 3000
-    });
+    try {
+      // Sign out with global scope to clear all sessions
+      await supabase.auth.signOut({ scope: 'global' });
+      
+      // Explicitly clear all state
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setUserRole(null);
+      setOrganization(null);
+      
+      // Clear any localStorage items related to auth
+      localStorage.removeItem('supabase.auth.token');
+      sessionStorage.clear();
+      
+      toast({
+        title: "Utloggad",
+        description: "Du har loggats ut",
+        duration: 3000
+      });
+      
+      // Navigate to auth page
+      window.location.href = '/auth';
+    } catch (error) {
+      console.error('Error signing out:', error);
+      // Even if there's an error, try to clear state and redirect
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setUserRole(null);
+      setOrganization(null);
+      window.location.href = '/auth';
+    }
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
