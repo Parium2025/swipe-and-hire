@@ -502,12 +502,12 @@ const AuthDesktop = ({
           <div className="text-center mb-8">
             <div className="mb-4">
               <div className="relative mx-auto w-fit">
-                {/* Glow effect bakom loggan - subtle och faded */}
+                {/* Glow effect bakom loggan - subtle och täcker hela loggan */}
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                  <div className="w-40 h-40 bg-primary-glow/25 rounded-full blur-[35px]"></div>
+                  <div className="w-56 h-40 bg-primary-glow/25 rounded-full blur-[35px]"></div>
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                  <div className="w-28 h-28 bg-primary-glow/20 rounded-full blur-[25px]"></div>
+                  <div className="w-44 h-28 bg-primary-glow/20 rounded-full blur-[25px]"></div>
                 </div>
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
