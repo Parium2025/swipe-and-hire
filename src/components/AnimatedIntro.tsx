@@ -33,7 +33,7 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
       {/* Main logo container */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen">
         {/* Logo - much bigger */}
-        <div className={`transform transition-all duration-1000 ease-out ${
+        <div className={`-mb-8 transform transition-all duration-1000 ease-out ${
           phase === 'loading' 
             ? 'scale-50 opacity-0 translate-y-10' 
             : 'scale-100 opacity-100 translate-y-0'
