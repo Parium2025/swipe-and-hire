@@ -117,9 +117,9 @@ All colors MUST be HSL.
     max-width: 100%;
   }
   
-  /* Prevent any element from causing horizontal overflow */
-  *:not(html):not(body) {
-    overflow-x: clip !important;
+  /* Prevent page horizontal scroll without clipping children */
+  html, body, #root {
+    overflow-x: hidden !important;
   }
   /* Allow focus rings to render fully on interactive/form elements */
   input, textarea, select, button, [role="button"], .focus-ring-allow {
