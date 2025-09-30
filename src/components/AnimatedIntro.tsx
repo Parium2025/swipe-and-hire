@@ -39,9 +39,6 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
             : 'scale-100 opacity-100 translate-y-0'
         }`}>
           <div className="relative">
-            {/* Glow effect behind logo */}
-            <div className="absolute inset-0 blur-xl bg-secondary/40 rounded-full animate-pulse"></div>
-            
             {/* Logo image */}
             <img 
               src="/lovable-uploads/ad982286-50f2-4efc-946c-c3b288ff2553.png" 
