@@ -515,12 +515,9 @@ const AuthDesktop = ({
               </div>
             </div>
             
-            <h1 className="text-2xl lg:text-3xl font-semibold text-white mb-2">
-              Välkommen till Parium
-            </h1>
-            <p className="text-white/90 text-base lg:text-lg mb-4">
+            <h1 className="text-2xl lg:text-3xl font-semibold text-white mb-4">
               Framtiden börjar med ett swipe
-            </p>
+            </h1>
           </div>
 
           {/* Auth form */}

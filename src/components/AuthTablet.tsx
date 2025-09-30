@@ -515,12 +515,9 @@ const AuthTablet = ({
               </div>
             </div>
             
-            <h1 className="text-2xl md:text-3xl font-semibold text-white mb-2">
-              Välkommen till Parium
-            </h1>
-            <p className="text-white/90 text-base md:text-lg mb-4">
+            <h1 className="text-2xl md:text-3xl font-semibold text-white mb-4">
               Framtiden börjar med ett swipe
-            </p>
+            </h1>
           </div>
 
           {/* Auth form */}
