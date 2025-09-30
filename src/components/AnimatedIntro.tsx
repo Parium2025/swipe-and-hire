@@ -33,7 +33,7 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
       {/* Main logo container */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen">
         {/* Logo - much bigger */}
-        <div className={`-mb-8 transform transition-all duration-1000 ease-out ${
+        <div className={`-mb-12 transform transition-all duration-1000 ease-out ${
           phase === 'loading' 
             ? 'scale-50 opacity-0 translate-y-10' 
             : 'scale-100 opacity-100 translate-y-0'
@@ -42,18 +42,18 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
             <img 
               src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
               alt="Parium" 
-              className="relative h-48 md:h-56 w-auto"
+              className="relative h-56 md:h-64 w-auto"
             />
           </div>
         </div>
         
         {/* Subtitle text - crisp white with symmetrical spacing */}
-        <div className={`mt-6 transform transition-all duration-1000 delay-500 ease-out ${
+        <div className={`mt-4 transform transition-all duration-1000 delay-500 ease-out ${
           phase === 'loading' 
             ? 'scale-90 opacity-0 translate-y-5' 
             : 'scale-100 opacity-100 translate-y-0'
         }`}>
-          <p className="text-white text-center text-xl md:text-2xl font-medium">
+          <p className="text-white text-center text-xl md:text-2xl font-medium leading-tight">
             Din karriärresa börjar här
           </p>
         </div>
