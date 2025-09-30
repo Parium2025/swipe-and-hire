@@ -361,10 +361,10 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
         </div>
 
           {/* Bottom footer (consistent across slides) */}
-          <div className="absolute bottom-6 left-0 right-0">
+          <div className="absolute bottom-6 left-0 right-0 px-4">
             <div className="flex flex-col items-center gap-3">
               {/* Dots */}
-              <div className="flex justify-center space-x-3">
+              <div className="flex justify-center space-x-3 py-2">
                 {slides.map((_, index) => (
                   <button
                     key={index}
