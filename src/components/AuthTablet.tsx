@@ -500,7 +500,7 @@ const AuthTablet = ({
         {/* Header med logo och text */}
         <div className="flex-1 flex flex-col justify-center items-center px-6 pt-4 pb-6">
           <div className="text-center mb-8">
-            <div className="mb-0 -mb-20">
+            <div className="mb-0 -mb-22">
               <div className="relative mx-auto w-fit">
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
