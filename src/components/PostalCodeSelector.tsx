@@ -114,15 +114,15 @@ const PostalCodeSelector = ({
 
       {/* Resultat-ruta */}
       {foundLocation && isValid && !isLoading && (
-        <Card className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 backdrop-blur-sm border-green-500/20 p-4">
+        <Card className="bg-white/5 backdrop-blur-sm border-white/20 p-4">
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
-                <Check className="w-4 h-4 text-green-400" />
+              <div className="w-8 h-8 bg-secondary/20 rounded-full flex items-center justify-center">
+                <Check className="w-4 h-4 text-secondary" />
               </div>
             </div>
             <div className="flex-1">
-              <p className="text-sm text-white">Din plats:</p>
+              <p className="text-sm text-white/70">Din plats:</p>
               <p className="text-lg font-semibold text-white">
                 {foundLocation.city}
                 {foundLocation.area && foundLocation.area !== foundLocation.city && (
@@ -130,9 +130,9 @@ const PostalCodeSelector = ({
                 )}
               </p>
               {foundLocation.county && (
-                <p className="text-xs text-white">{foundLocation.county}</p>
+                <p className="text-xs text-white/70">{foundLocation.county}</p>
               )}
-              <p className="text-xs text-green-300 mt-0.5">
+              <p className="text-xs text-white/60 mt-0.5">
                 ✓ Verifierat med svensk postnummerdatabas
               </p>
             </div>
