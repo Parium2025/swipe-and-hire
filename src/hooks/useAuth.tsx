@@ -513,37 +513,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
-      // Sign out with global scope to clear all sessions
+      // 1) Ask Supabase to revoke/clear session (global scope)
       await supabase.auth.signOut({ scope: 'global' });
-      
-      // Explicitly clear all state
+
+      // 2) Proactively purge any lingering Supabase tokens from storage
+      // Supabase stores the auth token under: sb-<projectRef>-auth-token
+      const SUPABASE_REF = 'rvtsfnaqlnggfkoqygbm';
+      const tokenKey = `sb-${SUPABASE_REF}-auth-token`;
+      try {
+        // Remove the exact key if present
+        localStorage.removeItem(tokenKey);
+        // Fallback: remove any sb- keys to avoid stale sessions
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i) || '';
+          if (key.startsWith('sb-') || key.includes('supabase')) {
+            localStorage.removeItem(key);
+          }
+        }
+      } catch (e) {
+        console.warn('Could not purge localStorage tokens:', e);
+      }
+
+      // 3) Clear app state and sessionStorage
       setUser(null);
       setSession(null);
       setProfile(null);
       setUserRole(null);
       setOrganization(null);
-      
-      // Clear any localStorage items related to auth
-      localStorage.removeItem('supabase.auth.token');
-      sessionStorage.clear();
-      
-      toast({
-        title: "Utloggad",
-        description: "Du har loggats ut",
-        duration: 3000
-      });
-      
-      // Navigate to auth page
-      window.location.href = '/auth';
+      try { sessionStorage.clear(); } catch {}
+
+      // 4) Notify and hard-redirect to auth (prevents going back to a cached session)
+      toast({ title: 'Utloggad', description: 'Du har loggats ut', duration: 2000 });
+      window.location.replace('/auth');
     } catch (error) {
       console.error('Error signing out:', error);
-      // Even if there's an error, try to clear state and redirect
+      // Ensure we still clear and redirect even if API errors (e.g., 403 session_not_found)
       setUser(null);
       setSession(null);
       setProfile(null);
       setUserRole(null);
       setOrganization(null);
-      window.location.href = '/auth';
+      window.location.replace('/auth');
     }
   };
 
