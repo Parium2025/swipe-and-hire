@@ -21,7 +21,7 @@ import {
   ArrowLeft,
   Check
 } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 
 interface ProfileBuilderProps {
   onProfileCompleted: () => void;
@@ -76,10 +76,10 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
         
         video_url: formData.videoUrl
       });
-      toast.success('Profil skapad! Välkommen till Parium!');
+      toast({ title: 'Profil skapad!', description: 'Välkommen till Parium!' });
       onProfileCompleted();
     } catch (error) {
-      toast.error('Något gick fel. Försök igen.');
+      toast({ title: 'Något gick fel', description: 'Försök igen.', variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
