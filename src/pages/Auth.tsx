@@ -297,7 +297,7 @@ const Auth = () => {
     };
 
     handleAuthFlow();
-  }, [user, navigate, searchParams, confirmationStatus, recoveryStatus]);
+  }, [user, profile, navigate, searchParams, confirmationStatus, recoveryStatus]);
 
   
   // DIREKT EXPIRY-KONTROLL: Kolla OMEDELBART när isPasswordReset blir true
