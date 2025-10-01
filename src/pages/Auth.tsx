@@ -284,11 +284,17 @@ const Auth = () => {
       
       setIsPasswordReset(isReset);
       
-      // If user is logged in, redirect to home immediately (but not during recovery flow)
+      // If user is logged in, redirect to role-specific home immediately (but not during recovery flow)
       const hasRecoveryParamsNow = isReset || !!accessToken || !!refreshToken || !!tokenParam || !!tokenHashParam || tokenType === 'recovery';
       if (user && !hasRecoveryParamsNow && confirmationStatus === 'none' && recoveryStatus === 'none' && !confirmed) {
-        console.log('User is logged in, redirecting to app');
-        navigate('/search-jobs', { replace: true });
+        // Resolve role from Supabase metadata to avoid double-redirect flicker
+        const { data: userRes } = await supabase.auth.getUser();
+        const roleMeta = (userRes.user?.user_metadata as any)?.role;
+        const target = roleMeta === 'employer' ? '/dashboard' : '/search-jobs';
+        console.log('User is logged in, redirecting to', target, 'based on role:', roleMeta);
+        if (window.location.pathname !== target) {
+          navigate(target, { replace: true });
+        }
       }
     };
 
