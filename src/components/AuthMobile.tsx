@@ -501,7 +501,7 @@ const AuthMobile = ({
         <div className="flex-1 flex flex-col justify-center items-center px-6 pt-2 pb-6">
           <div className="text-center mb-8">
             <div className="-mb-7">
-              <div className="relative mx-auto w-fit">
+              <div className="relative mx-auto w-fit min-h-[176px] flex items-center justify-center">
                 {/* Glow effect bakom loggan - subtle och täcker hela loggan */}
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-56 h-40 bg-primary-glow/20 rounded-full blur-[35px]"></div>
@@ -515,7 +515,7 @@ const AuthMobile = ({
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
-                  className="relative h-40 w-auto scale-125"
+                  className="relative h-40 w-auto scale-125 will-change-transform"
                   width="400"
                   height="160"
                   loading="eager"
