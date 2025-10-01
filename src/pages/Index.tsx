@@ -44,16 +44,13 @@ const Index = () => {
       navigate('/auth');
       setIsInitializing(false);
     } else if (user && profile && location.pathname === '/') {
-      // Navigate based on user role (debounced to avoid auth flicker)
-      const t = setTimeout(() => {
-        if ((userRole?.role as string) === 'employer') {
-          if (location.pathname !== '/dashboard') navigate('/dashboard');
-        } else {
-          if (location.pathname !== '/search-jobs') navigate('/search-jobs');
-        }
-        setIsInitializing(false);
-      }, 750);
-      return () => clearTimeout(t);
+      // Navigate immediately based on user role
+      if ((userRole?.role as string) === 'employer') {
+        navigate('/dashboard', { replace: true });
+      } else {
+        navigate('/search-jobs', { replace: true });
+      }
+      setIsInitializing(false);
     } else if (user && profile && !location.pathname.startsWith('/profile') && !location.pathname.startsWith('/search-jobs') && !location.pathname.startsWith('/dashboard') && !location.pathname.startsWith('/company-profile') && !location.pathname.startsWith('/subscription') && !location.pathname.startsWith('/support') && !location.pathname.startsWith('/settings') && !location.pathname.startsWith('/billing') && !location.pathname.startsWith('/payment') && !location.pathname.startsWith('/consent')) {
       // Show profile selector only for admin (fredrikandits@hotmail.com)
       if (user.email === 'fredrikandits@hotmail.com') {
