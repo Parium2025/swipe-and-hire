@@ -156,9 +156,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
             Skapa ny annons
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-md bg-parium-gradient [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] pb-safe pt-[calc(env(safe-area-inset-top,0px)+1rem)]">
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 relative">
-            <CardHeader className="pb-4 pt-6">
+        <DialogContent className="max-w-md bg-parium-gradient [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] pb-safe flex items-start justify-center pt-20">
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 relative w-full">
+            <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white flex-1 text-center text-xl">
                   Skapa jobb
@@ -172,7 +172,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-              <CardDescription className="text-white text-center text-sm leading-snug">
+              <CardDescription className="text-white text-center text-sm leading-snug mt-2">
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
               </CardDescription>
             </CardHeader>
