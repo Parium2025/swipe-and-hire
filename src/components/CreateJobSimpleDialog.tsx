@@ -156,9 +156,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
             Skapa ny annons
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-md bg-parium-gradient [&>button]:hidden">
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 relative">
-            <CardHeader>
+        <DialogContent className="max-w-md bg-parium-gradient [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] pb-safe">
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 relative my-4">
+            <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white flex-1 text-center">
                   Skapa jobb
@@ -172,11 +172,11 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-              <CardDescription className="text-white text-center">
+              <CardDescription className="text-white text-center text-sm">
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4 px-4 pb-4">
               <div className="space-y-2">
                 <Label htmlFor="job-title" className="text-white">Titel</Label>
                 <Input
@@ -282,7 +282,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
               </div>
 
               {templates.length > 0 && (
-                <div className="text-center">
+                <div className="text-center pt-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -297,7 +297,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 </div>
               )}
 
-              <div className="flex gap-2 pt-4">
+              <div className="flex gap-2 pt-2">
                 <Button 
                   onClick={handleCreateJob}
                   disabled={loading || !jobTitle.trim()}
