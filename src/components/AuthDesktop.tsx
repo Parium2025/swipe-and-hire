@@ -215,10 +215,8 @@ const AuthDesktop = ({
             setShowResetPassword(true);
           }
         } else {
-          // Navigate to app after successful login based on actual user role
-          const { data: userRes } = await supabase.auth.getUser();
-          const roleMeta = (userRes.user?.user_metadata as any)?.role;
-          navigate(roleMeta === 'employer' ? '/dashboard' : '/search-jobs', { replace: true });
+          // Defer navigation to Auth page once profile is loaded to avoid white flicker
+          console.log('Login successful, waiting for profile to load before redirect');
         }
       } else {
         // Validate all required fields

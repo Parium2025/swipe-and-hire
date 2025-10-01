@@ -56,7 +56,7 @@ const Auth = () => {
   const [resending, setResending] = useState(false);
   const [resendMessage, setResendMessage] = useState('');
 
-  const { user, updatePassword, confirmEmail } = useAuth();
+  const { user, profile, updatePassword, confirmEmail } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const device = useDevice();
@@ -284,14 +284,12 @@ const Auth = () => {
       
       setIsPasswordReset(isReset);
       
-      // If user is logged in, redirect to role-specific home immediately (but not during recovery flow)
+      // If user is logged in, redirect to role-specific home after profile is ready (avoid white flicker)
       const hasRecoveryParamsNow = isReset || !!accessToken || !!refreshToken || !!tokenParam || !!tokenHashParam || tokenType === 'recovery';
-      if (user && !hasRecoveryParamsNow && confirmationStatus === 'none' && recoveryStatus === 'none' && !confirmed) {
-        // Resolve role from Supabase metadata to avoid double-redirect flicker
-        const { data: userRes } = await supabase.auth.getUser();
-        const roleMeta = (userRes.user?.user_metadata as any)?.role;
-        const target = roleMeta === 'employer' ? '/dashboard' : '/search-jobs';
-        console.log('User is logged in, redirecting to', target, 'based on role:', roleMeta);
+      if (user && profile && !hasRecoveryParamsNow && confirmationStatus === 'none' && recoveryStatus === 'none' && !confirmed) {
+        const role = (profile as any)?.role;
+        const target = role === 'employer' ? '/dashboard' : '/search-jobs';
+        console.log('User is logged in, redirecting to', target, 'based on profile role:', role);
         if (window.location.pathname !== target) {
           navigate(target, { replace: true });
         }
