@@ -68,7 +68,14 @@ const Index = () => {
   }, []);
 
   if (loading || isInitializing) {
-    return null; // Return nothing instead of loading screen for faster perceived load
+    // Show minimal transition overlay instead of white screen
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-parium">
+        <div className="animate-pulse">
+          <div className="h-12 w-12 rounded-full bg-white/20"></div>
+        </div>
+      </div>
+    );
   }
 
   if (!user || !profile) {

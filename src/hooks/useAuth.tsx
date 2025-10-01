@@ -423,12 +423,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error };
       }
 
-      toast({
-        title: "Välkommen tillbaka!",
-        description: "Du är nu inloggad",
-        duration: 3000
-      });
-
+      // No toast on success - immediate navigation for best UX
       return {};
     } catch (error: any) {
       toast({
