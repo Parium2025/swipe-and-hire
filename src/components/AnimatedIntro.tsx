@@ -41,8 +41,9 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
           <div className="relative">
             {/* Glow layers behind logo */}
             <div className="absolute inset-0 -inset-x-8 -inset-y-4 flex items-center justify-center">
-              <div className="absolute w-48 h-32 bg-primary-glow/25 rounded-full blur-3xl"></div>
-              <div className="absolute w-36 h-20 bg-primary-glow/20 rounded-full blur-2xl"></div>
+              <div className="absolute w-52 h-36 bg-primary-glow/35 rounded-full blur-3xl"></div>
+              <div className="absolute w-40 h-24 bg-primary-glow/30 rounded-full blur-2xl"></div>
+              <div className="absolute w-32 h-16 bg-primary-glow/25 rounded-full blur-xl"></div>
             </div>
             
             {/* Logo */}
