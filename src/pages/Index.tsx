@@ -44,8 +44,8 @@ const Index = () => {
       navigate('/auth');
       setIsInitializing(false);
     } else if (user && profile && location.pathname === '/') {
-      // Navigate immediately based on user role
-      if ((userRole?.role as string) === 'employer') {
+      // Navigate immediately based on profile role (avoid flicker to job seeker)
+      if ((profile as any)?.role === 'employer') {
         navigate('/dashboard', { replace: true });
       } else {
         navigate('/search-jobs', { replace: true });

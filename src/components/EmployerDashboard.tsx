@@ -10,6 +10,7 @@ import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2 } from 'lucide-react';
 import CreateJobSimpleDialog from '@/components/CreateJobSimpleDialog';
 import EditJobDialog from '@/components/EditJobDialog';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface JobPosting {
   id: string;
@@ -151,15 +152,6 @@ const EmployerDashboard = () => {
     return '';
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <h2 className="text-xl">Laddar dina annonser...</h2>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -170,35 +162,79 @@ const EmployerDashboard = () => {
         </p>
       </div>
 
-      {/* Stats Overview */}
+      {/* Stats Overview - med skeleton när loading */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="pb-2">
             <CardDescription className="text-white">Totalt annonser</CardDescription>
-            <CardTitle className="text-2xl text-white">{jobs.length}</CardTitle>
+            {loading ? (
+              <Skeleton className="h-8 w-16 bg-white/20" />
+            ) : (
+              <CardTitle className="text-2xl text-white">{jobs.length}</CardTitle>
+            )}
           </CardHeader>
         </Card>
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="pb-2">
             <CardDescription className="text-white">Aktiva annonser</CardDescription>
-            <CardTitle className="text-2xl text-white">
-              {jobs.filter(job => job.is_active).length}
-            </CardTitle>
+            {loading ? (
+              <Skeleton className="h-8 w-16 bg-white/20" />
+            ) : (
+              <CardTitle className="text-2xl text-white">
+                {jobs.filter(job => job.is_active).length}
+              </CardTitle>
+            )}
           </CardHeader>
         </Card>
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="pb-2">
             <CardDescription className="text-white">Totala visningar</CardDescription>
-            <CardTitle className="text-2xl text-white">
-              {jobs.reduce((sum, job) => sum + job.views_count, 0)}
-            </CardTitle>
+            {loading ? (
+              <Skeleton className="h-8 w-16 bg-white/20" />
+            ) : (
+              <CardTitle className="text-2xl text-white">
+                {jobs.reduce((sum, job) => sum + job.views_count, 0)}
+              </CardTitle>
+            )}
           </CardHeader>
         </Card>
       </div>
 
-      {/* Job Listings */}
+      {/* Job Listings - med skeleton när loading */}
       <div className="space-y-4">
-        {jobs.length === 0 ? (
+        {loading ? (
+          // Loading skeleton - 3 placeholder cards
+          Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-6 w-1/3 bg-white/20" />
+                    <div className="flex gap-4">
+                      <Skeleton className="h-4 w-20 bg-white/20" />
+                      <Skeleton className="h-4 w-20 bg-white/20" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-6 w-12 bg-white/20" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-4 w-full bg-white/20 mb-2" />
+                <Skeleton className="h-4 w-2/3 bg-white/20 mb-4" />
+                <div className="flex justify-between">
+                  <div className="flex gap-4">
+                    <Skeleton className="h-4 w-16 bg-white/20" />
+                    <Skeleton className="h-4 w-16 bg-white/20" />
+                  </div>
+                  <div className="flex gap-2">
+                    <Skeleton className="h-8 w-20 bg-white/20" />
+                    <Skeleton className="h-8 w-20 bg-white/20" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        ) : jobs.length === 0 ? (
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardContent className="text-center py-12">
               <h3 className="text-lg font-semibold mb-2 text-white">Inga annonser än</h3>

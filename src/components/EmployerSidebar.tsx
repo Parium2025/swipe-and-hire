@@ -35,7 +35,7 @@ import { convertToSignedUrl } from "@/utils/storageUtils";
 const employerNavItems = [
   {
     title: "Dashboard",
-    url: "/",
+    url: "/dashboard",
     icon: BarChart3,
     group: "huvudmeny"
   },
