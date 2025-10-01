@@ -163,10 +163,18 @@ const Index = () => {
   // Show app intro tutorial after onboarding
   const showTourOverlay = showIntroTutorial;
   
+  // Resolve role from profile first to avoid flicker
+  const role = (profile as any)?.role || (userRole?.role as string) || '';
+
+  // While role is resolving, keep seamless background
+  if (user && profile && !role) {
+    return <div className="min-h-screen bg-gradient-parium" />;
+  }
+  
   // For employers, check if profile needs setup (basic info missing) - except for admin emails
   const needsProfileSetup = !profile.bio && !profile.location && !profile.profile_image_url;
   const isAdminEmail = user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com';
-  if (needsProfileSetup && (userRole?.role as string) === 'employer' && !isAdminEmail) {
+  if (needsProfileSetup && role === 'employer' && !isAdminEmail) {
     console.log('Showing ProfileSetup for employer');
     return <ProfileSetup />;
   }
@@ -175,7 +183,7 @@ const Index = () => {
   const sidebarRoutes = ['/profile', '/search-jobs', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/consent', '/templates'];
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
 
-  if (isSidebarRoute && (userRole?.role as string) !== 'employer') {
+  if (isSidebarRoute && role !== 'employer') {
     // Redirect job seekers from employer routes
     if (location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/company-profile')) {
       return <Navigate to="/search-jobs" replace />;
@@ -246,7 +254,7 @@ const Index = () => {
   }
 
   // Show employer dashboard with sidebar for employers
-  if ((userRole?.role as string) === 'employer') {
+  if (role === 'employer') {
     // Redirect employer from job seeker routes
     if (location.pathname === '/search-jobs') {
       return <Navigate to="/dashboard" replace />;

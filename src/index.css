@@ -168,6 +168,13 @@ All colors MUST be HSL.
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
+  /* Global background gradient to avoid white flash */
+  html, body {
+    background: var(--gradient-parium) fixed;
+    background-size: cover;
+    background-attachment: fixed;
+  }
+
   /* iOS Safari: force full-bleed gradient on html/body so status area isn't white */
   @supports (padding: env(safe-area-inset-top)) {
     html, body {
