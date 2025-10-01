@@ -143,12 +143,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Prevent rapid state updates by debouncing
-          setTimeout(() => {
-            if (mounted) {
-              fetchUserData(session.user.id);
-            }
-          }, 100); // Small delay to prevent flicker
+          // Fetch user data immediately without delay
+          fetchUserData(session.user.id);
         } else {
           setProfile(null);
           setUserRole(null);

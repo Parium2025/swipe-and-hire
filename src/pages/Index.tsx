@@ -68,13 +68,7 @@ const Index = () => {
   }, []);
 
   if (loading || isInitializing) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl text-white">Laddar...</h2>
-        </div>
-      </div>
-    );
+    return null; // Return nothing instead of loading screen for faster perceived load
   }
 
   if (!user || !profile) {
