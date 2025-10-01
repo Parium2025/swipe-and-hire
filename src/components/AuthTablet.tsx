@@ -528,7 +528,7 @@ const AuthTablet = ({
               </div>
             </div>
             
-            <h1 className="text-2xl md:text-3xl font-semibold text-white mb-4">
+            <h1 className="text-2xl md:text-3xl font-semibold text-white mb-4 relative z-10 [color:rgb(255,255,255)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
               Framtiden börjar med ett swipe
             </h1>
           </div>
