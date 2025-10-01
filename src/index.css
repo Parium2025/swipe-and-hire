@@ -181,6 +181,9 @@ All colors MUST be HSL.
       background: var(--gradient-parium) fixed;
       background-size: cover;
       background-attachment: fixed;
+      min-height: calc(100vh + env(safe-area-inset-top));
+      padding-top: env(safe-area-inset-top);
+      margin-top: calc(-1 * env(safe-area-inset-top));
     }
   }
 
