@@ -68,14 +68,7 @@ const Index = () => {
   }, []);
 
   if (loading || isInitializing) {
-    // Show minimal transition overlay instead of white screen
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-parium">
-        <div className="animate-pulse">
-          <div className="h-12 w-12 rounded-full bg-white/20"></div>
-        </div>
-      </div>
-    );
+    return null; // Ingen mellan-overlay för att undvika extra steg
   }
 
   if (!user || !profile) {
