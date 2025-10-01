@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -214,8 +215,10 @@ const AuthMobile = ({
             setShowResetPassword(true);
           }
         } else {
-          // Navigate to app after successful login
-          navigate('/search-jobs', { replace: true });
+          // Navigate to app after successful login based on actual user role
+          const { data: userRes } = await supabase.auth.getUser();
+          const roleMeta = (userRes.user?.user_metadata as any)?.role;
+          navigate(roleMeta === 'employer' ? '/dashboard' : '/search-jobs', { replace: true });
         }
       } else {
         // Validate all required fields
