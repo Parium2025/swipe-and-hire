@@ -45,7 +45,6 @@ const AnimatedIntro = ({ onComplete }: AnimatedIntroProps) => {
               <div className="absolute w-52 h-36 bg-primary-glow/22 rounded-full blur-3xl"></div>
               <div className="absolute w-44 h-28 bg-primary-glow/20 rounded-full blur-2xl"></div>
               <div className="absolute w-36 h-20 bg-primary-glow/18 rounded-full blur-xl"></div>
-              <div className="absolute w-28 h-16 bg-primary-glow/15 rounded-full blur-lg"></div>
             </div>
             
             {/* Logo */}

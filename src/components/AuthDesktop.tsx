@@ -515,9 +515,6 @@ const AuthDesktop = ({
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-36 h-20 bg-primary-glow/18 rounded-full blur-[25px]"></div>
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                  <div className="w-28 h-16 bg-primary-glow/15 rounded-full blur-[20px]"></div>
-                </div>
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
