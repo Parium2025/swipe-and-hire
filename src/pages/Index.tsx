@@ -68,7 +68,12 @@ const Index = () => {
   }, []);
 
   if (loading || isInitializing) {
-    return null; // Ingen mellan-overlay för att undvika extra steg
+    // Render samma gradient som auth-sidan för seamless transition
+    return (
+      <div className="min-h-screen bg-gradient-parium">
+        {/* Tomma för snabb övergång utan vit flicker */}
+      </div>
+    );
   }
 
   if (!user || !profile) {
