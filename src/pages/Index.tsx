@@ -40,47 +40,64 @@ const Index = () => {
   const location = useLocation();
 
   useEffect(() => {
-    if (!loading && !user) {
+    // Wait for auth to finish loading
+    if (loading) return;
+
+    // No user -> redirect to auth
+    if (!user) {
       navigate('/auth');
       setIsInitializing(false);
-    } else if (user && profile && location.pathname === '/') {
-      // Navigate immediately based on profile role (avoid flicker to job seeker)
-      if ((profile as any)?.role === 'employer') {
+      return;
+    }
+
+    // User exists but profile not loaded yet -> keep waiting with gradient background
+    if (!profile) {
+      return;
+    }
+
+    // Both user AND profile loaded -> redirect based on role
+    const role = (profile as any)?.role;
+    if (location.pathname === '/') {
+      if (role === 'employer') {
+        console.log('✅ Index: Redirecting employer to /dashboard');
         navigate('/dashboard', { replace: true });
       } else {
+        console.log('✅ Index: Redirecting job seeker to /search-jobs');
         navigate('/search-jobs', { replace: true });
       }
       setIsInitializing(false);
-    } else if (user && profile && !location.pathname.startsWith('/profile') && !location.pathname.startsWith('/search-jobs') && !location.pathname.startsWith('/dashboard') && !location.pathname.startsWith('/company-profile') && !location.pathname.startsWith('/subscription') && !location.pathname.startsWith('/support') && !location.pathname.startsWith('/settings') && !location.pathname.startsWith('/billing') && !location.pathname.startsWith('/payment') && !location.pathname.startsWith('/consent')) {
-      // Show profile selector only for admin (fredrikandits@hotmail.com)
+      return;
+    }
+
+    // Show profile selector only for admin
+    if (!location.pathname.startsWith('/profile') && 
+        !location.pathname.startsWith('/search-jobs') && 
+        !location.pathname.startsWith('/dashboard') && 
+        !location.pathname.startsWith('/company-profile') && 
+        !location.pathname.startsWith('/subscription') && 
+        !location.pathname.startsWith('/support') && 
+        !location.pathname.startsWith('/settings') && 
+        !location.pathname.startsWith('/billing') && 
+        !location.pathname.startsWith('/payment') && 
+        !location.pathname.startsWith('/consent')) {
       if (user.email === 'fredrikandits@hotmail.com') {
         setShowProfileSelector(true);
       }
-      setIsInitializing(false);
-    } else if (user && profile) {
-      setIsInitializing(false);
     }
-  }, [user, loading, navigate, profile, location.pathname, userRole]);
+    
+    setIsInitializing(false);
+  }, [user, loading, navigate, profile, location.pathname]);
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => setUiReady(true));
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  if (loading || isInitializing) {
-    // Render samma gradient som auth-sidan för seamless transition
+  // Show gradient background during ALL loading states (no white screen ever)
+  if (loading || isInitializing || !user || !profile) {
     return (
       <div className="min-h-screen bg-gradient-parium">
-        {/* Tomma för snabb övergång utan vit flicker */}
-      </div>
-    );
-  }
-
-  if (!user || !profile) {
-    // Fortsätt visa samma gradient-bakgrund tills både user och profile är redo
-    return (
-      <div className="min-h-screen bg-gradient-parium">
-        {/* Håller skärmen mörk och sömlös medan profilen laddas */}
+        {/* Seamless transition - no white flicker */}
       </div>
     );
   }

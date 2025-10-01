@@ -284,13 +284,13 @@ const Auth = () => {
       
       setIsPasswordReset(isReset);
       
-      // If user is logged in, redirect to role-specific home after profile is ready (avoid white flicker)
+      // If user is logged in AND profile is loaded, redirect immediately to role-specific home
       const hasRecoveryParamsNow = isReset || !!accessToken || !!refreshToken || !!tokenParam || !!tokenHashParam || tokenType === 'recovery';
       if (user && profile && !hasRecoveryParamsNow && confirmationStatus === 'none' && recoveryStatus === 'none' && !confirmed) {
         const role = (profile as any)?.role;
-        const target = role === 'employer' ? '/dashboard' : '/search-jobs';
-        console.log('User is logged in, redirecting to', target, 'based on profile role:', role);
-        if (window.location.pathname !== target) {
+        if (role) {
+          const target = role === 'employer' ? '/dashboard' : '/search-jobs';
+          console.log('✅ Auth: Redirecting to', target, 'for role:', role);
           navigate(target, { replace: true });
         }
       }
