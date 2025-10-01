@@ -26,7 +26,7 @@ All colors MUST be HSL.
     /* Parium Navy Blue (från loggan) */
     --primary: 215 100% 12%;
     --primary-foreground: 210 40% 98%;
-    --primary-glow: 200 100% 70%;
+    --primary-glow: 200 100% 60%;
 
     /* Parium Light Blue (från loggans ringar) */
     --secondary: 200 100% 60%;
@@ -302,7 +302,7 @@ All colors MUST be HSL.
   list-style: none;
   width: 20px;
   height: 20px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   animation: animate 25s linear infinite;
   bottom: -150px;
   border-radius: 50%;

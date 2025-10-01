@@ -156,8 +156,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
             Skapa ny annons
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-md bg-parium-gradient [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] pb-safe">
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 relative w-full mt-16">
+        <DialogContent className="max-w-md bg-parium-gradient [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] pb-safe" style={{ paddingTop: 'max(64px, env(safe-area-inset-top, 0px))' }}>
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 relative w-full">
             <CardHeader className="pb-4 pt-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white flex-1 text-center text-xl">
