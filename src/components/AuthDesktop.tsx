@@ -501,7 +501,7 @@ const AuthDesktop = ({
         <div className="flex-1 flex flex-col justify-center items-center px-6 pt-6 pb-6">
           <div className="text-center mb-8">
             <div className="mb-4">
-              <div className="relative mx-auto w-fit min-h-[224px] lg:min-h-[256px] flex items-center justify-center">
+              <div className="relative mx-auto w-fit min-h-[240px] lg:min-h-[280px] flex items-center justify-center">
                 {/* Glow effect bakom loggan - subtle och täcker hela loggan */}
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-64 h-44 bg-primary-glow/25 rounded-full blur-[40px]"></div>
@@ -518,7 +518,7 @@ const AuthDesktop = ({
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
-                  className="relative h-48 w-auto lg:h-56 scale-125 will-change-transform"
+                  className="relative h-60 w-auto lg:h-[280px]"
                   width="400"
                   height="160"
                   loading="eager"

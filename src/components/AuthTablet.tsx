@@ -501,7 +501,7 @@ const AuthTablet = ({
         <div className="flex-1 flex flex-col justify-center items-center px-6 pt-4 pb-6">
           <div className="text-center mb-8">
             <div className="mb-4">
-              <div className="relative mx-auto w-fit min-h-[192px] md:min-h-[224px] flex items-center justify-center">
+              <div className="relative mx-auto w-fit min-h-[224px] md:min-h-[240px] flex items-center justify-center">
                 {/* Glow effect bakom loggan - subtle och täcker hela loggan */}
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-64 h-44 bg-primary-glow/25 rounded-full blur-[40px]"></div>
@@ -518,7 +518,7 @@ const AuthTablet = ({
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
-                  className="relative h-44 w-auto md:h-48 scale-125 will-change-transform"
+                  className="relative h-[224px] w-auto md:h-[240px]"
                   width="400"
                   height="160"
                   loading="eager"
