@@ -77,7 +77,12 @@ const Index = () => {
   }
 
   if (!user || !profile) {
-    return null;
+    // Fortsätt visa samma gradient-bakgrund tills både user och profile är redo
+    return (
+      <div className="min-h-screen bg-gradient-parium">
+        {/* Håller skärmen mörk och sömlös medan profilen laddas */}
+      </div>
+    );
   }
 
   if (location.pathname === '/') {
