@@ -953,7 +953,7 @@ const Auth = () => {
     }
     
     return (
-      <div className="min-h-dvh bg-gradient-parium flex items-center justify-center p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div className="min-h-dvh flex items-center justify-center p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
         <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
           <CardContent className="p-8 text-center space-y-4">
             <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
@@ -997,7 +997,7 @@ const Auth = () => {
   // Visa bekräftelsestatus om det finns en
   if (confirmationStatus !== 'none') {
     return (
-      <div className="min-h-dvh bg-gradient-parium flex items-center justify-center p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div className="min-h-dvh flex items-center justify-center p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
         <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
           <CardContent className="p-8 text-center">
             {confirmationStatus === 'success' && (
@@ -1106,7 +1106,7 @@ const Auth = () => {
             // Använd ett annat approach - sätt bara expired status direkt
               return (
                 <div 
-                  className="bg-gradient-parium flex items-center justify-center p-4 smooth-scroll touch-pan" 
+                  className="flex items-center justify-center p-4 smooth-scroll touch-pan" 
                   style={{ 
                     WebkitOverflowScrolling: 'touch',
                     minHeight: 'calc(100dvh + env(safe-area-inset-bottom, 0px))',

@@ -182,23 +182,12 @@ All colors MUST be HSL.
       overflow: hidden;
       width: 100%;
       height: 100%;
-      background: hsl(215 100% 12%) !important; /* solid base to avoid seams */
+      background: transparent !important; /* use #app-bg for painting */
     }
 
-    /* Paint gradient on its own fixed layer that overscans the viewport */
-    body::before {
-      content: "";
-      position: fixed;
-      top: -20px;
-      left: -20px;
-      right: -20px;
-      bottom: calc(-20px - env(safe-area-inset-bottom, 0)); /* extend past bottom safe area */
-      background: var(--gradient-parium);
-      background-size: cover;
-      background-repeat: no-repeat;
-      pointer-events: none;
-      z-index: 0;
-    }
+    /* Disable extra body overlay; use #app-bg instead */
+    body::before { content: none !important; }
+
 
     #root {
       position: relative;
@@ -285,22 +274,10 @@ All colors MUST be HSL.
       @media (display-mode: standalone) {
         html, body {
           min-height: calc(100dvh + env(safe-area-inset-top) + env(safe-area-inset-bottom));
-          background: var(--gradient-parium) fixed !important;
-          background-size: cover;
-          background-attachment: fixed;
+          background: transparent !important; /* rely on #app-bg */
         }
-        /* Paint gradient under the home indicator too */
-        body::after {
-          content: "";
-          position: fixed;
-          top: -20px;
-          left: -20px;
-          right: -20px;
-          bottom: calc(-20px - env(safe-area-inset-bottom, 0px));
-          background: var(--gradient-parium);
-          pointer-events: none;
-          z-index: 0;
-        }
+        /* Disable extra overlay under home indicator */
+        body::after { content: none !important; }
         #root { position: relative; z-index: 1; }
       }
   }

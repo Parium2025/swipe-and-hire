@@ -418,7 +418,7 @@ const AuthTablet = ({
   if (isPasswordReset) {
     return (
       <div 
-        className="bg-gradient-parium flex items-center justify-center p-4 auth-dark smooth-scroll touch-pan" 
+        className="flex items-center justify-center p-4 auth-dark smooth-scroll touch-pan" 
         style={{ 
           WebkitOverflowScrolling: 'touch',
           minHeight: 'calc(100dvh + env(safe-area-inset-bottom, 0px))',
@@ -474,7 +474,7 @@ const AuthTablet = ({
 
   return (
     <div 
-      className="bg-gradient-parium flex flex-col relative auth-dark smooth-scroll touch-pan" 
+      className="flex flex-col relative auth-dark smooth-scroll touch-pan" 
       style={{ 
         WebkitOverflowScrolling: 'touch',
         minHeight: 'calc(100dvh + env(safe-area-inset-bottom, 0px))',

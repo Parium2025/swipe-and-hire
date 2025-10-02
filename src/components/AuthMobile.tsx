@@ -430,7 +430,7 @@ const AuthMobile = ({
   if (isPasswordReset) {
     return (
       <div 
-        className="bg-gradient-parium flex items-center justify-center p-4 auth-dark" 
+        className="flex items-center justify-center p-4 auth-dark" 
         style={{ 
           WebkitOverflowScrolling: 'touch', 
           touchAction: 'pan-y',
@@ -487,7 +487,7 @@ const AuthMobile = ({
 
   return (
     <div 
-      className="bg-gradient-parium flex flex-col relative auth-dark" 
+      className="flex flex-col relative auth-dark" 
       style={{ 
         WebkitOverflowScrolling: 'touch', 
         touchAction: 'pan-y',
