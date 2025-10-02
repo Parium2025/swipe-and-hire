@@ -555,7 +555,7 @@ const AuthTablet = ({
           {/* Auth form */}
           <div className="w-full max-w-md md:max-w-lg">
             <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden">
-              <CardContent className="p-6 md:p-8 auth-form-scroll">
+              <CardContent className="p-6 md:p-8">
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => {
                    setIsLogin(value === 'login');
                    setHasRegistered(false); // Låt upp knappen när användaren byter flik
