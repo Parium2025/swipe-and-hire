@@ -632,10 +632,18 @@ All colors MUST be HSL.
     position: fixed;
     inset: 0;
     width: 100%;
-    height: 100dvh; /* dynamisk vh för mobil */
+    height: calc(100dvh + env(safe-area-inset-bottom, 0px)); /* inkludera bottom safe area */
     overflow: hidden;
     overscroll-behavior: none;
     touch-action: pan-x; /* blockera vertikal scroll men tillåt swipe i x */
     -webkit-overflow-scrolling: auto;
+  }
+  
+  /* I standalone mode, säkerställ att background täcker hela vägen ner */
+  @media (display-mode: standalone) {
+    html.auth-locked, body.auth-locked,
+    html.auth-lock, body.auth-lock {
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
   }
 }
