@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation, Navigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import JobTemplatesOverview from '@/components/JobTemplatesOverview';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -40,16 +40,9 @@ const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Extra säkerhetsnät: om vi fastnar i loading på vissa mobila webbläsare
-  useEffect(() => {
-    const t = setTimeout(() => {
-      // Om användaren fortfarande inte är laddad efter 2s - gå till /auth
-      if (!user) {
-        navigate('/auth', { replace: true });
-      }
-    }, 2000);
-    return () => clearTimeout(t);
-  }, [user, navigate]);
+  // Borttagen aggressiv fallback till /auth som skapade loopar
+  // Vi navigerar nu endast när auth-loading är klar (se effekten nedan)
+
 
   useEffect(() => {
     // Wait for auth to finish loading
@@ -102,25 +95,14 @@ const Index = () => {
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => setUiReady(true));
-    // Visa CTA om vi fastnar
-    const ctaTimer = setTimeout(() => setShowAuthCTA(true), 1200);
     return () => {
       cancelAnimationFrame(raf);
-      clearTimeout(ctaTimer);
     };
   }, []);
 
-  // Show gradient background during ALL loading states (no white screen ever)
   if (loading || isInitializing) {
     return (
-      <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan flex items-center justify-center p-6" style={{ WebkitOverflowScrolling: 'touch' }}>
-        {showAuthCTA && (
-          <div className="text-center text-white/90">
-            <p className="mb-3">Laddar… Om inget händer, gå till inloggningen.</p>
-            <Link to="/auth" className="underline">Gå till /auth</Link>
-          </div>
-        )}
-      </div>
+      <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />
     );
   }
 

@@ -227,34 +227,8 @@ const AuthMobile = ({
             setShowResetPassword(true);
           }
         } else {
-          // Lyckad inloggning – vänta kort på Auth-redirect, annars fallback
-          console.log('Login successful, waiting for profile to load before redirect');
-          setTimeout(async () => {
-            try {
-              const { data: { session } } = await supabase.auth.getSession();
-              if (session?.user) {
-                const { data: profileData } = await supabase
-                  .from('profiles')
-                  .select('*')
-                  .eq('user_id', session.user.id)
-                  .maybeSingle();
-                if (profileData) {
-                  const { data: roleData } = await supabase
-                    .from('user_roles')
-                    .select('role')
-                    .eq('user_id', session.user.id)
-                    .eq('is_active', true)
-                    .maybeSingle();
-                  const userRole = roleData?.role;
-                  const target = userRole === 'employer' ? '/dashboard' : '/search-jobs';
-                  console.log('⚠️ Fallback redirect after 2s timeout to:', target);
-                  navigate(target, { replace: true });
-                }
-              }
-            } catch (error) {
-              console.error('Fallback redirect error:', error);
-            }
-          }, 2000);
+          // Lyckad inloggning – navigera direkt så Index hanterar resten
+          navigate('/', { replace: true });
         }
       } else {
         // Validate all required fields
