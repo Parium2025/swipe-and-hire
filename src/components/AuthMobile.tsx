@@ -514,22 +514,22 @@ const AuthMobile = ({
       </div>
 
       <div className="relative z-10 flex flex-col min-h-screen justify-center" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        {/* Header med logo och text */}
-        <div className="flex flex-col justify-center items-center px-6 py-8">
+        {/* Header med logo och text - fixed position så den inte flyttar sig */}
+        <div className="flex flex-col items-center px-6 py-8">
           <div className="text-center mb-8">
             <div className="-mb-7">
-              <div className="relative mx-auto w-fit min-h-[200px] flex items-center justify-center">
-                {/* Glow effect bakom loggan - subtle och täcker hela loggan */}
-                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
+              <div className="relative mx-auto w-fit h-[200px] flex items-center justify-center">
+                {/* Glow effect bakom loggan - fixed så den alltid är på samma plats */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                   <div className="w-64 h-44 bg-primary-glow/25 rounded-full blur-[40px]"></div>
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                   <div className="w-52 h-36 bg-primary-glow/22 rounded-full blur-[35px]"></div>
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                   <div className="w-44 h-28 bg-primary-glow/20 rounded-full blur-[30px]"></div>
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                   <div className="w-36 h-20 bg-primary-glow/18 rounded-full blur-[25px]"></div>
                 </div>
                 <img 
