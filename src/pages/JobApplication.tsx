@@ -338,8 +338,8 @@ const JobApplication = () => {
     'Deltidsanställd om minst 50%'
   ];
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800">
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
       {/* Header */}
       <div className="bg-gray-800 text-white p-4 sticky top-0 z-10">
         <div className="flex items-center justify-between">

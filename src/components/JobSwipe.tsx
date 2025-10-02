@@ -216,7 +216,7 @@ const JobSwipe = () => {
   const currentJob = jobs[currentJobIndex];
 
   return (
-    <div className="max-w-md mx-auto p-4">
+    <div className="max-w-md mx-auto p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
       <div className="mb-4 text-center">
         <h2 className="text-xl font-bold">Upptäck jobb</h2>
         <p className="text-sm text-muted-foreground">

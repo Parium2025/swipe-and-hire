@@ -154,7 +154,7 @@ const EmployerDashboard = () => {
 
 
   return (
-    <div className="space-y-6 px-4 py-6 sm:px-6 pb-safe min-h-screen">
+    <div className="space-y-6 px-4 py-6 sm:px-6 pb-safe min-h-screen smooth-scroll touch-pan no-overscroll" style={{ WebkitOverflowScrolling: 'touch' }}>
       <div className="text-center">
         <h1 className="text-2xl sm:text-3xl font-bold text-white">Mina jobbannonser</h1>
         <p className="text-white/90 mt-1 text-sm sm:text-base">

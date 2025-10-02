@@ -118,7 +118,7 @@ const ResetRedirect = () => {
 
   if (!isInAppBrowser) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-glow to-primary-dark flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-glow to-primary-dark flex items-center justify-center p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
         <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
           <CardContent className="p-8 text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-foreground mx-auto mb-4"></div>
@@ -131,7 +131,7 @@ const ResetRedirect = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary via-primary-glow to-primary-dark flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary via-primary-glow to-primary-dark flex items-center justify-center p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
       <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
         <CardContent className="p-8 text-center">
           <AlertTriangle className="h-16 w-16 text-yellow-500 mx-auto mb-4" />

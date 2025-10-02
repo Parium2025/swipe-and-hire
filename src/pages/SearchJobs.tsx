@@ -461,7 +461,7 @@ const SearchJobs = () => {
   const companySuggestions = getCompanySuggestions(searchTerm);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-4 relative">
+    <div className="max-w-7xl mx-auto space-y-4 relative smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
       
       {/* Main content */}
       {/* Hero Section */}

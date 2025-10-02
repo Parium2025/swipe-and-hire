@@ -96,7 +96,7 @@ const Index = () => {
   // Show gradient background during ALL loading states (no white screen ever)
   if (loading || isInitializing || !user || !profile) {
     return (
-      <div className="min-h-screen bg-gradient-parium">
+      <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
         {/* Seamless transition - no white flicker */}
       </div>
     );
@@ -185,7 +185,7 @@ const Index = () => {
 
   // While role is resolving, keep seamless background
   if (user && profile && !role) {
-    return <div className="min-h-screen bg-gradient-parium" />;
+    return <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />;
   }
   
   // For employers, check if profile needs setup (basic info missing) - except for admin emails
@@ -235,7 +235,7 @@ const Index = () => {
 
     return (
       <SidebarProvider>
-        <div className="min-h-screen flex w-full overflow-x-hidden">
+        <div className="min-h-screen flex w-full overflow-x-hidden smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
           {uiReady ? <AppSidebar /> : null}
           <div className="flex-1 flex flex-col overflow-x-hidden">
             <header className="sticky top-0 z-40 h-16 flex items-center justify-between border-b bg-white/10 backdrop-blur-sm px-6">
@@ -305,7 +305,7 @@ const Index = () => {
 
     return (
       <SidebarProvider>
-        <div className="min-h-screen flex w-full overflow-x-hidden">
+        <div className="min-h-screen flex w-full overflow-x-hidden smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
           {uiReady ? <EmployerSidebar /> : null}
           <div className="flex-1 flex flex-col overflow-x-hidden">
             <header className="sticky top-0 z-40 h-16 flex items-center justify-between border-b bg-white/10 backdrop-blur-sm px-6">
@@ -342,7 +342,7 @@ const Index = () => {
 
   // Show job seeker swipe view for job seekers
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
       <header className="border-b border-white/20 bg-white/10 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
           <div>

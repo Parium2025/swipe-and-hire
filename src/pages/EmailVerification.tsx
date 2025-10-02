@@ -116,7 +116,7 @@ const EmailVerification = () => {
 
   if (status === 'success') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-glow to-primary-dark flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-glow to-primary-dark flex items-center justify-center p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
         <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
           <CardContent className="p-8 text-center">
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
@@ -137,7 +137,7 @@ const EmailVerification = () => {
 
   if (status === 'error') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-glow to-primary-dark flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-glow to-primary-dark flex items-center justify-center p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
         <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
           <CardContent className="p-8 text-center">
             <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
@@ -157,7 +157,7 @@ const EmailVerification = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary via-primary-glow to-primary-dark flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary via-primary-glow to-primary-dark flex items-center justify-center p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
       <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
         <CardContent className="p-8">
           <div className="text-center mb-6">
