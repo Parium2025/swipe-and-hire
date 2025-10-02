@@ -35,7 +35,7 @@ const App = () => {
           <div className="min-h-screen bg-parium-gradient safe-area-content overflow-x-hidden w-full max-w-full">
             {/* Static animated background - identical to WelcomeTunnel */}
             <div className="fixed inset-0 pointer-events-none z-0 bg-parium-gradient overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
+              
               
               {/* Animated floating elements */}
               <div className="fixed top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce pointer-events-none z-[1]" style={{ animationDuration: '2s' }}></div>

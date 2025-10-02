@@ -469,7 +469,7 @@ const AuthDesktop = ({
     <div className="min-h-screen bg-gradient-parium flex flex-col relative auth-dark overflow-y-auto smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
       {/* Static animated background - won't re-render */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
+        
         
         {/* Animated floating elements - now stable */}
         <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce" style={{ animationDuration: '2s' }}></div>

@@ -1182,7 +1182,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     <div className="min-h-screen bg-gradient-parium flex flex-col relative overflow-x-hidden">
       {/* Static animated background - identical to AuthMobile */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
+        
         
         {/* Animated floating elements - completely isolated from layout changes */}
         <div className="fixed top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce pointer-events-none z-[1]" style={{ animationDuration: '2s' }}></div>
