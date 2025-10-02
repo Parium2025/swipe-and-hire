@@ -188,7 +188,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
             Lägg till egna frågor som jobbsökare måste svara på
           </p>
         </div>
-        <Button onClick={addQuestion} size="sm">
+        <Button onClick={addQuestion} size="sm" className="border border-white/20 hover:border-white/40">
           <Plus className="h-4 w-4 mr-2" />
           Lägg till fråga
         </Button>
@@ -304,7 +304,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
             <p className="text-muted-foreground mb-4">
               Lägg till egna frågor för att få mer information från jobbsökare
             </p>
-            <Button onClick={addQuestion}>
+            <Button onClick={addQuestion} className="border border-white/20 hover:border-white/40">
               <Plus className="h-4 w-4 mr-2" />
               Lägg till första frågan
             </Button>

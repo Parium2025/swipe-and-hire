@@ -2177,7 +2177,7 @@ const MobileJobWizard = ({
               variant="ghost"
               onClick={prevStep}
               disabled={currentStep === 0}
-              className="text-white/70 hover:text-white hover:bg-white/10 disabled:opacity-30"
+              className="text-white/70 hover:text-white hover:bg-white/10 disabled:opacity-30 border border-white/20 hover:border-white/40"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Tillbaka
@@ -2205,7 +2205,7 @@ const MobileJobWizard = ({
               <Button
                 onClick={nextStep}
                 disabled={!validateCurrentStep()}
-                className="bg-primary hover:bg-primary/90 text-white px-6"
+                className="bg-primary hover:bg-primary/90 text-white px-6 border border-white/20 hover:border-white/40"
               >
                 Nästa
                 <ArrowRight className="h-4 w-4 ml-2" />
