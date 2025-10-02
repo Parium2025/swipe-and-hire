@@ -62,6 +62,65 @@ const Auth = () => {
   const device = useDevice();
   const { toast } = useToast();
 
+  // Lås sidan (ingen scroll) och trigga reload vid pull-down från toppen
+  useEffect(() => {
+    try {
+      const html = document.documentElement;
+      const body = document.body;
+      html.classList.add('auth-locked');
+      body.classList.add('auth-locked');
+
+      let startY = 0;
+      let triggered = false;
+      let lastReload = 0;
+
+      const onTouchStart = (e: TouchEvent) => {
+        startY = e.touches?.[0]?.clientY ?? 0;
+        triggered = false;
+      };
+
+      const onTouchMove = (e: TouchEvent) => {
+        const y = e.touches?.[0]?.clientY ?? 0;
+        const dy = y - startY;
+        // Blockera all vertikal scroll
+        e.preventDefault();
+        // Dra-ner för att uppdatera
+        if (dy > 70 && !triggered) {
+          triggered = true;
+          const now = Date.now();
+          if (now - lastReload > 1500) {
+            lastReload = now;
+            window.location.reload();
+          }
+        }
+      };
+
+      const onWheel = (e: WheelEvent) => {
+        e.preventDefault();
+      };
+
+      const onScroll = () => {
+        if (window.scrollY !== 0) window.scrollTo(0, 0);
+      };
+
+      window.addEventListener('touchstart', onTouchStart, { passive: true });
+      window.addEventListener('touchmove', onTouchMove, { passive: false });
+      window.addEventListener('wheel', onWheel, { passive: false });
+      window.addEventListener('scroll', onScroll, { passive: true });
+
+      return () => {
+        html.classList.remove('auth-locked');
+        body.classList.remove('auth-locked');
+        window.removeEventListener('touchstart', onTouchStart as any);
+        window.removeEventListener('touchmove', onTouchMove as any);
+        window.removeEventListener('wheel', onWheel as any);
+        window.removeEventListener('scroll', onScroll as any);
+      };
+    } catch {
+      // noop
+    }
+  }, []);
+
   useEffect(() => {
     const handleAuthFlow = async () => {
       const isReset = searchParams.get('reset') === 'true';

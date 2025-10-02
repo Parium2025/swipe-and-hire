@@ -625,4 +625,17 @@ All colors MUST be HSL.
   .no-overscroll {
     overscroll-behavior: contain;
   }
+
+  /* Lås scroll på auth och fixa iOS viewport-gap */
+  html.auth-locked, body.auth-locked,
+  html.auth-lock, body.auth-lock {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100dvh; /* dynamisk vh för mobil */
+    overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: pan-x; /* blockera vertikal scroll men tillåt swipe i x */
+    -webkit-overflow-scrolling: auto;
+  }
 }
