@@ -182,6 +182,20 @@ All colors MUST be HSL.
       overflow: hidden;
       width: 100%;
       height: 100%;
+      /* Avoid iOS PWA gradient seams: don't use fixed attachment */
+      background: var(--gradient-parium);
+      background-attachment: scroll !important;
+      background-color: hsl(215 100% 12%);
+    }
+    
+    /* Ensure the gradient always paints under safe areas/home indicator */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -2px; /* cover 1px seams */
+      background: var(--gradient-parium);
+      pointer-events: none;
+      z-index: -1;
     }
     
     #root {
@@ -232,7 +246,7 @@ All colors MUST be HSL.
   @media (display-mode: standalone) {
     .bg-parium-gradient, 
     [style*="--gradient-parium"] {
-      min-height: calc(100dvh + env(safe-area-inset-top, 0));
+      min-height: calc(100dvh + env(safe-area-inset-top, 0) + env(safe-area-inset-bottom, 0));
     }
   }
 
@@ -263,11 +277,12 @@ All colors MUST be HSL.
     }
     
     /* Standalone mode (hemskärm) får full höjd */
-    @media (display-mode: standalone) {
-      html, body {
-        min-height: calc(100dvh + env(safe-area-inset-top));
+      @media (display-mode: standalone) {
+        html, body {
+          min-height: calc(100dvh + env(safe-area-inset-top) + env(safe-area-inset-bottom));
+          background-attachment: scroll !important;
+        }
       }
-    }
   }
 
   /* Custom date input styling */
