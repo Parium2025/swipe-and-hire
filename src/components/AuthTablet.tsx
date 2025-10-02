@@ -503,10 +503,10 @@ const AuthTablet = ({
 
       <div className="relative z-10 flex flex-col min-h-screen py-safe">
         {/* Header med logo och text */}
-        <div className="flex flex-col items-center px-6 pt-4 pb-3">
-          <div className="text-center mb-3">
-            <div className="mb-2">
-              <div className="relative mx-auto w-fit min-h-[150px] md:min-h-[160px] flex items-center justify-center">
+        <div className="flex flex-col items-center px-6 pt-6 pb-4">
+          <div className="text-center mb-5">
+            <div className="mb-1">
+              <div className="relative mx-auto w-fit min-h-[180px] md:min-h-[200px] flex items-center justify-center">
                 {/* Glow effect bakom loggan - subtle och täcker hela loggan */}
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-64 h-44 bg-primary-glow/25 rounded-full blur-[40px]"></div>
@@ -523,7 +523,7 @@ const AuthTablet = ({
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
-                  className="relative h-32 w-auto md:h-36"
+                  className="relative h-40 w-auto md:h-44"
                   width="400"
                   height="160"
                   loading="eager"

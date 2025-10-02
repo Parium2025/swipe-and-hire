@@ -515,27 +515,27 @@ const AuthMobile = ({
 
       <div className="relative z-10 flex flex-col min-h-screen" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {/* Header med logo och text */}
-        <div className="flex flex-col items-center px-6 pt-4 pb-3">
-          <div className="text-center mb-3">
-            <div className="mb-1">
-              <div className="relative mx-auto w-fit min-h-[120px] flex items-center justify-center">
+        <div className="flex flex-col items-center px-6 pt-6 pb-2">
+          <div className="text-center mb-4">
+            <div className="-mb-4">
+              <div className="relative mx-auto w-fit min-h-[160px] flex items-center justify-center">
                 {/* Glow effect bakom loggan - subtle och täcker hela loggan */}
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                  <div className="w-48 h-32 bg-primary-glow/25 rounded-full blur-[40px]"></div>
+                  <div className="w-56 h-40 bg-primary-glow/25 rounded-full blur-[40px]"></div>
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                  <div className="w-40 h-28 bg-primary-glow/22 rounded-full blur-[35px]"></div>
+                  <div className="w-48 h-32 bg-primary-glow/22 rounded-full blur-[35px]"></div>
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                  <div className="w-32 h-20 bg-primary-glow/20 rounded-full blur-[30px]"></div>
+                  <div className="w-40 h-24 bg-primary-glow/20 rounded-full blur-[30px]"></div>
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                  <div className="w-28 h-16 bg-primary-glow/18 rounded-full blur-[25px]"></div>
+                  <div className="w-32 h-20 bg-primary-glow/18 rounded-full blur-[25px]"></div>
                 </div>
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
-                  className="relative h-24 w-auto will-change-transform"
+                  className="relative h-32 w-auto scale-110 will-change-transform"
                   width="400"
                   height="160"
                   loading="eager"
