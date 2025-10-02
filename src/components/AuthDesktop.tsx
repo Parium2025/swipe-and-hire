@@ -417,7 +417,7 @@ const AuthDesktop = ({
 
   if (isPasswordReset) {
     return (
-      <div className="min-h-screen bg-gradient-parium flex items-center justify-center p-4 auth-dark smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div className="min-h-dvh bg-gradient-parium flex items-center justify-center p-4 auth-dark smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
         <Card className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="text-center">
             <CardTitle className="text-white">Nytt lösenord</CardTitle>
@@ -466,7 +466,7 @@ const AuthDesktop = ({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-parium flex flex-col relative auth-dark smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
+    <div className="min-h-dvh bg-gradient-parium flex flex-col relative auth-dark smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
       {/* Static animated background - won't re-render */}
       <div className="fixed inset-0 pointer-events-none z-0">
         
