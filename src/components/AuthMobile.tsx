@@ -489,7 +489,7 @@ const AuthMobile = ({
         <div className="absolute top-24 left-20 w-3 h-3 bg-secondary/20 rounded-full animate-bounce" style={{ animationDuration: '3s' }}></div>
         
         {/* Decorative glow effect in bottom right corner */}
-        <div className="absolute bottom-0 right-0 w-96 h-96 pointer-events-none">
+        <div className="absolute -bottom-32 -right-32 w-96 h-96 pointer-events-none">
           <div className="absolute inset-0 bg-primary-glow/40 rounded-full blur-[120px]"></div>
           <div className="absolute inset-4 bg-primary-glow/30 rounded-full blur-[100px]"></div>
           <div className="absolute inset-8 bg-primary-glow/25 rounded-full blur-[80px]"></div>
