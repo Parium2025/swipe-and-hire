@@ -507,19 +507,8 @@ const AuthDesktop = ({
           <div className="text-center mb-8">
             <div className="mb-4">
               <div className="relative mx-auto w-fit h-[240px] lg:h-[280px] flex items-center justify-center">
-                {/* Glow effect bakom loggan - helt statisk, ingen animation */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                  <div className="w-64 h-44 bg-[hsl(200_100%_30%/0.25)] rounded-full blur-[40px]"></div>
-                </div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                  <div className="w-52 h-36 bg-[hsl(200_100%_30%/0.22)] rounded-full blur-[35px]"></div>
-                </div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                  <div className="w-44 h-28 bg-[hsl(200_100%_30%/0.20)] rounded-full blur-[30px]"></div>
-                </div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                  <div className="w-36 h-20 bg-[hsl(200_100%_30%/0.18)] rounded-full blur-[25px]"></div>
-                </div>
+                {/* Glow effect bakom loggan - global och statisk */}
+                <div className="logo-glow"></div>
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 

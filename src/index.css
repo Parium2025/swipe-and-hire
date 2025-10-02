@@ -480,6 +480,27 @@ All colors MUST be HSL.
     animation: slide-up 0.3s ease-out;
   }
 
+  /* Stable logo glow (identical across tabs) */
+  .logo-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    isolation: isolate; /* prevent backdrop-blur from sampling it */
+    z-index: 0;
+  }
+  .logo-glow::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16rem; /* 256px */
+    height: 11rem; /* 176px */
+    border-radius: 9999px;
+    background: radial-gradient(closest-side, hsl(200 100% 30% / 0.28) 0%, hsl(200 100% 30% / 0.18) 55%, transparent 75%);
+    filter: blur(28px);
+  }
+
   /* Osynlig scrollbar för mobilpreview */
   .custom-scrollbar::-webkit-scrollbar {
     width: 0px; /* Helt osynlig */
