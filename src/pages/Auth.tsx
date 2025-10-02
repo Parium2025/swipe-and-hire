@@ -1169,6 +1169,14 @@ const Auth = () => {
             }}
           />
         </div>
+        {/* Bottom safe-area blend to eliminate iOS seam */}
+        <div
+          className="fixed inset-x-0 bottom-0 pointer-events-none z-40"
+          style={{
+            height: 'env(safe-area-inset-bottom, 0px)',
+            background: 'linear-gradient(180deg, transparent, hsl(var(--primary)))'
+          }}
+        />
         <AuthMobile
           isPasswordReset={isPasswordReset}
           newPassword={newPassword}
