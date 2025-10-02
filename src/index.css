@@ -403,6 +403,21 @@ All colors MUST be HSL.
   .bg-primary-gradient { background: var(--gradient-primary); }
   .bg-glass-surface { background: var(--gradient-glass); }
   .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0); }
+
+  /* Utility to position the bottom-right glow consistently */
+  .pwa-bottom-glow {
+    position: absolute;
+    right: -8rem; /* matches -right-32 */
+    bottom: -8rem; /* matches -bottom-32 by default */
+    pointer-events: none;
+  }
+}
+
+/* In installed PWA (standalone), push the glow further below the home indicator */
+@media (display-mode: standalone) {
+  .pwa-bottom-glow {
+    bottom: calc(-14rem - env(safe-area-inset-bottom, 0px)) !important; /* move lower only in PWA */
+  }
 }
 
 /* Animated circles for Auth and WelcomeTunnel backgrounds */
