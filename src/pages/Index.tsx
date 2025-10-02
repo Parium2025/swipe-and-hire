@@ -27,9 +27,11 @@ import EmployerSettings from '@/pages/employer/EmployerSettings';
 import DeveloperControls from '@/components/DeveloperControls';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRightLeft } from 'lucide-react';
+import { useStatusBar } from '@/hooks/useStatusBar';
 
 const Index = () => {
   const { user, profile, userRole, signOut, loading, switchRole } = useAuth();
+  const { setupStatusBar } = useStatusBar();
   const [switching, setSwitching] = useState(false);
   const [showProfileSelector, setShowProfileSelector] = useState(false);
   const [developerView, setDeveloperView] = useState<string>('dashboard');
@@ -39,6 +41,11 @@ const Index = () => {
   const [showAuthCTA, setShowAuthCTA] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Konfigurera status bar för transparent blur-effekt
+  useEffect(() => {
+    setupStatusBar();
+  }, []);
   
   // Borttagen aggressiv fallback till /auth som skapade loopar
   // Vi navigerar nu endast när auth-loading är klar (se effekten nedan)

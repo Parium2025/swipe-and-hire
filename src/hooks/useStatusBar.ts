@@ -4,10 +4,17 @@ export const useStatusBar = () => {
   const setupStatusBar = async () => {
     try {
       if (typeof window !== 'undefined' && (window as any).Capacitor) {
-        const { StatusBar } = await import('@capacitor/status-bar');
+        const { StatusBar, Style } = await import('@capacitor/status-bar');
         const { Capacitor } = await import('@capacitor/core');
         if (Capacitor.isNativePlatform()) {
-          await StatusBar.hide();
+          // Enable overlay mode så status bar blir transparent och ligger över innehållet
+          await StatusBar.setOverlaysWebView({ overlay: true });
+          
+          // Sätt ljus text (för mörk blur-bakgrund)
+          await StatusBar.setStyle({ style: Style.Light });
+          
+          // Visa status bar
+          await StatusBar.show();
         }
       }
     } catch (error) {
@@ -15,9 +22,6 @@ export const useStatusBar = () => {
       console.log('StatusBar configuration not available:', error);
     }
   };
-
-  // Consumers can call this manually when needed instead of on mount
-  // setupStatusBar(); // intentionally NOT auto-invoked to avoid hook-related issues
 
   const hideStatusBar = async () => {
     try {
@@ -49,5 +53,5 @@ export const useStatusBar = () => {
     }
   };
 
-  return { hideStatusBar, showStatusBar };
+  return { setupStatusBar, hideStatusBar, showStatusBar };
 };
