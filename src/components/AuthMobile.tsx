@@ -206,20 +206,29 @@ const AuthMobile = ({
       const currentPassword = currentData.password;
       
       if (isLogin) {
-        const result = await signIn(currentEmail, currentPassword);
+        // Network-safe sign in with timeout fallback
+        const signInPromise = signIn(currentEmail, currentPassword);
+        const timeoutPromise = (new Promise((resolve) =>
+          setTimeout(() => resolve({ error: { code: 'timeout', message: 'timeout' } }), 10000)
+        )) as Promise<{ error?: any }>;
+
+        const result = await Promise.race([signInPromise, timeoutPromise]);
         
-        if (result.error) {
-          if (result.error.code === 'email_not_confirmed') {
+        if (result?.error) {
+          if (result.error.code === 'timeout') {
+            toast({
+              title: 'Nätverksproblem',
+              description: 'Inloggningen tog för lång tid. Kontrollera uppkopplingen och försök igen.',
+              variant: 'default'
+            });
+          } else if (result.error.code === 'email_not_confirmed') {
             setShowResend(true);
           } else if (result.error.showResetPassword) {
             setShowResetPassword(true);
           }
         } else {
-          // Successful login - wait for Auth page to redirect based on role
-          // Add timeout fallback in case redirect doesn't happen
+          // Lyckad inloggning – vänta kort på Auth-redirect, annars fallback
           console.log('Login successful, waiting for profile to load before redirect');
-          
-          // Fallback: If no redirect happens within 5 seconds, manually navigate
           setTimeout(async () => {
             try {
               const { data: { session } } = await supabase.auth.getSession();
@@ -229,7 +238,6 @@ const AuthMobile = ({
                   .select('*')
                   .eq('user_id', session.user.id)
                   .maybeSingle();
-                
                 if (profileData) {
                   const { data: roleData } = await supabase
                     .from('user_roles')
@@ -237,18 +245,17 @@ const AuthMobile = ({
                     .eq('user_id', session.user.id)
                     .eq('is_active', true)
                     .maybeSingle();
-                  
                   const userRole = roleData?.role;
                   const target = userRole === 'employer' ? '/dashboard' : '/search-jobs';
-                  console.log('⚠️ Fallback redirect after 5s timeout to:', target);
+                  console.log('⚠️ Fallback redirect after 3s timeout to:', target);
                   navigate(target, { replace: true });
                 }
               }
             } catch (error) {
               console.error('Fallback redirect error:', error);
             }
-          }, 5000);
-        }
+          }, 3000);
+        } else {
       } else {
         // Validate all required fields
         if (role === 'job_seeker') {
