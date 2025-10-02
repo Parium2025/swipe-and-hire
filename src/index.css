@@ -409,6 +409,14 @@ All colors MUST be HSL.
     bottom: -8rem; /* matches -bottom-32 by default */
     pointer-events: none;
   }
+
+  /* Scroll container for auth card content only */
+  .auth-form-scroll {
+    max-height: min(70vh, calc(100dvh - 18rem));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
 }
 
 /* In installed PWA (standalone), push the glow further below the home indicator */

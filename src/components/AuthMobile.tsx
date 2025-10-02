@@ -569,7 +569,7 @@ const AuthMobile = ({
           {/* Auth form */}
           <div className="w-full max-w-sm overscroll-contain">
             <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden" style={{ WebkitOverflowScrolling: 'touch' }}>
-              <CardContent className="p-6">
+              <CardContent className="p-6 auth-form-scroll">
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => {
                    setIsLogin(value === 'login');
                    setHasRegistered(false); // Låt upp knappen när användaren byter flik
