@@ -129,7 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Set up auth state listener after initial check
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         if (!mounted) return;
         
         console.log('Auth state change:', event, session?.user?.id);
@@ -143,8 +143,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch user data immediately without delay
-          fetchUserData(session.user.id);
+          // CRITICAL: Await profile data before continuing
+          // This ensures all components have access to profile data immediately
+          await fetchUserData(session.user.id);
+          console.log('✅ Profile data loaded for user:', session.user.id);
         } else {
           setProfile(null);
           setUserRole(null);

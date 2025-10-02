@@ -284,14 +284,20 @@ const Auth = () => {
       
       setIsPasswordReset(isReset);
       
-      // If user is logged in AND profile is loaded, redirect immediately to role-specific home
+      // CRITICAL: Only redirect when BOTH user AND profile are fully loaded
+      // This prevents race conditions where components load before profile data is ready
       const hasRecoveryParamsNow = isReset || !!accessToken || !!refreshToken || !!tokenParam || !!tokenHashParam || tokenType === 'recovery';
       if (user && profile && !hasRecoveryParamsNow && confirmationStatus === 'none' && recoveryStatus === 'none' && !confirmed) {
         const role = (profile as any)?.role;
+        const onboardingCompleted = (profile as any)?.onboarding_completed;
+        
         if (role) {
-          const target = role === 'employer' ? '/dashboard' : '/search-jobs';
-          console.log('✅ Auth: Redirecting to', target, 'for role:', role);
-          navigate(target, { replace: true });
+          // Wait a tiny moment to ensure all state is synchronized
+          setTimeout(() => {
+            const target = role === 'employer' ? '/dashboard' : '/search-jobs';
+            console.log('✅ Auth: Redirecting to', target, 'for role:', role, 'onboarding:', onboardingCompleted);
+            navigate(target, { replace: true });
+          }, 100);
         }
       }
     };
