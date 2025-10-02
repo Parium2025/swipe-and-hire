@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +11,7 @@ import AuthDesktop from '@/components/AuthDesktop';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { CheckCircle, AlertCircle } from 'lucide-react';
+import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 const Auth = () => {
   const [showIntro, setShowIntro] = useState(() => {
@@ -55,6 +55,8 @@ const Auth = () => {
   const [emailForReset, setEmailForReset] = useState('');
   const [resending, setResending] = useState(false);
   const [resendMessage, setResendMessage] = useState('');
+  const [pullProgress, setPullProgress] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const { user, profile, updatePassword, confirmEmail } = useAuth();
   const [searchParams] = useSearchParams();
@@ -77,21 +79,38 @@ const Auth = () => {
       const onTouchStart = (e: TouchEvent) => {
         startY = e.touches?.[0]?.clientY ?? 0;
         triggered = false;
+        setPullProgress(0);
       };
 
       const onTouchMove = (e: TouchEvent) => {
         const y = e.touches?.[0]?.clientY ?? 0;
         const dy = y - startY;
+        
+        // Beräkna progress (0-1) baserat på drag-distans
+        const maxDrag = 100;
+        const progress = Math.min(Math.max(dy / maxDrag, 0), 1);
+        setPullProgress(progress);
+        
         // Blockera all vertikal scroll
         e.preventDefault();
+        
         // Dra-ner för att uppdatera
         if (dy > 70 && !triggered) {
           triggered = true;
           const now = Date.now();
           if (now - lastReload > 1500) {
             lastReload = now;
-            window.location.reload();
+            setIsRefreshing(true);
+            setTimeout(() => {
+              window.location.reload();
+            }, 300);
           }
+        }
+      };
+
+      const onTouchEnd = () => {
+        if (!isRefreshing) {
+          setPullProgress(0);
         }
       };
 
@@ -105,6 +124,7 @@ const Auth = () => {
 
       window.addEventListener('touchstart', onTouchStart, { passive: true });
       window.addEventListener('touchmove', onTouchMove, { passive: false });
+      window.addEventListener('touchend', onTouchEnd, { passive: true });
       window.addEventListener('wheel', onWheel, { passive: false });
       window.addEventListener('scroll', onScroll, { passive: true });
 
@@ -113,13 +133,14 @@ const Auth = () => {
         body.classList.remove('auth-locked');
         window.removeEventListener('touchstart', onTouchStart as any);
         window.removeEventListener('touchmove', onTouchMove as any);
+        window.removeEventListener('touchend', onTouchEnd as any);
         window.removeEventListener('wheel', onWheel as any);
         window.removeEventListener('scroll', onScroll as any);
       };
     } catch {
       // noop
     }
-  }, []);
+  }, [isRefreshing]);
 
   useEffect(() => {
     const handleAuthFlow = async () => {
@@ -1124,21 +1145,87 @@ const Auth = () => {
   // Använd rätt komponent baserat på skärmstorlek
   if (device === 'mobile') {
     return (
-      <AuthMobile
-        isPasswordReset={isPasswordReset}
-        newPassword={newPassword}
-        setNewPassword={setNewPassword}
-        confirmPassword={confirmPassword}
-        setConfirmPassword={setConfirmPassword}
-        handlePasswordReset={handlePasswordReset}
-        onBackToLogin={handleBackToLogin}
-      />
+      <>
+        {/* Pull-to-refresh spinner */}
+        <div 
+          className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
+          style={{ 
+            opacity: pullProgress,
+            pointerEvents: 'none'
+          }}
+        >
+          <Loader2 
+            className={`w-8 h-8 text-primary-foreground ${isRefreshing ? 'animate-spin' : ''}`}
+            style={{
+              transform: isRefreshing ? 'none' : `rotate(${pullProgress * 360}deg)`,
+              transition: isRefreshing ? 'none' : 'transform 0.1s linear'
+            }}
+          />
+        </div>
+        <AuthMobile
+          isPasswordReset={isPasswordReset}
+          newPassword={newPassword}
+          setNewPassword={setNewPassword}
+          confirmPassword={confirmPassword}
+          setConfirmPassword={setConfirmPassword}
+          handlePasswordReset={handlePasswordReset}
+          onBackToLogin={handleBackToLogin}
+        />
+      </>
     );
   }
 
   if (device === 'tablet') {
     return (
-      <AuthTablet
+      <>
+        {/* Pull-to-refresh spinner */}
+        <div 
+          className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
+          style={{ 
+            opacity: pullProgress,
+            pointerEvents: 'none'
+          }}
+        >
+          <Loader2 
+            className={`w-8 h-8 text-primary-foreground ${isRefreshing ? 'animate-spin' : ''}`}
+            style={{
+              transform: isRefreshing ? 'none' : `rotate(${pullProgress * 360}deg)`,
+              transition: isRefreshing ? 'none' : 'transform 0.1s linear'
+            }}
+          />
+        </div>
+        <AuthTablet
+          isPasswordReset={isPasswordReset}
+          newPassword={newPassword}
+          setNewPassword={setNewPassword}
+          confirmPassword={confirmPassword}
+          setConfirmPassword={setConfirmPassword}
+          handlePasswordReset={handlePasswordReset}
+          onBackToLogin={handleBackToLogin}
+        />
+      </>
+    );
+  }
+
+  return (
+    <>
+      {/* Pull-to-refresh spinner */}
+      <div 
+        className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
+        style={{ 
+          opacity: pullProgress,
+          pointerEvents: 'none'
+        }}
+      >
+        <Loader2 
+          className={`w-8 h-8 text-primary-foreground ${isRefreshing ? 'animate-spin' : ''}`}
+          style={{
+            transform: isRefreshing ? 'none' : `rotate(${pullProgress * 360}deg)`,
+            transition: isRefreshing ? 'none' : 'transform 0.1s linear'
+          }}
+        />
+      </div>
+      <AuthDesktop
         isPasswordReset={isPasswordReset}
         newPassword={newPassword}
         setNewPassword={setNewPassword}
@@ -1147,19 +1234,7 @@ const Auth = () => {
         handlePasswordReset={handlePasswordReset}
         onBackToLogin={handleBackToLogin}
       />
-    );
-  }
-
-  return (
-    <AuthDesktop
-      isPasswordReset={isPasswordReset}
-      newPassword={newPassword}
-      setNewPassword={setNewPassword}
-      confirmPassword={confirmPassword}
-      setConfirmPassword={setConfirmPassword}
-      handlePasswordReset={handlePasswordReset}
-      onBackToLogin={handleBackToLogin}
-    />
+    </>
   );
 };
 
