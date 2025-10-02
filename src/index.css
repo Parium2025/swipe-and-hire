@@ -182,29 +182,33 @@ All colors MUST be HSL.
       overflow: hidden;
       width: 100%;
       height: 100%;
-      /* Solid base to avoid gradient seams */
-      background: hsl(215 100% 12%) !important;
-      -webkit-overflow-scrolling: auto;
+      background: hsl(215 100% 12%) !important; /* solid base to avoid seams */
     }
 
-    /* Scroll only inside root and paint gradient there */
+    /* Paint gradient on its own fixed layer that overscans the viewport */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -20px; /* overscan hides 1px lines while scrolling */
+      background: var(--gradient-parium);
+      background-size: cover;
+      background-repeat: no-repeat;
+      pointer-events: none;
+      z-index: 0;
+    }
+
     #root {
       position: relative;
-      z-index: 0;
+      z-index: 1; /* ensure content sits above gradient layer */
       overflow-y: auto;
       overflow-x: hidden;
       height: 100%;
       width: 100%;
-      min-height: calc(100dvh + env(safe-area-inset-bottom, 0));
-      background: var(--gradient-parium);
-      background-attachment: scroll !important;
-      background-size: cover;
-      background-repeat: no-repeat;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: none;
       overscroll-behavior-y: none;
-      will-change: transform;
-      transform: translateZ(0); /* iOS painting quirk */
+      min-height: calc(100dvh + env(safe-area-inset-bottom, 0));
+      background: transparent;
     }
   }
 
@@ -378,8 +382,10 @@ All colors MUST be HSL.
 
 @layer utilities {
   .bg-parium-gradient { background: var(--gradient-parium); }
+  .bg-gradient-parium { background: var(--gradient-parium); }
   .bg-primary-gradient { background: var(--gradient-primary); }
   .bg-glass-surface { background: var(--gradient-glass); }
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0); }
 }
 
 /* Animated circles for Auth and WelcomeTunnel backgrounds */
