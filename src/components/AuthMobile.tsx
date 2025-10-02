@@ -483,9 +483,6 @@ const AuthMobile = ({
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
         
-        {/* Soft fade at bottom to prevent hard edges */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary-dark via-primary-dark/80 to-transparent"></div>
-        
         {/* Animated floating elements - now stable */}
         <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce" style={{ animationDuration: '2s' }}></div>
         <div className="absolute top-32 left-16 w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDuration: '2.5s' }}></div>
@@ -509,9 +506,9 @@ const AuthMobile = ({
         </div>
       </div>
 
-      <div className="relative z-10 flex flex-col min-h-screen py-safe">
+      <div className="relative z-10 flex flex-col min-h-screen justify-center" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {/* Header med logo och text */}
-        <div className="flex-1 flex flex-col justify-center items-center px-6 pt-4 pb-6">
+        <div className="flex flex-col justify-center items-center px-6 py-8">
           <div className="text-center mb-8">
             <div className="-mb-7">
               <div className="relative mx-auto w-fit min-h-[200px] flex items-center justify-center">
