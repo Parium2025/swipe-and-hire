@@ -1105,7 +1105,14 @@ const Auth = () => {
             sessionStorage.removeItem('parium-pending-recovery');
             // Använd ett annat approach - sätt bara expired status direkt
               return (
-                <div className="min-h-dvh bg-gradient-parium flex items-center justify-center p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
+                <div 
+                  className="bg-gradient-parium flex items-center justify-center p-4 smooth-scroll touch-pan" 
+                  style={{ 
+                    WebkitOverflowScrolling: 'touch',
+                    minHeight: 'calc(100dvh + env(safe-area-inset-bottom, 0px))',
+                    paddingBottom: 'env(safe-area-inset-bottom, 0px)'
+                  }}
+                >
                 <Card className="w-full max-w-md bg-glass backdrop-blur-md border-white/20">
                   <CardContent className="p-8 text-center space-y-4">
                     <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
