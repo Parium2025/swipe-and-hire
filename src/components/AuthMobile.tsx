@@ -513,29 +513,29 @@ const AuthMobile = ({
         </div>
       </div>
 
-      <div className="relative z-10 flex flex-col min-h-screen justify-center" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <div className="relative z-10 flex flex-col min-h-screen" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {/* Header med logo och text */}
-        <div className="flex flex-col justify-center items-center px-6 py-8">
-          <div className="text-center mb-8">
-            <div className="-mb-7">
-              <div className="relative mx-auto w-fit min-h-[200px] flex items-center justify-center">
+        <div className="flex flex-col items-center px-6 pt-4 pb-3">
+          <div className="text-center mb-3">
+            <div className="mb-1">
+              <div className="relative mx-auto w-fit min-h-[120px] flex items-center justify-center">
                 {/* Glow effect bakom loggan - subtle och täcker hela loggan */}
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                  <div className="w-64 h-44 bg-primary-glow/25 rounded-full blur-[40px]"></div>
+                  <div className="w-48 h-32 bg-primary-glow/25 rounded-full blur-[40px]"></div>
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                  <div className="w-52 h-36 bg-primary-glow/22 rounded-full blur-[35px]"></div>
+                  <div className="w-40 h-28 bg-primary-glow/22 rounded-full blur-[35px]"></div>
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                  <div className="w-44 h-28 bg-primary-glow/20 rounded-full blur-[30px]"></div>
+                  <div className="w-32 h-20 bg-primary-glow/20 rounded-full blur-[30px]"></div>
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                  <div className="w-36 h-20 bg-primary-glow/18 rounded-full blur-[25px]"></div>
+                  <div className="w-28 h-16 bg-primary-glow/18 rounded-full blur-[25px]"></div>
                 </div>
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
-                  className="relative h-40 w-auto scale-125 will-change-transform"
+                  className="relative h-24 w-auto will-change-transform"
                   width="400"
                   height="160"
                   loading="eager"
@@ -545,7 +545,7 @@ const AuthMobile = ({
               </div>
             </div>
             
-            <h1 className="text-2xl font-semibold text-white mb-2 relative z-10 [color:rgb(255,255,255)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
+            <h1 className="text-xl font-semibold text-white mb-1 relative z-10 [color:rgb(255,255,255)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
               Framtiden börjar med ett swipe
             </h1>
           </div>

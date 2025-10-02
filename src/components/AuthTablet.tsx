@@ -503,10 +503,10 @@ const AuthTablet = ({
 
       <div className="relative z-10 flex flex-col min-h-screen py-safe">
         {/* Header med logo och text */}
-        <div className="flex-1 flex flex-col justify-center items-center px-6 pt-4 pb-6">
-          <div className="text-center mb-8">
-            <div className="mb-4">
-              <div className="relative mx-auto w-fit min-h-[224px] md:min-h-[240px] flex items-center justify-center">
+        <div className="flex flex-col items-center px-6 pt-4 pb-3">
+          <div className="text-center mb-3">
+            <div className="mb-2">
+              <div className="relative mx-auto w-fit min-h-[150px] md:min-h-[160px] flex items-center justify-center">
                 {/* Glow effect bakom loggan - subtle och täcker hela loggan */}
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-64 h-44 bg-primary-glow/25 rounded-full blur-[40px]"></div>
@@ -523,7 +523,7 @@ const AuthTablet = ({
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
-                  className="relative h-[224px] w-auto md:h-[240px]"
+                  className="relative h-32 w-auto md:h-36"
                   width="400"
                   height="160"
                   loading="eager"
@@ -533,7 +533,7 @@ const AuthTablet = ({
               </div>
             </div>
             
-            <h1 className="text-2xl md:text-3xl font-semibold text-white mb-4 relative z-10 [color:rgb(255,255,255)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
+            <h1 className="text-2xl md:text-3xl font-semibold text-white mb-2 relative z-10 [color:rgb(255,255,255)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
               Framtiden börjar med ett swipe
             </h1>
           </div>
