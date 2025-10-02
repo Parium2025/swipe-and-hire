@@ -27,11 +27,6 @@ body {
   background: var(--gradient-parium);
   background-color: hsl(215 100% 12%);
   min-height: 100dvh;
-  /* Förhindra bounce/rubber-band i iOS standalone mode */
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
 }
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
