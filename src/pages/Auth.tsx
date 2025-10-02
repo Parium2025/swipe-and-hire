@@ -285,7 +285,6 @@ const Auth = () => {
       setIsPasswordReset(isReset);
       
       // CRITICAL: Only redirect when BOTH user AND profile are fully loaded
-      // This prevents race conditions where components load before profile data is ready
       const hasRecoveryParamsNow = isReset || !!accessToken || !!refreshToken || !!tokenParam || !!tokenHashParam || tokenType === 'recovery';
       if (user && profile && !hasRecoveryParamsNow && confirmationStatus === 'none' && recoveryStatus === 'none' && !confirmed) {
         const role = (profile as any)?.role;
@@ -294,12 +293,16 @@ const Auth = () => {
         if (role) {
           const target = role === 'employer' ? '/dashboard' : '/search-jobs';
           console.log('✅ Auth: Redirecting IMMEDIATELY to', target, 'for role:', role, 'onboarding:', onboardingCompleted);
-          // Immediate redirect - no delay needed since user and profile are both loaded
           navigate(target, { replace: true });
         }
       } else if (user && !profile && !hasRecoveryParamsNow) {
-        // User is logged in but profile not loaded yet - fetch it
-        console.log('⏳ User logged in, waiting for profile...');
+        // Fallback: if profile hasn't loaded within 1500ms after login, go to home
+        setTimeout(() => {
+          if (!profile && !hasRecoveryParamsNow) {
+            console.log('⚠️ Fallback redirect from Auth: profile still not loaded, going to /');
+            navigate('/', { replace: true });
+          }
+        }, 1500);
       }
     };
 

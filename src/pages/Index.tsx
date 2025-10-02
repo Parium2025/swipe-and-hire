@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate, Link } from 'react-router-dom';
 import JobTemplatesOverview from '@/components/JobTemplatesOverview';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -117,7 +117,7 @@ const Index = () => {
         {showAuthCTA && (
           <div className="text-center text-white/90">
             <p className="mb-3">Laddar… Om inget händer, gå till inloggningen.</p>
-            <a href="/auth" className="underline">Gå till /auth</a>
+            <Link to="/auth" className="underline">Gå till /auth</Link>
           </div>
         )}
       </div>

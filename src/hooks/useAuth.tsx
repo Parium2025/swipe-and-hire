@@ -107,16 +107,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let mounted = true;
     let sessionInitialized = false;
 
-    // Handle initial session check first
+    // Set up auth state listener FIRST to avoid missing events and deadlocks
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (!mounted) return;
+
+        console.log('Auth state change:', event, session?.user?.id);
+        if (event === 'INITIAL_SESSION') return; // skip duplicates
+
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        if (session?.user) {
+          // Defer any Supabase calls to avoid blocking the callback
+          setTimeout(() => {
+            if (!mounted) return;
+            fetchUserData(session.user!.id).then(() => {
+              if (mounted) setLoading(false);
+            });
+          }, 0);
+        } else {
+          setProfile(null);
+          setUserRole(null);
+          setOrganization(null);
+        }
+      }
+    );
+
+    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mounted || sessionInitialized) return;
-      
       sessionInitialized = true;
+
       console.log('Initial session check:', session?.user?.id);
-      
       setSession(session);
       setUser(session?.user ?? null);
-      
+
       if (session?.user) {
         fetchUserData(session.user.id).then(() => {
           if (mounted) setLoading(false);
@@ -125,34 +151,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       }
     });
-
-    // Set up auth state listener after initial check
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!mounted) return;
-        
-        console.log('Auth state change:', event, session?.user?.id);
-        
-        // Skip ALL INITIAL_SESSION events to prevent duplicates
-        if (event === 'INITIAL_SESSION') {
-          return;
-        }
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          // CRITICAL: Await profile data before continuing
-          // This ensures all components have access to profile data immediately
-          await fetchUserData(session.user.id);
-          console.log('✅ Profile data loaded for user:', session.user.id);
-        } else {
-          setProfile(null);
-          setUserRole(null);
-          setOrganization(null);
-        }
-      }
-    );
 
     return () => {
       mounted = false;
