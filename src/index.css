@@ -189,7 +189,10 @@ All colors MUST be HSL.
     body::before {
       content: "";
       position: fixed;
-      inset: -20px; /* overscan hides 1px lines while scrolling */
+      top: -20px;
+      left: -20px;
+      right: -20px;
+      bottom: calc(-20px - env(safe-area-inset-bottom, 0)); /* extend past bottom safe area */
       background: var(--gradient-parium);
       background-size: cover;
       background-repeat: no-repeat;
@@ -282,9 +285,23 @@ All colors MUST be HSL.
       @media (display-mode: standalone) {
         html, body {
           min-height: calc(100dvh + env(safe-area-inset-top) + env(safe-area-inset-bottom));
-          background: none !important;
-          background-color: hsl(215 100% 12%);
+          background: var(--gradient-parium) fixed !important;
+          background-size: cover;
+          background-attachment: fixed;
         }
+        /* Paint gradient under the home indicator too */
+        body::after {
+          content: "";
+          position: fixed;
+          top: -20px;
+          left: -20px;
+          right: -20px;
+          bottom: calc(-20px - env(safe-area-inset-bottom, 0px));
+          background: var(--gradient-parium);
+          pointer-events: none;
+          z-index: 0;
+        }
+        #root { position: relative; z-index: 1; }
       }
   }
 
