@@ -482,7 +482,7 @@ const AuthTablet = ({
       }}
     >
       {/* Static animated background - won't re-render */}
-      <div className="fixed inset-0 pointer-events-none z-0">
+      <div className="fixed inset-0 pointer-events-none z-0" style={{ bottom: 'calc(-1 * env(safe-area-inset-bottom, 0px))' }}>
         
         
         {/* Animated floating elements - now stable */}
