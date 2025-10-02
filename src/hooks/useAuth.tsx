@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -102,7 +102,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<UserRoleData | null>(null);
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
-  
 
   useEffect(() => {
     let mounted = true;
@@ -822,6 +821,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Cleanup error:', error);
     }
   };
+
+  // Automatisk utloggning efter inaktivitet (30 minuter)
+  useEffect(() => {
+    if (!user) return; // Bara aktiv när användaren är inloggad
+
+    const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minuter i millisekunder
+    let timeoutId: NodeJS.Timeout;
+    let lastActivityTime = Date.now();
+
+    const resetTimer = () => {
+      lastActivityTime = Date.now();
+      
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      timeoutId = setTimeout(() => {
+        console.log('🔒 Automatisk utloggning efter 30 minuters inaktivitet');
+        toast({
+          title: 'Session utgången',
+          description: 'Du har loggats ut efter inaktivitet',
+          duration: 3000
+        });
+        signOut();
+      }, INACTIVITY_TIMEOUT);
+    };
+
+    // Lyssna på användaraktivitet - throttled för prestanda
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    let throttleTimeout: NodeJS.Timeout | undefined;
+    
+    const throttledResetTimer = () => {
+      if (!throttleTimeout) {
+        resetTimer();
+        throttleTimeout = setTimeout(() => {
+          throttleTimeout = undefined;
+        }, 1000); // Max en gång per sekund
+      }
+    };
+
+    events.forEach(event => {
+      window.addEventListener(event, throttledResetTimer);
+    });
+
+    // Starta initial timer
+    resetTimer();
+
+    // Cleanup
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      if (throttleTimeout) {
+        clearTimeout(throttleTimeout);
+      }
+      events.forEach(event => {
+        window.removeEventListener(event, throttledResetTimer);
+      });
+    };
+  }, [user]); // Bara beroende av user
 
   const value = {
     user,
