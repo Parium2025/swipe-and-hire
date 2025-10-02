@@ -6,6 +6,19 @@ html {
   scrollbar-gutter: stable both-edges; 
   overflow-x: hidden !important;
   max-width: 100vw !important;
+  /* Smooth scrolling för hela sidan */
+  scroll-behavior: smooth;
+  /* iOS momentum scrolling */
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
+  /* Förbättrad touch-hantering */
+  touch-action: pan-y pinch-zoom;
+  /* Överscroll för naturlig scrollning */
+  overscroll-behavior-y: contain;
+  /* Smooth scrolling */
+  -webkit-overflow-scrolling: touch;
 }
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
@@ -142,7 +155,9 @@ All colors MUST be HSL.
     height: 100% !important;
     overflow-x: hidden !important;
     overscroll-behavior-x: none;
+    /* Optimerad touch-hantering för mobil */
     touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Make sure the app extends to the full screen including safe areas */
@@ -501,5 +516,25 @@ All colors MUST be HSL.
   .text-auto-fit {
     font-size: clamp(0.625rem, 4vw, 0.75rem);
     line-height: 1.2;
+  }
+  
+  /* Smooth scrolling utilities för mobil */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+  
+  .momentum-scroll {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+  }
+  
+  .touch-pan {
+    touch-action: pan-y;
+  }
+  
+  .no-overscroll {
+    overscroll-behavior: contain;
   }
 }

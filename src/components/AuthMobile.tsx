@@ -448,7 +448,7 @@ const AuthMobile = ({
 
   if (isPasswordReset) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex items-center justify-center p-4 auth-dark">
+      <div className="min-h-screen bg-gradient-parium flex items-center justify-center p-4 auth-dark overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
         <Card className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="text-center">
             <CardTitle className="text-white">Nytt lösenord</CardTitle>
@@ -497,7 +497,7 @@ const AuthMobile = ({
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-parium flex flex-col relative auth-dark">
+    <div className="min-h-screen bg-gradient-parium flex flex-col relative auth-dark overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
       {/* Static animated background - won't re-render */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark"></div>
@@ -528,9 +528,9 @@ const AuthMobile = ({
         </div>
       </div>
 
-      <div className="relative z-10 flex flex-col min-h-[calc(100vh-4rem)]">
+      <div className="relative z-10 flex flex-col min-h-screen py-safe">
         {/* Header med logo och text */}
-        <div className="flex-1 flex flex-col justify-center items-center px-6 pt-2 pb-6">
+        <div className="flex-1 flex flex-col justify-center items-center px-6 pt-4 pb-6">
           <div className="text-center mb-8">
             <div className="-mb-7">
               <div className="relative mx-auto w-fit min-h-[200px] flex items-center justify-center">
@@ -566,8 +566,8 @@ const AuthMobile = ({
           </div>
 
           {/* Auth form */}
-          <div className="w-full max-w-sm">
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden">
+          <div className="w-full max-w-sm overscroll-contain">
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden" style={{ WebkitOverflowScrolling: 'touch' }}>
               <CardContent className="p-6">
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => {
                    setIsLogin(value === 'login');
