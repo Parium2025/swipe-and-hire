@@ -292,13 +292,14 @@ const Auth = () => {
         const onboardingCompleted = (profile as any)?.onboarding_completed;
         
         if (role) {
-          // Wait a tiny moment to ensure all state is synchronized
-          setTimeout(() => {
-            const target = role === 'employer' ? '/dashboard' : '/search-jobs';
-            console.log('✅ Auth: Redirecting to', target, 'for role:', role, 'onboarding:', onboardingCompleted);
-            navigate(target, { replace: true });
-          }, 100);
+          const target = role === 'employer' ? '/dashboard' : '/search-jobs';
+          console.log('✅ Auth: Redirecting IMMEDIATELY to', target, 'for role:', role, 'onboarding:', onboardingCompleted);
+          // Immediate redirect - no delay needed since user and profile are both loaded
+          navigate(target, { replace: true });
         }
+      } else if (user && !profile && !hasRecoveryParamsNow) {
+        // User is logged in but profile not loaded yet - fetch it
+        console.log('⏳ User logged in, waiting for profile...');
       }
     };
 

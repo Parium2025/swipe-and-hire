@@ -215,8 +215,39 @@ const AuthMobile = ({
             setShowResetPassword(true);
           }
         } else {
-          // Defer navigation to Auth page once profile is loaded to avoid white flicker
+          // Successful login - wait for Auth page to redirect based on role
+          // Add timeout fallback in case redirect doesn't happen
           console.log('Login successful, waiting for profile to load before redirect');
+          
+          // Fallback: If no redirect happens within 5 seconds, manually navigate
+          setTimeout(async () => {
+            try {
+              const { data: { session } } = await supabase.auth.getSession();
+              if (session?.user) {
+                const { data: profileData } = await supabase
+                  .from('profiles')
+                  .select('*')
+                  .eq('user_id', session.user.id)
+                  .maybeSingle();
+                
+                if (profileData) {
+                  const { data: roleData } = await supabase
+                    .from('user_roles')
+                    .select('role')
+                    .eq('user_id', session.user.id)
+                    .eq('is_active', true)
+                    .maybeSingle();
+                  
+                  const userRole = roleData?.role;
+                  const target = userRole === 'employer' ? '/dashboard' : '/search-jobs';
+                  console.log('⚠️ Fallback redirect after 5s timeout to:', target);
+                  navigate(target, { replace: true });
+                }
+              }
+            } catch (error) {
+              console.error('Fallback redirect error:', error);
+            }
+          }, 5000);
         }
       } else {
         // Validate all required fields
