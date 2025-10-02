@@ -209,7 +209,7 @@ const AuthMobile = ({
         // Network-safe sign in with timeout fallback
         const signInPromise = signIn(currentEmail, currentPassword);
         const timeoutPromise = (new Promise((resolve) =>
-          setTimeout(() => resolve({ error: { code: 'timeout', message: 'timeout' } }), 10000)
+          setTimeout(() => resolve({ error: { code: 'timeout', message: 'timeout' } }), 5000)
         )) as Promise<{ error?: any }>;
 
         const result = await Promise.race([signInPromise, timeoutPromise]);
@@ -247,15 +247,15 @@ const AuthMobile = ({
                     .maybeSingle();
                   const userRole = roleData?.role;
                   const target = userRole === 'employer' ? '/dashboard' : '/search-jobs';
-                  console.log('⚠️ Fallback redirect after 3s timeout to:', target);
+                  console.log('⚠️ Fallback redirect after 2s timeout to:', target);
                   navigate(target, { replace: true });
                 }
               }
             } catch (error) {
               console.error('Fallback redirect error:', error);
             }
-          }, 3000);
-        } else {
+          }, 2000);
+        }
       } else {
         // Validate all required fields
         if (role === 'job_seeker') {
