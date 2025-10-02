@@ -182,32 +182,29 @@ All colors MUST be HSL.
       overflow: hidden;
       width: 100%;
       height: 100%;
-      /* In PWA, avoid using body background to prevent seams */
-      background: none !important;
-      background-color: hsl(215 100% 12%);
+      /* Solid base to avoid gradient seams */
+      background: hsl(215 100% 12%) !important;
+      -webkit-overflow-scrolling: auto;
     }
 
-    /* Dedicated gradient layer to cover entire screen including safe areas */
-    body::after {
-      content: "";
-      position: fixed;
-      inset: -10px; /* overscan to hide 1px lines */
-      background: var(--gradient-parium);
-      pointer-events: none;
-      z-index: 0;
-    }
-
+    /* Scroll only inside root and paint gradient there */
     #root {
       position: relative;
-      z-index: 1;
+      z-index: 0;
       overflow-y: auto;
       overflow-x: hidden;
       height: 100%;
       width: 100%;
+      min-height: calc(100dvh + env(safe-area-inset-bottom, 0));
+      background: var(--gradient-parium);
+      background-attachment: scroll !important;
+      background-size: cover;
+      background-repeat: no-repeat;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: none;
       overscroll-behavior-y: none;
-      min-height: calc(100dvh + env(safe-area-inset-bottom, 0));
+      will-change: transform;
+      transform: translateZ(0); /* iOS painting quirk */
     }
   }
 
