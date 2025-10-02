@@ -36,8 +36,20 @@ const Index = () => {
   const [showIntroTutorial, setShowIntroTutorial] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [uiReady, setUiReady] = useState(false);
+  const [showAuthCTA, setShowAuthCTA] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Extra säkerhetsnät: om vi fastnar i loading på vissa mobila webbläsare
+  useEffect(() => {
+    const t = setTimeout(() => {
+      // Om användaren fortfarande inte är laddad efter 2s - gå till /auth
+      if (!user) {
+        navigate('/auth', { replace: true });
+      }
+    }, 2000);
+    return () => clearTimeout(t);
+  }, [user, navigate]);
 
   useEffect(() => {
     // Wait for auth to finish loading
@@ -90,15 +102,37 @@ const Index = () => {
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => setUiReady(true));
-    return () => cancelAnimationFrame(raf);
+    // Visa CTA om vi fastnar
+    const ctaTimer = setTimeout(() => setShowAuthCTA(true), 1200);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(ctaTimer);
+    };
   }, []);
 
   // Show gradient background during ALL loading states (no white screen ever)
-  if (loading || isInitializing || !user || !profile) {
+  if (loading || isInitializing) {
     return (
-      <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
-        {/* Seamless transition - no white flicker */}
+      <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan flex items-center justify-center p-6" style={{ WebkitOverflowScrolling: 'touch' }}>
+        {showAuthCTA && (
+          <div className="text-center text-white/90">
+            <p className="mb-3">Laddar… Om inget händer, gå till inloggningen.</p>
+            <a href="/auth" className="underline">Gå till /auth</a>
+          </div>
+        )}
       </div>
+    );
+  }
+
+  // Om ingen användare: redirecta omedelbart till /auth (säkerhetsnät för mobil)
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  // Vänta på profil men visa bakgrund
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />
     );
   }
 
