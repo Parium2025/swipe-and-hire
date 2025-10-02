@@ -72,12 +72,12 @@ All colors MUST be HSL.
 
     /* Parium Brand Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(215 100% 12%), hsl(200 100% 60%));
-    /* Soften and unify background to avoid visible "bands" at the bottom on iOS */
+    /* Extended gradient that covers bottom safe area on iOS */
     --gradient-parium: radial-gradient(
       circle at 50% 40%,
       hsl(var(--primary-glow) / 0.35) 0%,
       hsl(var(--primary-glow) / 0) 45%
-    ), linear-gradient(180deg, hsl(215 100% 12%), hsl(215 100% 12%));
+    ), linear-gradient(180deg, hsl(215 100% 12%) 0%, hsl(215 100% 12%) 100%);
     --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(200 100% 98%));
     --gradient-glass: linear-gradient(135deg, hsla(0 0% 100% / 0.1), hsla(0 0% 100% / 0.05));
 
