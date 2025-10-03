@@ -85,10 +85,19 @@ const AuthMobile = ({
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const resetSectionRef = useRef<HTMLDivElement>(null);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (showResetPassword || resetPasswordSent) {
+      setTimeout(() => {
+        resetSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }, 0);
+    }
+  }, [showResetPassword, resetPasswordSent]);
 
   // Handle input focus - scroll into view when keyboard opens
   const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -576,7 +585,7 @@ const AuthMobile = ({
         ref={containerRef} 
         className={cn(
           "relative z-10 flex flex-col",
-          (showResetPassword || resetPasswordSent) ? "min-h-screen overflow-y-auto pb-24" : "min-h-screen"
+          (showResetPassword || resetPasswordSent) ? "h-[100svh] overflow-y-auto overscroll-contain" : "min-h-screen"
         )}
         style={{ 
           paddingTop: 'env(safe-area-inset-top)', 
@@ -712,8 +721,8 @@ const AuthMobile = ({
                          </button>
                        </div>
                        
-                        {showResetPassword && !resetPasswordSent && (
-                         <div className="mt-4 p-3 rounded-lg text-center">
+                         {showResetPassword && !resetPasswordSent && (
+                          <div ref={resetSectionRef} className="mt-4 p-3 rounded-lg text-center">
                             <Button
                               className="bg-primary hover:bg-primary/90 text-primary-foreground"
                               size="sm"
@@ -726,7 +735,7 @@ const AuthMobile = ({
                         )}
 
                         {resetPasswordSent && (
-                          <div className="mt-4 p-3 rounded-lg text-center">
+                          <div ref={resetSectionRef} className="mt-4 p-3 rounded-lg text-center">
                             <p className="text-sm mb-3 font-medium text-white">Återställningsmail skickat!</p>
                             <div className="text-xs text-muted-foreground bg-secondary/10 p-2 rounded border-l-4 border-secondary mb-3">
                               <p className="font-medium text-white">Tips:</p>
