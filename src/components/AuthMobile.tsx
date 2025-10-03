@@ -99,14 +99,14 @@ const AuthMobile = ({
     }
   }, [showResetPassword, resetPasswordSent]);
 
-  // Handle input focus - scroll into view when keyboard öppnas
+  // Handle input focus - scroll into view when keyboard opens
   const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     setTimeout(() => {
       e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 300); // Give keyboard time to appear
   };
 
-  // Handle scroll-lock direkt för snabb respons
+  // Handle scroll-lock directly for instant response
   const handleTabChange = (value: string) => {
     const newIsLogin = value === 'login';
     if (newIsLogin === isLogin) return; // avoid redundant work
@@ -121,14 +121,10 @@ const AuthMobile = ({
     setShowResetPassword(false);
     setResetPasswordSent(false);
 
-    // Reset scroll to top to avoid position jump when switching from a long register form
-    // Blur active element to prevent iOS keyboard from affecting layout
-    try { (document.activeElement as HTMLElement | null)?.blur?.(); } catch {}
-    // Use both window and container for maximum compatibility
-    requestAnimationFrame(() => {
-      containerRef.current?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-    });
+    // Scroll to top when switching tabs to prevent layout jump
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
     // Defer heavy clearing until idle to avoid blocking frame
     const deferClear = () => startTransition(() => clearFormData());
@@ -592,16 +588,15 @@ const AuthMobile = ({
 
       <div 
         ref={containerRef} 
-        className="relative z-10 flex flex-col min-h-[100svh] overflow-y-auto overscroll-contain"
+        className="relative z-10 flex flex-col min-h-screen"
         style={{ 
           paddingTop: 'env(safe-area-inset-top)', 
           paddingBottom: 'env(safe-area-inset-bottom)',
-          WebkitOverflowScrolling: 'touch',
-          touchAction: 'pan-y'
+          WebkitOverflowScrolling: 'touch'
         }}
       >
         {/* Header med logo och text */}
-        <div className="flex flex-col items-center px-6 pt-6 pb-2 flex-shrink-0">
+        <div className="flex flex-col items-center px-6 pt-6 pb-2">
           <div className="text-center mb-4">
             <div className="-mb-6">
               <div className="relative mx-auto w-fit min-h-[200px] flex items-center justify-center">
