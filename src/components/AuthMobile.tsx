@@ -86,6 +86,9 @@ const AuthMobile = ({
   const emailInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const resetSectionRef = useRef<HTMLDivElement>(null);
+  // Independent scroll positions per tab
+  const loginScrollRef = useRef(0);
+  const signupScrollRef = useRef(0);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
@@ -111,20 +114,33 @@ const AuthMobile = ({
     const newIsLogin = value === 'login';
     if (newIsLogin === isLogin) return; // avoid redundant work
 
+    // Save current scroll position for the tab we are leaving
+    const currentScroll = typeof window !== 'undefined' ? window.scrollY || 0 : 0;
+    if (isLogin) {
+      loginScrollRef.current = currentScroll;
+    } else {
+      signupScrollRef.current = currentScroll;
+    }
+
     onAuthModeChange?.(newIsLogin);
 
-    // Immediate visual swap
+    // Immediate visual swap and reset transient states
     setIsLogin(newIsLogin);
     setHasRegistered(false);
     setShowResend(false);
-    // CRITICAL: Reset password reset states when switching views
     setShowResetPassword(false);
     setResetPasswordSent(false);
 
-    // Scroll to top when switching tabs to prevent layout jump
-    if (typeof window !== 'undefined') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    // Restore independent scroll position per tab (force top for login)
+    const targetTop = newIsLogin ? 0 : (signupScrollRef.current || 0);
+    try { (document.activeElement as HTMLElement | null)?.blur?.(); } catch {}
+    requestAnimationFrame(() => {
+      if (containerRef.current && containerRef.current.scrollHeight > containerRef.current.clientHeight) {
+        containerRef.current.scrollTo({ top: targetTop, left: 0, behavior: 'auto' });
+      } else if (typeof window !== 'undefined') {
+        window.scrollTo({ top: targetTop, left: 0, behavior: 'auto' });
+      }
+    });
 
     // Defer heavy clearing until idle to avoid blocking frame
     const deferClear = () => startTransition(() => clearFormData());
