@@ -65,8 +65,13 @@ const Auth = () => {
   const device = useDevice();
   const { toast } = useToast();
 
-  // Smart scroll-locking: Lock only for login, allow scroll for register
+  // Smart scroll-locking: Lock only for login on MOBILE devices, allow scroll on desktop
   useEffect(() => {
+    // Only apply scroll-lock on mobile/tablet, not desktop
+    if (device === 'desktop') {
+      return; // Skip scroll-lock entirely on desktop
+    }
+
     try {
       const html = document.documentElement;
       const body = document.body;
