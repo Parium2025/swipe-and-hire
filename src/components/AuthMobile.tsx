@@ -586,10 +586,7 @@ const AuthMobile = ({
 
       <div 
         ref={containerRef} 
-        className={cn(
-          "relative z-10 flex flex-col",
-          (showResetPassword || resetPasswordSent) ? "h-[100svh] overflow-y-auto overscroll-contain" : "min-h-screen"
-        )}
+        className="relative z-10 flex flex-col min-h-screen"
         style={{ 
           paddingTop: 'env(safe-area-inset-top)', 
           paddingBottom: 'env(safe-area-inset-bottom)',
@@ -598,7 +595,7 @@ const AuthMobile = ({
         }}
       >
         {/* Header med logo och text */}
-        <div className="flex flex-col items-center px-6 pt-6 pb-2">
+        <div className="flex flex-col items-center px-6 pt-6 pb-2 flex-shrink-0">
           <div className="text-center mb-4">
             <div className="-mb-6">
               <div className="relative mx-auto w-fit min-h-[200px] flex items-center justify-center">
