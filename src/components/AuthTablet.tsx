@@ -89,11 +89,10 @@ const AuthTablet = ({
   // Handle scroll-lock directly for instant response
   const handleTabChange = (value: string) => {
     const newIsLogin = value === 'login';
-    
-    // Apply scroll-lock changes synchronously BEFORE state update
+    if (newIsLogin === isLogin) return;
+
     const html = document.documentElement;
     const body = document.body;
-    
     if (newIsLogin) {
       html.classList.add('auth-locked');
       body.classList.add('auth-locked');
@@ -101,19 +100,18 @@ const AuthTablet = ({
       html.classList.remove('auth-locked');
       body.classList.remove('auth-locked');
     }
-    
-    // Update parent state immediately
+
     onAuthModeChange?.(newIsLogin);
-    
-    // Batch all state updates for instant visual change
     setIsLogin(newIsLogin);
     setHasRegistered(false);
     setShowResend(false);
-    
-    // Clear form data in a separate transition to not block UI
-    startTransition(() => {
-      clearFormData();
-    });
+
+    const deferClear = () => startTransition(() => clearFormData());
+    if (typeof (window as any).requestIdleCallback === 'function') {
+      (window as any).requestIdleCallback(deferClear, { timeout: 500 } as any);
+    } else {
+      setTimeout(deferClear, 0);
+    }
   };
 
   // Popular email domains for suggestions (Swedish and international)
@@ -592,12 +590,14 @@ const AuthTablet = ({
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0 p-0 h-auto gap-2">
                     <TabsTrigger 
                       value="login" 
+                      onPointerDown={() => handleTabChange('login')}
                       className="text-white data-[state=active]:bg-parium-navy data-[state=active]:text-white rounded-md font-medium"
                     >
                       Logga in
                     </TabsTrigger>
                     <TabsTrigger 
                       value="signup"
+                      onPointerDown={() => handleTabChange('signup')}
                       className="text-white data-[state=active]:bg-parium-navy data-[state=active]:text-white rounded-md font-medium"
                     >
                       Registrera
