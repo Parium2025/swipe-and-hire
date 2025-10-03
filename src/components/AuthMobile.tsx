@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, startTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -89,15 +89,8 @@ const AuthMobile = ({
   // Handle scroll-lock directly for instant response
   const handleTabChange = (value: string) => {
     const newIsLogin = value === 'login';
-    setIsLogin(newIsLogin);
-    setHasRegistered(false);
-    setShowResend(false);
-    clearFormData();
     
-    // Update parent state immediately
-    onAuthModeChange?.(newIsLogin);
-    
-    // Apply scroll-lock changes synchronously for instant response
+    // Apply scroll-lock changes synchronously BEFORE state update
     const html = document.documentElement;
     const body = document.body;
     
@@ -108,6 +101,19 @@ const AuthMobile = ({
       html.classList.remove('auth-locked');
       body.classList.remove('auth-locked');
     }
+    
+    // Update parent state immediately
+    onAuthModeChange?.(newIsLogin);
+    
+    // Batch all state updates for instant visual change
+    setIsLogin(newIsLogin);
+    setHasRegistered(false);
+    setShowResend(false);
+    
+    // Clear form data in a separate transition to not block UI
+    startTransition(() => {
+      clearFormData();
+    });
   };
 
   // Popular email domains for suggestions (Swedish and international)
@@ -613,7 +619,7 @@ const AuthMobile = ({
                   </TabsList>
 
                   {/* Login form - always in DOM, show/hide with CSS */}
-                  <div style={{ display: isLogin ? 'block' : 'none' }}>
+                  <div className={isLogin ? 'block' : 'hidden'}>
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div className="relative">
                         <Label htmlFor="email" className="text-white">
@@ -710,7 +716,7 @@ const AuthMobile = ({
                     </div>
 
                   {/* Register form - always in DOM, show/hide with CSS */}
-                  <div style={{ display: isLogin ? 'none' : 'block' }}>
+                  <div className={isLogin ? 'hidden' : 'block'}>
                     <form onSubmit={handleSubmit} className="space-y-4">
                        {/* User Role Selection - First */}
                        <div>
