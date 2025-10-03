@@ -83,6 +83,7 @@ const AuthMobile = ({
   const [employeeMenuOpen, setEmployeeMenuOpen] = useState(false);
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const emailInputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
@@ -94,6 +95,25 @@ const AuthMobile = ({
       e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 300); // Give keyboard time to appear
   };
+
+  // iOS keyboard avoidance using VisualViewport
+  useEffect(() => {
+    const el = containerRef.current;
+    const vv = (window as any).visualViewport as VisualViewport | undefined;
+    if (!el || !vv) return;
+    const update = () => {
+      const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      el.style.paddingBottom = `calc(${kb}px + env(safe-area-inset-bottom, 0px))`;
+    };
+    update();
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+      el.style.paddingBottom = '';
+    };
+  }, []);
 
   // Handle scroll-lock directly for instant response
   const handleTabChange = (value: string) => {
@@ -531,8 +551,7 @@ const AuthMobile = ({
     >
       {/* Static animated background - won't re-render */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        
-        
+
         {/* Animated floating elements - now stable */}
         <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce" style={{ animationDuration: '2s' }}></div>
         <div className="absolute top-32 left-16 w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDuration: '2.5s' }}></div>
@@ -563,7 +582,7 @@ const AuthMobile = ({
         </div>
       </div>
 
-      <div className="relative z-10 flex flex-col min-h-screen" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <div ref={containerRef} className="relative z-10 flex flex-col min-h-screen" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {/* Header med logo och text */}
         <div className="flex flex-col items-center px-6 pt-6 pb-2">
           <div className="text-center mb-4">
