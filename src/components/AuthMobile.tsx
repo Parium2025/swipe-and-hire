@@ -618,8 +618,10 @@ const AuthMobile = ({
                     </TabsTrigger>
                   </TabsList>
 
-                  {/* Login form - always in DOM, show/hide with CSS */}
-                  <div className={isLogin ? 'block' : 'hidden'}>
+                  {/* Forms wrapper for instant swap */}
+                  <div className="relative">
+                    {/* Login form - always in DOM, overlay swap */}
+                    <div className={isLogin ? 'relative opacity-100 pointer-events-auto transition-none' : 'absolute inset-0 opacity-0 pointer-events-none transition-none'}>
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div className="relative">
                         <Label htmlFor="email" className="text-white">
@@ -1104,9 +1106,10 @@ const AuthMobile = ({
                        >
                          {loading ? "Registrerar..." : "Registrera"}
                        </Button>
-                    </form>
-                  </div>
-                </Tabs>
+                     </form>
+                   </div>
+                 </div>
+                 </Tabs>
 
                 {showResend && (
                   <div className="mt-4 p-4 bg-primary/10 backdrop-blur-sm border border-primary/20 rounded-lg text-center">
