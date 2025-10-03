@@ -537,29 +537,29 @@ const AuthDesktop = ({
         </div>
       </div>
 
-      <div className="relative z-10 flex flex-col min-h-screen justify-center items-center py-8 px-6">
+      <div className="relative z-10 flex flex-col min-h-screen justify-center items-center py-4 px-6">
         {/* Header med logo och text */}
         <div className="flex flex-col items-center w-full max-w-2xl">
           <div className="text-center mb-6">
             <div className="mb-4">
-              <div className="relative mx-auto w-fit min-h-[240px] lg:min-h-[280px] flex items-center justify-center">
+              <div className="relative mx-auto w-fit h-28 md:h-28 lg:h-32 min-h-0 flex items-center justify-center">
                 {/* Glow effect bakom loggan - subtle och täcker hela loggan */}
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                  <div className="w-64 h-44 bg-primary-glow/25 rounded-full blur-[40px]"></div>
+                  <div className="w-40 h-28 bg-primary-glow/25 rounded-full blur-[40px]"></div>
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                  <div className="w-52 h-36 bg-primary-glow/22 rounded-full blur-[35px]"></div>
+                  <div className="w-36 h-24 bg-primary-glow/22 rounded-full blur-[35px]"></div>
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                  <div className="w-44 h-28 bg-primary-glow/20 rounded-full blur-[30px]"></div>
+                  <div className="w-32 h-20 bg-primary-glow/20 rounded-full blur-[30px]"></div>
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
-                  <div className="w-36 h-20 bg-primary-glow/18 rounded-full blur-[25px]"></div>
+                  <div className="w-24 h-16 bg-primary-glow/18 rounded-full blur-[25px]"></div>
                 </div>
                 <img 
                   src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
                   alt="Parium" 
-                  className="relative h-60 w-auto lg:h-[280px]"
+                  className="relative h-24 w-auto lg:h-28"
                   width="400"
                   height="160"
                   loading="eager"
