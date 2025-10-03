@@ -87,10 +87,7 @@ const AuthMobile = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const resetSectionRef = useRef<HTMLDivElement>(null);
   // Independent scroll positions per tab
-  const loginScrollRef = useRef(0);
   const signupScrollRef = useRef(0);
-  // Scrollable wrapper for the signup form
-  const signupContentRef = useRef<HTMLDivElement>(null);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
@@ -116,10 +113,9 @@ const AuthMobile = ({
     const newIsLogin = value === 'login';
     if (newIsLogin === isLogin) return; // avoid redundant work
 
-    // Save scroll state of the tab we are leaving (signup has its own container)
-    if (!isLogin) {
-      // Leaving signup
-      signupScrollRef.current = signupContentRef.current?.scrollTop || 0;
+    // Save scroll state of the tab we are leaving
+    if (!isLogin && typeof window !== 'undefined') {
+      signupScrollRef.current = window.scrollY || 0;
     }
 
     onAuthModeChange?.(newIsLogin);
@@ -131,19 +127,13 @@ const AuthMobile = ({
     setShowResetPassword(false);
     setResetPasswordSent(false);
 
-    // Restore independent scroll positions (iOS-safe: wait 2 frames)
+    // Restore independent scroll positions
     try { (document.activeElement as HTMLElement | null)?.blur?.(); } catch {}
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        if (newIsLogin) {
-          // Always reset both inner and window scroll for login
-          signupContentRef.current?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-          if (typeof window !== 'undefined') {
-            window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-          }
-        } else {
-          const top = signupScrollRef.current || 0;
-          signupContentRef.current?.scrollTo({ top, left: 0, behavior: 'auto' });
+        if (typeof window !== 'undefined') {
+          const targetTop = newIsLogin ? 0 : (signupScrollRef.current || 0);
+          window.scrollTo({ top: targetTop, left: 0, behavior: 'auto' });
         }
       });
     });
@@ -773,9 +763,8 @@ const AuthMobile = ({
                       </form>
                     </div>
 
-                  {/* Register form - always in DOM, overlay swap */}
-                   <div className={isLogin ? 'absolute inset-0 opacity-0 pointer-events-none transition-none' : 'relative opacity-100 pointer-events-auto transition-none'}>
-                     <div ref={signupContentRef} className={cn('w-full', !isLogin && 'max-h-[70svh] overflow-y-auto overscroll-contain')}>
+                   {/* Register form - always in DOM, overlay swap */}
+                    <div className={isLogin ? 'absolute inset-0 opacity-0 pointer-events-none transition-none' : 'relative opacity-100 pointer-events-auto transition-none'}>
                        <form onSubmit={handleSubmit} className="space-y-4">
                        {/* User Role Selection - First */}
                        <div>
@@ -1164,7 +1153,6 @@ const AuthMobile = ({
                          {loading ? "Registrerar..." : "Registrera"}
                        </Button>
                       </form>
-                    </div>
                   </div>
                   </div>
                   </Tabs>
