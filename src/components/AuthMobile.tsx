@@ -473,7 +473,13 @@ const AuthMobile = ({
           paddingBottom: 'env(safe-area-inset-bottom, 0px)'
         }}
       >
-        <Card className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20 my-auto mx-auto">
+        <Card 
+          className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20 my-auto mx-auto overflow-y-auto" 
+          style={{ 
+            maxHeight: '80vh',
+            WebkitOverflowScrolling: 'touch'
+          }}
+        >
           <CardHeader className="text-center">
             <CardTitle className="text-white">Nytt lösenord</CardTitle>
           </CardHeader>
