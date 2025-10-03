@@ -99,19 +99,17 @@ const AuthMobile = ({
     }
   }, [showResetPassword, resetPasswordSent]);
 
-  // Handle input focus - scroll into view when keyboard opens
+  // Handle input focus - scroll into view when keyboard öppnas
   const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     setTimeout(() => {
       e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 300); // Give keyboard time to appear
   };
 
-  // Handle scroll-lock directly for instant response
+  // Handle scroll-lock direkt för snabb respons
   const handleTabChange = (value: string) => {
     const newIsLogin = value === 'login';
     if (newIsLogin === isLogin) return; // avoid redundant work
-
-    // No global class toggling to avoid iOS reflow jank
 
     onAuthModeChange?.(newIsLogin);
 
@@ -123,6 +121,15 @@ const AuthMobile = ({
     setShowResetPassword(false);
     setResetPasswordSent(false);
 
+    // Reset scroll to top to avoid position jump when switching from a long register form
+    // Blur active element to prevent iOS keyboard from affecting layout
+    try { (document.activeElement as HTMLElement | null)?.blur?.(); } catch {}
+    // Use both window and container for maximum compatibility
+    requestAnimationFrame(() => {
+      containerRef.current?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    });
+
     // Defer heavy clearing until idle to avoid blocking frame
     const deferClear = () => startTransition(() => clearFormData());
     if (typeof (window as any).requestIdleCallback === 'function') {
@@ -131,7 +138,6 @@ const AuthMobile = ({
       setTimeout(deferClear, 0);
     }
   };
-
   // Popular email domains for suggestions (Swedish and international)
   const popularDomains = [
     '@gmail.com', '@gmail.se', '@hotmail.com', '@hotmail.se', '@outlook.com', '@outlook.se',
@@ -586,7 +592,7 @@ const AuthMobile = ({
 
       <div 
         ref={containerRef} 
-        className="relative z-10 flex flex-col min-h-screen"
+        className="relative z-10 flex flex-col min-h-[100svh] overflow-y-auto overscroll-contain"
         style={{ 
           paddingTop: 'env(safe-area-inset-top)', 
           paddingBottom: 'env(safe-area-inset-bottom)',
