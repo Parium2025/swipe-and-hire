@@ -86,10 +86,29 @@ const AuthDesktop = ({
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Notify parent about auth mode changes for smart scroll handling
-  useEffect(() => {
-    onAuthModeChange?.(isLogin);
-  }, [isLogin, onAuthModeChange]);
+  // Handle scroll-lock directly for instant response
+  const handleTabChange = (value: string) => {
+    const newIsLogin = value === 'login';
+    setIsLogin(newIsLogin);
+    setHasRegistered(false);
+    setShowResend(false);
+    clearFormData();
+    
+    // Update parent state immediately
+    onAuthModeChange?.(newIsLogin);
+    
+    // Apply scroll-lock changes synchronously for instant response
+    const html = document.documentElement;
+    const body = document.body;
+    
+    if (newIsLogin) {
+      html.classList.add('auth-locked');
+      body.classList.add('auth-locked');
+    } else {
+      html.classList.remove('auth-locked');
+      body.classList.remove('auth-locked');
+    }
+  };
 
   // Popular email domains for suggestions (Swedish and international)
   const popularDomains = [
@@ -563,12 +582,7 @@ const AuthDesktop = ({
           <div className="w-full max-w-md lg:max-w-lg">
             <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden">
               <CardContent className="p-6 lg:p-8">
-                 <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={(value) => {
-                   setIsLogin(value === 'login');
-                   setHasRegistered(false); // Låt upp knappen när användaren byter flik
-                   setShowResend(false); // Återställ meddelande när användaren byter flik
-                   clearFormData(); // Rensa all formulärdata när man växlar flik
-                 }}>
+                 <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0 p-0 h-auto gap-2">
                     <TabsTrigger 
                       value="login" 
