@@ -465,7 +465,7 @@ const AuthMobile = ({
   if (isPasswordReset) {
     return (
       <div 
-        className="bg-gradient-parium flex items-center justify-center p-4 auth-dark" 
+        className="bg-gradient-parium overflow-y-auto p-4 py-8 auth-dark flex flex-col" 
         style={{ 
           WebkitOverflowScrolling: 'touch', 
           touchAction: 'pan-y',
@@ -473,7 +473,7 @@ const AuthMobile = ({
           paddingBottom: 'env(safe-area-inset-bottom, 0px)'
         }}
       >
-        <Card className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20">
+        <Card className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20 my-auto mx-auto">
           <CardHeader className="text-center">
             <CardTitle className="text-white">Nytt lösenord</CardTitle>
           </CardHeader>
