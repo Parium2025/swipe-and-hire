@@ -401,6 +401,7 @@ All colors MUST be HSL.
   .bg-primary-gradient { background: var(--gradient-primary); }
   .bg-glass-surface { background: var(--gradient-glass); }
   .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0); }
+  .overflow-anchor-none { overflow-anchor: none; }
 
   /* Utility to position the bottom-right glow consistently */
   .pwa-bottom-glow {

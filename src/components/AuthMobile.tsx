@@ -101,11 +101,22 @@ const AuthMobile = ({
     }
   }, [showResetPassword, resetPasswordSent]);
 
-  // Handle input focus - scroll into view when keyboard opens
-  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    setTimeout(() => {
-      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 300); // Give keyboard time to appear
+  // Utility: force top without smooth; works reliably on iOS Safari
+  const hardScrollTo = (top: number) => {
+    try {
+      const html = document.documentElement;
+      const body = document.body;
+      const prev = (html as any).style.scrollBehavior;
+      (html as any).style.scrollBehavior = 'auto';
+      window.scrollTo(0, top);
+      // double-write to be safe on iOS
+      (html as any).scrollTop = top;
+      (body as any).scrollTop = top;
+      requestAnimationFrame(() => {
+        window.scrollTo(0, top);
+        (html as any).style.scrollBehavior = prev || '';
+      });
+    } catch {}
   };
 
   // Handle scroll-lock directly for instant response
@@ -113,23 +124,19 @@ const AuthMobile = ({
     const newIsLogin = value === 'login';
     if (newIsLogin === isLogin) return; // avoid redundant work
 
-    // CRITICAL: Scroll BEFORE state change to prevent layout jump
-    try { (document.activeElement as HTMLElement | null)?.blur?.(); } catch {}
-    
-    if (typeof window !== 'undefined') {
-      // Save current scroll if leaving signup
-      if (!isLogin) {
-        signupScrollRef.current = window.scrollY || 0;
-      }
-      
-      // Scroll IMMEDIATELY and SYNCHRONOUSLY
-      const targetTop = newIsLogin ? 0 : (signupScrollRef.current || 0);
-      window.scrollTo({ top: targetTop, left: 0, behavior: 'instant' });
+    // Save current scroll if leaving signup
+    if (!isLogin && typeof window !== 'undefined') {
+      signupScrollRef.current = window.scrollY || 0;
     }
+
+    // Scroll BEFORE state change to prevent layout jump
+    try { (document.activeElement as HTMLElement | null)?.blur?.(); } catch {}
+    const targetTop = newIsLogin ? 0 : (signupScrollRef.current || 0);
+    if (typeof window !== 'undefined') hardScrollTo(targetTop);
 
     onAuthModeChange?.(newIsLogin);
 
-    // NOW do state changes after scroll is done
+    // Now swap content
     setIsLogin(newIsLogin);
     setHasRegistered(false);
     setShowResend(false);
@@ -598,7 +605,7 @@ const AuthMobile = ({
 
       <div 
         ref={containerRef} 
-        className="relative z-10 flex flex-col min-h-screen"
+        className="relative z-10 flex flex-col min-h-screen overflow-anchor-none"
         style={{ 
           paddingTop: 'env(safe-area-inset-top)', 
           paddingBottom: 'env(safe-area-inset-bottom)',
@@ -669,7 +676,7 @@ const AuthMobile = ({
                     {/* Login form - always in DOM, overlay swap */}
                     <div className={isLogin ? 'relative opacity-100 pointer-events-auto transition-none' : 'absolute inset-0 opacity-0 pointer-events-none transition-none'}>
                     <form onSubmit={handleSubmit} className="space-y-4">
-                      <div className="relative">
+                  <div className="relative overflow-anchor-none">
                         <Label htmlFor="email" className="text-white">
                           <Mail className="h-4 w-4 inline mr-2" />
                           E-post
