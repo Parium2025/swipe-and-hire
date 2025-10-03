@@ -612,7 +612,8 @@ const AuthMobile = ({
                     </TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="login">
+                  {/* Login form - always in DOM, show/hide with CSS */}
+                  <div style={{ display: isLogin ? 'block' : 'none' }}>
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div className="relative">
                         <Label htmlFor="email" className="text-white">
@@ -706,9 +707,10 @@ const AuthMobile = ({
                           </div>
                         )}
                       </form>
-                    </TabsContent>
+                    </div>
 
-                  <TabsContent value="signup">
+                  {/* Register form - always in DOM, show/hide with CSS */}
+                  <div style={{ display: isLogin ? 'none' : 'block' }}>
                     <form onSubmit={handleSubmit} className="space-y-4">
                        {/* User Role Selection - First */}
                        <div>
@@ -1097,7 +1099,7 @@ const AuthMobile = ({
                          {loading ? "Registrerar..." : "Registrera"}
                        </Button>
                     </form>
-                  </TabsContent>
+                  </div>
                 </Tabs>
 
                 {showResend && (
