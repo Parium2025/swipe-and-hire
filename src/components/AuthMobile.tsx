@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,6 +26,7 @@ interface AuthMobileProps {
   setConfirmPassword: (value: string) => void;
   handlePasswordReset: (e: React.FormEvent) => void;
   onBackToLogin?: () => void;
+  onAuthModeChange?: (isLogin: boolean) => void;
 }
 
 const AuthMobile = ({ 
@@ -35,7 +36,8 @@ const AuthMobile = ({
   confirmPassword, 
   setConfirmPassword, 
   handlePasswordReset,
-  onBackToLogin
+  onBackToLogin,
+  onAuthModeChange
 }: AuthMobileProps) => {
   const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
@@ -83,6 +85,11 @@ const AuthMobile = ({
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Notify parent about auth mode changes for smart scroll handling
+  useEffect(() => {
+    onAuthModeChange?.(isLogin);
+  }, [isLogin, onAuthModeChange]);
 
   // Popular email domains for suggestions (Swedish and international)
   const popularDomains = [

@@ -57,6 +57,7 @@ const Auth = () => {
   const [resendMessage, setResendMessage] = useState('');
   const [pullProgress, setPullProgress] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoginMode, setIsLoginMode] = useState(true); // Track if user is on login or register
 
   const { user, profile, updatePassword, confirmEmail } = useAuth();
   const [searchParams] = useSearchParams();
@@ -64,15 +65,89 @@ const Auth = () => {
   const device = useDevice();
   const { toast } = useToast();
 
-  // Tillåt scroll på Auth-sidan utan att ändra layout
+  // Smart scroll-locking: Lock only for login, allow scroll for register
   useEffect(() => {
     try {
       const html = document.documentElement;
       const body = document.body;
-      html.classList.remove('auth-locked', 'auth-lock');
-      body.classList.remove('auth-locked', 'auth-lock');
+      
+      if (isLoginMode) {
+        // Login mode: Lock scroll and enable pull-to-refresh
+        html.classList.add('auth-locked');
+        body.classList.add('auth-locked');
+        
+        let startY = 0;
+        let triggered = false;
+        let lastReload = 0;
+
+        const onTouchStart = (e: TouchEvent) => {
+          startY = e.touches?.[0]?.clientY ?? 0;
+          triggered = false;
+          setPullProgress(0);
+        };
+
+        const onTouchMove = (e: TouchEvent) => {
+          const y = e.touches?.[0]?.clientY ?? 0;
+          const dy = y - startY;
+          
+          // Calculate progress (0-1) based on drag distance
+          const maxDrag = 100;
+          const progress = Math.min(Math.max(dy / maxDrag, 0), 1);
+          setPullProgress(progress);
+          
+          // Block all vertical scroll
+          e.preventDefault();
+          
+          // Pull-to-refresh
+          if (dy > 70 && !triggered) {
+            triggered = true;
+            const now = Date.now();
+            if (now - lastReload > 1500) {
+              lastReload = now;
+              setIsRefreshing(true);
+              setTimeout(() => {
+                window.location.reload();
+              }, 300);
+            }
+          }
+        };
+
+        const onTouchEnd = () => {
+          if (!isRefreshing) {
+            setPullProgress(0);
+          }
+        };
+
+        const onWheel = (e: WheelEvent) => {
+          e.preventDefault();
+        };
+
+        const onScroll = () => {
+          if (window.scrollY !== 0) window.scrollTo(0, 0);
+        };
+
+        window.addEventListener('touchstart', onTouchStart, { passive: true });
+        window.addEventListener('touchmove', onTouchMove, { passive: false });
+        window.addEventListener('touchend', onTouchEnd, { passive: true });
+        window.addEventListener('wheel', onWheel, { passive: false });
+        window.addEventListener('scroll', onScroll, { passive: true });
+
+        return () => {
+          html.classList.remove('auth-locked');
+          body.classList.remove('auth-locked');
+          window.removeEventListener('touchstart', onTouchStart as any);
+          window.removeEventListener('touchmove', onTouchMove as any);
+          window.removeEventListener('touchend', onTouchEnd as any);
+          window.removeEventListener('wheel', onWheel as any);
+          window.removeEventListener('scroll', onScroll as any);
+        };
+      } else {
+        // Register mode: Allow scroll
+        html.classList.remove('auth-locked', 'auth-lock');
+        body.classList.remove('auth-locked', 'auth-lock');
+      }
     } catch {}
-  }, []);
+  }, [isLoginMode, isRefreshing]);
 
   useEffect(() => {
     const handleAuthFlow = async () => {
@@ -1117,6 +1192,7 @@ const Auth = () => {
           setConfirmPassword={setConfirmPassword}
           handlePasswordReset={handlePasswordReset}
           onBackToLogin={handleBackToLogin}
+          onAuthModeChange={setIsLoginMode}
         />
       </>
     );
@@ -1149,6 +1225,7 @@ const Auth = () => {
           setConfirmPassword={setConfirmPassword}
           handlePasswordReset={handlePasswordReset}
           onBackToLogin={handleBackToLogin}
+          onAuthModeChange={setIsLoginMode}
         />
       </>
     );
@@ -1180,6 +1257,7 @@ const Auth = () => {
         setConfirmPassword={setConfirmPassword}
         handlePasswordReset={handlePasswordReset}
         onBackToLogin={handleBackToLogin}
+        onAuthModeChange={setIsLoginMode}
       />
     </>
   );
