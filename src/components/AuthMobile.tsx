@@ -81,10 +81,19 @@ const AuthMobile = ({
   const employeeCountTriggerRef = useRef<HTMLButtonElement>(null);
   const [industryMenuOpen, setIndustryMenuOpen] = useState(false);
   const [employeeMenuOpen, setEmployeeMenuOpen] = useState(false);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
 
   const { signIn, signUp, resendConfirmation, resetPassword } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Handle input focus - scroll into view when keyboard opens
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300); // Give keyboard time to appear
+  };
 
   // Handle scroll-lock directly for instant response
   const handleTabChange = (value: string) => {
@@ -628,6 +637,7 @@ const AuthMobile = ({
                           type="email"
                           value={role === 'job_seeker' ? jobSeekerData.email : employerData.email}
                           onChange={(e) => handleEmailChange(e.target.value)}
+                          onFocus={handleInputFocus}
                           required
                             name={`email-${role}`}
                             autoComplete={`${role}-email`}
@@ -649,6 +659,7 @@ const AuthMobile = ({
                             type={showPassword ? 'text' : 'password'}
                             value={role === 'job_seeker' ? jobSeekerData.password : employerData.password}
                             onChange={(e) => handlePasswordChange(e.target.value)}
+                            onFocus={handleInputFocus}
                             required
                             name={`password-${role}`}
                             autoComplete={`${role}-current-password`}

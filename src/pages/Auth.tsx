@@ -73,11 +73,23 @@ const Auth = () => {
       
       if (isLoginMode) {
         // Login mode: enable pull-to-refresh and block scroll via listeners (no global CSS class)
-
         
         let startY = 0;
         let triggered = false;
         let lastReload = 0;
+        let isInputFocused = false;
+
+        const onFocusIn = (e: FocusEvent) => {
+          if (e.target && (e.target as HTMLElement).tagName === 'INPUT') {
+            isInputFocused = true;
+          }
+        };
+
+        const onFocusOut = (e: FocusEvent) => {
+          if (e.target && (e.target as HTMLElement).tagName === 'INPUT') {
+            isInputFocused = false;
+          }
+        };
 
         const onTouchStart = (e: TouchEvent) => {
           startY = e.touches?.[0]?.clientY ?? 0;
@@ -86,6 +98,9 @@ const Auth = () => {
         };
 
         const onTouchMove = (e: TouchEvent) => {
+          // Allow scroll when input is focused (keyboard is open)
+          if (isInputFocused) return;
+          
           const y = e.touches?.[0]?.clientY ?? 0;
           const dy = y - startY;
           
@@ -94,7 +109,7 @@ const Auth = () => {
           const progress = Math.min(Math.max(dy / maxDrag, 0), 1);
           setPullProgress(progress);
           
-          // Block all vertical scroll
+          // Block all vertical scroll when no input focused
           e.preventDefault();
           
           // Pull-to-refresh
@@ -118,13 +133,19 @@ const Auth = () => {
         };
 
         const onWheel = (e: WheelEvent) => {
-          e.preventDefault();
+          if (!isInputFocused) {
+            e.preventDefault();
+          }
         };
 
         const onScroll = () => {
-          if (window.scrollY !== 0) window.scrollTo(0, 0);
+          if (!isInputFocused && window.scrollY !== 0) {
+            window.scrollTo(0, 0);
+          }
         };
 
+        document.addEventListener('focusin', onFocusIn);
+        document.addEventListener('focusout', onFocusOut);
         window.addEventListener('touchstart', onTouchStart, { passive: true });
         window.addEventListener('touchmove', onTouchMove, { passive: false });
         window.addEventListener('touchend', onTouchEnd, { passive: true });
@@ -132,6 +153,8 @@ const Auth = () => {
         window.addEventListener('scroll', onScroll, { passive: true });
 
         return () => {
+          document.removeEventListener('focusin', onFocusIn);
+          document.removeEventListener('focusout', onFocusOut);
           window.removeEventListener('touchstart', onTouchStart as any);
           window.removeEventListener('touchmove', onTouchMove as any);
           window.removeEventListener('touchend', onTouchEnd as any);
