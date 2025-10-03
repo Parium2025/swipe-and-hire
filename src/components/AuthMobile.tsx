@@ -576,16 +576,13 @@ const AuthMobile = ({
         ref={containerRef} 
         className={cn(
           "relative z-10 flex flex-col",
-          (showResetPassword || resetPasswordSent) ? "min-h-fit overflow-y-auto" : "min-h-screen"
+          (showResetPassword || resetPasswordSent) ? "min-h-screen overflow-y-auto pb-24" : "min-h-screen"
         )}
         style={{ 
           paddingTop: 'env(safe-area-inset-top)', 
           paddingBottom: 'env(safe-area-inset-bottom)',
-          ...(showResetPassword || resetPasswordSent ? {
-            WebkitOverflowScrolling: 'touch',
-            overscrollBehavior: 'contain',
-            maxHeight: '100dvh'
-          } : {})
+          WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-y'
         }}
       >
         {/* Header med logo och text */}
@@ -630,7 +627,7 @@ const AuthMobile = ({
               className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden"
               style={{ WebkitOverflowScrolling: 'touch' }}
             >
-              <CardContent className="p-6">
+              <CardContent className={cn("p-6", (showResetPassword || resetPasswordSent) && "pb-24")}>
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0 p-0 h-auto gap-2">
                     <TabsTrigger 
