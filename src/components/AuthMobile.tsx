@@ -725,15 +725,15 @@ const AuthMobile = ({
                          {loading ? "Loggar in..." : "Logga in"}
                        </Button>
                        
-                       <div className="text-center mt-3">
-                         <button
-                           type="button"
-                           onClick={() => setShowResetPassword(true)}
-                            className="text-sm text-white hover:underline"
-                         >
-                           Glömt lösenordet?
-                         </button>
-                       </div>
+                        <div className="text-center mt-3">
+                          <button
+                            type="button"
+                            onClick={() => setShowResetPassword(true)}
+                             className="text-sm text-white no-underline"
+                          >
+                            Glömt lösenordet?
+                          </button>
+                        </div>
                        
                          {showResetPassword && !resetPasswordSent && (
                           <div ref={resetSectionRef} className="mt-4 p-3 rounded-lg text-center">
