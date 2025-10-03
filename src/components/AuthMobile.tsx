@@ -583,10 +583,15 @@ const AuthMobile = ({
 
       <div 
         ref={containerRef} 
-        className="relative z-10 flex flex-col min-h-screen"
+        className={cn(
+          "relative z-10 flex flex-col",
+          (showResetPassword || resetPasswordSent) ? "h-[100svh] overflow-y-auto overscroll-contain" : "min-h-screen"
+        )}
         style={{ 
           paddingTop: 'env(safe-area-inset-top)', 
-          paddingBottom: 'env(safe-area-inset-bottom)'
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-y'
         }}
       >
         {/* Header med logo och text */}
@@ -628,19 +633,10 @@ const AuthMobile = ({
           {/* Auth form */}
           <div className="w-full max-w-sm overscroll-contain">
             <Card 
-              className={cn(
-                "bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl",
-                (showResetPassword || resetPasswordSent) ? "overflow-y-auto max-h-[70svh]" : "overflow-hidden"
-              )}
-              style={(showResetPassword || resetPasswordSent) ? { 
-                WebkitOverflowScrolling: 'touch',
-                touchAction: 'pan-y',
-                overscrollBehavior: 'contain'
-              } : { 
-                WebkitOverflowScrolling: 'touch' 
-              }}
+              className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden"
+              style={{ WebkitOverflowScrolling: 'touch' }}
             >
-              <CardContent className="p-6">
+              <CardContent className={cn("p-6", (showResetPassword || resetPasswordSent) && "pb-24")}>
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0 p-0 h-auto gap-2">
                     <TabsTrigger 
