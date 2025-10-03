@@ -477,8 +477,10 @@ const AuthMobile = ({
         <Card 
           className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20 my-auto mx-auto overflow-y-auto" 
           style={{ 
-            maxHeight: '80vh',
-            WebkitOverflowScrolling: 'touch'
+            maxHeight: '85svh',
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehavior: 'contain',
+            touchAction: 'pan-y'
           }}
         >
           <CardHeader className="text-center">
@@ -608,7 +610,7 @@ const AuthMobile = ({
           </div>
 
           {/* Auth form */}
-          <div className="w-full max-w-sm overscroll-contain">
+          <div className={cn("w-full max-w-sm", (showResetPassword || resetPasswordSent) ? "overscroll-auto" : "overscroll-contain")}>
             <Card 
               className={cn(
                 "bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl",
@@ -616,7 +618,10 @@ const AuthMobile = ({
               )}
               style={{ WebkitOverflowScrolling: 'touch' }}
             >
-              <CardContent className="p-6">
+              <CardContent 
+                className={cn("p-6", (showResetPassword || resetPasswordSent) && "overflow-y-auto max-h-[85svh]")}
+                style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', touchAction: 'pan-y' }}
+              >
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0 p-0 h-auto gap-2">
                     <TabsTrigger 
