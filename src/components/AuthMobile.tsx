@@ -1083,17 +1083,18 @@ const AuthMobile = ({
                                  />
                               </div>
 
-                             <div>
-                               <Label htmlFor="companyDescription" className="text-white">Kort beskrivning</Label>
-                                <Textarea
-                                  id="companyDescription"
-                                  value={employerData.companyDescription}
-                                  onChange={(e) => setEmployerData(prev => ({ ...prev, companyDescription: e.target.value }))}
-                                  placeholder="Beskriv vad ert företag gör..."
-                                  className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 resize-none"
-                                  rows={2}
-                                />
-                             </div>
+                              <div>
+                                <Label htmlFor="companyDescription" className="text-white">Kort beskrivning</Label>
+                                 <Textarea
+                                   id="companyDescription"
+                                   value={employerData.companyDescription}
+                                   onChange={(e) => setEmployerData(prev => ({ ...prev, companyDescription: e.target.value }))}
+                                   placeholder="Beskriv vad ert företag gör..."
+                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 resize-none text-base"
+                                   style={{ fontSize: '16px' }}
+                                   rows={2}
+                                 />
+                              </div>
                            </div>
                          </>
                        )}
