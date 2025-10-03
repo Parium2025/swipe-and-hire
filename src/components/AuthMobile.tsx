@@ -113,30 +113,28 @@ const AuthMobile = ({
     const newIsLogin = value === 'login';
     if (newIsLogin === isLogin) return; // avoid redundant work
 
-    // Save scroll state of the tab we are leaving
-    if (!isLogin && typeof window !== 'undefined') {
-      signupScrollRef.current = window.scrollY || 0;
+    // CRITICAL: Scroll BEFORE state change to prevent layout jump
+    try { (document.activeElement as HTMLElement | null)?.blur?.(); } catch {}
+    
+    if (typeof window !== 'undefined') {
+      // Save current scroll if leaving signup
+      if (!isLogin) {
+        signupScrollRef.current = window.scrollY || 0;
+      }
+      
+      // Scroll IMMEDIATELY and SYNCHRONOUSLY
+      const targetTop = newIsLogin ? 0 : (signupScrollRef.current || 0);
+      window.scrollTo({ top: targetTop, left: 0, behavior: 'instant' });
     }
 
     onAuthModeChange?.(newIsLogin);
 
-    // Immediate visual swap and reset transient states
+    // NOW do state changes after scroll is done
     setIsLogin(newIsLogin);
     setHasRegistered(false);
     setShowResend(false);
     setShowResetPassword(false);
     setResetPasswordSent(false);
-
-    // Restore independent scroll positions
-    try { (document.activeElement as HTMLElement | null)?.blur?.(); } catch {}
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        if (typeof window !== 'undefined') {
-          const targetTop = newIsLogin ? 0 : (signupScrollRef.current || 0);
-          window.scrollTo({ top: targetTop, left: 0, behavior: 'auto' });
-        }
-      });
-    });
 
     // Defer heavy clearing until idle to avoid blocking frame
     const deferClear = () => startTransition(() => clearFormData());
