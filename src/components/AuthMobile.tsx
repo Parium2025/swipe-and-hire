@@ -96,25 +96,6 @@ const AuthMobile = ({
     }, 300); // Give keyboard time to appear
   };
 
-  // iOS keyboard avoidance using VisualViewport
-  useEffect(() => {
-    const el = containerRef.current;
-    const vv = (window as any).visualViewport as VisualViewport | undefined;
-    if (!el || !vv) return;
-    const update = () => {
-      const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-      el.style.paddingBottom = `calc(${kb}px + env(safe-area-inset-bottom, 0px))`;
-    };
-    update();
-    vv.addEventListener('resize', update);
-    vv.addEventListener('scroll', update);
-    return () => {
-      vv.removeEventListener('resize', update);
-      vv.removeEventListener('scroll', update);
-      el.style.paddingBottom = '';
-    };
-  }, []);
-
   // Handle scroll-lock directly for instant response
   const handleTabChange = (value: string) => {
     const newIsLogin = value === 'login';
@@ -545,7 +526,7 @@ const AuthMobile = ({
       style={{ 
         WebkitOverflowScrolling: 'touch', 
         touchAction: 'pan-y',
-        minHeight: 'calc(100dvh + env(safe-area-inset-bottom, 0px))',
+        minHeight: '100svh',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)'
       }}
     >
@@ -656,7 +637,6 @@ const AuthMobile = ({
                           type="email"
                           value={role === 'job_seeker' ? jobSeekerData.email : employerData.email}
                           onChange={(e) => handleEmailChange(e.target.value)}
-                          onFocus={handleInputFocus}
                           required
                             name={`email-${role}`}
                             autoComplete={`${role}-email`}
@@ -678,7 +658,6 @@ const AuthMobile = ({
                             type={showPassword ? 'text' : 'password'}
                             value={role === 'job_seeker' ? jobSeekerData.password : employerData.password}
                             onChange={(e) => handlePasswordChange(e.target.value)}
-                            onFocus={handleInputFocus}
                             required
                             name={`password-${role}`}
                             autoComplete={`${role}-current-password`}
