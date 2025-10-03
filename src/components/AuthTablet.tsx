@@ -91,15 +91,7 @@ const AuthTablet = ({
     const newIsLogin = value === 'login';
     if (newIsLogin === isLogin) return;
 
-    const html = document.documentElement;
-    const body = document.body;
-    if (newIsLogin) {
-      html.classList.add('auth-locked');
-      body.classList.add('auth-locked');
-    } else {
-      html.classList.remove('auth-locked');
-      body.classList.remove('auth-locked');
-    }
+    // No global class toggling to avoid iOS reflow jank
 
     onAuthModeChange?.(newIsLogin);
     setIsLogin(newIsLogin);

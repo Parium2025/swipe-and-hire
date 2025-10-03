@@ -72,9 +72,8 @@ const Auth = () => {
       const body = document.body;
       
       if (isLoginMode) {
-        // Login mode: Lock scroll and enable pull-to-refresh
-        html.classList.add('auth-locked');
-        body.classList.add('auth-locked');
+        // Login mode: enable pull-to-refresh and block scroll via listeners (no global CSS class)
+
         
         let startY = 0;
         let triggered = false;
@@ -133,8 +132,6 @@ const Auth = () => {
         window.addEventListener('scroll', onScroll, { passive: true });
 
         return () => {
-          html.classList.remove('auth-locked');
-          body.classList.remove('auth-locked');
           window.removeEventListener('touchstart', onTouchStart as any);
           window.removeEventListener('touchmove', onTouchMove as any);
           window.removeEventListener('touchend', onTouchEnd as any);
@@ -142,9 +139,7 @@ const Auth = () => {
           window.removeEventListener('scroll', onScroll as any);
         };
       } else {
-        // Register mode: Allow scroll
-        html.classList.remove('auth-locked', 'auth-lock');
-        body.classList.remove('auth-locked', 'auth-lock');
+        // Register mode: Allow scroll (no global class toggles)
       }
     } catch {}
   }, [isLoginMode, isRefreshing]);

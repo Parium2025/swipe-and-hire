@@ -91,16 +91,7 @@ const AuthMobile = ({
     const newIsLogin = value === 'login';
     if (newIsLogin === isLogin) return; // avoid redundant work
 
-    // Apply scroll-lock changes synchronously BEFORE state update
-    const html = document.documentElement;
-    const body = document.body;
-    if (newIsLogin) {
-      html.classList.add('auth-locked');
-      body.classList.add('auth-locked');
-    } else {
-      html.classList.remove('auth-locked');
-      body.classList.remove('auth-locked');
-    }
+    // No global class toggling to avoid iOS reflow jank
 
     onAuthModeChange?.(newIsLogin);
 
