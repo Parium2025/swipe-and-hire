@@ -17,6 +17,7 @@ import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
 import { SWEDISH_INDUSTRIES, EMPLOYEE_COUNT_OPTIONS } from '@/lib/industries';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { searchAddresses } from '@/lib/addressSearch';
+import { cn } from '@/lib/utils';
 
 interface AuthMobileProps {
   isPasswordReset: boolean;
@@ -608,7 +609,13 @@ const AuthMobile = ({
 
           {/* Auth form */}
           <div className="w-full max-w-sm overscroll-contain">
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <Card 
+              className={cn(
+                "bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl",
+                (showResetPassword || resetPasswordSent) ? "overflow-y-auto max-h-[80dvh]" : "overflow-hidden"
+              )}
+              style={{ WebkitOverflowScrolling: 'touch' }}
+            >
               <CardContent className="p-6">
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0 p-0 h-auto gap-2">
