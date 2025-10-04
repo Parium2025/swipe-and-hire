@@ -28,45 +28,34 @@ body {
   html, body {
     background: hsl(215 100% 12%) !important;
     background-color: hsl(215 100% 12%) !important;
+    background-attachment: initial !important;
+    background-image: none !important;
   }
 
   .bg-parium-gradient, .bg-gradient-parium { background: hsl(215 100% 12%) !important; }
 
   /* Dölja glow helt i standalone för att inte störa auth kortet */
-  .pwa-bottom-glow {
-    display: none !important;
-  }
+  .pwa-bottom-glow { display: none !important; }
 
-  /* Möjlighet att dölja specifikt vid behov */
-  .standalone-hide-glow { display: none !important; }
+  /* Ta bort alla pseudo-overlays som kan orsaka banding */
+  body::before, body::after { content: none !important; }
 
-  /* Korten ska täcka hela skärmen i standalone mode */
+  /* Korten ska täcka hela skärmen i standalone mode och vara HELT opaka */
   .auth-mobile-card {
     min-height: calc(100dvh - 2rem) !important;
     max-height: none !important;
-    background-color: hsl(var(--surface-blue) / 0.92) !important;
-    backdrop-filter: saturate(1.1) blur(8px);
-    -webkit-backdrop-filter: saturate(1.1) blur(8px);
+    background-color: hsl(var(--surface-blue)) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
-  /* Password reset kortet får också full höjd */
+  /* Password reset kortet får också full höjd och opak bakgrund */
   .auth-password-reset-card {
     min-height: calc(100dvh - 2rem) !important;
     max-height: none !important;
-    background-color: hsl(var(--surface-blue) / 0.92) !important;
-    backdrop-filter: saturate(1.1) blur(8px);
-    -webkit-backdrop-filter: saturate(1.1) blur(8px);
-  }
-
-  /* Extra safety: fyll iOS bottom safe-area för att ta bort ljus rand */
-  body::after {
-    content: "";
-    position: fixed;
-    left: 0; right: 0; bottom: 0;
-    height: max(1px, env(safe-area-inset-bottom, 14px));
-    background: hsl(215 100% 12%);
-    pointer-events: none;
-    z-index: 0;
+    background-color: hsl(var(--surface-blue)) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 }
 
