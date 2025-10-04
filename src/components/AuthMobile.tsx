@@ -647,7 +647,7 @@ const AuthMobile = ({
               className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden"
               style={{ WebkitOverflowScrolling: 'touch' }}
             >
-              <CardContent className={cn("p-6", isLogin && (showResetPassword || resetPasswordSent) && "pb-24", !isLogin && "pb-1")}>
+              <CardContent className={cn("p-6", isLogin && (showResetPassword || resetPasswordSent) && "pb-24", !isLogin && "pb-0")}>
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0 p-0 h-auto gap-2">
                     <TabsTrigger 
@@ -763,7 +763,7 @@ const AuthMobile = ({
 
                    {/* Register form - always in DOM, overlay swap */}
                     <div className={isLogin ? 'absolute inset-0 opacity-0 pointer-events-none transition-none' : 'relative opacity-100 pointer-events-auto transition-none'}>
-                       <form onSubmit={handleSubmit} className="space-y-4">
+                       <form onSubmit={handleSubmit} className="space-y-3">
                        {/* User Role Selection - First */}
                        <div>
                          <Label className="text-white">Jag är:</Label>
