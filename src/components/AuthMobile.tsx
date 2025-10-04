@@ -602,7 +602,6 @@ const AuthMobile = ({
         className="relative z-10 flex flex-col min-h-screen overflow-anchor-none"
         style={{ 
           paddingTop: 'env(safe-area-inset-top)', 
-          paddingBottom: 'env(safe-area-inset-bottom)',
           WebkitOverflowScrolling: 'touch'
         }}
       >
