@@ -4,6 +4,29 @@ import App from './App'
 import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 
+// Ensure robust PWA detection so CSS overrides always apply
+function applyStandaloneClass() {
+  try {
+    const isStandalone = (
+      typeof window !== 'undefined' && (
+        window.matchMedia('(display-mode: standalone)').matches ||
+        // iOS Safari legacy flag
+        (window.navigator as any)?.standalone === true
+      )
+    );
+    document.documentElement.classList.toggle('standalone', !!isStandalone);
+  } catch {}
+}
+
+applyStandaloneClass();
+if (typeof window !== 'undefined') {
+  const reapply = () => applyStandaloneClass();
+  window.addEventListener('resize', reapply);
+  window.addEventListener('orientationchange', reapply as any);
+  document.addEventListener('visibilitychange', reapply);
+  window.matchMedia?.('(display-mode: standalone)')?.addEventListener?.('change', reapply as any);
+}
+
 function redirectAuthTokensIfNeeded() {
   if (typeof window === 'undefined') return false;
   const { location } = window;

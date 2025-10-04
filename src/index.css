@@ -36,6 +36,7 @@ body {
 
   /* Dölja glow helt i standalone för att inte störa auth kortet */
   .pwa-bottom-glow { display: none !important; }
+  .auth-bg-fixed { display: none !important; }
 
   /* Ta bort alla pseudo-overlays som kan orsaka banding */
   body::before, body::after { content: none !important; }

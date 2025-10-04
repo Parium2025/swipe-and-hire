@@ -570,7 +570,7 @@ const AuthMobile = ({
       }}
     >
       {/* Static animated background - won't re-render */}
-      <div className="fixed inset-0 pointer-events-none z-0">
+      <div className="fixed inset-0 pointer-events-none z-0 auth-bg-fixed">
 
         {/* Animated floating elements - now stable */}
         <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce" style={{ animationDuration: '2s' }}></div>
