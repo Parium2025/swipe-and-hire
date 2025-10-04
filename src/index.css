@@ -23,7 +23,7 @@ body {
   min-height: 100dvh;
 }
 
-/* PWA Standalone mode - force solid dark background and reposition glows */
+/* PWA Standalone mode - force solid dark background and proper card height */
 @media (display-mode: standalone) {
   html, body {
     background: hsl(215 100% 12%) !important;
@@ -32,22 +32,31 @@ body {
 
   .bg-parium-gradient, .bg-gradient-parium { background: hsl(215 100% 12%) !important; }
 
-  /* Visa glow men placera det EXTREMT långt ned till höger */
+  /* Dölja glow helt i standalone för att inte störa auth kortet */
   .pwa-bottom-glow {
-    display: block !important;
-    position: fixed !important;
-    right: calc(-22rem + env(safe-area-inset-right, 0px));
-    bottom: calc(-18rem + env(safe-area-inset-bottom, 0px));
-    width: 36rem;
-    height: 36rem;
-    opacity: 0.42; /* synligt men mjukt */
-    -webkit-mask-image: radial-gradient(120% 120% at 100% 100%, #000 35%, transparent 72%);
-    mask-image: radial-gradient(120% 120% at 100% 100%, #000 35%, transparent 72%);
-    z-index: 0;
+    display: none !important;
   }
 
   /* Möjlighet att dölja specifikt vid behov */
   .standalone-hide-glow { display: none !important; }
+
+  /* Korten ska täcka hela skärmen i standalone mode */
+  .auth-mobile-card {
+    min-height: calc(100dvh - 2rem) !important;
+    max-height: none !important;
+    background-color: hsl(var(--surface-blue) / 0.92) !important;
+    backdrop-filter: saturate(1.1) blur(8px);
+    -webkit-backdrop-filter: saturate(1.1) blur(8px);
+  }
+
+  /* Password reset kortet får också full höjd */
+  .auth-password-reset-card {
+    min-height: calc(100dvh - 2rem) !important;
+    max-height: none !important;
+    background-color: hsl(var(--surface-blue) / 0.92) !important;
+    backdrop-filter: saturate(1.1) blur(8px);
+    -webkit-backdrop-filter: saturate(1.1) blur(8px);
+  }
 
   /* Extra safety: fyll iOS bottom safe-area för att ta bort ljus rand */
   body::after {
@@ -56,17 +65,6 @@ body {
     left: 0; right: 0; bottom: 0;
     height: max(1px, env(safe-area-inset-bottom, 14px));
     background: hsl(215 100% 12%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* Soft bottom gradient to remove banding on long content */
-  #app-bg::after {
-    content: "";
-    position: fixed;
-    left: 0; right: 0; bottom: 0;
-    height: 26vh;
-    background: linear-gradient(to bottom, hsla(215 100% 12% / 0) 0%, hsl(215 100% 12%) 70%);
     pointer-events: none;
     z-index: 0;
   }
