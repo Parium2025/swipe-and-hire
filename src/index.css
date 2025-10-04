@@ -25,16 +25,16 @@ body {
 
 /* PWA Standalone mode - force solid dark background */
 @media (display-mode: standalone) {
-  html {
+  html, body {
     background: hsl(215 100% 12%) !important;
     background-color: hsl(215 100% 12%) !important;
   }
-  
-  body {
-    background: hsl(215 100% 12%) !important;
-    background-color: hsl(215 100% 12%) !important;
-  }
+
+  /* Disable gradient layers and large glows that cause banding */
+  .bg-parium-gradient { background: hsl(215 100% 12%) !important; }
+  .pwa-bottom-glow, .standalone-hide-glow { display: none !important; }
 }
+
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
