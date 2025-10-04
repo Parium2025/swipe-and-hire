@@ -23,16 +23,39 @@ body {
   min-height: 100dvh;
 }
 
-/* PWA Standalone mode - force solid dark background */
+/* PWA Standalone mode - force solid dark background and reposition glows */
 @media (display-mode: standalone) {
   html, body {
     background: hsl(215 100% 12%) !important;
     background-color: hsl(215 100% 12%) !important;
   }
 
-  /* Disable gradient layers and large glows that cause banding */
   .bg-parium-gradient { background: hsl(215 100% 12%) !important; }
-  .pwa-bottom-glow, .standalone-hide-glow { display: none !important; }
+
+  /* Show the decorative glow but pin it far bottom-right to avoid banding */
+  .pwa-bottom-glow {
+    display: block !important;
+    position: fixed !important;
+    right: max(-12rem, calc(-20vw + env(safe-area-inset-right, 0px)));
+    bottom: max(-12rem, calc(-20vh + env(safe-area-inset-bottom, 0px)));
+    width: 24rem;
+    height: 24rem;
+    z-index: 0;
+  }
+
+  /* Keep ability to hide specific elements via class when needed */
+  .standalone-hide-glow { display: none !important; }
+
+  /* Extra safety: fill the iOS bottom safe-area to prevent thin line */
+  body::after {
+    content: "";
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: max(1px, env(safe-area-inset-bottom, 14px));
+    background: hsl(215 100% 12%);
+    pointer-events: none;
+    z-index: 0;
+  }
 }
 
 /* Fallback for iOS where display-mode media query may fail */
@@ -42,9 +65,17 @@ html.standalone, html.standalone body {
 }
 
 html.standalone .bg-parium-gradient { background: hsl(215 100% 12%) !important; }
-html.standalone .pwa-bottom-glow,
-html.standalone .standalone-hide-glow,
-html.standalone [class*="bg-primary-glow"] { display: none !important; }
+html.standalone .pwa-bottom-glow {
+  display: block !important;
+  position: fixed !important;
+  right: max(-12rem, calc(-20vw + env(safe-area-inset-right, 0px)));
+  bottom: max(-12rem, calc(-20vh + env(safe-area-inset-bottom, 0px)));
+  width: 24rem;
+  height: 24rem;
+  z-index: 0;
+}
+html.standalone .standalone-hide-glow { display: none !important; }
+
 
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
