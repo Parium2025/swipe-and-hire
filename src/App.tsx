@@ -32,9 +32,9 @@ const App = () => {
       <Toaster />
       <BrowserRouter>
         <UnsavedChangesProvider>
-          <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
+          <div className="min-h-screen bg-parium-gradient safe-area-content overflow-x-hidden w-full max-w-full">
             {/* Static animated background - identical to WelcomeTunnel */}
-            <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+            <div className="fixed inset-0 pointer-events-none z-0 bg-parium-gradient overflow-hidden">
               
               
               {/* Animated floating elements */}
@@ -43,7 +43,7 @@ const App = () => {
               <div className="fixed top-24 left-20 w-3 h-3 bg-secondary/20 rounded-full animate-bounce pointer-events-none z-[1]" style={{ animationDuration: '3s' }}></div>
               
               {/* Decorative glow effect in bottom right corner */}
-              <div className="absolute pwa-bottom-glow w-96 h-96 pointer-events-none z-[1]">
+              <div className="fixed -bottom-32 -right-32 w-96 h-96 pointer-events-none z-[1]">
                 <div className="absolute inset-0 bg-primary-glow/40 rounded-full blur-[120px]"></div>
                 <div className="absolute inset-4 bg-primary-glow/30 rounded-full blur-[100px]"></div>
                 <div className="absolute inset-8 bg-primary-glow/25 rounded-full blur-[80px]"></div>

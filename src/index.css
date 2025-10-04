@@ -73,20 +73,11 @@ All colors MUST be HSL.
     /* Parium Brand Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(215 100% 12%), hsl(200 100% 60%));
     /* Soften and unify background to avoid visible "bands" at the bottom on iOS */
-    --gradient-parium: 
-      radial-gradient(
-        1200px 1200px at 50% 48%,
-        hsl(var(--primary-glow) / 0.38) 0%,
-        hsl(var(--primary-glow) / 0.16) 40%,
-        hsl(var(--primary-glow) / 0.08) 60%,
-        hsl(var(--primary-glow) / 0.0) 78%
-      ),
-      radial-gradient(
-        1400px 1000px at 50% 85%,
-        hsl(var(--primary-glow) / 0.08) 0%,
-        hsl(var(--primary-glow) / 0.0) 75%
-      ),
-      linear-gradient(180deg, hsl(215 100% 13%), hsl(215 100% 12%));
+    --gradient-parium: radial-gradient(
+      circle at 50% 40%,
+      hsl(var(--primary-glow) / 0.35) 0%,
+      hsl(var(--primary-glow) / 0) 45%
+    ), linear-gradient(180deg, hsl(215 100% 12%), hsl(215 100% 12%));
     --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(200 100% 98%));
     --gradient-glass: linear-gradient(135deg, hsla(0 0% 100% / 0.1), hsla(0 0% 100% / 0.05));
 
@@ -272,15 +263,17 @@ All colors MUST be HSL.
 
   /* Global background gradient to avoid white flash */
   html, body {
-    background: var(--gradient-parium);
+    background: var(--gradient-parium) fixed;
     background-size: cover;
+    background-attachment: fixed;
   }
 
   /* iOS Safari: force full-bleed gradient on html/body so status area isn't white */
   @supports (padding: env(safe-area-inset-top)) {
     html, body {
-      background: var(--gradient-parium);
+      background: var(--gradient-parium) fixed;
       background-size: cover;
+      background-attachment: fixed;
       min-height: 100svh; /* Safari browser mode */
       padding-top: env(safe-area-inset-top);
       margin-top: calc(-1 * env(safe-area-inset-top));
@@ -290,8 +283,9 @@ All colors MUST be HSL.
       @media (display-mode: standalone) {
         html, body {
           min-height: calc(100dvh + env(safe-area-inset-top) + env(safe-area-inset-bottom));
-          background: var(--gradient-parium) !important;
+          background: var(--gradient-parium) fixed !important;
           background-size: cover;
+          background-attachment: fixed;
         }
         /* Paint gradient under the home indicator too */
         body::after {
