@@ -37,7 +37,7 @@
                 document.querySelectorAll('.pwa-bottom-glow').forEach(function(el){
                   el.style.setProperty('bottom','calc(-28rem - env(safe-area-inset-bottom, 0px))','important');
                 });
-                var mask = document.getElementById('pwa-bottom-mask'); if (mask) mask.style.display = 'block';
+                var mask = document.getElementById('pwa-bottom-mask'); if (mask) mask.style.display = 'none';
               } catch(e) {}
             });
           }
