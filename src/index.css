@@ -397,7 +397,16 @@ All colors MUST be HSL.
     bottom: -8rem; /* matches -bottom-32 by default */
     pointer-events: none;
   }
+  /* Show bottom mask only in standalone */
+  #pwa-bottom-mask { display: none; }
+  html.standalone #pwa-bottom-mask { display: block; }
+
+  /* Standalone fallback without @media support */
+  html.standalone .pwa-shift { transform: translateY(clamp(24px, 6vh, 96px)); will-change: transform; }
+  html.standalone .pwa-no-blur { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+  html.standalone .pwa-bottom-glow { bottom: calc(-22rem - env(safe-area-inset-bottom, 0px)) !important; }
 }
+
 
 /* In installed PWA (standalone), push the glow further below the home indicator */
 @media (display-mode: standalone) {

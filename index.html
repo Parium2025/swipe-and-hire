@@ -19,6 +19,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+      (function(){
+        try {
+          var isStandalone = (window.navigator && (window.navigator as any).standalone) || window.matchMedia('(display-mode: standalone)').matches;
+          if (isStandalone) { document.documentElement.classList.add('standalone','pwa'); console.log('[PWA] standalone detected'); }
+          else { console.log('[PWA] not standalone'); }
+        } catch(e) { console.log('[PWA] detect error', e); }
+      })();
+    </script>
     <link rel="preload" as="image" href="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" imagesrcset="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" fetchpriority="high" />
  
      
