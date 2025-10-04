@@ -32,9 +32,9 @@ const App = () => {
       <Toaster />
       <BrowserRouter>
         <UnsavedChangesProvider>
-          <div className="min-h-screen bg-parium-gradient safe-area-content overflow-x-hidden w-full max-w-full">
+          <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
             {/* Static animated background - identical to WelcomeTunnel */}
-            <div className="fixed inset-0 pointer-events-none z-0 bg-parium-gradient overflow-hidden">
+            <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
               
               
               {/* Animated floating elements */}
