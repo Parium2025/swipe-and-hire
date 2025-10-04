@@ -676,7 +676,7 @@ All colors MUST be HSL.
   @media (display-mode: standalone) {
     /* Global offset to align hero/bubbles in installed PWA */
     :root {
-      --pwa-offset: clamp(24px, 6vh, 64px);
+      --pwa-offset: clamp(40px, 10vh, 120px);
     }
 
     html.auth-locked, body.auth-locked,
