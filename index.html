@@ -62,11 +62,24 @@
     /* Ensure app content sits above background layer */
     #root { position: relative; z-index: 1; }
 
-    /* In standalone (Add to Home Screen) keep a solid base color under the gradient */
+    /* In standalone (Add to Home Screen) tuning */
     @media (display-mode: standalone) {
       html, body { 
         background: hsl(215 100% 12%) !important;
         min-height: calc(100dvh + env(safe-area-inset-bottom, 0px));
+      }
+      /* Align bubbles and content with web */
+      .pwa-shift { transform: translateY(clamp(24px, 6vh, 96px)) !important; will-change: transform; }
+      /* Move bottom glow further down to avoid band */
+      .pwa-bottom-glow { bottom: calc(-22rem - env(safe-area-inset-bottom, 0px)) !important; }
+      /* Remove glass blur to prevent banding */
+      .pwa-no-blur { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+      /* Subtle bottom mask to eliminate any remaining banding */
+      #pwa-bottom-mask {
+        position: fixed; left: 0; right: 0; bottom: 0;
+        height: calc(14vh + env(safe-area-inset-bottom, 0px));
+        background: linear-gradient(180deg, transparent 0%, hsl(215 100% 12% / 0.12) 55%, hsl(215 100% 12% / 0.24) 100%);
+        pointer-events: none; z-index: 2;
       }
     }
   </style>
@@ -75,6 +88,7 @@
   <body>
     <div id="app-bg" aria-hidden="true"></div>
     <div id="root"></div>
+    <div id="pwa-bottom-mask" aria-hidden="true"></div>
     <script>
       try {
         const meta = document.querySelector('meta[name="build-version"]');
