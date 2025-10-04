@@ -506,8 +506,9 @@ const AuthMobile = ({
         }}
       >
         <Card 
-          className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20 my-auto mx-auto overflow-y-auto auth-password-reset-card" 
+          className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20 my-auto mx-auto overflow-y-auto" 
           style={{ 
+            maxHeight: '85svh',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain',
             touchAction: 'pan-y'
@@ -570,7 +571,7 @@ const AuthMobile = ({
       }}
     >
       {/* Static animated background - won't re-render */}
-      <div className="fixed inset-0 pointer-events-none z-0 auth-bg-fixed">
+      <div className="fixed inset-0 pointer-events-none z-0">
 
         {/* Animated floating elements - now stable */}
         <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce" style={{ animationDuration: '2s' }}></div>
@@ -650,7 +651,7 @@ const AuthMobile = ({
           {/* Auth form */}
           <div className="w-full max-w-sm overscroll-contain">
             <Card 
-              className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden auth-mobile-card"
+              className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden"
               style={{ WebkitOverflowScrolling: 'touch' }}
             >
               <CardContent className={cn("p-6", isLogin && (showResetPassword || resetPasswordSent) && "pb-24")}>

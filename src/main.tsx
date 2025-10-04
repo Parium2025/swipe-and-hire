@@ -1,48 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
-import './index.css?v=20251006-1105'
+import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
-
-
-// Ensure robust PWA detection so CSS overrides always apply
-function applyStandaloneClass() {
-  try {
-    const isStandalone = (
-      typeof window !== 'undefined' && (
-        window.matchMedia('(display-mode: standalone)').matches ||
-        // iOS Safari legacy flag
-        (window.navigator as any)?.standalone === true
-      )
-    );
-    document.documentElement.classList.toggle('standalone', !!isStandalone);
-  } catch {}
-}
-
-applyStandaloneClass();
-if (typeof window !== 'undefined') {
-  const reapply = () => applyStandaloneClass();
-  window.addEventListener('resize', reapply);
-  window.addEventListener('orientationchange', reapply as any);
-  document.addEventListener('visibilitychange', reapply);
-  window.matchMedia?.('(display-mode: standalone)')?.addEventListener?.('change', reapply as any);
-}
-
-// Disable any existing Service Workers to avoid stale caches during debugging
-if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-  const unregisterAll = async () => {
-    try {
-      const regs = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map((r) => r.unregister()));
-      if (navigator.serviceWorker.controller) {
-        try { navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' }); } catch {}
-      }
-    } catch {}
-  };
-  if (document.readyState === 'complete') unregisterAll();
-  else window.addEventListener('load', unregisterAll);
-}
-
 
 function redirectAuthTokensIfNeeded() {
   if (typeof window === 'undefined') return false;

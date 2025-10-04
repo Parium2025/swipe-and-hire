@@ -6,15 +6,21 @@ html {
   scrollbar-gutter: stable both-edges; 
   overflow-x: hidden !important;
   max-width: 100vw !important;
+  /* Smooth scrolling för hela sidan */
   scroll-behavior: smooth;
+  /* iOS momentum scrolling */
   -webkit-overflow-scrolling: touch;
+  /* Se till att bakgrunden alltid fyller viewporten även vid iOS rubber-band */
   background: var(--gradient-parium);
   background-color: hsl(215 100% 12%);
   min-height: 100dvh;
 }
 
+
 body {
+  /* Förbättrad touch-hantering */
   touch-action: pan-y pinch-zoom;
+  /* Förhindra iOS rubber-band från att visa vit bakgrund */
   overscroll-behavior: none;
   overscroll-behavior-y: none;
   -webkit-overflow-scrolling: touch;
@@ -22,67 +28,6 @@ body {
   background-color: hsl(215 100% 12%);
   min-height: 100dvh;
 }
-
-/* PWA Standalone mode - force solid dark background and proper card height */
-@media (display-mode: standalone) {
-  html, body {
-    background: hsl(215 100% 12%) !important;
-    background-color: hsl(215 100% 12%) !important;
-    background-attachment: initial !important;
-    background-image: none !important;
-  }
-
-  .bg-parium-gradient, .bg-gradient-parium { background: var(--gradient-parium) !important; }
-
-  /* Dölja glow helt i standalone för att inte störa auth kortet */
-  .pwa-bottom-glow { display: none !important; }
-  .auth-bg-fixed { display: none !important; }
-
-  /* Ta bort alla pseudo-overlays som kan orsaka banding */
-  body::before, body::after { content: none !important; }
-
-  /* Korten ska täcka hela skärmen i standalone mode och vara HELT opaka */
-  .auth-mobile-card {
-    min-height: calc(100dvh - 2rem) !important;
-    max-height: none !important;
-    background-color: hsl(var(--surface-blue)) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  /* Password reset kortet får också full höjd och opak bakgrund */
-  .auth-password-reset-card {
-    min-height: calc(100dvh - 2rem) !important;
-    max-height: none !important;
-    background-color: hsl(var(--surface-blue)) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-}
-
-/* Fallback for iOS where display-mode media query may fail */
-html.standalone, html.standalone body {
-  background: hsl(215 100% 12%) !important;
-  background-color: hsl(215 100% 12%) !important;
-  background-attachment: initial !important;
-}
-
-html.standalone .bg-parium-gradient, html.standalone .bg-gradient-parium { background: var(--gradient-parium) !important; }
-html.standalone .pwa-bottom-glow { display: none !important; }
-html.standalone body::before,
-html.standalone body::after { content: none !important; }
-html.standalone .auth-bg-fixed { display: none !important; }
-html.standalone .auth-mobile-card,
-html.standalone .auth-password-reset-card {
-  min-height: calc(100dvh - 2rem) !important;
-  max-height: none !important;
-  background-color: hsl(var(--surface-blue)) !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-}
-html.standalone .standalone-hide-glow { display: none !important; }
-
-
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
@@ -338,14 +283,22 @@ All colors MUST be HSL.
       @media (display-mode: standalone) {
         html, body {
           min-height: calc(100dvh + env(safe-area-inset-top) + env(safe-area-inset-bottom));
-          background: hsl(215 100% 12%) !important;
-          background-size: auto !important;
-          background-attachment: initial !important;
-          background-image: none !important;
+          background: var(--gradient-parium) fixed !important;
+          background-size: cover;
+          background-attachment: fixed;
         }
-        /* Remove any gradient overlays in PWA */
-        body::after { content: none !important; }
-        body::before { content: none !important; }
+        /* Paint gradient under the home indicator too */
+        body::after {
+          content: "";
+          position: fixed;
+          top: -20px;
+          left: -20px;
+          right: -20px;
+          bottom: calc(-20px - env(safe-area-inset-bottom, 0px));
+          background: var(--gradient-parium);
+          pointer-events: none;
+          z-index: 0;
+        }
         #root { position: relative; z-index: 1; }
       }
   }
