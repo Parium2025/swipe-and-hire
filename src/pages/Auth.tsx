@@ -1185,9 +1185,8 @@ const Auth = () => {
       <>
         {/* Pull-to-refresh spinner */}
         <div 
-          className="fixed left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
+          className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
           style={{ 
-            top: 'calc(env(safe-area-inset-top, 0px) + 2rem)',
             opacity: pullProgress,
             pointerEvents: 'none'
           }}
@@ -1227,9 +1226,8 @@ const Auth = () => {
       <>
         {/* Pull-to-refresh spinner */}
         <div 
-          className="fixed left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
+          className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
           style={{ 
-            top: 'calc(env(safe-area-inset-top, 0px) + 2rem)',
             opacity: pullProgress,
             pointerEvents: 'none'
           }}
@@ -1260,9 +1258,8 @@ const Auth = () => {
     <>
       {/* Pull-to-refresh spinner */}
       <div 
-        className="fixed left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
+        className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
         style={{ 
-          top: 'calc(env(safe-area-inset-top, 0px) + 2rem)',
           opacity: pullProgress,
           pointerEvents: 'none'
         }}

@@ -11,7 +11,7 @@
     <meta name="description" content="Parium">
     <meta name="author" content="Lovable" />
     <meta http-equiv="Content-Language" content="sv-SE" />
-    <meta name="build-version" content="2025-10-04T12:15:00Z" />
+    <meta name="build-version" content="2025-10-02T21:01Z" />
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
@@ -19,36 +19,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>
-      (function(){
-        try {
-          var isStandalone = (window.navigator && (window.navigator).standalone) || window.matchMedia('(display-mode: standalone)').matches;
-          if (isStandalone) { document.documentElement.classList.add('standalone','pwa'); console.log('[PWA] standalone detected');
-            requestAnimationFrame(function(){
-              try {
-                document.querySelectorAll('.backdrop-blur-sm, [style*="backdrop-filter"], .auth-card *').forEach(function(el){
-                  el.style.setProperty('backdrop-filter','none','important');
-                  el.style.setProperty('-webkit-backdrop-filter','none','important');
-                });
-                document.querySelectorAll('.pwa-shift-bg, .auth-offset').forEach(function(el){
-                  el.style.setProperty('transform','none','important');
-                  el.style.setProperty('will-change','auto');
-                });
-                document.querySelectorAll('.pwa-shift').forEach(function(el){
-                  el.style.setProperty('transform','none','important');
-                  el.style.setProperty('will-change','auto');
-                });
-                document.querySelectorAll('.pwa-bottom-glow').forEach(function(el){
-                  el.style.setProperty('display','none','important');
-                });
-                var mask = document.getElementById('pwa-bottom-mask'); if (mask) mask.style.display = 'none';
-              } catch(e) {}
-            });
-          }
-          else { console.log('[PWA] not standalone'); }
-        } catch(e) { console.log('[PWA] detect error', e); }
-      })();
-    </script>
     <link rel="preload" as="image" href="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" imagesrcset="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" fetchpriority="high" />
  
      
@@ -92,20 +62,12 @@
     /* Ensure app content sits above background layer */
     #root { position: relative; z-index: 1; }
 
-    /* In standalone (Add to Home Screen) - keep identical to browser */
+    /* In standalone (Add to Home Screen) keep a solid base color under the gradient */
     @media (display-mode: standalone) {
       html, body { 
         background: hsl(215 100% 12%) !important;
         min-height: calc(100dvh + env(safe-area-inset-bottom, 0px));
       }
-      /* Keep layout identical to browser */
-      .pwa-shift { transform: none !important; will-change: auto; }
-      /* Hide bottom glow */
-      .pwa-bottom-glow { display: none !important; }
-      /* Remove glass blur to prevent banding */
-      .pwa-no-blur { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
-      /* Hide bottom mask */
-      #pwa-bottom-mask { display: none !important; }
     }
   </style>
 </head>
@@ -113,18 +75,6 @@
   <body>
     <div id="app-bg" aria-hidden="true"></div>
     <div id="root"></div>
-    <div id="pwa-bottom-mask" aria-hidden="true"></div>
-    <div id="build-badge" style="position:fixed;left:6px;bottom:6px;font:600 10px/1.2 Inter,system-ui,-apple-system,sans-serif;color:#fff;background:rgba(0,0,0,.35);padding:4px 6px;border-radius:6px;z-index:9999;display:none">-</div>
-    <script>
-      (function(){
-        try{
-          var v = (document.querySelector('meta[name="build-version"]')||{}).content || '';
-          var isStandalone = (window.navigator && (window.navigator).standalone) || window.matchMedia('(display-mode: standalone)').matches;
-          var el = document.getElementById('build-badge');
-          if(el){ el.textContent = 'build ' + v + (isStandalone ? ' • standalone' : ' • browser'); el.style.display = 'block'; }
-        }catch(e){}
-      })();
-    </script>
     <script>
       try {
         const meta = document.querySelector('meta[name="build-version"]');
@@ -145,6 +95,6 @@
         }
       } catch (e) { /* noop */ }
     </script>
-    <script type="module" src="/src/main.tsx?v=20251004-1507"></script>
+    <script type="module" src="/src/main.tsx?v=20251002-2056"></script>
   </body>
 </html>

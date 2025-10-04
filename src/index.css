@@ -261,31 +261,46 @@ All colors MUST be HSL.
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
-  /* Global background gradient */
+  /* Global background gradient to avoid white flash */
   html, body {
-    background: var(--gradient-parium);
+    background: var(--gradient-parium) fixed;
     background-size: cover;
+    background-attachment: fixed;
   }
 
-  /* iOS Safari: full-bleed gradient without fixed attachment */
+  /* iOS Safari: force full-bleed gradient on html/body so status area isn't white */
   @supports (padding: env(safe-area-inset-top)) {
     html, body {
-      background: var(--gradient-parium);
+      background: var(--gradient-parium) fixed;
       background-size: cover;
+      background-attachment: fixed;
       min-height: 100svh; /* Safari browser mode */
       padding-top: env(safe-area-inset-top);
       margin-top: calc(-1 * env(safe-area-inset-top));
     }
     
-    /* Standalone mode (hemskärm) full height */
-    @media (display-mode: standalone) {
-      html, body {
-        min-height: calc(100dvh + env(safe-area-inset-top) + env(safe-area-inset-bottom));
-        background: var(--gradient-parium) !important;
-        background-size: cover;
+    /* Standalone mode (hemskärm) får full höjd */
+      @media (display-mode: standalone) {
+        html, body {
+          min-height: calc(100dvh + env(safe-area-inset-top) + env(safe-area-inset-bottom));
+          background: var(--gradient-parium) fixed !important;
+          background-size: cover;
+          background-attachment: fixed;
+        }
+        /* Paint gradient under the home indicator too */
+        body::after {
+          content: "";
+          position: fixed;
+          top: -20px;
+          left: -20px;
+          right: -20px;
+          bottom: calc(-20px - env(safe-area-inset-bottom, 0px));
+          background: var(--gradient-parium);
+          pointer-events: none;
+          z-index: 0;
+        }
+        #root { position: relative; z-index: 1; }
       }
-      #root { position: relative; z-index: 1; }
-    }
   }
 
   /* Custom date input styling */
@@ -397,25 +412,13 @@ All colors MUST be HSL.
     bottom: -8rem; /* matches -bottom-32 by default */
     pointer-events: none;
   }
-  /* Bottom mask is disabled to avoid banding */
-  #pwa-bottom-mask { display: none !important; }
-  html.standalone #pwa-bottom-mask { display: none !important; }
-
-  /* Standalone: align background with safe-area top */
-  html.standalone .pwa-shift { transform: none; will-change: auto; }
-  html.standalone .pwa-shift-bg { transform: none; will-change: auto; }
-  html.standalone .pwa-no-blur { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
-  html.standalone .pwa-bottom-glow { display: none !important; }
 }
 
-
-/* In installed PWA (standalone), align fixed background with safe-area */
+/* In installed PWA (standalone), push the glow further below the home indicator */
 @media (display-mode: standalone) {
-  :root { --pwa-hero-shift: 0px; --pwa-hero-shift-bg: 0px; }
-  .pwa-bottom-glow { display: none !important; }
-  .pwa-shift { transform: none; will-change: auto; }
-  .pwa-shift-bg { transform: none; will-change: auto; }
-  .pwa-no-blur { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+  .pwa-bottom-glow {
+    bottom: calc(-14rem - env(safe-area-inset-bottom, 0px)) !important; /* move lower only in PWA */
+  }
 }
 
 /* Animated circles for Auth and WelcomeTunnel backgrounds */
