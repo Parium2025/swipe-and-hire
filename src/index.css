@@ -263,30 +263,27 @@ All colors MUST be HSL.
 
   /* Global background gradient to avoid white flash */
   html, body {
-    background: var(--gradient-parium) fixed;
+    background: var(--gradient-parium);
     background-size: cover;
-    background-attachment: fixed;
   }
 
   /* iOS Safari: force full-bleed gradient on html/body so status area isn't white */
   @supports (padding: env(safe-area-inset-top)) {
     html, body {
-      background: var(--gradient-parium) fixed;
+      background: var(--gradient-parium);
       background-size: cover;
-      background-attachment: fixed;
       min-height: 100svh; /* Safari browser mode */
       padding-top: env(safe-area-inset-top);
       margin-top: calc(-1 * env(safe-area-inset-top));
     }
-    
+
     /* Standalone mode (hemskärm) får full höjd */
-      @media (display-mode: standalone) {
-        html, body {
-          min-height: calc(100dvh + env(safe-area-inset-top) + env(safe-area-inset-bottom));
-          background: var(--gradient-parium) fixed !important;
-          background-size: cover;
-          background-attachment: fixed;
-        }
+    @media (display-mode: standalone) {
+      html, body {
+        min-height: calc(100dvh + env(safe-area-inset-top) + env(safe-area-inset-bottom));
+        background: var(--gradient-parium) !important;
+        background-size: cover;
+      }
         /* Paint gradient under the home indicator too */
         body::after {
           content: "";
