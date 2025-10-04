@@ -578,6 +578,12 @@ const AuthMobile = ({
         <div className="absolute top-32 left-16 w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDuration: '2.5s' }}></div>
         <div className="absolute top-24 left-20 w-3 h-3 bg-secondary/20 rounded-full animate-bounce" style={{ animationDuration: '3s' }}></div>
         
+        {/* Decorative glow effect in bottom right corner */}
+        <div className="absolute -right-32 w-96 h-96 pointer-events-none pwa-bottom-glow hidden md:block">
+          <div className="absolute inset-0 bg-primary-glow/40 rounded-full blur-[120px]"></div>
+          <div className="absolute inset-4 bg-primary-glow/30 rounded-full blur-[100px]"></div>
+          <div className="absolute inset-8 bg-primary-glow/25 rounded-full blur-[80px]"></div>
+        </div>
         
         <div className="absolute bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full animate-bounce" style={{ animationDuration: '2.2s' }}></div>
         <div className="absolute bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full animate-bounce" style={{ animationDuration: '2.8s' }}></div>
@@ -602,6 +608,7 @@ const AuthMobile = ({
         className="relative z-10 flex flex-col min-h-screen overflow-anchor-none"
         style={{ 
           paddingTop: 'env(safe-area-inset-top)', 
+          paddingBottom: 'env(safe-area-inset-bottom)',
           WebkitOverflowScrolling: 'touch'
         }}
       >
@@ -647,7 +654,7 @@ const AuthMobile = ({
               className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden"
               style={{ WebkitOverflowScrolling: 'touch' }}
             >
-              <CardContent className={cn("p-6", isLogin && (showResetPassword || resetPasswordSent) && "pb-24", !isLogin && "pb-0")}>
+              <CardContent className={cn("p-6", isLogin && (showResetPassword || resetPasswordSent) && "pb-24")}>
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0 p-0 h-auto gap-2">
                     <TabsTrigger 
@@ -763,7 +770,7 @@ const AuthMobile = ({
 
                    {/* Register form - always in DOM, overlay swap */}
                     <div className={isLogin ? 'absolute inset-0 opacity-0 pointer-events-none transition-none' : 'relative opacity-100 pointer-events-auto transition-none'}>
-                       <form onSubmit={handleSubmit} className="space-y-3">
+                       <form onSubmit={handleSubmit} className="space-y-4">
                        {/* User Role Selection - First */}
                        <div>
                          <Label className="text-white">Jag är:</Label>

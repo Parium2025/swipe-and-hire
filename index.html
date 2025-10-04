@@ -11,7 +11,7 @@
     <meta name="description" content="Parium">
     <meta name="author" content="Lovable" />
     <meta http-equiv="Content-Language" content="sv-SE" />
-    <meta name="build-version" content="2025-10-04T16:18Z" />
+    <meta name="build-version" content="2025-10-04T15:10Z" />
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
@@ -66,32 +66,18 @@
       try {
         const meta = document.querySelector('meta[name="build-version"]');
         const v = meta?.getAttribute('content') || '';
-        const verKey = 'parium_build_version';
-        const clearedKey = 'parium_cache_cleared_session';
-        const isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || (navigator as any).standalone;
-
-        // One-time per app run: nuke SW + CacheStorage in standalone (iOS PWA can ignore headers)
-        if (isStandalone && !sessionStorage.getItem(clearedKey)) {
-          sessionStorage.setItem(clearedKey, '1');
-          if (navigator.serviceWorker?.getRegistrations) {
-            navigator.serviceWorker.getRegistrations().then((rs) => rs.forEach((r) => r.unregister())).catch(() => {});
-          }
-          if (window.caches?.keys) {
-            caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))).catch(() => {});
-          }
-        }
-
-        const prev = localStorage.getItem(verKey);
+        const key = 'parium_build_version';
+        const prev = localStorage.getItem(key);
         if (!prev) {
-          localStorage.setItem(verKey, v);
+          localStorage.setItem(key, v);
         } else if (prev !== v) {
-          localStorage.setItem(verKey, v);
-          // Also purge on version change
-          if (navigator.serviceWorker?.getRegistrations) {
-            navigator.serviceWorker.getRegistrations().then((rs) => rs.forEach((r) => r.unregister())).catch(() => {});
+          localStorage.setItem(key, v);
+          // Best-effort purge of runtime caches to fight iOS PWA sticky caching
+          if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+            navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister())).catch(() => {});
           }
-          if (window.caches?.keys) {
-            caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))).catch(() => {});
+          if (window.caches && caches.keys) {
+            caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).catch(() => {});
           }
           const url = new URL(window.location.href);
           url.searchParams.set('v', v.replace(/\D/g, '').slice(0, 12));
@@ -103,6 +89,6 @@
         }
       } catch (e) { /* noop */ }
     </script>
-    <script type="module" src="/src/main.tsx?v=20251004-1605"></script>
+    <script type="module" src="/src/main.tsx?v=20251004-1510"></script>
   </body>
 </html>
