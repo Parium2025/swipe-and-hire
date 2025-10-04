@@ -401,20 +401,20 @@ All colors MUST be HSL.
   #pwa-bottom-mask { display: none !important; }
   html.standalone #pwa-bottom-mask { display: none !important; }
 
-  /* Standalone fallback without @media support */
-  html.standalone .pwa-shift { transform: translateY(clamp(16px, 4vh, 72px)); will-change: transform; }
-  html.standalone .pwa-shift-bg { transform: translateY(clamp(56px, 12vh, 160px)); will-change: transform; }
+  /* Standalone: no shifts, keep everything identical to browser */
+  html.standalone .pwa-shift { transform: none; will-change: auto; }
+  html.standalone .pwa-shift-bg { transform: none; will-change: auto; }
   html.standalone .pwa-no-blur { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
-  html.standalone .pwa-bottom-glow { bottom: calc(-26rem - env(safe-area-inset-bottom, 0px)) !important; }
+  html.standalone .pwa-bottom-glow { display: none !important; }
 }
 
 
-/* In installed PWA (standalone), push the glow further below the home indicator */
+/* In installed PWA (standalone), keep layout identical to browser */
 @media (display-mode: standalone) {
-  :root { --pwa-hero-shift: clamp(24px, 6vh, 96px); --pwa-hero-shift-bg: clamp(72px, 12vh, 160px); }
+  :root { --pwa-hero-shift: 0px; --pwa-hero-shift-bg: 0px; }
   .pwa-bottom-glow { display: none !important; }
-  .pwa-shift { transform: translateY(var(--pwa-hero-shift)); will-change: transform; }
-  .pwa-shift-bg { transform: translateY(var(--pwa-hero-shift-bg)); will-change: transform; }
+  .pwa-shift { transform: none; will-change: auto; }
+  .pwa-shift-bg { transform: none; will-change: auto; }
   .pwa-no-blur { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 }
 

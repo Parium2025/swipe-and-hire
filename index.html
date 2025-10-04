@@ -31,8 +31,12 @@
                   el.style.setProperty('-webkit-backdrop-filter','none','important');
                 });
                 document.querySelectorAll('.pwa-shift-bg, .auth-offset').forEach(function(el){
-                  el.style.setProperty('transform','translateY(120px)','important');
-                  el.style.setProperty('will-change','transform');
+                  el.style.setProperty('transform','none','important');
+                  el.style.setProperty('will-change','auto');
+                });
+                document.querySelectorAll('.pwa-shift').forEach(function(el){
+                  el.style.setProperty('transform','none','important');
+                  el.style.setProperty('will-change','auto');
                 });
                 document.querySelectorAll('.pwa-bottom-glow').forEach(function(el){
                   el.style.setProperty('display','none','important');
@@ -88,25 +92,20 @@
     /* Ensure app content sits above background layer */
     #root { position: relative; z-index: 1; }
 
-    /* In standalone (Add to Home Screen) tuning */
+    /* In standalone (Add to Home Screen) - keep identical to browser */
     @media (display-mode: standalone) {
       html, body { 
         background: hsl(215 100% 12%) !important;
         min-height: calc(100dvh + env(safe-area-inset-bottom, 0px));
       }
-      /* Align bubbles and content with web */
-      .pwa-shift { transform: translateY(clamp(24px, 6vh, 96px)) !important; will-change: transform; }
-      /* Move bottom glow further down to avoid band */
-      .pwa-bottom-glow { bottom: calc(-22rem - env(safe-area-inset-bottom, 0px)) !important; }
+      /* Keep layout identical to browser */
+      .pwa-shift { transform: none !important; will-change: auto; }
+      /* Hide bottom glow */
+      .pwa-bottom-glow { display: none !important; }
       /* Remove glass blur to prevent banding */
       .pwa-no-blur { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
-      /* Subtle bottom mask to eliminate any remaining banding */
-      #pwa-bottom-mask {
-        position: fixed; left: 0; right: 0; bottom: 0;
-        height: calc(18vh + env(safe-area-inset-bottom, 0px));
-        background: linear-gradient(180deg, transparent 0%, hsl(215 100% 12% / 0.20) 55%, hsl(215 100% 12% / 0.35) 100%);
-        pointer-events: none; z-index: 2;
-      }
+      /* Hide bottom mask */
+      #pwa-bottom-mask { display: none !important; }
     }
   </style>
 </head>
