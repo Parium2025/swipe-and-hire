@@ -32,21 +32,22 @@ body {
 
   .bg-parium-gradient { background: hsl(215 100% 12%) !important; }
 
-  /* Show the decorative glow but pin it far bottom-right to avoid banding */
+  /* Visa glow men placera det EXTREMT långt ned till höger */
   .pwa-bottom-glow {
     display: block !important;
     position: fixed !important;
-    right: max(-12rem, calc(-20vw + env(safe-area-inset-right, 0px)));
-    bottom: max(-12rem, calc(-20vh + env(safe-area-inset-bottom, 0px)));
-    width: 24rem;
-    height: 24rem;
+    right: calc(-40rem + env(safe-area-inset-right, 0px));
+    bottom: calc(-44rem + env(safe-area-inset-bottom, 0px));
+    width: 28rem;
+    height: 28rem;
+    opacity: 0.28; /* dämpa intensitet för att undvika banding */
     z-index: 0;
   }
 
-  /* Keep ability to hide specific elements via class when needed */
+  /* Möjlighet att dölja specifikt vid behov */
   .standalone-hide-glow { display: none !important; }
 
-  /* Extra safety: fill the iOS bottom safe-area to prevent thin line */
+  /* Extra safety: fyll iOS bottom safe-area för att ta bort ljus rand */
   body::after {
     content: "";
     position: fixed;
@@ -68,10 +69,11 @@ html.standalone .bg-parium-gradient { background: hsl(215 100% 12%) !important; 
 html.standalone .pwa-bottom-glow {
   display: block !important;
   position: fixed !important;
-  right: max(-12rem, calc(-20vw + env(safe-area-inset-right, 0px)));
-  bottom: max(-12rem, calc(-20vh + env(safe-area-inset-bottom, 0px)));
-  width: 24rem;
-  height: 24rem;
+  right: calc(-40rem + env(safe-area-inset-right, 0px));
+  bottom: calc(-44rem + env(safe-area-inset-bottom, 0px));
+  width: 28rem;
+  height: 28rem;
+  opacity: 0.28;
   z-index: 0;
 }
 html.standalone .standalone-hide-glow { display: none !important; }
