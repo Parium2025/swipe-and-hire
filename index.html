@@ -52,19 +52,8 @@
       overflow-x: hidden;
     }
     
-    /* Dedicated full-screen background layer */
-    #app-bg {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      width: 100vw;
-      height: 100vh;
-      background: hsl(215 100% 12%);
-      pointer-events: none;
-      z-index: 0;
-    }
+    /* Dedicated full-screen background layer (disabled to avoid conflicts in PWA) */
+    #app-bg { display: none !important; }
     
     /* Ensure app content sits above background layer */
     #root { 

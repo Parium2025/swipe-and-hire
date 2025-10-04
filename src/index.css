@@ -32,7 +32,7 @@ body {
     background-image: none !important;
   }
 
-  .bg-parium-gradient, .bg-gradient-parium { background: hsl(215 100% 12%) !important; }
+  .bg-parium-gradient, .bg-gradient-parium { background: var(--gradient-parium) !important; }
 
   /* Dölja glow helt i standalone för att inte störa auth kortet */
   .pwa-bottom-glow { display: none !important; }
@@ -67,7 +67,7 @@ html.standalone, html.standalone body {
   background-attachment: initial !important;
 }
 
-html.standalone .bg-parium-gradient, html.standalone .bg-gradient-parium { background: hsl(215 100% 12%) !important; }
+html.standalone .bg-parium-gradient, html.standalone .bg-gradient-parium { background: var(--gradient-parium) !important; }
 html.standalone .pwa-bottom-glow { display: none !important; }
 html.standalone body::before,
 html.standalone body::after { content: none !important; }

@@ -1,8 +1,9 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
-import './index.css'
+import './index.css?v=20251006-1105'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
+
 
 // Ensure robust PWA detection so CSS overrides always apply
 function applyStandaloneClass() {
@@ -27,27 +28,19 @@ if (typeof window !== 'undefined') {
   window.matchMedia?.('(display-mode: standalone)')?.addEventListener?.('change', reapply as any);
 }
 
-// Register a minimal Service Worker to bust iOS A2HS caches
+// Disable any existing Service Workers to avoid stale caches during debugging
 if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-  let refreshed = false;
-  const onControllerChange = () => {
-    if (refreshed) return;
-    refreshed = true;
-    try { window.location.reload(); } catch {}
+  const unregisterAll = async () => {
+    try {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.unregister()));
+      if (navigator.serviceWorker.controller) {
+        try { navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' }); } catch {}
+      }
+    } catch {}
   };
-
-  const registerSW = () => {
-    const swUrl = '/sw.js?v=20251006-01';
-    navigator.serviceWorker.register(swUrl)
-      .then((reg) => {
-        try { reg.update(); } catch {}
-        try { navigator.serviceWorker.addEventListener('controllerchange', onControllerChange); } catch {}
-      })
-      .catch(() => {});
-  };
-  // Register on load for reliability in iOS PWA
-  if (document.readyState === 'complete') registerSW();
-  else window.addEventListener('load', registerSW);
+  if (document.readyState === 'complete') unregisterAll();
+  else window.addEventListener('load', unregisterAll);
 }
 
 
