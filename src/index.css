@@ -401,20 +401,20 @@ All colors MUST be HSL.
   #pwa-bottom-mask { display: none !important; }
   html.standalone #pwa-bottom-mask { display: none !important; }
 
-  /* Standalone: no shifts, keep everything identical to browser */
+  /* Standalone: align background with safe-area top */
   html.standalone .pwa-shift { transform: none; will-change: auto; }
-  html.standalone .pwa-shift-bg { transform: none; will-change: auto; }
+  html.standalone .pwa-shift-bg { transform: translateY(env(safe-area-inset-top, 0)); will-change: transform; }
   html.standalone .pwa-no-blur { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
   html.standalone .pwa-bottom-glow { display: none !important; }
 }
 
 
-/* In installed PWA (standalone), keep layout identical to browser */
+/* In installed PWA (standalone), align fixed background with safe-area */
 @media (display-mode: standalone) {
   :root { --pwa-hero-shift: 0px; --pwa-hero-shift-bg: 0px; }
   .pwa-bottom-glow { display: none !important; }
   .pwa-shift { transform: none; will-change: auto; }
-  .pwa-shift-bg { transform: none; will-change: auto; }
+  .pwa-shift-bg { transform: translateY(env(safe-area-inset-top, 0)); will-change: transform; }
   .pwa-no-blur { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 }
 

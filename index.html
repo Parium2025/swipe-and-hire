@@ -31,8 +31,8 @@
                   el.style.setProperty('-webkit-backdrop-filter','none','important');
                 });
                 document.querySelectorAll('.pwa-shift-bg, .auth-offset').forEach(function(el){
-                  el.style.setProperty('transform','none','important');
-                  el.style.setProperty('will-change','auto');
+                  el.style.setProperty('transform','translateY(env(safe-area-inset-top, 0px))','important');
+                  el.style.setProperty('will-change','transform');
                 });
                 document.querySelectorAll('.pwa-shift').forEach(function(el){
                   el.style.setProperty('transform','none','important');
