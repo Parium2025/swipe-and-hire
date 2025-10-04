@@ -674,9 +674,21 @@ All colors MUST be HSL.
   
   /* I standalone mode, säkerställ att background täcker hela vägen ner */
   @media (display-mode: standalone) {
+    /* Global offset to align hero/bubbles in installed PWA */
+    :root {
+      --pwa-offset: clamp(24px, 6vh, 64px);
+    }
+
     html.auth-locked, body.auth-locked,
     html.auth-lock, body.auth-lock {
       padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    /* Shift hero and background slightly down only in PWA */
+    .auth-offset,
+    .auth-bg-layer {
+      transform: translateY(var(--pwa-offset));
+      will-change: transform;
     }
 
     /* Auth PWA: opaka kort och full höjd */

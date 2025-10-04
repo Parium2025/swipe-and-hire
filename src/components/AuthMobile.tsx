@@ -501,7 +501,6 @@ const AuthMobile = ({
         style={{ 
           WebkitOverflowScrolling: 'touch', 
           touchAction: 'pan-y',
-          minHeight: 'calc(100dvh + env(safe-area-inset-bottom, 0px))',
           paddingBottom: 'env(safe-area-inset-bottom, 0px)'
         }}
       >
@@ -566,12 +565,11 @@ const AuthMobile = ({
       style={{ 
         WebkitOverflowScrolling: 'touch', 
         touchAction: 'pan-y',
-        minHeight: '100svh',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)'
       }}
     >
       {/* Static animated background - won't re-render */}
-      <div className="fixed inset-0 pointer-events-none z-0">
+      <div className="fixed inset-0 pointer-events-none z-0 auth-bg-layer">
 
         {/* Animated floating elements - now stable */}
         <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce" style={{ animationDuration: '2s' }}></div>
@@ -605,7 +603,7 @@ const AuthMobile = ({
 
       <div 
         ref={containerRef} 
-        className="relative z-10 flex flex-col min-h-screen overflow-anchor-none"
+        className="relative z-10 flex flex-col min-h-screen overflow-anchor-none auth-offset"
         style={{ 
           paddingTop: 'env(safe-area-inset-top)', 
           paddingBottom: 'env(safe-area-inset-bottom)',
