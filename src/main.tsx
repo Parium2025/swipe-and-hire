@@ -27,6 +27,30 @@ if (typeof window !== 'undefined') {
   window.matchMedia?.('(display-mode: standalone)')?.addEventListener?.('change', reapply as any);
 }
 
+// Register a minimal Service Worker to bust iOS A2HS caches
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  let refreshed = false;
+  const onControllerChange = () => {
+    if (refreshed) return;
+    refreshed = true;
+    try { window.location.reload(); } catch {}
+  };
+
+  const registerSW = () => {
+    const swUrl = '/sw.js?v=20251006-01';
+    navigator.serviceWorker.register(swUrl)
+      .then((reg) => {
+        try { reg.update(); } catch {}
+        try { navigator.serviceWorker.addEventListener('controllerchange', onControllerChange); } catch {}
+      })
+      .catch(() => {});
+  };
+  // Register on load for reliability in iOS PWA
+  if (document.readyState === 'complete') registerSW();
+  else window.addEventListener('load', registerSW);
+}
+
+
 function redirectAuthTokensIfNeeded() {
   if (typeof window === 'undefined') return false;
   const { location } = window;
