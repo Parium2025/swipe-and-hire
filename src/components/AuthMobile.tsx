@@ -496,16 +496,17 @@ const AuthMobile = ({
 
   if (isPasswordReset) {
     return (
-      <div 
-        className="bg-gradient-parium overflow-y-auto p-4 py-8 auth-dark flex flex-col auth-screen" 
-        style={{ 
-          WebkitOverflowScrolling: 'touch', 
-          touchAction: 'pan-y',
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)'
-        }}
-      >
-        <Card 
-          className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20 my-auto mx-auto overflow-y-auto auth-card" 
+    <div 
+      className="bg-gradient-parium overflow-y-auto p-4 py-8 auth-dark flex flex-col" 
+      style={{ 
+        WebkitOverflowScrolling: 'touch', 
+        touchAction: 'pan-y',
+        minHeight: '100dvh',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)'
+      }}
+    >
+      <Card 
+        className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20 my-auto mx-auto overflow-y-auto"
           style={{ 
             maxHeight: '85svh',
             WebkitOverflowScrolling: 'touch',
@@ -561,15 +562,16 @@ const AuthMobile = ({
 
   return (
     <div 
-      className="bg-gradient-parium flex flex-col relative auth-dark auth-screen" 
+      className="bg-gradient-parium flex flex-col relative auth-dark" 
       style={{ 
         WebkitOverflowScrolling: 'touch', 
         touchAction: 'pan-y',
+        minHeight: '100dvh',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)'
       }}
     >
       {/* Static animated background - won't re-render */}
-      <div className="fixed inset-0 pointer-events-none z-0 auth-bg-layer">
+      <div className="fixed inset-0 pointer-events-none z-0">
 
         {/* Animated floating elements - now stable */}
         <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce" style={{ animationDuration: '2s' }}></div>
@@ -603,7 +605,7 @@ const AuthMobile = ({
 
       <div 
         ref={containerRef} 
-        className="relative z-10 flex flex-col min-h-screen overflow-anchor-none auth-offset"
+        className="relative z-10 flex flex-col min-h-screen overflow-anchor-none"
         style={{ 
           paddingTop: 'env(safe-area-inset-top)', 
           paddingBottom: 'env(safe-area-inset-bottom)',
@@ -649,7 +651,7 @@ const AuthMobile = ({
           {/* Auth form */}
           <div className="w-full max-w-sm overscroll-contain">
             <Card 
-              className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden auth-card"
+              className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden"
               style={{ WebkitOverflowScrolling: 'touch' }}
             >
               <CardContent className={cn("p-6", isLogin && (showResetPassword || resetPasswordSent) && "pb-24")}>

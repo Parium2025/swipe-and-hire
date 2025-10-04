@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
-import './index.css?v=20251004-1410'
+import './index.css?v=20251004-1430'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
 
 function redirectAuthTokensIfNeeded() {
