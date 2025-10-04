@@ -11,7 +11,7 @@
     <meta name="description" content="Parium">
     <meta name="author" content="Lovable" />
     <meta http-equiv="Content-Language" content="sv-SE" />
-    <meta name="build-version" content="2025-10-04T14:55Z" />
+    <meta name="build-version" content="2025-10-04T12:15:00Z" />
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
@@ -98,6 +98,17 @@
     <div id="app-bg" aria-hidden="true"></div>
     <div id="root"></div>
     <div id="pwa-bottom-mask" aria-hidden="true"></div>
+    <div id="build-badge" style="position:fixed;left:6px;bottom:6px;font:600 10px/1.2 Inter,system-ui,-apple-system,sans-serif;color:#fff;background:rgba(0,0,0,.35);padding:4px 6px;border-radius:6px;z-index:9999;display:none">-</div>
+    <script>
+      (function(){
+        try{
+          var v = (document.querySelector('meta[name="build-version"]')||{}).content || '';
+          var isStandalone = (window.navigator && (window.navigator).standalone) || window.matchMedia('(display-mode: standalone)').matches;
+          var el = document.getElementById('build-badge');
+          if(el){ el.textContent = 'build ' + v + (isStandalone ? ' • standalone' : ' • browser'); el.style.display = 'block'; }
+        }catch(e){}
+      })();
+    </script>
     <script>
       try {
         const meta = document.querySelector('meta[name="build-version"]');
@@ -118,6 +129,6 @@
         }
       } catch (e) { /* noop */ }
     </script>
-    <script type="module" src="/src/main.tsx?v=20251004-1456"></script>
+    <script type="module" src="/src/main.tsx?v=20251004-1507"></script>
   </body>
 </html>
