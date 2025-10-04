@@ -562,15 +562,16 @@ const AuthMobile = ({
 
   return (
     <div 
-      className="bg-gradient-parium flex flex-col relative auth-dark min-h-[120dvh]" 
+      className="bg-gradient-parium flex flex-col relative auth-dark" 
       style={{ 
         WebkitOverflowScrolling: 'touch', 
         touchAction: 'pan-y',
-        paddingBottom: 'calc(20vh + env(safe-area-inset-bottom, 0px))'
+        minHeight: '100dvh',
+        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)'
       }}
     >
-      {/* Static animated background - extends beyond viewport */}
-      <div className="fixed inset-0 pointer-events-none z-0 pwa-shift-bg" style={{ height: '150vh', bottom: '-50vh' }}>
+      {/* Static animated background - won't re-render */}
+      <div className="fixed inset-0 pointer-events-none z-0 pwa-shift-bg">
 
         {/* Animated floating elements - now stable */}
         <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce" style={{ animationDuration: '2s' }}></div>
@@ -604,10 +605,10 @@ const AuthMobile = ({
 
       <div 
         ref={containerRef} 
-        className="relative z-10 flex flex-col min-h-[120dvh] overflow-anchor-none pwa-shift"
+        className="relative z-10 flex flex-col min-h-screen overflow-anchor-none pwa-shift"
         style={{ 
           paddingTop: 'env(safe-area-inset-top)', 
-          paddingBottom: 'calc(20vh + env(safe-area-inset-bottom, 0px))',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
           WebkitOverflowScrolling: 'touch'
         }}
       >
