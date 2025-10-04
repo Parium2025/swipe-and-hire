@@ -6,27 +6,34 @@ html {
   scrollbar-gutter: stable both-edges; 
   overflow-x: hidden !important;
   max-width: 100vw !important;
-  /* Smooth scrolling för hela sidan */
   scroll-behavior: smooth;
-  /* iOS momentum scrolling */
   -webkit-overflow-scrolling: touch;
-  /* Se till att bakgrunden alltid fyller viewporten även vid iOS rubber-band */
   background: var(--gradient-parium);
   background-color: hsl(215 100% 12%);
   min-height: 100dvh;
 }
 
-
 body {
-  /* Förbättrad touch-hantering */
   touch-action: pan-y pinch-zoom;
-  /* Förhindra iOS rubber-band från att visa vit bakgrund */
   overscroll-behavior: none;
   overscroll-behavior-y: none;
   -webkit-overflow-scrolling: touch;
   background: var(--gradient-parium);
   background-color: hsl(215 100% 12%);
   min-height: 100dvh;
+}
+
+/* PWA Standalone mode - force solid dark background */
+@media (display-mode: standalone) {
+  html {
+    background: hsl(215 100% 12%) !important;
+    background-color: hsl(215 100% 12%) !important;
+  }
+  
+  body {
+    background: hsl(215 100% 12%) !important;
+    background-color: hsl(215 100% 12%) !important;
+  }
 }
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 

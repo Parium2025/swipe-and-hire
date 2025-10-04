@@ -44,31 +44,61 @@
   <meta name="twitter:description" content="Parium">
   <link rel="icon" type="image/x-icon" href="https://storage.googleapis.com/gpt-engineer-file-uploads/ba8bMyn0QxTPSBwPQ9Xu1sYbNQ83/uploads/1758650202142-remove_watermark_image_20250806_181213.png">
   <style>
-    /* Dedicated full-screen background layer to eliminate iOS PWA banding/stripes */
+    /* PWA Full-screen background - eliminates iOS banding */
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: hsl(215 100% 12%) !important;
+      overflow-x: hidden;
+    }
+    
+    /* Dedicated full-screen background layer */
     #app-bg {
       position: fixed;
-      top: calc(-100px - env(safe-area-inset-top, 0px)); /* extend past top safe area */
-      left: -100px;
-      right: -100px;
-      bottom: calc(-100px - env(safe-area-inset-bottom, 0px)); /* extend past bottom safe area */
-      background: var(--gradient-parium);
-      background-size: cover;
-      background-repeat: no-repeat;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100vw;
+      height: 100vh;
+      background: hsl(215 100% 12%);
       pointer-events: none;
       z-index: 0;
-      -webkit-transform: translateZ(0);
-      will-change: transform;
     }
+    
     /* Ensure app content sits above background layer */
-    #root { position: relative; z-index: 1; }
+    #root { 
+      position: relative; 
+      z-index: 1;
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
 
-    /* In standalone (Add to Home Screen) keep a solid base color under the gradient */
+    /* Standalone PWA mode - force solid background everywhere */
     @media (display-mode: standalone) {
-      html, body { 
+      html {
+        background-color: hsl(215 100% 12%) !important;
         background: hsl(215 100% 12%) !important;
+      }
+      
+      body { 
+        background-color: hsl(215 100% 12%) !important;
+        background: hsl(215 100% 12%) !important;
+        min-height: 100vh;
         min-height: 100dvh;
-        padding-top: env(safe-area-inset-top, 0px);
-        padding-bottom: env(safe-area-inset-bottom, 0px);
+        padding-top: env(safe-area-inset-top, 0px) !important;
+        padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+      }
+      
+      #app-bg {
+        background-color: hsl(215 100% 12%) !important;
+        background: hsl(215 100% 12%) !important;
+        top: calc(-100px - env(safe-area-inset-top, 0px));
+        bottom: calc(-100px - env(safe-area-inset-bottom, 0px));
+        left: -100px;
+        right: -100px;
+        width: calc(100vw + 200px);
+        height: calc(100vh + 200px + env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px));
       }
     }
   </style>
