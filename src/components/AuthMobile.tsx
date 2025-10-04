@@ -573,21 +573,25 @@ const AuthMobile = ({
       {/* Static animated background - won't re-render */}
       <div className="fixed inset-0 pointer-events-none z-0">
 
-        {/* Animated floating elements - now stable */}
-        <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce" style={{ animationDuration: '2s' }}></div>
-        <div className="absolute top-32 left-16 w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDuration: '2.5s' }}></div>
-        <div className="absolute top-24 left-20 w-3 h-3 bg-secondary/20 rounded-full animate-bounce" style={{ animationDuration: '3s' }}></div>
+        {/* Animated floating elements - matching parium.se exactly */}
+        {/* Top left area - large blue bubble */}
+        <div className="absolute top-36 left-8 w-8 h-8 bg-primary/40 rounded-full animate-bounce" style={{ animationDuration: '2.5s' }}></div>
+        {/* Top left - medium blue bubble */}
+        <div className="absolute top-24 left-20 w-5 h-5 bg-primary/30 rounded-full animate-bounce" style={{ animationDuration: '2.8s' }}></div>
+        {/* Top left - small gray bubble */}
+        <div className="absolute top-28 left-12 w-3 h-3 bg-muted-foreground/20 rounded-full animate-bounce" style={{ animationDuration: '3.2s' }}></div>
         
-        {/* Decorative glow effect in bottom right corner */}
-        <div className="absolute -right-32 w-96 h-96 pointer-events-none pwa-bottom-glow hidden md:block">
-          <div className="absolute inset-0 bg-primary-glow/40 rounded-full blur-[120px]"></div>
-          <div className="absolute inset-4 bg-primary-glow/30 rounded-full blur-[100px]"></div>
-          <div className="absolute inset-8 bg-primary-glow/25 rounded-full blur-[80px]"></div>
-        </div>
+        {/* Top right - cyan bubble */}
+        <div className="absolute top-12 right-12 w-4 h-4 bg-primary/35 rounded-full animate-bounce" style={{ animationDuration: '2.3s' }}></div>
         
-        <div className="absolute bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full animate-bounce" style={{ animationDuration: '2.2s' }}></div>
-        <div className="absolute bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full animate-bounce" style={{ animationDuration: '2.8s' }}></div>
-        <div className="absolute bottom-36 right-24 w-2 h-2 bg-accent/35 rounded-full animate-bounce" style={{ animationDuration: '2.3s' }}></div>
+        {/* Middle right - small gray bubble */}
+        <div className="absolute top-32 right-16 w-2.5 h-2.5 bg-muted-foreground/25 rounded-full animate-bounce" style={{ animationDuration: '2.6s' }}></div>
+        
+        {/* Center - tiny white bubble */}
+        <div className="absolute top-56 left-1/2 w-1.5 h-1.5 bg-white/30 rounded-full animate-bounce" style={{ animationDuration: '3s' }}></div>
+        
+        {/* Left middle - small gray bubble */}
+        <div className="absolute top-48 left-6 w-2 h-2 bg-muted-foreground/20 rounded-full animate-bounce" style={{ animationDuration: '2.9s' }}></div>
         
         {/* Pulsing lights */}
         <div className="absolute top-10 right-10 w-3 h-3 bg-secondary/40 rounded-full animate-pulse" style={{ animationDuration: '1.5s' }}></div>
