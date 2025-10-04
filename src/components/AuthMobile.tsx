@@ -497,7 +497,7 @@ const AuthMobile = ({
   if (isPasswordReset) {
     return (
       <div 
-        className="bg-gradient-parium overflow-y-auto p-4 py-8 auth-dark flex flex-col" 
+        className="bg-gradient-parium overflow-y-auto p-4 py-8 auth-dark flex flex-col auth-screen" 
         style={{ 
           WebkitOverflowScrolling: 'touch', 
           touchAction: 'pan-y',
@@ -506,7 +506,7 @@ const AuthMobile = ({
         }}
       >
         <Card 
-          className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20 my-auto mx-auto overflow-y-auto" 
+          className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20 my-auto mx-auto overflow-y-auto auth-card" 
           style={{ 
             maxHeight: '85svh',
             WebkitOverflowScrolling: 'touch',
@@ -562,7 +562,7 @@ const AuthMobile = ({
 
   return (
     <div 
-      className="bg-gradient-parium flex flex-col relative auth-dark" 
+      className="bg-gradient-parium flex flex-col relative auth-dark auth-screen" 
       style={{ 
         WebkitOverflowScrolling: 'touch', 
         touchAction: 'pan-y',
@@ -651,7 +651,7 @@ const AuthMobile = ({
           {/* Auth form */}
           <div className="w-full max-w-sm overscroll-contain">
             <Card 
-              className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden"
+              className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden auth-card"
               style={{ WebkitOverflowScrolling: 'touch' }}
             >
               <CardContent className={cn("p-6", isLogin && (showResetPassword || resetPasswordSent) && "pb-24")}>
