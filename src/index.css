@@ -36,11 +36,13 @@ body {
   .pwa-bottom-glow {
     display: block !important;
     position: fixed !important;
-    right: calc(-40rem + env(safe-area-inset-right, 0px));
-    bottom: calc(-44rem + env(safe-area-inset-bottom, 0px));
-    width: 28rem;
-    height: 28rem;
-    opacity: 0.28; /* dämpa intensitet för att undvika banding */
+    right: calc(-28rem + env(safe-area-inset-right, 0px));
+    bottom: calc(-12rem + env(safe-area-inset-bottom, 0px));
+    width: 30rem;
+    height: 30rem;
+    opacity: 0.4; /* synligt men mjukt */
+    -webkit-mask-image: radial-gradient(120% 120% at 100% 100%, #000 30%, transparent 70%);
+    mask-image: radial-gradient(120% 120% at 100% 100%, #000 30%, transparent 70%);
     z-index: 0;
   }
 
@@ -57,6 +59,17 @@ body {
     pointer-events: none;
     z-index: 0;
   }
+
+  /* Soft bottom gradient to remove banding on long content */
+  #app-bg::after {
+    content: "";
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 26vh;
+    background: linear-gradient(to bottom, hsla(215 100% 12% / 0) 0%, hsl(215 100% 12%) 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
 }
 
 /* Fallback for iOS where display-mode media query may fail */
@@ -69,11 +82,13 @@ html.standalone .bg-parium-gradient { background: hsl(215 100% 12%) !important; 
 html.standalone .pwa-bottom-glow {
   display: block !important;
   position: fixed !important;
-  right: calc(-40rem + env(safe-area-inset-right, 0px));
-  bottom: calc(-44rem + env(safe-area-inset-bottom, 0px));
-  width: 28rem;
-  height: 28rem;
-  opacity: 0.28;
+  right: calc(-28rem + env(safe-area-inset-right, 0px));
+  bottom: calc(-12rem + env(safe-area-inset-bottom, 0px));
+  width: 30rem;
+  height: 30rem;
+  opacity: 0.4;
+  -webkit-mask-image: radial-gradient(120% 120% at 100% 100%, #000 30%, transparent 70%);
+  mask-image: radial-gradient(120% 120% at 100% 100%, #000 30%, transparent 70%);
   z-index: 0;
 }
 html.standalone .standalone-hide-glow { display: none !important; }
