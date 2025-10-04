@@ -35,6 +35,17 @@ body {
   .pwa-bottom-glow, .standalone-hide-glow { display: none !important; }
 }
 
+/* Fallback for iOS where display-mode media query may fail */
+html.standalone, html.standalone body {
+  background: hsl(215 100% 12%) !important;
+  background-color: hsl(215 100% 12%) !important;
+}
+
+html.standalone .bg-parium-gradient { background: hsl(215 100% 12%) !important; }
+html.standalone .pwa-bottom-glow,
+html.standalone .standalone-hide-glow,
+html.standalone [class*="bg-primary-glow"] { display: none !important; }
+
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.

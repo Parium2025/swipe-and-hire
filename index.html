@@ -105,6 +105,16 @@
 </head>
 
   <body>
+    <script>
+      (function(){
+        try {
+          var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone;
+          if (isStandalone) {
+            document.documentElement.classList.add('standalone');
+          }
+        } catch(e) { /* noop */ }
+      })();
+    </script>
     <div id="app-bg" aria-hidden="true"></div>
     <div id="root"></div>
     <script>
