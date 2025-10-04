@@ -47,10 +47,10 @@
     /* Dedicated full-screen background layer to eliminate iOS PWA banding/stripes */
     #app-bg {
       position: fixed;
-      top: -20px;
-      left: -20px;
-      right: -20px;
-      bottom: calc(-20px - env(safe-area-inset-bottom, 0px)); /* extend past bottom safe area */
+      top: calc(-100px - env(safe-area-inset-top, 0px)); /* extend past top safe area */
+      left: -100px;
+      right: -100px;
+      bottom: calc(-100px - env(safe-area-inset-bottom, 0px)); /* extend past bottom safe area */
       background: var(--gradient-parium);
       background-size: cover;
       background-repeat: no-repeat;
@@ -66,7 +66,9 @@
     @media (display-mode: standalone) {
       html, body { 
         background: hsl(215 100% 12%) !important;
-        min-height: calc(100dvh + env(safe-area-inset-bottom, 0px));
+        min-height: 100dvh;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
       }
     }
   </style>
