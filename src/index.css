@@ -74,21 +74,13 @@ body {
 html.standalone, html.standalone body {
   background: hsl(215 100% 12%) !important;
   background-color: hsl(215 100% 12%) !important;
+  background-attachment: initial !important;
 }
 
 html.standalone .bg-parium-gradient, html.standalone .bg-gradient-parium { background: hsl(215 100% 12%) !important; }
-html.standalone .pwa-bottom-glow {
-  display: block !important;
-  position: fixed !important;
-  right: calc(-22rem + env(safe-area-inset-right, 0px));
-  bottom: calc(-18rem + env(safe-area-inset-bottom, 0px));
-  width: 36rem;
-  height: 36rem;
-  opacity: 0.42;
-  -webkit-mask-image: radial-gradient(120% 120% at 100% 100%, #000 35%, transparent 72%);
-  mask-image: radial-gradient(120% 120% at 100% 100%, #000 35%, transparent 72%);
-  z-index: 0;
-}
+html.standalone .pwa-bottom-glow { display: none !important; }
+html.standalone body::before,
+html.standalone body::after { content: none !important; }
 html.standalone .standalone-hide-glow { display: none !important; }
 
 
@@ -347,22 +339,14 @@ All colors MUST be HSL.
       @media (display-mode: standalone) {
         html, body {
           min-height: calc(100dvh + env(safe-area-inset-top) + env(safe-area-inset-bottom));
-          background: var(--gradient-parium) fixed !important;
-          background-size: cover;
-          background-attachment: fixed;
+          background: hsl(215 100% 12%) !important;
+          background-size: auto !important;
+          background-attachment: initial !important;
+          background-image: none !important;
         }
-        /* Paint gradient under the home indicator too */
-        body::after {
-          content: "";
-          position: fixed;
-          top: -20px;
-          left: -20px;
-          right: -20px;
-          bottom: calc(-20px - env(safe-area-inset-bottom, 0px));
-          background: var(--gradient-parium);
-          pointer-events: none;
-          z-index: 0;
-        }
+        /* Remove any gradient overlays in PWA */
+        body::after { content: none !important; }
+        body::before { content: none !important; }
         #root { position: relative; z-index: 1; }
       }
   }
