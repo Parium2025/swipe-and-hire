@@ -30,19 +30,19 @@ body {
     background-color: hsl(215 100% 12%) !important;
   }
 
-  .bg-parium-gradient { background: hsl(215 100% 12%) !important; }
+  .bg-parium-gradient, .bg-gradient-parium { background: hsl(215 100% 12%) !important; }
 
   /* Visa glow men placera det EXTREMT långt ned till höger */
   .pwa-bottom-glow {
     display: block !important;
     position: fixed !important;
-    right: calc(-28rem + env(safe-area-inset-right, 0px));
-    bottom: calc(-12rem + env(safe-area-inset-bottom, 0px));
-    width: 30rem;
-    height: 30rem;
-    opacity: 0.4; /* synligt men mjukt */
-    -webkit-mask-image: radial-gradient(120% 120% at 100% 100%, #000 30%, transparent 70%);
-    mask-image: radial-gradient(120% 120% at 100% 100%, #000 30%, transparent 70%);
+    right: calc(-22rem + env(safe-area-inset-right, 0px));
+    bottom: calc(-18rem + env(safe-area-inset-bottom, 0px));
+    width: 36rem;
+    height: 36rem;
+    opacity: 0.42; /* synligt men mjukt */
+    -webkit-mask-image: radial-gradient(120% 120% at 100% 100%, #000 35%, transparent 72%);
+    mask-image: radial-gradient(120% 120% at 100% 100%, #000 35%, transparent 72%);
     z-index: 0;
   }
 
@@ -78,17 +78,17 @@ html.standalone, html.standalone body {
   background-color: hsl(215 100% 12%) !important;
 }
 
-html.standalone .bg-parium-gradient { background: hsl(215 100% 12%) !important; }
+html.standalone .bg-parium-gradient, html.standalone .bg-gradient-parium { background: hsl(215 100% 12%) !important; }
 html.standalone .pwa-bottom-glow {
   display: block !important;
   position: fixed !important;
-  right: calc(-28rem + env(safe-area-inset-right, 0px));
-  bottom: calc(-12rem + env(safe-area-inset-bottom, 0px));
-  width: 30rem;
-  height: 30rem;
-  opacity: 0.4;
-  -webkit-mask-image: radial-gradient(120% 120% at 100% 100%, #000 30%, transparent 70%);
-  mask-image: radial-gradient(120% 120% at 100% 100%, #000 30%, transparent 70%);
+  right: calc(-22rem + env(safe-area-inset-right, 0px));
+  bottom: calc(-18rem + env(safe-area-inset-bottom, 0px));
+  width: 36rem;
+  height: 36rem;
+  opacity: 0.42;
+  -webkit-mask-image: radial-gradient(120% 120% at 100% 100%, #000 35%, transparent 72%);
+  mask-image: radial-gradient(120% 120% at 100% 100%, #000 35%, transparent 72%);
   z-index: 0;
 }
 html.standalone .standalone-hide-glow { display: none !important; }
