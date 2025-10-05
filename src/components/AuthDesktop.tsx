@@ -506,7 +506,7 @@ const AuthDesktop = ({
 
       <div className="relative z-10 flex flex-col min-h-screen justify-center items-center py-4 px-6">
         {/* Desktop-anchored bottom-right glow tied to auth content */}
-        <div className="pointer-events-none absolute hidden lg:block -right-32 -bottom-32 w-96 h-96">
+        <div className="pointer-events-none fixed hidden lg:block -right-32 -bottom-32 w-96 h-96 z-[1]">
           <div className="absolute inset-0 bg-primary-glow/40 rounded-full blur-[120px]"></div>
           <div className="absolute inset-4 bg-primary-glow/30 rounded-full blur-[100px]"></div>
           <div className="absolute inset-8 bg-primary-glow/25 rounded-full blur-[80px]"></div>
