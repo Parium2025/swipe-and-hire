@@ -93,9 +93,19 @@
           </div>'
         ].join('');
 
+        function ensureStyle(){
+          if (document.getElementById('parium-bounce-style')) return;
+          var css = '\n@-webkit-keyframes parium-bounce {\n  0%, 100% { -webkit-transform: translateY(-25%); transform: translateY(-25%); -webkit-animation-timing-function: cubic-bezier(0.8, 0, 1, 1); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }\n  50% { -webkit-transform: translateY(0); transform: translateY(0); -webkit-animation-timing-function: cubic-bezier(0, 0, 0.2, 1); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }\n}\n@keyframes parium-bounce {\n  0%, 100% { transform: translateY(-25%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }\n  50% { transform: translateY(0); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }\n}\n';
+          var style = document.createElement('style');
+          style.id = 'parium-bounce-style';
+          style.appendChild(document.createTextNode(css));
+          document.head.appendChild(style);
+        }
+
         function mount(){
           var host = document.getElementById('bg-bubbles');
           if (!host) return;
+          ensureStyle();
           host.innerHTML = html;
           applyBounce();
         }
@@ -105,10 +115,12 @@
           nodes.forEach(function(el){
             var d = parseInt(el.getAttribute('data-duration') || '2000', 10);
             el.classList.remove('animate-bounce');
-            // force reflow so Safari re-applies keyframes reliably
+            // Force reflow so Safari re-applies reliably
             void el.offsetHeight;
-            el.classList.add('animate-bounce');
-            el.style.animationDuration = (d/1000) + 's';
+            // Apply exact Tailwind v3 bounce via inline animation to avoid class purge/timing issues
+            el.style.animation = 'parium-bounce ' + d + 'ms infinite';
+            el.style.webkitAnimation = 'parium-bounce ' + d + 'ms infinite';
+            el.style.willChange = 'transform';
           });
         }
 
