@@ -93,52 +93,26 @@
           </div>'
         ].join('');
 
-        let animations = [];
-
         function mount(){
           var host = document.getElementById('bg-bubbles');
           if (!host) return;
           host.innerHTML = html;
-          initAnimations();
+          applyBounce();
         }
 
-        function initAnimations(){
-          cleanupAnimations();
-          if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
+        function applyBounce(){
           var nodes = document.querySelectorAll('#bg-bubbles [data-animated-bubble]');
           nodes.forEach(function(el){
             var d = parseInt(el.getAttribute('data-duration') || '2000', 10);
-            try {
-              var amp = 10; // px
-              var anim = el.animate(
-                [
-                  { transform: 'translate3d(0, 0, 0)' },
-                  { transform: 'translate3d(0, -' + amp + 'px, 0)' },
-                  { transform: 'translate3d(0, 0, 0)' }
-                ],
-                { duration: d, iterations: Infinity, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' }
-              );
-              animations.push(anim);
-            } catch (e) {
-              // Fallback to CSS bounce if WAAPI fails
-              el.classList.add('animate-bounce');
-              el.style.animationDuration = (d/1000) + 's';
-            }
-          });
-        }
-
-        function cleanupAnimations(){
-          animations.forEach(function(a){ try { a.cancel(); } catch(_){} });
-          animations = [];
-          var nodes = document.querySelectorAll('#bg-bubbles [data-animated-bubble]');
-          nodes.forEach(function(el){
             el.classList.remove('animate-bounce');
-            el.style.removeProperty('animation-duration');
+            // force reflow so Safari re-applies keyframes reliably
+            void el.offsetHeight;
+            el.classList.add('animate-bounce');
+            el.style.animationDuration = (d/1000) + 's';
           });
         }
 
-        function restart(){ initAnimations(); }
+        function restart(){ applyBounce(); }
 
         function init(){
           // Ensure CSS is parsed: wait for full load on Safari/iOS
