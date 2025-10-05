@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -25,6 +25,15 @@ const App = () => {
   const device = useDevice();
   const showHeader = false; // Header removed for cleaner UI
 
+  // Force reflow för att starta animationer korrekt på mobil
+  useEffect(() => {
+    const bubbles = document.querySelectorAll('[data-animated-bubble]');
+    bubbles.forEach((bubble) => {
+      // Force reflow genom att läsa offsetHeight
+      void (bubble as HTMLElement).offsetHeight;
+    });
+  }, []);
+
   return (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -38,9 +47,9 @@ const App = () => {
               
               
               {/* Animated floating elements */}
-              <div className="fixed top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce pointer-events-none z-[1]" style={{ animationDuration: '2s' }}></div>
-              <div className="fixed top-32 left-16 w-2 h-2 bg-accent/40 rounded-full animate-bounce pointer-events-none z-[1]" style={{ animationDuration: '2.5s' }}></div>
-              <div className="fixed top-24 left-20 w-3 h-3 bg-secondary/20 rounded-full animate-bounce pointer-events-none z-[1]" style={{ animationDuration: '3s' }}></div>
+              <div data-animated-bubble className="fixed top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-bounce pointer-events-none z-[1] will-change-transform transform-gpu" style={{ animationDuration: '2s' }}></div>
+              <div data-animated-bubble className="fixed top-32 left-16 w-2 h-2 bg-accent/40 rounded-full animate-bounce pointer-events-none z-[1] will-change-transform transform-gpu" style={{ animationDuration: '2.5s' }}></div>
+              <div data-animated-bubble className="fixed top-24 left-20 w-3 h-3 bg-secondary/20 rounded-full animate-bounce pointer-events-none z-[1] will-change-transform transform-gpu" style={{ animationDuration: '3s' }}></div>
               
               {/* Decorative glow effect in bottom right corner */}
               <div className="fixed -bottom-32 -right-32 w-96 h-96 pointer-events-none z-[1] hidden md:block">
@@ -49,9 +58,9 @@ const App = () => {
                 <div className="absolute inset-8 bg-primary-glow/25 rounded-full blur-[80px]"></div>
               </div>
               
-              <div className="fixed bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full animate-bounce pointer-events-none z-[1]" style={{ animationDuration: '2.2s' }}></div>
-              <div className="fixed bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full animate-bounce pointer-events-none z-[1]" style={{ animationDuration: '2.8s' }}></div>
-              <div className="fixed bottom-36 right-24 w-2 h-2 bg-accent/35 rounded-full animate-bounce pointer-events-none z-[1]" style={{ animationDuration: '2.3s' }}></div>
+              <div data-animated-bubble className="fixed bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full animate-bounce pointer-events-none z-[1] will-change-transform transform-gpu" style={{ animationDuration: '2.2s' }}></div>
+              <div data-animated-bubble className="fixed bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full animate-bounce pointer-events-none z-[1] will-change-transform transform-gpu" style={{ animationDuration: '2.8s' }}></div>
+              <div data-animated-bubble className="fixed bottom-36 right-24 w-2 h-2 bg-accent/35 rounded-full animate-bounce pointer-events-none z-[1] will-change-transform transform-gpu" style={{ animationDuration: '2.3s' }}></div>
               
               {/* Pulsing lights */}
               <div className="fixed top-10 right-10 w-3 h-3 bg-secondary/40 rounded-full animate-pulse pointer-events-none z-[1]" style={{ animationDuration: '1.5s' }}></div>
