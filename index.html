@@ -71,17 +71,17 @@
     <script>
       (function(){
         var html = [
-          '<div data-animated-bubble data-duration="2000" class="fixed top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full transform-gpu will-change-transform pointer-events-none z-[1]"></div>',
-          '<div data-animated-bubble data-duration="2500" class="fixed top-32 left-16 w-2 h-2 bg-accent/40 rounded-full transform-gpu will-change-transform pointer-events-none z-[1]"></div>',
-          '<div data-animated-bubble data-duration="3000" class="fixed top-24 left-20 w-3 h-3 bg-secondary/20 rounded-full transform-gpu will-change-transform pointer-events-none z-[1]"></div>',
+          '<div data-animated-bubble data-dur="2" class="fixed top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full pointer-events-none z-[1]"></div>',
+          '<div data-animated-bubble data-dur="2.5" class="fixed top-32 left-16 w-2 h-2 bg-accent/40 rounded-full pointer-events-none z-[1]"></div>',
+          '<div data-animated-bubble data-dur="3" class="fixed top-24 left-20 w-3 h-3 bg-secondary/20 rounded-full pointer-events-none z-[1]"></div>',
           '<div class="fixed -bottom-32 -right-32 w-96 h-96 pointer-events-none z-[1] hidden md:block">\
             <div class="absolute inset-0 bg-primary-glow/40 rounded-full blur-[120px]"></div>\
             <div class="absolute inset-4 bg-primary-glow/30 rounded-full blur-[100px]"></div>\
             <div class="absolute inset-8 bg-primary-glow/25 rounded-full blur-[80px]"></div>\
           </div>',
-          '<div data-animated-bubble data-duration="2200" class="fixed bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full transform-gpu will-change-transform pointer-events-none z-[1]"></div>',
-          '<div data-animated-bubble data-duration="2800" class="fixed bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full transform-gpu will-change-transform pointer-events-none z-[1]"></div>',
-          '<div data-animated-bubble data-duration="2300" class="fixed bottom-36 right-24 w-2 h-2 bg-accent/35 rounded-full transform-gpu will-change-transform pointer-events-none z-[1]"></div>',
+          '<div data-animated-bubble data-dur="2.2" class="fixed bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full pointer-events-none z-[1]"></div>',
+          '<div data-animated-bubble data-dur="2.8" class="fixed bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full pointer-events-none z-[1]"></div>',
+          '<div data-animated-bubble data-dur="2.3" class="fixed bottom-36 right-24 w-2 h-2 bg-accent/35 rounded-full pointer-events-none z-[1]"></div>',
           '<div class="fixed top-10 right-10 w-3 h-3 bg-secondary/40 rounded-full animate-pulse pointer-events-none z-[1]" style="animation-duration:1.5s;"></div>',
           '<div class="fixed top-16 right-20 w-2 h-2 bg-accent/30 rounded-full animate-pulse pointer-events-none z-[1]" style="animation-duration:2s;"></div>',
           '<div class="fixed top-12 left-8 w-3 h-3 bg-accent/40 rounded-full animate-pulse pointer-events-none z-[1]" style="animation-duration:1.8s;"></div>',
@@ -93,19 +93,9 @@
           </div>'
         ].join('');
 
-        function ensureStyle(){
-          if (document.getElementById('parium-bounce-style')) return;
-          var css = '\n@-webkit-keyframes parium-bounce {\n  0%, 100% { -webkit-transform: translateY(-25%); transform: translateY(-25%); -webkit-animation-timing-function: cubic-bezier(0.8, 0, 1, 1); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }\n  50% { -webkit-transform: translateY(0); transform: translateY(0); -webkit-animation-timing-function: cubic-bezier(0, 0, 0.2, 1); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }\n}\n@keyframes parium-bounce {\n  0%, 100% { transform: translateY(-25%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }\n  50% { transform: translateY(0); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }\n}\n';
-          var style = document.createElement('style');
-          style.id = 'parium-bounce-style';
-          style.appendChild(document.createTextNode(css));
-          document.head.appendChild(style);
-        }
-
         function mount(){
           var host = document.getElementById('bg-bubbles');
           if (!host) return;
-          ensureStyle();
           host.innerHTML = html;
           applyBounce();
         }
@@ -113,31 +103,54 @@
         function applyBounce(){
           var nodes = document.querySelectorAll('#bg-bubbles [data-animated-bubble]');
           nodes.forEach(function(el){
-            var d = parseInt(el.getAttribute('data-duration') || '2000', 10);
+            var s = parseFloat(el.getAttribute('data-dur') || '2');
             el.classList.remove('animate-bounce');
-            // Force reflow so Safari re-applies reliably
-            void el.offsetHeight;
-            // Apply exact Tailwind v3 bounce via inline animation to avoid class purge/timing issues
-            el.style.animation = 'parium-bounce ' + d + 'ms infinite';
-            el.style.webkitAnimation = 'parium-bounce ' + d + 'ms infinite';
-            el.style.willChange = 'transform';
+            void el.offsetHeight; // reflow for Safari
+            el.classList.add('animate-bounce');
+            el.style.animationDuration = s + 's';
+            el.style.removeProperty('animation-name');
+            el.style.removeProperty('-webkit-animation');
           });
         }
 
-        function restart(){ applyBounce(); }
+        function waitForBounceCSS(timeout){
+          timeout = typeof timeout === 'number' ? timeout : 1500;
+          return new Promise(function(resolve){
+            var start = performance.now();
+            (function check(){
+              var probe = document.createElement('div');
+              probe.className = 'animate-bounce hidden';
+              document.body.appendChild(probe);
+              var name = getComputedStyle(probe).animationName;
+              probe.remove();
+              if (name && name !== 'none') return resolve(true);
+              if (performance.now() - start >= timeout) return resolve(false);
+              setTimeout(check, 50);
+            })();
+          });
+        }
 
         function init(){
-          // Ensure CSS is parsed: wait for full load on Safari/iOS
-          window.addEventListener('load', function(){ setTimeout(mount, 0); }, { once: true });
+          window.addEventListener('load', function(){
+            waitForBounceCSS(1500).then(function(){
+              setTimeout(mount, 0);
+            });
+          }, { once: true });
         }
+
         if (document.readyState === 'loading') {
           document.addEventListener('DOMContentLoaded', init, { once: true });
         } else { init(); }
-        window.addEventListener('pageshow', function(){ setTimeout(restart, 0); });
-        document.addEventListener('visibilitychange', function(){
-          if (document.visibilityState === 'visible') setTimeout(restart, 0);
+
+        window.addEventListener('pageshow', function(){
+          waitForBounceCSS(300).then(function(){ setTimeout(applyBounce, 0); });
         });
-        window.addEventListener('orientationchange', function(){ setTimeout(restart, 100); });
+        document.addEventListener('visibilitychange', function(){
+          if (document.visibilityState === 'visible') {
+            waitForBounceCSS(300).then(function(){ setTimeout(applyBounce, 0); });
+          }
+        });
+        window.addEventListener('orientationchange', function(){ setTimeout(applyBounce, 100); });
       })();
     </script>
     <script>
