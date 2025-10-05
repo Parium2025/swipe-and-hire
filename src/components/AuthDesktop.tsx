@@ -543,14 +543,14 @@ const AuthDesktop = ({
 
           {/* Auth form */}
           <div className="w-full max-w-md lg:max-w-lg">
-            <Card className="relative bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden">
+            <Card className="relative bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden lg:h-[640px]">
               {/* Glow anchored to the card to prevent layout shifts */}
               <div className="pointer-events-none absolute hidden lg:block -right-20 -bottom-20 w-80 h-80">
                 <div className="absolute inset-0 bg-primary-glow/40 rounded-full blur-[120px]"></div>
                 <div className="absolute inset-4 bg-primary-glow/30 rounded-full blur-[100px]"></div>
                 <div className="absolute inset-8 bg-primary-glow/25 rounded-full blur-[80px]"></div>
               </div>
-              <CardContent className="relative z-[1] p-6 lg:p-8 lg:min-h-[560px]">
+              <CardContent className="relative z-[1] p-6 lg:p-8 lg:h-full lg:overflow-y-auto lg:[scrollbar-gutter:stable]">
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0 p-0 h-auto gap-2">
                     <TabsTrigger 
