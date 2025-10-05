@@ -23,16 +23,55 @@ const queryClient = new QueryClient();
 const BubblesLayer: React.FC = () => {
   const [ready, setReady] = React.useState(false);
 
+  // Restart animation helper (Safari-friendly)
+  const restart = React.useCallback(() => {
+    const nodes = document.querySelectorAll('[data-animated-bubble]');
+    nodes.forEach((n) => {
+      const el = n as HTMLElement;
+      // Temporarily disable animation, force reflow, then restore
+      const prev = el.style.animation;
+      el.style.animation = 'none';
+      // Force reflow
+      void el.offsetHeight;
+      // Clear inline animation to allow the class (animate-bounce) to re-apply
+      el.style.animation = prev || '';
+      if (!prev) {
+        // If there was no inline animation, removing the override is enough
+        el.style.removeProperty('animation');
+      }
+    });
+  }, []);
+
   React.useEffect(() => {
+    // Wait for styles to be applied fully, then kick animations
     const raf1 = requestAnimationFrame(() => {
       const raf2 = requestAnimationFrame(() => {
-        // Force a tiny reflow before starting animations (Safari quirk)
-        void document.body.offsetHeight;
-        setReady(true);
+        // Tiny timeout is more reliable on iOS Safari than RAF-only
+        setTimeout(() => {
+          void document.body.offsetHeight;
+          setReady(true);
+          // Immediately restart to ensure first frame is correct
+          restart();
+        }, 0);
       });
     });
     return () => cancelAnimationFrame(raf1);
-  }, []);
+  }, [restart]);
+
+  // Handle Safari-specific page lifecycle events
+  React.useEffect(() => {
+    const onPageShow = () => restart();
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') restart();
+    };
+    window.addEventListener('pageshow', onPageShow);
+    window.addEventListener('load', onPageShow, { once: true } as any);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.removeEventListener('pageshow', onPageShow);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [restart]);
 
   if (!ready) return null;
 
