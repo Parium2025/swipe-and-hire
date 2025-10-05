@@ -566,8 +566,7 @@ const AuthMobile = ({
       style={{ 
         WebkitOverflowScrolling: 'touch', 
         touchAction: 'pan-y',
-        minHeight: '100svh',
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)'
+        minHeight: '100svh'
       }}
     >
       {/* Static animated background - won't re-render */}
@@ -608,7 +607,6 @@ const AuthMobile = ({
         className="relative z-10 flex flex-col min-h-screen overflow-anchor-none"
         style={{ 
           paddingTop: 'env(safe-area-inset-top)', 
-          paddingBottom: 'env(safe-area-inset-bottom)',
           WebkitOverflowScrolling: 'touch'
         }}
       >
