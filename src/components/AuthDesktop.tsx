@@ -512,8 +512,8 @@ const AuthDesktop = ({
         <div className="absolute top-32 left-16 w-2 h-2 bg-accent/40 rounded-full animate-bounce" style={{ animationDuration: '2.5s' }}></div>
         <div className="absolute top-24 left-20 w-3 h-3 bg-secondary/20 rounded-full animate-bounce" style={{ animationDuration: '3s' }}></div>
         
-        {/* Decorative glow effect in bottom right corner */}
-        <div className="absolute -right-32 w-96 h-96 pointer-events-none pwa-bottom-glow">
+        {/* Decorative glow effect in bottom right corner - fixed position */}
+        <div className="absolute bottom-32 -right-32 w-96 h-96 pointer-events-none">
           <div className="absolute inset-0 bg-primary-glow/40 rounded-full blur-[120px]"></div>
           <div className="absolute inset-4 bg-primary-glow/30 rounded-full blur-[100px]"></div>
           <div className="absolute inset-8 bg-primary-glow/25 rounded-full blur-[80px]"></div>
@@ -575,8 +575,16 @@ const AuthDesktop = ({
           </div>
 
           {/* Auth form */}
-          <div className="w-full max-w-md lg:max-w-lg">
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden">
+          <div className="w-full max-w-md lg:max-w-lg relative">
+            {/* Glow effect bakom kortet - följer med kortet */}
+            <div className="absolute inset-0 -inset-x-8 -inset-y-8 pointer-events-none">
+              <div className="absolute inset-0 bg-primary-glow/20 rounded-full blur-[80px]"></div>
+            </div>
+            <div className="absolute inset-0 -inset-x-4 -inset-y-4 pointer-events-none">
+              <div className="absolute inset-0 bg-primary-glow/15 rounded-full blur-[60px]"></div>
+            </div>
+            
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden relative z-10">
               <CardContent className="p-6 lg:p-8">
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0 p-0 h-auto gap-2">
