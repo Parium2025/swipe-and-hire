@@ -126,10 +126,6 @@ export default {
 					'50%': {
 						'background-position': '100% 50%'
 					}
-				},
-				'bubble-bounce': {
-					'0%': { transform: 'translateY(0)' },
-					'100%': { transform: 'translateY(-12px)' }
 				}
 			},
 			animation: {
@@ -137,8 +133,7 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.5s ease-out',
 				'scale-in': 'scale-in 0.3s ease-out',
-				'gradient': 'gradient 15s ease infinite',
-				'bubble-bounce': 'bubble-bounce 2.4s ease-in-out infinite alternate'
+				'gradient': 'gradient 15s ease infinite'
 			}
 		}
 	},
