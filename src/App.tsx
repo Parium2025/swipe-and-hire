@@ -91,8 +91,7 @@ const RoutedContent: React.FC = () => {
   return (
     <UnsavedChangesProvider>
       <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
-        {/* Static animated background - identical to WelcomeTunnel */}
-        <BubblesLayer />
+        {/* Background rendered in index.html for Safari reliability */}
         
         <div className="relative z-10">
           {showHeader && <Header />}
