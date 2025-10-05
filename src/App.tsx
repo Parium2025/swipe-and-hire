@@ -2,7 +2,7 @@ import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Consent from "./pages/Consent";
@@ -23,8 +23,9 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const device = useDevice();
+  const location = useLocation();
+  const isAuthRoute = location.pathname.startsWith("/auth");
   const showHeader = false; // Header removed for cleaner UI
-
   return (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -43,11 +44,13 @@ const App = () => {
               <div className="fixed top-24 left-20 w-3 h-3 bg-secondary/20 rounded-full animate-bounce pointer-events-none z-[1]" style={{ animationDuration: '3s' }}></div>
               
               {/* Decorative glow effect in bottom right corner */}
-              <div className="fixed -bottom-32 -right-32 w-96 h-96 pointer-events-none z-[1] hidden md:block">
-                <div className="absolute inset-0 bg-primary-glow/40 rounded-full blur-[120px]"></div>
-                <div className="absolute inset-4 bg-primary-glow/30 rounded-full blur-[100px]"></div>
-                <div className="absolute inset-8 bg-primary-glow/25 rounded-full blur-[80px]"></div>
-              </div>
+              {!isAuthRoute && (
+                <div className="fixed -bottom-32 -right-32 w-96 h-96 pointer-events-none z-[1] hidden md:block">
+                  <div className="absolute inset-0 bg-primary-glow/40 rounded-full blur-[120px]"></div>
+                  <div className="absolute inset-4 bg-primary-glow/30 rounded-full blur-[100px]"></div>
+                  <div className="absolute inset-8 bg-primary-glow/25 rounded-full blur-[80px]"></div>
+                </div>
+              )}
               
               <div className="fixed bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full animate-bounce pointer-events-none z-[1]" style={{ animationDuration: '2.2s' }}></div>
               <div className="fixed bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full animate-bounce pointer-events-none z-[1]" style={{ animationDuration: '2.8s' }}></div>
