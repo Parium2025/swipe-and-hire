@@ -17,12 +17,10 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { UnsavedChangesProvider } from "@/hooks/useUnsavedChanges";
 import { Header } from "@/components/Header";
 import AuthTokenBridge from "./components/AuthTokenBridge";
-import { useDevice } from "@/hooks/use-device";
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  const device = useDevice();
   const showHeader = false; // Header removed for cleaner UI
   const [animationsReady, setAnimationsReady] = useState(false);
 
