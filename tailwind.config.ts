@@ -119,33 +119,22 @@ export default {
 						opacity: '1'
 					}
 				},
-			'gradient': {
-				'0%, 100%': {
-					'background-position': '0% 50%'
-				},
-				'50%': {
-					'background-position': '100% 50%'
+				'gradient': {
+					'0%, 100%': {
+						'background-position': '0% 50%'
+					},
+					'50%': {
+						'background-position': '100% 50%'
+					}
 				}
 			},
-			'float': {
-				'0%, 100%': {
-					transform: 'translateY(0) translateX(0)',
-					opacity: '1'
-				},
-				'50%': {
-					transform: 'translateY(-20px) translateX(5px)',
-					opacity: '1'
-				}
+			animation: {
+				'accordion-down': 'accordion-down 0.2s ease-out',
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.5s ease-out',
+				'scale-in': 'scale-in 0.3s ease-out',
+				'gradient': 'gradient 15s ease infinite'
 			}
-			},
-		animation: {
-			'accordion-down': 'accordion-down 0.2s ease-out',
-			'accordion-up': 'accordion-up 0.2s ease-out',
-			'fade-in': 'fade-in 0.5s ease-out',
-			'scale-in': 'scale-in 0.3s ease-out',
-			'gradient': 'gradient 15s ease infinite',
-			'float': 'float 3s ease-in-out infinite both'
-		}
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
