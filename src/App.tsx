@@ -24,6 +24,38 @@ const RoutedContent: React.FC = () => {
   const location = useLocation();
   const [animKey, setAnimKey] = React.useState(0);
 
+  const restartAnimations = React.useCallback(() => {
+    const nodes = document.querySelectorAll('[data-animated-bubble]');
+    nodes.forEach((node) => {
+      const clone = node.cloneNode(true) as HTMLElement;
+      node.parentNode?.replaceChild(clone, node);
+    });
+  }, []);
+
+  // Ensure correct animation on initial mount
+  React.useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      const id2 = requestAnimationFrame(() => {
+        restartAnimations();
+      });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [restartAnimations]);
+
+  // Also restart when route changes and page becomes visible (mobile Safari)
+  React.useEffect(() => {
+    const id = requestAnimationFrame(() => restartAnimations());
+    return () => cancelAnimationFrame(id);
+  }, [location.pathname, restartAnimations]);
+
+  React.useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') restartAnimations();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [restartAnimations]);
+
   React.useEffect(() => {
     setAnimKey((k) => k + 1);
   }, [location.pathname]);
