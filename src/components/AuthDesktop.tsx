@@ -585,8 +585,8 @@ const AuthDesktop = ({
           {/* Auth form */}
           <div className="w-full max-w-md lg:max-w-lg relative">
             
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden relative z-10 will-change-auto">
-              <CardContent className="p-6 lg:p-8">
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden relative z-10 will-change-auto lg:h-[720px] lg:overflow-hidden">
+              <CardContent className="p-6 lg:p-8 lg:h-full lg:overflow-y-auto">
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0 p-0 h-auto gap-2">
                     <TabsTrigger 
