@@ -14,6 +14,26 @@ import { Input } from '@/components/ui/input';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 const Auth = () => {
+  // Version check för att undvika cache-problem på mobilen
+  useEffect(() => {
+    try {
+      const meta = document.querySelector('meta[name="build-version"]');
+      const currentVersion = meta?.getAttribute('content') || '';
+      const storedVersion = localStorage.getItem('parium_build_version');
+      
+      // Om det finns en ny version, tvinga reload en gång
+      if (storedVersion && currentVersion && storedVersion !== currentVersion) {
+        const hasReloaded = sessionStorage.getItem('auth_version_reloaded');
+        if (!hasReloaded) {
+          sessionStorage.setItem('auth_version_reloaded', 'true');
+          window.location.reload();
+        }
+      }
+    } catch (e) {
+      console.error('Version check error:', e);
+    }
+  }, []);
+
   const [showIntro, setShowIntro] = useState(() => {
     try {
       const loc = typeof window !== 'undefined' ? window.location : null;
