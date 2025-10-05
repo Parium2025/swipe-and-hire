@@ -496,7 +496,7 @@ const AuthDesktop = ({
 
   return (
     <div 
-      className="bg-gradient-parium flex flex-col relative auth-dark smooth-scroll touch-pan" 
+      className="bg-gradient-parium flex flex-col relative auth-dark smooth-scroll touch-pan lg:[scrollbar-gutter:stable] lg:overflow-y-scroll" 
       style={{ 
         WebkitOverflowScrolling: 'touch',
         minHeight: 'calc(100dvh + env(safe-area-inset-bottom, 0px))',
@@ -550,7 +550,7 @@ const AuthDesktop = ({
           {/* Auth form */}
           <div className="w-full max-w-md lg:max-w-lg">
             <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden">
-              <CardContent className="p-6 lg:p-8">
+              <CardContent className="p-6 lg:p-8 lg:min-h-[560px]">
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0 p-0 h-auto gap-2">
                     <TabsTrigger 
