@@ -519,6 +519,14 @@ const AuthDesktop = ({
           <div className="absolute inset-8 bg-primary-glow/25 rounded-full blur-[80px]"></div>
         </div>
         
+        {/* Glow bakom kortet - fixed på mitten av skärmen */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[10%]">
+          <div className="w-[560px] h-[380px] bg-primary-glow/22 rounded-full blur-[90px]"></div>
+        </div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[10%]">
+          <div className="w-[420px] h-[280px] bg-primary-glow/18 rounded-full blur-[70px]"></div>
+        </div>
+        
         <div className="absolute bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full animate-bounce" style={{ animationDuration: '2.2s' }}></div>
         <div className="absolute bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full animate-bounce" style={{ animationDuration: '2.8s' }}></div>
         <div className="absolute bottom-36 right-24 w-2 h-2 bg-accent/35 rounded-full animate-bounce" style={{ animationDuration: '2.3s' }}></div>
@@ -576,13 +584,6 @@ const AuthDesktop = ({
 
           {/* Auth form */}
           <div className="w-full max-w-md lg:max-w-lg relative">
-            {/* Stabil, fast storlek på glow bakom kortet */}
-            <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-              <div className="w-[560px] h-[380px] bg-primary-glow/22 rounded-full blur-[90px]"></div>
-            </div>
-            <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-              <div className="w-[420px] h-[280px] bg-primary-glow/18 rounded-full blur-[70px]"></div>
-            </div>
             
             <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden relative z-10">
               <CardContent className="p-6 lg:p-8">
