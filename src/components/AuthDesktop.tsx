@@ -576,12 +576,12 @@ const AuthDesktop = ({
 
           {/* Auth form */}
           <div className="w-full max-w-md lg:max-w-lg relative">
-            {/* Glow effect bakom kortet - följer med kortet */}
-            <div className="absolute inset-0 -inset-x-8 -inset-y-8 pointer-events-none">
-              <div className="absolute inset-0 bg-primary-glow/20 rounded-full blur-[80px]"></div>
+            {/* Stabil, fast storlek på glow bakom kortet */}
+            <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+              <div className="w-[560px] h-[380px] bg-primary-glow/22 rounded-full blur-[90px]"></div>
             </div>
-            <div className="absolute inset-0 -inset-x-4 -inset-y-4 pointer-events-none">
-              <div className="absolute inset-0 bg-primary-glow/15 rounded-full blur-[60px]"></div>
+            <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+              <div className="w-[420px] h-[280px] bg-primary-glow/18 rounded-full blur-[70px]"></div>
             </div>
             
             <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden relative z-10">
