@@ -675,10 +675,5 @@ All colors MUST be HSL.
     html.auth-lock, body.auth-lock {
       padding-bottom: env(safe-area-inset-bottom, 0px);
     }
-
-    /* Hide top bubbles in standalone/PWA mode */
-    .hide-in-standalone {
-      display: none !important;
-    }
   }
 }
