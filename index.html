@@ -56,6 +56,16 @@
         min-height: calc(100dvh + env(safe-area-inset-bottom, 0px));
       }
     }
+
+    /* Force proper GPU rendering for animations on iOS to avoid blur on initial load */
+    .animate-bounce {
+      backface-visibility: hidden !important;
+      perspective: 1000px !important;
+      transform: translateZ(0) !important;
+      -webkit-backface-visibility: hidden !important;
+      -webkit-perspective: 1000px !important;
+      -webkit-transform: translateZ(0) !important;
+    }
   </style>
 </head>
 
