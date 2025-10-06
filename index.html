@@ -57,11 +57,20 @@
       }
     }
 
-    /* Force proper GPU rendering for animations on iOS to avoid blur on initial load */
-    .animate-bounce {
-      -webkit-backface-visibility: hidden;
-      backface-visibility: hidden;
+    /* iOS: keep default bounce intact but avoid compositing blur */
+    .animate-bounce { -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+
+    /* Bubble-specific crisp animation using translate3d with integer pixels */
+    @keyframes bubble-bounce {
+      0%, 100% { transform: translate3d(0, 0, 0); }
+      50% { transform: translate3d(0, -8px, 0); }
     }
+    .bubble { 
+      -webkit-backface-visibility: hidden; backface-visibility: hidden; 
+      transform: translateZ(0); -webkit-transform: translateZ(0); 
+      will-change: transform; 
+    }
+    .animate-bubble { animation: bubble-bounce var(--bubble-speed, 2.6s) ease-in-out infinite; }
   </style>
 </head>
 
