@@ -11,7 +11,7 @@
     <meta name="description" content="Parium">
     <meta name="author" content="Lovable" />
     <meta http-equiv="Content-Language" content="sv-SE" />
-    <meta name="build-version" content="2025-10-07T21:05Z" />
+    <meta name="build-version" content="2025-10-07T21:30Z" />
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
@@ -64,10 +64,47 @@
 
     /* iOS hint: keep Tailwind bounce but reduce initial blur */
     .animate-bounce { -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+
+    /* Portrait-only overlay - show message in landscape mode */
+    #portrait-warning {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: hsl(215 100% 12%);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    @media (orientation: landscape) and (max-height: 600px) {
+      #portrait-warning {
+        display: flex;
+      }
+      #root {
+        visibility: hidden;
+      }
+    }
   </style>
 </head>
 
   <body>
+    <!-- Portrait-only warning -->
+    <div id="portrait-warning" role="alert" aria-live="polite">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 2rem; opacity: 0.9;">
+        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+        <line x1="12" y1="18" x2="12.01" y2="18"/>
+      </svg>
+      <h1 style="color: white; font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; font-family: Inter, sans-serif;">
+        Rotera din enhet
+      </h1>
+      <p style="color: rgba(255,255,255,0.8); font-size: 1rem; font-family: Inter, sans-serif; max-width: 320px;">
+        Parium fungerar bäst i porträttläge. Vrid tillbaka din telefon för att fortsätta.
+      </p>
+    </div>
+    
     <div id="app-bg" aria-hidden="true"></div>
     <div id="root"></div>
     <script>
