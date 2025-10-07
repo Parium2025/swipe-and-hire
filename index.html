@@ -11,7 +11,7 @@
     <meta name="description" content="Parium">
     <meta name="author" content="Lovable" />
     <meta http-equiv="Content-Language" content="sv-SE" />
-    <meta name="build-version" content="2025-10-07T20:45Z" />
+    <meta name="build-version" content="2025-10-07T21:05Z" />
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
@@ -57,9 +57,9 @@
       html, body { 
         background: hsl(215 100% 12%) !important;
         min-height: calc(100dvh + env(safe-area-inset-bottom, 0px));
-        padding-top: max(env(safe-area-inset-top, 0px), 64px);
+        padding-top: max(env(safe-area-inset-top, 0px), 88px);
       }
-      :root { --pwa-top-offset: max(env(safe-area-inset-top, 0px), 64px); }
+      :root { --pwa-top-offset: max(env(safe-area-inset-top, 0px), 88px); }
     }
 
     /* iOS hint: keep Tailwind bounce but reduce initial blur */
@@ -107,7 +107,7 @@
             isStandalone = true;
           }
           if (isStandalone) {
-            var base = 64; // default offset for status area in standalone
+            var base = 88; // default offset for status area in standalone
             document.documentElement.style.setProperty('--pwa-top-offset', base + 'px');
             document.body.style.setProperty('--pwa-top-offset', base + 'px');
           }
