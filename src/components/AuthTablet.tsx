@@ -504,7 +504,7 @@ const AuthTablet = ({
       }}
     >
       {/* Static animated background - won't re-render */}
-      <div className="fixed inset-0 pointer-events-none z-0">
+      <div className="fixed inset-0 pointer-events-none z-0" style={{ paddingTop: 'var(--pwa-top-offset, 0px)' }}>
         
         
         {/* Animated floating elements - now stable */}
