@@ -399,6 +399,29 @@ All colors MUST be HSL.
   .bg-gradient-parium { background: var(--gradient-parium); }
   .bg-primary-gradient { background: var(--gradient-primary); }
 
+  /* Scoped: remove borders in create-job dialog */
+  .job-dialog input,
+  .job-dialog button,
+  .job-dialog select,
+  .job-dialog textarea,
+  .job-dialog [role="combobox"],
+  .job-dialog [data-radix-select-trigger],
+  .job-dialog .no-border {
+    border: 0 !important;
+    border-color: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    background-clip: padding-box !important;
+  }
+
+  .job-dialog input:focus,
+  .job-dialog button:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
   /* iOS Safari halo fix for glass cards and inputs */
   @supports (-webkit-touch-callout: none) {
     .ios-glass { background-clip: padding-box !important; }
