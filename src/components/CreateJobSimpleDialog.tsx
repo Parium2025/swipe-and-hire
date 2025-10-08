@@ -184,7 +184,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-0 text-white placeholder:text-white/60 focus-visible:ring-0 focus:ring-0 outline-none"
+                  className="bg-white/10 border-0 text-white placeholder:text-white/60 focus-visible:ring-0 focus:ring-0 outline-none appearance-none shadow-none"
                 />
               </div>
 
