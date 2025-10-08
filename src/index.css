@@ -398,6 +398,20 @@ All colors MUST be HSL.
   .bg-parium-gradient { background: var(--gradient-parium); }
   .bg-gradient-parium { background: var(--gradient-parium); }
   .bg-primary-gradient { background: var(--gradient-primary); }
+
+  /* iOS Safari halo fix for glass cards and inputs */
+  @supports (-webkit-touch-callout: none) {
+    .ios-glass { background-clip: padding-box !important; }
+    .ios-glass input,
+    .ios-glass button {
+      border: 0 !important;
+      outline: none !important;
+      box-shadow: none !important;
+      -webkit-appearance: none !important;
+      appearance: none !important;
+      background-clip: padding-box !important;
+    }
+  }
   .bg-glass-surface { background: var(--gradient-glass); }
   .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0); }
   .overflow-anchor-none { overflow-anchor: none; }
