@@ -363,8 +363,8 @@ All colors MUST be HSL.
     -webkit-box-shadow: 0 0 0px 1000px hsla(0 0% 100% / 0.05) inset !important;
     box-shadow: 0 0 0px 1000px hsla(0 0% 100% / 0.05) inset !important;
     transition: background-color 9999s ease-in-out 0s !important;
-    border-color: transparent !important;
-    border-width: 0 !important;
+    border-color: hsla(0 0% 100% / 0.2) !important;
+    border-width: 1px !important;
   }
 
   /* Force browser suggestion dropdowns to use white text */
@@ -389,8 +389,8 @@ All colors MUST be HSL.
     caret-color: hsl(210 40% 98%) !important;
     -webkit-box-shadow: 0 0 0px 1000px hsla(0 0% 100% / 0.05) inset !important;
     box-shadow: 0 0 0px 1000px hsla(0 0% 100% / 0.05) inset !important;
-    border-color: transparent !important;
-    border-width: 0 !important;
+    border-color: hsla(0 0% 100% / 0.2) !important;
+    border-width: 1px !important;
   }
 }
 
@@ -398,55 +398,6 @@ All colors MUST be HSL.
   .bg-parium-gradient { background: var(--gradient-parium); }
   .bg-gradient-parium { background: var(--gradient-parium); }
   .bg-primary-gradient { background: var(--gradient-primary); }
-
-  /* Scoped: remove borders in create-job dialog */
-  .job-dialog input,
-  .job-dialog button,
-  .job-dialog select,
-  .job-dialog textarea,
-  .job-dialog [role="combobox"],
-  .job-dialog [data-radix-select-trigger],
-  .job-dialog .no-border {
-    border: 0 !important;
-    border-color: transparent !important;
-    outline: none !important;
-    box-shadow: none !important;
-    -webkit-appearance: none !important;
-    appearance: none !important;
-    background-clip: padding-box !important;
-  }
-
-  .job-dialog input:focus,
-  .job-dialog button:focus {
-    outline: none !important;
-    box-shadow: none !important;
-  }
-
-  /* iOS Safari halo fix for glass cards and inputs */
-  @supports (-webkit-touch-callout: none) {
-    .ios-glass { background-clip: padding-box !important; }
-    .ios-glass input,
-    .ios-glass button,
-    .ios-glass select,
-    .ios-glass textarea {
-      border: 0 !important;
-      outline: none !important;
-      box-shadow: none !important;
-      -webkit-appearance: none !important;
-      appearance: none !important;
-      background-clip: padding-box !important;
-    }
-  }
-
-  /* Utility: forcefully remove borders/shadows (scoped usage) */
-  .no-border { 
-    border: 0 !important; 
-    outline: none !important; 
-    box-shadow: none !important; 
-    -webkit-appearance: none !important; 
-    appearance: none !important; 
-    background-clip: padding-box !important; 
-  }
   .bg-glass-surface { background: var(--gradient-glass); }
   .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0); }
   .overflow-anchor-none { overflow-anchor: none; }

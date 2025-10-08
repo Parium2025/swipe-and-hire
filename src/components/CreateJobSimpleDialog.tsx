@@ -157,7 +157,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-md bg-parium-gradient [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] pb-safe">
-          <Card className="job-dialog bg-white/10 backdrop-blur-sm border-0 relative w-full mt-16 overflow-hidden bg-clip-padding ios-glass">
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 relative w-full mt-16">
             <CardHeader className="pb-4 pt-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white flex-1 text-center text-xl">
@@ -184,7 +184,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
                   placeholder="Namnge jobbet"
-                  className="no-border bg-white/10 text-white placeholder:text-white/60 bg-clip-padding"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                 />
               </div>
 
@@ -200,7 +200,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className="no-border w-full bg-white/5 backdrop-blur-sm text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
+                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
                       >
                         <span className="truncate text-left flex-1 px-1">
                           {selectedTemplate?.name || 'Ingen mall är vald'}
@@ -225,7 +225,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             placeholder="Sök mall..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="no-border pl-10 pr-4 h-10 bg-white/5 text-white placeholder:text-white/60 rounded-lg"
+                            className="pl-10 pr-4 h-10 bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-lg"
                             autoComplete="off"
                           />
                         </div>
@@ -290,7 +290,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       setOpen(false);
                       // TODO: Open template management
                     }}
-                    className="bg-white/5 border-transparent text-white/70 hover:bg-white/10 hover:text-white text-xs"
+                    className="bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:text-white text-xs"
                   >
                     Lägg till en ny mall
                   </Button>
@@ -309,7 +309,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 <Button 
                   variant="outline" 
                   onClick={handleClose}
-                  className="no-border bg-white/10 text-white hover:bg-white/20"
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
                 >
                   Avbryt
                 </Button>
