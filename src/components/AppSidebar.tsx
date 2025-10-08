@@ -129,13 +129,21 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className={`${collapsed ? 'w-14' : 'w-64'} sticky top-0 h-screen overflow-y-auto transition-all duration-200 ease-in-out`}
+      className={`${collapsed ? 'w-14' : 'w-64'} sticky top-0 h-screen overflow-y-auto transition-all duration-200 ease-in-out relative`}
       style={{
         background: 'linear-gradient(180deg, hsl(215 80% 18%) 0%, hsl(215 70% 22%) 100%)'
       }}
       collapsible="icon"
     >
-      <SidebarContent className="p-4">
+      {/* Glow overlay that covers entire sidebar */}
+      <div 
+        className="absolute inset-0 pointer-events-none z-0"
+        style={{
+          background: 'radial-gradient(ellipse at 50% 20%, hsla(200, 100%, 60%, 0.15) 0%, transparent 60%)',
+          mixBlendMode: 'screen'
+        }}
+      />
+      <SidebarContent className="p-4 relative z-10">
         {/* User Profile Section */}
         {!collapsed && (
           <div className="mb-6 animate-fade-in">
