@@ -184,7 +184,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 !border-0 !border-transparent text-white placeholder:text-white/60 focus-visible:!ring-0 focus:!ring-0 !outline-none appearance-none shadow-none bg-clip-padding"
+                  className="no-border bg-white/10 text-white placeholder:text-white/60 bg-clip-padding"
                 />
               </div>
 
@@ -200,7 +200,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className="w-full bg-white/5 backdrop-blur-sm !border-0 border-transparent text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
+                        className="no-border w-full bg-white/5 backdrop-blur-sm text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
                       >
                         <span className="truncate text-left flex-1 px-1">
                           {selectedTemplate?.name || 'Ingen mall är vald'}
@@ -225,7 +225,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             placeholder="Sök mall..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 pr-4 h-10 bg-white/5 !border-0 border-transparent text-white placeholder:text-white/60 focus:border-white/40 rounded-lg"
+                            className="no-border pl-10 pr-4 h-10 bg-white/5 text-white placeholder:text-white/60 rounded-lg"
                             autoComplete="off"
                           />
                         </div>
@@ -309,7 +309,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 <Button 
                   variant="outline" 
                   onClick={handleClose}
-                  className="bg-white/10 !border-0 border-transparent text-white hover:bg-white/20"
+                  className="no-border bg-white/10 text-white hover:bg-white/20"
                 >
                   Avbryt
                 </Button>

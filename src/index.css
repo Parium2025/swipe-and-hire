@@ -403,7 +403,9 @@ All colors MUST be HSL.
   @supports (-webkit-touch-callout: none) {
     .ios-glass { background-clip: padding-box !important; }
     .ios-glass input,
-    .ios-glass button {
+    .ios-glass button,
+    .ios-glass select,
+    .ios-glass textarea {
       border: 0 !important;
       outline: none !important;
       box-shadow: none !important;
@@ -411,6 +413,16 @@ All colors MUST be HSL.
       appearance: none !important;
       background-clip: padding-box !important;
     }
+  }
+
+  /* Utility: forcefully remove borders/shadows (scoped usage) */
+  .no-border { 
+    border: 0 !important; 
+    outline: none !important; 
+    box-shadow: none !important; 
+    -webkit-appearance: none !important; 
+    appearance: none !important; 
+    background-clip: padding-box !important; 
   }
   .bg-glass-surface { background: var(--gradient-glass); }
   .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0); }
