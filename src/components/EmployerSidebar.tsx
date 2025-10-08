@@ -186,21 +186,13 @@ export function EmployerSidebar() {
 
   return (
     <Sidebar 
-      className={`border-r-0 ${collapsed ? 'w-16' : 'w-64'} relative overflow-hidden`}
+      className={`border-r-0 ${collapsed ? 'w-16' : 'w-64'}`}
       style={{
         background: 'linear-gradient(180deg, hsl(215 80% 18%) 0%, hsl(215 70% 22%) 100%)'
       }}
       collapsible="icon"
     >
-      {/* Glow overlay that covers entire sidebar */}
-      <div 
-        className="absolute inset-0 pointer-events-none z-0"
-        style={{
-          background: 'radial-gradient(ellipse at 50% 20%, hsla(200, 100%, 60%, 0.15) 0%, transparent 60%)',
-          mixBlendMode: 'screen'
-        }}
-      />
-      <SidebarContent className="gap-0 relative z-10">
+      <SidebarContent className="gap-0">
         {/* User Profile Section - only show when not collapsed */}
         {!collapsed && (
           <div className="p-4">
