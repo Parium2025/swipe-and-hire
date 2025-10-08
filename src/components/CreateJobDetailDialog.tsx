@@ -14,6 +14,7 @@ import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { searchOccupations } from '@/lib/occupations';
 import { Loader2, X, ChevronDown } from 'lucide-react';
 import JobQuestionsManager from '@/components/JobQuestionsManager';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 
 interface JobTemplate {
   id: string;
@@ -210,7 +211,8 @@ const CreateJobDetailDialog = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-parium-gradient border-white/20 text-white [&>button]:hidden">
-        <div className="relative">
+        <AnimatedBackground />
+        <div className="relative z-10">
           <Button
             variant="ghost"
             size="icon"

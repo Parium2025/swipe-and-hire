@@ -26,6 +26,7 @@ import ImageEditor from '@/components/ImageEditor';
 import { createSignedUrl } from '@/utils/storageUtils';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import useSmartTextFit from '@/hooks/useSmartTextFit';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 
 interface JobQuestion {
   id?: string;
@@ -1182,7 +1183,8 @@ const MobileJobWizard = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md h-[90vh] bg-parium-gradient border-white/20 text-white [&>button]:hidden p-0 flex flex-col">
-        <div className="flex flex-col h-full">
+        <AnimatedBackground />
+        <div className="flex flex-col h-full relative z-10">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-white/20 flex-shrink-0">
             <DialogHeader className="flex-1">
