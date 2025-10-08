@@ -184,7 +184,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-transparent text-white placeholder:text-white/60"
+                  className="bg-white/10 border-0 text-white placeholder:text-white/60 focus-visible:ring-0 focus:ring-0 outline-none"
                 />
               </div>
 
@@ -200,7 +200,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
+                        className="w-full bg-white/5 backdrop-blur-sm border-transparent text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
                       >
                         <span className="truncate text-left flex-1 px-1">
                           {selectedTemplate?.name || 'Ingen mall är vald'}
