@@ -130,6 +130,9 @@ export function AppSidebar() {
   return (
     <Sidebar
       className={`${collapsed ? 'w-14' : 'w-64'} sticky top-0 h-screen overflow-y-auto transition-all duration-200 ease-in-out`}
+      style={{
+        background: 'linear-gradient(180deg, hsl(215 80% 18%) 0%, hsl(215 70% 22%) 100%)'
+      }}
       collapsible="icon"
     >
       <SidebarContent className="p-4">
