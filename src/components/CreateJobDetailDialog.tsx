@@ -256,7 +256,7 @@ const CreateJobDetailDialog = ({
                   onChange={(e) => handleInputChange('title', e.target.value)}
                   placeholder="t.ex. Lagerarbetare, Lastbilschaufför"
                   required
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  className="bg-white/10 border-transparent text-white placeholder:text-white/60"
                 />
               </div>
 
@@ -270,7 +270,7 @@ const CreateJobDetailDialog = ({
                     onFocus={() => setShowOccupationDropdown(occupationSearchTerm.length > 0)}
                     placeholder="t.ex. Mjukvaru- och systemutvecklare"
                     required
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 pr-10"
+                    className="bg-white/10 border-transparent text-white placeholder:text-white/60 pr-10"
                   />
                   <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
                   
@@ -321,7 +321,7 @@ const CreateJobDetailDialog = ({
                   onChange={(e) => handleInputChange('location', e.target.value)}
                   placeholder="t.ex. Stockholm, Göteborg"
                   required
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  className="bg-white/10 border-transparent text-white placeholder:text-white/60"
                 />
               </div>
 
@@ -334,7 +334,7 @@ const CreateJobDetailDialog = ({
                     value={formData.salary_min}
                     onChange={(e) => handleInputChange('salary_min', e.target.value)}
                     placeholder="25000"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                    className="bg-white/10 border-transparent text-white placeholder:text-white/60"
                   />
                 </div>
                 <div className="space-y-2">
@@ -345,7 +345,7 @@ const CreateJobDetailDialog = ({
                     value={formData.salary_max}
                     onChange={(e) => handleInputChange('salary_max', e.target.value)}
                     placeholder="35000"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                    className="bg-white/10 border-transparent text-white placeholder:text-white/60"
                   />
                 </div>
               </div>
@@ -379,7 +379,7 @@ const CreateJobDetailDialog = ({
                   value={formData.positions_count}
                   onChange={(e) => handleInputChange('positions_count', e.target.value)}
                   placeholder="1"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  className="bg-white/10 border-transparent text-white placeholder:text-white/60"
                 />
               </div>
 
@@ -390,7 +390,7 @@ const CreateJobDetailDialog = ({
                   value={formData.work_schedule}
                   onChange={(e) => handleInputChange('work_schedule', e.target.value)}
                   placeholder="t.ex. 08:00-17:00, Skiftarbete"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  className="bg-white/10 border-transparent text-white placeholder:text-white/60"
                 />
               </div>
 
@@ -403,7 +403,7 @@ const CreateJobDetailDialog = ({
                   onChange={(e) => handleInputChange('contact_email', e.target.value)}
                   placeholder="kontakt@företag.se"
                   required
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  className="bg-white/10 border-transparent text-white placeholder:text-white/60"
                 />
               </div>
 
@@ -416,7 +416,7 @@ const CreateJobDetailDialog = ({
                   placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
                   rows={4}
                   required
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  className="bg-white/10 border-transparent text-white placeholder:text-white/60"
                 />
               </div>
 
@@ -428,7 +428,7 @@ const CreateJobDetailDialog = ({
                   onChange={(e) => handleInputChange('requirements', e.target.value)}
                   placeholder="Beskriv vilka krav och kvalifikationer som krävs för tjänsten..."
                   rows={3}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  className="bg-white/10 border-transparent text-white placeholder:text-white/60"
                 />
               </div>
 
@@ -440,7 +440,7 @@ const CreateJobDetailDialog = ({
                   onChange={(e) => handleInputChange('application_instructions', e.target.value)}
                   placeholder="Hur ska kandidater ansöka? Via e-post, telefon eller webbsida?"
                   rows={3}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  className="bg-white/10 border-transparent text-white placeholder:text-white/60"
                 />
               </div>
 

@@ -184,7 +184,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  className="bg-white/10 border-transparent text-white placeholder:text-white/60"
                 />
               </div>
 
@@ -225,7 +225,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             placeholder="Sök mall..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 pr-4 h-10 bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-lg"
+                            className="pl-10 pr-4 h-10 bg-white/5 border-transparent text-white placeholder:text-white/60 focus:border-white/40 rounded-lg"
                             autoComplete="off"
                           />
                         </div>
