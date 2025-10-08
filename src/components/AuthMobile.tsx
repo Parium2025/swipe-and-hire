@@ -712,8 +712,10 @@ const AuthMobile = ({
                           />
                           <button
                             type="button"
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white/70 hover:text-white transition-colors"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white/70 hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
                             onClick={() => setShowPassword(!showPassword)}
+                            onTouchStart={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                            onTouchEnd={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                           >
                             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                           </button>

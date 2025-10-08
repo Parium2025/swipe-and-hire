@@ -637,15 +637,15 @@ const AuthTablet = ({
                             autoComplete={`${role}-current-password`}
                             className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                           />
-                          <Button
+                          <button
                             type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="absolute right-2 top-1/2 -translate-y-1/2 h-auto p-1 text-white hover:text-white/80"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white/70 hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
                             onClick={() => setShowPassword(!showPassword)}
+                            onTouchStart={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                            onTouchEnd={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                           >
                             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </Button>
+                          </button>
                         </div>
                       </div>
                        <Button type="submit" className="w-full bg-parium-navy hover:bg-parium-navy/90 text-white" disabled={loading}>
