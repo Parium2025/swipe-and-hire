@@ -290,7 +290,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       setOpen(false);
                       // TODO: Open template management
                     }}
-                    className="bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:text-white text-xs"
+                    className="bg-white/5 border-transparent text-white/70 hover:bg-white/10 hover:text-white text-xs"
                   >
                     Lägg till en ny mall
                   </Button>
@@ -309,7 +309,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 <Button 
                   variant="outline" 
                   onClick={handleClose}
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  className="bg-white/10 border-transparent text-white hover:bg-white/20"
                 >
                   Avbryt
                 </Button>

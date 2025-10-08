@@ -353,7 +353,7 @@ const CreateJobDetailDialog = ({
               <div className="space-y-2">
                 <Label htmlFor="employment_type" className="text-white">Anställningsform</Label>
                 <Select value={formData.employment_type} onValueChange={(value) => handleInputChange('employment_type', value)}>
-                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                  <SelectTrigger className="bg-white/10 border-transparent text-white">
                     <SelectValue placeholder="Välj anställningsform" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-800 border-gray-600">
