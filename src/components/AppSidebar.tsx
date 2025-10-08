@@ -139,7 +139,7 @@ export function AppSidebar() {
       <div 
         className="absolute inset-0 pointer-events-none z-0"
         style={{
-          background: 'radial-gradient(ellipse at 50% 20%, hsla(200, 100%, 60%, 0.15) 0%, transparent 60%)',
+          background: 'linear-gradient(180deg, hsla(200, 100%, 60%, 0.15) 0%, hsla(200, 100%, 60%, 0.08) 50%, hsla(200, 100%, 60%, 0.15) 100%)',
           mixBlendMode: 'screen'
         }}
       />
