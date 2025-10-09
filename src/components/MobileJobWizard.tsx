@@ -97,6 +97,9 @@ const MobileJobWizard = ({
   onJobCreated 
 }: MobileJobWizardProps) => {
   const [currentStep, setCurrentStep] = useState(0);
+  useEffect(() => {
+    console.log('MobileJobWizard: open changed', open);
+  }, [open]);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [customQuestions, setCustomQuestions] = useState<JobQuestion[]>([]);

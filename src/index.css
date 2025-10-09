@@ -159,9 +159,6 @@ All colors MUST be HSL.
     margin-top: 0 !important;
     overflow-x: hidden !important;
     max-width: 100vw !important;
-    /* Enable hardware acceleration */
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
   }
 
   /* Mobile fullscreen support - extend under status bar */
@@ -176,11 +173,6 @@ All colors MUST be HSL.
     /* Optimerad touch-hantering för mobil */
     touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
-    /* Hardware acceleration */
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    perspective: 1000;
-    -webkit-perspective: 1000;
   }
   
   /* Extra förhindra bounce i standalone mode */
@@ -417,40 +409,6 @@ All colors MUST be HSL.
     bottom: -8rem; /* matches -bottom-32 by default */
     pointer-events: none;
   }
-
-  /* Performance optimizations for mobile */
-  button, a, [role="button"], input, textarea, select {
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-
-  input, textarea, select {
-    user-select: text;
-    -webkit-user-select: text;
-  }
-
-  /* Optimize animations with will-change hints */
-  [data-state="open"], [data-state="closed"],
-  .animate-fade-in, .animate-scale-in,
-  .transition-all, .transition-transform {
-    will-change: transform, opacity;
-  }
-
-  /* Remove will-change after animation */
-  [data-state="open"]:not(:hover):not(:focus),
-  [data-state="closed"]:not(:hover):not(:focus) {
-    will-change: auto;
-  }
-
-  /* Instant visual feedback for all interactive elements */
-  button:active:not(:disabled),
-  [role="button"]:active:not([aria-disabled="true"]),
-  a:active {
-    transform: scale(0.98);
-    transition: transform 75ms ease-out;
-  }
 }
 
 /* In installed PWA (standalone), push the glow further below the home indicator */
@@ -613,7 +571,7 @@ All colors MUST be HSL.
     overflow: hidden;
   }
 
-  /* Slide-up animation - faster */
+  /* Slide-up animation */
   @keyframes slide-up {
     from {
       transform: translateY(100%);
@@ -624,7 +582,7 @@ All colors MUST be HSL.
   }
   
   .animate-slide-up {
-    animation: slide-up 0.2s ease-out;
+    animation: slide-up 0.3s ease-out;
   }
 
   /* Osynlig scrollbar för mobilpreview */
