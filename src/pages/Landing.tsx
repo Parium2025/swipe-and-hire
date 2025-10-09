@@ -67,14 +67,9 @@ const Landing = () => {
                 Rekrytering som matchar på riktigt
               </h1>
               
-              <div className="space-y-4">
-                <p className="text-lg md:text-xl text-white/80 leading-relaxed">
-                  Vi förändrar hur människor och företag hittar varandra – Framtiden börjar med ett swipe
-                </p>
-                <p className="text-lg md:text-xl text-white/80 leading-relaxed">
-                  En smartare, mänskligare och snabbare väg till anställning
-                </p>
-              </div>
+              <p className="text-lg md:text-xl text-white leading-relaxed">
+                Vi förändrar hur människor och företag hittar varandra – Framtiden börjar med ett swipe
+              </p>
               
               <div className="pt-4">
                 <Button
