@@ -1182,7 +1182,7 @@ const MobileJobWizard = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md h-[90vh] bg-parium-gradient border-white/20 text-white [&>button]:hidden p-0 flex flex-col">
+      <DialogContent className="max-w-md h-[90vh] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none sm:rounded-xl overflow-y-auto">
         <AnimatedBackground showBubbles={false} />
         <div className="flex flex-col h-full relative z-10">
           {/* Header */}
