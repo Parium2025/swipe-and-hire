@@ -73,7 +73,7 @@ const Landing = () => {
                 Vi förändrar hur människor och företag hittar varandra – Framtiden börjar med ett swipe
               </p>
               
-              <div className="pt-4">
+              <div className="pt-4 hidden md:block">
                 <Button
                   onClick={handleLogin}
                   size="lg"
@@ -85,7 +85,7 @@ const Landing = () => {
             </div>
 
             {/* Hero Image */}
-            <div className="relative mt-20 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <div className="relative mt-20 animate-fade-in hidden md:block" style={{ animationDelay: '0.2s' }}>
               <div className="relative z-10">
                 <img
                   src={phoneImage}
