@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import LandingNav from '@/components/LandingNav';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Button } from '@/components/ui/button';
 import { Zap, Video, Heart } from 'lucide-react';
 import phoneImage from '@/assets/phone-landscape-final.jpg';
@@ -54,7 +55,8 @@ const Landing = () => {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-gradient-parium text-white overflow-x-hidden">
+    <div className="min-h-screen w-full bg-gradient-parium text-white overflow-x-hidden relative">
+      <AnimatedBackground />
       <LandingNav onLoginClick={handleLogin} />
       
       {/* Hero Section */}
