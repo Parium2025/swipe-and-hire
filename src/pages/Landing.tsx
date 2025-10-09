@@ -69,7 +69,7 @@ const Landing = () => {
               
               <div className="space-y-4">
                 <p className="text-lg md:text-xl text-white/80 leading-relaxed">
-                  Parium förenar teknik och personlighet – där företag hittar rätt talang snabbare och kandidater hittar sitt nästa steg.
+                  Vi förändrar hur människor och företag hittar varandra – Framtiden börjar med ett swipe
                 </p>
                 <p className="text-lg md:text-xl text-white/80 leading-relaxed">
                   En smartare, mänskligare och snabbare väg till anställning
