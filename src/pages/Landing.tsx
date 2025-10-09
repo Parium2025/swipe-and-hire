@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import LandingNav from '@/components/LandingNav';
 import { Button } from '@/components/ui/button';
 import { Zap, Video, Heart } from 'lucide-react';
-import phoneImage from '@/assets/phone-with-parium-logo.jpg';
+import logoImage from '/lovable-uploads/parium-logo-transparent.png';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -86,9 +86,9 @@ const Landing = () => {
             <div className="relative lg:block animate-fade-in" style={{ animationDelay: '0.2s' }}>
               <div className="relative z-10">
                 <img
-                  src={phoneImage}
-                  alt="Parium mobilapp"
-                  className="w-full max-w-md mx-auto drop-shadow-2xl"
+                  src={logoImage}
+                  alt="Parium logotyp"
+                  className="w-full max-w-sm mx-auto drop-shadow-2xl"
                 />
               </div>
               {/* Decorative glow */}
