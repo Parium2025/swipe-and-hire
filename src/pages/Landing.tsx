@@ -73,29 +73,8 @@ const Landing = () => {
                 Vi förändrar hur människor och företag hittar varandra – Framtiden börjar med ett swipe
               </p>
               
-              <div className="pt-4 hidden md:block">
-                <Button
-                  onClick={handleLogin}
-                  size="lg"
-                  className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-6 h-auto font-semibold shadow-2xl"
-                >
-                  Logga in
-                </Button>
-              </div>
             </div>
 
-            {/* Hero Image */}
-            <div className="relative mt-20 animate-fade-in hidden md:block" style={{ animationDelay: '0.2s' }}>
-              <div className="relative z-10">
-                <img
-                  src={phoneImage}
-                  alt="Parium mobilapp med logotyp"
-                  className="w-full max-w-2xl mx-auto drop-shadow-2xl"
-                />
-              </div>
-              {/* Decorative glow */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-secondary/20 rounded-full blur-3xl -z-10" />
-            </div>
           </div>
         </div>
       </section>
