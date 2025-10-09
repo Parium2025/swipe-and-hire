@@ -60,14 +60,14 @@ const Landing = () => {
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-6 md:px-12 lg:px-24">
         <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="flex flex-col items-center text-center">
             {/* Hero Content */}
-            <div className="space-y-8 animate-fade-in">
+            <div className="space-y-8 animate-fade-in max-w-4xl">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
                 Matchningen som förändrar rekrytering
               </h1>
               
-              <p className="text-lg md:text-xl text-white/80 leading-relaxed max-w-2xl">
+              <p className="text-lg md:text-xl text-white/80 leading-relaxed">
                 Parium kopplar samman rätt talanger med rätt jobb på rekordtid. Med video-profiler och smart matchning gör vi rekrytering enkel, snabb och personlig.
               </p>
               
@@ -83,12 +83,12 @@ const Landing = () => {
             </div>
 
             {/* Hero Image */}
-            <div className="relative lg:block animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <div className="relative mt-20 animate-fade-in" style={{ animationDelay: '0.2s' }}>
               <div className="relative z-10">
                 <img
                   src={phoneImage}
                   alt="Parium mobilapp med logotyp"
-                  className="w-full max-w-md mx-auto drop-shadow-2xl"
+                  className="w-full max-w-2xl mx-auto drop-shadow-2xl"
                 />
               </div>
               {/* Decorative glow */}
