@@ -119,14 +119,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         description: "Vänligen ange en titel för jobbet.",
         variant: "destructive"
       });
-      console.warn('CreateJobSimpleDialog: prevented create, empty title');
       return;
     }
 
-    console.log('CreateJobSimpleDialog: opening MobileJobWizard', {
-      jobTitle,
-      selectedTemplateId: selectedTemplate?.id,
-    });
     setOpen(false);
     setShowDetailDialog(true);
   };
