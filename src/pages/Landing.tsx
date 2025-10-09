@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import LandingNav from '@/components/LandingNav';
 import { Button } from '@/components/ui/button';
 import { Zap, Video, Heart } from 'lucide-react';
-import phoneImage from '@/assets/phone-with-parium-logo-blue.jpg';
+import phoneImage from '@/assets/phone-mockup-with-logo.jpg';
 
 const Landing = () => {
   const navigate = useNavigate();
