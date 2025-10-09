@@ -64,12 +64,17 @@ const Landing = () => {
             {/* Hero Content */}
             <div className="space-y-8 animate-fade-in max-w-4xl">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                Matchningen som förändrar rekrytering
+                Rekrytering som matchar på riktigt
               </h1>
               
-              <p className="text-lg md:text-xl text-white/80 leading-relaxed">
-                Parium kopplar samman rätt talanger med rätt jobb på rekordtid. Med video-profiler och smart matchning gör vi rekrytering enkel, snabb och personlig.
-              </p>
+              <div className="space-y-4">
+                <p className="text-lg md:text-xl text-white/80 leading-relaxed">
+                  Parium förenar teknik och personlighet – där företag hittar rätt talang snabbare och kandidater hittar sitt nästa steg.
+                </p>
+                <p className="text-lg md:text-xl text-white/80 leading-relaxed">
+                  En smartare, mänskligare och snabbare väg till anställning
+                </p>
+              </div>
               
               <div className="pt-4">
                 <Button
