@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import pariumLogo from '/lovable-uploads/parium-logo-transparent.png';
+import pariumLogo from '@/assets/parium-logo-blue.png';
 
 interface LandingNavProps {
   onLoginClick: () => void;
