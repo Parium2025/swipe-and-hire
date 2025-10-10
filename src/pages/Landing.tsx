@@ -70,7 +70,7 @@ const Landing = () => {
           className="absolute inset-0 bg-cover bg-no-repeat"
           style={{ 
             backgroundImage: `url(${heroBackground})`,
-            backgroundPosition: '90% center',
+            backgroundPosition: '97% center',
             transform: 'scaleX(-1)'
           }}
         />
