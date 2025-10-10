@@ -70,12 +70,12 @@ const Landing = () => {
           className="absolute inset-0 bg-cover bg-no-repeat"
           style={{ 
             backgroundImage: `url(${heroBackground})`,
-            backgroundPosition: '97% center',
+            backgroundPosition: '130% center',
             transform: 'scaleX(-1)'
           }}
         />
         {/* Overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/80 via-primary/30 to-transparent" />
         
         <div className="max-w-7xl mx-auto relative z-10 w-full">
           <div className="flex flex-col items-start text-left max-w-2xl">
