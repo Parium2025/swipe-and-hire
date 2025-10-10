@@ -67,10 +67,10 @@ const Landing = () => {
       <section className="relative pt-32 pb-20 px-6 md:px-12 lg:px-24 min-h-screen flex items-center">
         {/* Background Image as <img> for precise positioning */}
         <img
-          src={`${heroBackground}?v=hero-pos-3`}
+          src={`${heroBackground}?v=hero-pos-4`}
           alt="Parium hero – kvinna som håller upp telefonen"
           className="absolute inset-0 w-full h-full object-cover -scale-x-100"
-          style={{ objectPosition: '150% center' }}
+          style={{ objectPosition: '170% center' }}
           loading="eager"
         />
         {/* Overlay for better text readability */}
