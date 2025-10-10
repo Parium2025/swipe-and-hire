@@ -43,18 +43,18 @@ const Landing = () => {
   const features = [
     {
       icon: Zap,
-      title: 'Snabb matchning',
-      description: 'Hitta rätt match på 60 sekunder med vår intelligenta algoritm'
+      title: 'Snabba beslut',
+      description: 'Swipea genom profiler och jobb på sekunder. Inga långa formulär eller krångliga processer.'
     },
     {
       icon: Video,
       title: 'Video-profiler',
-      description: 'Visa vem du verkligen är med personliga video-presentationer'
+      description: 'Se kandidater i aktion. Få en genuin känsla för vem personen är innan du matchar.'
     },
     {
       icon: Heart,
-      title: 'Smart swipe',
-      description: 'Enkelt och intuitivt gränssnitt som gör rekrytering till en upplevelse'
+      title: 'Enkel matchning',
+      description: 'Höger för intresse, vänster för nästa. Båda parter har kontroll över sin process.'
     }
   ];
 
@@ -74,27 +74,22 @@ const Landing = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full backdrop-blur-sm border border-white/20">
-                <span className="text-secondary font-semibold text-sm">🚀 Framtidens rekrytering</span>
-              </div>
-              
               <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
-                Rekrytering som <span className="text-secondary">matchar på riktigt</span>
+                Snabbaste vägen till rätt match
               </h1>
               
               <p className="text-lg md:text-xl text-white/80 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                Minska time-to-hire med 73% genom intelligent matchning. 
-                Vi förändrar hur människor och företag hittar varandra – 
-                framtiden börjar med ett swipe.
+                Swipea dig till ditt nästa jobb eller din nästa stjärnkandidat. 
+                Enkelt, snabbt och effektivt – för både arbetsgivare och jobbsökare.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Button
                   onClick={() => navigate('/auth')}
                   size="lg"
-                  className="bg-secondary text-white hover:bg-secondary/90 text-lg px-8 py-6 h-auto font-semibold shadow-2xl"
+                  className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-6 h-auto font-semibold"
                 >
-                  Kom igång gratis
+                  Kom igång nu
                 </Button>
                 <Button
                   onClick={() => navigate('/auth')}
@@ -102,20 +97,8 @@ const Landing = () => {
                   variant="outline"
                   className="border-white/30 text-white hover:bg-white/10 text-lg px-8 py-6 h-auto font-semibold"
                 >
-                  Boka demo
+                  Se hur det fungerar
                 </Button>
-              </div>
-
-              {/* Trust indicators */}
-              <div className="flex flex-wrap items-center gap-6 justify-center lg:justify-start pt-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                  <span className="text-white/70 text-sm">500+ aktiva företag</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-secondary rounded-full animate-pulse" />
-                  <span className="text-white/70 text-sm">10,000+ kandidater</span>
-                </div>
               </div>
             </motion.div>
 
@@ -159,15 +142,12 @@ const Landing = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-secondary/20 rounded-full mb-6 border border-secondary/30">
-              <Sparkles className="w-4 h-4 text-secondary" />
-              <span className="text-secondary font-semibold text-sm">Upplev Parium</span>
-            </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Rekrytering som känns som magi
+              Så här fungerar det
             </h2>
             <p className="text-xl text-white/70 max-w-2xl mx-auto">
-              Testa hur enkelt det är att hitta din perfekta match. Swipea höger för att matcha!
+              Swipea höger på jobb du gillar. Swipea vänster på de du inte är intresserad av. 
+              Det är verkligen så enkelt.
             </p>
           </motion.div>
 
@@ -199,11 +179,11 @@ const Landing = () => {
               <div className="space-y-8">
                 <div>
                   <h3 className="text-3xl font-bold mb-4">
-                    Resultat som talar för sig själva
+                    Effektivitet som syns
                   </h3>
                   <p className="text-white/70 text-lg leading-relaxed">
-                    Tusentals företag och kandidater har redan hittat sin perfekta match genom Parium. 
-                    Bli en del av framtidens rekrytering.
+                    Färre klick. Snabbare beslut. Bättre matcher. 
+                    Parium gör rekrytering enklare för alla parter.
                   </p>
                 </div>
                 
@@ -213,9 +193,9 @@ const Landing = () => {
                   <Button
                     onClick={() => navigate('/auth')}
                     size="lg"
-                    className="bg-secondary text-white hover:bg-secondary/90 text-lg px-8 py-6 h-auto font-semibold shadow-2xl w-full md:w-auto"
+                    className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-6 h-auto font-semibold w-full md:w-auto"
                   >
-                    Kom igång gratis
+                    Prova nu
                   </Button>
                 </div>
               </div>
@@ -234,10 +214,10 @@ const Landing = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Varför välja Parium?
+              Fördelarna för dig
             </h2>
             <p className="text-white/70 text-lg max-w-2xl mx-auto">
-              Vi har byggt en plattform som gör rekrytering snabbt, enkelt och roligt
+              Enkel, snabb och effektiv rekrytering för både arbetsgivare och kandidater
             </p>
           </motion.div>
 
