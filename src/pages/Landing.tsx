@@ -67,20 +67,57 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col items-center text-center">
             {/* Hero Content */}
-            <div className="space-y-8 animate-fade-in max-w-4xl">
+            <div className="space-y-8 animate-fade-in max-w-4xl mb-12">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                Rekrytering som matchar på riktigt
+                Rekryteringen som matchar på riktigt
               </h1>
               
-              <p className="text-lg md:text-xl text-white leading-relaxed">
-                Vi förändrar hur människor och företag hittar varandra – Framtiden börjar med ett swipe
+              <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-3xl mx-auto">
+                Vi förändrar hur människor och företag hittar varandra. Framtiden börjar med ett swipe.
               </p>
-              
-          </div>
+            </div>
 
+            {/* Two Main CTAs */}
+            <div className="grid md:grid-cols-2 gap-6 w-full max-w-4xl">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                onClick={() => navigate('/auth')}
+                className="bg-white text-primary p-8 rounded-2xl cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-2xl font-bold">Jag söker jobb</h3>
+                  <div className="transform group-hover:translate-x-2 transition-transform">
+                    →
+                  </div>
+                </div>
+                <p className="text-primary/70">
+                  Hitta ditt drömjobb snabbt och enkelt. Swipea dig till rätt match.
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                onClick={() => navigate('/auth')}
+                className="bg-white text-primary p-8 rounded-2xl cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-2xl font-bold">Jag söker personal</h3>
+                  <div className="transform group-hover:translate-x-2 transition-transform">
+                    →
+                  </div>
+                </div>
+                <p className="text-primary/70">
+                  Hitta rätt kandidater effektivt. Swipea dig till perfekta medarbetare.
+                </p>
+              </motion.div>
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
     {/* Scroll Transition */}
     <ScrollTransition />
