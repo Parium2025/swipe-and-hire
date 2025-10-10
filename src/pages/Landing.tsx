@@ -65,65 +65,73 @@ const Landing = () => {
       
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-6 md:px-12 lg:px-24 min-h-screen flex items-center">
-        {/* Background Image */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${heroBackground})` }}
-        />
-        {/* Overlay for better text readability */}
-        <div className="absolute inset-0 bg-primary/70" />
-        
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="flex flex-col items-center text-center">
-            {/* Hero Content */}
-            <div className="space-y-8 animate-fade-in max-w-4xl mb-32 md:mb-40">
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                Rekryteringen som matchar på riktigt
-              </h1>
-              
-              <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-3xl mx-auto">
-                Vi förändrar hur människor och företag hittar varandra. Framtiden börjar med ett swipe.
-              </p>
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left: Text and CTAs */}
+            <div className="space-y-12">
+              <div className="space-y-6 animate-fade-in">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+                  Rekryteringen som matchar på riktigt
+                </h1>
+                
+                <p className="text-lg md:text-xl text-white/90 leading-relaxed">
+                  Vi förändrar hur människor och företag hittar varandra. Framtiden börjar med ett swipe.
+                </p>
+              </div>
+
+              {/* Two Main CTAs */}
+              <div className="grid gap-6">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                  onClick={() => navigate('/auth')}
+                  className="bg-white text-primary p-8 rounded-2xl cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-2xl font-bold">Jag söker jobb</h3>
+                    <div className="transform group-hover:translate-x-2 transition-transform text-2xl">
+                      →
+                    </div>
+                  </div>
+                  <p className="text-primary/70">
+                    Hitta ditt drömjobb snabbt och enkelt. Swipea dig till rätt match.
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                  onClick={() => navigate('/auth')}
+                  className="bg-white text-primary p-8 rounded-2xl cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-2xl font-bold">Jag söker personal</h3>
+                    <div className="transform group-hover:translate-x-2 transition-transform text-2xl">
+                      →
+                    </div>
+                  </div>
+                  <p className="text-primary/70">
+                    Hitta rätt kandidater effektivt. Swipea dig till perfekta medarbetare.
+                  </p>
+                </motion.div>
+              </div>
             </div>
 
-            {/* Two Main CTAs */}
-            <div className="grid md:grid-cols-2 gap-6 w-full max-w-4xl">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-                onClick={() => navigate('/auth')}
-                className="bg-white text-primary p-8 rounded-2xl cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-2xl font-bold">Jag söker jobb</h3>
-                  <div className="transform group-hover:translate-x-2 transition-transform">
-                    →
-                  </div>
-                </div>
-                <p className="text-primary/70">
-                  Hitta ditt drömjobb snabbt och enkelt. Swipea dig till rätt match.
-                </p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-                onClick={() => navigate('/auth')}
-                className="bg-white text-primary p-8 rounded-2xl cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-2xl font-bold">Jag söker personal</h3>
-                  <div className="transform group-hover:translate-x-2 transition-transform">
-                    →
-                  </div>
-                </div>
-                <p className="text-primary/70">
-                  Hitta rätt kandidater effektivt. Swipea dig till perfekta medarbetare.
-                </p>
-              </motion.div>
-            </div>
+            {/* Right: Image */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="hidden lg:flex justify-center items-center"
+            >
+              <img 
+                src={heroBackground} 
+                alt="Parium app på mobil" 
+                className="w-full max-w-lg rounded-3xl shadow-2xl"
+              />
+            </motion.div>
           </div>
         </div>
       </section>
