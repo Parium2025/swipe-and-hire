@@ -67,8 +67,11 @@ const Landing = () => {
       <section className="relative pt-32 pb-20 px-6 md:px-12 lg:px-24 min-h-screen flex items-center">
         {/* Background Image */}
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${heroBackground})` }}
+          className="absolute inset-0 bg-cover bg-no-repeat"
+          style={{ 
+            backgroundImage: `url(${heroBackground})`,
+            backgroundPosition: '60% center'
+          }}
         />
         {/* Overlay for better text readability */}
         <div className="absolute inset-0 bg-primary/70" />
