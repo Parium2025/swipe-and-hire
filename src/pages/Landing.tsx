@@ -70,27 +70,27 @@ const Landing = () => {
           className="absolute inset-0 bg-cover bg-no-repeat"
           style={{ 
             backgroundImage: `url(${heroBackground})`,
-            backgroundPosition: '68% 24%'
+            backgroundPosition: 'right center'
           }}
         />
         {/* Overlay for better text readability */}
-        <div className="absolute inset-0 bg-primary/70" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/90 to-primary/30" />
         
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="flex flex-col items-center text-center">
+        <div className="max-w-7xl mx-auto relative z-10 w-full">
+          <div className="flex flex-col items-start text-left max-w-2xl">
             {/* Hero Content */}
-            <div className="space-y-8 animate-fade-in max-w-4xl mb-12">
+            <div className="space-y-8 animate-fade-in mb-12">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
                 Verktyget som matchar på riktigt
               </h1>
               
-              <p className="text-lg md:text-xl text-white leading-relaxed max-w-3xl mx-auto">
+              <p className="text-lg md:text-xl text-white leading-relaxed">
                 Vi förändrar hur människor och verktyg hittar varandra. Framtiden börjar med ett swipe.
               </p>
             </div>
 
             {/* Two Main CTAs */}
-            <div className="grid md:grid-cols-2 gap-4 w-full max-w-3xl">
+            <div className="grid md:grid-cols-2 gap-4 w-full">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
