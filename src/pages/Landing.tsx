@@ -9,7 +9,7 @@ import { SwipeDemo } from '@/components/SwipeDemo';
 import { LiveStats } from '@/components/LiveStats';
 import { ScrollTransition } from '@/components/ScrollTransition';
 import { motion } from 'framer-motion';
-import heroBackground from '@/assets/hero-woman-mirrored.jpg';
+import heroBackground from '@/assets/hero-woman-left-hand-right-side-v3.jpg';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -70,7 +70,7 @@ const Landing = () => {
           src={heroBackground}
           alt="Parium hero – kvinna som håller upp telefonen"
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ objectPosition: 'center center' }}
+          style={{ objectPosition: 'right center' }}
           loading="eager"
         />
         {/* Overlay for better text readability */}
