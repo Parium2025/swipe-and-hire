@@ -78,7 +78,7 @@ const Landing = () => {
             {/* Hero Content */}
             <div className="space-y-8 animate-fade-in max-w-4xl mb-12">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                Rekryteringen som matchar på riktigt
+                Verktyget som matchar på riktigt
               </h1>
               
               <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-3xl mx-auto">
