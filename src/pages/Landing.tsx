@@ -65,17 +65,16 @@ const Landing = () => {
       
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-6 md:px-12 lg:px-24 min-h-screen flex items-center">
-        {/* Background Image */}
-        <div 
-          className="absolute inset-0 bg-cover bg-no-repeat"
-          style={{ 
-            backgroundImage: `url(${heroBackground})`,
-            backgroundPosition: '180% center',
-            transform: 'scaleX(-1)'
-          }}
+        {/* Background Image as <img> for precise positioning */}
+        <img
+          src={`${heroBackground}?v=hero-pos-3`}
+          alt="Parium hero – kvinna som håller upp telefonen"
+          className="absolute inset-0 w-full h-full object-cover -scale-x-100"
+          style={{ objectPosition: '150% center' }}
+          loading="eager"
         />
         {/* Overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/80 via-primary/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/75 via-primary/20 to-transparent" />
         
         <div className="max-w-7xl mx-auto relative z-10 w-full">
           <div className="flex flex-col items-start text-left max-w-2xl">
