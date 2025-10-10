@@ -76,7 +76,7 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="flex flex-col items-center text-center">
             {/* Hero Content */}
-            <div className="space-y-8 animate-fade-in max-w-4xl mb-12">
+            <div className="space-y-8 animate-fade-in max-w-4xl mb-32 md:mb-40">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
                 Rekryteringen som matchar på riktigt
               </h1>
