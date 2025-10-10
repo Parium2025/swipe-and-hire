@@ -70,7 +70,7 @@ const Landing = () => {
           className="absolute inset-0 bg-cover bg-no-repeat"
           style={{ 
             backgroundImage: `url(${heroBackground})`,
-            backgroundPosition: '60% 35%'
+            backgroundPosition: '68% 24%'
           }}
         />
         {/* Overlay for better text readability */}
