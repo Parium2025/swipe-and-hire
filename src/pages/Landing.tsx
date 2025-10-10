@@ -9,6 +9,7 @@ import { SwipeDemo } from '@/components/SwipeDemo';
 import { LiveStats } from '@/components/LiveStats';
 import { ScrollTransition } from '@/components/ScrollTransition';
 import { motion } from 'framer-motion';
+import heroBackground from '@/assets/phone-mockup-with-logo.jpg';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -63,8 +64,16 @@ const Landing = () => {
       <LandingNav onLoginClick={handleLogin} />
       
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-6 md:px-12 lg:px-24">
-        <div className="max-w-7xl mx-auto">
+      <section className="relative pt-32 pb-20 px-6 md:px-12 lg:px-24 min-h-screen flex items-center">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${heroBackground})` }}
+        />
+        {/* Overlay for better text readability */}
+        <div className="absolute inset-0 bg-primary/70" />
+        
+        <div className="max-w-7xl mx-auto relative z-10">
           <div className="flex flex-col items-center text-center">
             {/* Hero Content */}
             <div className="space-y-8 animate-fade-in max-w-4xl mb-12">
