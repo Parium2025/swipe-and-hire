@@ -81,8 +81,8 @@ const Landing = () => {
                 Verktyget som matchar på riktigt
               </h1>
               
-              <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-3xl mx-auto">
-                Vi förändrar hur människor och företag hittar varandra. Framtiden börjar med ett swipe.
+              <p className="text-lg md:text-xl text-white leading-relaxed max-w-3xl mx-auto">
+                Vi förändrar hur människor och verktyg hittar varandra. Framtiden börjar med ett swipe.
               </p>
             </div>
 
