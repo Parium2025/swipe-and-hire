@@ -9,7 +9,7 @@ import { SwipeDemo } from '@/components/SwipeDemo';
 import { LiveStats } from '@/components/LiveStats';
 import { ScrollTransition } from '@/components/ScrollTransition';
 import { motion } from 'framer-motion';
-import heroBackground from '@/assets/hero-phone-parium-split.jpg';
+import heroBackground from '@/assets/hero-woman-phone-parium.jpg';
 
 const Landing = () => {
   const navigate = useNavigate();
