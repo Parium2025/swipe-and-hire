@@ -9,7 +9,7 @@ import { SwipeDemo } from '@/components/SwipeDemo';
 import { LiveStats } from '@/components/LiveStats';
 import { ScrollTransition } from '@/components/ScrollTransition';
 import { motion } from 'framer-motion';
-import heroBackground from '@/assets/hero-woman-left-hand-verified.jpg';
+import heroBackground from '@/assets/hero-woman-left-hand-correct.jpg';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -68,7 +68,7 @@ const Landing = () => {
         {/* Background Image */}
         <img
           src={heroBackground}
-          alt="Parium hero – kvinna som håller upp telefonen"
+          alt="Parium hero – kvinna håller telefonen i vänster hand"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ objectPosition: 'right center' }}
           loading="eager"
