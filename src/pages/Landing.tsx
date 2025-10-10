@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Zap, Video, Heart, Sparkles } from 'lucide-react';
 import { SwipeDemo } from '@/components/SwipeDemo';
 import { LiveStats } from '@/components/LiveStats';
+import { ScrollTransition } from '@/components/ScrollTransition';
 import { motion } from 'framer-motion';
 
 const Landing = () => {
@@ -75,14 +76,17 @@ const Landing = () => {
                 Vi förändrar hur människor och företag hittar varandra – Framtiden börjar med ett swipe
               </p>
               
-            </div>
-
           </div>
-        </div>
-      </section>
 
-      {/* Experience Parium Section */}
-      <section className="py-32 px-6 md:px-12 lg:px-24 relative">
+        </div>
+      </div>
+    </section>
+
+    {/* Scroll Transition */}
+    <ScrollTransition />
+
+    {/* Experience Parium Section */}
+    <section id="experience-section" className="py-32 px-6 md:px-12 lg:px-24 relative">
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
           <motion.div 
