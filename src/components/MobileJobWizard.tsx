@@ -1468,11 +1468,11 @@ const MobileJobWizard = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md h-[90vh] max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-t-[20px] sm:rounded-xl overflow-hidden">
+      <DialogContent className="max-w-md h-[90vh] max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden">
         <AnimatedBackground showBubbles={false} />
         <div className="flex flex-col h-full relative z-10">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-white/20 flex-shrink-0">
+          <div className="flex items-center justify-between p-4 border-b border-white/20 flex-shrink-0 rounded-t-[24px] bg-background/10">
             <DialogHeader className="flex-1">
               <DialogTitle className="text-white text-lg">
                 {steps[currentStep].title}
