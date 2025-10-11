@@ -2413,7 +2413,7 @@ const MobileJobWizard = ({
                                                   <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-3 w-3 text-white/60 pointer-events-none" />
                                                 </button>
                                                 
-                                                <div className="hidden absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-48 overflow-y-auto shadow-lg">
+                                                <div className="hidden bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-48 overflow-y-auto shadow-lg">
                                                   {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => (
                                                     <div
                                                       key={optIndex}
