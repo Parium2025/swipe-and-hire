@@ -565,16 +565,9 @@ const MobileJobWizard = ({
     setHasUnsavedChanges(hasChanges);
   }, [formData, customQuestions, initialFormData, open]);
 
-  // Show company tooltip when user reaches step 4 (preview)
+  // Show company tooltip only on step 4 (visible and persistent while on this step)
   useEffect(() => {
-    if (currentStep === 3 && open) {
-      setShowCompanyTooltip(true);
-      // Auto-hide after 10 seconds
-      const timer = setTimeout(() => {
-        setShowCompanyTooltip(false);
-      }, 10000);
-      return () => clearTimeout(timer);
-    }
+    setShowCompanyTooltip(currentStep === 3 && open);
   }, [currentStep, open]);
 
   // Resolve signed URL for uploaded job image preview
@@ -2202,7 +2195,6 @@ const MobileJobWizard = ({
                                      <button 
                                        onClick={() => {
                                          setShowCompanyProfile(true);
-                                         setShowCompanyTooltip(false);
                                        }}
                                        className="text-xs font-bold text-white hover:text-primary transition-colors cursor-pointer relative"
                                      >
