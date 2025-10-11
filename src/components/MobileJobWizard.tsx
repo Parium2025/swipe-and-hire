@@ -1475,14 +1475,16 @@ const MobileJobWizard = ({
                 Steg {currentStep + 1} av {steps.length}
               </div>
             </DialogHeader>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleClose}
-              className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            {!showQuestionTemplates && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleClose}
+                className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
           </div>
 
           {/* Progress Bar */}
@@ -2525,46 +2527,48 @@ const MobileJobWizard = ({
           </div>
 
           {/* Navigation */}
-          <div className="flex items-center justify-between p-4 border-t border-white/20 flex-shrink-0">
-            <Button
-              variant="ghost"
-              onClick={prevStep}
-              disabled={currentStep === 0}
-              className="text-white hover:text-white hover:bg-white/10 disabled:opacity-30 border border-white/40 hover:border-white/60"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Tillbaka
-            </Button>
+          {!showQuestionTemplates && (
+            <div className="flex items-center justify-between p-4 border-t border-white/20 flex-shrink-0">
+              <Button
+                variant="ghost"
+                onClick={prevStep}
+                disabled={currentStep === 0}
+                className="text-white hover:text-white hover:bg-white/10 disabled:opacity-30 border border-white/40 hover:border-white/60"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Tillbaka
+              </Button>
 
-            {isLastStep ? (
-              <Button
-                onClick={handleSubmit}
-                disabled={loading || !validateCurrentStep()}
-                className="bg-green-600/80 hover:bg-green-600 text-white px-6"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Skapar...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Publicera
-                  </>
-                )}
-              </Button>
-            ) : (
-              <Button
-                onClick={nextStep}
-                disabled={!validateCurrentStep()}
-                className="bg-primary hover:bg-primary/90 text-white px-6 border border-white/20 hover:border-white/40"
-              >
-                Nästa
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            )}
-          </div>
+              {isLastStep ? (
+                <Button
+                  onClick={handleSubmit}
+                  disabled={loading || !validateCurrentStep()}
+                  className="bg-green-600/80 hover:bg-green-600 text-white px-6"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Skapar...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Publicera
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  onClick={nextStep}
+                  disabled={!validateCurrentStep()}
+                  className="bg-primary hover:bg-primary/90 text-white px-6 border border-white/20 hover:border-white/40"
+                >
+                  Nästa
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Image Editor Dialog */}
