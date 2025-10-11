@@ -211,10 +211,10 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <DialogTitle className="text-2xl">{company.company_name}</DialogTitle>
+                  <DialogTitle className="text-2xl text-white">{company.company_name}</DialogTitle>
                   <div className="flex items-center gap-2 mt-1">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-sm text-white">
                       {averageRating} ({reviews.length} {reviews.length === 1 ? 'recension' : 'recensioner'})
                     </span>
                   </div>
@@ -224,8 +224,8 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
 
             {/* Översikt */}
             <div className="space-y-4 mb-6">
-              <h3 className="font-semibold text-lg">Översikt</h3>
-              <p className="text-muted-foreground">
+              <h3 className="font-semibold text-lg text-white">Översikt</h3>
+              <p className="text-white">
                 {company.company_description || "Ingen beskrivning tillgänglig."}
               </p>
             </div>
@@ -234,19 +234,19 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
 
             {/* Företagsinformation */}
             <div className="space-y-4 mb-6">
-              <h3 className="font-semibold text-lg">Företagsinformation</h3>
+              <h3 className="font-semibold text-lg text-white">Företagsinformation</h3>
               
               <div className="grid gap-3">
                 {company.website && (
                   <div className="flex items-center gap-3">
-                    <Globe className="h-5 w-5 text-muted-foreground" />
+                    <Globe className="h-5 w-5 text-white" />
                     <div>
-                      <p className="text-sm font-medium">Webbplats</p>
+                      <p className="text-sm font-medium text-white">Webbplats</p>
                       <a 
                         href={company.website} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-sm text-primary hover:underline"
+                        className="text-sm text-white hover:underline"
                       >
                         {company.website}
                       </a>
@@ -256,30 +256,30 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
 
                 {company.industry && (
                   <div className="flex items-center gap-3">
-                    <Briefcase className="h-5 w-5 text-muted-foreground" />
+                    <Briefcase className="h-5 w-5 text-white" />
                     <div>
-                      <p className="text-sm font-medium">Bransch</p>
-                      <p className="text-sm text-muted-foreground">{company.industry}</p>
+                      <p className="text-sm font-medium text-white">Bransch</p>
+                      <p className="text-sm text-white">{company.industry}</p>
                     </div>
                   </div>
                 )}
 
                 {company.employee_count && (
                   <div className="flex items-center gap-3">
-                    <Users className="h-5 w-5 text-muted-foreground" />
+                    <Users className="h-5 w-5 text-white" />
                     <div>
-                      <p className="text-sm font-medium">Företagsstorlek</p>
-                      <p className="text-sm text-muted-foreground">{company.employee_count} anställda</p>
+                      <p className="text-sm font-medium text-white">Företagsstorlek</p>
+                      <p className="text-sm text-white">{company.employee_count} anställda</p>
                     </div>
                   </div>
                 )}
 
                 {company.address && (
                   <div className="flex items-center gap-3">
-                    <MapPin className="h-5 w-5 text-muted-foreground" />
+                    <MapPin className="h-5 w-5 text-white" />
                     <div>
-                      <p className="text-sm font-medium">Huvudkontor</p>
-                      <p className="text-sm text-muted-foreground">{company.address}</p>
+                      <p className="text-sm font-medium text-white">Huvudkontor</p>
+                      <p className="text-sm text-white">{company.address}</p>
                     </div>
                   </div>
                 )}
@@ -355,7 +355,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
               {/* Lista med kommentarer */}
               <div className="space-y-4 mt-6">
                 {reviews.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">
+                  <p className="text-center text-white py-8">
                     Inga kommentarer än. Var först med att dela dina erfarenheter!
                   </p>
                 ) : (
