@@ -214,6 +214,42 @@ export type Database = {
           },
         ]
       }
+      job_question_templates: {
+        Row: {
+          created_at: string
+          employer_id: string
+          id: string
+          options: Json | null
+          placeholder_text: string | null
+          question_text: string
+          question_type: string
+          updated_at: string
+          usage_count: number
+        }
+        Insert: {
+          created_at?: string
+          employer_id: string
+          id?: string
+          options?: Json | null
+          placeholder_text?: string | null
+          question_text: string
+          question_type: string
+          updated_at?: string
+          usage_count?: number
+        }
+        Update: {
+          created_at?: string
+          employer_id?: string
+          id?: string
+          options?: Json | null
+          placeholder_text?: string | null
+          question_text?: string
+          question_type?: string
+          updated_at?: string
+          usage_count?: number
+        }
+        Relationships: []
+      }
       job_questions: {
         Row: {
           created_at: string

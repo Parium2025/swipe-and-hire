@@ -104,6 +104,8 @@ const MobileJobWizard = ({
   const [profile, setProfile] = useState<any>(null);
   const [customQuestions, setCustomQuestions] = useState<JobQuestion[]>([]);
   const [showQuestionForm, setShowQuestionForm] = useState(false);
+  const [showQuestionTemplates, setShowQuestionTemplates] = useState(false);
+  const [questionTemplates, setQuestionTemplates] = useState<JobQuestion[]>([]);
   const [editingQuestion, setEditingQuestion] = useState<JobQuestion | null>(null);
   
   // Unsaved changes tracking
@@ -371,8 +373,39 @@ const MobileJobWizard = ({
   useEffect(() => {
     if (user && open) {
       fetchProfile();
+      fetchQuestionTemplates();
     }
   }, [user, open]);
+  
+  const fetchQuestionTemplates = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('job_question_templates')
+        .select('*')
+        .eq('employer_id', user.id)
+        .order('usage_count', { ascending: false });
+      
+      if (error) throw error;
+      
+      // Map database templates to JobQuestion format
+      const mappedTemplates = (data || []).map(template => ({
+        id: template.id,
+        question_text: template.question_text,
+        question_type: template.question_type as 'text' | 'yes_no' | 'multiple_choice' | 'number' | 'date' | 'file' | 'range' | 'video',
+        options: template.options as string[] || [],
+        is_required: true,
+        order_index: 0,
+        placeholder_text: template.placeholder_text || undefined,
+        usage_count: template.usage_count
+      }));
+      
+      setQuestionTemplates(mappedTemplates as any);
+    } catch (error) {
+      console.error('Error fetching question templates:', error);
+    }
+  };
   
   // Update form data when jobTitle or selectedTemplate changes
   useEffect(() => {
@@ -543,19 +576,50 @@ const MobileJobWizard = ({
 
   // Functions for handling custom questions
   const addCustomQuestion = () => {
+    // Show template list first
+    setShowQuestionTemplates(true);
+  };
+  
+  const createNewQuestion = () => {
     const newQuestion: JobQuestion = {
       question_text: '',
-      question_type: 'text', // Default to text but we'll make user choose
+      question_type: 'text',
       is_required: true,
       order_index: customQuestions.length,
       options: []
     };
     setEditingQuestion(newQuestion);
+    setShowQuestionTemplates(false);
     setShowQuestionForm(true);
   };
+  
+  const useQuestionTemplate = async (template: any) => {
+    // Add template to questions
+    const newQuestion: JobQuestion = {
+      id: `temp_${Date.now()}`,
+      question_text: template.question_text,
+      question_type: template.question_type,
+      is_required: true,
+      order_index: customQuestions.length,
+      options: template.options || []
+    };
+    
+    setCustomQuestions(prev => [...prev, newQuestion]);
+    setShowQuestionTemplates(false);
+    
+    // Increment usage count
+    try {
+      await supabase
+        .from('job_question_templates')
+        .update({ usage_count: template.usage_count + 1 })
+        .eq('id', template.id);
+    } catch (error) {
+      console.error('Error updating template usage:', error);
+    }
+  };
 
-  const saveCustomQuestion = () => {
-    if (!editingQuestion?.question_text.trim()) return;
+  const saveCustomQuestion = async () => {
+    if (!editingQuestion?.question_text.trim() || !user) return;
     
     if (editingQuestion.id) {
       // Update existing question
@@ -570,6 +634,24 @@ const MobileJobWizard = ({
         order_index: customQuestions.length
       };
       setCustomQuestions(prev => [...prev, newQuestion]);
+      
+      // Save as template for future use
+      try {
+        await supabase
+          .from('job_question_templates')
+          .insert({
+            employer_id: user.id,
+            question_text: editingQuestion.question_text,
+            question_type: editingQuestion.question_type,
+            options: editingQuestion.options,
+            placeholder_text: editingQuestion.placeholder_text
+          });
+        
+        // Refresh templates
+        await fetchQuestionTemplates();
+      } catch (error) {
+        console.error('Error saving question template:', error);
+      }
     }
     
     setShowQuestionForm(false);
@@ -1494,7 +1576,7 @@ const MobileJobWizard = ({
             {/* Step 3: Ansökningsfrågor */}
             {currentStep === 2 && (
               <div className="space-y-6">
-                {!showQuestionForm ? (
+                {!showQuestionForm && !showQuestionTemplates ? (
                   <>
                     <div className="text-center space-y-2">
                       <h3 className="text-white font-medium text-lg">Ansökningsfrågor</h3>
@@ -1590,6 +1672,66 @@ const MobileJobWizard = ({
                       )}
                     </div>
                   </>
+                ) : showQuestionTemplates ? (
+                  /* Template Selection */
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-white font-medium text-lg">Välj fråga</h3>
+                      <Button
+                        onClick={() => setShowQuestionTemplates(false)}
+                        variant="ghost"
+                        size="sm"
+                        className="text-white/70 hover:text-white hover:bg-white/10"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                      {questionTemplates.length > 0 ? (
+                        <>
+                          {questionTemplates.map((template) => (
+                            <button
+                              key={template.id}
+                              onClick={() => useQuestionTemplate(template)}
+                              className="w-full bg-white/5 hover:bg-white/10 rounded-lg p-4 border border-white/20 text-left transition-colors"
+                            >
+                              <div className="text-white font-medium text-sm mb-1">
+                                {template.question_text}
+                              </div>
+                              <div className="text-white/60 text-xs flex items-center gap-2">
+                                <span>
+                                  {template.question_type === 'text' ? 'Text' : 
+                                   template.question_type === 'yes_no' ? 'Ja/Nej' :
+                                   template.question_type === 'multiple_choice' ? 'Flervalsval' :
+                                   template.question_type === 'number' ? 'Siffra' : template.question_type}
+                                </span>
+                                {(template as any).usage_count > 0 && (
+                                  <span className="text-white/40">• Använd {(template as any).usage_count}  gånger</span>
+                                )}
+                              </div>
+                            </button>
+                          ))}
+                        </>
+                      ) : (
+                        <div className="text-white/60 text-sm text-center py-8">
+                          Du har inga sparade frågor än
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-2">
+                      <Button
+                        onClick={createNewQuestion}
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-white/40 text-white bg-transparent hover:bg-transparent hover:border-white/60"
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Skapa ny fråga
+                      </Button>
+                    </div>
+                  </div>
                 ) : (
                   /* Question Form */
                   <div className="space-y-4">
