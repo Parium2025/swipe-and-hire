@@ -2122,14 +2122,14 @@ const MobileJobWizard = ({
                     <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px]">
                     {/* Tooltip framför mobilen som pekar på företagsnamnet */}
                     {showCompanyTooltip && showApplicationForm && (
-                      <div className="pointer-events-none absolute z-[999] -top-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1">
+                      <div className="pointer-events-none absolute z-[999] top-10 -left-44 flex items-center gap-2">
                         <div className="bg-primary text-primary-foreground text-sm px-4 py-2 rounded-lg shadow-2xl font-bold border-2 border-primary/40 whitespace-nowrap">
                           Obs, här kan du trycka! 👆
                         </div>
-                        <svg width="32" height="24" viewBox="0 0 32 24" className="text-primary">
-                          <path d="M16 0 L16 20" stroke="currentColor" strokeWidth="3" fill="none" markerEnd="url(#arrowhead2)" />
+                        <svg width="48" height="28" viewBox="0 0 48 28" className="text-primary">
+                          <path d="M2 14 Q 24 0, 46 14" stroke="currentColor" strokeWidth="3" fill="none" markerEnd="url(#arrowheadRight)" />
                           <defs>
-                            <marker id="arrowhead2" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+                            <marker id="arrowheadRight" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
                               <polygon points="0 0, 10 5, 0 10" fill="currentColor" />
                             </marker>
                           </defs>
