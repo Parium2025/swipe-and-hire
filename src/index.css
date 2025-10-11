@@ -76,7 +76,7 @@ All colors MUST be HSL.
     --gradient-parium: radial-gradient(
       circle at 50% 40%,
       hsl(var(--primary-glow) / 0.5) 0%,
-      hsl(var(--primary-glow) / 0.15) 60%,
+      hsl(var(--primary-glow) / 0.15) 50%,
       hsl(var(--primary-glow) / 0) 80%
     ), linear-gradient(180deg, hsl(215 100% 12%), hsl(215 100% 12%));
     --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(200 100% 98%));
