@@ -1851,16 +1851,11 @@ const MobileJobWizard = ({
                               <div className="text-white font-medium text-sm mb-1">
                                 {template.question_text}
                               </div>
-                              <div className="text-white/60 text-xs flex items-center gap-2">
-                                <span>
-                                  {template.question_type === 'text' ? 'Text' : 
-                                   template.question_type === 'yes_no' ? 'Ja/Nej' :
-                                   template.question_type === 'multiple_choice' ? 'Flervalsval' :
-                                   template.question_type === 'number' ? 'Siffra' : template.question_type}
-                                </span>
-                                {(template as any).usage_count > 0 && (
-                                  <span className="text-white/40">• Använd {(template as any).usage_count}  gånger</span>
-                                )}
+                              <div className="text-white/95 text-xs">
+                                {template.question_type === 'text' ? 'Text' : 
+                                 template.question_type === 'yes_no' ? 'Ja/Nej' :
+                                 template.question_type === 'multiple_choice' ? 'Flerval' :
+                                 template.question_type === 'number' ? 'Siffra' : template.question_type}
                               </div>
                             </button>
                           ))}
