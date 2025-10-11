@@ -48,7 +48,7 @@ All colors MUST be HSL.
     /* Parium Navy Blue (från loggan) */
     --primary: 215 100% 12%;
     --primary-foreground: 210 40% 98%;
-    --primary-glow: 200 100% 30%;
+    --primary-glow: 200 100% 40%;
 
     /* Parium Light Blue (från loggans ringar) */
     --secondary: 200 100% 60%;
@@ -75,8 +75,9 @@ All colors MUST be HSL.
     /* Soften and unify background to avoid visible "bands" at the bottom on iOS */
     --gradient-parium: radial-gradient(
       circle at 50% 40%,
-      hsl(var(--primary-glow) / 0.35) 0%,
-      hsl(var(--primary-glow) / 0) 45%
+      hsl(var(--primary-glow) / 0.5) 0%,
+      hsl(var(--primary-glow) / 0.15) 60%,
+      hsl(var(--primary-glow) / 0) 80%
     ), linear-gradient(180deg, hsl(215 100% 12%), hsl(215 100% 12%));
     --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(200 100% 98%));
     --gradient-glass: linear-gradient(135deg, hsla(0 0% 100% / 0.1), hsla(0 0% 100% / 0.05));
