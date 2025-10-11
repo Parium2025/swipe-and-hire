@@ -765,9 +765,7 @@ const MobileJobWizard = ({
     { value: 'text', label: 'Text' },
     { value: 'yes_no', label: 'Ja/Nej' },
     { value: 'multiple_choice', label: 'Flervalsval' },
-    { value: 'number', label: 'Siffra' },
-    { value: 'date', label: 'Datum' },
-    { value: 'range', label: 'Intervall' }
+    { value: 'number', label: 'Siffra' }
   ];
 
   // Salary type options
