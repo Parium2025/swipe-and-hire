@@ -14,6 +14,7 @@ import { Plus, Trash2, GripVertical, HelpCircle } from 'lucide-react';
 interface JobQuestion {
   id?: string;
   question_text: string;
+  description?: string;
   question_type: 'yes_no' | 'text' | 'video' | 'multiple_choice';
   options?: string[];
   is_required: boolean;
@@ -76,6 +77,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
     setSelectedType(type);
     setQuestionDraft({
       question_text: '',
+      description: '',
       question_type: type,
       is_required: false,
       order_index: questions.length,
@@ -219,85 +221,77 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
         </Button>
       </div>
 
-      {/* Steg 1: Välj frågetyp */}
-      {addingQuestion && !selectedType && (
-        <Card className="border-2 border-primary/50 bg-card/50">
-          <CardContent className="pt-6">
-            <h4 className="font-semibold mb-4">Välj typ av fråga</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Button
-                variant="outline"
-                className="h-auto py-4 flex flex-col items-start gap-1 hover:border-primary"
-                onClick={() => selectQuestionType('text')}
-              >
-                <span className="font-semibold">Textfråga</span>
-                <span className="text-xs text-muted-foreground">Fri text som svar</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-auto py-4 flex flex-col items-start gap-1 hover:border-primary"
-                onClick={() => selectQuestionType('yes_no')}
-              >
-                <span className="font-semibold">Ja/Nej-fråga</span>
-                <span className="text-xs text-muted-foreground">Enkelt ja eller nej</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-auto py-4 flex flex-col items-start gap-1 hover:border-primary"
-                onClick={() => selectQuestionType('multiple_choice')}
-              >
-                <span className="font-semibold">Flervalsalternativ</span>
-                <span className="text-xs text-muted-foreground">Välj bland alternativ</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-auto py-4 flex flex-col items-start gap-1 hover:border-primary"
-                onClick={() => selectQuestionType('video')}
-              >
-                <span className="font-semibold">Videosvar</span>
-                <span className="text-xs text-muted-foreground">Spela in ett svar</span>
-              </Button>
-            </div>
-            <div className="flex justify-end mt-4">
-              <Button variant="outline" onClick={cancelAddQuestion}>
-                Avbryt
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Steg 2: Fyll i frågedetaljer */}
-      {addingQuestion && selectedType && questionDraft && (
-        <Card className="border-2 border-primary/50 bg-card/50">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
-              <Badge variant="outline">{getQuestionTypeLabel(selectedType)}</Badge>
-              <div className="flex-1" />
-              <div className="flex items-center gap-2">
-                <Label htmlFor="draft-required" className="text-sm">
-                  Obligatorisk
-                </Label>
-                <Switch
-                  id="draft-required"
-                  checked={questionDraft.is_required}
-                  onCheckedChange={(checked) => setQuestionDraft({ ...questionDraft, is_required: checked })}
-                />
-              </div>
-            </div>
+      {/* Ny fråga dialog */}
+      {addingQuestion && questionDraft && (
+        <Card className="border-2 border-primary/50 bg-card">
+          <CardHeader>
+            <CardTitle className="text-xl">Ny fråga</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-6">
+            {/* Typ */}
             <div className="space-y-2">
-              <Label>Rubrik *</Label>
+              <Label htmlFor="question-type">Typ</Label>
+              <Select
+                value={questionDraft.question_type}
+                onValueChange={(value) => setQuestionDraft({ 
+                  ...questionDraft, 
+                  question_type: value as JobQuestion['question_type'],
+                  options: value === 'multiple_choice' ? (questionDraft.options || ['']) : undefined
+                })}
+              >
+                <SelectTrigger id="question-type">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="text">Textfråga</SelectItem>
+                  <SelectItem value="yes_no">Ja/Nej</SelectItem>
+                  <SelectItem value="multiple_choice">Flervalsalternativ</SelectItem>
+                  <SelectItem value="video">Videosvar</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Rubrik */}
+            <div className="space-y-2">
+              <Label htmlFor="question-title">Rubrik</Label>
               <Input
+                id="question-title"
                 value={questionDraft.question_text}
                 onChange={(e) => setQuestionDraft({ ...questionDraft, question_text: e.target.value })}
-                placeholder="Skriv din fråga här..."
+                placeholder="Gillar du äpplen?"
               />
             </div>
 
-            {selectedType === 'multiple_choice' && (
-              <div className="space-y-2">
+            {/* Beskrivning */}
+            <div className="space-y-2">
+              <Label htmlFor="question-description">Beskrivning</Label>
+              <Textarea
+                id="question-description"
+                value={questionDraft.description || ''}
+                onChange={(e) => setQuestionDraft({ ...questionDraft, description: e.target.value })}
+                placeholder="Beskrivning av frågan..."
+                rows={4}
+              />
+              <p className="text-xs text-muted-foreground">
+                Används när en fråga kan behöva förtydligas.
+              </p>
+            </div>
+
+            {/* Obligatorisk */}
+            <div className="flex items-center gap-2">
+              <Switch
+                id="draft-required"
+                checked={questionDraft.is_required}
+                onCheckedChange={(checked) => setQuestionDraft({ ...questionDraft, is_required: checked })}
+              />
+              <Label htmlFor="draft-required" className="cursor-pointer">
+                Gör frågan obligatorisk
+              </Label>
+            </div>
+
+            {/* Flervalsalternativ */}
+            {questionDraft.question_type === 'multiple_choice' && (
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <Label>Svarsalternativ</Label>
                   <Button
@@ -341,6 +335,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
               </div>
             )}
 
+            {/* Action buttons */}
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={cancelAddQuestion}>
                 Avbryt
@@ -349,7 +344,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
                 onClick={confirmAddQuestion}
                 disabled={!questionDraft.question_text.trim()}
               >
-                Lägg till fråga
+                Spara
               </Button>
             </div>
           </CardContent>
