@@ -569,10 +569,10 @@ const MobileJobWizard = ({
   useEffect(() => {
     if (currentStep === 3 && open) {
       setShowCompanyTooltip(true);
-      // Auto-hide after 8 seconds
+      // Auto-hide after 10 seconds
       const timer = setTimeout(() => {
         setShowCompanyTooltip(false);
-      }, 8000);
+      }, 10000);
       return () => clearTimeout(timer);
     }
   }, [currentStep, open]);
@@ -2154,11 +2154,11 @@ const MobileJobWizard = ({
                                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 relative">
                                   {/* Tooltip med pil */}
                                   {showCompanyTooltip && (
-                                    <div className="absolute -top-16 left-0 right-0 flex flex-col items-center animate-bounce z-50">
-                                      <div className="bg-primary text-white text-xs px-3 py-2 rounded-lg shadow-2xl whitespace-nowrap font-bold border-2 border-white/30">
+                                    <div className="absolute -top-[4.5rem] left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce z-[999] w-max">
+                                      <div className="bg-primary text-white text-[11px] px-2.5 py-1.5 rounded-md shadow-2xl font-bold border-2 border-white/40 whitespace-nowrap">
                                         Obs, här kan du trycka! 👆
                                       </div>
-                                      <ArrowDown className="h-5 w-5 text-primary -mt-1.5 drop-shadow-lg" />
+                                      <ArrowDown className="h-4 w-4 text-primary -mt-1 drop-shadow-lg" strokeWidth={3} />
                                     </div>
                                   )}
                                   
