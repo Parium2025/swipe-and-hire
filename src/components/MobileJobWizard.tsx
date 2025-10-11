@@ -761,11 +761,6 @@ const MobileJobWizard = ({
           
           // Refresh templates to show updated version
           await fetchQuestionTemplates();
-          
-          toast({
-            title: "Fråga uppdaterad",
-            description: "Mallen har också uppdaterats för framtida användning",
-          });
         } catch (error) {
           console.error('Error updating question template:', error);
           toast({
