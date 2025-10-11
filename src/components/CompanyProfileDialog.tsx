@@ -57,13 +57,20 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
   const [newRating, setNewRating] = React.useState(5);
   const [submitting, setSubmitting] = React.useState(false);
   const [isAnonymous, setIsAnonymous] = React.useState(false);
+  const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (open && companyId) {
       fetchCompanyData();
       fetchReviews();
+      getCurrentUser();
     }
   }, [open, companyId]);
+
+  const getCurrentUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setCurrentUserId(user?.id || null);
+  };
 
   const fetchCompanyData = async () => {
     try {
@@ -197,6 +204,8 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
     ? (reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length).toFixed(1)
     : "0";
 
+  const isOwnProfile = currentUserId === companyId;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] p-0 bg-gradient-parium border-white/20">
@@ -295,62 +304,70 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                 <h3 className="font-semibold text-lg">Kommentarer</h3>
               </div>
 
-              {/* Ny kommentar */}
-              <div className="bg-muted/50 p-4 rounded-lg space-y-3">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Betyg</label>
-                  <div className="flex gap-2">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        onClick={() => setNewRating(star)}
-                        className="transition-colors"
-                      >
-                        <Star
-                          className={`h-6 w-6 ${
-                            star <= newRating
-                              ? "fill-yellow-400 text-yellow-400"
-                              : "text-muted-foreground"
-                          }`}
-                        />
-                      </button>
-                    ))}
+              {/* Kommentarsfält eller informationstext */}
+              {isOwnProfile ? (
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <p className="text-sm text-white text-center italic">
+                    (Här lämnar jobbsökarna kommentarer om de vill samt betyg.)
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-muted/50 p-4 rounded-lg space-y-3">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block text-white">Betyg</label>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setNewRating(star)}
+                          className="transition-colors"
+                        >
+                          <Star
+                            className={`h-6 w-6 ${
+                              star <= newRating
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-muted-foreground"
+                            }`}
+                          />
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Din kommentar</label>
-                  <Textarea
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Dela dina erfarenheter av detta företag..."
-                    className="min-h-[100px]"
-                  />
-                </div>
+                  <div>
+                    <label className="text-sm font-medium mb-2 block text-white">Din kommentar</label>
+                    <Textarea
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="Dela dina erfarenheter av detta företag..."
+                      className="min-h-[100px]"
+                    />
+                  </div>
 
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="anonymous"
-                    checked={isAnonymous}
-                    onChange={(e) => setIsAnonymous(e.target.checked)}
-                    className="rounded"
-                  />
-                  <label htmlFor="anonymous" className="text-sm text-muted-foreground">
-                    Publicera anonymt
-                  </label>
-                </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="anonymous"
+                      checked={isAnonymous}
+                      onChange={(e) => setIsAnonymous(e.target.checked)}
+                      className="rounded"
+                    />
+                    <label htmlFor="anonymous" className="text-sm text-white">
+                      Publicera anonymt
+                    </label>
+                  </div>
 
-                <Button 
-                  onClick={handleSubmitReview} 
-                  disabled={submitting}
-                  className="w-full"
-                >
-                  <Send className="h-4 w-4 mr-2" />
-                  {submitting ? "Skickar..." : "Skicka kommentar"}
-                </Button>
-              </div>
+                  <Button 
+                    onClick={handleSubmitReview} 
+                    disabled={submitting}
+                    className="w-full"
+                  >
+                    <Send className="h-4 w-4 mr-2" />
+                    {submitting ? "Skickar..." : "Skicka kommentar"}
+                  </Button>
+                </div>
+              )}
 
               {/* Lista med kommentarer */}
               <div className="space-y-4 mt-6">
