@@ -74,16 +74,27 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
 
   const fetchCompanyData = async () => {
     try {
+      console.log("Fetching company data for companyId:", companyId);
       const { data, error } = await supabase
         .from("profiles")
         .select("company_name, company_logo_url, company_description, website, industry, employee_count, address")
         .eq("user_id", companyId)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching company data:", error);
+        throw error;
+      }
+      
+      console.log("Fetched company data:", data);
       setCompany(data);
     } catch (error) {
       console.error("Error fetching company:", error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte hämta företagsinformation",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -197,7 +208,19 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
   }
 
   if (!company) {
-    return null;
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-2xl max-h-[90vh] bg-gradient-parium border-white/20">
+          <div className="flex flex-col items-center justify-center p-8 text-white">
+            <Building2 className="h-16 w-16 mb-4 text-white/50" />
+            <p className="text-lg font-medium mb-2">Företagsinformation saknas</p>
+            <p className="text-sm text-white/70 text-center">
+              Det finns ingen företagsprofil tillgänglig för detta konto.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
   }
 
   const averageRating = reviews.length > 0
