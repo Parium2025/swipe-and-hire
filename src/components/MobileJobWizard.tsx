@@ -235,6 +235,7 @@ const MobileJobWizard = ({
   // Company profile dialog
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [showCompanyTooltip, setShowCompanyTooltip] = useState(false);
+  const [isScrolledTop, setIsScrolledTop] = useState(true);
 
   // Utility function to truncate text for better display
   const truncateText = (text: string, maxLength: number = 35) => {
@@ -2121,16 +2122,16 @@ const MobileJobWizard = ({
                     
                     <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px]">
                     {/* Tooltip framför mobilen som pekar på företagsnamnet */}
-                    {showCompanyTooltip && showApplicationForm && (
-                      <div className="pointer-events-none absolute z-[999] top-8 -left-40 flex items-center gap-2">
-                        <div className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-md shadow-lg font-semibold border border-primary/40 whitespace-nowrap">
-                          Obs, här kan du trycka!
+                    {showCompanyTooltip && showApplicationForm && isScrolledTop && (
+                      <div className="pointer-events-none absolute z-[999] top-8 -left-28 flex items-center gap-1">
+                        <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
+                          Obs, tryck här!
                         </div>
-                        <svg width="36" height="22" viewBox="0 0 48 28" className="text-primary">
+                        <svg width="20" height="12" viewBox="0 0 48 28" className="text-primary">
                           <path d="M2 14 Q 24 0, 46 14" stroke="currentColor" strokeWidth="2" fill="none" markerEnd="url(#arrowheadRight)" />
                           <defs>
-                            <marker id="arrowheadRight" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
-                              <polygon points="0 0, 8 4, 0 8" fill="currentColor" />
+                            <marker id="arrowheadRight" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                              <polygon points="0 0, 6 3, 0 6" fill="currentColor" />
                             </marker>
                           </defs>
                         </svg>
@@ -2155,10 +2156,14 @@ const MobileJobWizard = ({
                                <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white/80 hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
                              </div>
 
-                             {/* Scrollable content */}
-                           <div 
-                             className="px-2 py-2 overflow-y-auto relative z-10 custom-scrollbar flex-1"
-                           >
+                              {/* Scrollable content */}
+                            <div 
+                              className="px-2 py-2 overflow-y-auto relative z-10 custom-scrollbar flex-1"
+                              onScroll={(e) => {
+                                const target = e.currentTarget;
+                                setIsScrolledTop(target.scrollTop === 0);
+                              }}
+                            >
                              <div className="space-y-3 pb-3">{/* Minimal botten-padding */}
                               
                                  {/* Företagsinformation */}
