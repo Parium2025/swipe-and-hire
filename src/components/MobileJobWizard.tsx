@@ -2353,7 +2353,7 @@ const MobileJobWizard = ({
                                             {/* Input förhandsvisning baserat på frågetyp */}
                                             {question.question_type === 'text' && (
                                               <textarea
-                                                className="w-full border border-white/20 bg-white/10 backdrop-blur-sm rounded p-1 text-xs text-white placeholder:text-white/60 resize-none"
+                                                className="w-full border border-white/20 bg-white/10 backdrop-blur-sm rounded p-2 text-xs text-white placeholder:text-white/60 resize-none"
                                                 placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                                 rows={2}
                                               />
@@ -2364,22 +2364,34 @@ const MobileJobWizard = ({
                                                 <button 
                                                   type="button"
                                                   onClick={(e) => {
-                                                    const buttons = e.currentTarget.parentElement?.querySelectorAll('button');
-                                                    buttons?.forEach(btn => btn.classList.remove('bg-secondary', 'border-secondary'));
-                                                    e.currentTarget.classList.add('bg-secondary', 'border-secondary');
+                                                    e.preventDefault();
+                                                    const parent = e.currentTarget.parentElement;
+                                                    const buttons = parent?.querySelectorAll('button');
+                                                    buttons?.forEach(btn => {
+                                                      btn.classList.remove('bg-secondary', 'border-secondary', 'text-white');
+                                                      btn.classList.add('bg-white/10', 'border-white/20');
+                                                    });
+                                                    e.currentTarget.classList.remove('bg-white/10', 'border-white/20');
+                                                    e.currentTarget.classList.add('bg-secondary', 'border-secondary', 'text-white');
                                                   }}
-                                                  className="flex-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-2 py-1.5 text-xs text-white transition-colors"
+                                                  className="flex-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-2 py-1 text-xs text-white transition-all"
                                                 >
                                                   Ja
                                                 </button>
                                                 <button 
                                                   type="button"
                                                   onClick={(e) => {
-                                                    const buttons = e.currentTarget.parentElement?.querySelectorAll('button');
-                                                    buttons?.forEach(btn => btn.classList.remove('bg-secondary', 'border-secondary'));
-                                                    e.currentTarget.classList.add('bg-secondary', 'border-secondary');
+                                                    e.preventDefault();
+                                                    const parent = e.currentTarget.parentElement;
+                                                    const buttons = parent?.querySelectorAll('button');
+                                                    buttons?.forEach(btn => {
+                                                      btn.classList.remove('bg-secondary', 'border-secondary', 'text-white');
+                                                      btn.classList.add('bg-white/10', 'border-white/20');
+                                                    });
+                                                    e.currentTarget.classList.remove('bg-white/10', 'border-white/20');
+                                                    e.currentTarget.classList.add('bg-secondary', 'border-secondary', 'text-white');
                                                   }}
-                                                  className="flex-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-2 py-1.5 text-xs text-white transition-colors"
+                                                  className="flex-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-2 py-1 text-xs text-white transition-all"
                                                 >
                                                   Nej
                                                 </button>
@@ -2387,47 +2399,48 @@ const MobileJobWizard = ({
                                             )}
                                             
                                             {question.question_type === 'multiple_choice' && (
-                                              <div className="space-y-1.5">
-                                                {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => (
-                                                  <div 
-                                                    key={optIndex} 
-                                                    className="flex items-center space-x-2 bg-white/5 hover:bg-white/10 border border-white/20 rounded-lg px-3 py-2 cursor-pointer transition-colors"
-                                                    onClick={(e) => {
-                                                      const checkbox = e.currentTarget.querySelector('input[type="checkbox"]') as HTMLInputElement;
-                                                      if (checkbox) {
-                                                        checkbox.checked = !checkbox.checked;
-                                                        if (checkbox.checked) {
-                                                          e.currentTarget.classList.add('bg-secondary/20', 'border-secondary');
-                                                        } else {
-                                                          e.currentTarget.classList.remove('bg-secondary/20', 'border-secondary');
-                                                        }
-                                                      }
-                                                    }}
-                                                  >
-                                                    <input 
-                                                      type="checkbox" 
-                                                      className="w-4 h-4 accent-secondary cursor-pointer rounded"
-                                                      onClick={(e) => e.stopPropagation()}
-                                                      onChange={(e) => {
-                                                        const parent = e.currentTarget.parentElement;
-                                                        if (e.currentTarget.checked) {
-                                                          parent?.classList.add('bg-secondary/20', 'border-secondary');
-                                                        } else {
-                                                          parent?.classList.remove('bg-secondary/20', 'border-secondary');
+                                              <div className="relative">
+                                                <button
+                                                  type="button"
+                                                  onClick={(e) => {
+                                                    e.preventDefault();
+                                                    const dropdown = e.currentTarget.nextElementSibling;
+                                                    dropdown?.classList.toggle('hidden');
+                                                  }}
+                                                  className="w-full bg-white/10 border-white/20 text-white h-9 text-xs pr-10 cursor-pointer rounded border flex items-center px-3 hover:bg-white/20 transition-colors text-left"
+                                                >
+                                                  <span className="flex-1">Välj alternativ</span>
+                                                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-3 w-3 text-white/60 pointer-events-none" />
+                                                </button>
+                                                
+                                                <div className="hidden absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-48 overflow-y-auto shadow-lg">
+                                                  {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => (
+                                                    <div
+                                                      key={optIndex}
+                                                      onClick={(e) => {
+                                                        e.preventDefault();
+                                                        const checkbox = e.currentTarget.querySelector('input[type="checkbox"]') as HTMLInputElement;
+                                                        if (checkbox) {
+                                                          checkbox.checked = !checkbox.checked;
                                                         }
                                                       }}
-                                                    />
-                                                    <label className="text-sm text-white cursor-pointer flex-1 leading-tight">
-                                                      {option}
-                                                    </label>
-                                                  </div>
-                                                ))}
+                                                      className="flex items-center gap-2 px-3 py-2 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
+                                                    >
+                                                      <input
+                                                        type="checkbox"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className="w-3 h-3 accent-secondary cursor-pointer rounded"
+                                                      />
+                                                      <span className="text-xs text-white flex-1">{option}</span>
+                                                    </div>
+                                                  ))}
+                                                </div>
                                               </div>
                                             )}
                                             
                                             {question.question_type === 'number' && (
-                                              <div className="space-y-2">
-                                                <div className="text-center text-base font-semibold text-white" id={`number-value-${type}-${index}`}>
+                                              <div className="space-y-1.5">
+                                                <div className="text-center text-sm font-semibold text-white" id={`number-value-${type}-${index}`}>
                                                   {question.min_value ?? 0}
                                                 </div>
                                                 <input
@@ -2435,7 +2448,7 @@ const MobileJobWizard = ({
                                                   min={question.min_value ?? 0}
                                                   max={question.max_value ?? 100}
                                                   defaultValue={question.min_value ?? 0}
-                                                  className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-secondary [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+                                                  className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-secondary [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
                                                   onChange={(e) => {
                                                     const valueDisplay = document.getElementById(`number-value-${type}-${index}`);
                                                     if (valueDisplay) valueDisplay.textContent = e.target.value;
@@ -2447,7 +2460,7 @@ const MobileJobWizard = ({
                                             {question.question_type === 'date' && (
                                               <input
                                                 type="date"
-                                                className="w-full border border-white/20 bg-white/10 backdrop-blur-sm rounded p-1 text-xs text-white placeholder:text-white/60"
+                                                className="w-full border border-white/20 bg-white/10 backdrop-blur-sm rounded p-2 text-xs text-white placeholder:text-white/60 h-9"
                                                 placeholder={question.placeholder_text}
                                                 disabled
                                               />
@@ -2456,9 +2469,9 @@ const MobileJobWizard = ({
                                             {(question.question_type === 'file' || question.question_type === 'video') && (
                                               <div className="border-2 border-dashed border-white/30 rounded p-2 text-center bg-white/5">
                                                 {question.question_type === 'file' ? (
-                                                  <FileText className="h-4 w-4 mx-auto mb-1 text-white/60" />
+                                                  <FileText className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
                                                 ) : (
-                                                  <Video className="h-4 w-4 mx-auto mb-1 text-white/60" />
+                                                  <Video className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
                                                 )}
                                                 <p className="text-xs text-white/60">
                                                   {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
