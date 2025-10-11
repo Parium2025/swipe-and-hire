@@ -199,9 +199,9 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0">
+      <DialogContent className="max-w-2xl max-h-[90vh] p-0 bg-gradient-parium border-white/20">
         <ScrollArea className="max-h-[90vh]">
-          <div className="p-6">
+          <div className="p-6 text-white">
             <DialogHeader className="mb-6">
               <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16">
