@@ -711,6 +711,9 @@ const MobileJobWizard = ({
   };
   
   const useQuestionTemplate = async (template: any) => {
+    // Filter out empty options before adding
+    const filteredOptions = template.options?.filter((opt: string) => opt.trim() !== '') || [];
+    
     // Add template to questions with link to template
     const newQuestion: JobQuestion = {
       id: `temp_${Date.now()}`,
@@ -719,7 +722,7 @@ const MobileJobWizard = ({
       question_type: template.question_type,
       is_required: true,
       order_index: customQuestions.length,
-      options: template.options || []
+      options: filteredOptions
     };
     
     setCustomQuestions(prev => [...prev, newQuestion]);
@@ -739,25 +742,33 @@ const MobileJobWizard = ({
   const saveCustomQuestion = async () => {
     if (!editingQuestion?.question_text.trim() || !user) return;
     
-    if (editingQuestion.id) {
+    // Filter out empty options for multiple choice questions
+    const filteredQuestion = {
+      ...editingQuestion,
+      options: editingQuestion.question_type === 'multiple_choice' 
+        ? editingQuestion.options?.filter(opt => opt.trim() !== '')
+        : editingQuestion.options
+    };
+    
+    if (filteredQuestion.id) {
       // Update existing question
       setCustomQuestions(prev => 
-        prev.map(q => q.id === editingQuestion.id ? editingQuestion : q)
+        prev.map(q => q.id === filteredQuestion.id ? filteredQuestion : q)
       );
       
       // If question is linked to a template, update the template too
-      if (editingQuestion.template_id) {
+      if (filteredQuestion.template_id) {
         try {
           await supabase
             .from('job_question_templates')
             .update({
-              question_text: editingQuestion.question_text,
-              question_type: editingQuestion.question_type,
-              options: editingQuestion.options,
-              placeholder_text: editingQuestion.placeholder_text,
+              question_text: filteredQuestion.question_text,
+              question_type: filteredQuestion.question_type,
+              options: filteredQuestion.options,
+              placeholder_text: filteredQuestion.placeholder_text,
               updated_at: new Date().toISOString()
             })
-            .eq('id', editingQuestion.template_id);
+            .eq('id', filteredQuestion.template_id);
           
           // Refresh templates to show updated version
           await fetchQuestionTemplates();
@@ -773,7 +784,7 @@ const MobileJobWizard = ({
     } else {
       // Add new question
       const newQuestion = {
-        ...editingQuestion,
+        ...filteredQuestion,
         id: `temp_${Date.now()}`,
         order_index: customQuestions.length
       };
@@ -785,10 +796,10 @@ const MobileJobWizard = ({
           .from('job_question_templates')
           .insert({
             employer_id: user.id,
-            question_text: editingQuestion.question_text,
-            question_type: editingQuestion.question_type,
-            options: editingQuestion.options,
-            placeholder_text: editingQuestion.placeholder_text
+            question_text: filteredQuestion.question_text,
+            question_type: filteredQuestion.question_type,
+            options: filteredQuestion.options,
+            placeholder_text: filteredQuestion.placeholder_text
           })
           .select()
           .single();
@@ -1975,15 +1986,41 @@ const MobileJobWizard = ({
                       )}
 
                       {editingQuestion?.question_type === 'number' && (
-                        <div className="space-y-2">
-                          <Label className="text-white font-medium">Rubrik *</Label>
-                          <Input
-                            value={editingQuestion?.question_text || ''}
-                            onChange={(e) => updateQuestionField('question_text', e.target.value)}
-                            placeholder="T.ex. Ålder, Antal års erfarenhet, Antal anställda..."
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                          />
-                        </div>
+                        <>
+                          <div className="space-y-2">
+                            <Label className="text-white font-medium">Rubrik *</Label>
+                            <Input
+                              value={editingQuestion?.question_text || ''}
+                              onChange={(e) => updateQuestionField('question_text', e.target.value)}
+                              placeholder="T.ex. Ålder, Antal års erfarenhet, Antal anställda..."
+                              className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                            />
+                          </div>
+                          
+                          {/* Min/Max värden för slider */}
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label className="text-white font-medium">Min värde</Label>
+                              <Input
+                                type="number"
+                                value={editingQuestion?.min_value ?? ''}
+                                onChange={(e) => updateQuestionField('min_value', e.target.value ? parseInt(e.target.value) : undefined)}
+                                placeholder="0"
+                                className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-white font-medium">Max värde</Label>
+                              <Input
+                                type="number"
+                                value={editingQuestion?.max_value ?? ''}
+                                onChange={(e) => updateQuestionField('max_value', e.target.value ? parseInt(e.target.value) : undefined)}
+                                placeholder="100"
+                                className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                              />
+                            </div>
+                          </div>
+                        </>
                       )}
 
                       {/* Rubrik for multiple choice */}
@@ -2035,31 +2072,6 @@ const MobileJobWizard = ({
                         </div>
                       )}
 
-                      {/* Range/Number Options */}
-                      {(['range', 'number'].includes(editingQuestion?.question_type || '')) && (
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-white font-medium">Min värde</Label>
-                            <Input
-                              type="number"
-                              value={editingQuestion?.min_value || ''}
-                              onChange={(e) => updateQuestionField('min_value', e.target.value ? parseInt(e.target.value) : undefined)}
-                              placeholder="0"
-                              className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-white font-medium">Max värde</Label>
-                            <Input
-                              type="number"
-                              value={editingQuestion?.max_value || ''}
-                              onChange={(e) => updateQuestionField('max_value', e.target.value ? parseInt(e.target.value) : undefined)}
-                              placeholder="100"
-                              className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                            />
-                          </div>
-                        </div>
-                      )}
 
 
                       {/* Required Toggle */}
@@ -2327,23 +2339,21 @@ const MobileJobWizard = ({
                                         )}
                                         
                                         {question.question_type === 'yes_no' && (
-                                          <div className="flex space-x-2">
-                                            <div className="flex items-center space-x-1">
-                                              <input type="radio" className="w-2 h-2 accent-secondary cursor-pointer" />
-                                              <label className="text-xs text-white cursor-pointer">Ja</label>
-                                            </div>
-                                            <div className="flex items-center space-x-1">
-                                              <input type="radio" className="w-2 h-2 accent-secondary cursor-pointer" />
-                                              <label className="text-xs text-white cursor-pointer">Nej</label>
-                                            </div>
+                                          <div className="flex gap-2">
+                                            <button className="flex-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-2 py-1.5 text-xs text-white transition-colors">
+                                              Ja
+                                            </button>
+                                            <button className="flex-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-2 py-1.5 text-xs text-white transition-colors">
+                                              Nej
+                                            </button>
                                           </div>
                                         )}
                                         
                                         {question.question_type === 'multiple_choice' && (
                                           <div className="space-y-1">
-                                            {question.options?.map((option, optIndex) => (
+                                            {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => (
                                               <div key={optIndex} className="flex items-center space-x-1">
-                                                <input type="checkbox" className="w-2 h-2 accent-secondary cursor-pointer" />
+                                                <input type="checkbox" className="w-2.5 h-2.5 accent-secondary cursor-pointer rounded" />
                                                 <label className="text-xs text-white cursor-pointer flex-1 leading-tight">
                                                   {option}
                                                 </label>
@@ -2352,9 +2362,25 @@ const MobileJobWizard = ({
                                           </div>
                                         )}
                                         
-                                        {(question.question_type === 'number' || question.question_type === 'date') && (
+                                        {question.question_type === 'number' && (
+                                          <div className="space-y-2">
+                                            <div className="text-center text-base font-semibold text-white">
+                                              {question.min_value ?? 0}
+                                            </div>
+                                            <input
+                                              type="range"
+                                              min={question.min_value ?? 0}
+                                              max={question.max_value ?? 100}
+                                              defaultValue={question.min_value ?? 0}
+                                              className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-secondary [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+                                              disabled
+                                            />
+                                          </div>
+                                        )}
+                                        
+                                        {question.question_type === 'date' && (
                                           <input
-                                            type={question.question_type}
+                                            type="date"
                                             className="w-full border border-white/20 bg-white/10 backdrop-blur-sm rounded p-1 text-xs text-white placeholder:text-white/60"
                                             placeholder={question.placeholder_text}
                                             disabled
