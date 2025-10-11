@@ -67,6 +67,84 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
     }
   }, [open, companyId]);
 
+  // Real-time lyssning för företagsprofil
+  React.useEffect(() => {
+    if (!open || !companyId) return;
+
+    const profileChannel = supabase
+      .channel(`profile-dialog-${companyId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `user_id=eq.${companyId}`
+        },
+        (payload) => {
+          console.log('Profile updated in dialog:', payload);
+          setCompany(payload.new as CompanyProfile);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(profileChannel);
+    };
+  }, [open, companyId]);
+
+  // Real-time lyssning för recensioner
+  React.useEffect(() => {
+    if (!open || !companyId) return;
+
+    const reviewsChannel = supabase
+      .channel(`reviews-dialog-${companyId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'company_reviews',
+          filter: `company_id=eq.${companyId}`
+        },
+        () => {
+          console.log('New review added in dialog');
+          fetchReviews();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'company_reviews',
+          filter: `company_id=eq.${companyId}`
+        },
+        () => {
+          console.log('Review updated in dialog');
+          fetchReviews();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'company_reviews',
+          filter: `company_id=eq.${companyId}`
+        },
+        () => {
+          console.log('Review deleted in dialog');
+          fetchReviews();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(reviewsChannel);
+    };
+  }, [open, companyId]);
+
   const getCurrentUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     setCurrentUserId(user?.id || null);

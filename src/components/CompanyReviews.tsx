@@ -56,6 +56,84 @@ const CompanyReviews = () => {
     }
   }, [user?.id]);
 
+  // Real-time lyssning för företagsprofil
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const profileChannel = supabase
+      .channel('profile-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Profile updated:', payload);
+          setCompany(payload.new as CompanyProfile);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(profileChannel);
+    };
+  }, [user?.id]);
+
+  // Real-time lyssning för recensioner
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const reviewsChannel = supabase
+      .channel('reviews-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'company_reviews',
+          filter: `company_id=eq.${user.id}`
+        },
+        () => {
+          console.log('New review added');
+          fetchReviews();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'company_reviews',
+          filter: `company_id=eq.${user.id}`
+        },
+        () => {
+          console.log('Review updated');
+          fetchReviews();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'company_reviews',
+          filter: `company_id=eq.${user.id}`
+        },
+        () => {
+          console.log('Review deleted');
+          fetchReviews();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(reviewsChannel);
+    };
+  }, [user?.id]);
+
   const fetchCompanyData = async () => {
     if (!user?.id) return;
 
