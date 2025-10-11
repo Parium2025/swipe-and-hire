@@ -2307,15 +2307,11 @@ const MobileJobWizard = ({
                                   </h4>
                                   
                                   <div className="space-y-2">
-                                    {customQuestions.slice(0, 3).map((question, index) => (
+                                    {customQuestions.map((question, index) => (
                                       <div key={question.id || index} className="space-y-1">
                                         <label className="text-xs text-white flex items-start">
-                                          <span className="mr-1 text-secondary font-medium">Q{index + 1}.</span>
                                           <span className="flex-1 leading-tight">
-                                            {question.question_text.length > 40 ? 
-                                              question.question_text.substring(0, 40) + '...' : 
-                                              question.question_text
-                                            }
+                                            {question.question_text}
                                             {question.is_required && <span className="text-red-400 ml-1">*</span>}
                                           </span>
                                         </label>
@@ -2333,29 +2329,26 @@ const MobileJobWizard = ({
                                         {question.question_type === 'yes_no' && (
                                           <div className="flex space-x-2">
                                             <div className="flex items-center space-x-1">
-                                              <input type="radio" className="w-2 h-2 accent-secondary" disabled />
-                                              <label className="text-xs text-white">Ja</label>
+                                              <input type="radio" className="w-2 h-2 accent-secondary cursor-pointer" />
+                                              <label className="text-xs text-white cursor-pointer">Ja</label>
                                             </div>
                                             <div className="flex items-center space-x-1">
-                                              <input type="radio" className="w-2 h-2 accent-secondary" disabled />
-                                              <label className="text-xs text-white">Nej</label>
+                                              <input type="radio" className="w-2 h-2 accent-secondary cursor-pointer" />
+                                              <label className="text-xs text-white cursor-pointer">Nej</label>
                                             </div>
                                           </div>
                                         )}
                                         
                                         {question.question_type === 'multiple_choice' && (
                                           <div className="space-y-1">
-                                            {question.options?.slice(0, 2).map((option, optIndex) => (
+                                            {question.options?.map((option, optIndex) => (
                                               <div key={optIndex} className="flex items-center space-x-1">
-                                                <input type="radio" className="w-2 h-2 accent-secondary" disabled />
-                                                <label className="text-xs text-white">
-                                                  {option.length > 20 ? option.substring(0, 20) + '...' : option}
+                                                <input type="checkbox" className="w-2 h-2 accent-secondary cursor-pointer" />
+                                                <label className="text-xs text-white cursor-pointer flex-1 leading-tight">
+                                                  {option}
                                                 </label>
                                               </div>
                                             ))}
-                                            {question.options && question.options.length > 2 && (
-                                              <div className="text-xs text-white/60">+ {question.options.length - 2} fler</div>
-                                            )}
                                           </div>
                                         )}
                                         
@@ -2382,12 +2375,6 @@ const MobileJobWizard = ({
                                         )}
                                       </div>
                                     ))}
-                                    
-                                    {customQuestions.length > 3 && (
-                                      <div className="text-xs text-white/60 text-center py-1">
-                                        + {customQuestions.length - 3} fler frågor...
-                                      </div>
-                                    )}
                                   </div>
                                 </div>
                               )}
