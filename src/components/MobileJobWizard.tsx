@@ -2361,40 +2361,67 @@ const MobileJobWizard = ({
                                             
                                             {question.question_type === 'yes_no' && (
                                               <div className="flex gap-2">
-                                                <button className="flex-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-2 py-1.5 text-xs text-white transition-colors">
+                                                <button 
+                                                  type="button"
+                                                  onClick={(e) => {
+                                                    const buttons = e.currentTarget.parentElement?.querySelectorAll('button');
+                                                    buttons?.forEach(btn => btn.classList.remove('bg-secondary', 'border-secondary'));
+                                                    e.currentTarget.classList.add('bg-secondary', 'border-secondary');
+                                                  }}
+                                                  className="flex-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-2 py-1.5 text-xs text-white transition-colors"
+                                                >
                                                   Ja
                                                 </button>
-                                                <button className="flex-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-2 py-1.5 text-xs text-white transition-colors">
+                                                <button 
+                                                  type="button"
+                                                  onClick={(e) => {
+                                                    const buttons = e.currentTarget.parentElement?.querySelectorAll('button');
+                                                    buttons?.forEach(btn => btn.classList.remove('bg-secondary', 'border-secondary'));
+                                                    e.currentTarget.classList.add('bg-secondary', 'border-secondary');
+                                                  }}
+                                                  className="flex-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-2 py-1.5 text-xs text-white transition-colors"
+                                                >
                                                   Nej
                                                 </button>
                                               </div>
                                             )}
                                             
                                             {question.question_type === 'multiple_choice' && (
-                                              <div className="relative">
-                                                <select
-                                                  multiple
-                                                  className="w-full border border-white/20 bg-white/10 backdrop-blur-sm rounded p-2 text-xs text-white appearance-none cursor-pointer max-h-32 overflow-y-auto"
-                                                  style={{
-                                                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-                                                    backgroundRepeat: 'no-repeat',
-                                                    backgroundPosition: 'right 0.5rem center',
-                                                    backgroundSize: '1rem'
-                                                  }}
-                                                >
-                                                  {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => (
-                                                    <option 
-                                                      key={optIndex} 
-                                                      value={option}
-                                                      className="py-1.5 px-2 hover:bg-white/20 checked:bg-secondary/30"
-                                                    >
+                                              <div className="space-y-1.5">
+                                                {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => (
+                                                  <div 
+                                                    key={optIndex} 
+                                                    className="flex items-center space-x-2 bg-white/5 hover:bg-white/10 border border-white/20 rounded-lg px-3 py-2 cursor-pointer transition-colors"
+                                                    onClick={(e) => {
+                                                      const checkbox = e.currentTarget.querySelector('input[type="checkbox"]') as HTMLInputElement;
+                                                      if (checkbox) {
+                                                        checkbox.checked = !checkbox.checked;
+                                                        if (checkbox.checked) {
+                                                          e.currentTarget.classList.add('bg-secondary/20', 'border-secondary');
+                                                        } else {
+                                                          e.currentTarget.classList.remove('bg-secondary/20', 'border-secondary');
+                                                        }
+                                                      }
+                                                    }}
+                                                  >
+                                                    <input 
+                                                      type="checkbox" 
+                                                      className="w-4 h-4 accent-secondary cursor-pointer rounded"
+                                                      onClick={(e) => e.stopPropagation()}
+                                                      onChange={(e) => {
+                                                        const parent = e.currentTarget.parentElement;
+                                                        if (e.currentTarget.checked) {
+                                                          parent?.classList.add('bg-secondary/20', 'border-secondary');
+                                                        } else {
+                                                          parent?.classList.remove('bg-secondary/20', 'border-secondary');
+                                                        }
+                                                      }}
+                                                    />
+                                                    <label className="text-sm text-white cursor-pointer flex-1 leading-tight">
                                                       {option}
-                                                    </option>
-                                                  ))}
-                                                </select>
-                                                <div className="text-xs text-white/60 mt-1">
-                                                  Håll Ctrl/Cmd för att välja flera
-                                                </div>
+                                                    </label>
+                                                  </div>
+                                                ))}
                                               </div>
                                             )}
                                             
