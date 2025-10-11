@@ -69,28 +69,27 @@ const Landing = () => {
         <img
           src={heroBackground}
           alt="Parium hero – kvinna håller telefonen i vänster hand"
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ objectPosition: '45% center' }}
+          className="absolute inset-0 w-full h-full object-cover object-center md:object-[60%_center] lg:object-[45%_center]"
           loading="eager"
         />
         {/* Overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/70 via-primary/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/80 via-primary/40 to-transparent md:from-primary/70 md:via-primary/20" />
         
         <div className="max-w-7xl mx-auto relative z-10 w-full">
           <div className="flex flex-col items-start text-left max-w-2xl">
             {/* Hero Content */}
-            <div className="space-y-8 animate-fade-in mb-12">
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
+            <div className="space-y-6 md:space-y-8 animate-fade-in mb-8 md:mb-12">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
                 Verktyget som matchar på riktigt
               </h1>
               
-              <p className="text-lg md:text-xl text-white leading-relaxed">
+              <p className="text-base md:text-lg lg:text-xl text-white leading-relaxed">
                 Vi förändrar hur människor och företag hittar varandra. Framtiden börjar med ett swipe.
               </p>
             </div>
 
             {/* Two Main CTAs */}
-            <div className="grid md:grid-cols-2 gap-3 w-full max-w-xl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-xl">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
