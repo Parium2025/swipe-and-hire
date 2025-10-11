@@ -139,7 +139,7 @@ const Landing = () => {
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Varför välja Parium?
             </h2>
-            <p className="text-white/70 text-lg max-w-2xl mx-auto">
+            <p className="text-white text-lg max-w-2xl mx-auto">
               Vi har byggt en plattform som gör rekrytering snabbt, enkelt och roligt
             </p>
           </motion.div>
