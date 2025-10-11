@@ -47,6 +47,7 @@ import { CSS } from '@dnd-kit/utilities';
 
 interface JobQuestion {
   id?: string;
+  template_id?: string; // Link to template for syncing updates
   question_text: string;
   question_type: 'text' | 'yes_no' | 'multiple_choice' | 'number' | 'date' | 'file' | 'range' | 'video';
   options?: string[];
@@ -709,9 +710,10 @@ const MobileJobWizard = ({
   };
   
   const useQuestionTemplate = async (template: any) => {
-    // Add template to questions
+    // Add template to questions with link to template
     const newQuestion: JobQuestion = {
       id: `temp_${Date.now()}`,
+      template_id: template.id, // Save template ID for syncing
       question_text: template.question_text,
       question_type: template.question_type,
       is_required: true,
@@ -741,6 +743,37 @@ const MobileJobWizard = ({
       setCustomQuestions(prev => 
         prev.map(q => q.id === editingQuestion.id ? editingQuestion : q)
       );
+      
+      // If question is linked to a template, update the template too
+      if (editingQuestion.template_id) {
+        try {
+          await supabase
+            .from('job_question_templates')
+            .update({
+              question_text: editingQuestion.question_text,
+              question_type: editingQuestion.question_type,
+              options: editingQuestion.options,
+              placeholder_text: editingQuestion.placeholder_text,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', editingQuestion.template_id);
+          
+          // Refresh templates to show updated version
+          await fetchQuestionTemplates();
+          
+          toast({
+            title: "Fråga uppdaterad",
+            description: "Mallen har också uppdaterats för framtida användning",
+          });
+        } catch (error) {
+          console.error('Error updating question template:', error);
+          toast({
+            title: "Kunde inte uppdatera mall",
+            description: "Frågan är uppdaterad men mallen kunde inte synkroniseras",
+            variant: "destructive",
+          });
+        }
+      }
     } else {
       // Add new question
       const newQuestion = {
@@ -752,7 +785,7 @@ const MobileJobWizard = ({
       
       // Save as template for future use
       try {
-        await supabase
+        const { data, error } = await supabase
           .from('job_question_templates')
           .insert({
             employer_id: user.id,
@@ -760,7 +793,18 @@ const MobileJobWizard = ({
             question_type: editingQuestion.question_type,
             options: editingQuestion.options,
             placeholder_text: editingQuestion.placeholder_text
-          });
+          })
+          .select()
+          .single();
+        
+        if (error) throw error;
+        
+        // Link the new question to its template
+        if (data) {
+          setCustomQuestions(prev => 
+            prev.map(q => q.id === newQuestion.id ? { ...q, template_id: data.id } : q)
+          );
+        }
         
         // Refresh templates
         await fetchQuestionTemplates();
