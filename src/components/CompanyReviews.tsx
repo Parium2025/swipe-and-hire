@@ -364,7 +364,7 @@ const CompanyReviews = () => {
             <div className="space-y-4 mt-6">
               {reviews.length === 0 ? (
                 <p className="text-center text-white py-8">
-                  Inga kommentarer än Var först med att dela dina erfarenheter
+                  Inga kommentarer än
                 </p>
               ) : (
                 reviews.map((review) => (
