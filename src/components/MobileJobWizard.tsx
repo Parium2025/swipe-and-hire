@@ -2127,7 +2127,7 @@ const MobileJobWizard = ({
                         <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
                           Obs, tryck här!
                         </div>
-                        <svg width="20" height="12" viewBox="0 0 48 28" className="text-primary">
+                        <svg width="20" height="12" viewBox="0 0 48 28" className="text-white">
                           <path d="M2 14 Q 24 0, 46 14" stroke="currentColor" strokeWidth="2" fill="none" markerEnd="url(#arrowheadRight)" />
                           <defs>
                             <marker id="arrowheadRight" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
