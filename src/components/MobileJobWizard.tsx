@@ -2122,15 +2122,15 @@ const MobileJobWizard = ({
                     <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px]">
                     {/* Tooltip framför mobilen som pekar på företagsnamnet */}
                     {showCompanyTooltip && showApplicationForm && (
-                      <div className="pointer-events-none absolute z-[999] top-10 -left-44 flex items-center gap-2">
-                        <div className="bg-primary text-primary-foreground text-sm px-4 py-2 rounded-lg shadow-2xl font-bold border-2 border-primary/40 whitespace-nowrap">
-                          Obs, här kan du trycka! 👆
+                      <div className="pointer-events-none absolute z-[999] top-8 -left-40 flex items-center gap-2">
+                        <div className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-md shadow-lg font-semibold border border-primary/40 whitespace-nowrap">
+                          Obs, här kan du trycka!
                         </div>
-                        <svg width="48" height="28" viewBox="0 0 48 28" className="text-primary">
-                          <path d="M2 14 Q 24 0, 46 14" stroke="currentColor" strokeWidth="3" fill="none" markerEnd="url(#arrowheadRight)" />
+                        <svg width="36" height="22" viewBox="0 0 48 28" className="text-primary">
+                          <path d="M2 14 Q 24 0, 46 14" stroke="currentColor" strokeWidth="2" fill="none" markerEnd="url(#arrowheadRight)" />
                           <defs>
-                            <marker id="arrowheadRight" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
-                              <polygon points="0 0, 10 5, 0 10" fill="currentColor" />
+                            <marker id="arrowheadRight" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+                              <polygon points="0 0, 8 4, 0 8" fill="currentColor" />
                             </marker>
                           </defs>
                         </svg>
