@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import * as React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -50,15 +50,15 @@ interface CompanyReview {
 
 export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyProfileDialogProps) {
   const { toast } = useToast();
-  const [company, setCompany] = useState<CompanyProfile | null>(null);
-  const [reviews, setReviews] = useState<CompanyReview[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [newComment, setNewComment] = useState("");
-  const [newRating, setNewRating] = useState(5);
-  const [submitting, setSubmitting] = useState(false);
-  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [company, setCompany] = React.useState<CompanyProfile | null>(null);
+  const [reviews, setReviews] = React.useState<CompanyReview[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [newComment, setNewComment] = React.useState("");
+  const [newRating, setNewRating] = React.useState(5);
+  const [submitting, setSubmitting] = React.useState(false);
+  const [isAnonymous, setIsAnonymous] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (open && companyId) {
       fetchCompanyData();
       fetchReviews();

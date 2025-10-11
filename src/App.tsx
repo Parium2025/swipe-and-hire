@@ -67,7 +67,6 @@ const App = () => {
                   <Route path="/payment" element={<Index />} />
                   <Route path="/dashboard" element={<Index />} />
                   <Route path="/job-application/:jobId" element={<JobApplication />} />
-                  <Route path="/company-profile" element={<Index />} />
                   <Route path="/reset-redirect" element={<ResetRedirect />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
