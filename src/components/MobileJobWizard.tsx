@@ -222,6 +222,7 @@ const MobileJobWizard = ({
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const [showQuestionTemplates, setShowQuestionTemplates] = useState(false);
   const [questionTemplates, setQuestionTemplates] = useState<JobQuestion[]>([]);
+  const [questionSearchTerm, setQuestionSearchTerm] = useState('');
   const [editingQuestion, setEditingQuestion] = useState<JobQuestion | null>(null);
   
   // Unsaved changes tracking
@@ -1830,7 +1831,10 @@ const MobileJobWizard = ({
                     <div className="flex items-center justify-between">
                       <h3 className="text-white font-medium text-lg">Välj fråga</h3>
                       <Button
-                        onClick={() => setShowQuestionTemplates(false)}
+                        onClick={() => {
+                          setShowQuestionTemplates(false);
+                          setQuestionSearchTerm('');
+                        }}
                         variant="ghost"
                         size="sm"
                         className="text-white/70 hover:text-white hover:bg-white/10"
@@ -1839,10 +1843,25 @@ const MobileJobWizard = ({
                       </Button>
                     </div>
 
+                    <div className="relative">
+                      <Input
+                        value={questionSearchTerm}
+                        onChange={(e) => setQuestionSearchTerm(e.target.value)}
+                        placeholder="Sök efter fråga..."
+                        className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
+                      />
+                    </div>
+
                     <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                      {questionTemplates.length > 0 ? (
+                      {questionTemplates.filter(template => 
+                        template.question_text.toLowerCase().includes(questionSearchTerm.toLowerCase())
+                      ).length > 0 ? (
                         <>
-                          {questionTemplates.map((template) => (
+                          {questionTemplates
+                            .filter(template => 
+                              template.question_text.toLowerCase().includes(questionSearchTerm.toLowerCase())
+                            )
+                            .map((template) => (
                             <button
                               key={template.id}
                               onClick={() => useQuestionTemplate(template)}
