@@ -26,6 +26,7 @@ interface JobTemplate {
   application_instructions?: string;
   category?: string;
   is_default: boolean;
+  questions?: any[];
 }
 
 interface CreateJobSimpleDialogProps {
@@ -65,12 +66,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         return;
       }
 
-      setTemplates(data || []);
+      setTemplates((data as any) || []);
       
       // Set default template if available and no title is set
       const defaultTemplate = data?.find(t => t.is_default);
       if (defaultTemplate && !jobTitle) {
-        setSelectedTemplate(defaultTemplate);
+        setSelectedTemplate(defaultTemplate as any);
         setJobTitle(defaultTemplate.title);
       }
     } catch (error) {
@@ -99,7 +100,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     
     const template = templates.find(t => t.id === templateId);
     if (template) {
-      setSelectedTemplate(template);
+      setSelectedTemplate(template as any);
       if (!jobTitle) {
         setJobTitle(template.title);
       }

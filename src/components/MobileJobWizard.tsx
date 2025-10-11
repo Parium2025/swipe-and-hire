@@ -74,6 +74,7 @@ interface JobTemplate {
   application_instructions?: string;
   category?: string;
   is_default: boolean;
+  questions?: JobQuestion[];
 }
 
 interface JobFormData {
@@ -497,8 +498,21 @@ const MobileJobWizard = ({
     if (user && open) {
       fetchProfile();
       fetchQuestionTemplates();
+      // Load questions from template if it's the default template
+      if (selectedTemplate?.is_default && selectedTemplate.questions) {
+        try {
+          const templateQuestions = selectedTemplate.questions as any[];
+          setCustomQuestions(templateQuestions.map((q: any, index: number) => ({
+            ...q,
+            id: `temp_${Date.now()}_${index}`,
+            order_index: index
+          })));
+        } catch (error) {
+          console.error('Error loading template questions:', error);
+        }
+      }
     }
-  }, [user, open]);
+  }, [user, open, selectedTemplate]);
   
   const fetchQuestionTemplates = async () => {
     if (!user) return;
@@ -1443,9 +1457,11 @@ const MobileJobWizard = ({
         category
       };
 
-      const { error } = await supabase
+      const { data: jobPost, error } = await supabase
         .from('job_postings')
-        .insert([jobData]);
+        .insert([jobData])
+        .select()
+        .single();
 
       if (error) {
         toast({
@@ -1456,12 +1472,59 @@ const MobileJobWizard = ({
         return;
       }
 
+      // Save questions to job_questions table if there are any
+      if (customQuestions.length > 0 && jobPost) {
+        const questionData = customQuestions.map(q => ({
+          job_id: jobPost.id,
+          question_text: q.question_text,
+          question_type: q.question_type,
+          options: q.options || null,
+          is_required: q.is_required,
+          order_index: q.order_index,
+          placeholder_text: q.placeholder_text || null,
+          min_value: q.min_value || null,
+          max_value: q.max_value || null
+        }));
+
+        const { error: questionsError } = await supabase
+          .from('job_questions')
+          .insert(questionData);
+
+        if (questionsError) {
+          console.error('Error saving questions:', questionsError);
+        }
+      }
+
+      // If using default template, update it with the questions for future use
+      if (selectedTemplate?.is_default && customQuestions.length > 0) {
+        const { error: templateError } = await supabase
+          .from('job_templates')
+          .update({ 
+            questions: customQuestions.map(q => ({
+              question_text: q.question_text,
+              question_type: q.question_type,
+              options: q.options || [],
+              is_required: q.is_required,
+              order_index: q.order_index,
+              placeholder_text: q.placeholder_text || null,
+              min_value: q.min_value || null,
+              max_value: q.max_value || null
+            }))
+          })
+          .eq('id', selectedTemplate.id);
+
+        if (templateError) {
+          console.error('Error updating template questions:', templateError);
+        }
+      }
+
       toast({
         title: "Jobbannons skapad!",
         description: "Din annons är nu publicerad och synlig för jobbsökare."
       });
 
       handleClose();
+      onJobCreated();
 
     } catch (error) {
       toast({

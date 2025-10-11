@@ -349,6 +349,7 @@ export type Database = {
           is_default: boolean
           location: string | null
           name: string
+          questions: Json | null
           requirements: string | null
           salary_max: number | null
           salary_min: number | null
@@ -368,6 +369,7 @@ export type Database = {
           is_default?: boolean
           location?: string | null
           name: string
+          questions?: Json | null
           requirements?: string | null
           salary_max?: number | null
           salary_min?: number | null
@@ -387,6 +389,7 @@ export type Database = {
           is_default?: boolean
           location?: string | null
           name?: string
+          questions?: Json | null
           requirements?: string | null
           salary_max?: number | null
           salary_min?: number | null

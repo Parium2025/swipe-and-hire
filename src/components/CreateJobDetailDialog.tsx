@@ -31,6 +31,7 @@ interface JobTemplate {
   application_instructions?: string;
   category?: string;
   is_default: boolean;
+  questions?: any[];
 }
 
 interface JobFormData {
