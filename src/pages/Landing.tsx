@@ -85,7 +85,7 @@ const Landing = () => {
               </h1>
               
               <p className="text-lg md:text-xl text-white leading-relaxed">
-                Vi förändrar hur människor och verktyg hittar varandra. Framtiden börjar med ett swipe.
+                Vi förändrar hur människor och företag hittar varandra. Framtiden börjar med ett swipe.
               </p>
             </div>
 
