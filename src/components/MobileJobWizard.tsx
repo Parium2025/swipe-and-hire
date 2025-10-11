@@ -2313,8 +2313,7 @@ const MobileJobWizard = ({
                               {/* Anpassade frågor med Parium styling */}
                               {customQuestions.length > 0 && (
                                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                                  <h4 className="text-xs font-semibold text-white mb-2 flex items-center">
-                                    <CheckSquare className="h-3 w-3 mr-1 text-secondary" />
+                                  <h4 className="text-xs font-semibold text-white mb-2">
                                     Anpassade frågor ({customQuestions.length})
                                   </h4>
                                   
@@ -2333,7 +2332,6 @@ const MobileJobWizard = ({
                                             className="w-full border border-white/20 bg-white/10 backdrop-blur-sm rounded p-1 text-xs text-white placeholder:text-white/60 resize-none"
                                             placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                             rows={2}
-                                            disabled
                                           />
                                         )}
                                         
@@ -2349,21 +2347,36 @@ const MobileJobWizard = ({
                                         )}
                                         
                                         {question.question_type === 'multiple_choice' && (
-                                          <div className="space-y-1">
-                                            {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => (
-                                              <div key={optIndex} className="flex items-center space-x-1">
-                                                <input type="checkbox" className="w-2.5 h-2.5 accent-secondary cursor-pointer rounded" />
-                                                <label className="text-xs text-white cursor-pointer flex-1 leading-tight">
+                                          <div className="relative">
+                                            <select
+                                              multiple
+                                              className="w-full border border-white/20 bg-white/10 backdrop-blur-sm rounded p-2 text-xs text-white appearance-none cursor-pointer max-h-32 overflow-y-auto"
+                                              style={{
+                                                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                                                backgroundRepeat: 'no-repeat',
+                                                backgroundPosition: 'right 0.5rem center',
+                                                backgroundSize: '1rem'
+                                              }}
+                                            >
+                                              {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => (
+                                                <option 
+                                                  key={optIndex} 
+                                                  value={option}
+                                                  className="py-1.5 px-2 hover:bg-white/20 checked:bg-secondary/30"
+                                                >
                                                   {option}
-                                                </label>
-                                              </div>
-                                            ))}
+                                                </option>
+                                              ))}
+                                            </select>
+                                            <div className="text-xs text-white/60 mt-1">
+                                              Håll Ctrl/Cmd för att välja flera
+                                            </div>
                                           </div>
                                         )}
                                         
                                         {question.question_type === 'number' && (
                                           <div className="space-y-2">
-                                            <div className="text-center text-base font-semibold text-white">
+                                            <div className="text-center text-base font-semibold text-white" id={`number-value-${index}`}>
                                               {question.min_value ?? 0}
                                             </div>
                                             <input
@@ -2372,7 +2385,10 @@ const MobileJobWizard = ({
                                               max={question.max_value ?? 100}
                                               defaultValue={question.min_value ?? 0}
                                               className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-secondary [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
-                                              disabled
+                                              onChange={(e) => {
+                                                const valueDisplay = document.getElementById(`number-value-${index}`);
+                                                if (valueDisplay) valueDisplay.textContent = e.target.value;
+                                              }}
                                             />
                                           </div>
                                         )}
