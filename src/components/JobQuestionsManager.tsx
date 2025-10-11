@@ -55,6 +55,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
       const formattedQuestions = data.map(q => ({
         id: q.id,
         question_text: q.question_text,
+        description: q.description || '',
         question_type: q.question_type as JobQuestion['question_type'],
         options: q.options ? JSON.parse(q.options as string) : undefined,
         is_required: q.is_required,
@@ -152,6 +153,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
         .map(q => ({
           job_id: jobId,
           question_text: q.question_text.trim(),
+          description: q.description?.trim() || null,
           question_type: q.question_type,
           options: q.options && q.options.length > 0 ? JSON.stringify(q.options.filter(o => o && o.trim().length > 0)) : null,
           is_required: q.is_required,
