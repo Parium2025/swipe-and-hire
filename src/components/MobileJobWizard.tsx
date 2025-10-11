@@ -2131,7 +2131,7 @@ const MobileJobWizard = ({
                            <div 
                              className="px-2 py-2 overflow-y-auto relative z-10 custom-scrollbar flex-1"
                            >
-                             <div className="space-y-3 pb-16">{/* Extra padding för scrollning */}
+                             <div className="space-y-3 pb-6">{/* Mindre botten-padding för tajtare layout */}
                               
                                {/* Företagsinformation */}
                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
@@ -2487,7 +2487,7 @@ const MobileJobWizard = ({
                               })()}
 
                               {/* Extra space for scrolling */}
-                              <div className="h-4"></div>
+                              <div className="h-2"></div>
                             </div>
                           </div>
                         </div>
