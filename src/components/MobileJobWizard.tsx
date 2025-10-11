@@ -1720,7 +1720,7 @@ const MobileJobWizard = ({
                               onClick={addOption}
                               variant="outline"
                               size="sm"
-                              className="border-white/40 text-white hover:border-white/60 hover:bg-transparent"
+                              className="border-white/40 text-white bg-transparent hover:bg-transparent hover:border-white/60"
                             >
                               <Plus className="h-4 w-4 mr-1" />
                               Lägg till alternativ
