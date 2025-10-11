@@ -355,16 +355,16 @@ const CompanyReviews = () => {
 
             {/* Informationstext för arbetsgivare */}
             <div className="bg-white/5 p-4 rounded-lg">
-              <p className="text-sm text-white/70 text-center italic">
-                (Här lämnar jobbsökarna kommentarer om de vill samt betyg.)
+              <p className="text-sm text-white text-center italic">
+                (Här lämnar jobbsökarna kommentarer om de vill samt betyg)
               </p>
             </div>
 
             {/* Lista med kommentarer */}
             <div className="space-y-4 mt-6">
               {reviews.length === 0 ? (
-                <p className="text-center text-white/70 py-8">
-                  Inga kommentarer än. Var först med att dela dina erfarenheter!
+                <p className="text-center text-white py-8">
+                  Inga kommentarer än Var först med att dela dina erfarenheter
                 </p>
               ) : (
                 reviews.map((review) => (
