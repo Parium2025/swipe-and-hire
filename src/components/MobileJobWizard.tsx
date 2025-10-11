@@ -1687,7 +1687,7 @@ const MobileJobWizard = ({
                           <Input
                             value={editingQuestion?.question_text || ''}
                             onChange={(e) => updateQuestionField('question_text', e.target.value)}
-                            placeholder="T.ex. Vilken tjänst söker du?"
+                            placeholder="T.ex. Vilka behörigheter har du?"
                             className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                           />
                         </div>
@@ -1718,9 +1718,9 @@ const MobileJobWizard = ({
                             ))}
                             <Button
                               onClick={addOption}
-                              variant="outline"
+                              variant="ghost"
                               size="sm"
-                              className="border-white/20 text-white hover:bg-white/10"
+                              className="text-white hover:text-white"
                             >
                               <Plus className="h-4 w-4 mr-1" />
                               Lägg till alternativ
