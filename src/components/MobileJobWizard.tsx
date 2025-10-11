@@ -765,9 +765,7 @@ const MobileJobWizard = ({
     { value: 'text', label: 'Text' },
     { value: 'yes_no', label: 'Ja/Nej' },
     { value: 'multiple_choice', label: 'Flervalsval' },
-    { value: 'number', label: 'Siffra' },
-    { value: 'date', label: 'Datum' },
-    { value: 'range', label: 'Intervall' }
+    { value: 'number', label: 'Siffra' }
   ];
 
   // Salary type options
@@ -1555,9 +1553,6 @@ const MobileJobWizard = ({
                                           question.question_type === 'yes_no' ? 'Ja/Nej' :
                                           question.question_type === 'multiple_choice' ? 'Flervalsval' :
                                           question.question_type === 'number' ? 'Siffra' :
-                                          question.question_type === 'date' ? 'Datum' :
-                                          question.question_type === 'file' ? 'Fil' :
-                                          question.question_type === 'range' ? 'Intervall' :
                                           question.question_type === 'video' ? 'Video' : question.question_type}
                                     {question.is_required && ' • Obligatorisk'}
                                   </div>
