@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      company_reviews: {
+        Row: {
+          comment: string
+          company_id: string
+          created_at: string
+          id: string
+          is_anonymous: boolean
+          rating: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          company_id: string
+          created_at?: string
+          id?: string
+          is_anonymous?: boolean
+          rating?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_anonymous?: boolean
+          rating?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       email_confirmations: {
         Row: {
           confirmed_at: string | null

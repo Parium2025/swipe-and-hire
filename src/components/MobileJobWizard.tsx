@@ -20,6 +20,7 @@ import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Bu
 import { Switch } from '@/components/ui/switch';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
+import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
 import ImageEditor from '@/components/ImageEditor';
@@ -230,6 +231,9 @@ const MobileJobWizard = ({
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingClose, setPendingClose] = useState(false);
   const [initialFormData, setInitialFormData] = useState<JobFormData | null>(null);
+  
+  // Company profile dialog
+  const [showCompanyProfile, setShowCompanyProfile] = useState(false);
 
   // Utility function to truncate text for better display
   const truncateText = (text: string, maxLength: number = 35) => {
@@ -2148,10 +2152,15 @@ const MobileJobWizard = ({
                                      <div className="w-4 h-4 bg-primary/20 rounded-full mr-1 flex items-center justify-center">
                                        <Building2 className="h-2 w-2 text-primary-foreground" />
                                      </div>
-                                   )}
-                                   <div className="text-xs font-bold text-white">{profile?.company_name || 'Företagsnamn'}</div>
+                                    )}
+                                    <button 
+                                      onClick={() => setShowCompanyProfile(true)}
+                                      className="text-xs font-bold text-white hover:text-primary transition-colors cursor-pointer"
+                                    >
+                                      {profile?.company_name || 'Företagsnamn'}
+                                    </button>
+                                  </div>
                                  </div>
-                                </div>
 
                                 {/* Yrke */}
                                 {formData.occupation && (
@@ -2513,7 +2522,12 @@ const MobileJobWizard = ({
                 const textSizes = getSmartTextSizes();
                 return (
                   <>
-                    <div className={`${textSizes.company} text-white font-medium mb-1`}>{profile?.company_name || 'Företag'}</div>
+                    <button 
+                      onClick={() => setShowCompanyProfile(true)}
+                      className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary transition-colors cursor-pointer text-left`}
+                    >
+                      {profile?.company_name || 'Företag'}
+                    </button>
                     <h3 className={`${textSizes.title} text-white font-bold leading-tight mb-1`}>{getDisplayTitle()}</h3>
                     <div className={`${textSizes.meta} text-white`}>
                       {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
@@ -2672,6 +2686,15 @@ const MobileJobWizard = ({
           onConfirm={handleConfirmClose}
           onCancel={handleCancelClose}
         />
+
+        {/* Company Profile Dialog */}
+        {user?.id && (
+          <CompanyProfileDialog
+            open={showCompanyProfile}
+            onOpenChange={setShowCompanyProfile}
+            companyId={user.id}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
