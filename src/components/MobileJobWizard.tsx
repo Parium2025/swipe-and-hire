@@ -1643,8 +1643,21 @@ const MobileJobWizard = ({
                         </div>
                       </div>
 
-                      {/* Question Text - only show after question type is selected */}
-                      {editingQuestion?.question_type && (
+                      {/* Rubrik - show for text, yes_no, and number types */}
+                      {editingQuestion?.question_type && ['text', 'yes_no', 'number'].includes(editingQuestion.question_type) && (
+                        <div className="space-y-2">
+                          <Label className="text-white font-medium">Rubrik *</Label>
+                          <Input
+                            value={editingQuestion?.question_text || ''}
+                            onChange={(e) => updateQuestionField('question_text', e.target.value)}
+                            placeholder="T.ex. Namn, Ålder, E-post..."
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                          />
+                        </div>
+                      )}
+
+                      {/* Question Text for multiple choice */}
+                      {editingQuestion?.question_type === 'multiple_choice' && (
                         <div className="space-y-2">
                           <Label className="text-white font-medium">Frågetext *</Label>
                           <Textarea
