@@ -28,6 +28,9 @@ interface JobQuestionsManagerProps {
 const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerProps) => {
   const [questions, setQuestions] = useState<JobQuestion[]>([]);
   const [loading, setLoading] = useState(false);
+  const [addingQuestion, setAddingQuestion] = useState(false);
+  const [selectedType, setSelectedType] = useState<JobQuestion['question_type'] | null>(null);
+  const [questionDraft, setQuestionDraft] = useState<JobQuestion | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -64,13 +67,35 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
   };
 
   const addQuestion = () => {
-    const newQuestion: JobQuestion = {
+    setAddingQuestion(true);
+    setSelectedType(null);
+    setQuestionDraft(null);
+  };
+
+  const selectQuestionType = (type: JobQuestion['question_type']) => {
+    setSelectedType(type);
+    setQuestionDraft({
       question_text: '',
-      question_type: 'text',
+      question_type: type,
       is_required: false,
-      order_index: questions.length
-    };
-    setQuestions([...questions, newQuestion]);
+      order_index: questions.length,
+      options: type === 'multiple_choice' ? [''] : undefined
+    });
+  };
+
+  const confirmAddQuestion = () => {
+    if (questionDraft && questionDraft.question_text.trim()) {
+      setQuestions([...questions, questionDraft]);
+      setAddingQuestion(false);
+      setSelectedType(null);
+      setQuestionDraft(null);
+    }
+  };
+
+  const cancelAddQuestion = () => {
+    setAddingQuestion(false);
+    setSelectedType(null);
+    setQuestionDraft(null);
   };
 
   const updateQuestion = (index: number, updates: Partial<JobQuestion>) => {
@@ -193,6 +218,143 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
           Lägg till fråga
         </Button>
       </div>
+
+      {/* Steg 1: Välj frågetyp */}
+      {addingQuestion && !selectedType && (
+        <Card className="border-2 border-primary/50 bg-card/50">
+          <CardContent className="pt-6">
+            <h4 className="font-semibold mb-4">Välj typ av fråga</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Button
+                variant="outline"
+                className="h-auto py-4 flex flex-col items-start gap-1 hover:border-primary"
+                onClick={() => selectQuestionType('text')}
+              >
+                <span className="font-semibold">Textfråga</span>
+                <span className="text-xs text-muted-foreground">Fri text som svar</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-auto py-4 flex flex-col items-start gap-1 hover:border-primary"
+                onClick={() => selectQuestionType('yes_no')}
+              >
+                <span className="font-semibold">Ja/Nej-fråga</span>
+                <span className="text-xs text-muted-foreground">Enkelt ja eller nej</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-auto py-4 flex flex-col items-start gap-1 hover:border-primary"
+                onClick={() => selectQuestionType('multiple_choice')}
+              >
+                <span className="font-semibold">Flervalsalternativ</span>
+                <span className="text-xs text-muted-foreground">Välj bland alternativ</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-auto py-4 flex flex-col items-start gap-1 hover:border-primary"
+                onClick={() => selectQuestionType('video')}
+              >
+                <span className="font-semibold">Videosvar</span>
+                <span className="text-xs text-muted-foreground">Spela in ett svar</span>
+              </Button>
+            </div>
+            <div className="flex justify-end mt-4">
+              <Button variant="outline" onClick={cancelAddQuestion}>
+                Avbryt
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Steg 2: Fyll i frågedetaljer */}
+      {addingQuestion && selectedType && questionDraft && (
+        <Card className="border-2 border-primary/50 bg-card/50">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">{getQuestionTypeLabel(selectedType)}</Badge>
+              <div className="flex-1" />
+              <div className="flex items-center gap-2">
+                <Label htmlFor="draft-required" className="text-sm">
+                  Obligatorisk
+                </Label>
+                <Switch
+                  id="draft-required"
+                  checked={questionDraft.is_required}
+                  onCheckedChange={(checked) => setQuestionDraft({ ...questionDraft, is_required: checked })}
+                />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="space-y-2">
+              <Label>Rubrik *</Label>
+              <Input
+                value={questionDraft.question_text}
+                onChange={(e) => setQuestionDraft({ ...questionDraft, question_text: e.target.value })}
+                placeholder="Skriv din fråga här..."
+              />
+            </div>
+
+            {selectedType === 'multiple_choice' && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Svarsalternativ</Label>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const options = questionDraft.options || [];
+                      setQuestionDraft({ ...questionDraft, options: [...options, ''] });
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Lägg till alternativ
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {(questionDraft.options || []).map((option, optionIndex) => (
+                    <div key={optionIndex} className="flex items-center gap-2">
+                      <Input
+                        value={option}
+                        onChange={(e) => {
+                          const options = [...(questionDraft.options || [])];
+                          options[optionIndex] = e.target.value;
+                          setQuestionDraft({ ...questionDraft, options });
+                        }}
+                        placeholder={`Alternativ ${optionIndex + 1}`}
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const options = (questionDraft.options || []).filter((_, i) => i !== optionIndex);
+                          setQuestionDraft({ ...questionDraft, options });
+                        }}
+                        className="text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={cancelAddQuestion}>
+                Avbryt
+              </Button>
+              <Button 
+                onClick={confirmAddQuestion}
+                disabled={!questionDraft.question_text.trim()}
+              >
+                Lägg till fråga
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {questions.map((question, index) => (
         <Card key={index}>
