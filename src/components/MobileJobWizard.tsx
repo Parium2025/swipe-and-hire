@@ -16,7 +16,7 @@ import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES, getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users, GripVertical } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
@@ -27,6 +27,23 @@ import { createSignedUrl } from '@/utils/storageUtils';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import useSmartTextFit from '@/hooks/useSmartTextFit';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface JobQuestion {
   id?: string;
@@ -89,7 +106,93 @@ interface MobileJobWizardProps {
   onJobCreated: () => void;
 }
 
-const MobileJobWizard = ({ 
+// Sortable Question Item Component
+interface SortableQuestionItemProps {
+  question: JobQuestion;
+  onEdit: (question: JobQuestion) => void;
+  onDelete: (id: string) => void;
+}
+
+const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQuestionItemProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: question.id! });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="bg-white/5 rounded-lg p-4 border border-white/20"
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex items-start gap-3 flex-1">
+          {/* Drag handle */}
+          <div
+            {...attributes}
+            {...listeners}
+            className="text-white/40 hover:text-white/70 cursor-grab active:cursor-grabbing pt-1 touch-none"
+          >
+            <GripVertical className="h-5 w-5" />
+          </div>
+          
+          <div className="flex-1">
+            <div className="text-white font-medium text-sm mb-1">
+              {question.question_text || 'Ingen frågetext'}
+            </div>
+            <div className="text-white/60 text-xs mb-2">
+              Typ: {question.question_type === 'text' ? 'Text' : 
+                    question.question_type === 'yes_no' ? 'Ja/Nej' :
+                    question.question_type === 'multiple_choice' ? 'Flervalsval' :
+                    question.question_type === 'number' ? 'Siffra' :
+                    question.question_type === 'date' ? 'Datum' :
+                    question.question_type === 'file' ? 'Fil' :
+                    question.question_type === 'range' ? 'Intervall' :
+                    question.question_type === 'video' ? 'Video' : question.question_type}
+              {question.is_required && ' • Obligatorisk'}
+            </div>
+            {question.question_type === 'multiple_choice' && question.options && (
+              <div className="text-white/50 text-xs">
+                Alternativ: {question.options.filter(o => o.trim()).join(', ')}
+              </div>
+            )}
+          </div>
+        </div>
+        
+        <div className="flex items-center space-x-2 ml-4">
+          <Button
+            onClick={() => onEdit(question)}
+            variant="ghost"
+            size="sm"
+            className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
+          >
+            ✏️
+          </Button>
+          <Button
+            onClick={() => onDelete(question.id!)}
+            variant="ghost"
+            size="sm"
+            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 w-8 p-0"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const MobileJobWizard = ({
   open, 
   onOpenChange, 
   jobTitle, 
@@ -97,6 +200,18 @@ const MobileJobWizard = ({
   onJobCreated 
 }: MobileJobWizardProps) => {
   const [currentStep, setCurrentStep] = useState(0);
+  
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
   useEffect(() => {
     console.log('MobileJobWizard: open changed', open);
   }, [open]);
@@ -665,6 +780,25 @@ const MobileJobWizard = ({
   const editCustomQuestion = (question: JobQuestion) => {
     setEditingQuestion(question);
     setShowQuestionForm(true);
+  };
+  
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setCustomQuestions((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        
+        const reorderedItems = arrayMove(items, oldIndex, newIndex);
+        
+        // Update order_index for all items
+        return reorderedItems.map((item, index) => ({
+          ...item,
+          order_index: index
+        }));
+      });
+    }
   };
 
   const updateQuestionField = (field: keyof JobQuestion, value: any) => {
@@ -1622,53 +1756,27 @@ const MobileJobWizard = ({
                           Saknas något? Klicka på "Lägg till fråga" och skapa de frågor du vill att kandidaten ska svara på
                         </div>
                       ) : (
-                        <div className="space-y-3">
-                          {customQuestions.map((question, index) => (
-                            <div key={question.id} className="bg-white/5 rounded-lg p-4 border border-white/20">
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <div className="text-white font-medium text-sm mb-1">
-                                    {question.question_text || 'Ingen frågetext'}
-                                  </div>
-                                  <div className="text-white/60 text-xs mb-2">
-                                    Typ: {question.question_type === 'text' ? 'Text' : 
-                                          question.question_type === 'yes_no' ? 'Ja/Nej' :
-                                          question.question_type === 'multiple_choice' ? 'Flervalsval' :
-                                          question.question_type === 'number' ? 'Siffra' :
-                                          question.question_type === 'date' ? 'Datum' :
-                                          question.question_type === 'file' ? 'Fil' :
-                                          question.question_type === 'range' ? 'Intervall' :
-                                          question.question_type === 'video' ? 'Video' : question.question_type}
-                                    {question.is_required && ' • Obligatorisk'}
-                                  </div>
-                                  {question.question_type === 'multiple_choice' && question.options && (
-                                    <div className="text-white/50 text-xs">
-                                      Alternativ: {question.options.filter(o => o.trim()).join(', ')}
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="flex items-center space-x-2 ml-4">
-                                  <Button
-                                    onClick={() => editCustomQuestion(question)}
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
-                                  >
-                                    ✏️
-                                  </Button>
-                                  <Button
-                                    onClick={() => deleteCustomQuestion(question.id!)}
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 w-8 p-0"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </div>
+                        <DndContext
+                          sensors={sensors}
+                          collisionDetection={closestCenter}
+                          onDragEnd={handleDragEnd}
+                        >
+                          <SortableContext
+                            items={customQuestions.map(q => q.id!)}
+                            strategy={verticalListSortingStrategy}
+                          >
+                            <div className="space-y-3">
+                              {customQuestions.map((question) => (
+                                <SortableQuestionItem
+                                  key={question.id}
+                                  question={question}
+                                  onEdit={editCustomQuestion}
+                                  onDelete={deleteCustomQuestion}
+                                />
+                              ))}
                             </div>
-                          ))}
-                        </div>
+                          </SortableContext>
+                        </DndContext>
                       )}
                     </div>
                   </>
