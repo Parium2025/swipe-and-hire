@@ -1020,12 +1020,30 @@ const MobileJobWizard = ({
   const nextStep = () => {
     if (validateCurrentStep() && currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
+      // Scroll to top immediately when changing steps
+      setTimeout(() => {
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTo({
+            top: 0,
+            behavior: 'instant'
+          });
+        }
+      }, 0);
     }
   };
 
   const prevStep = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top immediately when changing steps
+      setTimeout(() => {
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTo({
+            top: 0,
+            behavior: 'instant'
+          });
+        }
+      }, 0);
     }
   };
 
@@ -1185,7 +1203,7 @@ const MobileJobWizard = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md h-[90vh] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none sm:rounded-xl overflow-y-auto">
+      <DialogContent className="max-w-md h-[90vh] max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none sm:rounded-xl overflow-hidden">
         <AnimatedBackground showBubbles={false} />
         <div className="flex flex-col h-full relative z-10">
           {/* Header */}
