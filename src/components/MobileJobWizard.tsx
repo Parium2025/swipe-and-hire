@@ -1644,13 +1644,37 @@ const MobileJobWizard = ({
                       </div>
 
                       {/* Rubrik - show for text, yes_no, and number types */}
-                      {editingQuestion?.question_type && ['text', 'yes_no', 'number'].includes(editingQuestion.question_type) && (
+                      {editingQuestion?.question_type === 'text' && (
                         <div className="space-y-2">
                           <Label className="text-white font-medium">Rubrik *</Label>
                           <Input
                             value={editingQuestion?.question_text || ''}
                             onChange={(e) => updateQuestionField('question_text', e.target.value)}
-                            placeholder="T.ex. Namn, Ålder, E-post..."
+                            placeholder="T.ex. Namn, E-post, Telefonnummer..."
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                          />
+                        </div>
+                      )}
+
+                      {editingQuestion?.question_type === 'yes_no' && (
+                        <div className="space-y-2">
+                          <Label className="text-white font-medium">Rubrik *</Label>
+                          <Input
+                            value={editingQuestion?.question_text || ''}
+                            onChange={(e) => updateQuestionField('question_text', e.target.value)}
+                            placeholder="T.ex. Har du körkort?, Kan du arbeta helger?..."
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                          />
+                        </div>
+                      )}
+
+                      {editingQuestion?.question_type === 'number' && (
+                        <div className="space-y-2">
+                          <Label className="text-white font-medium">Rubrik *</Label>
+                          <Input
+                            value={editingQuestion?.question_text || ''}
+                            onChange={(e) => updateQuestionField('question_text', e.target.value)}
+                            placeholder="T.ex. Ålder, Antal års erfarenhet, Antal anställda..."
                             className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                           />
                         </div>
