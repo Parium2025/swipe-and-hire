@@ -2319,12 +2319,11 @@ const MobileJobWizard = ({
                                   </h4>
                                   
                                   <div className="space-y-2">
-                                    {customQuestions.map((question, index) => (
+                                     {customQuestions.map((question, index) => (
                                       <div key={question.id || index} className="space-y-1">
                                         <label className="text-xs text-white flex items-start">
                                           <span className="flex-1 leading-tight">
                                             {question.question_text}
-                                            {question.is_required && <span className="text-red-400 ml-1">*</span>}
                                           </span>
                                         </label>
                                         
