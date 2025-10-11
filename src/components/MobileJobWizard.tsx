@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -969,17 +969,17 @@ const MobileJobWizard = ({
       )
     : remoteWorkOptions;
 
-  const handleWorkplacePostalCodeChange = (postalCode: string) => {
+  const handleWorkplacePostalCodeChange = useCallback((postalCode: string) => {
     handleInputChange('workplace_postal_code', postalCode);
-  };
+  }, []);
 
-  const handleWorkplaceLocationChange = (location: string) => {
+  const handleWorkplaceLocationChange = useCallback((location: string) => {
     setFormData(prev => ({
       ...prev,
       workplace_city: location,
       location: location // Auto-update main location field from postal code
     }));
-  };
+  }, []);
 
   const filteredCities = citySearchTerm.length > 0 ? filterCities(citySearchTerm) : [];
   const filteredOccupations = occupationSearchTerm.length > 0 ? searchOccupations(occupationSearchTerm) : [];

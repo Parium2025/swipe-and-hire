@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
@@ -25,12 +25,18 @@ const WorkplacePostalCodeSelector = ({
   const [foundLocation, setFoundLocation] = useState<PostalCodeResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isValid, setIsValid] = useState(false);
+  const [lastSuccessfulPostalCode, setLastSuccessfulPostalCode] = useState<string>('');
+
+  // Memoized validation status
+  const hasValidLocation = useMemo(
+    () => foundLocation !== null && isValid,
+    [foundLocation, isValid]
+  );
 
   // Report validation status to parent
   useEffect(() => {
-    const hasValidLocation = foundLocation !== null && isValid;
     onValidationChange?.(hasValidLocation);
-  }, [foundLocation, isValid, onValidationChange]);
+  }, [hasValidLocation, onValidationChange]);
 
   useEffect(() => {
     const fetchLocation = async () => {
@@ -39,6 +45,11 @@ const WorkplacePostalCodeSelector = ({
         const isValidFormat = isValidSwedishPostalCode(cleanedCode);
         setIsValid(isValidFormat);
         
+        // Om samma postnummer som förra gången, behåll det befintliga
+        if (cleanedCode === lastSuccessfulPostalCode && foundLocation) {
+          return;
+        }
+        
         if (isValidFormat && cleanedCode.length === 5) {
           setIsLoading(true);
           try {
@@ -46,38 +57,46 @@ const WorkplacePostalCodeSelector = ({
             setFoundLocation(location);
             
             if (location) {
+              setLastSuccessfulPostalCode(cleanedCode);
               // Skicka tillbaka bara orten (city)
               onLocationChange(location.city);
+            } else {
+              setLastSuccessfulPostalCode('');
             }
           } catch (error) {
             console.error('Error fetching postal code:', error);
             setFoundLocation(null);
+            setLastSuccessfulPostalCode('');
           } finally {
             setIsLoading(false);
           }
         } else {
           setFoundLocation(null);
-          onLocationChange(''); // Clear location when postal code is invalid
+          setLastSuccessfulPostalCode('');
+          if (!postalCodeValue.trim()) {
+            onLocationChange('');
+          }
           setIsLoading(false);
         }
       } else {
         setFoundLocation(null);
         setIsValid(false);
-        onLocationChange(''); // Clear location when postal code is empty
+        setLastSuccessfulPostalCode('');
+        onLocationChange('');
         setIsLoading(false);
       }
     };
 
-    // Debounce API-anrop
-    const timeoutId = setTimeout(fetchLocation, 500);
+    // Snabbare debounce för bättre användarupplevelse (200ms istället för 500ms)
+    const timeoutId = setTimeout(fetchLocation, 200);
     return () => clearTimeout(timeoutId);
-  }, [postalCodeValue, onLocationChange]);
+  }, [postalCodeValue, onLocationChange, lastSuccessfulPostalCode, foundLocation]);
 
-  const handlePostalCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePostalCodeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const formatted = formatPostalCodeInput(value);
     onPostalCodeChange(formatted);
-  };
+  }, [onPostalCodeChange]);
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -91,9 +110,11 @@ const WorkplacePostalCodeSelector = ({
               value={postalCodeValue}
               onChange={handlePostalCodeChange}
               placeholder="XXX XX"
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pl-10"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pl-10 transition-all duration-150"
               maxLength={6}
               autoComplete="off"
+              autoCorrect="off"
+              spellCheck="false"
             />
             {isLoading && (
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -117,15 +138,18 @@ const WorkplacePostalCodeSelector = ({
             value={cityValue}
             onChange={(e) => onLocationChange(e.target.value)}
             placeholder="Fylls i automatiskt"
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
+            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base transition-all duration-150"
             readOnly={foundLocation !== null}
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck="false"
           />
         </div>
       </div>
 
       {/* Resultat-kort när location hittas */}
       {foundLocation && isValid && !isLoading && (
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20 p-3">
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20 p-3 animate-fade-in">
           <div className="flex items-center space-x-2">
             <div className="flex-shrink-0">
               <div className="w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center">
