@@ -90,21 +90,21 @@ const Landing = () => {
             </div>
 
             {/* Two Main CTAs */}
-            <div className="grid md:grid-cols-2 gap-4 w-full">
+            <div className="grid md:grid-cols-2 gap-3 w-full max-w-xl">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
                 onClick={() => navigate('/auth')}
-                className="bg-white text-primary p-6 rounded-xl cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
+                className="bg-white text-primary p-4 rounded-lg cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xl font-bold">Jag söker jobb</h3>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-bold">Jag söker jobb</h3>
                   <div className="transform group-hover:translate-x-2 transition-transform">
                     →
                   </div>
                 </div>
-                <p className="text-primary/70 text-sm">
+                <p className="text-primary/70 text-xs">
                   Hitta ditt drömjobb snabbt och enkelt. Swipea dig till rätt match.
                 </p>
               </motion.div>
@@ -114,15 +114,15 @@ const Landing = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
                 onClick={() => navigate('/auth')}
-                className="bg-white text-primary p-6 rounded-xl cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
+                className="bg-white text-primary p-4 rounded-lg cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xl font-bold">Jag söker personal</h3>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-bold">Jag söker personal</h3>
                   <div className="transform group-hover:translate-x-2 transition-transform">
                     →
                   </div>
                 </div>
-                <p className="text-primary/70 text-sm">
+                <p className="text-primary/70 text-xs">
                   Hitta rätt kandidater effektivt. Swipea dig till perfekta medarbetare.
                 </p>
               </motion.div>
