@@ -1650,7 +1650,7 @@ const MobileJobWizard = ({
                           <Input
                             value={editingQuestion?.question_text || ''}
                             onChange={(e) => updateQuestionField('question_text', e.target.value)}
-                            placeholder="T.ex. Namn, E-post, Telefonnummer..."
+                            placeholder="T.ex. Har du jobbat på ett lager tidigare?, Beskriv dina erfarenheter..."
                             className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                           />
                         </div>
