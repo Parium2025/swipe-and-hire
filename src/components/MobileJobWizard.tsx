@@ -385,7 +385,7 @@ const MobileJobWizard = ({
         .from('job_question_templates')
         .select('*')
         .eq('employer_id', user.id)
-        .order('usage_count', { ascending: false });
+        .order('question_text', { ascending: true }); // Alphabetical order
       
       if (error) throw error;
       
