@@ -70,7 +70,7 @@ const Landing = () => {
           src={heroBackground}
           alt="Parium hero – kvinna håller telefonen i vänster hand"
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ objectPosition: '85% center', transform: 'scaleX(-1)' }}
+          style={{ objectPosition: '15% center', transform: 'scaleX(-1)' }}
           loading="eager"
         />
         {/* Overlay for better text readability */}
