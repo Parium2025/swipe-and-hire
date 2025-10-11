@@ -48,9 +48,18 @@ interface TemplateFormData {
   description: string;
   requirements: string;
   location: string;
+  occupation: string;
   salary_min: string;
   salary_max: string;
   employment_type: string;
+  salary_type: string;
+  positions_count: string;
+  work_location_type: string;
+  remote_work_possible: string;
+  workplace_name: string;
+  workplace_address: string;
+  workplace_postal_code: string;
+  workplace_city: string;
   work_schedule: string;
   contact_email: string;
   application_instructions: string;
@@ -148,6 +157,7 @@ const SortableQuestionItem = ({
 const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateTemplateWizardProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
   const [customQuestions, setCustomQuestions] = useState<JobQuestion[]>([]);
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<JobQuestion | null>(null);
@@ -155,6 +165,14 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
   const [showEmploymentTypeDropdown, setShowEmploymentTypeDropdown] = useState(false);
   const [questionTypeSearchTerm, setQuestionTypeSearchTerm] = useState('');
   const [showQuestionTypeDropdown, setShowQuestionTypeDropdown] = useState(false);
+  const [occupationSearchTerm, setOccupationSearchTerm] = useState('');
+  const [showOccupationDropdown, setShowOccupationDropdown] = useState(false);
+  const [salaryTypeSearchTerm, setSalaryTypeSearchTerm] = useState('');
+  const [showSalaryTypeDropdown, setShowSalaryTypeDropdown] = useState(false);
+  const [workLocationSearchTerm, setWorkLocationSearchTerm] = useState('');
+  const [showWorkLocationDropdown, setShowWorkLocationDropdown] = useState(false);
+  const [remoteWorkSearchTerm, setRemoteWorkSearchTerm] = useState('');
+  const [showRemoteWorkDropdown, setShowRemoteWorkDropdown] = useState(false);
   
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
@@ -177,21 +195,71 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
     description: '',
     requirements: '',
     location: '',
+    occupation: '',
     salary_min: '',
     salary_max: '',
     employment_type: '',
+    salary_type: '',
+    positions_count: '1',
+    work_location_type: 'på-plats',
+    remote_work_possible: 'nej',
+    workplace_name: '',
+    workplace_address: '',
+    workplace_postal_code: '',
+    workplace_city: '',
     work_schedule: '',
     contact_email: '',
     application_instructions: ''
   });
 
+  // Load user profile for company info
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      
+      setProfile(data);
+      
+      if (data?.company_name && !formData.workplace_name) {
+        setFormData(prev => ({
+          ...prev,
+          workplace_name: data.company_name
+        }));
+      }
+      
+      if (!formData.contact_email && user.email) {
+        setFormData(prev => ({
+          ...prev,
+          contact_email: user.email
+        }));
+      }
+    };
+
+    if (open) {
+      fetchProfile();
+    }
+  }, [user, open]);
+
   const steps = [
     {
-      title: 'Mallnamn & Grundinfo',
-      fields: ['name', 'title', 'description', 'employment_type']
+      title: "Mallnamn",
+      fields: ['name']
     },
     {
-      title: 'Ansökningsfrågor',
+      title: "Grundinfo",
+      fields: ['title', 'occupation', 'description', 'employment_type', 'positions_count']
+    },
+    {
+      title: "Var finns jobbet?",
+      fields: ['work_location_type', 'remote_work_possible', 'workplace_name', 'workplace_postal_code', 'workplace_city']
+    },
+    {
+      title: "Ansökningsfrågor",
       fields: []
     }
   ];
@@ -212,10 +280,22 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
 
   const validateCurrentStep = () => {
     if (currentStep === 0) {
-      return formData.name.trim() && 
-             formData.title.trim() && 
+      return formData.name.trim();
+    }
+    if (currentStep === 1) {
+      return formData.title.trim() && 
+             formData.occupation.trim() && 
              formData.description.trim() &&
-             formData.employment_type;
+             formData.employment_type &&
+             formData.salary_type &&
+             parseInt(formData.positions_count) > 0;
+    }
+    if (currentStep === 2) {
+      return formData.work_location_type && 
+             formData.remote_work_possible && 
+             formData.workplace_name.trim() && 
+             formData.workplace_postal_code.trim() && 
+             formData.workplace_city.trim();
     }
     return true;
   };
@@ -250,9 +330,18 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
       description: '',
       requirements: '',
       location: '',
+      occupation: '',
       salary_min: '',
       salary_max: '',
       employment_type: '',
+      salary_type: '',
+      positions_count: '1',
+      work_location_type: 'på-plats',
+      remote_work_possible: 'nej',
+      workplace_name: '',
+      workplace_address: '',
+      workplace_postal_code: '',
+      workplace_city: '',
       work_schedule: '',
       contact_email: '',
       application_instructions: ''
@@ -610,7 +699,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
               </div>
             )}
 
-            {/* Step 1: Grundinfo */}
+            {/* Step 0: Mallnamn */}
             {!showQuestionForm && currentStep === 0 && (
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -621,8 +710,16 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
                     placeholder="t.ex. Standard Lagerarbetare"
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
                   />
+                  <p className="text-white/60 text-sm">
+                    Detta namn hjälper dig att känna igen mallen senare
+                  </p>
                 </div>
+              </div>
+            )}
 
+            {/* Step 1: Grundinfo */}
+            {!showQuestionForm && currentStep === 1 && (
+              <div className="space-y-4">
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Jobbtitel *</Label>
                   <Input
@@ -631,6 +728,43 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
                     placeholder="t.ex. Lagerarbetare"
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white font-medium">Yrke *</Label>
+                  <div className="relative occupation-dropdown">
+                    <Input
+                      value={formData.occupation}
+                      onChange={(e) => {
+                        setOccupationSearchTerm(e.target.value);
+                        handleInputChange('occupation', e.target.value);
+                        setShowOccupationDropdown(e.target.value.length > 0);
+                      }}
+                      onFocus={() => setShowOccupationDropdown(occupationSearchTerm.length > 0)}
+                      placeholder="t.ex. Lagerarbetare"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10"
+                    />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    
+                    {showOccupationDropdown && (
+                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                        {searchOccupations(occupationSearchTerm).map((occupation, index) => (
+                          <button
+                            key={`${occupation}-${index}`}
+                            type="button"
+                            onClick={() => {
+                              handleInputChange('occupation', occupation);
+                              setOccupationSearchTerm(occupation);
+                              setShowOccupationDropdown(false);
+                            }}
+                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                          >
+                            <div className="font-medium">{occupation}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -664,25 +798,44 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium">Beskrivning *</Label>
-                  <Textarea
-                    value={formData.description}
-                    onChange={(e) => handleInputChange('description', e.target.value)}
-                    placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
-                    rows={4}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-white font-medium">Krav och kvalifikationer</Label>
-                  <Textarea
-                    value={formData.requirements}
-                    onChange={(e) => handleInputChange('requirements', e.target.value)}
-                    placeholder="Beskriv vilka krav och kvalifikationer som krävs..."
-                    rows={3}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                  />
+                  <Label className="text-white font-medium">Lönetyp *</Label>
+                  <div className="relative salary-type-dropdown">
+                    <Input
+                      value={salaryTypeSearchTerm || [
+                        { value: 'fast', label: 'Fast månads- vecko- eller timlön' },
+                        { value: 'rorlig', label: 'Rörlig ackord- eller provisionslön' },
+                        { value: 'fast-rorlig', label: 'Fast och rörlig lön' }
+                      ].find(t => t.value === formData.salary_type)?.label || ''}
+                      onClick={() => setShowSalaryTypeDropdown(!showSalaryTypeDropdown)}
+                      placeholder="Välj lönetyp"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer"
+                      readOnly
+                    />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    
+                    {showSalaryTypeDropdown && (
+                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                        {[
+                          { value: 'fast', label: 'Fast månads- vecko- eller timlön' },
+                          { value: 'rorlig', label: 'Rörlig ackord- eller provisionslön' },
+                          { value: 'fast-rorlig', label: 'Fast och rörlig lön' }
+                        ].map((type) => (
+                          <button
+                            key={type.value}
+                            type="button"
+                            onClick={() => {
+                              handleInputChange('salary_type', type.value);
+                              setSalaryTypeSearchTerm(type.label);
+                              setShowSalaryTypeDropdown(false);
+                            }}
+                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                          >
+                            <div className="font-medium">{type.label}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -709,6 +862,141 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
                 </div>
 
                 <div className="space-y-2">
+                  <Label className="text-white font-medium">Antal personer att rekrytera *</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={formData.positions_count}
+                    onChange={(e) => handleInputChange('positions_count', e.target.value)}
+                    placeholder="1"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white font-medium">Beskrivning *</Label>
+                  <Textarea
+                    value={formData.description}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
+                    rows={4}
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Var finns jobbet */}
+            {!showQuestionForm && currentStep === 2 && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-white font-medium">Arbetsplatstyp *</Label>
+                  <div className="relative work-location-dropdown">
+                    <Input
+                      value={workLocationSearchTerm || [
+                        { value: 'på-plats', label: 'På plats' },
+                        { value: 'hemarbete', label: 'Hemarbete' },
+                        { value: 'hybridarbete', label: 'Hybridarbete' },
+                        { value: 'fältarbete', label: 'Fältarbete/ute' },
+                        { value: 'utomlands', label: 'Utomlands' }
+                      ].find(t => t.value === formData.work_location_type)?.label || ''}
+                      onClick={() => setShowWorkLocationDropdown(!showWorkLocationDropdown)}
+                      placeholder="Välj arbetsplatstyp"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer"
+                      readOnly
+                    />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    
+                    {showWorkLocationDropdown && (
+                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                        {[
+                          { value: 'på-plats', label: 'På plats' },
+                          { value: 'hemarbete', label: 'Hemarbete' },
+                          { value: 'hybridarbete', label: 'Hybridarbete' },
+                          { value: 'fältarbete', label: 'Fältarbete/ute' },
+                          { value: 'utomlands', label: 'Utomlands' }
+                        ].map((type) => (
+                          <button
+                            key={type.value}
+                            type="button"
+                            onClick={() => {
+                              handleInputChange('work_location_type', type.value);
+                              setWorkLocationSearchTerm(type.label);
+                              setShowWorkLocationDropdown(false);
+                            }}
+                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                          >
+                            <div className="font-medium">{type.label}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white font-medium">Distansarbete möjligt *</Label>
+                  <div className="relative remote-work-dropdown">
+                    <Input
+                      value={remoteWorkSearchTerm || [
+                        { value: 'nej', label: 'Nej' },
+                        { value: 'delvis', label: 'Delvis' },
+                        { value: 'ja', label: 'Ja, helt' }
+                      ].find(t => t.value === formData.remote_work_possible)?.label || ''}
+                      onClick={() => setShowRemoteWorkDropdown(!showRemoteWorkDropdown)}
+                      placeholder="Välj alternativ"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer"
+                      readOnly
+                    />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    
+                    {showRemoteWorkDropdown && (
+                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                        {[
+                          { value: 'nej', label: 'Nej' },
+                          { value: 'delvis', label: 'Delvis' },
+                          { value: 'ja', label: 'Ja, helt' }
+                        ].map((type) => (
+                          <button
+                            key={type.value}
+                            type="button"
+                            onClick={() => {
+                              handleInputChange('remote_work_possible', type.value);
+                              setRemoteWorkSearchTerm(type.label);
+                              setShowRemoteWorkDropdown(false);
+                            }}
+                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                          >
+                            <div className="font-medium">{type.label}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white font-medium">Arbetsplatsnamn *</Label>
+                  <Input
+                    value={formData.workplace_name}
+                    onChange={(e) => handleInputChange('workplace_name', e.target.value)}
+                    placeholder="t.ex. IKEA Kungens Kurva"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white font-medium">Kontakt-email *</Label>
+                  <Input
+                    type="email"
+                    value={formData.contact_email}
+                    onChange={(e) => handleInputChange('contact_email', e.target.value)}
+                    placeholder="kontakt@företag.se"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <Label className="text-white font-medium">Arbetstider</Label>
                   <Input
                     value={formData.work_schedule}
@@ -719,20 +1007,20 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium">Kontakt-email</Label>
-                  <Input
-                    type="email"
-                    value={formData.contact_email}
-                    onChange={(e) => handleInputChange('contact_email', e.target.value)}
-                    placeholder="kontakt@företag.se"
+                  <Label className="text-white font-medium">Krav och kvalifikationer</Label>
+                  <Textarea
+                    value={formData.requirements}
+                    onChange={(e) => handleInputChange('requirements', e.target.value)}
+                    placeholder="Beskriv vilka krav och kvalifikationer som krävs..."
+                    rows={3}
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                   />
                 </div>
               </div>
             )}
 
-            {/* Step 2: Questions */}
-            {!showQuestionForm && currentStep === 1 && (
+            {/* Step 3: Ansökningsfrågor */}
+            {!showQuestionForm && currentStep === 3 && (
               <div className="space-y-4">
                 <div className="text-center py-4">
                   <p className="text-white/70 text-sm mb-4">
