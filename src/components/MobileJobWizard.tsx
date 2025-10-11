@@ -234,7 +234,7 @@ const MobileJobWizard = ({
   
   // Company profile dialog
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
-  const [showCompanyTooltip, setShowCompanyTooltip] = useState(true);
+  const [showCompanyTooltip, setShowCompanyTooltip] = useState(false);
 
   // Utility function to truncate text for better display
   const truncateText = (text: string, maxLength: number = 35) => {
@@ -564,6 +564,18 @@ const MobileJobWizard = ({
     
     setHasUnsavedChanges(hasChanges);
   }, [formData, customQuestions, initialFormData, open]);
+
+  // Show company tooltip when user reaches step 4 (preview)
+  useEffect(() => {
+    if (currentStep === 3 && open) {
+      setShowCompanyTooltip(true);
+      // Auto-hide after 8 seconds
+      const timer = setTimeout(() => {
+        setShowCompanyTooltip(false);
+      }, 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentStep, open]);
 
   // Resolve signed URL for uploaded job image preview
   useEffect(() => {
@@ -2142,11 +2154,11 @@ const MobileJobWizard = ({
                                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 relative">
                                   {/* Tooltip med pil */}
                                   {showCompanyTooltip && (
-                                    <div className="absolute -top-12 left-0 right-0 flex flex-col items-center animate-bounce z-50">
-                                      <div className="bg-primary/90 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded-md shadow-lg whitespace-nowrap font-medium">
+                                    <div className="absolute -top-16 left-0 right-0 flex flex-col items-center animate-bounce z-50">
+                                      <div className="bg-primary text-white text-xs px-3 py-2 rounded-lg shadow-2xl whitespace-nowrap font-bold border-2 border-white/30">
                                         Obs, här kan du trycka! 👆
                                       </div>
-                                      <ArrowDown className="h-4 w-4 text-primary/90 -mt-1" />
+                                      <ArrowDown className="h-5 w-5 text-primary -mt-1.5 drop-shadow-lg" />
                                     </div>
                                   )}
                                   
