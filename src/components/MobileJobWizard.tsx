@@ -1656,16 +1656,15 @@ const MobileJobWizard = ({
                         </div>
                       )}
 
-                      {/* Question Text for multiple choice */}
+                      {/* Rubrik for multiple choice */}
                       {editingQuestion?.question_type === 'multiple_choice' && (
                         <div className="space-y-2">
-                          <Label className="text-white font-medium">Frågetext *</Label>
-                          <Textarea
+                          <Label className="text-white font-medium">Rubrik *</Label>
+                          <Input
                             value={editingQuestion?.question_text || ''}
                             onChange={(e) => updateQuestionField('question_text', e.target.value)}
-                            placeholder="Skriv din fråga här..."
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 resize-none"
-                            rows={2}
+                            placeholder="T.ex. Vilken tjänst söker du?"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                           />
                         </div>
                       )}
@@ -1732,18 +1731,6 @@ const MobileJobWizard = ({
                         </div>
                       )}
 
-                      {/* Placeholder Text */}
-                      {['text', 'number'].includes(editingQuestion?.question_type || '') && (
-                        <div className="space-y-2">
-                          <Label className="text-white font-medium">Platshållartext</Label>
-                          <Input
-                            value={editingQuestion?.placeholder_text || ''}
-                            onChange={(e) => updateQuestionField('placeholder_text', e.target.value)}
-                            placeholder="Exempeltext som visas i fältet..."
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                          />
-                        </div>
-                      )}
 
                       {/* Required Toggle */}
                       <div className="flex items-center space-x-3">
