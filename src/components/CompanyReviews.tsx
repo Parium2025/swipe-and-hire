@@ -249,9 +249,9 @@ const CompanyReviews = () => {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="text-center">
         <h1 className="text-3xl font-bold text-white">Recensioner</h1>
-        <p className="text-white/90 mt-1">
+        <p className="text-white mt-1">
           Se hur ditt företag upplevs av jobbsökare
         </p>
       </div>
