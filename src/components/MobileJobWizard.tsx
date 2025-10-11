@@ -1475,7 +1475,7 @@ const MobileJobWizard = ({
                 Steg {currentStep + 1} av {steps.length}
               </div>
             </DialogHeader>
-            {!showQuestionTemplates && (
+            {!showQuestionTemplates && !showQuestionForm && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -2077,17 +2077,7 @@ const MobileJobWizard = ({
                       </div>
 
                       {/* Save Button */}
-                      <div className="flex justify-end space-x-2 pt-4">
-                        <Button
-                          onClick={() => {
-                            setShowQuestionForm(false);
-                            setEditingQuestion(null);
-                          }}
-                          variant="ghost"
-                          className="text-white/70 hover:text-white hover:bg-white/10"
-                        >
-                          Avbryt
-                        </Button>
+                      <div className="flex justify-end pt-4">
                         <Button
                           onClick={saveCustomQuestion}
                           disabled={!editingQuestion?.question_text?.trim()}
@@ -2528,7 +2518,7 @@ const MobileJobWizard = ({
           </div>
 
           {/* Navigation */}
-          {!showQuestionTemplates && (
+          {!showQuestionTemplates && !showQuestionForm && (
             <div className="flex items-center justify-between p-4 border-t border-white/20 flex-shrink-0">
               <Button
                 variant="ghost"
