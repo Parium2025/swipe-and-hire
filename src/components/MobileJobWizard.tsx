@@ -2123,8 +2123,41 @@ const MobileJobWizard = ({
                 <div className="flex flex-col items-center space-y-4">
                   <h3 className="text-white font-medium">Så kommer ansökningsformuläret att se ut på mobil:</h3>
                   
-                  {/* Phone mockup med ansökningsformulär */}
-                  <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px] mx-auto">
+                  {/* Phone mockup med ansökningsformulär + tooltip */}
+                  <div className="relative flex items-center justify-center gap-4">
+                    {/* Tooltip med böjd pil bredvid telefonen */}
+                    {showCompanyTooltip && (
+                      <div className="absolute left-[180px] top-[80px] flex items-center gap-2 animate-bounce z-50">
+                        <div className="relative">
+                          <svg width="40" height="60" viewBox="0 0 40 60" className="text-primary">
+                            <path 
+                              d="M 5 5 Q 20 30, 35 55" 
+                              stroke="currentColor" 
+                              strokeWidth="3" 
+                              fill="none"
+                              markerEnd="url(#arrowhead)"
+                            />
+                            <defs>
+                              <marker
+                                id="arrowhead"
+                                markerWidth="10"
+                                markerHeight="10"
+                                refX="5"
+                                refY="5"
+                                orient="auto"
+                              >
+                                <polygon points="0 0, 10 5, 0 10" fill="currentColor" />
+                              </marker>
+                            </defs>
+                          </svg>
+                        </div>
+                        <div className="bg-primary text-white text-xs px-3 py-2 rounded-lg shadow-2xl font-bold border-2 border-white/40 whitespace-nowrap">
+                          Obs, här kan du trycka! 👆
+                        </div>
+                      </div>
+                    )}
+                    
+                    <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px]">
                     {/* iPhone-stil telefonram */}
                     <div className="relative w-full h-full rounded-[2rem] bg-black p-1 shadow-2xl">
                       {/* Skärm */}
@@ -2150,19 +2183,9 @@ const MobileJobWizard = ({
                            >
                              <div className="space-y-3 pb-3">{/* Minimal botten-padding */}
                               
-                                {/* Företagsinformation */}
-                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 relative">
-                                  {/* Tooltip med pil */}
-                                  {showCompanyTooltip && (
-                                    <div className="absolute -top-[4.5rem] left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce z-[999] w-max">
-                                      <div className="bg-primary text-white text-[11px] px-2.5 py-1.5 rounded-md shadow-2xl font-bold border-2 border-white/40 whitespace-nowrap">
-                                        Obs, här kan du trycka! 👆
-                                      </div>
-                                      <ArrowDown className="h-4 w-4 text-primary -mt-1 drop-shadow-lg" strokeWidth={3} />
-                                    </div>
-                                  )}
-                                  
-                                  <div className="flex items-center">
+                                 {/* Företagsinformation */}
+                                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 relative">
+                                   <div className="flex items-center">
                                     {profile?.company_logo_url ? (
                                       <div className="w-4 h-4 rounded-full mr-1 overflow-hidden bg-white/10 flex items-center justify-center">
                                         <img 
@@ -2579,6 +2602,7 @@ const MobileJobWizard = ({
                       </div>
                       </div>
                     </section>
+                  </div>
                   
                   <p className="text-white text-sm text-center max-w-md">
                     Detta är hur ansökningsformuläret ser ut på mobilen. Jobbsökare har redan sina uppgifter ifyllda.
