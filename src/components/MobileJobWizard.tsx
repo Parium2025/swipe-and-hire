@@ -16,7 +16,7 @@ import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES, getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users, GripVertical } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users, GripVertical, ArrowDown } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
@@ -234,6 +234,7 @@ const MobileJobWizard = ({
   
   // Company profile dialog
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
+  const [showCompanyTooltip, setShowCompanyTooltip] = useState(true);
 
   // Utility function to truncate text for better display
   const truncateText = (text: string, maxLength: number = 35) => {
@@ -2137,30 +2138,43 @@ const MobileJobWizard = ({
                            >
                              <div className="space-y-3 pb-3">{/* Minimal botten-padding */}
                               
-                               {/* Företagsinformation */}
-                               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                                 <div className="flex items-center">
-                                   {profile?.company_logo_url ? (
-                                     <div className="w-4 h-4 rounded-full mr-1 overflow-hidden bg-white/10 flex items-center justify-center">
-                                       <img 
-                                         src={profile.company_logo_url} 
-                                         alt="Företagslogotyp" 
-                                         className="w-full h-full object-contain"
-                                       />
-                                     </div>
-                                   ) : (
-                                     <div className="w-4 h-4 bg-primary/20 rounded-full mr-1 flex items-center justify-center">
-                                       <Building2 className="h-2 w-2 text-primary-foreground" />
-                                     </div>
-                                    )}
-                                    <button 
-                                      onClick={() => setShowCompanyProfile(true)}
-                                      className="text-xs font-bold text-white hover:text-primary transition-colors cursor-pointer"
-                                    >
-                                      {profile?.company_name || 'Företagsnamn'}
-                                    </button>
+                                {/* Företagsinformation */}
+                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 relative">
+                                  {/* Tooltip med pil */}
+                                  {showCompanyTooltip && (
+                                    <div className="absolute -top-12 left-0 right-0 flex flex-col items-center animate-bounce z-50">
+                                      <div className="bg-primary/90 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded-md shadow-lg whitespace-nowrap font-medium">
+                                        Obs, här kan du trycka! 👆
+                                      </div>
+                                      <ArrowDown className="h-4 w-4 text-primary/90 -mt-1" />
+                                    </div>
+                                  )}
+                                  
+                                  <div className="flex items-center">
+                                    {profile?.company_logo_url ? (
+                                      <div className="w-4 h-4 rounded-full mr-1 overflow-hidden bg-white/10 flex items-center justify-center">
+                                        <img 
+                                          src={profile.company_logo_url} 
+                                          alt="Företagslogotyp" 
+                                          className="w-full h-full object-contain"
+                                        />
+                                      </div>
+                                    ) : (
+                                      <div className="w-4 h-4 bg-primary/20 rounded-full mr-1 flex items-center justify-center">
+                                        <Building2 className="h-2 w-2 text-primary-foreground" />
+                                      </div>
+                                     )}
+                                     <button 
+                                       onClick={() => {
+                                         setShowCompanyProfile(true);
+                                         setShowCompanyTooltip(false);
+                                       }}
+                                       className="text-xs font-bold text-white hover:text-primary transition-colors cursor-pointer relative"
+                                     >
+                                       {profile?.company_name || 'Företagsnamn'}
+                                     </button>
+                                   </div>
                                   </div>
-                                 </div>
 
                                 {/* Yrke */}
                                 {formData.occupation && (
