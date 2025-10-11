@@ -95,15 +95,15 @@ const Landing = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
                 onClick={() => navigate('/auth')}
-                className="bg-white text-primary p-4 rounded-lg cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
+                className="bg-white/10 backdrop-blur-sm border border-white/20 text-white p-4 rounded-lg cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-bold">Jag söker jobb</h3>
-                  <div className="transform group-hover:translate-x-2 transition-transform">
+                  <h3 className="text-lg font-bold text-white">Jag söker jobb</h3>
+                  <div className="transform group-hover:translate-x-2 transition-transform text-white">
                     →
                   </div>
                 </div>
-                <p className="text-primary/70 text-xs">
+                <p className="text-white text-xs">
                   Hitta ditt drömjobb snabbt och enkelt. Swipea dig till rätt match.
                 </p>
               </motion.div>
@@ -113,15 +113,15 @@ const Landing = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
                 onClick={() => navigate('/auth')}
-                className="bg-white text-primary p-4 rounded-lg cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
+                className="bg-white/10 backdrop-blur-sm border border-white/20 text-white p-4 rounded-lg cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-bold">Jag söker personal</h3>
-                  <div className="transform group-hover:translate-x-2 transition-transform">
+                  <h3 className="text-lg font-bold text-white">Jag söker personal</h3>
+                  <div className="transform group-hover:translate-x-2 transition-transform text-white">
                     →
                   </div>
                 </div>
-                <p className="text-primary/70 text-xs">
+                <p className="text-white text-xs">
                   Hitta rätt kandidater effektivt. Swipea dig till perfekta medarbetare.
                 </p>
               </motion.div>
