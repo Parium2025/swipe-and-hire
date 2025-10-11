@@ -27,7 +27,7 @@ import {
   CreditCard,
   HelpCircle,
   FileText,
-  Layout
+  Star
 } from "lucide-react";
 import { convertToSignedUrl } from "@/utils/storageUtils";
 
@@ -67,9 +67,9 @@ const businessNavItems = [
     group: "företag"
   },
   {
-    title: "Jobbmallar",
-    url: "/templates",
-    icon: Layout,
+    title: "Recensioner",
+    url: "/reviews",
+    icon: Star,
     group: "företag"
   },
   {

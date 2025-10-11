@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import JobTemplatesOverview from '@/components/JobTemplatesOverview';
+import CompanyReviews from '@/components/CompanyReviews';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -301,6 +302,8 @@ const Index = () => {
           return <EmployerProfile />;
         case '/company-profile':
           return <CompanyProfile />;
+        case '/reviews':
+          return <CompanyReviews />;
         case '/templates':
           return <JobTemplatesOverview />;
         case '/settings':
