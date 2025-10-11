@@ -334,11 +334,11 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[400px] max-h-[90vh] p-0">
+      <DialogContent className="sm:max-w-[400px] max-h-[90vh] p-0 rounded-[24px] overflow-hidden bg-parium-gradient text-white border-none shadow-none">
         <div className="relative h-[600px] flex flex-col">
           {/* Header */}
-          <div className="p-4 border-b bg-gradient-to-r from-primary/10 to-primary/5">
-            <div className="flex items-center justify-between">
+          <div className="p-4 border-b border-white/20 bg-background/10 rounded-t-[24px]">
+            <div className="flex items-center justify-between text-white">
               <div className="flex items-center gap-2">
                 <Heart className="h-5 w-5 text-primary" />
                 <span className="font-semibold text-sm">Ansökan</span>
@@ -347,7 +347,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
                 variant="ghost" 
                 size="sm" 
                 onClick={() => onOpenChange(false)}
-                className="text-muted-foreground"
+                className="text-white/80 hover:text-white hover:bg-white/10"
               >
                 ✕
               </Button>
