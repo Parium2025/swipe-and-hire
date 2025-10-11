@@ -10,6 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Loader2, ChevronDown, Search, X } from 'lucide-react';
 import MobileJobWizard from '@/components/MobileJobWizard';
+import CreateTemplateWizard from '@/components/CreateTemplateWizard';
 
 interface JobTemplate {
   id: string;
@@ -43,6 +44,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [templateMenuOpen, setTemplateMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showTemplateWizard, setShowTemplateWizard] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -250,11 +252,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                         <DropdownMenuItem
                           onClick={() => {
                             setTemplateMenuOpen(false);
-                            // TODO: Open create template dialog
-                            toast({
-                              title: "Kommer snart",
-                              description: "Funktionen för att skapa nya mallar kommer snart!",
-                            });
+                            setOpen(false);
+                            setShowTemplateWizard(true);
                           }}
                           className="px-4 py-3 text-white hover:bg-slate-700/80 cursor-pointer transition-colors border-b border-slate-600/20"
                         >
@@ -346,6 +345,19 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         jobTitle={jobTitle}
         selectedTemplate={selectedTemplate}
         onJobCreated={handleJobCreated}
+      />
+
+      {/* Create Template Wizard */}
+      <CreateTemplateWizard
+        open={showTemplateWizard}
+        onOpenChange={setShowTemplateWizard}
+        onTemplateCreated={() => {
+          fetchTemplates();
+          toast({
+            title: "Mall skapad!",
+            description: "Din nya mall är nu tillgänglig."
+          });
+        }}
       />
     </>
   );
