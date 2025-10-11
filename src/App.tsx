@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -27,7 +27,7 @@ const App = () => {
   const showHeader = false; // Header removed for cleaner UI
 
   const [animReady, setAnimReady] = useState(false);
-  React.useEffect(() => {
+  useEffect(() => {
     const start = () => requestAnimationFrame(() => requestAnimationFrame(() => setAnimReady(true)));
     if (document.readyState === 'complete') start();
     else window.addEventListener('load', start, { once: true } as any);
