@@ -1911,6 +1911,7 @@ const MobileJobWizard = ({
                         onClick={() => {
                           setShowQuestionForm(false);
                           setEditingQuestion(null);
+                          setShowQuestionTemplates(true);
                         }}
                         variant="ghost"
                         size="sm"
