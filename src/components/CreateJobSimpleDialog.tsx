@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -45,7 +45,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const fetchTemplates = async () => {
+  const fetchTemplates = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -82,7 +82,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     } finally {
       setLoadingTemplates(false);
     }
-  };
+  }, [user, jobTitle, toast]);
 
   useEffect(() => {
     if (open) {
@@ -90,7 +90,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     }
   }, [user, open]);
 
-  const handleTemplateSelect = (templateId: string, templateName: string) => {
+  const handleTemplateSelect = useCallback((templateId: string, templateName: string) => {
     if (templateId === 'none') {
       setSelectedTemplate(null);
       setTemplateMenuOpen(false);
@@ -105,14 +105,17 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       }
     }
     setTemplateMenuOpen(false);
-  };
+  }, [templates, jobTitle]);
 
   // Filter templates based on search term
-  const filteredTemplates = templates.filter(template =>
-    template.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredTemplates = useMemo(
+    () => templates.filter(template =>
+      template.name.toLowerCase().includes(searchTerm.toLowerCase())
+    ),
+    [templates, searchTerm]
   );
 
-  const handleCreateJob = () => {
+  const handleCreateJob = useCallback(() => {
     if (!jobTitle.trim()) {
       toast({
         title: "Titel krävs",
@@ -128,21 +131,24 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       selectedTemplateId: selectedTemplate?.id,
     });
     setOpen(false);
-    setShowDetailDialog(true);
-  };
+    // Använd requestAnimationFrame för smidigare transition
+    requestAnimationFrame(() => {
+      setShowDetailDialog(true);
+    });
+  }, [jobTitle, selectedTemplate, toast]);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setOpen(false);
     setJobTitle('');
     setSelectedTemplate(null);
-  };
+  }, []);
 
-  const handleJobCreated = () => {
+  const handleJobCreated = useCallback(() => {
     setShowDetailDialog(false);
     setJobTitle('');
     setSelectedTemplate(null);
     onJobCreated();
-  };
+  }, [onJobCreated]);
 
   return (
     <>
@@ -161,8 +167,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
             Skapa ny annons
           </Button>
         </DialogTrigger>
-          <DialogContent className="max-w-md bg-parium-gradient [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] border-none shadow-none sm:rounded-xl">
-          <Card className="bg-white/10 backdrop-blur-sm border-transparent border-0 ring-0 shadow-none relative w-full mt-16">
+          <DialogContent className="max-w-md bg-parium-gradient [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] border-none shadow-none sm:rounded-xl transition-all duration-200 ease-out animate-scale-in">
+          <Card className="bg-white/10 backdrop-blur-sm border-transparent border-0 ring-0 shadow-none relative w-full mt-16 transition-all duration-200">
             <CardHeader className="pb-4 pt-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white flex-1 text-center text-xl">
@@ -189,7 +195,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                   value={jobTitle}
                   onChange={(e) => setJobTitle(e.target.value)}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150"
+                  autoComplete="off"
                 />
               </div>
 
@@ -205,16 +212,16 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
+                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-all duration-150 justify-between mt-1 text-left"
                       >
                         <span className="truncate text-left flex-1 px-1">
                           {selectedTemplate?.name || 'Ingen mall är vald'}
                         </span>
-                        <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
+                        <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2 transition-transform duration-150" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent 
-                      className="w-80 bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-96"
+                      className="w-80 bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-96 animate-scale-in"
                       side="bottom"
                       align="center"
                       alignOffset={0}
@@ -306,7 +313,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 <Button 
                   onClick={handleCreateJob}
                   disabled={loading || !jobTitle.trim()}
-                  className="flex-1"
+                  className="flex-1 transition-all duration-150 active:scale-95"
                 >
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Skapa jobb
@@ -314,7 +321,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 <Button 
                   variant="outline" 
                   onClick={handleClose}
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-all duration-150 active:scale-95"
                 >
                   Avbryt
                 </Button>

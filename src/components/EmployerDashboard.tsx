@@ -310,7 +310,7 @@ const EmployerDashboard = () => {
                       variant="outline" 
                       size="sm"
                       onClick={() => handleEditJob(job)}
-                      className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                      className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-all duration-150 active:scale-95"
                     >
                       <Edit size={14} className="mr-1" />
                       Redigera
@@ -319,7 +319,7 @@ const EmployerDashboard = () => {
                       variant="outline" 
                       size="sm"
                       onClick={() => deleteJob(job.id)}
-                      className="bg-white/10 border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-100"
+                      className="bg-white/10 border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-100 transition-all duration-150 active:scale-95"
                     >
                       <Trash2 size={14} className="mr-1" />
                       Ta bort
