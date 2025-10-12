@@ -1468,7 +1468,6 @@ const MobileJobWizard = ({
         salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         employment_type: formData.employment_type || null,
-        positions_count: formData.positions_count ? parseInt(formData.positions_count) : 1,
         work_schedule: formData.work_schedule || null,
         contact_email: formData.contact_email || null,
         application_instructions: formData.application_instructions || null,
@@ -1738,52 +1737,6 @@ const MobileJobWizard = ({
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-white font-medium">Antal personer att rekrytera</Label>
-                  <div className="relative flex items-center bg-white/10 border border-white/20 rounded-lg overflow-hidden h-12">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        const current = parseInt(formData.positions_count) || 1;
-                        if (current > 1) {
-                          handleInputChange('positions_count', (current - 1).toString());
-                        }
-                      }}
-                      disabled={parseInt(formData.positions_count) <= 1}
-                      className="text-white hover:bg-white/20 h-full w-12 rounded-none disabled:opacity-30"
-                    >
-                      <Minus className="h-5 w-5" />
-                    </Button>
-                    <Input
-                      type="text"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      value={formData.positions_count}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/[^0-9]/g, '');
-                        if (value === '' || parseInt(value) > 0) {
-                          handleInputChange('positions_count', value);
-                        }
-                      }}
-                      placeholder="1"
-                      className="flex-1 bg-transparent border-0 text-white placeholder:text-white/60 text-base text-center focus-visible:ring-0 focus-visible:ring-offset-0 h-full"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        const current = parseInt(formData.positions_count) || 1;
-                        handleInputChange('positions_count', (current + 1).toString());
-                      }}
-                      className="text-white hover:bg-white/20 h-full w-12 rounded-none"
-                    >
-                      <Plus className="h-5 w-5" />
-                    </Button>
-                  </div>
-                </div>
               </div>
             )}
 
