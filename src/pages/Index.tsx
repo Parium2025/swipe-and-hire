@@ -25,6 +25,7 @@ import SupportAdmin from '@/pages/SupportAdmin';
 import EmployerProfile from '@/pages/employer/EmployerProfile';
 import CompanyProfile from '@/pages/employer/CompanyProfile';
 import EmployerSettings from '@/pages/employer/EmployerSettings';
+import MyJobs from '@/pages/employer/MyJobs';
 import DeveloperControls from '@/components/DeveloperControls';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRightLeft } from 'lucide-react';
@@ -254,8 +255,8 @@ const Index = () => {
     return (
       <SidebarProvider>
         <div className="min-h-screen flex w-full overflow-x-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <AnimatedBackground />
-          {uiReady ? <AppSidebar /> : null}
+          <AnimatedBackground showBubbles={true} />
+          <AppSidebar />
           <div className="flex-1 flex flex-col overflow-x-hidden relative z-10">
             <header className="sticky top-0 z-40 h-16 flex items-center justify-between border-b border-white/20 bg-white/10 backdrop-blur-md px-6">
               <div className="flex items-center gap-4">
@@ -277,8 +278,10 @@ const Index = () => {
               </div>
             </header>
             
-            <main className="flex-1 overflow-y-auto overflow-x-hidden p-6">
-              {renderSidebarContent()}
+            <main className="flex-1 overflow-y-auto overflow-x-hidden p-6 transition-opacity duration-200">
+              <div className="animate-fade-in">
+                {renderSidebarContent()}
+              </div>
               {showTourOverlay && (
                 <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
               )}
@@ -312,6 +315,8 @@ const Index = () => {
           return <Billing />;
         case '/support':
           return <Support />;
+        case '/jobs':
+          return <MyJobs />;
         case '/admin':
           if (user.email === 'fredrikandits@hotmail.com') {
             return <SupportAdmin />;
@@ -327,8 +332,8 @@ const Index = () => {
     return (
       <SidebarProvider>
         <div className="min-h-screen flex w-full overflow-x-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <AnimatedBackground />
-          {uiReady ? <EmployerSidebar /> : null}
+          <AnimatedBackground showBubbles={true} />
+          <EmployerSidebar />
           <div className="flex-1 flex flex-col overflow-x-hidden relative z-10">
             <header className="sticky top-0 z-40 h-16 flex items-center justify-between border-b border-white/20 bg-white/10 backdrop-blur-md px-6">
               <div className="flex items-center gap-4">
@@ -350,8 +355,10 @@ const Index = () => {
               </div>
             </header>
             
-            <main className="flex-1 overflow-y-auto overflow-x-hidden p-6">
-              {renderEmployerContent()}
+            <main className="flex-1 overflow-y-auto overflow-x-hidden p-6 transition-opacity duration-200">
+              <div className="animate-fade-in">
+                {renderEmployerContent()}
+              </div>
               {showTourOverlay && (
                 <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
               )}

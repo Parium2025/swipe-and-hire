@@ -107,7 +107,7 @@ const supportNavItems = [
   }
 ];
 
-export function EmployerSidebar() {
+const EmployerSidebarComponent = () => {
   const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
   const collapsed = state === 'collapsed';
   const { profile, signOut, user } = useAuth();
@@ -371,6 +371,7 @@ export function EmployerSidebar() {
       </SidebarContent>
     </Sidebar>
   );
-}
+};
 
+export const EmployerSidebar = React.memo(EmployerSidebarComponent);
 export default EmployerSidebar;

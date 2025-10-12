@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
         // ... keep existing imports
         import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
-        import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+        import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
         import FileUpload from '@/components/FileUpload';
 import JobPreview from '@/components/JobPreview';
 import { useToast } from '@/hooks/use-toast';
@@ -117,6 +117,10 @@ interface MobileJobWizardProps {
   jobTitle: string;
   selectedTemplate: JobTemplate | null;
   onJobCreated: () => void;
+  // Edit mode support
+  mode?: 'create' | 'edit';
+  editJobId?: string;
+  onJobUpdated?: () => void;
 }
 
 // Sortable Question Item Component
@@ -210,7 +214,10 @@ const MobileJobWizard = ({
   onOpenChange, 
   jobTitle, 
   selectedTemplate, 
-  onJobCreated 
+  onJobCreated,
+  mode = 'create',
+  editJobId,
+  onJobUpdated
 }: MobileJobWizardProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   
@@ -229,12 +236,109 @@ const MobileJobWizard = ({
     console.log('MobileJobWizard: open changed', open);
   }, [open]);
   
-  // Always start from step 0 when opening
-  useEffect(() => {
-    if (open) {
-      setCurrentStep(0); // Always start from beginning
+// Always start from step 0 when opening
+useEffect(() => {
+  if (open) {
+    setCurrentStep(0); // Always start from beginning
+  }
+}, [open]);
+
+// Load existing job + questions in edit mode so layout/struktur är identisk
+useEffect(() => {
+  const loadForEdit = async () => {
+    if (!(open && mode === 'edit' && editJobId)) return;
+    try {
+      const { data: job, error } = await supabase
+        .from('job_postings')
+        .select('*')
+        .eq('id', editJobId)
+        .maybeSingle();
+      if (error) throw error;
+      if (!job) throw new Error('Annonsen kunde inte hittas.');
+
+      // Pause active ad while editing
+      try {
+        if ((job as any).is_active) {
+          await supabase
+            .from('job_postings')
+            .update({ is_active: false, updated_at: new Date().toISOString() })
+            .eq('id', editJobId);
+          toast({
+            title: 'Annons pausad',
+            description: 'Annonsen är inaktiv under redigering.'
+          });
+        }
+      } catch (pauseErr) {
+        console.warn('Could not pause job during edit', pauseErr);
+      }
+
+      const loadedFormData: JobFormData = {
+        title: (job as any).title || '',
+        description: (job as any).description || '',
+        requirements: (job as any).requirements || '',
+        location: (job as any).location || '',
+        occupation: (job as any).occupation || '',
+        salary_min: (job as any).salary_min ? String((job as any).salary_min) : '',
+        salary_max: (job as any).salary_max ? String((job as any).salary_max) : '',
+        salary_type: (job as any).salary_type || '',
+        employment_type: (job as any).employment_type || '',
+        work_location_type: (job as any).work_location_type || '',
+        remote_work_possible: (job as any).remote_work_possible || '',
+        positions_count: ((job as any).positions_count ?? '1').toString(),
+        work_schedule: (job as any).work_schedule || '',
+        contact_email: (job as any).contact_email || '',
+        application_instructions: (job as any).application_instructions || '',
+        workplace_name: (job as any).workplace_name || '',
+        workplace_address: (job as any).workplace_address || '',
+        workplace_postal_code: (job as any).workplace_postal_code || '',
+        workplace_city: (job as any).workplace_city || '',
+        pitch: (job as any).pitch || '',
+        job_image_url: (job as any).job_image_url || '',
+      };
+
+      setFormData(loadedFormData);
+      // Reset initialFormData and hasUnsavedChanges so X button works immediately
+      setInitialFormData({ ...loadedFormData });
+      setHasUnsavedChanges(false);
+
+      const { data: qs, error: qErr } = await supabase
+        .from('job_questions')
+        .select('*')
+        .eq('job_id', editJobId)
+        .order('order_index');
+      if (qErr) throw qErr;
+
+      const parsedQs = (qs || []).map((q: any, idx: number) => {
+        let options: string[] | undefined = undefined;
+        try {
+          if (Array.isArray(q.options)) options = q.options;
+          else if (typeof q.options === 'string') options = JSON.parse(q.options);
+          else if (q.options && typeof q.options === 'object') options = q.options as string[];
+        } catch {}
+        return {
+          id: q.id,
+          question_text: q.question_text,
+          question_type: q.question_type,
+          options,
+          is_required: q.is_required,
+          order_index: q.order_index ?? idx,
+          placeholder_text: q.placeholder_text || undefined,
+          min_value: q.min_value || undefined,
+          max_value: q.max_value || undefined,
+        };
+      });
+      setCustomQuestions(parsedQs);
+      setInitialQuestions(parsedQs);
+    } catch (e: any) {
+      toast({
+        title: 'Kunde inte ladda annonsen',
+        description: e?.message || 'Försök igen om en stund.',
+        variant: 'destructive'
+      });
     }
-  }, [open]);
+  };
+  loadForEdit();
+}, [open, mode, editJobId]);
   
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
@@ -250,6 +354,7 @@ const MobileJobWizard = ({
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingClose, setPendingClose] = useState(false);
   const [initialFormData, setInitialFormData] = useState<JobFormData | null>(null);
+  const [initialQuestions, setInitialQuestions] = useState<JobQuestion[] | null>(null);
   
   // Company profile dialog
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
@@ -587,24 +692,49 @@ const MobileJobWizard = ({
     }));
   }, [jobTitle, selectedTemplate]);
   
-  // Set initial form data for unsaved changes tracking
+  // Set initial snapshots for unsaved changes tracking
   useEffect(() => {
-    if (open && !initialFormData) {
+    if (!open) return;
+    if (!initialFormData) {
       setInitialFormData({ ...formData });
+    }
+    if (initialQuestions === null) {
+      setInitialQuestions([...customQuestions]);
+    }
+    if (!initialFormData || initialQuestions === null) {
       setHasUnsavedChanges(false);
     }
-  }, [open, formData, initialFormData]);
+  }, [open, formData, customQuestions, initialFormData, initialQuestions]);
   
-  // Track form changes
+  // Track form and questions changes
   useEffect(() => {
-    if (!initialFormData || !open) return;
-    
-    const hasChanges = Object.keys(formData).some(key => {
-      return formData[key as keyof JobFormData] !== initialFormData[key as keyof JobFormData];
-    }) || customQuestions.length > 0;
-    
-    setHasUnsavedChanges(hasChanges);
-  }, [formData, customQuestions, initialFormData, open]);
+    if (!open) return;
+
+    const formChanged = initialFormData
+      ? Object.keys(formData).some((key) => formData[key as keyof JobFormData] !== (initialFormData as any)[key])
+      : false;
+
+    const normalizeQuestions = (qs: JobQuestion[]) =>
+      qs
+        .map((q) => ({
+          id: q.id || null,
+          question_text: q.question_text,
+          question_type: q.question_type,
+          options: q.options || [],
+          is_required: q.is_required,
+          order_index: q.order_index ?? 0,
+          min_value: q.min_value ?? null,
+          max_value: q.max_value ?? null,
+          placeholder_text: q.placeholder_text ?? null,
+        }))
+        .sort((a, b) => (a.order_index - b.order_index) || String(a.id).localeCompare(String(b.id)));
+
+    const questionsChanged = initialQuestions
+      ? JSON.stringify(normalizeQuestions(customQuestions)) !== JSON.stringify(normalizeQuestions(initialQuestions))
+      : customQuestions.length > 0;
+
+    setHasUnsavedChanges(formChanged || questionsChanged);
+  }, [open, formData, customQuestions, initialFormData, initialQuestions]);
 
   // Show company tooltip only on step 4 (visible and persistent while on this step)
   useEffect(() => {
@@ -1405,6 +1535,7 @@ const MobileJobWizard = ({
       setJobImageDisplayUrl(null);
       setOriginalImageUrl(null);
       setInitialFormData(null);
+      setInitialQuestions(null);
       setHasUnsavedChanges(false);
       onOpenChange(false);
     }
@@ -1440,6 +1571,7 @@ const MobileJobWizard = ({
     setJobImageDisplayUrl(null);
     setOriginalImageUrl(null);
     setInitialFormData(null);
+    setInitialQuestions(null);
     setHasUnsavedChanges(false);
     setShowUnsavedDialog(false);
     setPendingClose(false);
@@ -1449,6 +1581,17 @@ const MobileJobWizard = ({
   const handleCancelClose = () => {
     setShowUnsavedDialog(false);
     setPendingClose(false);
+  };
+
+  // Ensure Radix Dialog doesn't call our close logic when opening
+  const handleDialogOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) {
+      // Propagate open state to parent without closing logic
+      onOpenChange(true);
+      return;
+    }
+    // When user tries to close, run unsaved-check flow
+    handleClose();
   };
 
   const handleSubmit = async () => {
@@ -1465,20 +1608,80 @@ const MobileJobWizard = ({
         description: formData.description,
         requirements: formData.requirements || null,
         location: formData.location,
+        occupation: formData.occupation || null,
         salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
+        salary_type: formData.salary_type || null,
         employment_type: formData.employment_type || null,
         work_schedule: formData.work_schedule || null,
+        work_location_type: formData.work_location_type || null,
+        remote_work_possible: formData.remote_work_possible || null,
+        positions_count: formData.positions_count ? parseInt(formData.positions_count) : 1,
         contact_email: formData.contact_email || null,
         application_instructions: formData.application_instructions || null,
         workplace_name: formData.workplace_name || null,
         workplace_address: formData.workplace_address || null,
         workplace_postal_code: formData.workplace_postal_code || null,
         workplace_city: formData.workplace_city || null,
+        pitch: formData.pitch || null,
+        job_image_url: formData.job_image_url || null,
         category,
         is_active: true
       };
 
+      // EDIT MODE: update existing posting + replace questions
+      if (mode === 'edit' && editJobId) {
+        const { error: updateError } = await supabase
+          .from('job_postings')
+          .update(jobData)
+          .eq('id', editJobId);
+
+        if (updateError) {
+          toast({
+            title: "Fel vid uppdatering av annons",
+            description: updateError.message,
+            variant: "destructive"
+          });
+          return;
+        }
+
+        // Replace existing questions with current set
+        try {
+          await supabase.from('job_questions').delete().eq('job_id', editJobId);
+          const questionData = customQuestions.map(q => ({
+            job_id: editJobId,
+            question_text: q.question_text,
+            question_type: q.question_type,
+            options: q.options || null,
+            is_required: q.is_required,
+            order_index: q.order_index,
+            placeholder_text: q.placeholder_text || null,
+            min_value: q.min_value || null,
+            max_value: q.max_value || null
+          }));
+          if (questionData.length > 0) {
+            const { error: questionsError } = await supabase
+              .from('job_questions')
+              .insert(questionData);
+            if (questionsError) {
+              console.error('Error saving questions (edit):', questionsError);
+            }
+          }
+        } catch (qe) {
+          console.error('Error replacing questions in edit mode:', qe);
+        }
+
+        toast({
+          title: "Annons uppdaterad och publicerad igen!",
+          description: "Dina ändringar är nu live."
+        });
+
+        handleConfirmClose();
+        onJobUpdated?.();
+        return;
+      }
+
+      // CREATE MODE: insert new posting
       const { data: jobPost, error } = await supabase
         .from('job_postings')
         .insert([jobData])
@@ -1545,7 +1748,7 @@ const MobileJobWizard = ({
         description: "Din annons är nu publicerad och synlig för jobbsökare."
       });
 
-      handleClose();
+      handleConfirmClose();
       onJobCreated();
 
     } catch (error) {
@@ -1563,7 +1766,7 @@ const MobileJobWizard = ({
   const isLastStep = currentStep === steps.length - 1;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogContent className="max-w-md h-[90vh] max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden">
         <AnimatedBackground showBubbles={false} />
         <div className="flex flex-col h-full relative z-10">
@@ -1573,6 +1776,9 @@ const MobileJobWizard = ({
               <DialogTitle className="text-white text-lg">
                 {steps[currentStep].title}
               </DialogTitle>
+              <DialogDescription className="sr-only">
+                Redigera jobbannons, osparade ändringar varnas innan stängning.
+              </DialogDescription>
               <div className="text-sm text-white">
                 Steg {currentStep + 1} av {steps.length}
               </div>
