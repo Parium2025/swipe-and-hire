@@ -2257,7 +2257,7 @@ const MobileJobWizard = ({
                       </div>
                     )}
                     {/* iPhone-stil telefonram */}
-                    <div className="relative w-full h-full rounded-[2rem] bg-black p-1 shadow-2xl">
+                    <div className="relative w-full h-full rounded-[2rem] bg-black p-1 shadow-xl">
                       {/* Skärm */}
                       <div className="relative w-full h-full rounded-[1.6rem] overflow-hidden bg-black">
                         {/* iPhone notch */}
@@ -2270,7 +2270,7 @@ const MobileJobWizard = ({
                           
                            {/* Form container (toggle) */}
                            <div className={showApplicationForm ? 'flex flex-col h-full' : 'hidden'}>
-                             <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 backdrop-blur-sm border-b border-white/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem]">
+                             <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 border-b border-white/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem]">
                                <div className="text-xs font-bold text-white">Ansökningsformulär</div>
                                <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white/80 hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
                              </div>
@@ -2286,7 +2286,7 @@ const MobileJobWizard = ({
                              <div className="space-y-3 pb-3">{/* Minimal botten-padding */}
                               
                                  {/* Företagsinformation */}
-                                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 relative">
+                                 <div className="bg-white/10 rounded-lg p-2 border border-white/20 relative">
                                    <div className="flex items-center">
                                     {profile?.company_logo_url ? (
                                       <div className="w-4 h-4 rounded-full mr-1 overflow-hidden bg-white/10 flex items-center justify-center">
@@ -2314,7 +2314,7 @@ const MobileJobWizard = ({
 
                                 {/* Yrke */}
                                 {formData.occupation && (
-                                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 mb-2">
+                                   <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
                                     <h5 className="text-xs font-medium text-white mb-1 flex items-center">
                                       <Briefcase className="h-2 w-2 mr-1 text-white" />
                                       Yrke
@@ -2332,7 +2332,7 @@ const MobileJobWizard = ({
 
                                 {/* Jobbeskrivning */}
                                 {formData.description && (
-                                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 mb-2">
+                                  <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
                                     <h5 className="text-xs font-medium text-white mb-1">Jobbeskrivning</h5>
                                     <div className="text-xs text-white leading-relaxed whitespace-pre-wrap break-words [&>*]:mb-1 [&>*:last-child]:mb-0">
                                       {formData.description.split('\n').map((line, index) => {
@@ -2362,8 +2362,8 @@ const MobileJobWizard = ({
 
                                {/* Lön */}
                                {(formData.salary_min || formData.salary_max || formData.salary_type) && (
-                                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 mb-2">
-                                   <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                 <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
+                                   <h5 className="text-xs font-medium text_white mb-1 flex items-center">
                                      <Banknote className="h-2 w-2 mr-1 text-white" />
                                      Lön
                                    </h5>
@@ -2377,7 +2377,7 @@ const MobileJobWizard = ({
 
 
                                 {/* Arbetsplats */}
-                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+                                <div className="bg-white/10 rounded-lg p-2 border border_white/20">
                                   <h5 className="text-xs font-medium text-white mb-1 flex items-center">
                                     <MapPin className="h-2 w-2 mr-1 text-white" />
                                     Arbetsplats
@@ -2406,8 +2406,8 @@ const MobileJobWizard = ({
 
                                  {/* Antal rekryteringar */}
                                  {formData.positions_count && parseInt(formData.positions_count) > 0 && (
-                                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20 mb-2">
-                                     <h5 className="text-xs font-medium text-white mb-1 flex items-center whitespace-nowrap">
+                                   <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
+                                     <h5 className="text-xs font-medium text-white mb-1 flex items_center whitespace-nowrap">
                                        <Users className="h-2 w-2 mr-1 text-white" />
                                        Antal rekryteringar
                                      </h5>
@@ -2417,8 +2417,8 @@ const MobileJobWizard = ({
                                    </div>
                                  )}
 
-                                 {/* Kontakt */}
-                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+                                {/* Kontakt */}
+                               <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                   <h5 className="text-xs font-medium text-white mb-1 flex items-center">
                                     <Mail className="h-2 w-2 mr-1 text-white" />
                                     Kontakt
@@ -2437,7 +2437,7 @@ const MobileJobWizard = ({
 
                               {/* Krav och kvalifikationer */}
                               {formData.requirements && (
-                                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+                                <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                   <h4 className="text-xs font-semibold text-white mb-1">Kvalifikationer</h4>
                                   <p className="text-xs text-white leading-relaxed">
                                     {formData.requirements.length > 100 
@@ -2449,7 +2449,7 @@ const MobileJobWizard = ({
                               )}
 
                                {/* Följande information samlas automatiskt in från alla kandidater */}
-                               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+                               <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                  <p className="text-xs text-white mb-3 leading-relaxed">
                                    Följande information samlas automatiskt in från alla kandidater som har sökt:
                                  </p>
@@ -2501,7 +2501,7 @@ const MobileJobWizard = ({
                                   if (questions.length === 0) return null;
                                   
                                   return (
-                                    <div key={type} className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+                                    <div key={type} className="bg-white/10 rounded-lg p-2 border border-white/20">
                                       <h4 className="text-xs font-semibold text-white mb-2">
                                         {typeLabels[type as keyof typeof typeLabels]} ({questions.length})
                                       </h4>
@@ -2518,7 +2518,7 @@ const MobileJobWizard = ({
                                             {/* Input förhandsvisning baserat på frågetyp */}
                                             {question.question_type === 'text' && (
                                               <textarea
-                                                className="w-full border border-white/20 bg-white/10 backdrop-blur-sm rounded p-2 text-xs text-white placeholder:text-white/60 resize-none"
+                                                className="w-full border border-white/20 bg-white/10 rounded p-2 text-xs text-white placeholder:text-white/60 resize-none"
                                                 placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                                 rows={2}
                                               />
@@ -2625,7 +2625,7 @@ const MobileJobWizard = ({
                                             {question.question_type === 'date' && (
                                               <input
                                                 type="date"
-                                                className="w-full border border-white/20 bg-white/10 backdrop-blur-sm rounded p-2 text-xs text-white placeholder:text-white/60 h-9"
+                                                className="w-full border border-white/20 bg-white/10 rounded p-2 text-xs text-white placeholder:text-white/60 h-9"
                                                 placeholder={question.placeholder_text}
                                                 disabled
                                               />
