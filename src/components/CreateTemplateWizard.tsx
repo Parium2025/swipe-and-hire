@@ -65,6 +65,7 @@ interface TemplateFormData {
   work_schedule: string;
   contact_email: string;
   application_instructions: string;
+  pitch: string;
 }
 
 interface CreateTemplateWizardProps {
@@ -211,7 +212,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
     workplace_city: '',
     work_schedule: '',
     contact_email: '',
-    application_instructions: ''
+    application_instructions: '',
+    pitch: ''
   });
 
   // Load user profile for company info
@@ -487,7 +489,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
       workplace_city: '',
       work_schedule: '',
       contact_email: '',
-      application_instructions: ''
+      application_instructions: '',
+      pitch: ''
     });
     setCustomQuestions([]);
     onOpenChange(false);
@@ -506,10 +509,20 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
         description: formData.description,
         requirements: formData.requirements || null,
         location: formData.location || '',
+        occupation: formData.occupation || null,
         employment_type: formData.employment_type || null,
         work_schedule: formData.work_schedule || null,
         salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
+        salary_type: formData.salary_type || null,
+        work_location_type: formData.work_location_type || null,
+        remote_work_possible: formData.remote_work_possible || null,
+        workplace_name: formData.workplace_name || null,
+        workplace_address: formData.workplace_address || null,
+        workplace_postal_code: formData.workplace_postal_code || null,
+        workplace_city: formData.workplace_city || null,
+        positions_count: formData.positions_count || null,
+        pitch: formData.pitch || null,
         contact_email: formData.contact_email || null,
         application_instructions: formData.application_instructions || null,
         questions: customQuestions.length > 0 ? customQuestions.map(q => ({

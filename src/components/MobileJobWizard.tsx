@@ -66,10 +66,20 @@ interface JobTemplate {
   description: string;
   requirements?: string;
   location: string;
+  occupation?: string;
   employment_type?: string;
   work_schedule?: string;
   salary_min?: number;
   salary_max?: number;
+  salary_type?: string;
+  work_location_type?: string;
+  remote_work_possible?: string;
+  workplace_name?: string;
+  workplace_address?: string;
+  workplace_postal_code?: string;
+  workplace_city?: string;
+  positions_count?: string;
+  pitch?: string;
   contact_email?: string;
   application_instructions?: string;
   category?: string;
@@ -508,8 +518,8 @@ const MobileJobWizard = ({
     if (user && open) {
       fetchProfile();
       fetchQuestionTemplates();
-      // Load questions from template if it's the default template
-      if (selectedTemplate?.is_default && selectedTemplate.questions) {
+      // Load questions from template - works for all templates, not just default
+      if (selectedTemplate?.questions && Array.isArray(selectedTemplate.questions)) {
         try {
           const templateQuestions = selectedTemplate.questions as any[];
           setCustomQuestions(templateQuestions.map((q: any, index: number) => ({
@@ -562,12 +572,20 @@ const MobileJobWizard = ({
       description: selectedTemplate?.description || prev.description,
       requirements: selectedTemplate?.requirements || prev.requirements,
       // Never auto-fill location from template - user must always set it manually
+      occupation: selectedTemplate?.occupation || prev.occupation,
       salary_min: selectedTemplate?.salary_min?.toString() || prev.salary_min,
       salary_max: selectedTemplate?.salary_max?.toString() || prev.salary_max,
+      salary_type: selectedTemplate?.salary_type || prev.salary_type,
       employment_type: selectedTemplate?.employment_type || prev.employment_type,
+      work_location_type: selectedTemplate?.work_location_type || prev.work_location_type,
+      remote_work_possible: selectedTemplate?.remote_work_possible || prev.remote_work_possible,
+      workplace_name: selectedTemplate?.workplace_name || prev.workplace_name,
+      workplace_address: selectedTemplate?.workplace_address || prev.workplace_address,
+      positions_count: selectedTemplate?.positions_count || prev.positions_count,
       work_schedule: selectedTemplate?.work_schedule || prev.work_schedule,
       contact_email: selectedTemplate?.contact_email || prev.contact_email,
       application_instructions: selectedTemplate?.application_instructions || prev.application_instructions,
+      pitch: selectedTemplate?.pitch || prev.pitch,
     }));
   }, [jobTitle, selectedTemplate]);
   
@@ -952,22 +970,22 @@ const MobileJobWizard = ({
         description: selectedTemplate?.description || prev.description,
         requirements: selectedTemplate?.requirements || prev.requirements,
         location: prev.location, // Never override location from template
-        occupation: prev.occupation,
+        occupation: selectedTemplate?.occupation || prev.occupation,
         salary_min: selectedTemplate?.salary_min?.toString() || prev.salary_min,
         salary_max: selectedTemplate?.salary_max?.toString() || prev.salary_max,
         employment_type: selectedTemplate?.employment_type || prev.employment_type,
-        salary_type: prev.salary_type || '',
-        positions_count: prev.positions_count || '1',
-        work_location_type: prev.work_location_type || 'på-plats',
-        remote_work_possible: prev.remote_work_possible || 'nej',
-        workplace_name: prev.workplace_name || profile?.company_name || '',
-        workplace_address: prev.workplace_address || '',
+        salary_type: selectedTemplate?.salary_type || prev.salary_type,
+        positions_count: selectedTemplate?.positions_count || prev.positions_count || '1',
+        work_location_type: selectedTemplate?.work_location_type || prev.work_location_type || 'på-plats',
+        remote_work_possible: selectedTemplate?.remote_work_possible || prev.remote_work_possible || 'nej',
+        workplace_name: selectedTemplate?.workplace_name || prev.workplace_name || profile?.company_name || '',
+        workplace_address: selectedTemplate?.workplace_address || prev.workplace_address || '',
         workplace_postal_code: prev.workplace_postal_code || '', // Never from template
         workplace_city: prev.workplace_city || '', // Never from template
         work_schedule: selectedTemplate?.work_schedule || prev.work_schedule,
         contact_email: prev.contact_email || selectedTemplate?.contact_email || user?.email || '',
         application_instructions: selectedTemplate?.application_instructions || prev.application_instructions,
-        pitch: prev.pitch || '',
+        pitch: selectedTemplate?.pitch || prev.pitch || '',
         job_image_url: prev.job_image_url || ''
       }));
       
