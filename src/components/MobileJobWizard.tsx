@@ -1846,28 +1846,16 @@ const MobileJobWizard = ({
 
                     {/* Automatiska frågor info */}
                     <div className="bg-white/5 rounded-lg p-4 border border-white/20">
-                      <div className="text-white text-sm space-y-2">
-                        {[
-                          '• Namn och efternamn',
-                          '• Ålder',
-                          '• E-post',
-                          '• Telefonnummer',
-                          '• Ort/stad',
-                          '• Presentation',
-                          '• CV',
-                          '• Nuvarande anställningsform',
-                          '• Tillgänglighet'
-                        ].map((item, index) => (
-                          <div key={index} className="flex items-center justify-between group">
-                            <p>{item}</p>
-                            <button
-                              type="button"
-                              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/10 rounded"
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </button>
-                          </div>
-                        ))}
+                      <div className="text-white text-sm space-y-1">
+                        <p>• Namn och efternamn</p>
+                        <p>• Ålder</p>
+                        <p>• E-post</p>
+                        <p>• Telefonnummer</p>
+                        <p>• Ort/stad</p>
+                        <p>• Presentation</p>
+                        <p>• CV</p>
+                        <p>• Nuvarande anställningsform</p>
+                        <p>• Tillgänglighet</p>
                       </div>
                     </div>
 
@@ -1918,7 +1906,15 @@ const MobileJobWizard = ({
                   /* Template Selection */
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-white font-medium text-lg">Välj fråga</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-white font-medium text-lg">Välj fråga</h3>
+                        <button
+                          type="button"
+                          className="p-1 hover:bg-white/10 rounded transition-colors"
+                        >
+                          <Trash2 className="h-5 w-5 text-destructive" />
+                        </button>
+                      </div>
                       <Button
                         onClick={() => {
                           setShowQuestionTemplates(false);
