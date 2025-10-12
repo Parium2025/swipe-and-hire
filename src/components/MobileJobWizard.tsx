@@ -1740,10 +1740,10 @@ const MobileJobWizard = ({
 
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Antal personer att rekrytera</Label>
-                  <div className="flex items-center gap-3">
+                  <div className="relative flex items-center bg-white/10 border border-white/20 rounded-lg overflow-hidden h-12">
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="ghost"
                       size="icon"
                       onClick={() => {
                         const current = parseInt(formData.positions_count) || 1;
@@ -1752,7 +1752,7 @@ const MobileJobWizard = ({
                         }
                       }}
                       disabled={parseInt(formData.positions_count) <= 1}
-                      className="bg-white/10 border-white/20 text-white hover:bg-white/20 h-12 w-12 disabled:opacity-30"
+                      className="text-white hover:bg-white/20 h-full w-12 rounded-none disabled:opacity-30"
                     >
                       <Minus className="h-5 w-5" />
                     </Button>
@@ -1768,17 +1768,17 @@ const MobileJobWizard = ({
                         }
                       }}
                       placeholder="1"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base text-center focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                      className="flex-1 bg-transparent border-0 text-white placeholder:text-white/60 text-base text-center focus-visible:ring-0 focus-visible:ring-offset-0 h-full"
                     />
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="ghost"
                       size="icon"
                       onClick={() => {
                         const current = parseInt(formData.positions_count) || 1;
                         handleInputChange('positions_count', (current + 1).toString());
                       }}
-                      className="bg-white/10 border-white/20 text-white hover:bg-white/20 h-12 w-12"
+                      className="text-white hover:bg-white/20 h-full w-12 rounded-none"
                     >
                       <Plus className="h-5 w-5" />
                     </Button>
