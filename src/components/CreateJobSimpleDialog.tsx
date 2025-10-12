@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Loader2, ChevronDown, Search, X } from 'lucide-react';
+import { Plus, Loader2, ChevronDown, Search, X, Trash2 } from 'lucide-react';
 import MobileJobWizard from '@/components/MobileJobWizard';
 import CreateTemplateWizard from '@/components/CreateTemplateWizard';
 
@@ -266,17 +266,64 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                         {filteredTemplates.map((template) => (
                           <DropdownMenuItem
                             key={template.id}
-                            onClick={() => handleTemplateSelect(template.id, template.name)}
+                            onSelect={(e) => e.preventDefault()}
                             className="px-4 py-3 text-white hover:bg-slate-700/80 focus:bg-slate-700/80 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20 last:border-b-0"
                           >
-                            <div className="flex flex-col w-full">
-                              <div className="flex items-center justify-between">
-                                <span className="font-medium">{template.name}</span>
-                                {template.is_default && (
-                                  <span className="text-xs text-blue-400 ml-2">Standard</span>
-                                )}
-                              </div>
-                              <span className="text-xs text-white/60 mt-1">{template.title}</span>
+                            <div className="flex items-center justify-between w-full gap-3">
+                              <button
+                                onClick={() => handleTemplateSelect(template.id, template.name)}
+                                className="flex flex-col flex-1 text-left hover:opacity-80 transition-opacity"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="font-medium">{template.name}</span>
+                                  {template.is_default && (
+                                    <span className="text-xs text-blue-400 ml-2">Standard</span>
+                                  )}
+                                </div>
+                                <span className="text-xs text-white/60 mt-1">{template.title}</span>
+                              </button>
+                              <Button
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  if (!template.id) return;
+                                  
+                                  if (!confirm(`Är du säker på att du vill ta bort mallen "${template.name}"?`)) {
+                                    return;
+                                  }
+                                  
+                                  try {
+                                    const { error } = await supabase
+                                      .from('job_templates')
+                                      .delete()
+                                      .eq('id', template.id);
+                                    
+                                    if (error) throw error;
+                                    
+                                    setTemplates(prev => prev.filter(t => t.id !== template.id));
+                                    
+                                    // Clear selection if deleted template was selected
+                                    if (selectedTemplate?.id === template.id) {
+                                      setSelectedTemplate(null);
+                                    }
+                                    
+                                    toast({
+                                      title: "Mall borttagen",
+                                      description: `"${template.name}" har tagits bort.`
+                                    });
+                                  } catch (error) {
+                                    console.error('Error deleting template:', error);
+                                    toast({
+                                      title: "Kunde inte ta bort mallen",
+                                      variant: "destructive"
+                                    });
+                                  }
+                                }}
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0 flex-shrink-0"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             </div>
                           </DropdownMenuItem>
                         ))}
