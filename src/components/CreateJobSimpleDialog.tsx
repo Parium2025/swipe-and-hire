@@ -390,7 +390,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         <AlertDialogContent className="bg-gradient-to-br from-slate-900 to-slate-800 border-slate-700">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white text-xl">Ta bort mall</AlertDialogTitle>
-            <AlertDialogDescription className="text-slate-300 text-base">
+            <AlertDialogDescription className="text-white text-base">
               Är du säker på att du vill ta bort mallen <span className="font-semibold text-white">"{templateToDelete?.name}"</span>? 
               Denna åtgärd kan inte ångras.
             </AlertDialogDescription>
