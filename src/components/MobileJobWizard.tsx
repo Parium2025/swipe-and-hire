@@ -1906,15 +1906,7 @@ const MobileJobWizard = ({
                   /* Template Selection */
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-white font-medium text-lg">Välj fråga</h3>
-                        <button
-                          type="button"
-                          className="p-1 hover:bg-white/10 rounded transition-colors"
-                        >
-                          <Trash2 className="h-5 w-5 text-destructive" />
-                        </button>
-                      </div>
+                      <h3 className="text-white font-medium text-lg">Välj fråga</h3>
                       <Button
                         onClick={() => {
                           setShowQuestionTemplates(false);
