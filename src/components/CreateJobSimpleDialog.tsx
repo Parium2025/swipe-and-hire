@@ -255,7 +255,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             setOpen(false);
                             setShowTemplateWizard(true);
                           }}
-                          className="px-4 py-3 text-white hover:bg-slate-700/80 cursor-pointer transition-colors border-b border-slate-600/20"
+                          className="px-4 py-3 text-white hover:bg-slate-700/80 focus:bg-slate-700/80 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20"
                         >
                           <div className="flex flex-col">
                             <span className="font-medium">+ Skapa en ny mall</span>
@@ -267,7 +267,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           <DropdownMenuItem
                             key={template.id}
                             onClick={() => handleTemplateSelect(template.id, template.name)}
-                            className="px-4 py-3 text-white hover:bg-slate-700/80 cursor-pointer transition-colors border-b border-slate-600/20 last:border-b-0"
+                            className="px-4 py-3 text-white hover:bg-slate-700/80 focus:bg-slate-700/80 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20 last:border-b-0"
                           >
                             <div className="flex flex-col w-full">
                               <div className="flex items-center justify-between">
