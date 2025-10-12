@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
         // ... keep existing imports
         import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
-        import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+        import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
         import FileUpload from '@/components/FileUpload';
 import JobPreview from '@/components/JobPreview';
 import { useToast } from '@/hooks/use-toast';
@@ -271,7 +271,8 @@ useEffect(() => {
         console.warn('Could not pause job during edit', pauseErr);
       }
 
-      const loadedFormData: JobFormData = {
+      setFormData(prev => ({
+        ...prev,
         title: (job as any).title || '',
         description: (job as any).description || '',
         requirements: (job as any).requirements || '',
@@ -293,12 +294,7 @@ useEffect(() => {
         workplace_city: (job as any).workplace_city || '',
         pitch: (job as any).pitch || '',
         job_image_url: (job as any).job_image_url || '',
-      };
-
-      setFormData(loadedFormData);
-      // Reset initialFormData and hasUnsavedChanges so X button works immediately
-      setInitialFormData({ ...loadedFormData });
-      setHasUnsavedChanges(false);
+      }));
 
       const { data: qs, error: qErr } = await supabase
         .from('job_questions')
@@ -327,7 +323,6 @@ useEffect(() => {
         };
       });
       setCustomQuestions(parsedQs);
-      setInitialQuestions(parsedQs);
     } catch (e: any) {
       toast({
         title: 'Kunde inte ladda annonsen',
@@ -353,7 +348,6 @@ useEffect(() => {
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingClose, setPendingClose] = useState(false);
   const [initialFormData, setInitialFormData] = useState<JobFormData | null>(null);
-  const [initialQuestions, setInitialQuestions] = useState<JobQuestion[] | null>(null);
   
   // Company profile dialog
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
@@ -691,49 +685,24 @@ useEffect(() => {
     }));
   }, [jobTitle, selectedTemplate]);
   
-  // Set initial snapshots for unsaved changes tracking
+  // Set initial form data for unsaved changes tracking
   useEffect(() => {
-    if (!open) return;
-    if (!initialFormData) {
+    if (open && !initialFormData) {
       setInitialFormData({ ...formData });
-    }
-    if (initialQuestions === null) {
-      setInitialQuestions([...customQuestions]);
-    }
-    if (!initialFormData || initialQuestions === null) {
       setHasUnsavedChanges(false);
     }
-  }, [open, formData, customQuestions, initialFormData, initialQuestions]);
+  }, [open, formData, initialFormData]);
   
-  // Track form and questions changes
+  // Track form changes
   useEffect(() => {
-    if (!open) return;
-
-    const formChanged = initialFormData
-      ? Object.keys(formData).some((key) => formData[key as keyof JobFormData] !== (initialFormData as any)[key])
-      : false;
-
-    const normalizeQuestions = (qs: JobQuestion[]) =>
-      qs
-        .map((q) => ({
-          id: q.id || null,
-          question_text: q.question_text,
-          question_type: q.question_type,
-          options: q.options || [],
-          is_required: q.is_required,
-          order_index: q.order_index ?? 0,
-          min_value: q.min_value ?? null,
-          max_value: q.max_value ?? null,
-          placeholder_text: q.placeholder_text ?? null,
-        }))
-        .sort((a, b) => (a.order_index - b.order_index) || String(a.id).localeCompare(String(b.id)));
-
-    const questionsChanged = initialQuestions
-      ? JSON.stringify(normalizeQuestions(customQuestions)) !== JSON.stringify(normalizeQuestions(initialQuestions))
-      : customQuestions.length > 0;
-
-    setHasUnsavedChanges(formChanged || questionsChanged);
-  }, [open, formData, customQuestions, initialFormData, initialQuestions]);
+    if (!initialFormData || !open) return;
+    
+    const hasChanges = Object.keys(formData).some(key => {
+      return formData[key as keyof JobFormData] !== initialFormData[key as keyof JobFormData];
+    }) || customQuestions.length > 0;
+    
+    setHasUnsavedChanges(hasChanges);
+  }, [formData, customQuestions, initialFormData, open]);
 
   // Show company tooltip only on step 4 (visible and persistent while on this step)
   useEffect(() => {
@@ -1534,7 +1503,6 @@ useEffect(() => {
       setJobImageDisplayUrl(null);
       setOriginalImageUrl(null);
       setInitialFormData(null);
-      setInitialQuestions(null);
       setHasUnsavedChanges(false);
       onOpenChange(false);
     }
@@ -1570,7 +1538,6 @@ useEffect(() => {
     setJobImageDisplayUrl(null);
     setOriginalImageUrl(null);
     setInitialFormData(null);
-    setInitialQuestions(null);
     setHasUnsavedChanges(false);
     setShowUnsavedDialog(false);
     setPendingClose(false);
@@ -1580,17 +1547,6 @@ useEffect(() => {
   const handleCancelClose = () => {
     setShowUnsavedDialog(false);
     setPendingClose(false);
-  };
-
-  // Ensure Radix Dialog doesn't call our close logic when opening
-  const handleDialogOpenChange = (nextOpen: boolean) => {
-    if (nextOpen) {
-      // Propagate open state to parent without closing logic
-      onOpenChange(true);
-      return;
-    }
-    // When user tries to close, run unsaved-check flow
-    handleClose();
   };
 
   const handleSubmit = async () => {
@@ -1675,7 +1631,7 @@ useEffect(() => {
           description: "Dina ändringar är nu live."
         });
 
-        handleConfirmClose();
+        onOpenChange(false);
         onJobUpdated?.();
         return;
       }
@@ -1747,7 +1703,7 @@ useEffect(() => {
         description: "Din annons är nu publicerad och synlig för jobbsökare."
       });
 
-      handleConfirmClose();
+      handleClose();
       onJobCreated();
 
     } catch (error) {
@@ -1765,7 +1721,7 @@ useEffect(() => {
   const isLastStep = currentStep === steps.length - 1;
 
   return (
-    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md h-[90vh] max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden">
         <AnimatedBackground showBubbles={false} />
         <div className="flex flex-col h-full relative z-10">
@@ -1775,9 +1731,6 @@ useEffect(() => {
               <DialogTitle className="text-white text-lg">
                 {steps[currentStep].title}
               </DialogTitle>
-              <DialogDescription className="sr-only">
-                Redigera jobbannons, osparade ändringar varnas innan stängning.
-              </DialogDescription>
               <div className="text-sm text-white">
                 Steg {currentStep + 1} av {steps.length}
               </div>
