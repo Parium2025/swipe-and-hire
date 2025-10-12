@@ -251,7 +251,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
             </div>
 
             {/* Description */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8">
+            <div className="bg-white/10 rounded-xl p-6 mb-8">
               <h4 className="text-white font-semibold text-lg mb-3">Beskrivning</h4>
               <p className="text-white/90 leading-relaxed whitespace-pre-wrap">
                 {jobData.description}
@@ -296,7 +296,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
               <div key={questionId} className="min-h-screen snap-start flex flex-col justify-center px-6 py-12">
                 
                 {/* Question card */}
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 space-y-6">
+                <div className="bg-white/10 rounded-2xl p-8 space-y-6">
                   
                   {/* Question header */}
                   <div className="flex items-start space-x-4">
