@@ -1939,21 +1939,54 @@ const MobileJobWizard = ({
                               template.question_text.toLowerCase().includes(questionSearchTerm.toLowerCase())
                             )
                             .map((template) => (
-                            <button
+                            <div
                               key={template.id}
-                              onClick={() => useQuestionTemplate(template)}
-                              className="w-full bg-white/5 hover:bg-white/10 rounded-lg p-4 border border-white/20 text-left transition-colors"
+                              className="w-full bg-white/5 rounded-lg p-4 border border-white/20 flex items-center justify-between gap-3"
                             >
-                              <div className="text-white font-medium text-sm mb-1">
-                                {template.question_text}
-                              </div>
-                              <div className="text-white/95 text-xs">
-                                {template.question_type === 'text' ? 'Text' : 
-                                 template.question_type === 'yes_no' ? 'Ja/Nej' :
-                                 template.question_type === 'multiple_choice' ? 'Flerval' :
-                                 template.question_type === 'number' ? 'Siffra' : template.question_type}
-                              </div>
-                            </button>
+                              <button
+                                onClick={() => useQuestionTemplate(template)}
+                                className="flex-1 text-left hover:opacity-80 transition-opacity"
+                              >
+                                <div className="text-white font-medium text-sm mb-1">
+                                  {template.question_text}
+                                </div>
+                                <div className="text-white/95 text-xs">
+                                  {template.question_type === 'text' ? 'Text' : 
+                                   template.question_type === 'yes_no' ? 'Ja/Nej' :
+                                   template.question_type === 'multiple_choice' ? 'Flerval' :
+                                   template.question_type === 'number' ? 'Siffra' : template.question_type}
+                                </div>
+                              </button>
+                              <Button
+                                onClick={async () => {
+                                  if (!template.id) return;
+                                  try {
+                                    const { error } = await supabase
+                                      .from('job_question_templates')
+                                      .delete()
+                                      .eq('id', template.id);
+                                    
+                                    if (error) throw error;
+                                    
+                                    setQuestionTemplates(prev => prev.filter(t => t.id !== template.id));
+                                    toast({
+                                      title: "Fråga borttagen"
+                                    });
+                                  } catch (error) {
+                                    console.error('Error deleting template:', error);
+                                    toast({
+                                      title: "Kunde inte ta bort frågan",
+                                      variant: "destructive"
+                                    });
+                                  }
+                                }}
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0 flex-shrink-0"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           ))}
                         </>
                       ) : (
