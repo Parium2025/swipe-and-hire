@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Loader2, ChevronDown, Search, X, Trash2, Pencil } from 'lucide-react';
 import MobileJobWizard from '@/components/MobileJobWizard';
@@ -46,6 +47,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const [searchTerm, setSearchTerm] = useState('');
   const [showTemplateWizard, setShowTemplateWizard] = useState(false);
   const [templateToEdit, setTemplateToEdit] = useState<JobTemplate | null>(null);
+  const [templateToDelete, setTemplateToDelete] = useState<JobTemplate | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -299,45 +301,14 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                   <Pencil className="h-4 w-4" />
                                 </Button>
                                 <Button
-                                  onClick={async (e) => {
-                                  e.stopPropagation();
-                                  if (!template.id) return;
-                                  
-                                  if (!confirm(`Är du säker på att du vill ta bort mallen "${template.name}"?`)) {
-                                    return;
-                                  }
-                                  
-                                  try {
-                                    const { error } = await supabase
-                                      .from('job_templates')
-                                      .delete()
-                                      .eq('id', template.id);
-                                    
-                                    if (error) throw error;
-                                    
-                                    setTemplates(prev => prev.filter(t => t.id !== template.id));
-                                    
-                                    // Clear selection if deleted template was selected
-                                    if (selectedTemplate?.id === template.id) {
-                                      setSelectedTemplate(null);
-                                    }
-                                    
-                                    toast({
-                                      title: "Mall borttagen",
-                                      description: `"${template.name}" har tagits bort.`
-                                    });
-                                  } catch (error) {
-                                    console.error('Error deleting template:', error);
-                                    toast({
-                                      title: "Kunde inte ta bort mallen",
-                                      variant: "destructive"
-                                    });
-                                  }
-                                }}
-                                variant="ghost"
-                                size="sm"
-                                className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0 flex-shrink-0"
-                              >
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setTemplateToDelete(template);
+                                  }}
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0 flex-shrink-0"
+                                >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
@@ -413,6 +384,61 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
           });
         }}
       />
+
+      {/* Delete Template Confirmation */}
+      <AlertDialog open={!!templateToDelete} onOpenChange={(open) => !open && setTemplateToDelete(null)}>
+        <AlertDialogContent className="bg-gradient-to-br from-slate-900 to-slate-800 border-slate-700">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white text-xl">Ta bort mall</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-300 text-base">
+              Är du säker på att du vill ta bort mallen <span className="font-semibold text-white">"{templateToDelete?.name}"</span>? 
+              Denna åtgärd kan inte ångras.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-slate-700 hover:bg-slate-600 text-white border-slate-600">
+              Avbryt
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (!templateToDelete?.id) return;
+                
+                try {
+                  const { error } = await supabase
+                    .from('job_templates')
+                    .delete()
+                    .eq('id', templateToDelete.id);
+                  
+                  if (error) throw error;
+                  
+                  setTemplates(prev => prev.filter(t => t.id !== templateToDelete.id));
+                  
+                  // Clear selection if deleted template was selected
+                  if (selectedTemplate?.id === templateToDelete.id) {
+                    setSelectedTemplate(null);
+                  }
+                  
+                  toast({
+                    title: "Mall borttagen",
+                    description: `"${templateToDelete.name}" har tagits bort.`
+                  });
+                } catch (error) {
+                  console.error('Error deleting template:', error);
+                  toast({
+                    title: "Kunde inte ta bort mallen",
+                    variant: "destructive"
+                  });
+                }
+                
+                setTemplateToDelete(null);
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Ta bort
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
