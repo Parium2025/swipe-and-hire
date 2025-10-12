@@ -218,12 +218,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-all duration-150 justify-between mt-1 text-left"
+                        className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20 justify-between h-12 text-base cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                       >
-                        <span className="truncate text-left flex-1 px-1">
+                        <span className="truncate text-left flex-1">
                           {selectedTemplate?.name || 'Ingen mall är vald'}
                         </span>
-                        <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2 transition-transform duration-150" />
+                        <ChevronDown className="h-4 w-4 flex-shrink-0 text-white/60" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent 
