@@ -155,11 +155,16 @@ const EmployerDashboard = () => {
 
   return (
     <div className="space-y-6 px-4 py-6 sm:px-6 pb-safe min-h-screen smooth-scroll touch-pan no-overscroll" style={{ WebkitOverflowScrolling: 'touch' }}>
-      <div className="text-center">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white">Mina jobbannonser</h1>
-        <p className="text-white/90 mt-1 text-sm sm:text-base">
-          Hantera dina publicerade tjänster
-        </p>
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="text-center sm:text-left">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Mina jobbannonser</h1>
+          <p className="text-white/90 mt-1 text-sm sm:text-base">
+            Hantera dina publicerade tjänster
+          </p>
+        </div>
+        <div className="flex-shrink-0">
+          <CreateJobSimpleDialog onJobCreated={fetchJobs} />
+        </div>
       </div>
 
       {/* Stats Overview - med skeleton när loading */}
@@ -241,9 +246,6 @@ const EmployerDashboard = () => {
               <p className="text-white mb-4">
                 Skapa din första jobbannons för att komma igång med rekrytering
               </p>
-              <div className="flex justify-center">
-                <CreateJobSimpleDialog onJobCreated={fetchJobs} />
-              </div>
             </CardContent>
           </Card>
         ) : (
