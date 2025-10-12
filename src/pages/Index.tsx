@@ -25,6 +25,7 @@ import SupportAdmin from '@/pages/SupportAdmin';
 import EmployerProfile from '@/pages/employer/EmployerProfile';
 import CompanyProfile from '@/pages/employer/CompanyProfile';
 import EmployerSettings from '@/pages/employer/EmployerSettings';
+import MyJobs from '@/pages/employer/MyJobs';
 import DeveloperControls from '@/components/DeveloperControls';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRightLeft } from 'lucide-react';
@@ -312,6 +313,8 @@ const Index = () => {
           return <Billing />;
         case '/support':
           return <Support />;
+        case '/jobs':
+          return <MyJobs />;
         case '/admin':
           if (user.email === 'fredrikandits@hotmail.com') {
             return <SupportAdmin />;
