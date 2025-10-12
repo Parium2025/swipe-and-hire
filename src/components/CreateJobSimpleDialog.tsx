@@ -227,7 +227,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent 
-                      className="w-80 bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-96 animate-scale-in"
+                      className="w-80 bg-gray-800 border-gray-600 shadow-xl z-50 rounded-md text-white overflow-hidden max-h-96"
                       side="bottom"
                       align="center"
                       alignOffset={0}
@@ -236,21 +236,21 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       onCloseAutoFocus={(e) => e.preventDefault()}
                     >
                       {/* Search input */}
-                      <div className="p-3 border-b border-slate-600/30 sticky top-0 bg-slate-800/95 backdrop-blur-md z-10">
+                      <div className="p-3 border-b border-gray-600 sticky top-0 bg-gray-800 z-10">
                         <div className="relative">
                           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
                           <Input
                             placeholder="Sök mall..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 pr-4 h-10 bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-lg"
+                            className="pl-10 pr-4 h-10 bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0 rounded-md"
                             autoComplete="off"
                           />
                         </div>
                       </div>
 
                       {/* Template options */}
-                      <div className="max-h-64 overflow-y-auto bg-slate-800/95">
+                      <div className="max-h-64 overflow-y-auto bg-gray-800">
                         {/* Create new template option */}
                         <DropdownMenuItem
                           onClick={() => {
@@ -258,7 +258,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             setOpen(false);
                             setShowTemplateWizard(true);
                           }}
-                          className="px-4 py-3 text-white hover:bg-slate-700/80 focus:bg-slate-700/80 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20"
+                          className="px-3 py-3 text-white hover:bg-gray-700 focus:bg-gray-700 focus:text-white cursor-pointer transition-colors border-b border-gray-700"
                         >
                           <div className="flex flex-col">
                             <span className="font-medium">+ Skapa en ny mall</span>
@@ -270,7 +270,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           <DropdownMenuItem
                             key={template.id}
                             onSelect={(e) => e.preventDefault()}
-                            className="px-4 py-3 text-white hover:bg-slate-700/80 focus:bg-slate-700/80 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20 last:border-b-0"
+                            className="px-3 py-3 text-white hover:bg-gray-700 focus:bg-gray-700 focus:text-white cursor-pointer transition-colors border-b border-gray-700 last:border-b-0"
                           >
                             <div className="flex items-center justify-between w-full gap-3">
                               <button
