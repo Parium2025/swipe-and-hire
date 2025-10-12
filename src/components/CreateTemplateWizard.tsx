@@ -895,9 +895,6 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
                     placeholder="t.ex. Standard Lagerarbetare"
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
-                  <p className="text-white/60 text-sm">
-                    Detta namn hjälper dig att känna igen mallen senare
-                  </p>
                 </div>
               </div>
             )}
