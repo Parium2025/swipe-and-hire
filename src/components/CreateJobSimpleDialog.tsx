@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Loader2, ChevronDown, Search, X, Trash2, Pencil } from 'lucide-react';
+import { Plus, Loader2, ChevronDown, Search, X, Trash2 } from 'lucide-react';
 import MobileJobWizard from '@/components/MobileJobWizard';
 import CreateTemplateWizard from '@/components/CreateTemplateWizard';
 
@@ -294,9 +294,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                   }}
                                   variant="ghost"
                                   size="sm"
-                                  className="text-white/70 hover:text-white hover:bg-white/15 h-8 w-8 p-0 flex-shrink-0"
+                                  className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8 p-0 flex-shrink-0"
                                 >
-                                  <Pencil className="h-4 w-4" />
+                                  ✏️
                                 </Button>
                                 <Button
                                   onClick={async (e) => {
