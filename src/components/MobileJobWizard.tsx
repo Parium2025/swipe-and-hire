@@ -327,6 +327,7 @@ useEffect(() => {
         };
       });
       setCustomQuestions(parsedQs);
+      setInitialQuestions(parsedQs);
     } catch (e: any) {
       toast({
         title: 'Kunde inte ladda annonsen',
@@ -352,6 +353,7 @@ useEffect(() => {
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingClose, setPendingClose] = useState(false);
   const [initialFormData, setInitialFormData] = useState<JobFormData | null>(null);
+  const [initialQuestions, setInitialQuestions] = useState<JobQuestion[] | null>(null);
   
   // Company profile dialog
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
@@ -689,24 +691,49 @@ useEffect(() => {
     }));
   }, [jobTitle, selectedTemplate]);
   
-  // Set initial form data for unsaved changes tracking
+  // Set initial snapshots for unsaved changes tracking
   useEffect(() => {
-    if (open && !initialFormData) {
+    if (!open) return;
+    if (!initialFormData) {
       setInitialFormData({ ...formData });
+    }
+    if (initialQuestions === null) {
+      setInitialQuestions([...customQuestions]);
+    }
+    if (!initialFormData || initialQuestions === null) {
       setHasUnsavedChanges(false);
     }
-  }, [open, formData, initialFormData]);
+  }, [open, formData, customQuestions, initialFormData, initialQuestions]);
   
-  // Track form changes
+  // Track form and questions changes
   useEffect(() => {
-    if (!initialFormData || !open) return;
-    
-    const hasChanges = Object.keys(formData).some(key => {
-      return formData[key as keyof JobFormData] !== initialFormData[key as keyof JobFormData];
-    }) || customQuestions.length > 0;
-    
-    setHasUnsavedChanges(hasChanges);
-  }, [formData, customQuestions, initialFormData, open]);
+    if (!open) return;
+
+    const formChanged = initialFormData
+      ? Object.keys(formData).some((key) => formData[key as keyof JobFormData] !== (initialFormData as any)[key])
+      : false;
+
+    const normalizeQuestions = (qs: JobQuestion[]) =>
+      qs
+        .map((q) => ({
+          id: q.id || null,
+          question_text: q.question_text,
+          question_type: q.question_type,
+          options: q.options || [],
+          is_required: q.is_required,
+          order_index: q.order_index ?? 0,
+          min_value: q.min_value ?? null,
+          max_value: q.max_value ?? null,
+          placeholder_text: q.placeholder_text ?? null,
+        }))
+        .sort((a, b) => (a.order_index - b.order_index) || String(a.id).localeCompare(String(b.id)));
+
+    const questionsChanged = initialQuestions
+      ? JSON.stringify(normalizeQuestions(customQuestions)) !== JSON.stringify(normalizeQuestions(initialQuestions))
+      : customQuestions.length > 0;
+
+    setHasUnsavedChanges(formChanged || questionsChanged);
+  }, [open, formData, customQuestions, initialFormData, initialQuestions]);
 
   // Show company tooltip only on step 4 (visible and persistent while on this step)
   useEffect(() => {
@@ -1507,6 +1534,7 @@ useEffect(() => {
       setJobImageDisplayUrl(null);
       setOriginalImageUrl(null);
       setInitialFormData(null);
+      setInitialQuestions(null);
       setHasUnsavedChanges(false);
       onOpenChange(false);
     }
@@ -1542,6 +1570,7 @@ useEffect(() => {
     setJobImageDisplayUrl(null);
     setOriginalImageUrl(null);
     setInitialFormData(null);
+    setInitialQuestions(null);
     setHasUnsavedChanges(false);
     setShowUnsavedDialog(false);
     setPendingClose(false);
@@ -1635,7 +1664,7 @@ useEffect(() => {
           description: "Dina ändringar är nu live."
         });
 
-        onOpenChange(false);
+        handleConfirmClose();
         onJobUpdated?.();
         return;
       }
@@ -1707,7 +1736,7 @@ useEffect(() => {
         description: "Din annons är nu publicerad och synlig för jobbsökare."
       });
 
-      handleClose();
+      handleConfirmClose();
       onJobCreated();
 
     } catch (error) {
