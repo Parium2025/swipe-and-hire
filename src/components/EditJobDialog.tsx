@@ -190,7 +190,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
             Uppdatera informationen om tjänsten och hantera ansökningsfrågor.
           </DialogDescription>
         </DialogHeader>
-        
+        {initialLoading ? (
+          <div className="flex items-center justify-center py-12 text-white/80">
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Laddar annons...
+          </div>
+        ) : (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="basic">Grundinformation</TabsTrigger>
@@ -242,7 +246,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
               <div className="space-y-2">
                 <Label htmlFor="edit_employment_type">Anställningsform</Label>
-                <Select value={formData.employment_type || ''} onValueChange={(value) => handleInputChange('employment_type', value)}>
+                <Select value={formData.employment_type || undefined} onValueChange={(value) => handleInputChange('employment_type', value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Välj anställningsform" />
                   </SelectTrigger>
@@ -363,6 +367,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
             </div>
           </TabsContent>
         </Tabs>
+        )}
       </DialogContent>
     </Dialog>
   );
