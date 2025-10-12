@@ -2275,9 +2275,18 @@ const MobileJobWizard = ({
                                <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white/80 hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
                              </div>
 
-                              {/* Scrollable content */}
+                            {/* Scrollable content */}
                             <div 
                               className="px-2 py-2 overflow-y-auto relative z-10 custom-scrollbar flex-1"
+                              onClick={(e) => {
+                                // Close all dropdowns when clicking anywhere in the scroll area
+                                const dropdowns = e.currentTarget.querySelectorAll('.bg-gray-800.border.border-gray-600');
+                                dropdowns.forEach(dropdown => {
+                                  if (!dropdown.classList.contains('hidden')) {
+                                    dropdown.classList.add('hidden');
+                                  }
+                                });
+                              }}
                               onScroll={(e) => {
                                 const target = e.currentTarget;
                                 setIsScrolledTop(target.scrollTop === 0);
@@ -2377,7 +2386,7 @@ const MobileJobWizard = ({
 
 
                                 {/* Arbetsplats */}
-                                <div className="bg-white/10 rounded-lg p-2 border border_white/20">
+                                <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                   <h5 className="text-xs font-medium text-white mb-1 flex items-center">
                                     <MapPin className="h-2 w-2 mr-1 text-white" />
                                     Arbetsplats
@@ -2578,7 +2587,10 @@ const MobileJobWizard = ({
                                                   <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-3 w-3 text-white/60 pointer-events-none" />
                                                 </button>
                                                 
-                                                <div className="hidden bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-48 overflow-y-auto shadow-lg">
+                                                <div 
+                                                  className="hidden bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-48 overflow-y-auto shadow-lg absolute z-50 w-full"
+                                                  onClick={(e) => e.stopPropagation()}
+                                                >
                                                   {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => (
                                                     <div
                                                       key={optIndex}
