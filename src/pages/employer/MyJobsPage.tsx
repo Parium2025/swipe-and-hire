@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import EmployerSidebar from "@/components/EmployerSidebar";
-import { AnimatedBackground } from "@/components/AnimatedBackground";
 import MyJobs from "@/pages/employer/MyJobs";
 import DeveloperControls from "@/components/DeveloperControls";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,7 +15,6 @@ const MyJobsPage = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full overflow-x-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <AnimatedBackground />
         <EmployerSidebar />
         <div className="flex-1 flex flex-col overflow-x-hidden relative z-10">
           <header className="sticky top-0 z-40 h-16 flex items-center justify-between border-b border-white/20 bg-white/10 backdrop-blur-md px-6">

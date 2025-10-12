@@ -19,7 +19,6 @@ import { UnsavedChangesProvider } from "@/hooks/useUnsavedChanges";
 import { Header } from "@/components/Header";
 import AuthTokenBridge from "./components/AuthTokenBridge";
 import { useDevice } from "@/hooks/use-device";
-import MyJobsPage from "./pages/employer/MyJobsPage";
 
 const queryClient = new QueryClient();
 
@@ -67,7 +66,7 @@ const App = () => {
                   <Route path="/billing" element={<Index />} />
                   <Route path="/payment" element={<Index />} />
                   <Route path="/dashboard" element={<Index />} />
-                  <Route path="/jobs" element={<MyJobsPage />} />
+                  <Route path="/jobs" element={<Index />} />
                   <Route path="/candidates" element={<Index />} />
                   <Route path="/messages" element={<Index />} />
                   <Route path="/company-profile" element={<Index />} />

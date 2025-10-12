@@ -263,7 +263,11 @@ const CompanyReviews = () => {
           <div className="mb-6">
             <div className="flex items-center gap-4">
               <Avatar className="h-16 w-16">
-                <AvatarImage src={company.company_logo_url} alt={company.company_name} />
+                <AvatarImage 
+                  src={company.company_logo_url} 
+                  alt={company.company_name}
+                  loading="lazy"
+                />
                 <AvatarFallback>
                   <Building2 className="h-8 w-8" />
                 </AvatarFallback>
