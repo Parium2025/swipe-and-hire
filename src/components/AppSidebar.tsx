@@ -133,7 +133,7 @@ export function AppSidebar() {
       style={{
         background: 'linear-gradient(180deg, hsl(215 80% 18%) 0%, hsl(215 70% 22%) 100%)'
       }}
-      collapsible="icon"
+      collapsible="offcanvas"
     >
       <SidebarContent className="p-4">
         {/* User Profile Section */}

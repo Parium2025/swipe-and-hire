@@ -252,7 +252,7 @@ const Index = () => {
     };
 
     return (
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={false}>
         <div className="min-h-screen flex w-full overflow-x-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
           <AnimatedBackground />
           {uiReady ? <AppSidebar /> : null}
@@ -325,7 +325,7 @@ const Index = () => {
     };
 
     return (
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={false}>
         <div className="min-h-screen flex w-full overflow-x-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
           <AnimatedBackground />
           {uiReady ? <EmployerSidebar /> : null}
