@@ -292,22 +292,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 )}
               </div>
 
-              {templates.length > 0 && (
-                <div className="text-center pt-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setOpen(false);
-                      // TODO: Open template management
-                    }}
-                    className="bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:text-white text-xs"
-                  >
-                    Lägg till en ny mall
-                  </Button>
-                </div>
-              )}
-
               <div className="flex gap-2 pt-2">
                 <Button 
                   onClick={handleCreateJob}
