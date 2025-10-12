@@ -233,7 +233,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       onCloseAutoFocus={(e) => e.preventDefault()}
                     >
                       {/* Search input */}
-                      <div className="p-3 border-b border-slate-600/30 sticky top-0 bg-slate-700/95 backdrop-blur-md">
+                      <div className="p-3 border-b border-slate-600/30 sticky top-0 bg-slate-800/95 backdrop-blur-md z-10">
                         <div className="relative">
                           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
                           <Input
@@ -247,7 +247,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       </div>
 
                       {/* Template options */}
-                      <div className="max-h-64 overflow-y-auto">
+                      <div className="max-h-64 overflow-y-auto bg-slate-800/95">
                         {/* Create new template option */}
                         <DropdownMenuItem
                           onClick={() => {
@@ -262,7 +262,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             <span className="text-xs text-white/60">Skapa en återanvändbar jobbmall</span>
                           </div>
                         </DropdownMenuItem>
-                        
                         
                         {filteredTemplates.map((template) => (
                           <DropdownMenuItem
