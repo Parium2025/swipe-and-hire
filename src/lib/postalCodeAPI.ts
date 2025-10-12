@@ -65,17 +65,26 @@ const localPostalCodes: Record<string, PostalCodeResponse> = {
   '97125': { postalCode: '971 25', city: 'Luleå', municipality: 'Luleå', county: 'Norrbottens län', area: 'Centrum' }
 };
 
-// Försök med flera API-källor
 // Komplett svensk postnummer-databas (16,000+ postnummer)
 let swedishPostalDatabase: Record<string, string> | null = null;
+let databaseLoadingPromise: Promise<Record<string, string>> | null = null;
 
-// Ladda komplett svensk postnummer-databas
+// Ladda databasen direkt vid start för snabbare sökningar
+function initializePostalDatabase() {
+  if (!databaseLoadingPromise) {
+    databaseLoadingPromise = loadSwedishPostalDatabase();
+  }
+  return databaseLoadingPromise;
+}
+
+// Ladda komplett svensk postnummer-databas (körs bara EN gång)
 async function loadSwedishPostalDatabase(): Promise<Record<string, string>> {
   if (swedishPostalDatabase) {
     return swedishPostalDatabase;
   }
 
   try {
+    console.log('📚 Loading Swedish postal database...');
     const response = await fetch('/swedish-postal-codes.csv');
     const csvText = await response.text();
     const lines = csvText.trim().split('\n');
@@ -88,7 +97,6 @@ async function loadSwedishPostalDatabase(): Promise<Record<string, string>> {
       if (line) {
         const [zipCode, city] = line.split(',');
           if (zipCode && city) {
-            // Formatera postnummer till 5 siffror utan mellanslag
             const cleanZip = zipCode.replace(/\D/g, '');
             if (cleanZip.length === 5) {
               swedishPostalDatabase[cleanZip] = formatCityName(city.replace(/"/g, ''));
@@ -97,7 +105,7 @@ async function loadSwedishPostalDatabase(): Promise<Record<string, string>> {
       }
     }
     
-    console.log(`✅ Loaded ${Object.keys(swedishPostalDatabase).length} Swedish postal codes from complete database`);
+    console.log(`✅ Loaded ${Object.keys(swedishPostalDatabase).length} postal codes - ready for instant search!`);
     return swedishPostalDatabase;
   } catch (error) {
     console.error('❌ Failed to load Swedish postal database:', error);
@@ -106,72 +114,38 @@ async function loadSwedishPostalDatabase(): Promise<Record<string, string>> {
   }
 }
 
+// Initiera databasen direkt när modulen laddas
+initializePostalDatabase();
+
 async function tryMultipleApis(postalCode: string): Promise<PostalCodeResponse | null> {
   const cleanedCode = postalCode.replace(/\s+/g, '');
   
-  // 1. Försök komplett svensk databas först (16,000+ postnummer)
+  // Använd cachad databas (laddades vid sidstart)
   try {
-    const database = await loadSwedishPostalDatabase();
-    const city = database[cleanedCode];
-    if (city) {
-      return {
-        postalCode: formatPostalCodeDisplay(cleanedCode),
-        city: formatCityName(city),
-        municipality: formatCityName(city),
-        county: getCountyByPostalCode(cleanedCode),
-        area: formatCityName(city)
-      };
-    }
-  } catch (error) {
-    console.log('✅ Swedish postal database failed, trying PAPILITE...');
-  }
-  
-  // 2. Försök PAPILITE API (proffsig svensk tjänst)
-  try {
-    const response = await fetch(`https://api.papilite.se/v1/se/${cleanedCode}`);
-    if (response.ok) {
-      const data = await response.json();
-      if (data && data.city) {
+    const database = await databaseLoadingPromise;
+    if (database) {
+      const city = database[cleanedCode];
+      if (city) {
         return {
           postalCode: formatPostalCodeDisplay(cleanedCode),
-          city: formatCityName(data.city),
-          municipality: formatCityName(data.municipality || data.city),
-          county: data.county || getCountyByPostalCode(cleanedCode),
-          area: formatCityName(data.city)
+          city: formatCityName(city),
+          municipality: formatCityName(city),
+          county: getCountyByPostalCode(cleanedCode),
+          area: formatCityName(city)
         };
       }
     }
   } catch (error) {
-    console.log('📡 PAPILITE failed, trying Zippopotam...');
-  }
-
-  // 3. Försök Zippopotam
-  try {
-    const response = await fetch(`https://api.zippopotam.us/SE/${cleanedCode}`);
-    if (response.ok) {
-      const data = await response.json();
-      if (data && data.places && data.places.length > 0) {
-        const place = data.places[0];
-        return {
-          postalCode: formatPostalCodeDisplay(data['post code']),
-          city: formatCityName(place['place name']),
-          municipality: formatCityName(place['place name']),
-          county: place['state'],
-          area: formatCityName(place['place name'])
-        };
-      }
-    }
-  } catch (error) {
-    console.log('🌍 Zippopotam failed, trying local database...');
+    console.log('⚠️ Swedish postal database error, using fallback...');
   }
   
-  // 4. Försök lokal databas (begränsad)
+  // Fallback till lokal databas
   const localData = localPostalCodes[cleanedCode];
   if (localData) {
     return localData;
   }
   
-  // 5. Sista utvägen: regionuppskattning
+  // Sista utvägen: regionuppskattning
   const regionCode = cleanedCode.substring(0, 3);
   const regionEstimate = getRegionEstimate(regionCode);
   if (regionEstimate) {
