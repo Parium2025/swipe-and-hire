@@ -40,10 +40,6 @@ const MyJobs = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  useEffect(() => {
-    console.log('MyJobs: state', { editDialogOpen, editingJobId: editingJob?.id });
-  }, [editDialogOpen, editingJob]);
-
   const fetchJobs = async () => {
     if (!user) return;
 
@@ -144,7 +140,6 @@ const MyJobs = () => {
   };
 
   const handleEditJob = (job: JobPosting) => {
-    console.log('MyJobs: Edit clicked for job', job.id);
     setEditingJob(job);
     setEditDialogOpen(true);
   };

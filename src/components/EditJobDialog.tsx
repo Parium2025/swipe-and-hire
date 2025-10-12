@@ -12,7 +12,6 @@ import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { Loader2 } from 'lucide-react';
 import JobQuestionsManager from '@/components/JobQuestionsManager';
-import MobileJobWizard from '@/components/MobileJobWizard';
 
 interface JobPosting {
   id: string;
@@ -27,7 +26,6 @@ interface JobPosting {
   work_schedule?: string;
   contact_email?: string;
   application_instructions?: string;
-  is_active?: boolean;
 }
 
 interface JobFormData {
@@ -53,9 +51,6 @@ interface EditJobDialogProps {
 
 const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogProps) => {
   const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(false);
-  const [activeJobId, setActiveJobId] = useState<string | null>(null);
-  const [activeJob, setActiveJob] = useState<JobPosting | null>(null);
   const [activeTab, setActiveTab] = useState("basic");
   const [formData, setFormData] = useState<JobFormData>({
     title: '',
@@ -74,71 +69,24 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Load fresh job data when dialog opens
+  // Update form data when job changes
   useEffect(() => {
-    const load = async () => {
-      if (!open || !job?.id) return;
-      setInitialLoading(true);
-      setActiveJobId(job.id);
-      try {
-        const { data, error } = await supabase
-          .from('job_postings')
-          .select('*')
-          .eq('id', job.id)
-          .maybeSingle();
-        if (error) throw error;
-        const j = (data as any) as JobPosting;
-        setActiveJob(j);
-        setFormData({
-          title: j.title || '',
-          description: j.description || '',
-          requirements: j.requirements || '',
-          location: j.location || '',
-          salary_min: j.salary_min?.toString() || '',
-          salary_max: j.salary_max?.toString() || '',
-          employment_type: j.employment_type || '',
-          positions_count: (j as any).positions_count?.toString?.() || '1',
-          work_schedule: j.work_schedule || '',
-          contact_email: j.contact_email || '',
-          application_instructions: j.application_instructions || ''
-        });
-
-        // Pause the ad while editing if it was active
-        try {
-          if ((j as any).is_active) {
-            const { error: deactErr } = await supabase
-              .from('job_postings')
-              .update({ is_active: false, updated_at: new Date().toISOString() })
-              .eq('id', j.id);
-            if (!deactErr) {
-              toast({
-                title: 'Annons pausad',
-                description: 'Annonsen är inaktiv under redigering. Spara för att publicera igen.'
-              });
-            }
-          }
-        } catch (pauseErr) {
-          console.error('Kunde inte pausa annonsen vid redigering', pauseErr);
-        }
-      } catch (e: any) {
-        console.error('Failed to load job for editing', e);
-        toast({
-          title: 'Kunde inte ladda annonsen',
-          description: e?.message || 'Försök igen om en stund.',
-          variant: 'destructive'
-        });
-      } finally {
-        setInitialLoading(false);
-      }
-    };
-    load();
-  }, [open, job?.id]);
-
-  useEffect(() => {
-    if (open) {
-      console.log('EditJobDialog: open', open, 'jobId', job?.id);
+    if (job) {
+      setFormData({
+        title: job.title || '',
+        description: job.description || '',
+        requirements: job.requirements || '',
+        location: job.location || '',
+        salary_min: job.salary_min?.toString() || '',
+        salary_max: job.salary_max?.toString() || '',
+        employment_type: job.employment_type || '',
+        positions_count: job.positions_count?.toString() || '1',
+        work_schedule: job.work_schedule || '',
+        contact_email: job.contact_email || '',
+        application_instructions: job.application_instructions || ''
+      });
     }
-  }, [open, job?.id]);
+  }, [job]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,7 +107,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         work_schedule: formData.work_schedule || null,
         contact_email: formData.contact_email || null,
         application_instructions: formData.application_instructions || null,
-        is_active: true,
         updated_at: new Date().toISOString()
       };
 
@@ -211,11 +158,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
             Uppdatera informationen om tjänsten och hantera ansökningsfrågor.
           </DialogDescription>
         </DialogHeader>
-        {initialLoading ? (
-          <div className="flex items-center justify-center py-12 text-white/80">
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Laddar annons...
-          </div>
-        ) : (
+        
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="basic">Grundinformation</TabsTrigger>
@@ -267,12 +210,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
               <div className="space-y-2">
                 <Label htmlFor="edit_employment_type">Anställningsform</Label>
-                <Select value={formData.employment_type || undefined} onValueChange={(value) => handleInputChange('employment_type', value)}>
+                <Select value={formData.employment_type || ''} onValueChange={(value) => handleInputChange('employment_type', value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Välj anställningsform" />
                   </SelectTrigger>
                   <SelectContent>
-                    
+                    <SelectItem value="">Ej specificerat</SelectItem>
                     {EMPLOYMENT_TYPES.map(type => (
                       <SelectItem key={type.value} value={type.value}>
                         {type.label}
@@ -352,7 +295,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                   className="flex-1"
                 >
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {loading ? 'Uppdaterar...' : 'Spara och publicera igen'}
+                  {loading ? 'Uppdaterar...' : 'Spara ändringar'}
                 </Button>
                 <Button 
                   type="button" 
@@ -388,7 +331,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
             </div>
           </TabsContent>
         </Tabs>
-        )}
       </DialogContent>
     </Dialog>
   );

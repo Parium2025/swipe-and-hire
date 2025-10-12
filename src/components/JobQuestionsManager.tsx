@@ -52,30 +52,15 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
 
       if (error) throw error;
 
-      const formattedQuestions = data.map(q => {
-        let options: string[] | undefined = undefined;
-        const raw = (q as any).options;
-        try {
-          if (Array.isArray(raw)) {
-            options = raw as string[];
-          } else if (typeof raw === 'string') {
-            options = JSON.parse(raw);
-          } else if (raw && typeof raw === 'object') {
-            options = raw as string[];
-          }
-        } catch (parseErr) {
-          console.warn('Kunde inte tolka options', parseErr, raw);
-        }
-        return {
-          id: (q as any).id,
-          question_text: (q as any).question_text,
-          description: (q as any).description || '',
-          question_type: (q as any).question_type as JobQuestion['question_type'],
-          options,
-          is_required: (q as any).is_required,
-          order_index: (q as any).order_index
-        } as JobQuestion;
-      });
+      const formattedQuestions = data.map(q => ({
+        id: q.id,
+        question_text: q.question_text,
+        description: q.description || '',
+        question_type: q.question_type as JobQuestion['question_type'],
+        options: q.options ? JSON.parse(q.options as string) : undefined,
+        is_required: q.is_required,
+        order_index: q.order_index
+      }));
 
       setQuestions(formattedQuestions);
     } catch (error) {
@@ -170,9 +155,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
           question_text: q.question_text.trim(),
           description: q.description?.trim() || null,
           question_type: q.question_type,
-          options: q.question_type === 'multiple_choice' 
-            ? (q.options || []).filter(o => o && o.trim().length > 0)
-            : null,
+          options: q.options && q.options.length > 0 ? JSON.stringify(q.options.filter(o => o && o.trim().length > 0)) : null,
           is_required: q.is_required,
           order_index: q.order_index
         }));

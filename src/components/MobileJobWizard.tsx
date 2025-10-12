@@ -117,10 +117,6 @@ interface MobileJobWizardProps {
   jobTitle: string;
   selectedTemplate: JobTemplate | null;
   onJobCreated: () => void;
-  // Edit mode support
-  mode?: 'create' | 'edit';
-  editJobId?: string;
-  onJobUpdated?: () => void;
 }
 
 // Sortable Question Item Component
@@ -214,10 +210,7 @@ const MobileJobWizard = ({
   onOpenChange, 
   jobTitle, 
   selectedTemplate, 
-  onJobCreated,
-  mode = 'create',
-  editJobId,
-  onJobUpdated
+  onJobCreated 
 }: MobileJobWizardProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   
@@ -236,97 +229,12 @@ const MobileJobWizard = ({
     console.log('MobileJobWizard: open changed', open);
   }, [open]);
   
-// Always start from step 0 when opening
-useEffect(() => {
-  if (open) {
-    setCurrentStep(0); // Always start from beginning
-  }
-}, [open]);
-
-// Load existing job + questions in edit mode so layout/struktur är identisk
-useEffect(() => {
-  const loadForEdit = async () => {
-    if (!(open && mode === 'edit' && editJobId)) return;
-    try {
-      const { data: job, error } = await supabase
-        .from('job_postings')
-        .select('*')
-        .eq('id', editJobId)
-        .single();
-      if (error) throw error;
-
-      // Pause active ad while editing
-      try {
-        if ((job as any).is_active) {
-          await supabase
-            .from('job_postings')
-            .update({ is_active: false, updated_at: new Date().toISOString() })
-            .eq('id', editJobId);
-          toast({
-            title: 'Annons pausad',
-            description: 'Annonsen är inaktiv under redigering.'
-          });
-        }
-      } catch (pauseErr) {
-        console.warn('Could not pause job during edit', pauseErr);
-      }
-
-      setFormData(prev => ({
-        ...prev,
-        title: (job as any).title || '',
-        description: (job as any).description || '',
-        requirements: (job as any).requirements || '',
-        location: (job as any).location || '',
-        salary_min: (job as any).salary_min ? String((job as any).salary_min) : '',
-        salary_max: (job as any).salary_max ? String((job as any).salary_max) : '',
-        employment_type: (job as any).employment_type || '',
-        positions_count: ((job as any).positions_count ?? '').toString(),
-        work_schedule: (job as any).work_schedule || '',
-        contact_email: (job as any).contact_email || '',
-        application_instructions: (job as any).application_instructions || '',
-        workplace_name: (job as any).workplace_name || '',
-        workplace_address: (job as any).workplace_address || '',
-        workplace_postal_code: (job as any).workplace_postal_code || '',
-        workplace_city: (job as any).workplace_city || '',
-      }));
-
-      const { data: qs, error: qErr } = await supabase
-        .from('job_questions')
-        .select('*')
-        .eq('job_id', editJobId)
-        .order('order_index');
-      if (qErr) throw qErr;
-
-      const parsedQs = (qs || []).map((q: any, idx: number) => {
-        let options: string[] | undefined = undefined;
-        try {
-          if (Array.isArray(q.options)) options = q.options;
-          else if (typeof q.options === 'string') options = JSON.parse(q.options);
-          else if (q.options && typeof q.options === 'object') options = q.options as string[];
-        } catch {}
-        return {
-          id: q.id,
-          question_text: q.question_text,
-          question_type: q.question_type,
-          options,
-          is_required: q.is_required,
-          order_index: q.order_index ?? idx,
-          placeholder_text: q.placeholder_text || undefined,
-          min_value: q.min_value || undefined,
-          max_value: q.max_value || undefined,
-        };
-      });
-      setCustomQuestions(parsedQs);
-    } catch (e: any) {
-      toast({
-        title: 'Kunde inte ladda annonsen',
-        description: e?.message || 'Försök igen om en stund.',
-        variant: 'destructive'
-      });
+  // Always start from step 0 when opening
+  useEffect(() => {
+    if (open) {
+      setCurrentStep(0); // Always start from beginning
     }
-  };
-  loadForEdit();
-}, [open, mode, editJobId]);
+  }, [open]);
   
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
@@ -1571,59 +1479,6 @@ useEffect(() => {
         is_active: true
       };
 
-      // EDIT MODE: update existing posting + replace questions
-      if (mode === 'edit' && editJobId) {
-        const { error: updateError } = await supabase
-          .from('job_postings')
-          .update(jobData)
-          .eq('id', editJobId);
-
-        if (updateError) {
-          toast({
-            title: "Fel vid uppdatering av annons",
-            description: updateError.message,
-            variant: "destructive"
-          });
-          return;
-        }
-
-        // Replace existing questions with current set
-        try {
-          await supabase.from('job_questions').delete().eq('job_id', editJobId);
-          const questionData = customQuestions.map(q => ({
-            job_id: editJobId,
-            question_text: q.question_text,
-            question_type: q.question_type,
-            options: q.options || null,
-            is_required: q.is_required,
-            order_index: q.order_index,
-            placeholder_text: q.placeholder_text || null,
-            min_value: q.min_value || null,
-            max_value: q.max_value || null
-          }));
-          if (questionData.length > 0) {
-            const { error: questionsError } = await supabase
-              .from('job_questions')
-              .insert(questionData);
-            if (questionsError) {
-              console.error('Error saving questions (edit):', questionsError);
-            }
-          }
-        } catch (qe) {
-          console.error('Error replacing questions in edit mode:', qe);
-        }
-
-        toast({
-          title: "Annons uppdaterad och publicerad igen!",
-          description: "Dina ändringar är nu live."
-        });
-
-        onOpenChange(false);
-        onJobUpdated?.();
-        return;
-      }
-
-      // CREATE MODE: insert new posting
       const { data: jobPost, error } = await supabase
         .from('job_postings')
         .insert([jobData])
