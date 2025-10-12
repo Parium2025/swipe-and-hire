@@ -140,6 +140,7 @@ const MyJobs = () => {
   };
 
   const handleEditJob = (job: JobPosting) => {
+    console.log('MyJobs: Edit clicked for job', job.id);
     setEditingJob(job);
     setEditDialogOpen(true);
   };

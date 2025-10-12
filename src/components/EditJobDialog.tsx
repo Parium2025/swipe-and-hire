@@ -88,6 +88,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     }
   }, [job]);
 
+  useEffect(() => {
+    if (open) {
+      console.log('EditJobDialog: open', open, 'jobId', job?.id);
+    }
+  }, [open, job?.id]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !job) return;
