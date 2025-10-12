@@ -72,6 +72,7 @@ interface CreateTemplateWizardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onTemplateCreated: () => void;
+  templateToEdit?: any;
 }
 
 // Sortable Question Item Component
@@ -157,7 +158,7 @@ const SortableQuestionItem = ({
   );
 };
 
-const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateTemplateWizardProps) => {
+const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateToEdit }: CreateTemplateWizardProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
@@ -248,6 +249,66 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
       fetchProfile();
     }
   }, [user, open]);
+
+  // Load template data when editing
+  useEffect(() => {
+    if (templateToEdit && open) {
+      setFormData({
+        name: templateToEdit.name || '',
+        title: templateToEdit.title || '',
+        occupation: templateToEdit.occupation || '',
+        description: templateToEdit.description || '',
+        pitch: templateToEdit.pitch || '',
+        employment_type: templateToEdit.employment_type || '',
+        work_schedule: templateToEdit.work_schedule || '',
+        salary_type: templateToEdit.salary_type || '',
+        salary_min: templateToEdit.salary_min?.toString() || '',
+        salary_max: templateToEdit.salary_max?.toString() || '',
+        positions_count: templateToEdit.positions_count || '1',
+        work_location_type: templateToEdit.work_location_type || 'på-plats',
+        remote_work_possible: templateToEdit.remote_work_possible || 'nej',
+        workplace_name: templateToEdit.workplace_name || '',
+        workplace_address: templateToEdit.workplace_address || '',
+        workplace_postal_code: templateToEdit.workplace_postal_code || '',
+        workplace_city: templateToEdit.workplace_city || '',
+        requirements: templateToEdit.requirements || '',
+        contact_email: templateToEdit.contact_email || '',
+        application_instructions: templateToEdit.application_instructions || '',
+        location: ''
+      });
+      
+      if (templateToEdit.questions && Array.isArray(templateToEdit.questions)) {
+        setCustomQuestions(templateToEdit.questions);
+      }
+    } else if (!open) {
+      // Reset when dialog closes
+      setFormData({
+        name: '',
+        title: '',
+        description: '',
+        requirements: '',
+        location: '',
+        occupation: '',
+        salary_min: '',
+        salary_max: '',
+        employment_type: '',
+        salary_type: '',
+        positions_count: '1',
+        work_location_type: 'på-plats',
+        remote_work_possible: 'nej',
+        workplace_name: '',
+        workplace_address: '',
+        workplace_postal_code: '',
+        workplace_city: '',
+        work_schedule: '',
+        contact_email: '',
+        application_instructions: '',
+        pitch: ''
+      });
+      setCustomQuestions([]);
+      setCurrentStep(0);
+    }
+  }, [templateToEdit, open]);
 
   const steps = [
     {
@@ -538,23 +599,46 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
         is_default: false
       };
 
-      const { error } = await supabase
-        .from('job_templates')
-        .insert([templateData]);
+      if (templateToEdit) {
+        // Update existing template
+        const { error } = await supabase
+          .from('job_templates')
+          .update(templateData)
+          .eq('id', templateToEdit.id);
 
-      if (error) {
+        if (error) {
+          toast({
+            title: "Fel vid uppdatering av mall",
+            description: error.message,
+            variant: "destructive"
+          });
+          return;
+        }
+
         toast({
-          title: "Fel vid skapande av mall",
-          description: error.message,
-          variant: "destructive"
+          title: "Mall uppdaterad!",
+          description: `Mallen "${formData.name}" har uppdaterats.`
         });
-        return;
-      }
+      } else {
+        // Create new template
+        const { error } = await supabase
+          .from('job_templates')
+          .insert([templateData]);
 
-      toast({
-        title: "Mall skapad!",
-        description: `Mallen "${formData.name}" har skapats.`
-      });
+        if (error) {
+          toast({
+            title: "Fel vid skapande av mall",
+            description: error.message,
+            variant: "destructive"
+          });
+          return;
+        }
+
+        toast({
+          title: "Mall skapad!",
+          description: `Mallen "${formData.name}" har skapats.`
+        });
+      }
 
       handleClose();
       onTemplateCreated();
@@ -705,7 +789,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
           <div className="flex items-center justify-between p-4 border-b border-white/20 flex-shrink-0 rounded-t-[24px] bg-background/10">
             <DialogHeader className="flex-1">
               <DialogTitle className="text-white text-lg">
-                {showQuestionForm ? 'Lägg till fråga' : steps[currentStep].title}
+                {showQuestionForm ? 'Lägg till fråga' : (templateToEdit ? 'Redigera mall' : steps[currentStep].title)}
               </DialogTitle>
               {!showQuestionForm && (
                 <div className="text-sm text-white">
@@ -1261,7 +1345,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
                     className="flex-1"
                   >
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Skapa mall
+                    {templateToEdit ? 'Uppdatera mall' : 'Skapa mall'}
                   </Button>
                 )}
               </div>

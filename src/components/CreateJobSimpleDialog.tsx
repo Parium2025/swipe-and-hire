@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Loader2, ChevronDown, Search, X, Trash2 } from 'lucide-react';
+import { Plus, Loader2, ChevronDown, Search, X, Trash2, Pencil } from 'lucide-react';
 import MobileJobWizard from '@/components/MobileJobWizard';
 import CreateTemplateWizard from '@/components/CreateTemplateWizard';
 
@@ -45,6 +45,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const [templateMenuOpen, setTemplateMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showTemplateWizard, setShowTemplateWizard] = useState(false);
+  const [templateToEdit, setTemplateToEdit] = useState<JobTemplate | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -282,8 +283,23 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                 </div>
                                 <span className="text-xs text-white/60 mt-1">{template.title}</span>
                               </button>
-                              <Button
-                                onClick={async (e) => {
+                              <div className="flex gap-1 flex-shrink-0">
+                                <Button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setTemplateToEdit(template);
+                                    setTemplateMenuOpen(false);
+                                    setOpen(false);
+                                    setShowTemplateWizard(true);
+                                  }}
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-white/70 hover:text-white hover:bg-white/15 h-8 w-8 p-0 flex-shrink-0"
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  onClick={async (e) => {
                                   e.stopPropagation();
                                   if (!template.id) return;
                                   
@@ -322,8 +338,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                 size="sm"
                                 className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0 flex-shrink-0"
                               >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </div>
                           </DropdownMenuItem>
                         ))}
@@ -380,12 +397,19 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       {/* Create Template Wizard */}
       <CreateTemplateWizard
         open={showTemplateWizard}
-        onOpenChange={setShowTemplateWizard}
+        onOpenChange={(isOpen) => {
+          setShowTemplateWizard(isOpen);
+          if (!isOpen) {
+            setTemplateToEdit(null);
+          }
+        }}
+        templateToEdit={templateToEdit}
         onTemplateCreated={() => {
           fetchTemplates();
+          setTemplateToEdit(null);
           toast({
-            title: "Mall skapad!",
-            description: "Din nya mall är nu tillgänglig."
+            title: templateToEdit ? "Mall uppdaterad!" : "Mall skapad!",
+            description: templateToEdit ? "Din mall har uppdaterats." : "Din nya mall är nu tillgänglig."
           });
         }}
       />
