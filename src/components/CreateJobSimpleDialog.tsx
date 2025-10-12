@@ -71,17 +71,13 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         return;
       }
 
-      console.log('📋 Hämtade mallar:', data?.length || 0, data);
       setTemplates((data as any) || []);
       
       // Set default template if available and no title is set
       const defaultTemplate = data?.find(t => t.is_default);
       if (defaultTemplate && !jobTitle) {
-        console.log('✅ Satte standardmall:', defaultTemplate.name);
         setSelectedTemplate(defaultTemplate as any);
         setJobTitle(defaultTemplate.title);
-      } else {
-        console.log('ℹ️ Ingen standardmall att sätta', { hasDefault: !!defaultTemplate, hasTitle: !!jobTitle });
       }
     } catch (error) {
       toast({

@@ -24,10 +24,10 @@ export function UnsavedChangesDialog({
 }: UnsavedChangesDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-md bg-gray-800/95 backdrop-blur-md border-white/10 text-white">
+      <AlertDialogContent className="max-w-md bg-white/10 backdrop-blur-sm border-white/20 text-white shadow-lg">
         <AlertDialogHeader>
           <AlertDialogTitle>Osparade ändringar</AlertDialogTitle>
-          <AlertDialogDescription className="text-white/90">
+          <AlertDialogDescription className="text-white">
             Du har osparade ändringar. Är du säker på att du vill lämna sidan utan att spara?
           </AlertDialogDescription>
         </AlertDialogHeader>
