@@ -987,11 +987,11 @@ const MobileJobWizard = ({
       fields: ['work_location_type', 'remote_work_possible', 'workplace_name', 'workplace_address', 'workplace_postal_code', 'workplace_city']
     },
     {
-      title: "Förhandsvisning",
+      title: "Extra frågor",
       fields: []
     },
     {
-      title: "Kontakt",
+      title: "Förhandsvisning",
       fields: ['contact_email', 'requirements']
     }
   ];
