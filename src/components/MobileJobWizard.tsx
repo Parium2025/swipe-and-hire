@@ -16,7 +16,7 @@ import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES, getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users, GripVertical, ArrowDown } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users, GripVertical, ArrowDown, Pencil } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
@@ -189,7 +189,7 @@ const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQuestionIt
             size="sm"
             className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
           >
-            ✏️
+            <Pencil className="h-4 w-4" />
           </Button>
           <Button
             onClick={() => onDelete(question.id!)}
