@@ -1153,22 +1153,34 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
             {!showQuestionForm && currentStep === 3 && (
               <div className="space-y-6">
                 {/* Rubrik för automatiska frågor */}
-                <h3 className="text-white/90 text-sm font-medium text-center">
+                <h3 className="text-white text-sm font-medium text-center">
                   Dessa frågor fylls automatiskt från jobbsökarens profil
                 </h3>
 
                 {/* Automatiska frågor info */}
                 <div className="bg-white/5 rounded-lg p-4 border border-white/20">
-                  <div className="text-white text-sm space-y-1">
-                    <p>• Namn och efternamn</p>
-                    <p>• Ålder</p>
-                    <p>• E-post</p>
-                    <p>• Telefonnummer</p>
-                    <p>• Ort/stad</p>
-                    <p>• Presentation</p>
-                    <p>• CV</p>
-                    <p>• Nuvarande anställningsform</p>
-                    <p>• Tillgänglighet</p>
+                  <div className="text-white text-sm space-y-2">
+                    {[
+                      '• Namn och efternamn',
+                      '• Ålder',
+                      '• E-post',
+                      '• Telefonnummer',
+                      '• Ort/stad',
+                      '• Presentation',
+                      '• CV',
+                      '• Nuvarande anställningsform',
+                      '• Tillgänglighet'
+                    ].map((item, index) => (
+                      <div key={index} className="flex items-center justify-between group">
+                        <p>{item}</p>
+                        <button
+                          type="button"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/10 rounded"
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
