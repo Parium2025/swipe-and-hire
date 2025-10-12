@@ -188,7 +188,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-full max-h-full h-screen w-screen p-0 bg-gradient-to-br from-primary via-purple-600 to-pink-500 border-none overflow-hidden">
         {/* Hinge-style fullscreen scrollable content */}
-        <div className="h-full overflow-y-auto snap-y snap-mandatory">
+        <div className="h-full overflow-y-auto overflow-x-hidden snap-y snap-mandatory">
           
           {/* Första kortet: Jobbinfo (stora kort som täcker hela skärmen) */}
           <div className="min-h-screen snap-start flex flex-col justify-center px-6 py-12 relative">
