@@ -1631,7 +1631,7 @@ const MobileJobWizard = ({
                         
                         {/* Show message if search is too short */}
                         {occupationSearchTerm.trim().length > 0 && occupationSearchTerm.trim().length < 2 && (
-                          <div className="py-4 px-3 text-center text-gray-400 italic text-sm">
+                          <div className="py-4 px-3 text-center text-white not-italic text-sm">
                             Skriv minst 2 bokstäver för att söka
                           </div>
                         )}
