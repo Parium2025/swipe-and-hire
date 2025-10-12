@@ -278,7 +278,13 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       });
       
       if (templateToEdit.questions && Array.isArray(templateToEdit.questions)) {
-        setCustomQuestions(templateToEdit.questions);
+        // Ensure each question has a unique ID
+        const questionsWithIds = templateToEdit.questions.map((q: JobQuestion, index: number) => ({
+          ...q,
+          id: q.id || `temp_${Date.now()}_${index}`,
+          order_index: index
+        }));
+        setCustomQuestions(questionsWithIds);
       }
     } else if (!open) {
       // Reset when dialog closes
