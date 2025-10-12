@@ -2206,7 +2206,7 @@ const MobileJobWizard = ({
               <div className="space-y-6">
                 {/* Mobile Mockup Preview - Mobilansökningsformulär */}
                 <div className="flex flex-col items-center space-y-4">
-                  <h3 className="text-white font-medium">Så kommer ansökningsformuläret att se ut på mobil:</h3>
+                  <h3 className="text-white font-medium">Så kommer ansökningsformuläret att se ut på mobil: Testa att trycka på mobilens skärm</h3>
                   
                    {/* Phone mockup med ansökningsformulär + tooltip */}
                   <div className="relative flex items-center justify-center gap-4">
@@ -2682,10 +2682,6 @@ const MobileJobWizard = ({
                       </div>
                     </section>
                   </div>
-                  
-                  <p className="text-white text-sm text-center max-w-md">
-                    Detta är hur ansökningsformuläret ser ut på mobilen. Jobbsökare har redan sina uppgifter ifyllda.
-                  </p>
                 </div>
 
                 {/* Image upload section */}
