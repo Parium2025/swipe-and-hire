@@ -261,7 +261,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
       fields: ['work_location_type', 'remote_work_possible', 'workplace_name', 'contact_email', 'workplace_postal_code', 'workplace_city']
     },
     {
-      title: "Ansökningsfrågor",
+      title: "Anpassade frågor (valfritt)",
       fields: []
     }
   ];
@@ -1149,16 +1149,9 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated }: CreateT
               </div>
             )}
 
-            {/* Step 3: Ansökningsfrågor - EXAKT SAMMA SOM MOBILEJOBWIZARD */}
+            {/* Step 3: Anpassade frågor - EXAKT SAMMA SOM MOBILEJOBWIZARD */}
             {!showQuestionForm && currentStep === 3 && (
               <div className="space-y-6">
-                <div className="text-center space-y-2">
-                  <h3 className="text-white font-medium text-lg">Ansökningsfrågor</h3>
-                  <p className="text-white text-sm">
-                    Skapa frågor som jobbsökarna ska besvara i sin ansökan
-                  </p>
-                </div>
-
                 {/* Automatiska frågor info */}
                 <div className="bg-white/5 rounded-lg p-4 border border-white/20">
                   <p className="text-white/90 text-sm font-medium mb-3 text-center">

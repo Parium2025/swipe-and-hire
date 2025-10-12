@@ -987,7 +987,7 @@ const MobileJobWizard = ({
       fields: ['work_location_type', 'remote_work_possible', 'workplace_name', 'workplace_address', 'workplace_postal_code', 'workplace_city']
     },
     {
-      title: "Extra frågor",
+      title: "Anpassade frågor (valfritt)",
       fields: []
     },
     {
@@ -1839,13 +1839,6 @@ const MobileJobWizard = ({
               <div className="space-y-6">
                 {!showQuestionForm && !showQuestionTemplates ? (
                   <>
-                    <div className="text-center space-y-2">
-                      <h3 className="text-white font-medium text-lg">Ansökningsfrågor</h3>
-                      <p className="text-white text-sm">
-                        Skapa frågor som jobbsökarna ska besvara i sin ansökan
-                      </p>
-                    </div>
-
                     {/* Automatiska frågor info */}
                     <div className="bg-white/5 rounded-lg p-4 border border-white/20">
                       <p className="text-white/90 text-sm font-medium mb-3 text-center">
