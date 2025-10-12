@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { Loader2 } from 'lucide-react';
 import JobQuestionsManager from '@/components/JobQuestionsManager';
+import MobileJobWizard from '@/components/MobileJobWizard';
 
 interface JobPosting {
   id: string;
