@@ -271,8 +271,7 @@ useEffect(() => {
         console.warn('Could not pause job during edit', pauseErr);
       }
 
-      setFormData(prev => ({
-        ...prev,
+      const loadedFormData: JobFormData = {
         title: (job as any).title || '',
         description: (job as any).description || '',
         requirements: (job as any).requirements || '',
@@ -294,7 +293,12 @@ useEffect(() => {
         workplace_city: (job as any).workplace_city || '',
         pitch: (job as any).pitch || '',
         job_image_url: (job as any).job_image_url || '',
-      }));
+      };
+
+      setFormData(loadedFormData);
+      // Reset initialFormData and hasUnsavedChanges so X button works immediately
+      setInitialFormData({ ...loadedFormData });
+      setHasUnsavedChanges(false);
 
       const { data: qs, error: qErr } = await supabase
         .from('job_questions')
