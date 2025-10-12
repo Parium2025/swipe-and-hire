@@ -252,9 +252,8 @@ useEffect(() => {
         .from('job_postings')
         .select('*')
         .eq('id', editJobId)
-        .maybeSingle();
+        .single();
       if (error) throw error;
-      if (!job) throw new Error('Annonsen kunde inte hittas.');
 
       // Pause active ad while editing
       try {
