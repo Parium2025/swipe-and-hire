@@ -496,7 +496,7 @@ export default function ProfilePreview() {
   }
 
   return (
-    <SidebarProvider defaultOpen={false}>
+    <SidebarProvider>
       <AppSidebar />
       <div className="flex-1 flex flex-col">
         {/* Header with developer controls */}
