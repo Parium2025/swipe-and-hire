@@ -2578,6 +2578,7 @@ const MobileJobWizard = ({
                                                   type="button"
                                                   onClick={(e) => {
                                                     e.preventDefault();
+                                                    e.stopPropagation(); // Prevent closing from parent click handler
                                                     const dropdown = e.currentTarget.nextElementSibling;
                                                     dropdown?.classList.toggle('hidden');
                                                   }}
