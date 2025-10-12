@@ -40,6 +40,10 @@ const MyJobs = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
+  useEffect(() => {
+    console.log('MyJobs: state', { editDialogOpen, editingJobId: editingJob?.id });
+  }, [editDialogOpen, editingJob]);
+
   const fetchJobs = async () => {
     if (!user) return;
 
