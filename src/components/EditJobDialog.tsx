@@ -51,6 +51,9 @@ interface EditJobDialogProps {
 
 const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogProps) => {
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(false);
+  const [activeJobId, setActiveJobId] = useState<string | null>(null);
+  const [activeJob, setActiveJob] = useState<JobPosting | null>(null);
   const [activeTab, setActiveTab] = useState("basic");
   const [formData, setFormData] = useState<JobFormData>({
     title: '',
@@ -69,24 +72,47 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Update form data when job changes
+  // Load fresh job data when dialog opens
   useEffect(() => {
-    if (job) {
-      setFormData({
-        title: job.title || '',
-        description: job.description || '',
-        requirements: job.requirements || '',
-        location: job.location || '',
-        salary_min: job.salary_min?.toString() || '',
-        salary_max: job.salary_max?.toString() || '',
-        employment_type: job.employment_type || '',
-        positions_count: job.positions_count?.toString() || '1',
-        work_schedule: job.work_schedule || '',
-        contact_email: job.contact_email || '',
-        application_instructions: job.application_instructions || ''
-      });
-    }
-  }, [job]);
+    const load = async () => {
+      if (!open || !job?.id) return;
+      setInitialLoading(true);
+      setActiveJobId(job.id);
+      try {
+        const { data, error } = await supabase
+          .from('job_postings')
+          .select('*')
+          .eq('id', job.id)
+          .maybeSingle();
+        if (error) throw error;
+        const j = (data as any) as JobPosting;
+        setActiveJob(j);
+        setFormData({
+          title: j.title || '',
+          description: j.description || '',
+          requirements: j.requirements || '',
+          location: j.location || '',
+          salary_min: j.salary_min?.toString() || '',
+          salary_max: j.salary_max?.toString() || '',
+          employment_type: j.employment_type || '',
+          positions_count: (j as any).positions_count?.toString?.() || '1',
+          work_schedule: j.work_schedule || '',
+          contact_email: j.contact_email || '',
+          application_instructions: j.application_instructions || ''
+        });
+      } catch (e: any) {
+        console.error('Failed to load job for editing', e);
+        toast({
+          title: 'Kunde inte ladda annonsen',
+          description: e?.message || 'Försök igen om en stund.',
+          variant: 'destructive'
+        });
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+    load();
+  }, [open, job?.id]);
 
   useEffect(() => {
     if (open) {
