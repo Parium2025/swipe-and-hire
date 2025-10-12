@@ -47,7 +47,7 @@ const MyJobs = () => {
         .from('job_postings')
         .select('*')
         .eq('employer_id', user.id)
-        .order('created_at', { ascending: false });
+        .order('updated_at', { ascending: false });
 
       if (error) {
         toast({

@@ -233,7 +233,7 @@ const SearchJobs = () => {
           profiles!job_postings_employer_id_fkey(company_name)
         `)
         .eq('is_active', true)
-        .order('created_at', { ascending: false });
+        .order('updated_at', { ascending: false });
 
       // Apply search filters with smart synonyms
       if (searchTerm) {
