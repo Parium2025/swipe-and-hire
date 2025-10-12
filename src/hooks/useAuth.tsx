@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -93,17 +93,17 @@ interface AuthContextType {
   cleanupExpiredConfirmations: () => Promise<void>;
 }
 
-const AuthContext = React.createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = React.useState<User | null>(null);
-  const [session, setSession] = React.useState<Session | null>(null);
-  const [profile, setProfile] = React.useState<Profile | null>(null);
-  const [userRole, setUserRole] = React.useState<UserRoleData | null>(null);
-  const [organization, setOrganization] = React.useState<Organization | null>(null);
-  const [loading, setLoading] = React.useState(true);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [userRole, setUserRole] = useState<UserRoleData | null>(null);
+  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  React.useEffect(() => {
+  useEffect(() => {
     let mounted = true;
     let sessionInitialized = false;
 
@@ -821,7 +821,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Automatisk utloggning efter inaktivitet (30 minuter)
-  React.useEffect(() => {
+  useEffect(() => {
     if (!user) return; // Bara aktiv när användaren är inloggad
 
     const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minuter i millisekunder
@@ -913,7 +913,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useAuth() {
-  const context = React.useContext(AuthContext);
+  const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
