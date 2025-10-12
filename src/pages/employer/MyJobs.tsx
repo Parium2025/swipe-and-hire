@@ -21,6 +21,7 @@ interface JobPosting {
   salary_min?: number;
   salary_max?: number;
   employment_type?: string;
+  positions_count?: number;
   work_schedule?: string;
   contact_email?: string;
   application_instructions?: string;
