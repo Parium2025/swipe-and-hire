@@ -229,14 +229,12 @@ const MobileJobWizard = ({
     console.log('MobileJobWizard: open changed', open);
   }, [open]);
   
-  // When opening with a template, go directly to preview step
+  // Always start from step 0 when opening
   useEffect(() => {
-    if (open && selectedTemplate) {
-      setCurrentStep(3); // Go to preview step (step 4)
-    } else if (open && !selectedTemplate) {
-      setCurrentStep(0); // Start from beginning if no template
+    if (open) {
+      setCurrentStep(0); // Always start from beginning
     }
-  }, [open, selectedTemplate]);
+  }, [open]);
   
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
