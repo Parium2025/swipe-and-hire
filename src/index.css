@@ -656,6 +656,16 @@ All colors MUST be HSL.
   .no-overscroll {
     overscroll-behavior: contain;
   }
+  
+  /* Dölj scrollbar men behåll funktionalitet */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 
   /* Lås scroll på auth och fixa iOS viewport-gap */
   html.auth-locked, body.auth-locked,
