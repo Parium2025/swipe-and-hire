@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
         // ... keep existing imports
         import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
-        import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+        import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
         import FileUpload from '@/components/FileUpload';
 import JobPreview from '@/components/JobPreview';
 import { useToast } from '@/hooks/use-toast';
@@ -1582,6 +1582,17 @@ useEffect(() => {
     setPendingClose(false);
   };
 
+  // Ensure Radix Dialog doesn't call our close logic when opening
+  const handleDialogOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) {
+      // Propagate open state to parent without closing logic
+      onOpenChange(true);
+      return;
+    }
+    // When user tries to close, run unsaved-check flow
+    handleClose();
+  };
+
   const handleSubmit = async () => {
     if (!user || !validateCurrentStep()) return;
 
@@ -1754,7 +1765,7 @@ useEffect(() => {
   const isLastStep = currentStep === steps.length - 1;
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogContent className="max-w-md h-[90vh] max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden">
         <AnimatedBackground showBubbles={false} />
         <div className="flex flex-col h-full relative z-10">
@@ -1764,6 +1775,9 @@ useEffect(() => {
               <DialogTitle className="text-white text-lg">
                 {steps[currentStep].title}
               </DialogTitle>
+              <DialogDescription className="sr-only">
+                Redigera jobbannons, osparade ändringar varnas innan stängning.
+              </DialogDescription>
               <div className="text-sm text-white">
                 Steg {currentStep + 1} av {steps.length}
               </div>
