@@ -26,6 +26,7 @@ interface JobPosting {
   work_schedule?: string;
   contact_email?: string;
   application_instructions?: string;
+  is_active?: boolean;
 }
 
 interface JobFormData {
@@ -100,6 +101,24 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
           contact_email: j.contact_email || '',
           application_instructions: j.application_instructions || ''
         });
+
+        // Pause the ad while editing if it was active
+        try {
+          if ((j as any).is_active) {
+            const { error: deactErr } = await supabase
+              .from('job_postings')
+              .update({ is_active: false, updated_at: new Date().toISOString() })
+              .eq('id', j.id);
+            if (!deactErr) {
+              toast({
+                title: 'Annons pausad',
+                description: 'Annonsen är inaktiv under redigering. Spara för att publicera igen.'
+              });
+            }
+          }
+        } catch (pauseErr) {
+          console.error('Kunde inte pausa annonsen vid redigering', pauseErr);
+        }
       } catch (e: any) {
         console.error('Failed to load job for editing', e);
         toast({
@@ -139,6 +158,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         work_schedule: formData.work_schedule || null,
         contact_email: formData.contact_email || null,
         application_instructions: formData.application_instructions || null,
+        is_active: true,
         updated_at: new Date().toISOString()
       };
 
@@ -251,7 +271,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                     <SelectValue placeholder="Välj anställningsform" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Ej specificerat</SelectItem>
+                    
                     {EMPLOYMENT_TYPES.map(type => (
                       <SelectItem key={type.value} value={type.value}>
                         {type.label}
@@ -331,7 +351,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                   className="flex-1"
                 >
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {loading ? 'Uppdaterar...' : 'Spara ändringar'}
+                  {loading ? 'Uppdaterar...' : 'Spara och publicera igen'}
                 </Button>
                 <Button 
                   type="button" 
