@@ -1476,7 +1476,8 @@ const MobileJobWizard = ({
         workplace_address: formData.workplace_address || null,
         workplace_postal_code: formData.workplace_postal_code || null,
         workplace_city: formData.workplace_city || null,
-        category
+        category,
+        is_active: true
       };
 
       const { data: jobPost, error } = await supabase
