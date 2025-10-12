@@ -218,6 +218,16 @@ const MobileJobWizard = ({
   useEffect(() => {
     console.log('MobileJobWizard: open changed', open);
   }, [open]);
+  
+  // When opening with a template, go directly to preview step
+  useEffect(() => {
+    if (open && selectedTemplate) {
+      setCurrentStep(3); // Go to preview step (step 4)
+    } else if (open && !selectedTemplate) {
+      setCurrentStep(0); // Start from beginning if no template
+    }
+  }, [open, selectedTemplate]);
+  
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [customQuestions, setCustomQuestions] = useState<JobQuestion[]>([]);
@@ -551,7 +561,7 @@ const MobileJobWizard = ({
       title: jobTitle,
       description: selectedTemplate?.description || prev.description,
       requirements: selectedTemplate?.requirements || prev.requirements,
-      location: selectedTemplate?.location || prev.location,
+      // Never auto-fill location from template - user must always set it manually
       salary_min: selectedTemplate?.salary_min?.toString() || prev.salary_min,
       salary_max: selectedTemplate?.salary_max?.toString() || prev.salary_max,
       employment_type: selectedTemplate?.employment_type || prev.employment_type,
@@ -932,17 +942,16 @@ const MobileJobWizard = ({
     }
     
     // Only reset form if it's completely empty or when a template is selected
-    const isFormEmpty = !formData.title && !formData.location && !formData.occupation;
+    const isFormEmpty = !formData.title && !formData.occupation;
     const shouldUpdateFromTemplate = selectedTemplate && 
       (formData.title !== selectedTemplate.title || formData.description !== selectedTemplate.description);
     
     if (isFormEmpty || shouldUpdateFromTemplate) {
-      const newLocation = selectedTemplate?.location || '';
       setFormData(prev => ({
         title: (!prev.title || prev.title === selectedTemplate?.title ? (jobTitle || selectedTemplate?.title || prev.title) : prev.title),
         description: selectedTemplate?.description || prev.description,
         requirements: selectedTemplate?.requirements || prev.requirements,
-        location: newLocation || prev.location,
+        location: prev.location, // Never override location from template
         occupation: prev.occupation,
         salary_min: selectedTemplate?.salary_min?.toString() || prev.salary_min,
         salary_max: selectedTemplate?.salary_max?.toString() || prev.salary_max,
@@ -953,8 +962,8 @@ const MobileJobWizard = ({
         remote_work_possible: prev.remote_work_possible || 'nej',
         workplace_name: prev.workplace_name || profile?.company_name || '',
         workplace_address: prev.workplace_address || '',
-        workplace_postal_code: prev.workplace_postal_code || '',
-        workplace_city: prev.workplace_city || '',
+        workplace_postal_code: prev.workplace_postal_code || '', // Never from template
+        workplace_city: prev.workplace_city || '', // Never from template
         work_schedule: selectedTemplate?.work_schedule || prev.work_schedule,
         contact_email: prev.contact_email || selectedTemplate?.contact_email || user?.email || '',
         application_instructions: selectedTemplate?.application_instructions || prev.application_instructions,
@@ -962,10 +971,7 @@ const MobileJobWizard = ({
         job_image_url: prev.job_image_url || ''
       }));
       
-      // Update city search term when template location changes
-      if (selectedTemplate?.location) {
-        setCitySearchTerm(selectedTemplate.location);
-      }
+      // Never auto-fill city from template - user must set location manually each time
     }
     
     // Update workplace name and contact email if they're empty but we have new data
