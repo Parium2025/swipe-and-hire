@@ -106,8 +106,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         positions_count: formData.positions_count ? parseInt(formData.positions_count) : 1,
         work_schedule: formData.work_schedule || null,
         contact_email: formData.contact_email || null,
-        application_instructions: formData.application_instructions || null,
-        updated_at: new Date().toISOString()
+        application_instructions: formData.application_instructions || null
       };
 
       const { error } = await supabase
@@ -125,8 +124,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
       }
 
       toast({
-        title: "Annons uppdaterad och publicerad om!",
-        description: "Din annons visas nu längst upp i listan."
+        title: "Annons uppdaterad!",
+        description: "Dina ändringar har sparats."
       });
 
       onOpenChange(false);
