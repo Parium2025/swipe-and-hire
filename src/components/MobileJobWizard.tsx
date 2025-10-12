@@ -16,7 +16,7 @@ import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES, getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users, GripVertical, ArrowDown, Pencil } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Minus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users, GripVertical, ArrowDown, Pencil } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
@@ -1740,20 +1740,49 @@ const MobileJobWizard = ({
 
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Antal personer att rekrytera</Label>
-                  <Input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={formData.positions_count}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/[^0-9]/g, '');
-                      if (value === '' || parseInt(value) > 0) {
-                        handleInputChange('positions_count', value);
-                      }
-                    }}
-                    placeholder="1"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
-                  />
+                  <div className="flex items-center gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => {
+                        const current = parseInt(formData.positions_count) || 1;
+                        if (current > 1) {
+                          handleInputChange('positions_count', (current - 1).toString());
+                        }
+                      }}
+                      disabled={parseInt(formData.positions_count) <= 1}
+                      className="bg-white/10 border-white/20 text-white hover:bg-white/20 h-12 w-12 disabled:opacity-30"
+                    >
+                      <Minus className="h-5 w-5" />
+                    </Button>
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={formData.positions_count}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^0-9]/g, '');
+                        if (value === '' || parseInt(value) > 0) {
+                          handleInputChange('positions_count', value);
+                        }
+                      }}
+                      placeholder="1"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base text-center focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => {
+                        const current = parseInt(formData.positions_count) || 1;
+                        handleInputChange('positions_count', (current + 1).toString());
+                      }}
+                      className="bg-white/10 border-white/20 text-white hover:bg-white/20 h-12 w-12"
+                    >
+                      <Plus className="h-5 w-5" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
