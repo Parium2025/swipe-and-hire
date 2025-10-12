@@ -2333,9 +2333,15 @@ const MobileJobWizard = ({
                                      {formData.workplace_address && (
                                        <div>{formData.workplace_address}</div>
                                      )}
-                                     {formData.workplace_city && formData.workplace_postal_code && (
+                                     {(formData.workplace_postal_code || formData.workplace_city) && (
                                        <div>
-                                         <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
+                                         {formData.workplace_postal_code && formData.workplace_city ? (
+                                           <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
+                                         ) : formData.workplace_city ? (
+                                           <div>{formData.workplace_city}</div>
+                                         ) : (
+                                           <div>{formData.workplace_postal_code}</div>
+                                         )}
                                          <div>{getWorkLocationDisplayText()}</div>
                                        </div>
                                      )}
