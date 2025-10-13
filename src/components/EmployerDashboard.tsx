@@ -207,18 +207,19 @@ const EmployerDashboard = memo(() => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-col items-center gap-2">
-                    <Badge variant={job.is_active ? "default" : "secondary"}>
+                  <div className="flex flex-col items-center gap-1.5 min-w-[100px]">
+                    <Badge variant={job.is_active ? "default" : "secondary"} className="w-full justify-center">
                       {job.is_active ? 'Aktiv' : 'Inaktiv'}
                     </Badge>
                     {job.employment_type && (
-                      <Badge variant="outline" className="text-xs bg-white/10 text-white border-white/20">
+                      <Badge variant="outline" className="text-xs bg-white/10 text-white border-white/20 w-full justify-center">
                         {getEmploymentTypeLabel(job.employment_type)}
                       </Badge>
                     )}
                     <Switch
                       checked={job.is_active}
                       onCheckedChange={() => toggleJobStatus(job.id, job.is_active)}
+                      className="mt-1"
                     />
                   </div>
                 </div>
