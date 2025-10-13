@@ -1,23 +1,23 @@
-import { memo } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { memo, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
 import { Briefcase, Users, Eye, TrendingUp } from 'lucide-react';
 import { useJobsData } from '@/hooks/useJobsData';
+import CreateJobSimpleDialog from '@/components/CreateJobSimpleDialog';
 
 const Dashboard = memo(() => {
-  const navigate = useNavigate();
-  const { stats, isLoading } = useJobsData();
+  const { stats, isLoading, invalidateJobs } = useJobsData();
+  const [createJobOpen, setCreateJobOpen] = useState(false);
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-white">Dashboard</h1>
         <Button 
-          onClick={() => navigate('/my-jobs')}
+          onClick={() => setCreateJobOpen(true)}
           className="bg-primary hover:bg-primary/90"
         >
-          Hantera annonser
+          Skapa ny annons
         </Button>
       </div>
 
@@ -80,33 +80,11 @@ const Dashboard = memo(() => {
         </Card>
       </div>
 
-      {/* Quick Actions */}
-      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-        <CardHeader>
-          <CardTitle className="text-white">Snabbåtgärder</CardTitle>
-          <CardDescription className="text-white/70">
-            Hantera dina annonser och kandidater
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <Button 
-            onClick={() => navigate('/my-jobs')}
-            variant="outline"
-            className="w-full justify-start border-white/20 text-white hover:bg-white/20"
-          >
-            <Briefcase className="mr-2 h-4 w-4" />
-            Visa alla annonser
-          </Button>
-          <Button 
-            onClick={() => navigate('/candidates')}
-            variant="outline"
-            className="w-full justify-start border-white/20 text-white hover:bg-white/20"
-          >
-            <Users className="mr-2 h-4 w-4" />
-            Visa kandidater
-          </Button>
-        </CardContent>
-      </Card>
+      <CreateJobSimpleDialog 
+        onJobCreated={() => {
+          invalidateJobs();
+        }}
+      />
     </div>
   );
 });
