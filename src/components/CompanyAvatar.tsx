@@ -11,7 +11,7 @@ function CompanyAvatarBase({ companyLogoUrl, companyName, initials }: CompanyAva
   const [error, setError] = React.useState(false);
 
   return (
-    <Avatar className="h-10 w-10 ring-2 ring-white/20 transform-gpu">
+    <Avatar className="h-10 w-10 ring-2 ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
       {companyLogoUrl && !error ? (
         <AvatarImage
           src={companyLogoUrl}

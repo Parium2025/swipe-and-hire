@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, memo } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
@@ -386,4 +386,4 @@ export function EmployerSidebar() {
   );
 }
 
-export default EmployerSidebar;
+export default memo(EmployerSidebar);
