@@ -87,7 +87,7 @@ const Dashboard = memo(() => {
       <Card className="bg-white/10 backdrop-blur-sm border-white/20">
         <CardHeader>
           <CardTitle className="text-xl text-white">
-            Jobb, Utlagda jobb av {profile?.company_name || 'ditt företag'}
+            Utlagda jobb av {profile?.company_name || 'ditt företag'}
           </CardTitle>
         </CardHeader>
         <CardContent>
