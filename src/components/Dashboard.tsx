@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 
 const Dashboard = memo(() => {
   const { jobs, stats, isLoading, invalidateJobs } = useJobsData();
@@ -128,7 +129,7 @@ const Dashboard = memo(() => {
                           <span>{job.title}</span>
                           {job.employment_type && (
                             <Badge variant="outline" className="w-fit text-xs bg-white/5 text-white/70 border-white/20">
-                              {job.employment_type}
+                              {getEmploymentTypeLabel(job.employment_type)}
                             </Badge>
                           )}
                         </div>
