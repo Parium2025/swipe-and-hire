@@ -201,7 +201,7 @@ const EmployerDashboard = memo(() => {
                         {job.is_active ? 'Aktiv' : 'Inaktiv'}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-white/70">
+                    <div className="flex items-center gap-4 text-sm text-white">
                       <div className="flex items-center gap-1">
                         <MapPin size={14} />
                         {job.location}
@@ -226,7 +226,7 @@ const EmployerDashboard = memo(() => {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-white/80 mb-4 line-clamp-2">
+                <p className="text-sm text-white mb-4 line-clamp-2">
                   {job.description}
                 </p>
                 
@@ -237,7 +237,7 @@ const EmployerDashboard = memo(() => {
                 )}
 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 text-sm text-white/70">
+                  <div className="flex items-center gap-4 text-sm text-white">
                     <div className="flex items-center gap-1">
                       <Eye size={14} />
                       {job.views_count} visningar
