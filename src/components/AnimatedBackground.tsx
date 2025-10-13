@@ -10,7 +10,7 @@ interface AnimatedBackgroundProps {
 
 export const AnimatedBackground = memo(({ showBubbles = true }: AnimatedBackgroundProps) => {
   return (
-    <div className="absolute inset-0 pointer-events-none z-0" style={{ paddingTop: 'var(--pwa-top-offset, 0px)', willChange: 'transform, opacity', transform: 'translateZ(0)' }}>
+    <div className="fixed inset-0 pointer-events-none z-0" style={{ willChange: 'transform, opacity', transform: 'translateY(var(--pwa-top-offset, 0px)) translateZ(0)' }}>
       {showBubbles && (
         <>
           {/* Animated floating elements */}
