@@ -9,6 +9,7 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/s
 import { AppSidebar } from "@/components/AppSidebar";
 import EmployerLayout from "@/components/EmployerLayout";
 import Dashboard from '@/components/Dashboard';
+import EmployerDashboard from '@/components/EmployerDashboard';
 import JobSwipe from '@/components/JobSwipe';
 import ProfileSetup from '@/components/ProfileSetup';
 import ProfileSelector from '@/components/ProfileSelector';
@@ -300,6 +301,8 @@ const Index = () => {
       switch (location.pathname) {
         case '/dashboard':
           return <Dashboard />;
+        case '/my-jobs':
+          return <EmployerDashboard />;
         case '/profile':
           return <EmployerProfile />;
         case '/company-profile':
