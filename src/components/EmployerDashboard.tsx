@@ -8,7 +8,6 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2 } from 'lucide-react';
-import CreateJobSimpleDialog from '@/components/CreateJobSimpleDialog';
 import EditJobDialog from '@/components/EditJobDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
@@ -102,14 +101,11 @@ const EmployerDashboard = memo(() => {
 
   return (
     <div className="space-y-6 px-4 py-6 sm:px-6 pb-safe min-h-screen smooth-scroll touch-pan no-overscroll" style={{ WebkitOverflowScrolling: 'touch' }}>
-      <div className="flex items-center justify-between">
-        <div className="text-center flex-1">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Mina jobbannonser</h1>
-          <p className="text-white/90 mt-1 text-sm sm:text-base">
-            Hantera dina publicerade tjänster
-          </p>
-        </div>
-        <CreateJobSimpleDialog onJobCreated={(job) => { invalidateJobs(); setEditingJob(job); setEditDialogOpen(true); }} />
+      <div className="text-center">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white">Mina jobbannonser</h1>
+        <p className="text-white mt-1 text-sm sm:text-base">
+          Hantera dina publicerade tjänster
+        </p>
       </div>
 
       {/* Stats Overview - med skeleton när loading */}
@@ -191,9 +187,6 @@ const EmployerDashboard = memo(() => {
               <p className="text-white mb-4">
                 Skapa din första jobbannons för att komma igång med rekrytering
               </p>
-              <div className="flex justify-center">
-                <CreateJobSimpleDialog onJobCreated={invalidateJobs} />
-              </div>
             </CardContent>
           </Card>
         ) : (
