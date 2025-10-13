@@ -4,13 +4,36 @@ interface State {
   hasError: boolean;
   error?: Error;
   info?: React.ErrorInfo;
+  isStuck: boolean;
 }
 
 export default class GlobalErrorBoundary extends React.Component<React.PropsWithChildren, State> {
-  state: State = { hasError: false };
+  state: State = { hasError: false, isStuck: false };
+  private stuckTimer?: NodeJS.Timeout;
+
+  componentDidMount() {
+    // Detect if app is stuck (e.g., redirect loop in preview)
+    this.stuckTimer = setTimeout(() => {
+      // If component is still mounted after 5 seconds without user interaction,
+      // check if we're on a problematic URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const hasAuthTokens = urlParams.has('access_token') || 
+                           urlParams.has('token') || 
+                           urlParams.has('token_hash');
+      
+      if (hasAuthTokens && window.location.pathname !== '/auth') {
+        console.warn('[GlobalErrorBoundary] Detected potential stuck state');
+        this.setState({ isStuck: true });
+      }
+    }, 5000);
+  }
+
+  componentWillUnmount() {
+    if (this.stuckTimer) clearTimeout(this.stuckTimer);
+  }
 
   static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+    return { hasError: true, error, isStuck: false };
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
@@ -20,20 +43,26 @@ export default class GlobalErrorBoundary extends React.Component<React.PropsWith
   }
 
   handleReload = () => {
-    // Attempt a soft reload first
+    // Clear any stuck state and reload
     if (typeof window !== 'undefined') {
-      window.location.reload();
+      // Clear URL parameters that might cause loops
+      const cleanUrl = window.location.origin + window.location.pathname;
+      window.location.replace(cleanUrl);
     }
   };
 
   render() {
-    if (this.state.hasError) {
+    if (this.state.hasError || this.state.isStuck) {
+      const message = this.state.isStuck 
+        ? "Appen verkar ha fastnat. Klicka för att ladda om."
+        : "Appen stötte på ett fel. Försök ladda om sidan.";
+      
       return (
-        <div className="min-h-screen flex items-center justify-center p-6">
-          <div className="max-w-md w-full rounded-lg border bg-background/80 backdrop-blur p-6 text-center">
+        <div className="min-h-screen flex items-center justify-center p-6 bg-background">
+          <div className="max-w-md w-full rounded-lg border bg-card/80 backdrop-blur p-6 text-center">
             <h2 className="text-lg font-semibold mb-2">Något gick fel</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              Appen stötte på ett fel. Försök ladda om sidan.
+              {message}
             </p>
             <button
               onClick={this.handleReload}
