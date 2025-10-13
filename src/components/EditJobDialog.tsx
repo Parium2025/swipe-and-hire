@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
+import { EMPLOYMENT_TYPES, normalizeEmploymentType } from '@/lib/employmentTypes';
 import { Loader2 } from 'lucide-react';
 const JobQuestionsManagerLazy = lazy(() => import('@/components/JobQuestionsManager'));
 
@@ -80,7 +80,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         location: job.location || '',
         salary_min: job.salary_min?.toString() || '',
         salary_max: job.salary_max?.toString() || '',
-        employment_type: job.employment_type || '',
+        employment_type: normalizeEmploymentType(job.employment_type || ''),
         positions_count: (job.positions_count ?? 1).toString(),
         work_schedule: job.work_schedule || '',
         contact_email: job.contact_email || '',
@@ -181,7 +181,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                   <div className="space-y-2">
                     <Label htmlFor="edit_employment_type">Anställningsform</Label>
                     <Select
-                      value={(formData.employment_type || undefined) as any}
+                      value={(EMPLOYMENT_TYPES.some(t => t.value === formData.employment_type) ? formData.employment_type : undefined) as any}
                       onValueChange={(v) => setField('employment_type')(v)}
                     >
                       <SelectTrigger>
