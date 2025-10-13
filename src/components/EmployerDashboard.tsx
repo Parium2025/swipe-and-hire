@@ -195,7 +195,7 @@ const EmployerDashboard = memo(() => {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <CardTitle className="text-xl text-white mb-1">{job.title}</CardTitle>
+                    <CardTitle className="text-xl text-white">{job.title}</CardTitle>
                     <div className="flex items-center gap-4 text-sm text-white">
                       <div className="flex items-center gap-1">
                         <MapPin size={14} />
