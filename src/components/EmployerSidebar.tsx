@@ -41,7 +41,7 @@ const employerNavItems = [
   },
   {
     title: "Mina Annonser", 
-    url: "/dashboard",
+    url: "/my-jobs",
     icon: Briefcase,
     group: "huvudmeny"
   },
