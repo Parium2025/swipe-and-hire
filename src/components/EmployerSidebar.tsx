@@ -29,7 +29,7 @@ import {
   FileText,
   Star
 } from "lucide-react";
-import { convertToSignedUrl } from "@/utils/storageUtils";
+
 
 // Navigation items for employer sidebar
 const employerNavItems = [
@@ -114,6 +114,7 @@ export function EmployerSidebar() {
   const navigate = useNavigate();
   const { checkBeforeNavigation } = useUnsavedChanges();
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null);
+  const [logoLoaded, setLogoLoaded] = useState(false);
 
   // Helper function to get company initials
   const getCompanyInitials = () => {
@@ -126,21 +127,22 @@ export function EmployerSidebar() {
       .slice(0, 2);
   };
 
-  // Load and refresh company logo URL
+  // Load company logo URL and reset loaded state only when URL actually changes
   useEffect(() => {
     const logoUrl = (profile as any)?.company_logo_url;
     if (logoUrl) {
       try {
-        // Remove any existing cache busting params for cleaner URLs
         const baseUrl = logoUrl.split('?')[0];
-        // Don't add timestamp - let browser cache handle it
         setCompanyLogoUrl(baseUrl);
+        setLogoLoaded(false);
       } catch (error) {
         console.error('Failed to load company logo:', error);
         setCompanyLogoUrl(null);
+        setLogoLoaded(false);
       }
     } else {
       setCompanyLogoUrl(null);
+      setLogoLoaded(false);
     }
   }, [(profile as any)?.company_logo_url]);
 
@@ -196,8 +198,15 @@ export function EmployerSidebar() {
           <div className="p-4">
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10 ring-2 ring-white/20">
-                <AvatarImage src={companyLogoUrl || ''} />
-                <AvatarFallback className="bg-white/10 text-white font-semibold">
+                {companyLogoUrl && (
+                  <AvatarImage
+                    src={companyLogoUrl}
+                    onLoad={() => setLogoLoaded(true)}
+                    onError={() => setLogoLoaded(false)}
+                    loading="eager"
+                  />
+                )}
+                <AvatarFallback className={`bg-white/10 text-white font-semibold transition-opacity duration-150 ${companyLogoUrl ? 'opacity-0' : 'opacity-100'}`}>
                   {getCompanyInitials()}
                 </AvatarFallback>
               </Avatar>
