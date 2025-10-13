@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +13,7 @@ import EditJobDialog from '@/components/EditJobDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
 
-const EmployerDashboard = () => {
+const EmployerDashboard = memo(() => {
   const { jobs, stats, isLoading: loading, invalidateJobs } = useJobsData();
   const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -289,6 +289,8 @@ const EmployerDashboard = () => {
       />
     </div>
   );
-};
+});
+
+EmployerDashboard.displayName = 'EmployerDashboard';
 
 export default EmployerDashboard;

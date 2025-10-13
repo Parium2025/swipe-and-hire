@@ -1,10 +1,11 @@
+import { memo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Briefcase, Users, Eye, TrendingUp } from 'lucide-react';
 import { useJobsData } from '@/hooks/useJobsData';
 
-const Dashboard = () => {
+const Dashboard = memo(() => {
   const navigate = useNavigate();
   const { stats, isLoading } = useJobsData();
 
@@ -108,6 +109,8 @@ const Dashboard = () => {
       </Card>
     </div>
   );
-};
+});
+
+Dashboard.displayName = 'Dashboard';
 
 export default Dashboard;
