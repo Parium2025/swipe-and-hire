@@ -205,17 +205,17 @@ const EmployerDashboard = memo(() => {
                         <Calendar size={14} />
                         {new Date(job.created_at).toLocaleDateString('sv-SE')}
                       </div>
+                      <div className="flex flex-col items-center gap-1.5">
+                        <Badge variant={job.is_active ? "default" : "secondary"}>
+                          {job.is_active ? 'Aktiv' : 'Inaktiv'}
+                        </Badge>
+                        {job.employment_type && (
+                          <Badge variant="outline" className="text-xs bg-white/10 text-white border-white/20">
+                            {getEmploymentTypeLabel(job.employment_type)}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex flex-col items-center gap-1.5">
-                    <Badge variant={job.is_active ? "default" : "secondary"}>
-                      {job.is_active ? 'Aktiv' : 'Inaktiv'}
-                    </Badge>
-                    {job.employment_type && (
-                      <Badge variant="outline" className="text-xs bg-white/10 text-white border-white/20">
-                        {getEmploymentTypeLabel(job.employment_type)}
-                      </Badge>
-                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <Switch
