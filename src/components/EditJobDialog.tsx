@@ -2220,7 +2220,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         <CompanyProfileDialog 
           open={showCompanyProfile}
           onOpenChange={setShowCompanyProfile}
-          profile={profile}
+          companyId={profile?.user_id || ''}
         />
       )}
     </>
