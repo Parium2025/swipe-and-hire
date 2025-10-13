@@ -14,7 +14,7 @@ import {
   SidebarSeparator,
   useSidebar
 } from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CompanyAvatar } from "@/components/CompanyAvatar";
 import { Button } from "@/components/ui/button";
 import { 
   Building, 
@@ -211,22 +211,11 @@ export function EmployerSidebar() {
         {!collapsed && (
           <div className="p-4">
             <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10 ring-2 ring-white/20">
-                {companyLogoUrl && (
-                  <AvatarImage
-                    src={companyLogoUrl}
-                    alt={`${profile?.company_name || 'Företag'} logotyp`}
-                    onLoad={() => { setLogoLoaded(true); setLogoError(false); }}
-                    onError={() => { setLogoLoaded(false); setLogoError(true); }}
-                    decoding="sync"
-                    loading="eager"
-                    fetchPriority="high"
-                  />
-                )}
-                <AvatarFallback className={`bg-white/10 text-white font-semibold ${companyLogoUrl && !logoError ? 'hidden' : ''}`}>
-                  {getCompanyInitials()}
-                </AvatarFallback>
-              </Avatar>
+              <CompanyAvatar
+                companyLogoUrl={companyLogoUrl}
+                companyName={profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
+                initials={getCompanyInitials()}
+              />
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-white text-sm truncate">
                   {profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
@@ -253,7 +242,7 @@ export function EmployerSidebar() {
                     className={`
                       mx-2 rounded-lg transition-all duration-200
                       ${isActiveUrl(item.url) 
-                        ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm' 
+                        ? 'bg-white/20 text-white shadow-lg' 
                         : 'text-white/80 hover:bg-white/10 hover:text-white'
                       }
                     `}
@@ -288,7 +277,7 @@ export function EmployerSidebar() {
                     className={`
                       mx-2 rounded-lg transition-all duration-200
                       ${isActiveUrl(item.url) 
-                        ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm' 
+                        ? 'bg-white/20 text-white shadow-lg' 
                         : 'text-white/80 hover:bg-white/10 hover:text-white'
                       }
                     `}
@@ -323,7 +312,7 @@ export function EmployerSidebar() {
                     className={`
                       mx-2 rounded-lg transition-all duration-200
                       ${isActiveUrl(item.url) 
-                        ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm' 
+                        ? 'bg-white/20 text-white shadow-lg' 
                         : 'text-white/80 hover:bg-white/10 hover:text-white'
                       }
                     `}
@@ -356,7 +345,7 @@ export function EmployerSidebar() {
                       className={`
                         mx-2 rounded-lg transition-all duration-200
                         ${isActiveUrl('/admin') 
-                          ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm' 
+                          ? 'bg-white/20 text-white shadow-lg' 
                           : 'text-white/80 hover:bg-white/10 hover:text-white'
                         }
                       `}
