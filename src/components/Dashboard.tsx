@@ -6,9 +6,11 @@ import CreateJobSimpleDialog from '@/components/CreateJobSimpleDialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 const Dashboard = memo(() => {
   const { jobs, stats, isLoading, invalidateJobs } = useJobsData();
+  const { profile } = useAuth();
   const navigate = useNavigate();
 
   return (
@@ -84,7 +86,9 @@ const Dashboard = memo(() => {
       {/* Jobs Table */}
       <Card className="bg-white/10 backdrop-blur-sm border-white/20">
         <CardHeader>
-          <CardTitle className="text-xl text-white">Mina Jobbannonser</CardTitle>
+          <CardTitle className="text-xl text-white">
+            Jobb, Utlagda jobb av {profile?.company_name || 'ditt företag'}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
