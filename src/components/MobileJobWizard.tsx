@@ -116,7 +116,7 @@ interface MobileJobWizardProps {
   onOpenChange: (open: boolean) => void;
   jobTitle: string;
   selectedTemplate: JobTemplate | null;
-  onJobCreated: () => void;
+  onJobCreated: (job: any) => void;
 }
 
 // Sortable Question Item Component
@@ -1546,7 +1546,7 @@ const MobileJobWizard = ({
       });
 
       handleClose();
-      onJobCreated();
+      onJobCreated(jobPost);
 
     } catch (error) {
       toast({

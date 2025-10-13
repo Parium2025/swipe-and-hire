@@ -109,7 +109,7 @@ const EmployerDashboard = memo(() => {
             Hantera dina publicerade tjänster
           </p>
         </div>
-        <CreateJobSimpleDialog onJobCreated={invalidateJobs} />
+        <CreateJobSimpleDialog onJobCreated={(job) => { invalidateJobs(); setEditingJob(job); setEditDialogOpen(true); }} />
       </div>
 
       {/* Stats Overview - med skeleton när loading */}

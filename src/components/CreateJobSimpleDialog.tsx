@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, Loader2, ChevronDown, Search, X, Trash2, Pencil } from 'lucide-react';
 import MobileJobWizard from '@/components/MobileJobWizard';
 import CreateTemplateWizard from '@/components/CreateTemplateWizard';
+import type { JobPosting } from '@/hooks/useJobsData';
 
 interface JobTemplate {
   id: string;
@@ -32,7 +33,7 @@ interface JobTemplate {
 }
 
 interface CreateJobSimpleDialogProps {
-  onJobCreated: () => void;
+  onJobCreated: (job: JobPosting) => void;
 }
 
 const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => {
@@ -149,12 +150,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     setSelectedTemplate(null);
   }, []);
 
-  const handleJobCreated = useCallback(() => {
-    setShowDetailDialog(false);
-    setJobTitle('');
-    setSelectedTemplate(null);
-    onJobCreated();
-  }, [onJobCreated]);
+const handleJobCreated = useCallback((job: JobPosting) => {
+  setShowDetailDialog(false);
+  setJobTitle('');
+  setSelectedTemplate(null);
+  onJobCreated(job);
+}, [onJobCreated]);
 
   return (
     <>
