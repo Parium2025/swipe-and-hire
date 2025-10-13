@@ -195,23 +195,25 @@ const EmployerDashboard = memo(() => {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <CardTitle className="text-xl text-white leading-none">{job.title}</CardTitle>
-                      <Badge variant={job.is_active ? "default" : "secondary"} className="self-center">
+                    <div className="grid grid-cols-[1fr_auto] gap-x-2">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <CardTitle className="text-xl text-white leading-none">{job.title}</CardTitle>
+                      </div>
+                      <Badge variant={job.is_active ? "default" : "secondary"} className="self-center justify-self-center">
                         {job.is_active ? 'Aktiv' : 'Inaktiv'}
                       </Badge>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-white">
-                      <div className="flex items-center gap-1">
-                        <MapPin size={14} />
-                        {job.location}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Calendar size={14} />
-                        {new Date(job.created_at).toLocaleDateString('sv-SE')}
+                      <div className="flex items-center gap-4 text-sm text-white">
+                        <div className="flex items-center gap-1">
+                          <MapPin size={14} />
+                          {job.location}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Calendar size={14} />
+                          {new Date(job.created_at).toLocaleDateString('sv-SE')}
+                        </div>
                       </div>
                       {job.employment_type && (
-                        <Badge variant="outline" className="text-xs bg-white/10 text-white border-white/20 self-center">
+                        <Badge variant="outline" className="text-xs bg-white/10 text-white border-white/20 self-center justify-self-center">
                           {getEmploymentTypeLabel(job.employment_type)}
                         </Badge>
                       )}
