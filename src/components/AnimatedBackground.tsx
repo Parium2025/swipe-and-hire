@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 /**
  * Animated background with bubbles and glow effects
  * Used across auth and main app for visual consistency
@@ -6,7 +8,7 @@ interface AnimatedBackgroundProps {
   showBubbles?: boolean;
 }
 
-export const AnimatedBackground = ({ showBubbles = true }: AnimatedBackgroundProps) => {
+export const AnimatedBackground = memo(({ showBubbles = true }: AnimatedBackgroundProps) => {
   return (
     <div className="fixed inset-0 pointer-events-none z-0" style={{ paddingTop: 'var(--pwa-top-offset, 0px)', transform: 'translateY(var(--pwa-top-offset, 0px))' }}>
       {showBubbles && (
@@ -43,4 +45,6 @@ export const AnimatedBackground = ({ showBubbles = true }: AnimatedBackgroundPro
       </div>
     </div>
   );
-};
+});
+
+AnimatedBackground.displayName = 'AnimatedBackground';
