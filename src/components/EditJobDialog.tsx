@@ -180,12 +180,14 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                   <div className="space-y-2">
                     <Label htmlFor="edit_employment_type">Anställningsform</Label>
-                    <Select value={formData.employment_type || ''} onValueChange={(v) => setField('employment_type')(v)}>
+                    <Select
+                      value={(formData.employment_type || undefined) as any}
+                      onValueChange={(v) => setField('employment_type')(v)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Välj anställningsform" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Ej specificerat</SelectItem>
                         {EMPLOYMENT_TYPES.map((t) => (
                           <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
                         ))}
