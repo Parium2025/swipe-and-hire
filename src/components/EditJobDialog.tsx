@@ -150,7 +150,7 @@ const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQuestionIt
             <div className="text-white font-medium text-sm mb-1">
               {question.question_text || 'Ingen frågetext'}
             </div>
-            <div className="text-white/60 text-xs mb-2">
+            <div className="text-white text-xs mb-2">
               Typ: {question.question_type === 'text' ? 'Text' : 
                     question.question_type === 'yes_no' ? 'Ja/Nej' :
                     question.question_type === 'multiple_choice' ? 'Flervalsval' :
@@ -2152,8 +2152,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             <div className="mt-4 space-y-3">
                               <Button
                                 onClick={openImageEditor}
-                                variant="outline"
-                                className="w-full border-white/40 text-white hover:bg-white/10"
+                                className="w-full bg-transparent border border-white/40 text-white hover:bg-white/10"
                               >
                                 Redigera bild
                               </Button>
@@ -2172,8 +2171,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
               <Button
                 onClick={handleBack}
                 disabled={currentStep === 0}
-                variant="outline"
-                className="border-white/40 text-white hover:bg-white/10 disabled:opacity-50"
+                className="bg-transparent border border-white/40 text-white hover:bg-white/10 disabled:opacity-50"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Tillbaka
