@@ -166,14 +166,21 @@ export type Database = {
           employment_type: string | null
           id: string
           is_active: boolean
+          job_image_url: string | null
           location: string
+          occupation: string | null
           organization_id: string | null
+          pitch: string | null
+          positions_count: number | null
+          remote_work_possible: string | null
           requirements: string | null
           salary_max: number | null
           salary_min: number | null
+          salary_type: string | null
           title: string
           updated_at: string
           views_count: number
+          work_location_type: string | null
           work_schedule: string | null
           workplace_address: string | null
           workplace_city: string | null
@@ -191,14 +198,21 @@ export type Database = {
           employment_type?: string | null
           id?: string
           is_active?: boolean
+          job_image_url?: string | null
           location: string
+          occupation?: string | null
           organization_id?: string | null
+          pitch?: string | null
+          positions_count?: number | null
+          remote_work_possible?: string | null
           requirements?: string | null
           salary_max?: number | null
           salary_min?: number | null
+          salary_type?: string | null
           title: string
           updated_at?: string
           views_count?: number
+          work_location_type?: string | null
           work_schedule?: string | null
           workplace_address?: string | null
           workplace_city?: string | null
@@ -216,14 +230,21 @@ export type Database = {
           employment_type?: string | null
           id?: string
           is_active?: boolean
+          job_image_url?: string | null
           location?: string
+          occupation?: string | null
           organization_id?: string | null
+          pitch?: string | null
+          positions_count?: number | null
+          remote_work_possible?: string | null
           requirements?: string | null
           salary_max?: number | null
           salary_min?: number | null
+          salary_type?: string | null
           title?: string
           updated_at?: string
           views_count?: number
+          work_location_type?: string | null
           work_schedule?: string | null
           workplace_address?: string | null
           workplace_city?: string | null
