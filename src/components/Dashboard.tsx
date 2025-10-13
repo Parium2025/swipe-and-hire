@@ -1,24 +1,21 @@
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Briefcase, Users, Eye, TrendingUp } from 'lucide-react';
 import { useJobsData } from '@/hooks/useJobsData';
 import CreateJobSimpleDialog from '@/components/CreateJobSimpleDialog';
 
 const Dashboard = memo(() => {
   const { stats, isLoading, invalidateJobs } = useJobsData();
-  const [createJobOpen, setCreateJobOpen] = useState(false);
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-        <Button 
-          onClick={() => setCreateJobOpen(true)}
-          className="bg-primary hover:bg-primary/90"
-        >
-          Skapa ny annons
-        </Button>
+        <CreateJobSimpleDialog 
+          onJobCreated={() => {
+            invalidateJobs();
+          }}
+        />
       </div>
 
       {/* Stats Grid */}
@@ -79,12 +76,6 @@ const Dashboard = memo(() => {
           </CardContent>
         </Card>
       </div>
-
-      <CreateJobSimpleDialog 
-        onJobCreated={() => {
-          invalidateJobs();
-        }}
-      />
     </div>
   );
 });
