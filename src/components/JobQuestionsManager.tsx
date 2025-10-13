@@ -57,7 +57,11 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
         question_text: q.question_text,
         description: q.description || '',
         question_type: q.question_type as JobQuestion['question_type'],
-        options: q.options ? JSON.parse(q.options as string) : undefined,
+        options: Array.isArray(q.options)
+          ? (q.options as string[])
+          : (typeof q.options === 'string' && q.options.trim().startsWith('[')
+            ? JSON.parse(q.options)
+            : undefined),
         is_required: q.is_required,
         order_index: q.order_index
       }));
