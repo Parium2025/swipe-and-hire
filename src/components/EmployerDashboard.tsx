@@ -197,7 +197,7 @@ const EmployerDashboard = memo(() => {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-0.5">
                       <CardTitle className="text-xl text-white">{job.title}</CardTitle>
-                      <Badge variant={job.is_active ? "default" : "secondary"}>
+                      <Badge variant={job.is_active ? "default" : "secondary"} className="mt-0.5">
                         {job.is_active ? 'Aktiv' : 'Inaktiv'}
                       </Badge>
                     </div>
