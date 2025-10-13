@@ -1517,8 +1517,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
       <UnsavedChangesDialog
         open={showUnsavedDialog}
+        onOpenChange={setShowUnsavedDialog}
+        onConfirm={handleConfirmClose}
         onCancel={handleCancelClose}
-        onDiscard={handleConfirmClose}
       />
     </>
   );
