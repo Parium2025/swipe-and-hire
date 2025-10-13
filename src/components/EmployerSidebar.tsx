@@ -115,6 +115,7 @@ export function EmployerSidebar() {
   const { checkBeforeNavigation } = useUnsavedChanges();
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null);
   const [logoLoaded, setLogoLoaded] = useState(false);
+  const [logoError, setLogoError] = useState(false);
 
   // Helper function to get company initials
   const getCompanyInitials = () => {
@@ -127,23 +128,27 @@ export function EmployerSidebar() {
       .slice(0, 2);
   };
 
-  // Load company logo URL and reset loaded state only when URL actually changes
+  // Load company logo URL once and keep last known value during route re-renders
   useEffect(() => {
-    const logoUrl = (profile as any)?.company_logo_url;
-    if (logoUrl) {
+    const raw = (profile as any)?.company_logo_url;
+    if (typeof raw === 'string' && raw.trim() !== '') {
       try {
-        const baseUrl = logoUrl.split('?')[0];
-        setCompanyLogoUrl(baseUrl);
+        const base = raw.split('?')[0];
+        setCompanyLogoUrl(prev => (prev === base ? prev : base));
         setLogoLoaded(false);
+        setLogoError(false);
       } catch (error) {
-        console.error('Failed to load company logo:', error);
-        setCompanyLogoUrl(null);
+        console.error('Failed to parse company logo:', error);
+        setCompanyLogoUrl(prev => prev ?? null);
         setLogoLoaded(false);
+        setLogoError(false);
       }
-    } else {
+    } else if (raw === '' || raw === null) {
       setCompanyLogoUrl(null);
       setLogoLoaded(false);
+      setLogoError(false);
     }
+    // If raw is undefined, keep previous logo to avoid flicker during auth/profile re-fetch
   }, [(profile as any)?.company_logo_url]);
 
   // Listen for unsaved changes cancel event to close sidebar
@@ -201,12 +206,14 @@ export function EmployerSidebar() {
                 {companyLogoUrl && (
                   <AvatarImage
                     src={companyLogoUrl}
-                    onLoad={() => setLogoLoaded(true)}
-                    onError={() => setLogoLoaded(false)}
-                    loading="eager"
+                    alt={`${profile?.company_name || 'Företag'} logotyp`}
+                    onLoad={() => { setLogoLoaded(true); setLogoError(false); }}
+                    onError={() => { setLogoLoaded(false); setLogoError(true); }}
+                    decoding="async"
+                    loading="lazy"
                   />
                 )}
-                <AvatarFallback className={`bg-white/10 text-white font-semibold transition-opacity duration-150 ${companyLogoUrl ? 'opacity-0' : 'opacity-100'}`}>
+                <AvatarFallback className={`bg-white/10 text-white font-semibold ${companyLogoUrl && !logoError ? 'hidden' : ''}`}>
                   {getCompanyInitials()}
                 </AvatarFallback>
               </Avatar>
