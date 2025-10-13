@@ -85,6 +85,7 @@ const EmployerDashboard = memo(() => {
   };
 
   const handleEditJob = (job: JobPosting) => {
+    console.log('[MyJobs] Open edit for job:', { id: job.id, title: job.title });
     setEditingJob(job);
     setEditDialogOpen(true);
   };
