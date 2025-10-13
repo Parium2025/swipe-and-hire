@@ -8,11 +8,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES, normalizeEmploymentType } from '@/lib/employmentTypes';
-import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, GripVertical, Pencil, Minus } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, GripVertical, Pencil } from 'lucide-react';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { Progress } from '@/components/ui/progress';
 import { searchOccupations } from '@/lib/occupations';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
+import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import {
   DndContext,
   closestCenter,
@@ -30,8 +32,6 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
-import JobPreview from '@/components/JobPreview';
 
 interface JobQuestion {
   id?: string;
@@ -102,7 +102,7 @@ interface EditJobDialogProps {
   onJobUpdated: () => void;
 }
 
-// Sortable Question Item Component
+// Sortable Question Item Component (samma som i MobileJobWizard)
 interface SortableQuestionItemProps {
   question: JobQuestion;
   onEdit: (question: JobQuestion) => void;
@@ -217,6 +217,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const [questionTypeSearchTerm, setQuestionTypeSearchTerm] = useState('');
   const [showQuestionTypeDropdown, setShowQuestionTypeDropdown] = useState(false);
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   const [formData, setFormData] = useState<JobFormData>({
     title: '',
     description: '',
@@ -301,6 +303,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     { value: 'delvis', label: 'Delvis' },
     { value: 'ja', label: 'Ja, helt' }
   ];
+
+  // Always start from step 0 when opening
+  useEffect(() => {
+    if (open) {
+      setCurrentStep(0);
+    }
+  }, [open]);
 
   // Fetch profile
   useEffect(() => {
@@ -404,7 +413,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
       setFormData(newFormData);
       setInitialFormData(newFormData);
       setHasUnsavedChanges(false);
-      setCurrentStep(0); // Always start from step 0
     }
   }, [job, open]);
 
@@ -783,10 +791,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   };
 
   const canProceed = () => {
-    const step = steps[currentStep];
-    
     if (currentStep === 0) {
-      return formData.title.trim() && formData.description.trim();
+      return formData.title.trim() && formData.occupation.trim() && formData.description.trim() && formData.employment_type;
     }
     
     if (currentStep === 1) {
@@ -800,12 +806,20 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const handleNext = () => {
     if (canProceed() && currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
+      // Scroll to top
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = 0;
+      }
     }
   };
 
   const handleBack = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = 0;
+      }
     }
   };
 
@@ -848,14 +862,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         return;
       }
 
-      // Update job questions
-      // First, delete all existing questions
+      // Update job questions - delete all existing and insert new ones
       await supabase
         .from('job_questions')
         .delete()
         .eq('job_id', job.id);
 
-      // Then insert new/updated questions
       if (customQuestions.length > 0) {
         const questionsToInsert = customQuestions.map(q => ({
           job_id: job.id,
@@ -874,7 +886,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
           .insert(questionsToInsert);
       }
 
-      toast({ title: 'Annons uppdaterad', description: 'Dina ändringar har sparats.' });
+      toast({ title: 'Annons uppdaterad!', description: 'Dina ändringar har sparats.' });
       setHasUnsavedChanges(false);
       onOpenChange(false);
       onJobUpdated();
@@ -886,42 +898,46 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   };
 
   const progress = ((currentStep + 1) / steps.length) * 100;
+  const isLastStep = currentStep === steps.length - 1;
 
   return (
     <>
-      <Dialog open={open} onOpenChange={(isOpen) => {
-        if (!isOpen) {
-          handleClose();
-        } else {
-          onOpenChange(isOpen);
-        }
-      }}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden bg-parium-gradient border-none shadow-none p-0">
-          <div className="bg-white/10 backdrop-blur-sm border-transparent rounded-lg overflow-hidden h-full flex flex-col">
-            <DialogHeader className="p-6 pb-4 flex-shrink-0">
-              <div className="flex items-center justify-between mb-4">
-                <DialogTitle className="text-white text-2xl">
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-md h-[90vh] max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden">
+          <AnimatedBackground showBubbles={false} />
+          <div className="flex flex-col h-full relative z-10">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-white/20 flex-shrink-0 rounded-t-[24px] bg-background/10">
+              <DialogHeader className="flex-1">
+                <DialogTitle className="text-white text-lg">
                   {steps[currentStep].title}
                 </DialogTitle>
+                <div className="text-sm text-white">
+                  Steg {currentStep + 1} av {steps.length}
+                </div>
+              </DialogHeader>
+              {!showQuestionTemplates && !showQuestionForm && (
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={handleClose}
-                  className="text-white/70 hover:text-white hover:bg-white/10"
+                  className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-4 w-4" />
                 </Button>
-              </div>
+              )}
+            </div>
 
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs text-white/70">
-                  <span>Steg {currentStep + 1} av {steps.length}</span>
-                </div>
-                <Progress value={progress} className="h-2" />
-              </div>
-            </DialogHeader>
+            {/* Progress Bar */}
+            <div className="px-4 py-2 flex-shrink-0">
+              <Progress 
+                value={progress} 
+                className="h-1 bg-white/20 [&>div]:bg-white"
+              />
+            </div>
 
-            <div className="flex-1 overflow-y-auto px-6 pb-6">
+            {/* Scrollable Content */}
+            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
               {!job ? (
                 <div className="py-10 text-center text-white">
                   <p>Laddar annons...</p>
@@ -936,7 +952,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         <Input
                           value={formData.title}
                           onChange={(e) => handleInputChange('title', e.target.value)}
-                          placeholder="t.ex. Truckförare"
+                          placeholder="t.ex. Lagerarbetare"
                           className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                         />
                       </div>
@@ -945,24 +961,43 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         <Label className="text-white font-medium">Yrke *</Label>
                         <div className="relative occupation-dropdown">
                           <Input
-                            value={occupationSearchTerm || formData.occupation}
+                            value={formData.occupation}
                             onChange={(e) => handleOccupationSearch(e.target.value)}
+                            onFocus={() => setShowOccupationDropdown(occupationSearchTerm.length > 0)}
                             placeholder="t.ex. Mjukvaru- och systemutvecklare"
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                           />
+                          <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
                           
-                          {showOccupationDropdown && filteredOccupations.length > 0 && (
+                          {showOccupationDropdown && (
                             <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
-                              {filteredOccupations.slice(0, 10).map((occupation) => (
+                              {filteredOccupations.map((occupation, index) => (
                                 <button
-                                  key={occupation}
+                                  key={`${occupation}-${index}`}
                                   type="button"
                                   onClick={() => handleOccupationSelect(occupation)}
                                   className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
                                 >
-                                  {occupation}
+                                  <div className="font-medium">{occupation}</div>
                                 </button>
                               ))}
+                              
+                              {occupationSearchTerm.trim().length >= 2 &&
+                               filteredOccupations.length === 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleOccupationSelect(occupationSearchTerm)}
+                                  className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-t border-gray-700/30"
+                                >
+                                  <span className="font-medium">Använd "{occupationSearchTerm}"</span>
+                                </button>
+                              )}
+                              
+                              {occupationSearchTerm.trim().length > 0 && occupationSearchTerm.trim().length < 2 && (
+                                <div className="py-4 px-3 text-center text-white not-italic text-sm">
+                                  Skriv minst 2 bokstäver för att söka
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
@@ -974,8 +1009,20 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           value={formData.description}
                           onChange={(e) => handleInputChange('description', e.target.value)}
                           placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
-                          rows={6}
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0 resize-none"
+                          rows={4}
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 text-base resize-none leading-relaxed focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                        />
+                      </div>
+
+                      {/* Kravprofil */}
+                      <div className="space-y-2">
+                        <Label className="text-white font-medium">Kravprofil:</Label>
+                        <Textarea
+                          value={formData.requirements}
+                          onChange={(e) => handleInputChange('requirements', e.target.value)}
+                          placeholder="Beskriv vilka krav ni har på kandidaten..."
+                          rows={4}
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 text-base resize-none leading-relaxed focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                         />
                       </div>
 
@@ -993,7 +1040,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                           
                           {showEmploymentTypeDropdown && (
-                            <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                             <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 shadow-lg">
                               {filteredEmploymentTypes.map((type) => (
                                 <button
                                   key={type.value}
@@ -1045,13 +1092,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                   {currentStep === 1 && (
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label className="text-white font-medium">Var utförs arbetet? *</Label>
+                        <Label className="text-white font-medium">Arbetets plats *</Label>
                         <div className="relative work-location-dropdown">
                           <Input
                             value={workLocationSearchTerm || (formData.work_location_type ? workLocationTypes.find(t => t.value === formData.work_location_type)?.label || '' : '')}
                             onChange={(e) => handleWorkLocationSearch(e.target.value)}
                             onClick={handleWorkLocationClick}
-                            placeholder="Välj arbetsplats"
+                            placeholder="Välj plats"
                             className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                             readOnly
                           />
@@ -1075,7 +1122,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-white font-medium">Är distansarbete möjligt? *</Label>
+                        <Label className="text-white font-medium">Fjärr-/distansarbete *</Label>
                         <div className="relative remote-work-dropdown">
                           <Input
                             value={remoteWorkSearchTerm || (formData.remote_work_possible ? remoteWorkOptions.find(t => t.value === formData.remote_work_possible)?.label || '' : '')}
@@ -1109,364 +1156,292 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         <Input
                           value={formData.workplace_name}
                           onChange={(e) => handleInputChange('workplace_name', e.target.value)}
-                          placeholder={profile?.company_name ? `t.ex. ${profile.company_name}` : "t.ex. IKEA Kungens Kurva"}
+                          placeholder="Företagets namn"
                           className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                         />
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-white font-medium">Kontakt e-mail *</Label>
-                        <Input
-                          type="email"
-                          value={formData.contact_email}
-                          onChange={(e) => handleInputChange('contact_email', e.target.value)}
-                          placeholder={user?.email || "kontakt@företag.se"}
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-white font-medium">Gatuadress (frivilligt)</Label>
+                        <Label className="text-white font-medium">Adress</Label>
                         <Input
                           value={formData.workplace_address}
                           onChange={(e) => handleInputChange('workplace_address', e.target.value)}
-                          placeholder="t.ex. Modulvägen 1"
+                          placeholder="Gatuadress"
                           className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                         />
                       </div>
 
+                      <div className="space-y-2">
+                        <Label className="text-white font-medium">Postnummer</Label>
                       <WorkplacePostalCodeSelector
                         postalCodeValue={formData.workplace_postal_code}
                         cityValue={formData.workplace_city}
                         onPostalCodeChange={handleWorkplacePostalCodeChange}
                         onLocationChange={handleWorkplaceLocationChange}
                       />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-white font-medium">Kontaktmail *</Label>
+                        <Input
+                          type="email"
+                          value={formData.contact_email}
+                          onChange={(e) => handleInputChange('contact_email', e.target.value)}
+                          placeholder="kontakt@foretaget.se"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                        />
+                      </div>
                     </div>
                   )}
 
                   {/* Step 3: Ansökningsfrågor */}
                   {currentStep === 2 && (
-                    <div className="space-y-6">
-                      {!showQuestionForm && !showQuestionTemplates ? (
+                    <>
+                      {!showQuestionTemplates && !showQuestionForm && (
                         <>
-                          <h3 className="text-white text-sm font-medium text-center">
-                            Dessa frågor fylls automatiskt från jobbsökarens profil
-                          </h3>
-
-                          <div className="bg-white/5 rounded-lg p-4 border border-white/20">
-                            <div className="text-white text-sm space-y-1">
-                              <p>• Namn och efternamn</p>
-                              <p>• Ålder</p>
-                              <p>• E-post</p>
-                              <p>• Telefonnummer</p>
-                              <p>• Ort/stad</p>
-                              <p>• Presentation</p>
-                              <p>• CV</p>
-                              <p>• Nuvarande anställningsform</p>
-                              <p>• Tillgänglighet</p>
-                            </div>
-                          </div>
-
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                              <h4 className="text-white font-medium">Anpassade frågor (valfritt)</h4>
-                              <Button
-                                onClick={addCustomQuestion}
-                                size="sm"
-                                className="bg-primary hover:bg-primary/90 text-white"
-                              >
-                                <Plus className="h-4 w-4 mr-1" />
-                                Lägg till fråga
-                              </Button>
-                            </div>
-                            
-                            {customQuestions.length === 0 ? (
-                              <div className="text-white text-sm bg-white/5 rounded-lg p-3 border border-white/20">
-                                Saknas något? Klicka på "Lägg till fråga" och skapa de frågor du vill att kandidaten ska svara på
-                              </div>
-                            ) : (
-                              <DndContext
-                                sensors={sensors}
-                                collisionDetection={closestCenter}
-                                onDragEnd={handleDragEnd}
-                              >
-                                <SortableContext
-                                  items={customQuestions.map(q => q.id!)}
-                                  strategy={verticalListSortingStrategy}
-                                >
-                                  <div className="space-y-3">
-                                    {customQuestions.map((question) => (
-                                      <SortableQuestionItem
-                                        key={question.id}
-                                        question={question}
-                                        onEdit={editCustomQuestion}
-                                        onDelete={deleteCustomQuestion}
-                                      />
-                                    ))}
-                                  </div>
-                                </SortableContext>
-                              </DndContext>
-                            )}
-                          </div>
-                        </>
-                      ) : showQuestionTemplates ? (
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <h3 className="text-white font-medium text-lg">Välj fråga</h3>
+                          <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-white text-lg font-semibold">Ansökningsfrågor</h3>
                             <Button
-                              onClick={() => {
-                                setShowQuestionTemplates(false);
-                                setQuestionSearchTerm('');
-                              }}
-                              variant="ghost"
-                              size="sm"
-                              className="text-white/70 hover:text-white hover:bg-white/10"
+                              onClick={addCustomQuestion}
+                              variant="outline"
+                              className="flex items-center gap-2"
                             >
-                              <X className="h-4 w-4" />
+                              <Plus className="h-4 w-4" />
+                              Lägg till fråga
                             </Button>
                           </div>
 
-                          <div className="relative">
-                            <Input
-                              value={questionSearchTerm}
-                              onChange={(e) => setQuestionSearchTerm(e.target.value)}
-                              placeholder="Sök efter fråga..."
-                              className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
-                            />
+                          {customQuestions.length === 0 ? (
+                            <div className="text-white/70 text-center py-10">
+                              Inga frågor tillagda ännu.
+                            </div>
+                          ) : (
+                            <DndContext
+                              sensors={sensors}
+                              collisionDetection={closestCenter}
+                              onDragEnd={handleDragEnd}
+                            >
+                              <SortableContext
+                                items={customQuestions.map(q => q.id!)}
+                                strategy={verticalListSortingStrategy}
+                              >
+                                <div className="space-y-3">
+                                  {customQuestions.map(question => (
+                                    <SortableQuestionItem
+                                      key={question.id}
+                                      question={question}
+                                      onEdit={editCustomQuestion}
+                                      onDelete={deleteCustomQuestion}
+                                    />
+                                  ))}
+                                </div>
+                              </SortableContext>
+                            </DndContext>
+                          )}
+                        </>
+                      )}
+
+                      {showQuestionTemplates && (
+                        <div>
+                          <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-white text-lg font-semibold">Välj mall för fråga</h3>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setShowQuestionTemplates(false)}
+                              className="text-white/70 hover:text-white hover:bg-white/10"
+                            >
+                              <X className="h-5 w-5" />
+                            </Button>
                           </div>
 
                           <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                            {questionTemplates.filter(template => 
-                              template.question_text.toLowerCase().includes(questionSearchTerm.toLowerCase())
-                            ).length > 0 ? (
-                              <>
-                                {questionTemplates
-                                  .filter(template => 
-                                    template.question_text.toLowerCase().includes(questionSearchTerm.toLowerCase())
-                                  )
-                                  .map((template) => (
-                                  <div
-                                    key={template.id}
-                                    className="w-full bg-white/5 rounded-lg p-4 border border-white/20 flex items-center justify-between gap-3"
-                                  >
-                                    <button
-                                      onClick={() => useQuestionTemplate(template)}
-                                      className="flex-1 text-left hover:opacity-80 transition-opacity"
-                                    >
-                                      <div className="text-white font-medium text-sm mb-1">
-                                        {template.question_text}
-                                      </div>
-                                      <div className="text-white/95 text-xs">
-                                        {template.question_type === 'text' ? 'Text' : 
-                                         template.question_type === 'yes_no' ? 'Ja/Nej' :
-                                         template.question_type === 'multiple_choice' ? 'Flerval' :
-                                         template.question_type === 'number' ? 'Siffra' : template.question_type}
-                                      </div>
-                                    </button>
-                                    <Button
-                                      onClick={async () => {
-                                        if (!(template as any).id) return;
-                                        try {
-                                          const { error } = await supabase
-                                            .from('job_question_templates')
-                                            .delete()
-                                            .eq('id', (template as any).id);
-                                          
-                                          if (error) throw error;
-                                          
-                                          setQuestionTemplates(prev => prev.filter(t => (t as any).id !== (template as any).id));
-                                          toast({
-                                            title: "Fråga borttagen"
-                                          });
-                                        } catch (error) {
-                                          console.error('Error deleting template:', error);
-                                          toast({
-                                            title: "Kunde inte ta bort frågan",
-                                            variant: "destructive"
-                                          });
-                                        }
-                                      }}
-                                      variant="ghost"
-                                      size="sm"
-                                      className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0 flex-shrink-0"
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                                ))}
-                              </>
-                            ) : (
-                              <div className="text-white/60 text-sm text-center py-8">
-                                Du har inga sparade frågor än
+                            {questionTemplates.length === 0 ? (
+                              <div className="text-white/70 text-center py-10">
+                                Inga mallar tillgängliga.
                               </div>
+                            ) : (
+                              questionTemplates.map(template => (
+                                <div
+                                  key={template.id}
+                                  className="bg-white/10 rounded-md p-3 cursor-pointer hover:bg-white/20"
+                                  onClick={() => useQuestionTemplate(template)}
+                                >
+                                  <div className="font-medium text-white">{template.question_text}</div>
+                                  <div className="text-white/60 text-sm">
+                                    Typ: {template.question_type}
+                                  </div>
+                                </div>
+                              ))
                             )}
                           </div>
 
-                          <div className="pt-2">
-                            <Button
-                              onClick={createNewQuestion}
-                              variant="outline"
-                              size="sm"
-                              className="w-full border-white/40 text-white bg-transparent hover:bg-transparent hover:border-white/60"
-                            >
-                              <Plus className="h-4 w-4 mr-1" />
-                              Skapa ny fråga
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <h3 className="text-white font-medium text-lg">
-                              {editingQuestion?.id?.startsWith('temp_') ? 'Redigera fråga' : 'Ny fråga'}
-                            </h3>
-                            <Button
-                              onClick={() => {
-                                setShowQuestionForm(false);
-                                setEditingQuestion(null);
-                                setShowQuestionTemplates(true);
-                              }}
-                              variant="ghost"
-                              size="sm"
-                              className="text-white/70 hover:text-white hover:bg-white/10"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label className="text-white font-medium">Frågetext *</Label>
-                            <Input
-                              value={editingQuestion?.question_text || ''}
-                              onChange={(e) => updateQuestionField('question_text', e.target.value)}
-                              placeholder="t.ex. Har du körkort?"
-                              className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label className="text-white font-medium">Frågetyp *</Label>
-                            <div className="relative question-type-dropdown">
-                              <Input
-                                value={questionTypeSearchTerm || (editingQuestion?.question_type ? questionTypes.find(t => t.value === editingQuestion.question_type)?.label || '' : '')}
-                                onChange={(e) => handleQuestionTypeSearch(e.target.value)}
-                                onClick={handleQuestionTypeClick}
-                                placeholder="Välj frågetyp"
-                                className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer"
-                                readOnly
-                              />
-                              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
-                              
-                              {showQuestionTypeDropdown && (
-                                <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
-                                  {filteredQuestionTypes.map((type) => (
-                                    <button
-                                      key={type.value}
-                                      type="button"
-                                      onClick={() => handleQuestionTypeSelect(type)}
-                                      className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
-                                    >
-                                      <div className="font-medium">{type.label}</div>
-                                    </button>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {editingQuestion?.question_type === 'multiple_choice' && (
-                            <div className="space-y-2">
-                              <Label className="text-white font-medium">Alternativ</Label>
-                              {editingQuestion.options?.map((option, index) => (
-                                <div key={index} className="flex gap-2">
-                                  <Input
-                                    value={option}
-                                    onChange={(e) => updateOption(index, e.target.value)}
-                                    placeholder={`Alternativ ${index + 1}`}
-                                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                                  />
-                                  <Button
-                                    onClick={() => removeOption(index)}
-                                    variant="ghost"
-                                    size="icon"
-                                    className="text-destructive hover:text-destructive/90"
-                                  >
-                                    <Minus className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              ))}
-                              <Button
-                                onClick={addOption}
-                                variant="outline"
-                                size="sm"
-                                className="w-full border-white/40 text-white"
-                              >
-                                <Plus className="h-4 w-4 mr-1" />
-                                Lägg till alternativ
-                              </Button>
-                            </div>
-                          )}
-
-                          <div className="flex justify-end gap-2 pt-4">
-                            <Button
-                              onClick={() => {
-                                setShowQuestionForm(false);
-                                setEditingQuestion(null);
-                                setShowQuestionTemplates(true);
-                              }}
-                              variant="outline"
-                              className="border-white/40 text-white"
-                            >
+                          <div className="mt-4 flex justify-end gap-2">
+                            <Button variant="outline" onClick={() => setShowQuestionTemplates(false)}>
                               Avbryt
                             </Button>
-                            <Button
-                              onClick={saveCustomQuestion}
-                              className="bg-primary hover:bg-primary/90"
-                              disabled={!editingQuestion?.question_text.trim()}
-                            >
-                              Spara fråga
-                            </Button>
+                            <Button onClick={createNewQuestion}>Skapa ny fråga</Button>
                           </div>
                         </div>
                       )}
-                    </div>
-                  )}
 
-                  {/* Step 4: Förhandsvisning */}
-                  {currentStep === 3 && job && (
-                    <div className="space-y-6">
-                      <h3 className="text-white text-lg font-medium text-center">
-                        Så kommer ansökningsformuläret att se ut på mobil
-                      </h3>
+                      {showQuestionForm && editingQuestion && (
+                        <div>
+                          <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-white text-lg font-semibold">
+                              {editingQuestion.id ? 'Redigera fråga' : 'Ny fråga'}
+                            </h3>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setShowQuestionForm(false);
+                                setEditingQuestion(null);
+                              }}
+                              className="text-white/70 hover:text-white hover:bg-white/10"
+                            >
+                              <X className="h-5 w-5" />
+                            </Button>
+                          </div>
 
-                      <div className="flex justify-center">
-                        <div 
-                          className="relative bg-gray-900 rounded-[2.5rem] p-3 shadow-2xl"
-                          style={{
-                            width: '375px',
-                            height: '667px',
-                            border: '14px solid #1f1f1f',
-                          }}
-                        >
-                          <div className="w-full h-full bg-white rounded-[1.75rem] overflow-hidden">
-                            <div className="p-4 text-center text-gray-600">
-                              <p className="font-semibold mb-2">{profile?.company_name || 'Företag'}</p>
-                              <p className="text-lg font-bold mb-1">{formData.title}</p>
-                              <p className="text-sm mb-2">{formData.workplace_city || formData.location}</p>
-                              <p className="text-xs text-gray-500">{formData.description}</p>
+                          <div className="space-y-4">
+                            <div>
+                              <Label className="text-white font-medium">Frågetext *</Label>
+                              <Input
+                                value={editingQuestion.question_text}
+                                onChange={(e) => updateQuestionField('question_text', e.target.value)}
+                                placeholder="Skriv frågetext"
+                                className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                              />
+                            </div>
+
+                            <div>
+                              <Label className="text-white font-medium">Frågetyp *</Label>
+                              <div className="relative question-type-dropdown">
+                                <Input
+                                  value={questionTypeSearchTerm || questionTypes.find(t => t.value === editingQuestion.question_type)?.label || ''}
+                                  onChange={(e) => handleQuestionTypeSearch(e.target.value)}
+                                  onClick={handleQuestionTypeClick}
+                                  placeholder="Välj frågetyp"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                                  readOnly
+                                />
+                                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                                
+                                {showQuestionTypeDropdown && (
+                                  <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                                    {filteredQuestionTypes.map((type) => (
+                                      <button
+                                        key={type.value}
+                                        type="button"
+                                        onClick={() => handleQuestionTypeSelect(type)}
+                                        className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                                      >
+                                        <div className="font-medium">{type.label}</div>
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {editingQuestion.question_type === 'multiple_choice' && (
+                              <div>
+                                <Label className="text-white font-medium">Alternativ</Label>
+                                <div className="space-y-2">
+                                  {(editingQuestion.options || []).map((option, index) => (
+                                    <div key={index} className="flex items-center gap-2">
+                                      <Input
+                                        value={option}
+                                        onChange={(e) => updateOption(index, e.target.value)}
+                                        placeholder={`Alternativ ${index + 1}`}
+                                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-10 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                                      />
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => removeOption(index)}
+                                        className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0"
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                  <Button variant="outline" onClick={addOption} className="w-full">
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Lägg till alternativ
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={editingQuestion.is_required}
+                                onChange={(e) => updateQuestionField('is_required', e.target.checked)}
+                                id="required-checkbox"
+                                className="accent-primary"
+                              />
+                              <Label htmlFor="required-checkbox" className="text-white select-none">
+                                Obligatorisk fråga
+                              </Label>
+                            </div>
+
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  setShowQuestionForm(false);
+                                  setEditingQuestion(null);
+                                }}
+                              >
+                                Avbryt
+                              </Button>
+                              <Button onClick={saveCustomQuestion}>Spara fråga</Button>
                             </div>
                           </div>
                         </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* Step 4: Förhandsvisning */}
+                  {currentStep === 3 && (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-white font-medium">Kontaktmail *</Label>
+                        <Input
+                          type="email"
+                          value={formData.contact_email}
+                          onChange={(e) => handleInputChange('contact_email', e.target.value)}
+                          placeholder="kontakt@foretaget.se"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                        />
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-white font-medium">Jobbild (valfritt)</Label>
-                        <Input
-                          value={formData.job_image_url}
-                          onChange={(e) => handleInputChange('job_image_url', e.target.value)}
-                          placeholder="URL till jobbild"
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base"
+                        <Label className="text-white font-medium">Kravprofil</Label>
+                        <Textarea
+                          value={formData.requirements}
+                          onChange={(e) => handleInputChange('requirements', e.target.value)}
+                          placeholder="Beskriv vilka krav ni har på kandidaten..."
+                          rows={4}
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 text-base resize-none leading-relaxed focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                         />
+                      </div>
+
+                      <div className="bg-white/10 rounded-lg p-4">
+                        <h4 className="text-white font-semibold mb-2">Förhandsvisning av annons</h4>
+                        <div className="text-white text-sm space-y-1">
+                          <div><strong>Titel:</strong> {formData.title}</div>
+                          <div><strong>Yrke:</strong> {formData.occupation}</div>
+                          <div><strong>Beskrivning:</strong> {formData.description}</div>
+                          <div><strong>Anställningsform:</strong> {EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label || ''}</div>
+                          <div><strong>Arbetsplats:</strong> {workLocationTypes.find(t => t.value === formData.work_location_type)?.label || ''}</div>
+                          <div><strong>Fjärr-/distansarbete:</strong> {remoteWorkOptions.find(t => t.value === formData.remote_work_possible)?.label || ''}</div>
+                          <div><strong>Kontaktmail:</strong> {formData.contact_email}</div>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -1474,27 +1449,19 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
               )}
             </div>
 
-            <div className="flex-shrink-0 p-6 pt-0 flex justify-between gap-3">
+            {/* Footer Navigation */}
+            <div className="p-4 border-t border-white/20 flex-shrink-0 flex justify-between gap-3">
               <Button
                 onClick={handleBack}
                 disabled={currentStep === 0}
                 variant="outline"
-                className="border-white/40 text-white hover:bg-white/10"
+                className="border-white/40 text-white hover:bg-white/10 disabled:opacity-50"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Tillbaka
               </Button>
 
-              {currentStep < steps.length - 1 ? (
-                <Button
-                  onClick={handleNext}
-                  disabled={!canProceed()}
-                  className="bg-primary hover:bg-primary/90 text-white"
-                >
-                  Nästa
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              ) : (
+              {isLastStep ? (
                 <Button
                   onClick={handleSubmit}
                   disabled={loading}
@@ -1508,6 +1475,15 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                   ) : (
                     'Spara ändringar'
                   )}
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleNext}
+                  disabled={!canProceed()}
+                  className="bg-primary hover:bg-primary/90 text-white disabled:opacity-50"
+                >
+                  Nästa
+                  <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               )}
             </div>
