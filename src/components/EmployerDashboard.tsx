@@ -195,7 +195,12 @@ const EmployerDashboard = memo(() => {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <CardTitle className="text-xl text-white">{job.title}</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="text-xl text-white">{job.title}</CardTitle>
+                      <Badge variant={job.is_active ? "default" : "secondary"}>
+                        {job.is_active ? 'Aktiv' : 'Inaktiv'}
+                      </Badge>
+                    </div>
                     <div className="flex items-center gap-4 text-sm text-white">
                       <div className="flex items-center gap-1">
                         <MapPin size={14} />
@@ -205,16 +210,11 @@ const EmployerDashboard = memo(() => {
                         <Calendar size={14} />
                         {new Date(job.created_at).toLocaleDateString('sv-SE')}
                       </div>
-                      <div className="flex flex-col items-center gap-1.5">
-                        <Badge variant={job.is_active ? "default" : "secondary"}>
-                          {job.is_active ? 'Aktiv' : 'Inaktiv'}
+                      {job.employment_type && (
+                        <Badge variant="outline" className="text-xs bg-white/10 text-white border-white/20">
+                          {getEmploymentTypeLabel(job.employment_type)}
                         </Badge>
-                        {job.employment_type && (
-                          <Badge variant="outline" className="text-xs bg-white/10 text-white border-white/20">
-                            {getEmploymentTypeLabel(job.employment_type)}
-                          </Badge>
-                        )}
-                      </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
