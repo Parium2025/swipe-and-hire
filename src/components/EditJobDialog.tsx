@@ -221,12 +221,21 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Redigera jobbannons</DialogTitle>
-          <DialogDescription>
-            Uppdatera informationen om tjänsten och hantera ansökningsfrågor.
-          </DialogDescription>
-        </DialogHeader>
+        {!job ? (
+          <div className="py-10 text-center">
+            <DialogHeader>
+              <DialogTitle>Laddar annons...</DialogTitle>
+              <DialogDescription>Vi kunde inte hitta annonsdata ännu. Försök igen strax.</DialogDescription>
+            </DialogHeader>
+          </div>
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle>Redigera jobbannons</DialogTitle>
+              <DialogDescription>
+                Uppdatera informationen om tjänsten och hantera ansökningsfrågor.
+              </DialogDescription>
+            </DialogHeader>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
@@ -559,6 +568,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
             </div>
           </TabsContent>
         </Tabs>
+        </>
+        )}
       </DialogContent>
     </Dialog>
   );
