@@ -2171,7 +2171,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
               <Button
                 onClick={handleBack}
                 disabled={currentStep === 0}
-                className="bg-transparent border border-white/40 text-white hover:bg-white/10 disabled:opacity-50"
+                className="bg-transparent border border-white/40 text-white hover:bg-white/10 disabled:opacity-50 disabled:border-white/20"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Tillbaka
