@@ -76,6 +76,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const [activeTab, setActiveTab] = useState("basic");
   const [occupationSearchTerm, setOccupationSearchTerm] = useState('');
   const [showOccupationDropdown, setShowOccupationDropdown] = useState(false);
+  const [showContent, setShowContent] = useState(false);
   const [formData, setFormData] = useState<JobFormData>({
     title: '',
     description: '',
@@ -101,6 +102,16 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Mount content slightly after dialog opens to avoid portal timing issues
+  useEffect(() => {
+    if (open) {
+      const t = setTimeout(() => setShowContent(true), 0);
+      return () => { clearTimeout(t); setShowContent(false); };
+    } else {
+      setShowContent(false);
+    }
+  }, [open]);
 
   // Update form data when job changes
   useEffect(() => {
@@ -221,11 +232,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        {!job ? (
+        {(!showContent || !job) ? (
           <div className="py-10 text-center">
             <DialogHeader>
-              <DialogTitle>Laddar annons...</DialogTitle>
-              <DialogDescription>Vi kunde inte hitta annonsdata ännu. Försök igen strax.</DialogDescription>
+              <DialogTitle>{!job ? 'Laddar annons...' : 'Öppnar redigeraren...'}</DialogTitle>
+              <DialogDescription>Hämtar data – klart strax.</DialogDescription>
             </DialogHeader>
           </div>
         ) : (
