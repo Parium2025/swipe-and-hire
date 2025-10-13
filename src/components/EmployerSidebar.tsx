@@ -107,13 +107,20 @@ const supportNavItems = [
   }
 ];
 
+const LOGO_CACHE_KEY = 'parium_company_logo_url';
+
 export function EmployerSidebar() {
   const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
   const collapsed = state === 'collapsed';
   const { profile, signOut, user } = useAuth();
   const navigate = useNavigate();
   const { checkBeforeNavigation } = useUnsavedChanges();
-  const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null);
+  const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(() => {
+    const fromProfile = (profile as any)?.company_logo_url as string | undefined;
+    const cached = typeof window !== 'undefined' ? sessionStorage.getItem(LOGO_CACHE_KEY) : null;
+    const raw = (typeof fromProfile === 'string' && fromProfile.trim() !== '') ? fromProfile : cached;
+    return raw ? raw.split('?')[0] : null;
+  });
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [logoError, setLogoError] = useState(false);
 
@@ -128,27 +135,29 @@ export function EmployerSidebar() {
       .slice(0, 2);
   };
 
-  // Load company logo URL once and keep last known value during route re-renders
+  // Keep last known logo; don't reset state unless value actually changes
   useEffect(() => {
     const raw = (profile as any)?.company_logo_url;
     if (typeof raw === 'string' && raw.trim() !== '') {
       try {
         const base = raw.split('?')[0];
-        setCompanyLogoUrl(prev => (prev === base ? prev : base));
-        setLogoLoaded(false);
-        setLogoError(false);
+        setCompanyLogoUrl((prev) => {
+          if (prev === base) return prev; // no change → avoid flicker
+          setLogoLoaded(false);
+          setLogoError(false);
+          try { sessionStorage.setItem(LOGO_CACHE_KEY, base); } catch {}
+          return base;
+        });
       } catch (error) {
         console.error('Failed to parse company logo:', error);
-        setCompanyLogoUrl(prev => prev ?? null);
-        setLogoLoaded(false);
-        setLogoError(false);
       }
     } else if (raw === '' || raw === null) {
       setCompanyLogoUrl(null);
       setLogoLoaded(false);
       setLogoError(false);
+      try { sessionStorage.removeItem(LOGO_CACHE_KEY); } catch {}
     }
-    // If raw is undefined, keep previous logo to avoid flicker during auth/profile re-fetch
+    // if undefined, keep previous URL while profile is re-fetching
   }, [(profile as any)?.company_logo_url]);
 
   // Listen for unsaved changes cancel event to close sidebar
@@ -209,8 +218,9 @@ export function EmployerSidebar() {
                     alt={`${profile?.company_name || 'Företag'} logotyp`}
                     onLoad={() => { setLogoLoaded(true); setLogoError(false); }}
                     onError={() => { setLogoLoaded(false); setLogoError(true); }}
-                    decoding="async"
-                    loading="lazy"
+                    decoding="sync"
+                    loading="eager"
+                    fetchPriority="high"
                   />
                 )}
                 <AvatarFallback className={`bg-white/10 text-white font-semibold ${companyLogoUrl && !logoError ? 'hidden' : ''}`}>
