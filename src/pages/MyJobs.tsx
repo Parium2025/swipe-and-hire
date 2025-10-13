@@ -17,7 +17,7 @@ const MyJobs = () => {
   }, []);
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full overflow-x-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
         <AnimatedBackground />
         {uiReady ? <EmployerSidebar /> : null}
