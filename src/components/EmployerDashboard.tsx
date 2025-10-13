@@ -205,21 +205,22 @@ const EmployerDashboard = memo(() => {
                         <Calendar size={14} />
                         {new Date(job.created_at).toLocaleDateString('sv-SE')}
                       </div>
+                      <div className="flex flex-col items-center gap-1.5 min-w-[100px]">
+                        <Badge variant={job.is_active ? "default" : "secondary"} className="w-full justify-center">
+                          {job.is_active ? 'Aktiv' : 'Inaktiv'}
+                        </Badge>
+                        {job.employment_type && (
+                          <Badge variant="outline" className="text-xs bg-white/10 text-white border-white/20 w-full justify-center">
+                            {getEmploymentTypeLabel(job.employment_type)}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <div className="flex flex-col items-center gap-1.5 min-w-[100px]">
-                    <Badge variant={job.is_active ? "default" : "secondary"} className="w-full justify-center">
-                      {job.is_active ? 'Aktiv' : 'Inaktiv'}
-                    </Badge>
-                    {job.employment_type && (
-                      <Badge variant="outline" className="text-xs bg-white/10 text-white border-white/20 w-full justify-center">
-                        {getEmploymentTypeLabel(job.employment_type)}
-                      </Badge>
-                    )}
+                  <div className="flex items-center gap-2">
                     <Switch
                       checked={job.is_active}
                       onCheckedChange={() => toggleJobStatus(job.id, job.is_active)}
-                      className="mt-1"
                     />
                   </div>
                 </div>
