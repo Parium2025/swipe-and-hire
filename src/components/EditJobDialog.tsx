@@ -7,13 +7,18 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { EMPLOYMENT_TYPES, normalizeEmploymentType } from '@/lib/employmentTypes';
-import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, GripVertical, Pencil } from 'lucide-react';
+import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, GripVertical, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2 } from 'lucide-react';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
 import { searchOccupations } from '@/lib/occupations';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
+import FileUpload from '@/components/FileUpload';
+import ImageEditor from '@/components/ImageEditor';
+import { createSignedUrl } from '@/utils/storageUtils';
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import {
   DndContext,
@@ -197,6 +202,15 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const [questionTemplates, setQuestionTemplates] = useState<JobQuestion[]>([]);
   const [questionSearchTerm, setQuestionSearchTerm] = useState('');
   const [editingQuestion, setEditingQuestion] = useState<JobQuestion | null>(null);
+  const [showCompanyProfile, setShowCompanyProfile] = useState(false);
+  const [showCompanyTooltip, setShowCompanyTooltip] = useState(false);
+  const [isScrolledTop, setIsScrolledTop] = useState(true);
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
+  const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
+  const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
+  const [showImageEditor, setShowImageEditor] = useState(false);
+  const [editingImageUrl, setEditingImageUrl] = useState<string | null>(null);
+  const [manualFocus, setManualFocus] = useState<number | null>(null);
   
   // Unsaved changes tracking
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -218,6 +232,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const [showQuestionTypeDropdown, setShowQuestionTypeDropdown] = useState(false);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const occupationRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState<JobFormData>({
     title: '',
@@ -304,6 +319,152 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     { value: 'ja', label: 'Ja, helt' }
   ];
 
+  // Helper functions
+  const formatCity = (value?: string) => {
+    if (!value) return '';
+    return value
+      .toLowerCase()
+      .split(' ')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+  };
+
+  const getWorkLocationDisplayText = () => {
+    const locationType = workLocationTypes.find(t => t.value === formData.work_location_type);
+    
+    let displayText = locationType?.label || 'På plats';
+    
+    if (formData.remote_work_possible === 'ja') {
+      displayText += ', distans helt möjligt';
+    } else if (formData.remote_work_possible === 'delvis') {
+      displayText += ', delvis distans';
+    }
+    
+    const capitalizedText = displayText.charAt(0).toUpperCase() + displayText.slice(1).toLowerCase();
+    
+    return `(${capitalizedText})`;
+  };
+
+  const formatSalaryInfo = () => {
+    const parts = [];
+    
+    if (formData.salary_min || formData.salary_max) {
+      if (formData.salary_min && formData.salary_max) {
+        parts.push(`${parseInt(formData.salary_min).toLocaleString()} - ${parseInt(formData.salary_max).toLocaleString()} kr/mån`);
+      } else if (formData.salary_min) {
+        parts.push(`Från ${parseInt(formData.salary_min).toLocaleString()} kr/mån`);
+      } else if (formData.salary_max) {
+        parts.push(`Upp till ${parseInt(formData.salary_max).toLocaleString()} kr/mån`);
+      }
+    }
+    
+    if (formData.salary_type) {
+      const salaryType = salaryTypes.find(t => t.value === formData.salary_type);
+      if (salaryType) {
+        parts.push(salaryType.label);
+      }
+    }
+    
+    return parts;
+  };
+
+  const formatPositionsCount = () => {
+    const count = parseInt(formData.positions_count) || 1;
+    if (count === 1) {
+      return '1 person';
+    } else {
+      return `${count} personer`;
+    }
+  };
+
+  const getEmailTextSize = (email: string) => {
+    if (!email) return 'text-xs';
+    
+    const length = email.length;
+    if (length <= 15) return 'text-xs';
+    if (length <= 25) return 'text-[10px]';
+    if (length <= 35) return 'text-[9px]';
+    return 'text-[8px]';
+  };
+
+  const getDisplayTitle = () => {
+    return formData.title || 'Jobbtitel';
+  };
+
+  const formatCityWithMainCity = (city: string) => {
+    if (!city) return '';
+    return formatCity(city);
+  };
+
+  const getMetaLine = (employment?: string, city?: string) => {
+    const emp = getEmploymentTypeLabel(employment);
+    const c = formatCityWithMainCity(city || '');
+    return [emp, c].filter(Boolean).join(' • ');
+  };
+
+  const getSmartTextSizes = () => {
+    const companyName = profile?.company_name || 'Företag';
+    const jobTitle = getDisplayTitle();
+    const metaLine = getMetaLine(formData.employment_type, formData.workplace_city || formData.location);
+
+    const companyLength = companyName.length;
+    const titleLength = jobTitle.length;
+    const metaLength = metaLine.length;
+
+    let companySizeClass = 'text-xs';
+    let titleSizeClass = 'text-lg';
+    let metaSizeClass = 'text-sm';
+
+    if (titleLength > 50) {
+      titleSizeClass = 'text-base';
+      companySizeClass = 'text-xs';
+      metaSizeClass = 'text-xs';
+    } else if (titleLength > 30) {
+      titleSizeClass = 'text-lg';
+      companySizeClass = 'text-xs';
+      metaSizeClass = 'text-sm';
+    } else if (titleLength < 20) {
+      titleSizeClass = 'text-xl';
+      companySizeClass = 'text-sm';
+      metaSizeClass = 'text-base';
+    }
+
+    if (companyLength > 15) {
+      companySizeClass = 'text-xs';
+    } else if (companyLength < 8) {
+      companySizeClass = 'text-sm';
+    }
+
+    if (metaLength > 20) {
+      metaSizeClass = 'text-xs';
+    } else if (metaLength < 10) {
+      metaSizeClass = 'text-sm';
+    }
+
+    return {
+      company: companySizeClass,
+      title: titleSizeClass,
+      meta: metaSizeClass
+    };
+  };
+
+  const openImageEditor = async () => {
+    try {
+      const source = originalImageUrl || formData.job_image_url || jobImageDisplayUrl;
+      if (!source) return;
+
+      let urlToEdit = source;
+      if (!source.startsWith('http')) {
+        const signed = await createSignedUrl('job-applications', source, 86400);
+        if (signed) urlToEdit = signed;
+      }
+      setEditingImageUrl(urlToEdit);
+      setShowImageEditor(true);
+    } catch (e) {
+      console.error('Failed to open editor', e);
+    }
+  };
+
   // Always start from step 0 when opening
   useEffect(() => {
     if (open) {
@@ -383,6 +544,17 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
       })));
     }
   };
+
+  // Load job image if exists
+  useEffect(() => {
+    if (job?.job_image_url && open) {
+      setJobImageDisplayUrl(job.job_image_url);
+      setOriginalImageUrl(job.job_image_url);
+    } else {
+      setJobImageDisplayUrl(null);
+      setOriginalImageUrl(null);
+    }
+  }, [job, open]);
 
   // Sync incoming job to form
   useEffect(() => {
@@ -806,7 +978,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const handleNext = () => {
     if (canProceed() && currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
-      // Scroll to top
       if (scrollContainerRef.current) {
         scrollContainerRef.current.scrollTop = 0;
       }
@@ -816,7 +987,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const handleBack = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
-      // Scroll to top
       if (scrollContainerRef.current) {
         scrollContainerRef.current.scrollTop = 0;
       }
@@ -1014,7 +1184,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         />
                       </div>
 
-                      {/* Kravprofil */}
                       <div className="space-y-2">
                         <Label className="text-white font-medium">Kravprofil:</Label>
                         <Textarea
@@ -1092,13 +1261,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                   {currentStep === 1 && (
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label className="text-white font-medium">Arbetets plats *</Label>
+                        <Label className="text-white font-medium">Var utförs arbetet? *</Label>
                         <div className="relative work-location-dropdown">
                           <Input
                             value={workLocationSearchTerm || (formData.work_location_type ? workLocationTypes.find(t => t.value === formData.work_location_type)?.label || '' : '')}
                             onChange={(e) => handleWorkLocationSearch(e.target.value)}
                             onClick={handleWorkLocationClick}
-                            placeholder="Välj plats"
+                            placeholder="Välj arbetsplats"
                             className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                             readOnly
                           />
@@ -1122,7 +1291,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-white font-medium">Fjärr-/distansarbete *</Label>
+                        <Label className="text-white font-medium">Är distansarbete möjligt? *</Label>
                         <div className="relative remote-work-dropdown">
                           <Input
                             value={remoteWorkSearchTerm || (formData.remote_work_possible ? remoteWorkOptions.find(t => t.value === formData.remote_work_possible)?.label || '' : '')}
@@ -1156,170 +1325,237 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         <Input
                           value={formData.workplace_name}
                           onChange={(e) => handleInputChange('workplace_name', e.target.value)}
-                          placeholder="Företagets namn"
+                          placeholder={profile?.company_name ? `t.ex. ${profile.company_name}` : "t.ex. IKEA Kungens Kurva"}
                           className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                         />
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-white font-medium">Adress</Label>
+                        <Label className="text-white font-medium">Kontakt e-mail *</Label>
+                        <Input
+                          type="email"
+                          value={formData.contact_email}
+                          onChange={(e) => handleInputChange('contact_email', e.target.value)}
+                          placeholder={user?.email || "kontakt@företag.se"}
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-white font-medium">Gatuadress (frivilligt)</Label>
                         <Input
                           value={formData.workplace_address}
                           onChange={(e) => handleInputChange('workplace_address', e.target.value)}
-                          placeholder="Gatuadress"
+                          placeholder="t.ex. Modulvägen 1"
                           className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                         />
                       </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-white font-medium">Postnummer</Label>
                       <WorkplacePostalCodeSelector
                         postalCodeValue={formData.workplace_postal_code}
                         cityValue={formData.workplace_city}
                         onPostalCodeChange={handleWorkplacePostalCodeChange}
                         onLocationChange={handleWorkplaceLocationChange}
                       />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-white font-medium">Kontaktmail *</Label>
-                        <Input
-                          type="email"
-                          value={formData.contact_email}
-                          onChange={(e) => handleInputChange('contact_email', e.target.value)}
-                          placeholder="kontakt@foretaget.se"
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
-                        />
-                      </div>
                     </div>
                   )}
 
                   {/* Step 3: Ansökningsfrågor */}
                   {currentStep === 2 && (
-                    <>
-                      {!showQuestionTemplates && !showQuestionForm && (
+                    <div className="space-y-6">
+                      {!showQuestionForm && !showQuestionTemplates ? (
                         <>
-                          <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-white text-lg font-semibold">Ansökningsfrågor</h3>
+                          <h3 className="text-white text-sm font-medium text-center">
+                            Dessa frågor fylls automatiskt från jobbsökarens profil
+                          </h3>
+
+                          <div className="bg-white/5 rounded-lg p-4 border border-white/20">
+                            <div className="text-white text-sm space-y-1">
+                              <p>• Namn och efternamn</p>
+                              <p>• Ålder</p>
+                              <p>• E-post</p>
+                              <p>• Telefonnummer</p>
+                              <p>• Ort/stad</p>
+                              <p>• Presentation</p>
+                              <p>• CV</p>
+                              <p>• Nuvarande anställningsform</p>
+                              <p>• Tillgänglighet</p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-white font-medium">Anpassade frågor (valfritt)</h4>
+                              <Button
+                                onClick={addCustomQuestion}
+                                size="sm"
+                                className="bg-primary hover:bg-primary/90 text-white"
+                              >
+                                <Plus className="h-4 w-4 mr-1" />
+                                Lägg till fråga
+                              </Button>
+                            </div>
+                            
+                            {customQuestions.length === 0 ? (
+                              <div className="text-white text-sm bg-white/5 rounded-lg p-3 border border-white/20">
+                                Saknas något? Klicka på "Lägg till fråga" och skapa de frågor du vill att kandidaten ska svara på
+                              </div>
+                            ) : (
+                              <DndContext
+                                sensors={sensors}
+                                collisionDetection={closestCenter}
+                                onDragEnd={handleDragEnd}
+                              >
+                                <SortableContext
+                                  items={customQuestions.map(q => q.id!)}
+                                  strategy={verticalListSortingStrategy}
+                                >
+                                  <div className="space-y-3">
+                                    {customQuestions.map((question) => (
+                                      <SortableQuestionItem
+                                        key={question.id}
+                                        question={question}
+                                        onEdit={editCustomQuestion}
+                                        onDelete={deleteCustomQuestion}
+                                      />
+                                    ))}
+                                  </div>
+                                </SortableContext>
+                              </DndContext>
+                            )}
+                          </div>
+                        </>
+                      ) : showQuestionTemplates ? (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-white font-medium text-lg">Välj fråga</h3>
                             <Button
-                              onClick={addCustomQuestion}
-                              variant="outline"
-                              className="flex items-center gap-2"
+                              onClick={() => {
+                                setShowQuestionTemplates(false);
+                                setQuestionSearchTerm('');
+                              }}
+                              variant="ghost"
+                              size="sm"
+                              className="text-white/70 hover:text-white hover:bg-white/10"
                             >
-                              <Plus className="h-4 w-4" />
-                              Lägg till fråga
+                              <X className="h-4 w-4" />
                             </Button>
                           </div>
 
-                          {customQuestions.length === 0 ? (
-                            <div className="text-white/70 text-center py-10">
-                              Inga frågor tillagda ännu.
-                            </div>
-                          ) : (
-                            <DndContext
-                              sensors={sensors}
-                              collisionDetection={closestCenter}
-                              onDragEnd={handleDragEnd}
-                            >
-                              <SortableContext
-                                items={customQuestions.map(q => q.id!)}
-                                strategy={verticalListSortingStrategy}
-                              >
-                                <div className="space-y-3">
-                                  {customQuestions.map(question => (
-                                    <SortableQuestionItem
-                                      key={question.id}
-                                      question={question}
-                                      onEdit={editCustomQuestion}
-                                      onDelete={deleteCustomQuestion}
-                                    />
-                                  ))}
-                                </div>
-                              </SortableContext>
-                            </DndContext>
-                          )}
-                        </>
-                      )}
-
-                      {showQuestionTemplates && (
-                        <div>
-                          <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-white text-lg font-semibold">Välj mall för fråga</h3>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => setShowQuestionTemplates(false)}
-                              className="text-white/70 hover:text-white hover:bg-white/10"
-                            >
-                              <X className="h-5 w-5" />
-                            </Button>
+                          <div className="relative">
+                            <Input
+                              value={questionSearchTerm}
+                              onChange={(e) => setQuestionSearchTerm(e.target.value)}
+                              placeholder="Sök efter fråga..."
+                              className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
+                            />
                           </div>
 
                           <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                            {questionTemplates.length === 0 ? (
-                              <div className="text-white/70 text-center py-10">
-                                Inga mallar tillgängliga.
-                              </div>
-                            ) : (
-                              questionTemplates.map(template => (
-                                <div
-                                  key={template.id}
-                                  className="bg-white/10 rounded-md p-3 cursor-pointer hover:bg-white/20"
-                                  onClick={() => useQuestionTemplate(template)}
-                                >
-                                  <div className="font-medium text-white">{template.question_text}</div>
-                                  <div className="text-white/60 text-sm">
-                                    Typ: {template.question_type}
+                            {questionTemplates.filter(template => 
+                              template.question_text.toLowerCase().includes(questionSearchTerm.toLowerCase())
+                            ).length > 0 ? (
+                              <>
+                                {questionTemplates
+                                  .filter(template => 
+                                    template.question_text.toLowerCase().includes(questionSearchTerm.toLowerCase())
+                                  )
+                                  .map((template) => (
+                                  <div
+                                    key={template.id}
+                                    className="w-full bg-white/5 rounded-lg p-4 border border-white/20 flex items-center justify-between gap-3"
+                                  >
+                                    <button
+                                      onClick={() => useQuestionTemplate(template)}
+                                      className="flex-1 text-left hover:opacity-80 transition-opacity"
+                                    >
+                                      <div className="text-white font-medium text-sm mb-1">
+                                        {template.question_text}
+                                      </div>
+                                      <div className="text-white/95 text-xs">
+                                        {template.question_type === 'text' ? 'Text' : 
+                                         template.question_type === 'yes_no' ? 'Ja/Nej' :
+                                         template.question_type === 'multiple_choice' ? 'Flerval' :
+                                         template.question_type === 'number' ? 'Siffra' : template.question_type}
+                                      </div>
+                                    </button>
+                                    <Button
+                                      onClick={async () => {
+                                        if (!(template as any).id) return;
+                                        try {
+                                          const { error } = await supabase
+                                            .from('job_question_templates')
+                                            .delete()
+                                            .eq('id', (template as any).id);
+                                          
+                                          if (error) throw error;
+                                          
+                                          setQuestionTemplates(prev => prev.filter(t => (t as any).id !== (template as any).id));
+                                          toast({
+                                            title: "Fråga borttagen"
+                                          });
+                                        } catch (error) {
+                                          console.error('Error deleting template:', error);
+                                          toast({
+                                            title: "Kunde inte ta bort frågan",
+                                            variant: "destructive"
+                                          });
+                                        }
+                                      }}
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0 flex-shrink-0"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
                                   </div>
-                                </div>
-                              ))
+                                ))}
+                              </>
+                            ) : (
+                              <div className="text-white/60 text-sm text-center py-8">
+                                Du har inga sparade frågor än
+                              </div>
                             )}
                           </div>
 
-                          <div className="mt-4 flex justify-end gap-2">
-                            <Button variant="outline" onClick={() => setShowQuestionTemplates(false)}>
-                              Avbryt
+                          <div className="pt-2">
+                            <Button
+                              onClick={createNewQuestion}
+                              variant="outline"
+                              size="sm"
+                              className="w-full border-white/40 text-white bg-transparent hover:bg-transparent hover:border-white/60"
+                            >
+                              <Plus className="h-4 w-4 mr-1" />
+                              Skapa ny fråga
                             </Button>
-                            <Button onClick={createNewQuestion}>Skapa ny fråga</Button>
                           </div>
                         </div>
-                      )}
-
-                      {showQuestionForm && editingQuestion && (
-                        <div>
-                          <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-white text-lg font-semibold">
-                              {editingQuestion.id ? 'Redigera fråga' : 'Ny fråga'}
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-white font-medium text-lg">
+                              {editingQuestion?.id?.startsWith('temp_') ? 'Redigera fråga' : 'Ny fråga'}
                             </h3>
                             <Button
-                              variant="ghost"
-                              size="icon"
                               onClick={() => {
                                 setShowQuestionForm(false);
                                 setEditingQuestion(null);
+                                setShowQuestionTemplates(true);
                               }}
+                              variant="ghost"
+                              size="sm"
                               className="text-white/70 hover:text-white hover:bg-white/10"
                             >
-                              <X className="h-5 w-5" />
+                              <X className="h-4 w-4" />
                             </Button>
                           </div>
 
                           <div className="space-y-4">
-                            <div>
-                              <Label className="text-white font-medium">Frågetext *</Label>
-                              <Input
-                                value={editingQuestion.question_text}
-                                onChange={(e) => updateQuestionField('question_text', e.target.value)}
-                                placeholder="Skriv frågetext"
-                                className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
-                              />
-                            </div>
-
-                            <div>
+                            <div className="space-y-2">
                               <Label className="text-white font-medium">Frågetyp *</Label>
                               <div className="relative question-type-dropdown">
                                 <Input
-                                  value={questionTypeSearchTerm || questionTypes.find(t => t.value === editingQuestion.question_type)?.label || ''}
+                                  value={questionTypeSearchTerm || (editingQuestion?.question_type ? questionTypes.find(t => t.value === editingQuestion.question_type)?.label || '' : '')}
                                   onChange={(e) => handleQuestionTypeSearch(e.target.value)}
                                   onClick={handleQuestionTypeClick}
                                   placeholder="Välj frågetyp"
@@ -1345,103 +1581,585 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               </div>
                             </div>
 
-                            {editingQuestion.question_type === 'multiple_choice' && (
-                              <div>
-                                <Label className="text-white font-medium">Alternativ</Label>
+                            {editingQuestion?.question_type === 'text' && (
+                              <div className="space-y-2">
+                                <Label className="text-white font-medium">Rubrik *</Label>
+                                <Input
+                                  value={editingQuestion?.question_text || ''}
+                                  onChange={(e) => updateQuestionField('question_text', e.target.value)}
+                                  placeholder="T.ex. Beskriv dina erfarenheter inom..."
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                                />
+                              </div>
+                            )}
+
+                            {editingQuestion?.question_type === 'yes_no' && (
+                              <div className="space-y-2">
+                                <Label className="text-white font-medium">Rubrik *</Label>
+                                <Input
+                                  value={editingQuestion?.question_text || ''}
+                                  onChange={(e) => updateQuestionField('question_text', e.target.value)}
+                                  placeholder="T.ex. Har du körkort?, Kan du arbeta helger?..."
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                                />
+                              </div>
+                            )}
+
+                            {editingQuestion?.question_type === 'number' && (
+                              <>
+                                <div className="space-y-2">
+                                  <Label className="text-white font-medium">Rubrik *</Label>
+                                  <Input
+                                    value={editingQuestion?.question_text || ''}
+                                    onChange={(e) => updateQuestionField('question_text', e.target.value)}
+                                    placeholder="T.ex. Ålder, Antal års erfarenhet, Antal anställda..."
+                                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                                  />
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div className="space-y-2">
+                                    <Label className="text-white font-medium">Min värde</Label>
+                                    <Input
+                                      type="number"
+                                      value={editingQuestion?.min_value ?? ''}
+                                      onChange={(e) => updateQuestionField('min_value', e.target.value ? parseInt(e.target.value) : undefined)}
+                                      placeholder="0"
+                                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label className="text-white font-medium">Max värde</Label>
+                                    <Input
+                                      type="number"
+                                      value={editingQuestion?.max_value ?? ''}
+                                      onChange={(e) => updateQuestionField('max_value', e.target.value ? parseInt(e.target.value) : undefined)}
+                                      placeholder="100"
+                                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                                    />
+                                  </div>
+                                </div>
+                              </>
+                            )}
+
+                            {editingQuestion?.question_type === 'multiple_choice' && (
+                              <div className="space-y-2">
+                                <Label className="text-white font-medium">Rubrik *</Label>
+                                <Input
+                                  value={editingQuestion?.question_text || ''}
+                                  onChange={(e) => updateQuestionField('question_text', e.target.value)}
+                                  placeholder="T.ex. Vilka behörigheter har du?"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                                />
+                              </div>
+                            )}
+
+                            {editingQuestion?.question_type === 'multiple_choice' && (
+                              <div className="space-y-2">
+                                <Label className="text-white font-medium">Svarsalternativ</Label>
                                 <div className="space-y-2">
                                   {(editingQuestion.options || []).map((option, index) => (
-                                    <div key={index} className="flex items-center gap-2">
+                                    <div key={index} className="flex items-center space-x-2">
                                       <Input
                                         value={option}
                                         onChange={(e) => updateOption(index, e.target.value)}
                                         placeholder={`Alternativ ${index + 1}`}
-                                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-10 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                                       />
                                       <Button
-                                        variant="ghost"
-                                        size="icon"
                                         onClick={() => removeOption(index)}
-                                        className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0"
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                                       >
                                         <Trash2 className="h-4 w-4" />
                                       </Button>
                                     </div>
                                   ))}
-                                  <Button variant="outline" onClick={addOption} className="w-full">
-                                    <Plus className="h-4 w-4 mr-2" />
+                                  <Button
+                                    onClick={addOption}
+                                    variant="outline"
+                                    size="sm"
+                                    className="border-white/40 text-white bg-transparent hover:bg-transparent hover:border-white/60"
+                                  >
+                                    <Plus className="h-4 w-4 mr-1" />
                                     Lägg till alternativ
                                   </Button>
                                 </div>
                               </div>
                             )}
 
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="checkbox"
-                                checked={editingQuestion.is_required}
-                                onChange={(e) => updateQuestionField('is_required', e.target.checked)}
-                                id="required-checkbox"
-                                className="accent-primary"
+                            <div className="flex items-center space-x-3">
+                              <Switch
+                                checked={editingQuestion?.is_required || false}
+                                onCheckedChange={(checked) => updateQuestionField('is_required', checked)}
                               />
-                              <Label htmlFor="required-checkbox" className="text-white select-none">
-                                Obligatorisk fråga
-                              </Label>
+                              <Label className="text-white font-medium">Obligatorisk fråga</Label>
                             </div>
 
-                            <div className="flex justify-end gap-2">
+                            <div className="flex justify-end pt-4">
                               <Button
-                                variant="outline"
-                                onClick={() => {
-                                  setShowQuestionForm(false);
-                                  setEditingQuestion(null);
-                                }}
+                                onClick={saveCustomQuestion}
+                                disabled={!editingQuestion?.question_text?.trim()}
+                                className="bg-primary hover:bg-primary/90 text-white"
                               >
-                                Avbryt
+                                Spara fråga
                               </Button>
-                              <Button onClick={saveCustomQuestion}>Spara fråga</Button>
                             </div>
                           </div>
                         </div>
                       )}
-                    </>
+                    </div>
                   )}
 
                   {/* Step 4: Förhandsvisning */}
                   {currentStep === 3 && (
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label className="text-white font-medium">Kontaktmail *</Label>
-                        <Input
-                          type="email"
-                          value={formData.contact_email}
-                          onChange={(e) => handleInputChange('contact_email', e.target.value)}
-                          placeholder="kontakt@foretaget.se"
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
-                        />
-                      </div>
+                    <div className="space-y-6">
+                      <div className="flex flex-col items-center space-y-4">
+                        <h3 className="text-white font-medium">Så kommer ansökningsformuläret att se ut på mobil. (Testa att trycka på mobilens skärm)</h3>
+                        
+                        <div className="relative flex items-center justify-center gap-4">
+                          <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px]">
+                            {showCompanyTooltip && showApplicationForm && isScrolledTop && (
+                              <div className="pointer-events-none absolute z-[999] top-8 -left-28 flex items-center gap-1">
+                                <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
+                                  Obs, tryck här!
+                                </div>
+                                <svg width="20" height="12" viewBox="0 0 48 28" className="text-white">
+                                  <path d="M2 14 Q 24 0, 46 14" stroke="currentColor" strokeWidth="2" fill="none" markerEnd="url(#arrowheadRight)" />
+                                  <defs>
+                                    <marker id="arrowheadRight" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                                      <polygon points="0 0, 6 3, 0 6" fill="currentColor" />
+                                    </marker>
+                                  </defs>
+                                </svg>
+                              </div>
+                            )}
+                            
+                            <div className="relative w-full h-full rounded-[2rem] bg-black p-1 shadow-xl">
+                              <div className="relative w-full h-full rounded-[1.6rem] overflow-hidden bg-black">
+                                <div className="absolute top-1 left-1/2 -translate-x-1/2 z-20 h-1 w-8 rounded-full bg-black border border-gray-800"></div>
 
-                      <div className="space-y-2">
-                        <Label className="text-white font-medium">Kravprofil</Label>
-                        <Textarea
-                          value={formData.requirements}
-                          onChange={(e) => handleInputChange('requirements', e.target.value)}
-                          placeholder="Beskriv vilka krav ni har på kandidaten..."
-                          rows={4}
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 text-base resize-none leading-relaxed focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
-                        />
-                      </div>
+                                <div className="absolute inset-0 rounded-[1.6rem] overflow-hidden" style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}>
+                                  <div className="h-1 bg-black relative z-10"></div>
+                                  
+                                  <div className={showApplicationForm ? 'flex flex-col h-full' : 'hidden'}>
+                                    <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 border-b border-white/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem]">
+                                      <div className="text-xs font-bold text-white">Ansökningsformulär</div>
+                                      <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white/80 hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
+                                    </div>
 
-                      <div className="bg-white/10 rounded-lg p-4">
-                        <h4 className="text-white font-semibold mb-2">Förhandsvisning av annons</h4>
-                        <div className="text-white text-sm space-y-1">
-                          <div><strong>Titel:</strong> {formData.title}</div>
-                          <div><strong>Yrke:</strong> {formData.occupation}</div>
-                          <div><strong>Beskrivning:</strong> {formData.description}</div>
-                          <div><strong>Anställningsform:</strong> {EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label || ''}</div>
-                          <div><strong>Arbetsplats:</strong> {workLocationTypes.find(t => t.value === formData.work_location_type)?.label || ''}</div>
-                          <div><strong>Fjärr-/distansarbete:</strong> {remoteWorkOptions.find(t => t.value === formData.remote_work_possible)?.label || ''}</div>
-                          <div><strong>Kontaktmail:</strong> {formData.contact_email}</div>
+                                    <div 
+                                      className="px-2 py-2 overflow-y-auto relative z-10 custom-scrollbar flex-1"
+                                      onScroll={(e) => {
+                                        const target = e.currentTarget;
+                                        setIsScrolledTop(target.scrollTop === 0);
+                                      }}
+                                    >
+                                      <div className="space-y-3 pb-3">
+                                        <div className="bg-white/10 rounded-lg p-2 border border-white/20 relative">
+                                          <div className="flex items-center">
+                                            {profile?.company_logo_url ? (
+                                              <div className="w-4 h-4 rounded-full mr-1 overflow-hidden bg-white/10 flex items-center justify-center">
+                                                <img 
+                                                  src={profile.company_logo_url} 
+                                                  alt="Företagslogotyp" 
+                                                  className="w-full h-full object-contain"
+                                                />
+                                              </div>
+                                            ) : (
+                                              <div className="w-4 h-4 bg-primary/20 rounded-full mr-1 flex items-center justify-center">
+                                                <Building2 className="h-2 w-2 text-primary-foreground" />
+                                              </div>
+                                            )}
+                                            <button 
+                                              onClick={() => setShowCompanyProfile(true)}
+                                              className="text-xs font-bold text-white hover:text-primary transition-colors cursor-pointer"
+                                            >
+                                              {profile?.company_name || 'Företagsnamn'}
+                                            </button>
+                                          </div>
+                                        </div>
+
+                                        {formData.occupation && (
+                                          <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
+                                            <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                              <Briefcase className="h-2 w-2 mr-1 text-white" />
+                                              Yrke
+                                            </h5>
+                                            <div className="text-white">
+                                              <div 
+                                                ref={occupationRef}
+                                                className="text-xs leading-relaxed break-words inline-block pr-2 overflow-visible"
+                                              >
+                                                {formData.occupation}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        )}
+
+                                        {formData.description && (
+                                          <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
+                                            <h5 className="text-xs font-medium text-white mb-1">Jobbeskrivning</h5>
+                                            <div className="text-xs text-white leading-relaxed whitespace-pre-wrap break-words [&>*]:mb-1 [&>*:last-child]:mb-0">
+                                              {formData.description.split('\n').map((line, index) => {
+                                                const trimmedLine = line.trim();
+                                                const bulletMatch = trimmedLine.match(/^([•\-\*]|\d+[\.\)])\s*(.*)$/);
+                                                
+                                                if (bulletMatch) {
+                                                  const [, bullet, text] = bulletMatch;
+                                                  return (
+                                                    <div key={index} className="flex">
+                                                      <span className="flex-shrink-0 mr-1">{bullet}</span>
+                                                      <span className="flex-1 break-words">{text}</span>
+                                                    </div>
+                                                  );
+                                                }
+                                                
+                                                return trimmedLine ? (
+                                                  <div key={index}>{trimmedLine}</div>
+                                                ) : (
+                                                  <div key={index} className="h-3"></div>
+                                                );
+                                              })}
+                                            </div>
+                                          </div>
+                                        )}
+
+                                        {(formData.salary_min || formData.salary_max || formData.salary_type) && (
+                                          <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
+                                            <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                              <Banknote className="h-2 w-2 mr-1 text-white" />
+                                              Lön
+                                            </h5>
+                                            <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
+                                              {formatSalaryInfo().map((info, index) => (
+                                                <div key={index} className="font-medium">{info}</div>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
+
+                                        <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                          <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                            <MapPin className="h-2 w-2 mr-1 text-white" />
+                                            Arbetsplats
+                                          </h5>
+                                          <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
+                                            {formData.workplace_name && (
+                                              <div className="font-medium">{formData.workplace_name}</div>
+                                            )}
+                                            {formData.workplace_address && (
+                                              <div>{formData.workplace_address}</div>
+                                            )}
+                                            {(formData.workplace_postal_code || formData.workplace_city) && (
+                                              <div>
+                                                {formData.workplace_postal_code && formData.workplace_city ? (
+                                                  <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
+                                                ) : formData.workplace_city ? (
+                                                  <div>{formData.workplace_city}</div>
+                                                ) : (
+                                                  <div>{formData.workplace_postal_code}</div>
+                                                )}
+                                                <div>{getWorkLocationDisplayText()}</div>
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+
+                                        {formData.positions_count && parseInt(formData.positions_count) > 0 && (
+                                          <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
+                                            <h5 className="text-xs font-medium text-white mb-1 flex items-center whitespace-nowrap">
+                                              <Users className="h-2 w-2 mr-1 text-white" />
+                                              Antal rekryteringar
+                                            </h5>
+                                            <div className="text-xs text-white leading-relaxed break-words">
+                                              <div className="font-medium">{formatPositionsCount()}</div>
+                                            </div>
+                                          </div>
+                                        )}
+
+                                        <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                          <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                            <Mail className="h-2 w-2 mr-1 text-white" />
+                                            Kontakt
+                                          </h5>
+                                          <div className="text-xs text-white leading-relaxed break-words">
+                                            {formData.contact_email && (
+                                              <a 
+                                                href={`mailto:${formData.contact_email}`}
+                                                className={`text-blue-300 font-medium break-all hover:text-blue-200 underline cursor-pointer ${getEmailTextSize(formData.contact_email)}`}
+                                              >
+                                                {formData.contact_email}
+                                              </a>
+                                            )}
+                                          </div>
+                                        </div>
+
+                                        {formData.requirements && (
+                                          <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                            <h4 className="text-xs font-semibold text-white mb-1">Kvalifikationer</h4>
+                                            <p className="text-xs text-white leading-relaxed">
+                                              {formData.requirements.length > 100 
+                                                ? formData.requirements.substring(0, 100) + '...' 
+                                                : formData.requirements
+                                              }
+                                            </p>
+                                          </div>
+                                        )}
+
+                                        <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                          <p className="text-xs text-white mb-3 leading-relaxed">
+                                            Följande information samlas automatiskt in från alla kandidater som har sökt:
+                                          </p>
+                                          
+                                          <div className="space-y-1.5">
+                                            {[
+                                              'Namn',
+                                              'Efternamn',
+                                              'Ålder',
+                                              'E-post',
+                                              'Telefonnummer',
+                                              'Ort/stad',
+                                              'Presentation',
+                                              'CV',
+                                              'Nuvarande anställningsform',
+                                              'Tillgänglighet',
+                                            ].map((label, idx) => (
+                                              <div key={idx} className="text-xs flex">
+                                                <span className="flex-shrink-0 mr-1 text-white">•</span>
+                                                <span className="flex-1 text-white leading-tight break-words">{label}</span>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+
+                                        {(() => {
+                                          const questionsByType = {
+                                            number: customQuestions.filter(q => q.question_type === 'number'),
+                                            text: customQuestions.filter(q => q.question_type === 'text'),
+                                            multiple_choice: customQuestions.filter(q => q.question_type === 'multiple_choice'),
+                                            yes_no: customQuestions.filter(q => q.question_type === 'yes_no'),
+                                            date: customQuestions.filter(q => q.question_type === 'date'),
+                                            file: customQuestions.filter(q => q.question_type === 'file'),
+                                            video: customQuestions.filter(q => q.question_type === 'video'),
+                                          };
+
+                                          const typeLabels = {
+                                            number: 'Sifferfrågor',
+                                            text: 'Textfrågor',
+                                            multiple_choice: 'Flervalsfrågor',
+                                            yes_no: 'Ja/Nej-frågor',
+                                            date: 'Datumfrågor',
+                                            file: 'Filfrågor',
+                                            video: 'Videofrågor',
+                                          };
+
+                                          return Object.entries(questionsByType).map(([type, questions]) => {
+                                            if (questions.length === 0) return null;
+                                            
+                                            return (
+                                              <div key={type} className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                                <h4 className="text-xs font-semibold text-white mb-2">
+                                                  {typeLabels[type as keyof typeof typeLabels]} ({questions.length})
+                                                </h4>
+                                                
+                                                <div className="space-y-2">
+                                                  {questions.map((question, index) => (
+                                                    <div key={question.id || index} className="space-y-1">
+                                                      <label className="text-xs text-white flex items-start">
+                                                        <span className="flex-1 leading-tight">
+                                                          {question.question_text}
+                                                        </span>
+                                                      </label>
+                                                      
+                                                      {question.question_type === 'text' && (
+                                                        <textarea
+                                                          className="w-full border border-white/20 bg-white/10 rounded p-2 text-xs text-white placeholder:text-white/60 resize-none"
+                                                          placeholder={question.placeholder_text || 'Skriv ditt svar...'}
+                                                          rows={2}
+                                                        />
+                                                      )}
+                                                      
+                                                      {question.question_type === 'yes_no' && (
+                                                        <div className="flex gap-1.5">
+                                                          <button 
+                                                            type="button"
+                                                            className="flex-1 bg-white/10 border border-white/20 rounded-md px-2 py-1 text-xs text-white transition-colors font-medium"
+                                                          >
+                                                            Ja
+                                                          </button>
+                                                          <button 
+                                                            type="button"
+                                                            className="flex-1 bg-white/10 border border-white/20 rounded-md px-2 py-1 text-xs text-white transition-colors font-medium"
+                                                          >
+                                                            Nej
+                                                          </button>
+                                                        </div>
+                                                      )}
+                                                      
+                                                      {question.question_type === 'multiple_choice' && (
+                                                        <div className="relative">
+                                                          <button
+                                                            type="button"
+                                                            className="w-full bg-white/10 border-white/20 text-white h-9 text-xs pr-10 cursor-pointer rounded border flex items-center px-3 hover:bg-white/20 transition-colors text-left"
+                                                          >
+                                                            <span className="flex-1">Välj alternativ</span>
+                                                            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-3 w-3 text-white/60 pointer-events-none" />
+                                                          </button>
+                                                        </div>
+                                                      )}
+                                                      
+                                                      {question.question_type === 'number' && (
+                                                        <div className="space-y-1.5">
+                                                          <div className="text-center text-sm font-semibold text-white">
+                                                            {question.min_value ?? 0}
+                                                          </div>
+                                                          <input
+                                                            type="range"
+                                                            min={question.min_value ?? 0}
+                                                            max={question.max_value ?? 100}
+                                                            defaultValue={question.min_value ?? 0}
+                                                            className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-secondary"
+                                                          />
+                                                        </div>
+                                                      )}
+                                                      
+                                                      {question.question_type === 'date' && (
+                                                        <input
+                                                          type="date"
+                                                          className="w-full border border-white/20 bg-white/10 rounded p-2 text-xs text-white placeholder:text-white/60 h-9"
+                                                          disabled
+                                                        />
+                                                      )}
+                                                      
+                                                      {(question.question_type === 'file' || question.question_type === 'video') && (
+                                                        <div className="border-2 border-dashed border-white/30 rounded p-2 text-center bg-white/5">
+                                                          {question.question_type === 'file' ? (
+                                                            <FileText className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
+                                                          ) : (
+                                                            <Video className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
+                                                          )}
+                                                          <p className="text-xs text-white/60">
+                                                            {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
+                                                          </p>
+                                                        </div>
+                                                      )}
+                                                    </div>
+                                                  ))}
+                                                </div>
+                                              </div>
+                                            );
+                                          });
+                                        })()}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {!showApplicationForm && (
+                                  <div className="absolute inset-0 z-10">
+                                    {jobImageDisplayUrl ? (
+                                      <img
+                                        src={jobImageDisplayUrl}
+                                        alt={`Jobbbild för ${formData.title}`}
+                                        className="absolute inset-0 w-full h-full object-cover select-none"
+                                        loading="eager"
+                                        decoding="async"
+                                      />
+                                    ) : null}
+                                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                                    <div 
+                                      className="absolute inset-0 flex flex-col justify-start items-center pt-10 p-3 text-white text-center cursor-pointer"
+                                      onClick={() => setShowApplicationForm(true)}
+                                    >
+                                      {(() => {
+                                        const textSizes = getSmartTextSizes();
+                                        return (
+                                          <>
+                                            <button 
+                                              onClick={() => setShowCompanyProfile(true)}
+                                              className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary transition-colors cursor-pointer text-left`}
+                                            >
+                                              {profile?.company_name || 'Företag'}
+                                            </button>
+                                            <h3 className={`${textSizes.title} text-white font-bold leading-tight mb-1`}>{getDisplayTitle()}</h3>
+                                            <div className={`${textSizes.meta} text-white`}>
+                                              {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
+                                            </div>
+                                          </>
+                                        );
+                                      })()}
+                                    </div>
+                                    <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2 pointer-events-none">
+                                      <button aria-label="Nej tack" className="w-6 h-6 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto">
+                                        <X className="h-3 w-3 text-white" />
+                                      </button>
+                                      <button aria-label="Spara" className="w-6 h-6 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto">
+                                        <Bookmark className="h-3 w-3 text-white" />
+                                      </button>
+                                      <button onClick={() => setShowApplicationForm(true)} aria-label="Ansök" className="w-6 h-6 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto">
+                                        <Heart className="h-3 w-3 text-white fill-white" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </section>
                         </div>
+                      </div>
+
+                      <div className="bg-white/5 rounded-lg p-4 border border-white/20">
+                        <div className="text-white font-medium mb-3">Jobbild (valfritt)</div>
+                        <p className="text-white text-sm mb-4">
+                          Ladda upp en bild som representerar jobbet eller arbetsplatsen
+                        </p>
+                        
+                        {!jobImageDisplayUrl && (
+                          <FileUpload
+                            onFileUploaded={(url, fileName) => {
+                              handleInputChange('job_image_url', url);
+                              setOriginalImageUrl(url);
+                              setJobImageDisplayUrl(url);
+                            }}
+                            acceptedFileTypes={['image/*']}
+                            maxFileSize={5 * 1024 * 1024}
+                          />
+                        )}
+                        
+                        {jobImageDisplayUrl && (
+                          <>
+                            <div className="mt-3 relative">
+                              <img 
+                                src={jobImageDisplayUrl} 
+                                alt="Job preview" 
+                                className="w-full h-48 object-contain rounded-lg"
+                              />
+                              <button
+                                onClick={() => {
+                                  handleInputChange('job_image_url', '');
+                                  setOriginalImageUrl(null);
+                                  setJobImageDisplayUrl(null);
+                                  setManualFocus(null);
+                                }}
+                                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                            
+                            <div className="mt-4 space-y-3">
+                              <Button
+                                onClick={openImageEditor}
+                                variant="outline"
+                                className="w-full border-white/40 text-white hover:bg-white/10"
+                              >
+                                Redigera bild
+                              </Button>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   )}
@@ -1497,6 +2215,14 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         onConfirm={handleConfirmClose}
         onCancel={handleCancelClose}
       />
+
+      {showCompanyProfile && profile && (
+        <CompanyProfileDialog 
+          open={showCompanyProfile}
+          onOpenChange={setShowCompanyProfile}
+          profile={profile}
+        />
+      )}
     </>
   );
 };
