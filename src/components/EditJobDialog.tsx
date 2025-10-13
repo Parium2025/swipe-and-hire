@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { Loader2 } from 'lucide-react';
-import JobQuestionsManager from '@/components/JobQuestionsManager';
+const JobQuestionsManagerLazy = lazy(() => import('@/components/JobQuestionsManager'));
 
 // Keep this dialog lean and robust so edit always works
 interface JobPosting {
@@ -236,7 +236,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
               </TabsContent>
 
               <TabsContent value="questions" className="space-y-4 mt-6">
-                <JobQuestionsManager jobId={job?.id || null} onQuestionsChange={onJobUpdated} />
+                {activeTab === 'questions' && (
+                  <Suspense fallback={<div className="text-sm text-muted-foreground">Laddar frågor...</div>}>
+                    <JobQuestionsManagerLazy jobId={job?.id || null} onQuestionsChange={onJobUpdated} />
+                  </Suspense>
+                )}
                 <div className="flex gap-2 pt-4">
                   <Button onClick={() => onOpenChange(false)} className="flex-1">Stäng</Button>
                   <Button variant="outline" onClick={() => setActiveTab('basic')}>Tillbaka till grundinfo</Button>
