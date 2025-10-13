@@ -20,6 +20,7 @@ import { UnsavedChangesProvider } from "@/hooks/useUnsavedChanges";
 import { Header } from "@/components/Header";
 import AuthTokenBridge from "./components/AuthTokenBridge";
 import { useDevice } from "@/hooks/use-device";
+import { AnimatedBackground } from "@/components/AnimatedBackground";
 
 const queryClient = new QueryClient();
 
@@ -43,7 +44,8 @@ const App = () => {
       <BrowserRouter>
         <UnsavedChangesProvider>
           <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
-            {/* Global background moved to per-page components to avoid double layers */}
+            {/* Global persistent background to avoid flicker between routes */}
+            <AnimatedBackground />
             
             <div className="relative z-10">
               {showHeader && <Header />}
