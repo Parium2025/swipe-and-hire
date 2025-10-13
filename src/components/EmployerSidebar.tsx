@@ -128,22 +128,20 @@ export function EmployerSidebar() {
 
   // Load and refresh company logo URL
   useEffect(() => {
-    const loadLogoUrl = async () => {
-      const logoUrl = (profile as any)?.company_logo_url;
-      if (logoUrl) {
-        try {
-          // Company logos use public URLs, no need for signed URLs
-          setCompanyLogoUrl(`${logoUrl}&t=${Date.now()}`);
-        } catch (error) {
-          console.error('Failed to load company logo:', error);
-          setCompanyLogoUrl(null);
-        }
-      } else {
+    const logoUrl = (profile as any)?.company_logo_url;
+    if (logoUrl) {
+      try {
+        // Remove any existing cache busting params for cleaner URLs
+        const baseUrl = logoUrl.split('?')[0];
+        // Don't add timestamp - let browser cache handle it
+        setCompanyLogoUrl(baseUrl);
+      } catch (error) {
+        console.error('Failed to load company logo:', error);
         setCompanyLogoUrl(null);
       }
-    };
-
-    loadLogoUrl();
+    } else {
+      setCompanyLogoUrl(null);
+    }
   }, [(profile as any)?.company_logo_url]);
 
   // Listen for unsaved changes cancel event to close sidebar

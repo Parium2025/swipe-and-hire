@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,68 +11,14 @@ import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2 } from 'lucide-react
 import CreateJobSimpleDialog from '@/components/CreateJobSimpleDialog';
 import EditJobDialog from '@/components/EditJobDialog';
 import { Skeleton } from '@/components/ui/skeleton';
-
-interface JobPosting {
-  id: string;
-  title: string;
-  description: string;
-  requirements?: string;
-  location: string;
-  salary_min?: number;
-  salary_max?: number;
-  employment_type?: string;
-  work_schedule?: string;
-  contact_email?: string;
-  application_instructions?: string;
-  is_active: boolean;
-  views_count: number;
-  applications_count: number;
-  created_at: string;
-  updated_at: string;
-}
+import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
 
 const EmployerDashboard = () => {
-  const [jobs, setJobs] = useState<JobPosting[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { jobs, stats, isLoading: loading, invalidateJobs } = useJobsData();
   const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const { user, profile } = useAuth();
   const { toast } = useToast();
-
-  const fetchJobs = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('job_postings')
-        .select('*')
-        .eq('employer_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        toast({
-          title: "Fel vid hämtning av annonser",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
-      }
-
-      setJobs(data || []);
-    } catch (error) {
-      toast({
-        title: "Ett fel uppstod",
-        description: "Kunde inte hämta jobbannonser.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchJobs();
-  }, [user]);
 
   const toggleJobStatus = async (jobId: string, currentStatus: boolean) => {
     try {
@@ -95,7 +41,7 @@ const EmployerDashboard = () => {
         description: `Annonsen är nu ${!currentStatus ? 'aktiv' : 'inaktiv'}.`
       });
 
-      fetchJobs();
+      invalidateJobs();
     } catch (error) {
       toast({
         title: "Ett fel uppstod",
@@ -128,7 +74,7 @@ const EmployerDashboard = () => {
         description: "Jobbannonsen har tagits bort."
       });
 
-      fetchJobs();
+      invalidateJobs();
     } catch (error) {
       toast({
         title: "Ett fel uppstod",
@@ -162,7 +108,7 @@ const EmployerDashboard = () => {
             Hantera dina publicerade tjänster
           </p>
         </div>
-        <CreateJobSimpleDialog onJobCreated={fetchJobs} />
+        <CreateJobSimpleDialog onJobCreated={invalidateJobs} />
       </div>
 
       {/* Stats Overview - med skeleton när loading */}
@@ -245,7 +191,7 @@ const EmployerDashboard = () => {
                 Skapa din första jobbannons för att komma igång med rekrytering
               </p>
               <div className="flex justify-center">
-                <CreateJobSimpleDialog onJobCreated={fetchJobs} />
+                <CreateJobSimpleDialog onJobCreated={invalidateJobs} />
               </div>
             </CardContent>
           </Card>
@@ -339,7 +285,7 @@ const EmployerDashboard = () => {
         job={editingJob}
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
-        onJobUpdated={fetchJobs}
+        onJobUpdated={invalidateJobs}
       />
     </div>
   );
