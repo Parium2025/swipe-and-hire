@@ -12,17 +12,11 @@ interface EmployerLayoutProps {
 
 const EmployerLayout = ({ children, developerView, onViewChange }: EmployerLayoutProps) => {
   const { user, profile } = useAuth();
-  const [uiReady, setUiReady] = useState(false);
-
-  useEffect(() => {
-    const raf = requestAnimationFrame(() => setUiReady(true));
-    return () => cancelAnimationFrame(raf);
-  }, []);
 
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full overflow-x-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
-        {uiReady ? <EmployerSidebar /> : null}
+        <EmployerSidebar />
         <div className="flex-1 flex flex-col overflow-x-hidden relative z-10">
           <header className="sticky top-0 z-40 h-16 flex items-center justify-between border-b border-white/20 bg-white/10 backdrop-blur-md px-6">
             <div className="flex items-center gap-4">
