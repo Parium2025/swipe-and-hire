@@ -1740,7 +1740,14 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               <div className="relative w-full h-full rounded-[1.6rem] overflow-hidden bg-black">
                                 <div className="absolute top-1 left-1/2 -translate-x-1/2 z-20 h-1 w-8 rounded-full bg-black border border-gray-800"></div>
 
-                                <div className="absolute inset-0 rounded-[1.6rem] overflow-hidden" style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}>
+                                <div 
+                                  className="absolute inset-0 rounded-[1.6rem] overflow-hidden"
+                                  style={{ 
+                                    backgroundImage: `url(${modernMobileBg})`,
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center'
+                                  }}
+                                >
                                   <div className="h-1 bg-black relative z-10"></div>
                                   
                                   <div className={showApplicationForm ? 'flex flex-col h-full' : 'hidden'}>
