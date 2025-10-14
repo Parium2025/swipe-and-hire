@@ -6,7 +6,7 @@ import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Button } from '@/components/ui/button';
 import { Zap, Video, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
-const HERO_URL = '/assets/hero-parium-final.jpg';
+const HERO_URL = '/assets/hero-woman-left-hand-verified.jpg';
 
 const Landing = () => {
   const navigate = useNavigate();
