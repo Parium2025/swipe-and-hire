@@ -17,32 +17,47 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
 
     let last = getY();
     lastYRef.current = last;
+    let ticking = false;
 
-    const onScroll = () => {
-      const y = getY();
+    const update = (y: number) => {
       const delta = y - last;
-      // Debug
-      if (process.env.NODE_ENV !== 'production') {
-        console.debug('nav:scroll', { y, delta, visible: isVisible });
-      }
-
       if (y <= 10) {
         setIsVisible(true);
-      } else if (delta > 1 && y > 30) {
+      } else if (delta > 1) {
         setIsVisible(false);
       } else if (delta < -1) {
         setIsVisible(true);
       }
-
       last = y;
       lastYRef.current = y;
     };
 
+    const onScroll = () => {
+      const y = getY();
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          update(y);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      if (e.deltaY > 0) setIsVisible(false);
+      else if (e.deltaY < 0) setIsVisible(true);
+    };
+
     window.addEventListener('scroll', onScroll, { passive: true });
     document.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('wheel', onWheel, { passive: true });
+    window.addEventListener('mousewheel', onWheel as any, { passive: true } as any);
+
     return () => {
       window.removeEventListener('scroll', onScroll);
       document.removeEventListener('scroll', onScroll);
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('mousewheel', onWheel as any);
     };
   }, []);
 
