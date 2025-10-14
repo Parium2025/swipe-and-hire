@@ -6,7 +6,7 @@ import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Button } from '@/components/ui/button';
 import { Zap, Video, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
-import heroBackground from '@/assets/hero-woman-left-hand-verified.jpg';
+const HERO_URL = '/assets/hero-woman-left-hand-verified.jpg';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -64,7 +64,7 @@ const Landing = () => {
       <section className="relative pt-32 pb-20 px-6 md:px-12 lg:px-24 min-h-screen flex items-center">
         {/* Background Image */}
         <img
-          src={heroBackground}
+          src={HERO_URL}
           alt="Parium hero – kvinna håller telefonen i vänster hand"
           className="absolute inset-0 w-full h-full object-cover object-center md:object-[60%_center] lg:object-[45%_center] will-change-transform select-none"
           loading="eager"
