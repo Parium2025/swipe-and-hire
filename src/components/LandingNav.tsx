@@ -34,6 +34,13 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
       }
     };
 
+    // Wheel (desktop) for more responsive direction
+    const onWheel = (e: WheelEvent) => {
+      const y = scroller.scrollTop;
+      if (e.deltaY > 3 && y > 20) setIsVisible(false);
+      else if (e.deltaY < -3) setIsVisible(true);
+    };
+
     // Touch feedback (iOS/Android)
     let lastTouchY = 0;
     const onTouchStart = (e: TouchEvent) => { lastTouchY = e.touches[0].clientY; };
@@ -44,16 +51,33 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
       lastTouchY = currentY;
     };
 
+    // Keyboard navigation
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown' || e.key === 'PageDown') setIsVisible(false);
+      if (e.key === 'ArrowUp' || e.key === 'PageUp' || e.key === 'Home') setIsVisible(true);
+    };
+
+    // Restore correct state when tab becomes visible again
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') update(scroller.scrollTop);
+    };
+
     window.addEventListener('scroll', onScroll, { passive: true });
     document.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('wheel', onWheel, { passive: true });
     window.addEventListener('touchstart', onTouchStart, { passive: true });
     window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('keydown', onKeyDown);
+    document.addEventListener('visibilitychange', onVisibility);
 
     return () => {
       window.removeEventListener('scroll', onScroll);
       document.removeEventListener('scroll', onScroll);
+      window.removeEventListener('wheel', onWheel);
       window.removeEventListener('touchstart', onTouchStart);
       window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('visibilitychange', onVisibility);
     };
   }, []);
 
