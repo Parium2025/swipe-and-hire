@@ -13,30 +13,28 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
   const lastYRef = useRef(0);
 
   useEffect(() => {
-    let ticking = false;
-    const tolerance = 6; // px before toggling to avoid jitter
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const lastScrollY = lastYRef.current;
 
-    const onScroll = () => {
-      const y = window.scrollY;
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const last = lastYRef.current;
-          if (y <= 8) {
-            setIsVisible(true);
-          } else if (y > last + tolerance) {
-            setIsVisible(false);
-          } else if (y < last - tolerance) {
-            setIsVisible(true);
-          }
-          lastYRef.current = y;
-          ticking = false;
-        });
-        ticking = true;
+      console.log('Scroll detected:', { currentScrollY, lastScrollY, isVisible });
+
+      if (currentScrollY <= 10) {
+        // At top, always show
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY + 5) {
+        // Scrolling down
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY - 5) {
+        // Scrolling up
+        setIsVisible(true);
       }
+
+      lastYRef.current = currentScrollY;
     };
 
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const navItems = [
