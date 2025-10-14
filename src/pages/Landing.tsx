@@ -68,6 +68,8 @@ const Landing = () => {
           alt="Parium hero – kvinna håller telefonen i vänster hand"
           className="absolute inset-0 w-full h-full object-cover object-center md:object-[60%_center] lg:object-[45%_center]"
           loading="eager"
+          decoding="sync"
+          fetchPriority="high"
         />
         {/* Overlay for better text readability */}
         <div className="absolute inset-0 bg-gradient-to-r from-primary/80 via-primary/40 to-transparent md:from-primary/70 md:via-primary/20" />
