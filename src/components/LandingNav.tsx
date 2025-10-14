@@ -56,9 +56,15 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
   return (
     <>
       <nav 
-        className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 transition-all duration-300 ease-out transform-gpu will-change-transform ${
-          (mobileMenuOpen || isVisible) ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
-        }`}
+        className="fixed top-0 left-0 right-0 z-50 border-b border-white/10"
+        style={{
+          transform: isVisible ? 'translate3d(0,0,0)' : 'translate3d(0,-120%,0)',
+          top: isVisible ? 0 : -96,
+          opacity: isVisible ? 1 : 0,
+          pointerEvents: isVisible ? 'auto' : 'none',
+          transition: 'transform 300ms ease, top 300ms ease, opacity 200ms ease',
+          willChange: 'transform, top, opacity'
+        }}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24">
           <div className="flex items-center justify-between h-20">
