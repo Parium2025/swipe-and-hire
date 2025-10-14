@@ -41,12 +41,13 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
           {imageUrl ? (
             <img
               loading="eager"
-              
-              decoding="async"
+              decoding="sync"
+              fetchPriority="high"
               src={imageUrl}
               alt={imageAlt || `${title} hos ${company}`}
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover will-change-transform"
               draggable={false}
+              style={{ contentVisibility: 'auto' }}
             />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800" />
