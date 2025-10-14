@@ -13,29 +13,47 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
   
 
   useEffect(() => {
-    const scroller = document.scrollingElement || document.documentElement;
+    const scroller = document.scrollingElement || document.documentElement || document.body;
     let last = scroller.scrollTop;
     let ticking = false;
+
+    const update = (y: number) => {
+      const delta = y - last;
+      if (y <= 10) setIsVisible(true);
+      else if (delta > 2) setIsVisible(false);
+      else if (delta < -2) setIsVisible(true);
+      last = y;
+      ticking = false;
+    };
 
     const onScroll = () => {
       const y = scroller.scrollTop;
       if (!ticking) {
-        requestAnimationFrame(() => {
-          const delta = y - last;
-          if (y <= 10) setIsVisible(true);
-          else if (delta > 2) setIsVisible(false);
-          else if (delta < -2) setIsVisible(true);
-          last = y;
-          ticking = false;
-        });
         ticking = true;
+        requestAnimationFrame(() => update(y));
       }
     };
 
+    // Touch feedback (iOS/Android)
+    let lastTouchY = 0;
+    const onTouchStart = (e: TouchEvent) => { lastTouchY = e.touches[0].clientY; };
+    const onTouchMove = (e: TouchEvent) => {
+      const currentY = e.touches[0].clientY;
+      const delta = currentY - lastTouchY;
+      if (Math.abs(delta) > 3) setIsVisible(delta > 0);
+      lastTouchY = currentY;
+    };
+
     window.addEventListener('scroll', onScroll, { passive: true });
+    document.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
 
     return () => {
       window.removeEventListener('scroll', onScroll);
+      document.removeEventListener('scroll', onScroll);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
     };
   }, []);
 
