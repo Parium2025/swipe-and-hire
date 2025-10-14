@@ -21,13 +21,9 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
 
     const update = (y: number) => {
       const delta = y - last;
-      if (y <= 10) {
-        setIsVisible(true);
-      } else if (delta > 1) {
-        setIsVisible(false);
-      } else if (delta < -1) {
-        setIsVisible(true);
-      }
+      if (y <= 10) setIsVisible(true);
+      else if (delta > 1) setIsVisible(false);
+      else if (delta < -1) setIsVisible(true);
       last = y;
       lastYRef.current = y;
     };
@@ -35,29 +31,31 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
     const onScroll = () => {
       const y = getY();
       if (!ticking) {
-        requestAnimationFrame(() => {
-          update(y);
-          ticking = false;
-        });
+        requestAnimationFrame(() => { update(y); ticking = false; });
         ticking = true;
       }
     };
 
-    const onWheel = (e: WheelEvent) => {
-      if (e.deltaY > 0) setIsVisible(false);
-      else if (e.deltaY < 0) setIsVisible(true);
+    // iOS touch support
+    let lastTouchY = 0;
+    const onTouchStart = (e: TouchEvent) => { lastTouchY = e.touches[0].clientY; };
+    const onTouchMove = (e: TouchEvent) => {
+      const currentY = e.touches[0].clientY;
+      const delta = currentY - lastTouchY;
+      if (Math.abs(delta) > 2) setIsVisible(delta > 0); // swipe down -> show, up -> hide
+      lastTouchY = currentY;
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
     document.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('wheel', onWheel, { passive: true });
-    window.addEventListener('mousewheel', onWheel as any, { passive: true } as any);
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
 
     return () => {
       window.removeEventListener('scroll', onScroll);
       document.removeEventListener('scroll', onScroll);
-      window.removeEventListener('wheel', onWheel);
-      window.removeEventListener('mousewheel', onWheel as any);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
     };
   }, []);
 
