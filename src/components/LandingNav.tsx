@@ -13,22 +13,27 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
   const lastYRef = useRef(0);
 
   useEffect(() => {
-    const onScroll = () => {
-      const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
-      if (!isDesktop) {
-        setIsVisible(true);
-        lastYRef.current = window.scrollY;
-        return;
-      }
+    const getScrollY = () =>
+      window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
 
-      const y = window.scrollY;
-      const last = lastYRef.current;
-      const hidden = y > last && y > 20; // scrolling down beyond 20px
-      setIsVisible(!hidden);
+    let last = getScrollY();
+    lastYRef.current = last;
+
+    const onScroll = () => {
+      const y = getScrollY();
+      const delta = y - last;
+
+      if (y <= 10) {
+        setIsVisible(true);
+      } else if (delta > 2) {
+        setIsVisible(false);
+      } else if (delta < -2) {
+        setIsVisible(true);
+      }
+      last = y;
       lastYRef.current = y;
     };
 
-    lastYRef.current = window.scrollY;
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => {
       window.removeEventListener('scroll', onScroll);
@@ -44,10 +49,9 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
   return (
     <>
       <nav 
-        className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 transition-all duration-300 ease-out ${
-          (mobileMenuOpen || isVisible) ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
+        className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 transition-transform duration-300 ease-out transform-gpu will-change-transform ${
+          (mobileMenuOpen || isVisible) ? 'translate-y-0' : '-translate-y-full'
         }`}
-        style={{ willChange: 'transform, opacity' }}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24">
           <div className="flex items-center justify-between h-20">
