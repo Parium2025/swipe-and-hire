@@ -21,12 +21,16 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
     const onScroll = () => {
       const y = getY();
       const delta = y - last;
+      // Debug
+      if (process.env.NODE_ENV !== 'production') {
+        console.debug('nav:scroll', { y, delta, visible: isVisible });
+      }
 
       if (y <= 10) {
         setIsVisible(true);
-      } else if (delta > 2 && y > 40) {
+      } else if (delta > 1 && y > 30) {
         setIsVisible(false);
-      } else if (delta < -2) {
+      } else if (delta < -1) {
         setIsVisible(true);
       }
 
