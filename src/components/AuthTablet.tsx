@@ -70,7 +70,9 @@ const AuthTablet = ({
     email: '',
     password: ''
   });
-  const [role, setRole] = useState<'job_seeker' | 'employer'>('job_seeker');
+  const [role, setRole] = useState<'job_seeker' | 'employer'>(
+    initialRole === 'employer' ? 'employer' : 'job_seeker'
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [loading, setLoading] = useState(false);
