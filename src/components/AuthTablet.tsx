@@ -519,7 +519,7 @@ const AuthTablet = ({
         <div className="absolute top-24 left-20 w-3 h-3 bg-secondary/20 rounded-full animate-bounce" style={{ animationDuration: '3s' }}></div>
         
         {/* Decorative glow effect in bottom right corner */}
-        <div className="fixed -right-32 bottom-0 w-96 h-96 pointer-events-none pwa-bottom-glow">
+        <div className="absolute -right-32 w-96 h-96 pointer-events-none pwa-bottom-glow">
           <div className="absolute inset-0 bg-primary-glow/40 rounded-full blur-[120px]"></div>
           <div className="absolute inset-4 bg-primary-glow/30 rounded-full blur-[100px]"></div>
           <div className="absolute inset-8 bg-primary-glow/25 rounded-full blur-[80px]"></div>
@@ -550,16 +550,16 @@ const AuthTablet = ({
             <div className="mb-4">
               <div className="relative mx-auto w-fit min-h-[224px] md:min-h-[240px] flex items-center justify-center">
                 {/* Glow effect bakom loggan - subtle och täcker hela loggan */}
-                <div className="fixed left-1/2 top-[18vh] md:top-[20vh] lg:top-[22vh] -translate-x-1/2 -translate-y-2 pointer-events-none">
+                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-64 h-44 bg-primary-glow/25 rounded-full blur-[40px]"></div>
                 </div>
-                <div className="fixed left-1/2 top-[18vh] md:top-[20vh] lg:top-[22vh] -translate-x-1/2 -translate-y-2 pointer-events-none">
+                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-52 h-36 bg-primary-glow/22 rounded-full blur-[35px]"></div>
                 </div>
-                <div className="fixed left-1/2 top-[18vh] md:top-[20vh] lg:top-[22vh] -translate-x-1/2 -translate-y-2 pointer-events-none">
+                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-44 h-28 bg-primary-glow/20 rounded-full blur-[30px]"></div>
                 </div>
-                <div className="fixed left-1/2 top-[18vh] md:top-[20vh] lg:top-[22vh] -translate-x-1/2 -translate-y-2 pointer-events-none">
+                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-36 h-20 bg-primary-glow/18 rounded-full blur-[25px]"></div>
                 </div>
                 <img 
