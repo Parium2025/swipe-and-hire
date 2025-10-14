@@ -40,6 +40,11 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
     };
   }, []);
 
+  useEffect(() => {
+    // Debug visibility state and scroll position
+    console.debug('nav:isVisible', isVisible, 'scrollY', window.scrollY);
+  }, [isVisible]);
+
   const navItems = [
     { label: 'Produkt', href: '#produkt' },
     { label: 'Om oss', href: '#om-oss' },
