@@ -91,7 +91,7 @@ const Landing = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate('/auth', { state: { mode: 'register', role: 'job_seeker' } })}
                 className="bg-white/10 backdrop-blur-sm border border-white/20 text-white p-4 rounded-lg cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
               >
                 <div className="flex items-center justify-between mb-2">
@@ -109,7 +109,7 @@ const Landing = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate('/auth', { state: { mode: 'register', role: 'employer' } })}
                 className="bg-white/10 backdrop-blur-sm border border-white/20 text-white p-4 rounded-lg cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105 group"
               >
                 <div className="flex items-center justify-between mb-2">

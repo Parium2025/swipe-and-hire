@@ -28,6 +28,8 @@ interface AuthMobileProps {
   handlePasswordReset: (e: React.FormEvent) => void;
   onBackToLogin?: () => void;
   onAuthModeChange?: (isLogin: boolean) => void;
+  initialMode?: string;
+  initialRole?: string;
 }
 
 const AuthMobile = ({ 
@@ -38,11 +40,13 @@ const AuthMobile = ({
   setConfirmPassword, 
   handlePasswordReset,
   onBackToLogin,
-  onAuthModeChange
+  onAuthModeChange,
+  initialMode,
+  initialRole
 }: AuthMobileProps) => {
   const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(initialMode !== 'register');
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState('');
   // Separate form data for each role
@@ -67,7 +71,9 @@ const AuthMobile = ({
     email: '',
     password: ''
   });
-  const [role, setRole] = useState<'job_seeker' | 'employer'>('job_seeker');
+  const [role, setRole] = useState<'job_seeker' | 'employer'>(
+    initialRole === 'employer' ? 'employer' : 'job_seeker'
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [loading, setLoading] = useState(false);

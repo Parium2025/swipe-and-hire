@@ -27,6 +27,8 @@ interface AuthTabletProps {
   handlePasswordReset: (e: React.FormEvent) => void;
   onBackToLogin?: () => void;
   onAuthModeChange?: (isLogin: boolean) => void;
+  initialMode?: string;
+  initialRole?: string;
 }
 
 const AuthTablet = ({ 
@@ -37,11 +39,13 @@ const AuthTablet = ({
   setConfirmPassword, 
   handlePasswordReset,
   onBackToLogin,
-  onAuthModeChange
+  onAuthModeChange,
+  initialMode,
+  initialRole
 }: AuthTabletProps) => {
   const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(initialMode !== 'register');
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState('');
   // Separate form data for each role

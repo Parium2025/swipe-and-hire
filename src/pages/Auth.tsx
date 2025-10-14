@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
@@ -61,9 +61,14 @@ const Auth = () => {
 
   const { user, profile, updatePassword, confirmEmail } = useAuth();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const device = useDevice();
   const { toast } = useToast();
+
+  // Read initial state from navigation (from Landing page)
+  const initialMode = (location.state as any)?.mode;
+  const initialRole = (location.state as any)?.role;
 
   // Smart scroll-locking: Lock only for login on MOBILE devices, allow scroll on desktop
   useEffect(() => {
@@ -1216,6 +1221,8 @@ const Auth = () => {
           handlePasswordReset={handlePasswordReset}
           onBackToLogin={handleBackToLogin}
           onAuthModeChange={setIsLoginMode}
+          initialMode={initialMode}
+          initialRole={initialRole}
         />
       </>
     );
@@ -1249,6 +1256,8 @@ const Auth = () => {
           handlePasswordReset={handlePasswordReset}
           onBackToLogin={handleBackToLogin}
           onAuthModeChange={setIsLoginMode}
+          initialMode={initialMode}
+          initialRole={initialRole}
         />
       </>
     );
@@ -1281,6 +1290,8 @@ const Auth = () => {
         handlePasswordReset={handlePasswordReset}
         onBackToLogin={handleBackToLogin}
         onAuthModeChange={setIsLoginMode}
+        initialMode={initialMode}
+        initialRole={initialRole}
       />
     </>
   );
