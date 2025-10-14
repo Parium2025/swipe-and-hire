@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
@@ -10,59 +10,35 @@ interface LandingNavProps {
 const LandingNav = ({ onLoginClick }: LandingNavProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
-  const lastYRef = useRef(0);
+  
 
   useEffect(() => {
-    const getY = () => (document.scrollingElement?.scrollTop ?? window.scrollY ?? 0);
-
-    let last = getY();
-    lastYRef.current = last;
+    const scroller = document.scrollingElement || document.documentElement;
+    let last = scroller.scrollTop;
     let ticking = false;
 
-    const update = (y: number) => {
-      const delta = y - last;
-      if (y <= 10) setIsVisible(true);
-      else if (delta > 1) setIsVisible(false);
-      else if (delta < -1) setIsVisible(true);
-      last = y;
-      lastYRef.current = y;
-    };
-
     const onScroll = () => {
-      const y = getY();
+      const y = scroller.scrollTop;
       if (!ticking) {
-        requestAnimationFrame(() => { update(y); ticking = false; });
+        requestAnimationFrame(() => {
+          const delta = y - last;
+          if (y <= 10) setIsVisible(true);
+          else if (delta > 2) setIsVisible(false);
+          else if (delta < -2) setIsVisible(true);
+          last = y;
+          ticking = false;
+        });
         ticking = true;
       }
     };
 
-    // iOS touch support
-    let lastTouchY = 0;
-    const onTouchStart = (e: TouchEvent) => { lastTouchY = e.touches[0].clientY; };
-    const onTouchMove = (e: TouchEvent) => {
-      const currentY = e.touches[0].clientY;
-      const delta = currentY - lastTouchY;
-      if (Math.abs(delta) > 2) setIsVisible(delta > 0); // swipe down -> show, up -> hide
-      lastTouchY = currentY;
-    };
-
     window.addEventListener('scroll', onScroll, { passive: true });
-    document.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('touchstart', onTouchStart, { passive: true });
-    window.addEventListener('touchmove', onTouchMove, { passive: true });
 
     return () => {
       window.removeEventListener('scroll', onScroll);
-      document.removeEventListener('scroll', onScroll);
-      window.removeEventListener('touchstart', onTouchStart);
-      window.removeEventListener('touchmove', onTouchMove);
     };
   }, []);
 
-  useEffect(() => {
-    // Debug visibility state and scroll position
-    console.debug('nav:isVisible', isVisible, 'scrollY', window.scrollY);
-  }, [isVisible]);
 
   const navItems = [
     { label: 'Produkt', href: '#produkt' },
@@ -76,11 +52,10 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
         className="fixed top-0 left-0 right-0 z-50 border-b border-white/10"
         style={{
           transform: isVisible ? 'translate3d(0,0,0)' : 'translate3d(0,-120%,0)',
-          top: isVisible ? 0 : -96,
           opacity: isVisible ? 1 : 0,
           pointerEvents: isVisible ? 'auto' : 'none',
-          transition: 'transform 300ms ease, top 300ms ease, opacity 200ms ease',
-          willChange: 'transform, top, opacity'
+          transition: 'transform 250ms ease, opacity 200ms ease',
+          willChange: 'transform, opacity'
         }}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24">
