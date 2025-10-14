@@ -268,6 +268,27 @@ All colors MUST be HSL.
     background-size: cover;
   }
 
+  /* Desktop: render the gradient on a fixed layer so it never shifts with content height */
+  @media (min-width: 1024px) {
+    body::before {
+      content: "";
+      position: fixed;
+      top: -20px;
+      left: -20px;
+      right: -20px;
+      bottom: -20px;
+      background: var(--gradient-parium);
+      background-size: cover;
+      background-repeat: no-repeat;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Ensure page containers don't repaint another gradient on top on desktop */
+    .bg-gradient-parium { background: transparent !important; }
+    #root { position: relative; z-index: 1; }
+  }
+
   /* iOS Safari: force full-bleed gradient on html/body so status area isn't white */
   @supports (padding: env(safe-area-inset-top)) {
     html, body {
