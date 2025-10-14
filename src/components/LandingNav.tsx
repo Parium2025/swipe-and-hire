@@ -13,30 +13,32 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
   const lastYRef = useRef(0);
 
   useEffect(() => {
-    const getScrollY = () =>
-      window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    const getY = () => (document.scrollingElement?.scrollTop ?? window.scrollY ?? 0);
 
-    let last = getScrollY();
+    let last = getY();
     lastYRef.current = last;
 
     const onScroll = () => {
-      const y = getScrollY();
+      const y = getY();
       const delta = y - last;
 
       if (y <= 10) {
         setIsVisible(true);
-      } else if (delta > 2) {
+      } else if (delta > 2 && y > 40) {
         setIsVisible(false);
       } else if (delta < -2) {
         setIsVisible(true);
       }
+
       last = y;
       lastYRef.current = y;
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
+    document.addEventListener('scroll', onScroll, { passive: true });
     return () => {
       window.removeEventListener('scroll', onScroll);
+      document.removeEventListener('scroll', onScroll);
     };
   }, []);
 
