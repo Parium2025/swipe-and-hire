@@ -13,38 +13,27 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
   const lastYRef = useRef(0);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+    const onScroll = () => {
+      const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
       if (!isDesktop) {
-        // On mobile/tablet, always show
-        if (!isVisible) setIsVisible(true);
+        setIsVisible(true);
         lastYRef.current = window.scrollY;
         return;
       }
 
-      const currentScrollY = window.scrollY;
-      const lastScrollY = lastYRef.current;
-
-      if (currentScrollY <= 10) {
-        setIsVisible(true);
-      } else if (currentScrollY > lastScrollY + 4) {
-        setIsVisible(false);
-      } else if (currentScrollY < lastScrollY - 4) {
-        setIsVisible(true);
-      }
-
-      lastYRef.current = currentScrollY;
+      const y = window.scrollY;
+      const last = lastYRef.current;
+      const hidden = y > last && y > 20; // scrolling down beyond 20px
+      setIsVisible(!hidden);
+      lastYRef.current = y;
     };
 
-    // initialize
     lastYRef.current = window.scrollY;
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
+      window.removeEventListener('scroll', onScroll);
     };
-  }, [isVisible]);
+  }, []);
 
   const navItems = [
     { label: 'Produkt', href: '#produkt' },
