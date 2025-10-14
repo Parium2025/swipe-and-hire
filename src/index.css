@@ -412,6 +412,14 @@ All colors MUST be HSL.
   }
 }
 
+/* Desktop: lock glow to viewport with fixed positioning */
+@media (min-width: 1024px) {
+  .pwa-bottom-glow {
+    position: fixed !important;
+    z-index: 0;
+  }
+}
+
 /* In installed PWA (standalone), push the glow further below the home indicator */
 @media (display-mode: standalone) {
   .pwa-bottom-glow {
