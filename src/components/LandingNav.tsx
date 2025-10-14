@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import pariumLogo from '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
@@ -10,29 +10,24 @@ interface LandingNavProps {
 const LandingNav = ({ onLoginClick }: LandingNavProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const lastYRef = useRef(0);
 
   useEffect(() => {
-    const controlNavbar = () => {
-      const currentScrollY = window.scrollY;
-      
-      if (currentScrollY < 10) {
-        // Always show at top
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (y < 10) {
         setIsVisible(true);
-      } else if (currentScrollY > lastScrollY) {
-        // Scrolling down - hide
+      } else if (y > lastYRef.current) {
         setIsVisible(false);
       } else {
-        // Scrolling up - show
         setIsVisible(true);
       }
-      
-      setLastScrollY(currentScrollY);
+      lastYRef.current = y;
     };
 
-    window.addEventListener('scroll', controlNavbar);
-    return () => window.removeEventListener('scroll', controlNavbar);
-  }, [lastScrollY]);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const navItems = [
     { label: 'Produkt', href: '#produkt' },
@@ -42,8 +37,8 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
 
   return (
     <>
-      <nav className={`fixed left-0 right-0 z-50 border-b border-white/10 transition-all duration-300 ${
-        isVisible ? 'top-0' : '-top-24'
+      <nav className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 transform transition-transform duration-300 ${
+        (mobileMenuOpen || isVisible) ? 'translate-y-0' : '-translate-y-full'
       }`}>
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24">
           <div className="flex items-center justify-between h-20">
