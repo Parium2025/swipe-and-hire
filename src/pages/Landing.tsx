@@ -25,7 +25,7 @@ const Landing = () => {
 
   // SEO Meta tags
   useEffect(() => {
-    document.title = 'Parium - Matchningen som förändrar rekrytering';
+    document.title = 'Parium - Verktyget som matchar på riktigt';
     
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
