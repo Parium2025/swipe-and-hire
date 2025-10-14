@@ -14,28 +14,37 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
 
   useEffect(() => {
     const handleScroll = () => {
+      const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+      if (!isDesktop) {
+        // On mobile/tablet, always show
+        if (!isVisible) setIsVisible(true);
+        lastYRef.current = window.scrollY;
+        return;
+      }
+
       const currentScrollY = window.scrollY;
       const lastScrollY = lastYRef.current;
 
-      console.log('Scroll detected:', { currentScrollY, lastScrollY, isVisible });
-
       if (currentScrollY <= 10) {
-        // At top, always show
         setIsVisible(true);
-      } else if (currentScrollY > lastScrollY + 5) {
-        // Scrolling down
+      } else if (currentScrollY > lastScrollY + 4) {
         setIsVisible(false);
-      } else if (currentScrollY < lastScrollY - 5) {
-        // Scrolling up
+      } else if (currentScrollY < lastScrollY - 4) {
         setIsVisible(true);
       }
 
       lastYRef.current = currentScrollY;
     };
 
+    // initialize
+    lastYRef.current = window.scrollY;
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    window.addEventListener('resize', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [isVisible]);
 
   const navItems = [
     { label: 'Produkt', href: '#produkt' },
