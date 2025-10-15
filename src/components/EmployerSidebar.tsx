@@ -220,7 +220,7 @@ export function EmployerSidebar() {
                 <p className="font-medium text-white text-sm truncate">
                   {profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
                 </p>
-                <p className="text-xs text-white/70 truncate">
+                <p className="text-xs text-white truncate">
                   {profile?.industry || 'Arbetsgivare'}
                 </p>
               </div>
@@ -230,7 +230,7 @@ export function EmployerSidebar() {
 
         {/* Main Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white/80 text-xs uppercase tracking-wide px-4">
+          <SidebarGroupLabel className="text-white text-xs uppercase tracking-wide px-4">
             Huvudmeny
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -243,7 +243,7 @@ export function EmployerSidebar() {
                       mx-2 rounded-lg transition-all duration-200
                       ${isActiveUrl(item.url) 
                         ? 'bg-white/20 text-white shadow-lg' 
-                        : 'text-white/80 hover:bg-white/10 hover:text-white'
+                        : 'text-white hover:bg-white/10 hover:text-white'
                       }
                     `}
                   >
@@ -265,7 +265,7 @@ export function EmployerSidebar() {
 
         {/* Business Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white/80 text-xs uppercase tracking-wide px-4">
+          <SidebarGroupLabel className="text-white text-xs uppercase tracking-wide px-4">
             Företag
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -278,7 +278,7 @@ export function EmployerSidebar() {
                       mx-2 rounded-lg transition-all duration-200
                       ${isActiveUrl(item.url) 
                         ? 'bg-white/20 text-white shadow-lg' 
-                        : 'text-white/80 hover:bg-white/10 hover:text-white'
+                        : 'text-white hover:bg-white/10 hover:text-white'
                       }
                     `}
                   >
@@ -300,7 +300,7 @@ export function EmployerSidebar() {
 
         {/* Support Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white/80 text-xs uppercase tracking-wide px-4">
+          <SidebarGroupLabel className="text-white text-xs uppercase tracking-wide px-4">
             Support
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -313,7 +313,7 @@ export function EmployerSidebar() {
                       mx-2 rounded-lg transition-all duration-200
                       ${isActiveUrl(item.url) 
                         ? 'bg-white/20 text-white shadow-lg' 
-                        : 'text-white/80 hover:bg-white/10 hover:text-white'
+                        : 'text-white hover:bg-white/10 hover:text-white'
                       }
                     `}
                   >
@@ -346,7 +346,7 @@ export function EmployerSidebar() {
                         mx-2 rounded-lg transition-all duration-200
                         ${isActiveUrl('/admin') 
                           ? 'bg-white/20 text-white shadow-lg' 
-                          : 'text-white/80 hover:bg-white/10 hover:text-white'
+                          : 'text-white hover:bg-white/10 hover:text-white'
                         }
                       `}
                     >
@@ -372,7 +372,7 @@ export function EmployerSidebar() {
             onClick={signOut}
             variant="ghost"
             className={`
-              w-full justify-start text-white/80 hover:text-white hover:bg-white/10 
+              w-full justify-start text-white hover:text-white hover:bg-white/10 
               transition-all duration-200 border border-white/20 hover:border-white/40
               ${collapsed ? 'px-2' : 'px-4'}
             `}

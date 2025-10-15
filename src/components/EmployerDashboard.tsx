@@ -232,7 +232,7 @@ const EmployerDashboard = memo(() => {
                         </div>
                       </div>
                       {job.employment_type && (
-                        <Badge variant="outline" className="text-xs bg-white/10 text-white border-white/20 self-center justify-self-center">
+                        <Badge variant="outline" className="text-xs bg-white/10 text-white border-white self-center justify-self-center">
                           {getEmploymentTypeLabel(job.employment_type)}
                         </Badge>
                       )}
