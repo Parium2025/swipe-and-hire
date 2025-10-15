@@ -202,9 +202,9 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
   const getQuestionTypeLabel = (type: JobQuestion['question_type']) => {
     const labels = {
       yes_no: 'Ja/Nej',
-      text: 'Text',
-      video: 'Video',
-      multiple_choice: 'Flervalsalternativ'
+      text: 'Siffra',
+      video: 'Text',
+      multiple_choice: 'Flerval'
     };
     return labels[type];
   };
@@ -361,11 +361,11 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
         <Card key={index}>
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <GripVertical className="h-4 w-4 text-muted-foreground" />
-              <Badge variant="outline">{getQuestionTypeLabel(question.question_type)}</Badge>
+              <GripVertical className="h-4 w-4 text-white" />
+              <Badge variant="outline" className="text-white border-white/20">{getQuestionTypeLabel(question.question_type)}</Badge>
               <div className="flex-1" />
               <div className="flex items-center gap-2">
-                <Label htmlFor={`required-${index}`} className="text-sm">
+                <Label htmlFor={`required-${index}`} className="text-sm text-white">
                   Obligatorisk
                 </Label>
                 <Switch
@@ -387,7 +387,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
           <CardContent className="space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Frågetyp</Label>
+                <Label className="text-white">Frågetyp</Label>
                 <Select
                   value={question.question_type}
                   onValueChange={(value) => updateQuestion(index, { question_type: value as JobQuestion['question_type'] })}
@@ -396,15 +396,15 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="text">Textfråga</SelectItem>
-                    <SelectItem value="yes_no">Ja/Nej-fråga</SelectItem>
-                    <SelectItem value="multiple_choice">Flervalsalternativ</SelectItem>
-                    <SelectItem value="video">Videosvar</SelectItem>
+                    <SelectItem value="text">Siffra</SelectItem>
+                    <SelectItem value="yes_no">Ja/Nej</SelectItem>
+                    <SelectItem value="multiple_choice">Flerval</SelectItem>
+                    <SelectItem value="video">Text</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Fråga</Label>
+                <Label className="text-white">Fråga</Label>
                 <Input
                   value={question.question_text}
                   onChange={(e) => updateQuestion(index, { question_text: e.target.value })}
