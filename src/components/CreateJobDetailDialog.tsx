@@ -262,7 +262,10 @@ const CreateJobDetailDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-parium-gradient border-white/20 text-white [&>button]:hidden">
+      <DialogContent 
+        className="max-w-4xl max-h-[90vh] overflow-y-auto bg-parium-gradient border-white/20 text-white [&>button]:hidden"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <AnimatedBackground showBubbles={false} />
         <div className="relative z-10">
           <Button

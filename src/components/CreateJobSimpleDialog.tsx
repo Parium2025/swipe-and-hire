@@ -174,7 +174,10 @@ const handleJobCreated = useCallback((job: JobPosting) => {
             Skapa ny annons
           </Button>
         </DialogTrigger>
-          <DialogContent className="max-w-md bg-parium-gradient [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] border-none shadow-none sm:rounded-xl transition-all duration-200 ease-out animate-scale-in">
+          <DialogContent 
+            className="max-w-md bg-parium-gradient [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] border-none shadow-none sm:rounded-xl transition-all duration-200 ease-out animate-scale-in"
+            onInteractOutside={(e) => e.preventDefault()}
+          >
           <Card className="bg-white/10 backdrop-blur-sm border-transparent border-0 ring-0 shadow-none relative w-full mt-16 transition-all duration-200">
             <CardHeader className="pb-4 pt-6">
               <div className="flex items-center justify-between">
