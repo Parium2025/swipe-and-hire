@@ -122,7 +122,7 @@ const Dashboard = memo(() => {
                     <TableRow 
                       key={job.id}
                       className="border-white/10 hover:bg-white/5 cursor-pointer transition-colors"
-                      onClick={() => navigate('/my-jobs')}
+                      onClick={() => navigate(`/job-details/${job.id}`)}
                     >
                       <TableCell className="font-medium text-white">
                         <div className="flex flex-col gap-1">
