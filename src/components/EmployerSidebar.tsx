@@ -221,7 +221,7 @@ export function EmployerSidebar() {
                   {profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
                 </p>
                 <p className="text-xs text-white truncate">
-                  {profile?.industry || 'Arbetsgivare'}
+                  {profile?.industry || 'Admin'}
                 </p>
               </div>
             </div>
