@@ -18,68 +18,74 @@ export const AnimatedBackground = memo(({ showBubbles = true }: AnimatedBackgrou
           <motion.div 
             className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full"
             animate={{
-              y: [0, -15, 0]
+              y: [0, -12, 0]
             }}
             transition={{
-              duration: 2,
+              duration: 3.5,
               repeat: Infinity,
-              ease: [0.42, 0, 0.58, 1]
+              ease: "easeInOut",
+              repeatType: "loop"
             }}
           />
           <motion.div 
             className="absolute top-32 left-16 w-2 h-2 bg-accent/40 rounded-full"
             animate={{
-              y: [0, -15, 0]
+              y: [0, -10, 0]
             }}
             transition={{
-              duration: 2.5,
+              duration: 4,
               repeat: Infinity,
-              ease: [0.42, 0, 0.58, 1]
+              ease: "easeInOut",
+              repeatType: "loop"
             }}
           />
           <motion.div 
             className="absolute top-24 left-20 w-3 h-3 bg-secondary/20 rounded-full"
             animate={{
-              y: [0, -15, 0]
+              y: [0, -12, 0]
             }}
             transition={{
-              duration: 3,
+              duration: 4.5,
               repeat: Infinity,
-              ease: [0.42, 0, 0.58, 1]
+              ease: "easeInOut",
+              repeatType: "loop"
             }}
           />
           
           <motion.div 
             className="absolute bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full"
             animate={{
-              y: [0, -15, 0]
+              y: [0, -12, 0]
             }}
             transition={{
-              duration: 2.2,
+              duration: 3.8,
               repeat: Infinity,
-              ease: [0.42, 0, 0.58, 1]
+              ease: "easeInOut",
+              repeatType: "loop"
             }}
           />
           <motion.div 
             className="absolute bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full"
             animate={{
-              y: [0, -15, 0]
+              y: [0, -10, 0]
             }}
             transition={{
-              duration: 2.8,
+              duration: 4.2,
               repeat: Infinity,
-              ease: [0.42, 0, 0.58, 1]
+              ease: "easeInOut",
+              repeatType: "loop"
             }}
           />
           <motion.div 
             className="absolute bottom-36 right-24 w-2 h-2 bg-accent/35 rounded-full"
             animate={{
-              y: [0, -15, 0]
+              y: [0, -10, 0]
             }}
             transition={{
-              duration: 2.3,
+              duration: 3.6,
               repeat: Infinity,
-              ease: [0.42, 0, 0.58, 1]
+              ease: "easeInOut",
+              repeatType: "loop"
             }}
           />
           
