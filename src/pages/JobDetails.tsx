@@ -262,7 +262,7 @@ const JobDetails = () => {
             variant="outline"
             size="sm"
             onClick={() => navigate(-1)}
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-all duration-150 active:scale-95"
+            className="bg-white/10 border-2 border-white text-white hover:bg-white/20 transition-all duration-150 active:scale-95"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Tillbaka
