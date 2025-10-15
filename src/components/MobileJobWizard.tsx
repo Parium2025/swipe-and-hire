@@ -154,7 +154,7 @@ const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQuestionIt
           <div
             {...attributes}
             {...listeners}
-            className="text-white/40 hover:text-white/70 cursor-grab active:cursor-grabbing pt-1 touch-none"
+            className="text-white hover:text-white cursor-grab active:cursor-grabbing pt-1 touch-none"
           >
             <GripVertical className="h-5 w-5" />
           </div>
@@ -163,7 +163,7 @@ const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQuestionIt
             <div className="text-white font-medium text-sm mb-1">
               {question.question_text || 'Ingen frågetext'}
             </div>
-            <div className="text-white/60 text-xs mb-2">
+            <div className="text-white text-xs mb-2">
               Typ: {question.question_type === 'text' ? 'Text' : 
                     question.question_type === 'yes_no' ? 'Ja/Nej' :
                     question.question_type === 'multiple_choice' ? 'Flervalsval' :
