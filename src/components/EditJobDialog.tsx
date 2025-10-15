@@ -1455,6 +1455,16 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             />
                           </div>
 
+                          <Button
+                            onClick={createNewQuestion}
+                            variant="outline"
+                            size="sm"
+                            className="w-full border-white/40 text-white bg-transparent hover:bg-transparent hover:border-white/60"
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            Skapa ny fråga
+                          </Button>
+
                           <div className="space-y-3 max-h-[400px] overflow-y-auto">
                             {questionTemplates.filter(template => 
                               template.question_text.toLowerCase().includes(questionSearchTerm.toLowerCase())
@@ -1522,17 +1532,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             )}
                           </div>
 
-                          <div className="pt-2">
-                            <Button
-                              onClick={createNewQuestion}
-                              variant="outline"
-                              size="sm"
-                              className="w-full border-white/40 text-white bg-transparent hover:bg-transparent hover:border-white/60"
-                            >
-                              <Plus className="h-4 w-4 mr-1" />
-                              Skapa ny fråga
-                            </Button>
-                          </div>
                         </div>
                       ) : (
                         <div className="space-y-4">
