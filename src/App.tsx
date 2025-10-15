@@ -71,7 +71,7 @@ const App = () => {
                   <Route path="/payment" element={<Index />} />
                   <Route path="/dashboard" element={<Index />} />
                   <Route path="/my-jobs" element={<Index />} />
-                  <Route path="/job-details/:jobId" element={<JobDetails />} />
+                  <Route path="/job-details/:jobId" element={<Index />} />
                   <Route path="/company-profile" element={<Index />} />
                   <Route path="/reviews" element={<Index />} />
                   <Route path="/job-application/:jobId" element={<JobApplication />} />

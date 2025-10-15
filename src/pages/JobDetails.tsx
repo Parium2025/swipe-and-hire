@@ -64,7 +64,6 @@ const JobDetails = () => {
   const [job, setJob] = useState<JobPosting | null>(null);
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [loading, setLoading] = useState(true);
-  const [developerView, setDeveloperView] = useState('dashboard');
 
   useEffect(() => {
     if (!jobId || !user) return;
@@ -241,27 +240,22 @@ const JobDetails = () => {
 
   if (loading) {
     return (
-      <EmployerLayout developerView={developerView} onViewChange={setDeveloperView}>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-white">Laddar...</div>
-        </div>
-      </EmployerLayout>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-white">Laddar...</div>
+      </div>
     );
   }
 
   if (!job) {
     return (
-      <EmployerLayout developerView={developerView} onViewChange={setDeveloperView}>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-white">Jobbet hittades inte</div>
-        </div>
-      </EmployerLayout>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-white">Jobbet hittades inte</div>
+      </div>
     );
   }
 
   return (
-    <EmployerLayout developerView={developerView} onViewChange={setDeveloperView}>
-      <div className="space-y-6 px-4 py-6 sm:px-6 pb-safe min-h-screen">
+    <div className="space-y-6 px-4 py-6 sm:px-6 pb-safe min-h-screen">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button
@@ -434,7 +428,6 @@ const JobDetails = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </EmployerLayout>
   );
 };
 

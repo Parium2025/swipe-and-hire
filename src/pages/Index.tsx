@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
+import JobDetails from '@/pages/JobDetails';
 import JobTemplatesOverview from '@/components/JobTemplatesOverview';
 import CompanyReviews from '@/components/CompanyReviews';
 import { useAuth } from '@/hooks/useAuth';
@@ -296,6 +297,11 @@ const Index = () => {
     }
 
     const renderEmployerContent = () => {
+      // Handle job details route with dynamic ID
+      if (location.pathname.startsWith('/job-details/')) {
+        return <JobDetails />;
+      }
+      
       switch (location.pathname) {
         case '/dashboard':
           return <Dashboard />;

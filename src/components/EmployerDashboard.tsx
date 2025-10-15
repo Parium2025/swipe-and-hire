@@ -248,6 +248,7 @@ const EmployerDashboard = memo(() => {
                     <Switch
                       checked={job.is_active}
                       onCheckedChange={() => toggleJobStatus(job.id, job.is_active)}
+                      onClick={(e) => e.stopPropagation()}
                     />
                   </div>
                 </div>
@@ -279,7 +280,10 @@ const EmployerDashboard = memo(() => {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => handleEditJob(job)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditJob(job);
+                      }}
                       className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-all duration-150 active:scale-95"
                     >
                       <Edit size={14} className="mr-1" />
@@ -288,7 +292,10 @@ const EmployerDashboard = memo(() => {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => handleDeleteClick(job)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteClick(job);
+                      }}
                       className="bg-white/10 border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-100 transition-all duration-150 active:scale-95"
                     >
                       <Trash2 size={14} className="mr-1" />
