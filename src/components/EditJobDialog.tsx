@@ -1120,7 +1120,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                 <>
                   {/* Step 1: Grundinfo */}
                   {currentStep === 0 && (
-                    <div className="space-y-4">
+                    <div className="space-y-4 max-w-2xl mx-auto w-full">
                       <div className="space-y-2">
                         <Label className="text-white font-medium">Jobbtitel *</Label>
                         <Input
@@ -1263,7 +1263,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                   {/* Step 2: Var finns jobbet? */}
                   {currentStep === 1 && (
-                    <div className="space-y-4">
+                    <div className="space-y-4 max-w-2xl mx-auto w-full">
                       <div className="space-y-2">
                         <Label className="text-white font-medium">Var utförs arbetet? *</Label>
                         <div className="relative work-location-dropdown">
@@ -1366,7 +1366,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                   {/* Step 3: Ansökningsfrågor */}
                   {currentStep === 2 && (
-                    <div className="space-y-6">
+                    <div className="space-y-6 max-w-2xl mx-auto w-full">
                       {!showQuestionForm && !showQuestionTemplates ? (
                         <>
                           <h3 className="text-white text-sm font-medium text-center">
@@ -1717,7 +1717,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                   {/* Step 4: Förhandsvisning */}
                   {currentStep === 3 && (
-                    <div className="space-y-6">
+                    <div className="space-y-6 max-w-2xl mx-auto w-full">
                       <div className="flex flex-col items-center space-y-4">
                         <h3 className="text-white font-medium">Så kommer ansökningsformuläret att se ut på mobil. (Testa att trycka på mobilens skärm)</h3>
                         

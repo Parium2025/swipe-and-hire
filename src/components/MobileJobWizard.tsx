@@ -1604,7 +1604,7 @@ const MobileJobWizard = ({
           <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
             {/* Step 1: Grundinfo */}
             {currentStep === 0 && (
-              <div className="space-y-4">
+              <div className="space-y-4 max-w-2xl mx-auto w-full">
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Jobbtitel *</Label>
                   <Input
@@ -1745,7 +1745,7 @@ const MobileJobWizard = ({
 
             {/* Step 2: Var finns jobbet? */}
             {currentStep === 1 && (
-              <div className="space-y-4">
+              <div className="space-y-4 max-w-2xl mx-auto w-full">
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Var utförs arbetet? *</Label>
                   <div className="relative work-location-dropdown">
@@ -1850,7 +1850,7 @@ const MobileJobWizard = ({
 
             {/* Step 3: Ansökningsfrågor */}
             {currentStep === 2 && (
-              <div className="space-y-6">
+              <div className="space-y-6 max-w-2xl mx-auto w-full">
                 {!showQuestionForm && !showQuestionTemplates ? (
                   <>
                     {/* Rubrik för automatiska frågor */}
@@ -2216,7 +2216,7 @@ const MobileJobWizard = ({
 
             {/* Step 4: Förhandsvisning */}
             {currentStep === 3 && (
-              <div className="space-y-6">
+              <div className="space-y-6 max-w-2xl mx-auto w-full">
                 {/* Mobile Mockup Preview - Mobilansökningsformulär */}
                 <div className="flex flex-col items-center space-y-4">
                   <h3 className="text-white font-medium">Så kommer ansökningsformuläret att se ut på mobil. (Testa att trycka på mobilens skärm)</h3>

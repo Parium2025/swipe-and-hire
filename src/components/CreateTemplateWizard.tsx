@@ -333,6 +333,10 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
     {
       title: "Ansökningsfrågor",
       fields: []
+    },
+    {
+      title: "Förhandsvisning",
+      fields: []
     }
   ];
 
@@ -994,7 +998,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
             {/* Step 0: Mallnamn */}
             {!showQuestionForm && currentStep === 0 && (
-              <div className="space-y-4">
+              <div className="space-y-4 max-w-2xl mx-auto w-full">
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Mallnamn *</Label>
                   <Input
@@ -1009,7 +1013,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
             {/* Step 1: Grundinfo - EXAKT SAMMA SOM MOBILEJOBWIZARD */}
             {!showQuestionForm && currentStep === 1 && (
-              <div className="space-y-4">
+              <div className="space-y-4 max-w-2xl mx-auto w-full">
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Jobbtitel *</Label>
                   <Input
@@ -1153,7 +1157,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
             {/* Step 2: Var finns jobbet - EXAKT SAMMA SOM MOBILEJOBWIZARD */}
             {!showQuestionForm && currentStep === 2 && (
-              <div className="space-y-4">
+              <div className="space-y-4 max-w-2xl mx-auto w-full">
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Var utförs arbetet? *</Label>
                   <div className="relative work-location-dropdown">
@@ -1249,7 +1253,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
             {/* Step 3: Ansökningsfrågor - EXAKT SAMMA SOM MOBILEJOBWIZARD */}
             {!showQuestionForm && currentStep === 3 && (
-              <div className="space-y-6">
+              <div className="space-y-6 max-w-2xl mx-auto w-full">
                 {/* Rubrik för automatiska frågor */}
                 <h3 className="text-white text-sm font-medium text-center">
                   Dessa frågor fylls automatiskt från jobbsökarens profil
@@ -1336,6 +1340,50 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       )}
                     </>
                   )}
+                </div>
+              </div>
+            )}
+
+            {/* Step 4: Förhandsvisning */}
+            {!showQuestionForm && currentStep === 4 && (
+              <div className="space-y-6 max-w-2xl mx-auto w-full">
+                <h3 className="text-white font-medium text-center">Mallöversikt</h3>
+                
+                <div className="bg-white/5 rounded-lg p-6 border border-white/20 space-y-4">
+                  <div>
+                    <p className="text-white/60 text-sm mb-1">Mallnamn</p>
+                    <p className="text-white font-medium">{formData.name || '-'}</p>
+                  </div>
+                  
+                  <div>
+                    <p className="text-white/60 text-sm mb-1">Jobbtitel</p>
+                    <p className="text-white font-medium">{formData.title || '-'}</p>
+                  </div>
+                  
+                  <div>
+                    <p className="text-white/60 text-sm mb-1">Yrke</p>
+                    <p className="text-white font-medium">{formData.occupation || '-'}</p>
+                  </div>
+                  
+                  <div>
+                    <p className="text-white/60 text-sm mb-1">Beskrivning</p>
+                    <p className="text-white">{formData.description || '-'}</p>
+                  </div>
+                  
+                  <div>
+                    <p className="text-white/60 text-sm mb-1">Arbetsplats</p>
+                    <p className="text-white">{formData.workplace_name || '-'}</p>
+                  </div>
+                  
+                  <div>
+                    <p className="text-white/60 text-sm mb-1">Plats</p>
+                    <p className="text-white">{formData.workplace_city || '-'}</p>
+                  </div>
+                  
+                  <div>
+                    <p className="text-white/60 text-sm mb-1">Anpassade frågor</p>
+                    <p className="text-white">{customQuestions.length} frågor</p>
+                  </div>
                 </div>
               </div>
             )}
