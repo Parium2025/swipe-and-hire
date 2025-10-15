@@ -585,6 +585,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
       setFormData(newFormData);
       setInitialFormData(newFormData);
       setHasUnsavedChanges(false);
+      
+      // Set search terms for dropdowns to show correct labels
+      setOccupationSearchTerm(job.occupation || '');
+      setEmploymentTypeSearchTerm(job.employment_type ? EMPLOYMENT_TYPES.find(t => t.value === normalizeEmploymentType(job.employment_type))?.label || '' : '');
+      setSalaryTypeSearchTerm(job.salary_type ? salaryTypes.find(t => t.value === job.salary_type)?.label || '' : '');
+      setWorkLocationSearchTerm(job.work_location_type ? workLocationTypes.find(t => t.value === job.work_location_type)?.label || '' : '');
+      setRemoteWorkSearchTerm(job.remote_work_possible ? remoteWorkOptions.find(t => t.value === job.remote_work_possible)?.label || '' : '');
     }
   }, [job, open]);
 
@@ -964,12 +971,21 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
   const canProceed = () => {
     if (currentStep === 0) {
-      return formData.title.trim() && formData.occupation.trim() && formData.description.trim() && formData.employment_type;
+      return formData.title.trim() && 
+             formData.occupation.trim() && 
+             formData.description.trim() && 
+             formData.employment_type &&
+             formData.salary_type &&
+             parseInt(formData.positions_count) > 0;
     }
     
     if (currentStep === 1) {
-      return formData.work_location_type && formData.remote_work_possible && 
-             formData.workplace_name.trim() && formData.contact_email.trim();
+      return formData.work_location_type && 
+             formData.remote_work_possible && 
+             formData.workplace_name.trim() && 
+             formData.contact_email.trim() &&
+             formData.workplace_postal_code.trim() && 
+             formData.workplace_city.trim();
     }
     
     return true;
