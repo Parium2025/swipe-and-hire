@@ -7,15 +7,27 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2 } from 'lucide-react';
+import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2, AlertTriangle } from 'lucide-react';
 import EditJobDialog from '@/components/EditJobDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const EmployerDashboard = memo(() => {
   const { jobs, stats, isLoading: loading, invalidateJobs } = useJobsData();
   const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [jobToDelete, setJobToDelete] = useState<JobPosting | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { user, profile } = useAuth();
   const { toast } = useToast();
 
@@ -50,14 +62,19 @@ const EmployerDashboard = memo(() => {
     }
   };
 
-  const deleteJob = async (jobId: string) => {
-    if (!confirm('Är du säker på att du vill ta bort denna annons?')) return;
+  const handleDeleteClick = (job: JobPosting) => {
+    setJobToDelete(job);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteJob = async () => {
+    if (!jobToDelete) return;
 
     try {
       const { error } = await supabase
         .from('job_postings')
         .delete()
-        .eq('id', jobId);
+        .eq('id', jobToDelete.id);
 
       if (error) {
         toast({
@@ -73,6 +90,8 @@ const EmployerDashboard = memo(() => {
         description: "Jobbannonsen har tagits bort."
       });
 
+      setDeleteDialogOpen(false);
+      setJobToDelete(null);
       invalidateJobs();
     } catch (error) {
       toast({
@@ -263,7 +282,7 @@ const EmployerDashboard = memo(() => {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => deleteJob(job.id)}
+                      onClick={() => handleDeleteClick(job)}
                       className="bg-white/10 border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-100 transition-all duration-150 active:scale-95"
                     >
                       <Trash2 size={14} className="mr-1" />
@@ -276,6 +295,48 @@ const EmployerDashboard = memo(() => {
           ))
         )}
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="bg-parium-gradient border-white/20 text-white">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="bg-red-500/20 p-3 rounded-full">
+                <AlertTriangle className="h-6 w-6 text-red-400" />
+              </div>
+              <AlertDialogTitle className="text-white text-xl">
+                Ta bort jobbannons
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-white/80 text-base pt-2">
+              {jobToDelete && (
+                <>
+                  Är du säker på att du vill ta bort <span className="font-semibold text-white">"{jobToDelete.title}"</span>?
+                  <br /><br />
+                  Denna åtgärd går inte att ångra. Alla ansökningar och data kopplade till annonsen kommer att raderas permanent.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-2">
+            <AlertDialogCancel 
+              onClick={() => {
+                setDeleteDialogOpen(false);
+                setJobToDelete(null);
+              }}
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+            >
+              Avbryt
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteJob}
+              className="bg-red-500 hover:bg-red-600 text-white border-0"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Ta bort annons
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <EditJobDialog
         job={editingJob}
