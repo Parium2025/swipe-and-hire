@@ -10,6 +10,23 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, Trash2, GripVertical, HelpCircle } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface JobQuestion {
   id?: string;
@@ -26,6 +43,140 @@ interface JobQuestionsManagerProps {
   onQuestionsChange?: () => void;
 }
 
+// Sortable Question Card Component
+interface SortableQuestionProps {
+  question: JobQuestion;
+  index: number;
+  updateQuestion: (index: number, updates: Partial<JobQuestion>) => void;
+  removeQuestion: (index: number) => void;
+  addOption: (questionIndex: number) => void;
+  updateOption: (questionIndex: number, optionIndex: number, value: string) => void;
+  removeOption: (questionIndex: number, optionIndex: number) => void;
+  getQuestionTypeLabel: (type: JobQuestion['question_type']) => string;
+}
+
+const SortableQuestionCard = ({
+  question,
+  index,
+  updateQuestion,
+  removeQuestion,
+  addOption,
+  updateOption,
+  removeOption,
+  getQuestionTypeLabel
+}: SortableQuestionProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: question.id || `question-${index}` });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <Card ref={setNodeRef} style={style}>
+      <CardHeader className="pb-3">
+        <div className="flex items-center gap-2">
+          <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing">
+            <GripVertical className="h-4 w-4 text-white" />
+          </div>
+          <Badge variant="outline" className="text-white border-white/20">{getQuestionTypeLabel(question.question_type)}</Badge>
+          <div className="flex-1" />
+          <div className="flex items-center gap-2">
+            <Label htmlFor={`required-${index}`} className="text-sm text-white">
+              Obligatorisk
+            </Label>
+            <Switch
+              id={`required-${index}`}
+              checked={question.is_required}
+              onCheckedChange={(checked) => updateQuestion(index, { is_required: checked })}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => removeQuestion(index)}
+              className="text-red-600 hover:text-red-700"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label className="text-white">Frågetyp</Label>
+            <Select
+              value={question.question_type}
+              onValueChange={(value) => updateQuestion(index, { question_type: value as JobQuestion['question_type'] })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="text">Siffra</SelectItem>
+                <SelectItem value="yes_no">Ja/Nej</SelectItem>
+                <SelectItem value="multiple_choice">Flerval</SelectItem>
+                <SelectItem value="video">Text</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-white">Fråga</Label>
+            <Input
+              value={question.question_text}
+              onChange={(e) => updateQuestion(index, { question_text: e.target.value })}
+              placeholder="Skriv din fråga här..."
+            />
+          </div>
+        </div>
+
+        {question.question_type === 'multiple_choice' && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>Svarsalternativ</Label>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => addOption(index)}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Lägg till alternativ
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {(question.options || []).map((option, optionIndex) => (
+                <div key={optionIndex} className="flex items-center gap-2">
+                  <Input
+                    value={option}
+                    onChange={(e) => updateOption(index, optionIndex, e.target.value)}
+                    placeholder={`Alternativ ${optionIndex + 1} (t.ex. B-kort, Krankort)`}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeOption(index, optionIndex)}
+                    className="text-red-600"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerProps) => {
   const [questions, setQuestions] = useState<JobQuestion[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,6 +184,13 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
   const [selectedType, setSelectedType] = useState<JobQuestion['question_type'] | null>(null);
   const [questionDraft, setQuestionDraft] = useState<JobQuestion | null>(null);
   const { toast } = useToast();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     if (jobId) {
@@ -116,6 +274,22 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
     // Update order_index for remaining questions
     updated.forEach((q, i) => q.order_index = i);
     setQuestions(updated);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setQuestions((items) => {
+        const oldIndex = items.findIndex((item) => (item.id || `question-${items.indexOf(item)}`) === active.id);
+        const newIndex = items.findIndex((item) => (item.id || `question-${items.indexOf(item)}`) === over.id);
+
+        const reordered = arrayMove(items, oldIndex, newIndex);
+        // Update order_index for all questions after reordering
+        reordered.forEach((q, i) => q.order_index = i);
+        return reordered;
+      });
+    }
   };
 
   const addOption = (questionIndex: number) => {
@@ -357,99 +531,30 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
         </Card>
       )}
 
-      {questions.map((question, index) => (
-        <Card key={index}>
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
-              <GripVertical className="h-4 w-4 text-white" />
-              <Badge variant="outline" className="text-white border-white/20">{getQuestionTypeLabel(question.question_type)}</Badge>
-              <div className="flex-1" />
-              <div className="flex items-center gap-2">
-                <Label htmlFor={`required-${index}`} className="text-sm text-white">
-                  Obligatorisk
-                </Label>
-                <Switch
-                  id={`required-${index}`}
-                  checked={question.is_required}
-                  onCheckedChange={(checked) => updateQuestion(index, { is_required: checked })}
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => removeQuestion(index)}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-white">Frågetyp</Label>
-                <Select
-                  value={question.question_type}
-                  onValueChange={(value) => updateQuestion(index, { question_type: value as JobQuestion['question_type'] })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="text">Siffra</SelectItem>
-                    <SelectItem value="yes_no">Ja/Nej</SelectItem>
-                    <SelectItem value="multiple_choice">Flerval</SelectItem>
-                    <SelectItem value="video">Text</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-white">Fråga</Label>
-                <Input
-                  value={question.question_text}
-                  onChange={(e) => updateQuestion(index, { question_text: e.target.value })}
-                  placeholder="Skriv din fråga här..."
-                />
-              </div>
-            </div>
-
-            {question.question_type === 'multiple_choice' && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label>Svarsalternativ</Label>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => addOption(index)}
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Lägg till alternativ
-                  </Button>
-                </div>
-                <div className="space-y-2">
-                  {(question.options || []).map((option, optionIndex) => (
-                    <div key={optionIndex} className="flex items-center gap-2">
-                      <Input
-                        value={option}
-                        onChange={(e) => updateOption(index, optionIndex, e.target.value)}
-                        placeholder={`Alternativ ${optionIndex + 1} (t.ex. B-kort, Krankort)`}
-                      />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeOption(index, optionIndex)}
-                        className="text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      ))}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={questions.map((q, i) => q.id || `question-${i}`)}
+          strategy={verticalListSortingStrategy}
+        >
+          {questions.map((question, index) => (
+            <SortableQuestionCard
+              key={question.id || `question-${index}`}
+              question={question}
+              index={index}
+              updateQuestion={updateQuestion}
+              removeQuestion={removeQuestion}
+              addOption={addOption}
+              updateOption={updateOption}
+              removeOption={removeOption}
+              getQuestionTypeLabel={getQuestionTypeLabel}
+            />
+          ))}
+        </SortableContext>
+      </DndContext>
 
       {questions.length > 0 && (
         <div className="flex justify-end pt-4">
