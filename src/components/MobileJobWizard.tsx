@@ -1571,8 +1571,8 @@ const MobileJobWizard = ({
         <AnimatedBackground showBubbles={false} />
         <div className="flex flex-col h-full relative z-10">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-white/20 flex-shrink-0 rounded-t-[24px] bg-background/10">
-            <DialogHeader className="flex-1">
+          <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 rounded-t-[24px] bg-background/10">
+            <DialogHeader className="text-center sm:text-center">
               <DialogTitle className="text-white text-lg">
                 {steps[currentStep].title}
               </DialogTitle>
@@ -1585,7 +1585,7 @@ const MobileJobWizard = ({
                 variant="ghost"
                 size="icon"
                 onClick={handleClose}
-                className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+                className="absolute right-4 top-4 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
               >
                 <X className="h-4 w-4" />
               </Button>
