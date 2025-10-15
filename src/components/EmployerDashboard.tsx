@@ -297,7 +297,7 @@ const EmployerDashboard = memo(() => {
       </div>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="bg-parium-gradient border-white/20 text-white max-w-md max-h-[280px] p-5">
+        <AlertDialogContent className="border-white/20 text-white max-w-md w-[28rem] p-6 bg-background/90 backdrop-blur-md rounded-xl">
           <AlertDialogHeader className="space-y-2">
             <div className="flex items-center gap-2.5">
               <div className="bg-red-500/20 p-2 rounded-full">
