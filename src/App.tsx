@@ -13,6 +13,7 @@ import ResetRedirect from "./pages/ResetRedirect";
 import EmailVerification from "./pages/EmailVerification";
 import ProfilePreview from "./pages/ProfilePreview";
 import JobApplication from "./pages/JobApplication";
+import JobDetails from "./pages/JobDetails";
 import NotFound from "./pages/NotFound";
 // import MyJobs from "./pages/MyJobs";
 import { AuthProvider } from "@/hooks/useAuth";
@@ -70,6 +71,7 @@ const App = () => {
                   <Route path="/payment" element={<Index />} />
                   <Route path="/dashboard" element={<Index />} />
                   <Route path="/my-jobs" element={<Index />} />
+                  <Route path="/job-details/:jobId" element={<JobDetails />} />
                   <Route path="/company-profile" element={<Index />} />
                   <Route path="/reviews" element={<Index />} />
                   <Route path="/job-application/:jobId" element={<JobApplication />} />

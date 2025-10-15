@@ -1,4 +1,5 @@
 import { useState, memo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,6 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const EmployerDashboard = memo(() => {
+  const navigate = useNavigate();
   const { jobs, stats, isLoading: loading, invalidateJobs } = useJobsData();
   const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -210,7 +212,11 @@ const EmployerDashboard = memo(() => {
           </Card>
         ) : (
           jobs.map((job) => (
-            <Card key={job.id} className="bg-white/10 backdrop-blur-sm border-white/20">
+            <Card 
+              key={job.id} 
+              className="bg-white/10 backdrop-blur-sm border-white/20 cursor-pointer hover:bg-white/15 transition-colors"
+              onClick={() => navigate(`/job-details/${job.id}`)}
+            >
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
