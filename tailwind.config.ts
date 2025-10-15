@@ -126,6 +126,16 @@ export default {
 					'50%': {
 						'background-position': '100% 50%'
 					}
+				},
+				'soft-bounce': {
+					'0%, 100%': {
+						transform: 'translateY(0)',
+						animationTimingFunction: 'cubic-bezier(0.8, 0, 1, 1)'
+					},
+					'50%': {
+						transform: 'translateY(-15%)',
+						animationTimingFunction: 'cubic-bezier(0, 0, 0.2, 1)'
+					}
 				}
 			},
 			animation: {
@@ -133,7 +143,8 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.3s ease-out',
 				'scale-in': 'scale-in 0.3s ease-out',
-				'gradient': 'gradient 15s ease infinite'
+				'gradient': 'gradient 15s ease infinite',
+				'soft-bounce': 'soft-bounce 2s ease-in-out infinite'
 			}
 		}
 	},
