@@ -259,10 +259,10 @@ const JobDetails = () => {
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={() => navigate(-1)}
-            className="text-white hover:bg-white/10"
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-all duration-150 active:scale-95"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Tillbaka
