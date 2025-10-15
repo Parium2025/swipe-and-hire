@@ -113,23 +113,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!mounted) return;
 
         console.log('Auth state change:', event, session?.user?.id);
-        if (event === 'INITIAL_SESSION') return; // skip duplicates
-
+        
+        // Update session and user state for all events
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          // Defer any Supabase calls to avoid blocking the callback
-          setTimeout(() => {
-            if (!mounted) return;
-            fetchUserData(session.user!.id).then(() => {
-              if (mounted) setLoading(false);
-            });
-          }, 0);
+          // Skip fetching user data again for INITIAL_SESSION to avoid duplication
+          // The initial getSession() call below handles this
+          if (event !== 'INITIAL_SESSION') {
+            // Defer any Supabase calls to avoid blocking the callback
+            setTimeout(() => {
+              if (!mounted) return;
+              fetchUserData(session.user!.id).then(() => {
+                if (mounted) setLoading(false);
+              });
+            }, 0);
+          }
         } else {
           setProfile(null);
           setUserRole(null);
           setOrganization(null);
+          if (event !== 'INITIAL_SESSION') {
+            setLoading(false);
+          }
         }
       }
     );
