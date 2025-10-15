@@ -261,8 +261,8 @@ const Index = () => {
                 <SidebarTrigger className="text-white hover:bg-white/20" />
                 <div>
                   <h1 className="text-xl font-bold text-white">Parium</h1>
-                  <p className="text-sm text-white/70">
-                    {(userRole?.role as string) === 'employer' ? 'Arbetsgivare' : 'Jobbsökare'}: {profile.first_name} {profile.last_name}
+                  <p className="text-sm text-white">
+                    Admin: {profile.first_name} {profile.last_name}
                   </p>
                 </div>
               </div>
