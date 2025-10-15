@@ -43,10 +43,18 @@ interface JobFormData {
   salary_min: string;
   salary_max: string;
   employment_type: string;
+  salary_type: string;
   positions_count: string;
+  work_location_type: string;
+  remote_work_possible: string;
+  workplace_name: string;
+  workplace_address: string;
+  workplace_postal_code: string;
+  workplace_city: string;
   work_schedule: string;
   contact_email: string;
   application_instructions: string;
+  pitch: string;
 }
 
 interface CreateJobDetailDialogProps {
@@ -78,10 +86,18 @@ const CreateJobDetailDialog = ({
     salary_min: selectedTemplate?.salary_min?.toString() || '',
     salary_max: selectedTemplate?.salary_max?.toString() || '',
     employment_type: selectedTemplate?.employment_type || '',
+    salary_type: '',
     positions_count: '1',
+    work_location_type: '',
+    remote_work_possible: '',
+    workplace_name: '',
+    workplace_address: '',
+    workplace_postal_code: '',
+    workplace_city: '',
     work_schedule: selectedTemplate?.work_schedule || '',
     contact_email: selectedTemplate?.contact_email || '',
-    application_instructions: selectedTemplate?.application_instructions || ''
+    application_instructions: selectedTemplate?.application_instructions || '',
+    pitch: ''
   });
 
   const { user } = useAuth();
@@ -98,10 +114,18 @@ const CreateJobDetailDialog = ({
       salary_min: selectedTemplate?.salary_min?.toString() || '',
       salary_max: selectedTemplate?.salary_max?.toString() || '',
       employment_type: selectedTemplate?.employment_type || '',
+      salary_type: '',
       positions_count: '1',
+      work_location_type: '',
+      remote_work_possible: '',
+      workplace_name: '',
+      workplace_address: '',
+      workplace_postal_code: '',
+      workplace_city: '',
       work_schedule: selectedTemplate?.work_schedule || '',
       contact_email: selectedTemplate?.contact_email || '',
-      application_instructions: selectedTemplate?.application_instructions || ''
+      application_instructions: selectedTemplate?.application_instructions || '',
+      pitch: ''
     });
   }, [jobTitle, selectedTemplate]);
 
@@ -121,13 +145,22 @@ const CreateJobDetailDialog = ({
         description: formData.description,
         requirements: formData.requirements || null,
         location: formData.location,
+        occupation: formData.occupation || null,
         salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
         salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
         employment_type: formData.employment_type || null,
+        salary_type: formData.salary_type || null,
         positions_count: formData.positions_count ? parseInt(formData.positions_count) : 1,
+        work_location_type: formData.work_location_type || null,
+        remote_work_possible: formData.remote_work_possible || null,
+        workplace_name: formData.workplace_name || null,
+        workplace_address: formData.workplace_address || null,
+        workplace_postal_code: formData.workplace_postal_code || null,
+        workplace_city: formData.workplace_city || null,
         work_schedule: formData.work_schedule || null,
         contact_email: formData.contact_email || null,
         application_instructions: formData.application_instructions || null,
+        pitch: formData.pitch || null,
         category // Add the auto-generated category
       };
 
@@ -177,10 +210,18 @@ const CreateJobDetailDialog = ({
       salary_min: '',
       salary_max: '',
       employment_type: '',
+      salary_type: '',
       positions_count: '1',
+      work_location_type: '',
+      remote_work_possible: '',
+      workplace_name: '',
+      workplace_address: '',
+      workplace_postal_code: '',
+      workplace_city: '',
       work_schedule: '',
       contact_email: '',
-      application_instructions: ''
+      application_instructions: '',
+      pitch: ''
     });
     setCreatedJobId(null);
     setActiveTab("basic");
@@ -352,6 +393,26 @@ const CreateJobDetailDialog = ({
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="salary_type" className="text-white">Lönetyp</Label>
+                <Select value={formData.salary_type} onValueChange={(value) => handleInputChange('salary_type', value)}>
+                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                    <SelectValue placeholder="Välj lönetyp" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-600">
+                    <SelectItem value="fast" className="text-white hover:bg-gray-700 focus:bg-gray-700">
+                      Fast månads- vecko- eller timlön
+                    </SelectItem>
+                    <SelectItem value="rorlig" className="text-white hover:bg-gray-700 focus:bg-gray-700">
+                      Rörlig ackord- eller provisionslön
+                    </SelectItem>
+                    <SelectItem value="fast-rorlig" className="text-white hover:bg-gray-700 focus:bg-gray-700">
+                      Fast och rörlig lön
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="employment_type" className="text-white">Anställningsform</Label>
                 <Select value={formData.employment_type} onValueChange={(value) => handleInputChange('employment_type', value)}>
                   <SelectTrigger className="bg-white/10 border-white/20 text-white">
@@ -385,6 +446,82 @@ const CreateJobDetailDialog = ({
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="work_location_type" className="text-white">Typ av arbetsplats</Label>
+                <Select value={formData.work_location_type} onValueChange={(value) => handleInputChange('work_location_type', value)}>
+                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                    <SelectValue placeholder="Välj typ av arbetsplats" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-600">
+                    <SelectItem value="på-plats" className="text-white hover:bg-gray-700 focus:bg-gray-700">På plats</SelectItem>
+                    <SelectItem value="hemarbete" className="text-white hover:bg-gray-700 focus:bg-gray-700">Hemarbete</SelectItem>
+                    <SelectItem value="hybridarbete" className="text-white hover:bg-gray-700 focus:bg-gray-700">Hybridarbete</SelectItem>
+                    <SelectItem value="fältarbete" className="text-white hover:bg-gray-700 focus:bg-gray-700">Fältarbete/ute</SelectItem>
+                    <SelectItem value="utomlands" className="text-white hover:bg-gray-700 focus:bg-gray-700">Utomlands</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="remote_work_possible" className="text-white">Distansarbete möjligt?</Label>
+                <Select value={formData.remote_work_possible} onValueChange={(value) => handleInputChange('remote_work_possible', value)}>
+                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                    <SelectValue placeholder="Välj distansarbetsalternativ" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-600">
+                    <SelectItem value="nej" className="text-white hover:bg-gray-700 focus:bg-gray-700">Nej</SelectItem>
+                    <SelectItem value="delvis" className="text-white hover:bg-gray-700 focus:bg-gray-700">Delvis</SelectItem>
+                    <SelectItem value="ja" className="text-white hover:bg-gray-700 focus:bg-gray-700">Ja, helt</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="workplace_name" className="text-white">Arbetsplatsnamn *</Label>
+                <Input
+                  id="workplace_name"
+                  value={formData.workplace_name}
+                  onChange={(e) => handleInputChange('workplace_name', e.target.value)}
+                  placeholder="t.ex. Huvudkontoret Stockholm"
+                  required
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="workplace_address" className="text-white">Arbetsplatsadress</Label>
+                <Input
+                  id="workplace_address"
+                  value={formData.workplace_address}
+                  onChange={(e) => handleInputChange('workplace_address', e.target.value)}
+                  placeholder="t.ex. Storgatan 1"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="workplace_postal_code" className="text-white">Postnummer</Label>
+                  <Input
+                    id="workplace_postal_code"
+                    value={formData.workplace_postal_code}
+                    onChange={(e) => handleInputChange('workplace_postal_code', e.target.value)}
+                    placeholder="123 45"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="workplace_city" className="text-white">Stad</Label>
+                  <Input
+                    id="workplace_city"
+                    value={formData.workplace_city}
+                    onChange={(e) => handleInputChange('workplace_city', e.target.value)}
+                    placeholder="Stockholm"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="work_schedule" className="text-white">Arbetstider</Label>
                 <Input
                   id="work_schedule"
@@ -404,6 +541,18 @@ const CreateJobDetailDialog = ({
                   onChange={(e) => handleInputChange('contact_email', e.target.value)}
                   placeholder="kontakt@företag.se"
                   required
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pitch" className="text-white">Pitch (säljtext)</Label>
+                <Textarea
+                  id="pitch"
+                  value={formData.pitch}
+                  onChange={(e) => handleInputChange('pitch', e.target.value)}
+                  placeholder="En kort, säljande text om varför någon ska söka jobbet..."
+                  rows={3}
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
                 />
               </div>
