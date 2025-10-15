@@ -297,41 +297,39 @@ const EmployerDashboard = memo(() => {
       </div>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="bg-parium-gradient border-white/20 text-white max-w-md">
-          <AlertDialogHeader>
+        <AlertDialogContent className="bg-parium-gradient border-white/20 text-white max-w-sm p-4">
+          <AlertDialogHeader className="space-y-1">
             <div className="flex items-center gap-2">
-              <div className="bg-red-500/20 p-2 rounded-full">
-                <AlertTriangle className="h-4 w-4 text-red-400" />
+              <div className="bg-red-500/20 p-1.5 rounded-full">
+                <AlertTriangle className="h-3.5 w-3.5 text-red-400" />
               </div>
-              <AlertDialogTitle className="text-white text-base">
+              <AlertDialogTitle className="text-white text-sm font-semibold">
                 Ta bort jobbannons
               </AlertDialogTitle>
             </div>
-            <AlertDialogDescription className="text-white/80 text-sm pt-2">
+            <AlertDialogDescription className="text-white/80 text-xs leading-relaxed pl-7">
               {jobToDelete && (
                 <>
-                  Är du säker på att du vill ta bort <span className="font-semibold text-white">"{jobToDelete.title}"</span>?
-                  <br />
-                  Denna åtgärd går inte att ångra.
+                  Är du säker på att du vill ta bort <span className="font-semibold text-white">"{jobToDelete.title}"</span>? Denna åtgärd går inte att ångra.
                 </>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2 sm:gap-2">
+          <AlertDialogFooter className="gap-2 sm:gap-2 mt-3">
             <AlertDialogCancel 
               onClick={() => {
                 setDeleteDialogOpen(false);
                 setJobToDelete(null);
               }}
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-sm h-9"
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-xs h-8 px-3"
             >
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteJob}
-              className="bg-red-500 hover:bg-red-600 text-white border-0 text-sm h-9"
+              className="bg-red-500 hover:bg-red-600 text-white border-0 text-xs h-8 px-3"
             >
-              <Trash2 className="h-3 w-3 mr-1.5" />
+              <Trash2 className="h-3 w-3 mr-1" />
               Ta bort
             </AlertDialogAction>
           </AlertDialogFooter>
