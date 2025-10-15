@@ -128,7 +128,7 @@ const SortableQuestionItem = ({
               {question.is_required && ' • Obligatorisk'}
             </div>
             {question.question_type === 'multiple_choice' && question.options && (
-              <div className="text-white/50 text-xs">
+              <div className="text-white text-xs">
                 Alternativ: {question.options.filter(o => o.trim()).join(', ')}
               </div>
             )}
