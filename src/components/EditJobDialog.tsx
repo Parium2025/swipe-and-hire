@@ -1188,16 +1188,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         />
                       </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-white font-medium">Kravprofil:</Label>
-                        <Textarea
-                          value={formData.requirements}
-                          onChange={(e) => handleInputChange('requirements', e.target.value)}
-                          placeholder="Beskriv vilka krav ni har på kandidaten..."
-                          rows={4}
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 text-base resize-none leading-relaxed focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
-                        />
-                      </div>
+{/* Kravprofil borttagen för att matcha MobileJobWizard */}
 
                       <div className="space-y-2">
                         <Label className="text-white font-medium">Anställningsform *</Label>
