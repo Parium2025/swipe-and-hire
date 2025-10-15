@@ -265,6 +265,7 @@ const CreateJobDetailDialog = ({
       <DialogContent 
         className="max-w-4xl max-h-[90vh] overflow-y-auto bg-parium-gradient border-white/20 text-white [&>button]:hidden"
         onInteractOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <AnimatedBackground showBubbles={false} />
         <div className="relative z-10">
