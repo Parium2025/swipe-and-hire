@@ -1010,7 +1010,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   };
 
   const handleSubmit = async () => {
-    if (!user || !job) return;
+    if (!user || !job || loading) return;
 
     setLoading(true);
     try {
@@ -1077,9 +1077,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
       onOpenChange(false);
       onJobUpdated();
     } catch (err) {
+      console.error('Edit job error:', err);
       toast({ title: 'Ett fel uppstod', description: 'Kunde inte uppdatera annonsen.', variant: 'destructive' });
     } finally {
-      setLoading(false);
+      // Ensure loading is reset even if error occurs
+      setTimeout(() => setLoading(false), 100);
     }
   };
 

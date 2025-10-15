@@ -1452,7 +1452,7 @@ const MobileJobWizard = ({
   };
 
   const handleSubmit = async () => {
-    if (!user || !validateCurrentStep()) return;
+    if (!user || !validateCurrentStep() || loading) return;
 
     setLoading(true);
 
@@ -1556,13 +1556,15 @@ const MobileJobWizard = ({
       onJobCreated(jobPost);
 
     } catch (error) {
+      console.error('Submit error:', error);
       toast({
         title: "Ett fel uppstod",
         description: "Kunde inte skapa jobbannonsen.",
         variant: "destructive"
       });
     } finally {
-      setLoading(false);
+      // Ensure loading is reset even if error occurs
+      setTimeout(() => setLoading(false), 100);
     }
   };
 

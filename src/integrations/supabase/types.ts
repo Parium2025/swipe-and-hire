@@ -331,7 +331,7 @@ export type Database = {
           order_index?: number
           placeholder_text?: string | null
           question_text: string
-          question_type: string
+          question_type?: string
         }
         Update: {
           created_at?: string
