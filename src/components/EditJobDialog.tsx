@@ -545,15 +545,36 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     }
   };
 
-  // Load job image if exists
+  // Load job image if exists - create signed URL for storage paths
   useEffect(() => {
-    if (job?.job_image_url && open) {
-      setJobImageDisplayUrl(job.job_image_url);
-      setOriginalImageUrl(job.job_image_url);
-    } else {
-      setJobImageDisplayUrl(null);
-      setOriginalImageUrl(null);
-    }
+    const loadJobImage = async () => {
+      if (job?.job_image_url && open) {
+        const url = job.job_image_url;
+        
+        // If it's a storage path (not a full URL), create a signed URL
+        if (!url.startsWith('http')) {
+          try {
+            const signedUrl = await createSignedUrl('job-applications', url, 86400);
+            if (signedUrl) {
+              setJobImageDisplayUrl(signedUrl);
+              setOriginalImageUrl(url); // Keep storage path as original
+              return;
+            }
+          } catch (error) {
+            console.error('Failed to create signed URL for job image:', error);
+          }
+        }
+        
+        // If it's already a full URL or signing failed, use as-is
+        setJobImageDisplayUrl(url);
+        setOriginalImageUrl(url);
+      } else {
+        setJobImageDisplayUrl(null);
+        setOriginalImageUrl(null);
+      }
+    };
+    
+    loadJobImage();
   }, [job, open]);
 
   // Sync incoming job to form
