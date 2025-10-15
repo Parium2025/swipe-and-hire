@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Trash2, GripVertical, HelpCircle } from 'lucide-react';
+import { Plus, Trash2, GripVertical, HelpCircle, Search } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -183,6 +183,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
   const [addingQuestion, setAddingQuestion] = useState(false);
   const [selectedType, setSelectedType] = useState<JobQuestion['question_type'] | null>(null);
   const [questionDraft, setQuestionDraft] = useState<JobQuestion | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
 
   const sensors = useSensors(
@@ -383,23 +384,43 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
     return labels[type];
   };
 
+  // Filter questions based on search query
+  const filteredQuestions = questions.filter(q => 
+    q.question_text.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <HelpCircle className="h-5 w-5" />
-            Ansökningsfrågor
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            Lägg till egna frågor som jobbsökare måste svara på
-          </p>
-        </div>
-        <Button onClick={addQuestion} size="sm" className="border border-white/20 hover:border-white/40">
-          <Plus className="h-4 w-4 mr-2" />
-          Lägg till fråga
-        </Button>
+      <div>
+        <h3 className="text-lg font-semibold flex items-center gap-2">
+          <HelpCircle className="h-5 w-5" />
+          Ansökningsfrågor
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Lägg till egna frågor som jobbsökare måste svara på
+        </p>
       </div>
+
+      {/* Search field */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Sök efter fråga..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9"
+        />
+      </div>
+
+      {/* Add question button - always visible */}
+      <Button 
+        onClick={addQuestion} 
+        variant="outline" 
+        className="w-full border-dashed border-2 hover:border-primary/50"
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        Skapa ny fråga
+      </Button>
 
       {/* Ny fråga dialog */}
       {addingQuestion && questionDraft && (
@@ -531,30 +552,36 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
         </Card>
       )}
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={questions.map((q, i) => q.id || `question-${i}`)}
-          strategy={verticalListSortingStrategy}
+      {/* Questions list */}
+      {filteredQuestions.length > 0 && (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
         >
-          {questions.map((question, index) => (
-            <SortableQuestionCard
-              key={question.id || `question-${index}`}
-              question={question}
-              index={index}
-              updateQuestion={updateQuestion}
-              removeQuestion={removeQuestion}
-              addOption={addOption}
-              updateOption={updateOption}
-              removeOption={removeOption}
-              getQuestionTypeLabel={getQuestionTypeLabel}
-            />
-          ))}
-        </SortableContext>
-      </DndContext>
+          <SortableContext
+            items={filteredQuestions.map((q, i) => q.id || `question-${i}`)}
+            strategy={verticalListSortingStrategy}
+          >
+            {filteredQuestions.map((question, index) => {
+              const actualIndex = questions.findIndex(q => q === question);
+              return (
+                <SortableQuestionCard
+                  key={question.id || `question-${index}`}
+                  question={question}
+                  index={actualIndex}
+                  updateQuestion={updateQuestion}
+                  removeQuestion={removeQuestion}
+                  addOption={addOption}
+                  updateOption={updateOption}
+                  removeOption={removeOption}
+                  getQuestionTypeLabel={getQuestionTypeLabel}
+                />
+              );
+            })}
+          </SortableContext>
+        </DndContext>
+      )}
 
       {questions.length > 0 && (
         <div className="flex justify-end pt-4">
@@ -569,13 +596,21 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
           <CardContent className="text-center py-8">
             <HelpCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="font-semibold mb-2">Inga ansökningsfrågor än</h3>
-            <p className="text-muted-foreground mb-4">
-              Lägg till egna frågor för att få mer information från jobbsökare
+            <p className="text-muted-foreground">
+              Klicka på "Skapa ny fråga" ovan för att lägga till din första fråga
             </p>
-            <Button onClick={addQuestion} className="border border-white/20 hover:border-white/40">
-              <Plus className="h-4 w-4 mr-2" />
-              Lägg till första frågan
-            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {searchQuery && filteredQuestions.length === 0 && questions.length > 0 && (
+        <Card className="border-dashed">
+          <CardContent className="text-center py-8">
+            <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="font-semibold mb-2">Inga resultat</h3>
+            <p className="text-muted-foreground">
+              Hittade inga frågor som matchar "{searchQuery}"
+            </p>
           </CardContent>
         </Card>
       )}
