@@ -96,12 +96,12 @@ const Dashboard = memo(() => {
             <Table>
               <TableHeader>
                 <TableRow className="border-white/20 hover:bg-white/5">
-                  <TableHead className="text-white/80 font-semibold">Titel</TableHead>
-                  <TableHead className="text-white/80 font-semibold">Status</TableHead>
-                  <TableHead className="text-white/80 font-semibold text-center">Ansökningar</TableHead>
-                  <TableHead className="text-white/80 font-semibold text-center">Visningar</TableHead>
-                  <TableHead className="text-white/80 font-semibold">Plats</TableHead>
-                  <TableHead className="text-white/80 font-semibold">Skapad</TableHead>
+                  <TableHead className="text-white font-semibold">Titel</TableHead>
+                  <TableHead className="text-white font-semibold">Status</TableHead>
+                  <TableHead className="text-white font-semibold text-center">Ansökningar</TableHead>
+                  <TableHead className="text-white font-semibold text-center">Visningar</TableHead>
+                  <TableHead className="text-white font-semibold">Plats</TableHead>
+                  <TableHead className="text-white font-semibold">Skapad</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -128,7 +128,7 @@ const Dashboard = memo(() => {
                         <div className="flex flex-col gap-1">
                           <span>{job.title}</span>
                           {job.employment_type && (
-                            <Badge variant="outline" className="w-fit text-xs bg-white/5 text-white/70 border-white/20">
+                            <Badge variant="outline" className="w-fit text-xs bg-white/5 text-white border-white/20">
                               {getEmploymentTypeLabel(job.employment_type)}
                             </Badge>
                           )}
@@ -152,13 +152,13 @@ const Dashboard = memo(() => {
                           {job.views_count || 0}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-white/80">
+                      <TableCell className="text-white">
                         <div className="flex items-center gap-1 text-sm">
                           <MapPin size={14} />
                           {job.location}
                         </div>
                       </TableCell>
-                      <TableCell className="text-white/80">
+                      <TableCell className="text-white">
                         <div className="flex items-center gap-1 text-sm">
                           <Calendar size={14} />
                           {new Date(job.created_at).toLocaleDateString('sv-SE', { 
