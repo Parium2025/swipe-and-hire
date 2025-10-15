@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, GripVertical } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, GripVertical, Search } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Switch } from '@/components/ui/switch';
@@ -177,6 +177,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
   const [showWorkLocationDropdown, setShowWorkLocationDropdown] = useState(false);
   const [remoteWorkSearchTerm, setRemoteWorkSearchTerm] = useState('');
   const [showRemoteWorkDropdown, setShowRemoteWorkDropdown] = useState(false);
+  const [questionSearchQuery, setQuestionSearchQuery] = useState('');
   
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
@@ -1271,44 +1272,69 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
                 {/* Anpassade frågor */}
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-white font-medium">Anpassade frågor (valfritt)</h4>
-                    <Button
-                      onClick={addCustomQuestion}
-                      size="sm"
-                      className="bg-primary hover:bg-primary/90 text-white"
-                    >
-                      <Plus className="h-4 w-4 mr-1" />
-                      Lägg till fråga
-                    </Button>
+                  <h4 className="text-white font-medium">Anpassade frågor (valfritt)</h4>
+                  
+                  {/* Search field */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Sök efter fråga..."
+                      value={questionSearchQuery}
+                      onChange={(e) => setQuestionSearchQuery(e.target.value)}
+                      className="pl-9 bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                    />
                   </div>
+
+                  {/* Add question button - always visible */}
+                  <Button
+                    onClick={addCustomQuestion}
+                    variant="outline"
+                    className="w-full border-dashed border-2 hover:border-primary/50 bg-transparent text-white border-white/40"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Skapa ny fråga
+                  </Button>
                   
                   {customQuestions.length === 0 ? (
                     <div className="text-white text-sm bg-white/5 rounded-lg p-3 border border-white/20">
-                      Saknas något? Klicka på "Lägg till fråga" och skapa de frågor du vill att kandidaten ska svara på
+                      Klicka på "Skapa ny fråga" ovan för att lägga till din första fråga
                     </div>
                   ) : (
-                    <DndContext
-                      sensors={sensors}
-                      collisionDetection={closestCenter}
-                      onDragEnd={handleDragEnd}
-                    >
-                      <SortableContext
-                        items={customQuestions.map(q => q.id!)}
-                        strategy={verticalListSortingStrategy}
-                      >
-                        <div className="space-y-3">
-                          {customQuestions.map((question) => (
-                            <SortableQuestionItem
-                              key={question.id}
-                              question={question}
-                              onEdit={editCustomQuestion}
-                              onDelete={deleteCustomQuestion}
-                            />
-                          ))}
+                    <>
+                      {customQuestions.filter(q => 
+                        q.question_text.toLowerCase().includes(questionSearchQuery.toLowerCase())
+                      ).length > 0 ? (
+                        <DndContext
+                          sensors={sensors}
+                          collisionDetection={closestCenter}
+                          onDragEnd={handleDragEnd}
+                        >
+                          <SortableContext
+                            items={customQuestions
+                              .filter(q => q.question_text.toLowerCase().includes(questionSearchQuery.toLowerCase()))
+                              .map(q => q.id!)}
+                            strategy={verticalListSortingStrategy}
+                          >
+                            <div className="space-y-3">
+                              {customQuestions
+                                .filter(q => q.question_text.toLowerCase().includes(questionSearchQuery.toLowerCase()))
+                                .map((question) => (
+                                  <SortableQuestionItem
+                                    key={question.id}
+                                    question={question}
+                                    onEdit={editCustomQuestion}
+                                    onDelete={deleteCustomQuestion}
+                                  />
+                                ))}
+                            </div>
+                          </SortableContext>
+                        </DndContext>
+                      ) : (
+                        <div className="text-white text-sm bg-white/5 rounded-lg p-3 border border-white/20 text-center">
+                          Hittade inga frågor som matchar "{questionSearchQuery}"
                         </div>
-                      </SortableContext>
-                    </DndContext>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
