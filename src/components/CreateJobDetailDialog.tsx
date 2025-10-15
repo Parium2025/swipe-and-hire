@@ -23,12 +23,22 @@ interface JobTemplate {
   description: string;
   requirements?: string;
   location: string;
+  occupation?: string;
   employment_type?: string;
   work_schedule?: string;
   salary_min?: number;
   salary_max?: number;
+  salary_type?: string;
+  positions_count?: string;
+  work_location_type?: string;
+  remote_work_possible?: string;
+  workplace_name?: string;
+  workplace_address?: string;
+  workplace_postal_code?: string;
+  workplace_city?: string;
   contact_email?: string;
   application_instructions?: string;
+  pitch?: string;
   category?: string;
   is_default: boolean;
   questions?: any[];
@@ -103,29 +113,29 @@ const CreateJobDetailDialog = ({
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Update form data when props change
+  // Update form data when props change - Copy ALL fields from template
   useEffect(() => {
     setFormData({
       title: jobTitle,
       description: selectedTemplate?.description || '',
       requirements: selectedTemplate?.requirements || '',
       location: selectedTemplate?.location || '',
-      occupation: '',
+      occupation: selectedTemplate?.occupation || '',
       salary_min: selectedTemplate?.salary_min?.toString() || '',
       salary_max: selectedTemplate?.salary_max?.toString() || '',
       employment_type: selectedTemplate?.employment_type || '',
-      salary_type: '',
-      positions_count: '1',
-      work_location_type: '',
-      remote_work_possible: '',
-      workplace_name: '',
-      workplace_address: '',
-      workplace_postal_code: '',
-      workplace_city: '',
+      salary_type: selectedTemplate?.salary_type || '',
+      positions_count: selectedTemplate?.positions_count?.toString() || '1',
+      work_location_type: selectedTemplate?.work_location_type || '',
+      remote_work_possible: selectedTemplate?.remote_work_possible || '',
+      workplace_name: selectedTemplate?.workplace_name || '',
+      workplace_address: selectedTemplate?.workplace_address || '',
+      workplace_postal_code: selectedTemplate?.workplace_postal_code || '',
+      workplace_city: selectedTemplate?.workplace_city || '',
       work_schedule: selectedTemplate?.work_schedule || '',
       contact_email: selectedTemplate?.contact_email || '',
       application_instructions: selectedTemplate?.application_instructions || '',
-      pitch: ''
+      pitch: selectedTemplate?.pitch || ''
     });
   }, [jobTitle, selectedTemplate]);
 
