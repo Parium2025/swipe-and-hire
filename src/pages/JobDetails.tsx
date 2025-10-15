@@ -267,7 +267,7 @@ const JobDetails = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate('/my-jobs')}
+            onClick={() => navigate(-1)}
             className="text-white hover:bg-white/10"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
