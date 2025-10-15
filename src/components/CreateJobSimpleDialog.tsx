@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, Loader2, ChevronDown, Search, X, Trash2, Pencil } from 'lucide-react';
 import MobileJobWizard from '@/components/MobileJobWizard';
 import CreateTemplateWizard from '@/components/CreateTemplateWizard';
+import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import type { JobPosting } from '@/hooks/useJobsData';
 
 interface JobTemplate {
@@ -49,6 +50,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const [showTemplateWizard, setShowTemplateWizard] = useState(false);
   const [templateToEdit, setTemplateToEdit] = useState<JobTemplate | null>(null);
   const [templateToDelete, setTemplateToDelete] = useState<JobTemplate | null>(null);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -110,6 +113,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       if (!jobTitle) {
         setJobTitle(template.title);
       }
+      setHasUnsavedChanges(true);
     }
     setTemplateMenuOpen(false);
   }, [templates, jobTitle]);
@@ -145,9 +149,26 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   }, [jobTitle, selectedTemplate, toast]);
 
   const handleClose = useCallback(() => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      setOpen(false);
+      setJobTitle('');
+      setSelectedTemplate(null);
+      setHasUnsavedChanges(false);
+    }
+  }, [hasUnsavedChanges]);
+
+  const handleConfirmClose = useCallback(() => {
+    setShowUnsavedDialog(false);
     setOpen(false);
     setJobTitle('');
     setSelectedTemplate(null);
+    setHasUnsavedChanges(false);
+  }, []);
+
+  const handleCancelClose = useCallback(() => {
+    setShowUnsavedDialog(false);
   }, []);
 
 const handleJobCreated = useCallback((job: JobPosting) => {
@@ -204,7 +225,10 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                 <Input
                   id="job-title"
                   value={jobTitle}
-                  onChange={(e) => setJobTitle(e.target.value)}
+                  onChange={(e) => {
+                    setJobTitle(e.target.value);
+                    setHasUnsavedChanges(true);
+                  }}
                   placeholder="Namnge jobbet"
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150"
                   autoComplete="off"
@@ -444,6 +468,14 @@ const handleJobCreated = useCallback((job: JobPosting) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Unsaved Changes Dialog */}
+      <UnsavedChangesDialog
+        open={showUnsavedDialog}
+        onOpenChange={setShowUnsavedDialog}
+        onConfirm={handleConfirmClose}
+        onCancel={handleCancelClose}
+      />
     </>
   );
 };
