@@ -113,7 +113,7 @@ const Dashboard = memo(() => {
                   </TableRow>
                 ) : jobs.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-white py-8">
+                    <TableCell colSpan={6} className="text-center !text-white py-8 font-medium">
                       Inga jobbannonser än. Skapa din första annons!
                     </TableCell>
                   </TableRow>
