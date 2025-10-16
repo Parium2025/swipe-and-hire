@@ -2478,185 +2478,153 @@ const MobileJobWizard = ({
                                  </div>
                                </div>
 
-                              {/* Anpassade frågor uppdelade per typ */}
-                              {(() => {
-                                const questionsByType = {
-                                  number: customQuestions.filter(q => q.question_type === 'number'),
-                                  text: customQuestions.filter(q => q.question_type === 'text'),
-                                  multiple_choice: customQuestions.filter(q => q.question_type === 'multiple_choice'),
-                                  yes_no: customQuestions.filter(q => q.question_type === 'yes_no'),
-                                  date: customQuestions.filter(q => q.question_type === 'date'),
-                                  file: customQuestions.filter(q => q.question_type === 'file'),
-                                  video: customQuestions.filter(q => q.question_type === 'video'),
-                                };
+                              {/* Anpassade frågor - individuella kort */}
+                              {customQuestions.length > 0 && (
+                                <div className="space-y-2">
+                                  {customQuestions.map((question, index) => {
+                                    const typeLabels = {
+                                      number: 'Siffra',
+                                      text: 'Text',
+                                      multiple_choice: 'Flerval',
+                                      yes_no: 'Ja/Nej',
+                                      date: 'Datum',
+                                      file: 'Fil',
+                                      video: 'Video',
+                                    };
 
-                                const typeLabels = {
-                                  number: 'Sifferfrågor',
-                                  text: 'Textfrågor',
-                                  multiple_choice: 'Flervalsfrågor',
-                                  yes_no: 'Ja/Nej-frågor',
-                                  date: 'Datumfrågor',
-                                  file: 'Filfrågor',
-                                  video: 'Videofrågor',
-                                };
-
-                                return Object.entries(questionsByType).map(([type, questions]) => {
-                                  if (questions.length === 0) return null;
-                                  
-                                  return (
-                                    <div key={type} className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                      <h4 className="text-xs font-semibold text-white mb-2">
-                                        {typeLabels[type as keyof typeof typeLabels]} ({questions.length})
-                                      </h4>
-                                      
-                                      <div className="space-y-2">
-                                        {questions.map((question, index) => (
-                                          <div key={question.id || index} className="space-y-1">
-                                            <label className="text-xs text-white flex items-start">
+                                    return (
+                                      <div key={question.id || index} className="bg-white/10 rounded-lg p-3 border border-white/20">
+                                        {/* Frågetext och typ-badge */}
+                                        <div className="flex items-start gap-2 mb-2">
+                                          <div className="flex-1">
+                                            <label className="text-xs font-medium text-white flex items-start">
                                               <span className="flex-1 leading-tight">
                                                 {question.question_text}
                                               </span>
                                             </label>
-                                            
-                                            {/* Input förhandsvisning baserat på frågetyp */}
-                                            {question.question_type === 'text' && (
-                                              <textarea
-                                                className="w-full border border-white/20 bg-white/10 rounded p-2 text-xs text-white placeholder:text-white/60 resize-none"
-                                                placeholder={question.placeholder_text || 'Skriv ditt svar...'}
-                                                rows={2}
-                                              />
-                                            )}
-                                            
-                                            {question.question_type === 'yes_no' && (
-                                              <div className="flex gap-1.5">
-                                                <button 
-                                                  type="button"
-                                                  onClick={(e) => {
-                                                    e.preventDefault();
-                                                    const parent = e.currentTarget.parentElement;
-                                                    const buttons = parent?.querySelectorAll('button');
-                                                    buttons?.forEach(btn => {
-                                                      btn.classList.remove('bg-secondary', 'border-secondary', 'text-white');
-                                                      btn.classList.add('bg-white/10', 'border-white/20');
-                                                    });
-                                                    e.currentTarget.classList.remove('bg-white/10', 'border-white/20');
-                                                    e.currentTarget.classList.add('bg-secondary', 'border-secondary', 'text-white');
-                                                  }}
-                                                  className="flex-1 bg-white/10 border border-white/20 rounded-md px-2 py-1 text-xs text-white transition-colors font-medium"
-                                                >
-                                                  Ja
-                                                </button>
-                                                <button 
-                                                  type="button"
-                                                  onClick={(e) => {
-                                                    e.preventDefault();
-                                                    const parent = e.currentTarget.parentElement;
-                                                    const buttons = parent?.querySelectorAll('button');
-                                                    buttons?.forEach(btn => {
-                                                      btn.classList.remove('bg-secondary', 'border-secondary', 'text-white');
-                                                      btn.classList.add('bg-white/10', 'border-white/20');
-                                                    });
-                                                    e.currentTarget.classList.remove('bg-white/10', 'border-white/20');
-                                                    e.currentTarget.classList.add('bg-secondary', 'border-secondary', 'text-white');
-                                                  }}
-                                                  className="flex-1 bg-white/10 border border-white/20 rounded-md px-2 py-1 text-xs text-white transition-colors font-medium"
-                                                >
-                                                  Nej
-                                                </button>
-                                              </div>
-                                            )}
-                                            
-                                            {question.question_type === 'multiple_choice' && (
-                                              <div className="relative">
-                                                <button
-                                                  type="button"
-                                                  onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation(); // Prevent closing from parent click handler
-                                                    const dropdown = e.currentTarget.nextElementSibling;
-                                                    dropdown?.classList.toggle('hidden');
-                                                  }}
-                                                  className="w-full bg-white/10 border-white/20 text-white h-9 text-xs pr-10 cursor-pointer rounded border flex items-center px-3 hover:bg-white/20 transition-colors text-left"
-                                                >
-                                                  <span className="flex-1">Välj alternativ</span>
-                                                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-3 w-3 text-white/60 pointer-events-none" />
-                                                </button>
-                                                
-                                                <div 
-                                                  className="hidden bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-48 overflow-y-auto shadow-lg absolute z-50 w-full"
-                                                  onClick={(e) => e.stopPropagation()}
-                                                >
-                                                  {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => (
-                                                    <div
-                                                      key={optIndex}
-                                                      onClick={(e) => {
-                                                        e.preventDefault();
-                                                        const checkbox = e.currentTarget.querySelector('input[type="checkbox"]') as HTMLInputElement;
-                                                        if (checkbox) {
-                                                          checkbox.checked = !checkbox.checked;
-                                                        }
-                                                      }}
-                                                      className="flex items-center gap-2 px-3 py-2 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
-                                                    >
-                                                      <input
-                                                        type="checkbox"
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        className="w-3 h-3 accent-secondary cursor-pointer rounded"
-                                                      />
-                                                      <span className="text-xs text-white flex-1">{option}</span>
-                                                    </div>
-                                                  ))}
-                                                </div>
-                                              </div>
-                                            )}
-                                            
-                                            {question.question_type === 'number' && (
-                                              <div className="space-y-1.5">
-                                                <div className="text-center text-sm font-semibold text-white" id={`number-value-${type}-${index}`}>
-                                                  {question.min_value ?? 0}
-                                                </div>
-                                                <input
-                                                  type="range"
-                                                  min={question.min_value ?? 0}
-                                                  max={question.max_value ?? 100}
-                                                  defaultValue={question.min_value ?? 0}
-                                                  className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-secondary [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
-                                                  onChange={(e) => {
-                                                    const valueDisplay = document.getElementById(`number-value-${type}-${index}`);
-                                                    if (valueDisplay) valueDisplay.textContent = e.target.value;
-                                                  }}
-                                                />
-                                              </div>
-                                            )}
-                                            
-                                            {question.question_type === 'date' && (
-                                              <input
-                                                type="date"
-                                                className="w-full border border-white/20 bg-white/10 rounded p-2 text-xs text-white placeholder:text-white/60 h-9"
-                                                placeholder={question.placeholder_text}
-                                                disabled
-                                              />
-                                            )}
-                                            
-                                            {(question.question_type === 'file' || question.question_type === 'video') && (
-                                              <div className="border-2 border-dashed border-white/30 rounded p-2 text-center bg-white/5">
-                                                {question.question_type === 'file' ? (
-                                                  <FileText className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
-                                                ) : (
-                                                  <Video className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
-                                                )}
-                                                <p className="text-xs text-white/60">
-                                                  {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
-                                                </p>
-                                              </div>
-                                            )}
+                                            <div className="flex items-center gap-1.5 mt-1">
+                                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/20 text-white/80 border border-white/20">
+                                                Typ: {typeLabels[question.question_type as keyof typeof typeLabels]}
+                                              </span>
+                                              {question.is_required && (
+                                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/20 text-white border border-white/30">
+                                                  Obligatorisk
+                                                </span>
+                                              )}
+                                            </div>
                                           </div>
-                                        ))}
+                                        </div>
+                                        
+                                        {/* Input förhandsvisning baserat på frågetyp */}
+                                        {question.question_type === 'text' && (
+                                          <textarea
+                                            className="w-full border border-white/20 bg-white/10 rounded p-2 text-xs text-white placeholder:text-white/60 resize-none"
+                                            placeholder={question.placeholder_text || 'Skriv ditt svar...'}
+                                            rows={2}
+                                          />
+                                        )}
+                                        
+                                        {question.question_type === 'yes_no' && (
+                                          <div className="flex gap-1.5">
+                                            <button 
+                                              type="button"
+                                              onClick={(e) => {
+                                                e.preventDefault();
+                                                const parent = e.currentTarget.parentElement;
+                                                const buttons = parent?.querySelectorAll('button');
+                                                buttons?.forEach(btn => {
+                                                  btn.classList.remove('bg-secondary', 'border-secondary', 'text-white');
+                                                  btn.classList.add('bg-white/10', 'border-white/20');
+                                                });
+                                                e.currentTarget.classList.remove('bg-white/10', 'border-white/20');
+                                                e.currentTarget.classList.add('bg-secondary', 'border-secondary', 'text-white');
+                                              }}
+                                              className="flex-1 bg-white/10 border border-white/20 rounded-md px-2 py-1 text-xs text-white transition-colors font-medium"
+                                            >
+                                              Ja
+                                            </button>
+                                            <button 
+                                              type="button"
+                                              onClick={(e) => {
+                                                e.preventDefault();
+                                                const parent = e.currentTarget.parentElement;
+                                                const buttons = parent?.querySelectorAll('button');
+                                                buttons?.forEach(btn => {
+                                                  btn.classList.remove('bg-secondary', 'border-secondary', 'text-white');
+                                                  btn.classList.add('bg-white/10', 'border-white/20');
+                                                });
+                                                e.currentTarget.classList.remove('bg-white/10', 'border-white/20');
+                                                e.currentTarget.classList.add('bg-secondary', 'border-secondary', 'text-white');
+                                              }}
+                                              className="flex-1 bg-white/10 border border-white/20 rounded-md px-2 py-1 text-xs text-white transition-colors font-medium"
+                                            >
+                                              Nej
+                                            </button>
+                                          </div>
+                                        )}
+                                        
+                                        {question.question_type === 'multiple_choice' && (
+                                          <div className="space-y-1">
+                                            <p className="text-[10px] text-white/60 mb-1">Alternativ:</p>
+                                            <div className="space-y-1">
+                                              {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => (
+                                                <div
+                                                  key={optIndex}
+                                                  className="flex items-center gap-2 bg-white/5 rounded px-2 py-1.5 border border-white/10"
+                                                >
+                                                  <div className="w-2.5 h-2.5 rounded-full border border-white/40 flex-shrink-0"></div>
+                                                  <span className="text-xs text-white/90">{option}</span>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
+                                        
+                                        {question.question_type === 'number' && (
+                                          <div className="space-y-1.5">
+                                            <div className="text-center text-sm font-semibold text-white" id={`number-value-${index}`}>
+                                              {question.min_value ?? 0}
+                                            </div>
+                                            <input
+                                              type="range"
+                                              min={question.min_value ?? 0}
+                                              max={question.max_value ?? 100}
+                                              defaultValue={question.min_value ?? 0}
+                                              className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-secondary [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+                                              onChange={(e) => {
+                                                const valueDisplay = document.getElementById(`number-value-${index}`);
+                                                if (valueDisplay) valueDisplay.textContent = e.target.value;
+                                              }}
+                                            />
+                                          </div>
+                                        )}
+                                        
+                                        {question.question_type === 'date' && (
+                                          <input
+                                            type="date"
+                                            className="w-full border border-white/20 bg-white/10 rounded p-2 text-xs text-white placeholder:text-white/60 h-9"
+                                            placeholder={question.placeholder_text}
+                                            disabled
+                                          />
+                                        )}
+                                        
+                                        {(question.question_type === 'file' || question.question_type === 'video') && (
+                                          <div className="border-2 border-dashed border-white/30 rounded p-2 text-center bg-white/5">
+                                            {question.question_type === 'file' ? (
+                                              <FileText className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
+                                            ) : (
+                                              <Video className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
+                                            )}
+                                            <p className="text-xs text-white/60">
+                                              {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
+                                            </p>
+                                          </div>
+                                        )}
                                       </div>
-                                    </div>
-                                  );
-                                });
-                              })()}
+                                    );
+                                  })}
+                                </div>
+                              )}
 
                               {/* Extra space borttaget för tätare layout */}
                             </div>
