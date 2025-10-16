@@ -2275,15 +2275,6 @@ const MobileJobWizard = ({
                             {/* Scrollable content */}
                             <div 
                               className="px-2 py-2 overflow-y-auto relative z-10 custom-scrollbar flex-1"
-                              onClick={(e) => {
-                                // Close all dropdowns when clicking anywhere in the scroll area
-                                const dropdowns = e.currentTarget.querySelectorAll('.bg-gray-800.border.border-gray-600');
-                                dropdowns.forEach(dropdown => {
-                                  if (!dropdown.classList.contains('hidden')) {
-                                    dropdown.classList.add('hidden');
-                                  }
-                                });
-                              }}
                               onScroll={(e) => {
                                 const target = e.currentTarget;
                                 setIsScrolledTop(target.scrollTop === 0);

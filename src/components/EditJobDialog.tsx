@@ -2039,9 +2039,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                           <button
                                                             type="button"
                                                             onClick={() => setOpenMultipleChoiceIndex(openMultipleChoiceIndex === index ? null : index)}
-                                                            className="w-full bg-white/10 border border-white/20 text-white text-xs pr-8 cursor-pointer rounded-md flex items-center px-2 py-1 hover:bg-white/20 transition-colors text-left"
+                                                            className="w-full bg-white/10 border border-white/20 text-white text-xs pr-7 cursor-pointer rounded-md flex items-center px-2 py-1 hover:bg-white/20 transition-colors text-left"
                                                           >
-                                                            <span className="flex-1">
+                                                            <span className="flex-1 truncate">
                                                               {(() => {
                                                                 const key = `q_${question.id || index}`;
                                                                 const selected = multipleChoiceAnswers[key] || [];
@@ -2051,7 +2051,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                             <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3 w-3 text-white/60 pointer-events-none" />
                                                           </button>
                                                           {openMultipleChoiceIndex === index && (
-                                                            <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-40 overflow-y-auto shadow-lg">
+                                                            <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-40 overflow-y-auto shadow-lg pointer-events-auto">
                                                               {(question.options || []).filter(o => o.trim() !== '').map((option, optIdx) => {
                                                                 const key = `q_${question.id || index}`;
                                                                 const selected = multipleChoiceAnswers[key] || [];
