@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, GripVertical, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, GripVertical, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2, Check } from 'lucide-react';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { Progress } from '@/components/ui/progress';
@@ -230,6 +230,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const [showRemoteWorkDropdown, setShowRemoteWorkDropdown] = useState(false);
   const [questionTypeSearchTerm, setQuestionTypeSearchTerm] = useState('');
   const [showQuestionTypeDropdown, setShowQuestionTypeDropdown] = useState(false);
+  // Preview interaction state for multiple choice in phone mockup
+  const [openMultipleChoiceIndex, setOpenMultipleChoiceIndex] = useState<number | null>(null);
+  const [multipleChoiceAnswers, setMultipleChoiceAnswers] = useState<Record<string, string[]>>({});
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const occupationRef = useRef<HTMLDivElement>(null);
@@ -2035,11 +2038,47 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                         <div className="relative">
                                                           <button
                                                             type="button"
-                                                            className="w-full bg-white/10 border-white/20 text-white h-9 text-xs pr-10 cursor-pointer rounded border flex items-center px-3 hover:bg-white/20 transition-colors text-left"
+                                                            onClick={() => setOpenMultipleChoiceIndex(openMultipleChoiceIndex === index ? null : index)}
+                                                            className="w-full bg-white/10 border border-white/20 text-white text-xs pr-8 cursor-pointer rounded-md flex items-center px-2 py-1 hover:bg-white/20 transition-colors text-left"
                                                           >
-                                                            <span className="flex-1">Välj alternativ</span>
-                                                            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-3 w-3 text-white/60 pointer-events-none" />
+                                                            <span className="flex-1">
+                                                              {(() => {
+                                                                const key = `q_${question.id || index}`;
+                                                                const selected = multipleChoiceAnswers[key] || [];
+                                                                return selected.length > 0 ? selected.join(', ') : 'Välj alternativ';
+                                                              })()}
+                                                            </span>
+                                                            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3 w-3 text-white/60 pointer-events-none" />
                                                           </button>
+                                                          {openMultipleChoiceIndex === index && (
+                                                            <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-40 overflow-y-auto shadow-lg">
+                                                              {(question.options || []).filter(o => o.trim() !== '').map((option, optIdx) => {
+                                                                const key = `q_${question.id || index}`;
+                                                                const selected = multipleChoiceAnswers[key] || [];
+                                                                const isSelected = selected.includes(option);
+                                                                return (
+                                                                  <button
+                                                                    key={optIdx}
+                                                                    type="button"
+                                                                    onClick={(e) => {
+                                                                      e.stopPropagation();
+                                                                      const current = multipleChoiceAnswers[key] || [];
+                                                                      const next = isSelected
+                                                                        ? current.filter(v => v !== option)
+                                                                        : [...current, option];
+                                                                      setMultipleChoiceAnswers(prev => ({ ...prev, [key]: next }));
+                                                                    }}
+                                                                    className="w-full px-2.5 py-2 text-left hover:bg-gray-700 text-white text-xs border-b border-gray-700 last:border-b-0 flex items-center gap-2"
+                                                                  >
+                                                                    <div className="w-3 h-3 border border-white/40 rounded bg-white/5 flex items-center justify-center">
+                                                                      <Check className={`w-2 h-2 text-white transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`} />
+                                                                    </div>
+                                                                    <span className="flex-1">{option}</span>
+                                                                  </button>
+                                                                );
+                                                              })}
+                                                            </div>
+                                                          )}
                                                         </div>
                                                       )}
                                                       
