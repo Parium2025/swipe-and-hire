@@ -196,7 +196,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
           </Button>
         </DialogTrigger>
           <DialogContent 
-            className="max-w-md bg-parium-gradient [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] border-none shadow-none sm:rounded-xl transition-all duration-200 ease-out animate-scale-in"
+            className="max-w-md bg-white/10 backdrop-blur-md border-white/20 [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] shadow-lg sm:rounded-xl transition-all duration-200 ease-out animate-scale-in"
             onInteractOutside={(e) => e.preventDefault()}
             onEscapeKeyDown={(e) => e.preventDefault()}
           >
