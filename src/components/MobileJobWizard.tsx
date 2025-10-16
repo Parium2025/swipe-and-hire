@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card } from '@/components/ui/card';
         // ... keep existing imports
         import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
         import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -2479,13 +2478,13 @@ const MobileJobWizard = ({
                                  </div>
                                </div>
 
-                                {/* Anpassade frågor – enskilda kort */}
+                                 {/* Anpassade frågor – enskilda kort */}
                                {customQuestions.length > 0 && (
-                                 <div className="space-y-3">
+                                 <div className="space-y-2">
                                      {customQuestions.map((question, index) => (
-                                       <Card key={question.id || index} className="bg-white/10 border-white/20 p-3">
+                                       <div key={question.id || index} className="bg-white/10 rounded-lg p-2 border border-white/20">
                                          {/* Frågetext */}
-                                         <label className="text-sm text-white leading-tight block mb-2 font-medium">
+                                         <label className="text-xs font-medium text-white mb-1 block">
                                            {question.question_text}
                                            {question.is_required && <span className="text-red-400 ml-1">*</span>}
                                          </label>
@@ -2493,7 +2492,7 @@ const MobileJobWizard = ({
                                          {/* Input förhandsvisning baserat på frågetyp */}
                                          {question.question_type === 'text' && (
                            <textarea
-                             className="w-full border border-white/20 bg-white/10 rounded p-2 text-xs text-white placeholder:text-white/60 resize-none"
+                             className="w-full border border-white/20 bg-white/5 rounded p-1.5 text-xs text-white placeholder:text-white/60 resize-none"
                              placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                              rows={2}
                            />
@@ -2503,13 +2502,13 @@ const MobileJobWizard = ({
                            <div className="flex gap-2">
                              <button 
                                type="button"
-                               className="flex-1 bg-white/10 border border-white/20 rounded-md px-3 py-2 text-xs text-white transition-colors font-medium"
+                               className="flex-1 bg-white/5 border border-white/20 rounded px-2 py-1 text-xs text-white transition-colors font-medium"
                              >
                                Ja
                              </button>
                              <button 
                                type="button"
-                               className="flex-1 bg-white/10 border border-white/20 rounded-md px-3 py-2 text-xs text-white transition-colors font-medium"
+                               className="flex-1 bg-white/5 border border-white/20 rounded px-2 py-1 text-xs text-white transition-colors font-medium"
                              >
                                Nej
                              </button>
@@ -2518,9 +2517,9 @@ const MobileJobWizard = ({
 
 
                         {question.question_type === 'multiple_choice' && (
-                           <div className="flex flex-wrap gap-2">
+                           <div className="flex flex-wrap gap-1.5">
                              {(question.options || []).filter(opt => opt.trim() !== '').map((option, optIndex) => (
-                               <span key={optIndex} className="text-xs px-3 py-1 rounded bg-white/10 border border-white/20 text-white">
+                               <span key={optIndex} className="text-xs px-2 py-1 rounded bg-white/5 border border-white/20 text-white">
                                  {option}
                                </span>
                              ))}
@@ -2529,8 +2528,8 @@ const MobileJobWizard = ({
 
 
                         {question.question_type === 'number' && (
-                           <div className="space-y-2">
-                             <div className="text-center text-sm font-semibold text-white" id={`number-value-${index}`}>
+                           <div className="space-y-1.5">
+                             <div className="text-center text-xs font-semibold text-white" id={`number-value-${index}`}>
                                {question.min_value ?? 0}
                              </div>
                              <input
@@ -2551,25 +2550,25 @@ const MobileJobWizard = ({
                         {question.question_type === 'date' && (
                            <input
                              type="date"
-                             className="w-full border border-white/20 bg-white/10 rounded p-2 text-xs text-white placeholder:text-white/60"
+                             className="w-full border border-white/20 bg-white/5 rounded p-1.5 text-xs text-white placeholder:text-white/60"
                              placeholder={question.placeholder_text}
                              disabled
                            />
                          )}
 
                         {(question.question_type === 'file' || question.question_type === 'video') && (
-                           <div className="border-2 border-dashed border-white/30 rounded p-3 text-center bg-white/5">
+                           <div className="border-2 border-dashed border-white/30 rounded p-2 text-center bg-white/5">
                              {question.question_type === 'file' ? (
-                               <FileText className="h-4 w-4 mx-auto mb-1 text-white/60" />
+                               <FileText className="h-3 w-3 mx-auto mb-1 text-white/60" />
                              ) : (
-                               <Video className="h-4 w-4 mx-auto mb-1 text-white/60" />
+                               <Video className="h-3 w-3 mx-auto mb-1 text-white/60" />
                              )}
                              <p className="text-xs text-white/60">
                                {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
                              </p>
                            </div>
                          )}
-                                       </Card>
+                                       </div>
                                      ))}
                                  </div>
                                )}
