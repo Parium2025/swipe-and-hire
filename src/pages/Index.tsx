@@ -197,7 +197,7 @@ const Index = () => {
   }
 
   // Show app intro tutorial after onboarding
-  const showTourOverlay = showIntroTutorial && location.pathname === '/search-jobs';
+  const showTourOverlay = showIntroTutorial;
   
   // Resolve role from profile first to avoid flicker
   const role = (profile as any)?.role || (userRole?.role as string) || '';
