@@ -196,15 +196,16 @@ const handleJobCreated = useCallback((job: JobPosting) => {
           </Button>
         </DialogTrigger>
           <DialogContent 
-            className="max-w-md bg-parium-gradient border-none p-0 [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] shadow-lg sm:rounded-xl transition-all duration-200 ease-out animate-scale-in"
+            className="max-w-md bg-white/10 backdrop-blur-md border-white/20 [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] shadow-lg sm:rounded-xl transition-all duration-200 ease-out animate-scale-in"
             onInteractOutside={(e) => e.preventDefault()}
             onEscapeKeyDown={(e) => e.preventDefault()}
           >
-            <div className="pb-4 pt-6 px-6">
+          <Card className="bg-white/10 backdrop-blur-sm border-transparent border-0 ring-0 shadow-none relative w-full mt-16 transition-all duration-200">
+            <CardHeader className="pb-4 pt-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-white flex-1 text-center text-xl font-semibold">
+                <CardTitle className="text-white flex-1 text-center text-xl">
                   Skapa jobb
-                </h2>
+                </CardTitle>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -214,11 +215,11 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-              <p className="text-white text-center text-sm leading-snug mt-2">
+              <CardDescription className="text-white text-center text-sm leading-snug mt-2">
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
-              </p>
-            </div>
-            <div className="space-y-4 px-6 pb-6">
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 px-4 pb-4">
               <div className="space-y-2">
                 <Label htmlFor="job-title" className="text-white">Titel</Label>
                 <Input
@@ -372,7 +373,8 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                   Avbryt
                 </Button>
               </div>
-            </div>
+            </CardContent>
+          </Card>
         </DialogContent>
       </Dialog>
 
