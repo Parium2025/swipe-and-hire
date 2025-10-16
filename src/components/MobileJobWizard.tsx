@@ -2498,33 +2498,38 @@ const MobileJobWizard = ({
                            />
                          )}
 
-                        {question.question_type === 'yes_no' && (
-                           <div className="flex gap-2">
-                             <button 
-                               type="button"
-                               className="flex-1 bg-white/5 border border-white/20 rounded px-2 py-1 text-xs text-white transition-colors font-medium"
-                             >
-                               Ja
-                             </button>
-                             <button 
-                               type="button"
-                               className="flex-1 bg-white/5 border border-white/20 rounded px-2 py-1 text-xs text-white transition-colors font-medium"
-                             >
-                               Nej
-                             </button>
-                           </div>
-                         )}
+                         {question.question_type === 'yes_no' && (
+                            <div className="flex gap-2">
+                              <button 
+                                type="button"
+                                className="flex-1 bg-white/5 border border-white/20 rounded px-2 py-1 text-xs text-white transition-colors font-medium hover:bg-white/10 hover:border-white/30"
+                              >
+                                Ja
+                              </button>
+                              <button 
+                                type="button"
+                                className="flex-1 bg-white/5 border border-white/20 rounded px-2 py-1 text-xs text-white transition-colors font-medium hover:bg-white/10 hover:border-white/30"
+                              >
+                                Nej
+                              </button>
+                            </div>
+                          )}
 
 
-                        {question.question_type === 'multiple_choice' && (
-                           <div className="flex flex-wrap gap-1.5">
-                             {(question.options || []).filter(opt => opt.trim() !== '').map((option, optIndex) => (
-                               <span key={optIndex} className="text-xs px-2 py-1 rounded bg-white/5 border border-white/20 text-white">
-                                 {option}
-                               </span>
-                             ))}
-                           </div>
-                         )}
+                         {question.question_type === 'multiple_choice' && (
+                            <Select>
+                              <SelectTrigger className="w-full border-white/20 bg-white/5 text-white text-xs h-8">
+                                <SelectValue placeholder="Välj ett alternativ..." />
+                              </SelectTrigger>
+                              <SelectContent className="bg-background border-white/20">
+                                {(question.options || []).filter(opt => opt.trim() !== '').map((option, optIndex) => (
+                                  <SelectItem key={optIndex} value={option} className="text-xs">
+                                    {option}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
 
 
                         {question.question_type === 'number' && (
