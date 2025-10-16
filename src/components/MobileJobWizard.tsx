@@ -2517,18 +2517,25 @@ const MobileJobWizard = ({
 
 
                          {question.question_type === 'multiple_choice' && (
-                            <Select>
-                              <SelectTrigger className="w-full border-white/20 bg-white/5 text-white text-xs h-8">
-                                <SelectValue placeholder="Välj ett alternativ..." />
-                              </SelectTrigger>
-                              <SelectContent className="bg-background border-white/20">
+                            <div className="relative">
+                              <Input
+                                readOnly
+                                placeholder="Välj ett alternativ..."
+                                className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-8 text-xs pr-8 cursor-pointer"
+                              />
+                              <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-white/60" />
+                              <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-48 overflow-y-auto">
                                 {(question.options || []).filter(opt => opt.trim() !== '').map((option, optIndex) => (
-                                  <SelectItem key={optIndex} value={option} className="text-xs">
+                                  <button
+                                    key={optIndex}
+                                    type="button"
+                                    className="w-full px-3 py-2 text-left hover:bg-gray-700 text-white text-xs border-b border-gray-700 last:border-b-0"
+                                  >
                                     {option}
-                                  </SelectItem>
+                                  </button>
                                 ))}
-                              </SelectContent>
-                            </Select>
+                              </div>
+                            </div>
                           )}
 
 
