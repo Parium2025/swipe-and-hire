@@ -186,7 +186,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-full max-h-full h-screen w-screen p-0 bg-gradient-to-br from-primary via-purple-600 to-pink-500 border-none overflow-hidden">
+      <DialogContent className="max-w-full max-h-full h-screen w-screen p-0 bg-gradient-to-br from-parium-blue via-parium-blue to-parium-dark border-none overflow-hidden">
         {/* Hinge-style fullscreen scrollable content */}
         <div className="h-full overflow-y-auto overflow-x-hidden snap-y snap-mandatory">
           
