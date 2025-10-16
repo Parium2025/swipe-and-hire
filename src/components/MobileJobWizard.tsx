@@ -2513,21 +2513,22 @@ const MobileJobWizard = ({
                          {question.question_type === 'multiple_choice' && (
                             <div className="space-y-1.5">
                               <div className="relative">
-                                <input
-                                  type="text"
-                                  readOnly
-                                  value={(() => {
-                                    const qKey = `q_${index}`;
-                                    const selected = multipleChoiceAnswers[qKey] || [];
-                                    return selected.length > 0 ? selected.join(', ') : '';
-                                  })()}
+                                <button
+                                  type="button"
                                   onClick={() => setOpenMultipleChoiceIndex(openMultipleChoiceIndex === index ? null : index)}
-                                  placeholder="Välj alternativ..."
-                                  className="w-full border border-white/20 bg-white/5 rounded px-2 py-1 pr-7 text-xs text-white placeholder:text-white/60 cursor-pointer focus:outline-none"
-                                />
-                                <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-white/60 pointer-events-none" />
+                                  className="w-full bg-white/5 border border-white/20 rounded px-2 py-1 pr-7 text-xs text-white text-left flex items-center hover:bg-white/10 transition-colors"
+                                >
+                                  <span className="flex-1 truncate">
+                                    {(() => {
+                                      const qKey = `q_${index}`;
+                                      const selected = multipleChoiceAnswers[qKey] || [];
+                                      return selected.length > 0 ? selected.join(', ') : 'Välj alternativ...';
+                                    })()}
+                                  </span>
+                                  <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-white/60 pointer-events-none" />
+                                </button>
                                 {openMultipleChoiceIndex === index && (
-                                  <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-40 overflow-y-auto shadow-lg">
+                                  <div className="absolute top-full left-0 right-0 z-[9999] bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-40 overflow-y-auto shadow-lg pointer-events-auto">
                                     {(question.options || []).filter(opt => opt.trim() !== '').map((option, optIndex) => {
                                       const qKey = `q_${index}`;
                                       const selected = multipleChoiceAnswers[qKey] || [];

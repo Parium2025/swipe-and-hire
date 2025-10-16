@@ -1186,7 +1186,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
                           
                           {showOccupationDropdown && (
-                            <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                            <div className="absolute top-full left-0 right-0 z-[9999] bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
                               {filteredOccupations.map((occupation, index) => (
                                 <button
                                   key={`${occupation}-${index}`}
@@ -1246,7 +1246,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                           
                           {showEmploymentTypeDropdown && (
-                             <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 shadow-lg">
+                             <div className="absolute top-full left-0 right-0 z-[9999] bg-gray-800 border border-gray-600 rounded-md mt-1 shadow-lg">
                               {filteredEmploymentTypes.map((type) => (
                                 <button
                                   key={type.value}
@@ -1276,7 +1276,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                           
                           {showSalaryTypeDropdown && (
-                            <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                            <div className="absolute top-full left-0 right-0 z-[9999] bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
                               {filteredSalaryTypes.map((type) => (
                                 <button
                                   key={type.value}
@@ -1311,7 +1311,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                           
                           {showWorkLocationDropdown && (
-                            <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                            <div className="absolute top-full left-0 right-0 z-[9999] bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
                               {filteredWorkLocationTypes.map((type) => (
                                 <button
                                   key={type.value}
@@ -1341,7 +1341,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                           
                           {showRemoteWorkDropdown && (
-                            <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                            <div className="absolute top-full left-0 right-0 z-[9999] bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
                               {filteredRemoteWorkOptions.map((type) => (
                                 <button
                                   key={type.value}
@@ -1601,7 +1601,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                                 
                                 {showQuestionTypeDropdown && (
-                                  <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                                  <div className="absolute top-full left-0 right-0 z-[9999] bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
                                     {filteredQuestionTypes.map((type) => (
                                       <button
                                         key={type.value}
@@ -2051,7 +2051,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                             <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3 w-3 text-white/60 pointer-events-none" />
                                                           </button>
                                                           {openMultipleChoiceIndex === index && (
-                                                            <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-40 overflow-y-auto shadow-lg pointer-events-auto">
+                                                            <div className="absolute top-full left-0 right-0 z-[9999] bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-40 overflow-y-auto shadow-lg pointer-events-auto">
                                                               {(question.options || []).filter(o => o.trim() !== '').map((option, optIdx) => {
                                                                 const key = `q_${question.id || index}`;
                                                                 const selected = multipleChoiceAnswers[key] || [];
