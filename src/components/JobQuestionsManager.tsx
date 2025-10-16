@@ -81,97 +81,88 @@ const SortableQuestionCard = ({
   };
 
   return (
-    <Card ref={setNodeRef} style={style}>
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-2">
-          <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing">
-            <GripVertical className="h-4 w-4 text-white" />
-          </div>
-          <Badge variant="outline" className="text-white border-white/20">{getQuestionTypeLabel(question.question_type)}</Badge>
-          <div className="flex-1" />
-          <div className="flex items-center gap-2">
-            <Label htmlFor={`required-${index}`} className="text-sm text-white">
-              Obligatorisk
-            </Label>
-            <Switch
-              id={`required-${index}`}
-              checked={question.is_required}
-              onCheckedChange={(checked) => updateQuestion(index, { is_required: checked })}
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => removeQuestion(index)}
-              className="text-red-600 hover:text-red-700"
+    <Card 
+      ref={setNodeRef} 
+      style={style}
+      className="bg-white/10 backdrop-blur-sm border-white/20 shadow-sm hover:shadow-md transition-shadow mb-3"
+    >
+      <CardContent className="p-4">
+        <div className="space-y-3">
+          {/* Header med grip, typ och actions */}
+          <div className="flex items-start gap-3">
+            <div 
+              {...attributes} 
+              {...listeners} 
+              className="cursor-grab active:cursor-grabbing pt-1 flex-shrink-0"
             >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label className="text-white">Frågetyp</Label>
-            <Select
-              value={question.question_type}
-              onValueChange={(value) => updateQuestion(index, { question_type: value as JobQuestion['question_type'] })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="text">Siffra</SelectItem>
-                <SelectItem value="yes_no">Ja/Nej</SelectItem>
-                <SelectItem value="multiple_choice">Flerval</SelectItem>
-                <SelectItem value="video">Text</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label className="text-white">Fråga</Label>
-            <Input
-              value={question.question_text}
-              onChange={(e) => updateQuestion(index, { question_text: e.target.value })}
-              placeholder="Skriv din fråga här..."
-            />
-          </div>
-        </div>
+              <GripVertical className="h-5 w-5 text-white/70 hover:text-white" />
+            </div>
+            
+            <div className="flex-1 space-y-2">
+              {/* Frågetext */}
+              <div>
+                <p className="text-white font-medium text-base">
+                  {question.question_text || 'Skriv din fråga...'}
+                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge 
+                    variant="outline" 
+                    className="text-xs text-white/80 border-white/30 bg-white/5"
+                  >
+                    Typ: {getQuestionTypeLabel(question.question_type)}
+                  </Badge>
+                  <Badge 
+                    variant={question.is_required ? "default" : "outline"}
+                    className={question.is_required 
+                      ? "text-xs bg-white/20 text-white border-white/30" 
+                      : "text-xs text-white/60 border-white/20 bg-transparent"
+                    }
+                  >
+                    {question.is_required ? 'Obligatorisk' : 'Frivillig'}
+                  </Badge>
+                </div>
+              </div>
 
-        {question.question_type === 'multiple_choice' && (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label>Svarsalternativ</Label>
+              {/* Alternativ för flervalsfrågor */}
+              {question.question_type === 'multiple_choice' && question.options && question.options.length > 0 && (
+                <div className="pl-2 border-l-2 border-white/20">
+                  <p className="text-xs text-white/60 mb-1">Alternativ:</p>
+                  <div className="space-y-1">
+                    {question.options.map((option, idx) => (
+                      <p key={idx} className="text-sm text-white/80">
+                        • {option || `Alternativ ${idx + 1}`}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex items-center gap-1 flex-shrink-0">
               <Button
-                variant="outline"
-                size="sm"
-                onClick={() => addOption(index)}
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+                onClick={() => {
+                  // Expandera för redigering
+                }}
               >
-                <Plus className="h-4 w-4 mr-1" />
-                Lägg till alternativ
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                </svg>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                onClick={() => removeQuestion(index)}
+              >
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
-            <div className="space-y-2">
-              {(question.options || []).map((option, optionIndex) => (
-                <div key={optionIndex} className="flex items-center gap-2">
-                  <Input
-                    value={option}
-                    onChange={(e) => updateOption(index, optionIndex, e.target.value)}
-                    placeholder={`Alternativ ${optionIndex + 1} (t.ex. B-kort, Krankort)`}
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeOption(index, optionIndex)}
-                    className="text-red-600"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
           </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );
@@ -554,33 +545,35 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
 
       {/* Questions list */}
       {filteredQuestions.length > 0 && (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={filteredQuestions.map((q, i) => q.id || `question-${i}`)}
-            strategy={verticalListSortingStrategy}
+        <div className="space-y-3">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
           >
-            {filteredQuestions.map((question, index) => {
-              const actualIndex = questions.findIndex(q => q === question);
-              return (
-                <SortableQuestionCard
-                  key={question.id || `question-${index}`}
-                  question={question}
-                  index={actualIndex}
-                  updateQuestion={updateQuestion}
-                  removeQuestion={removeQuestion}
-                  addOption={addOption}
-                  updateOption={updateOption}
-                  removeOption={removeOption}
-                  getQuestionTypeLabel={getQuestionTypeLabel}
-                />
-              );
-            })}
-          </SortableContext>
-        </DndContext>
+            <SortableContext
+              items={filteredQuestions.map((q, i) => q.id || `question-${i}`)}
+              strategy={verticalListSortingStrategy}
+            >
+              {filteredQuestions.map((question, index) => {
+                const actualIndex = questions.findIndex(q => q === question);
+                return (
+                  <SortableQuestionCard
+                    key={question.id || `question-${index}`}
+                    question={question}
+                    index={actualIndex}
+                    updateQuestion={updateQuestion}
+                    removeQuestion={removeQuestion}
+                    addOption={addOption}
+                    updateOption={updateOption}
+                    removeOption={removeOption}
+                    getQuestionTypeLabel={getQuestionTypeLabel}
+                  />
+                );
+              })}
+            </SortableContext>
+          </DndContext>
+        </div>
       )}
 
       {questions.length > 0 && (
