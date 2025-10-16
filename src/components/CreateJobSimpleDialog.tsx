@@ -196,11 +196,11 @@ const handleJobCreated = useCallback((job: JobPosting) => {
           </Button>
         </DialogTrigger>
           <DialogContent 
-            className="max-w-md bg-card-parium text-white backdrop-blur-md border-white/20 [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] shadow-lg sm:rounded-xl transition-all duration-200 ease-out animate-scale-in p-0"
+            className="max-w-md bg-card-parium text-white backdrop-blur-md border-white/20 [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl transition-all duration-200 ease-out animate-scale-in"
             onInteractOutside={(e) => e.preventDefault()}
             onEscapeKeyDown={(e) => e.preventDefault()}
           >
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 ring-0 shadow-none relative w-full m-6 transition-all duration-200">
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 ring-0 shadow-none relative w-full transition-all duration-200">
             <CardHeader className="pb-4 pt-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white flex-1 text-center text-xl">
