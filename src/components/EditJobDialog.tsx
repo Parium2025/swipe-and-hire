@@ -1967,124 +1967,142 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           </div>
                                         </div>
 
-                                        {(() => {
-                                          const questionsByType = {
-                                            number: customQuestions.filter(q => q.question_type === 'number'),
-                                            text: customQuestions.filter(q => q.question_type === 'text'),
-                                            multiple_choice: customQuestions.filter(q => q.question_type === 'multiple_choice'),
-                                            yes_no: customQuestions.filter(q => q.question_type === 'yes_no'),
-                                            date: customQuestions.filter(q => q.question_type === 'date'),
-                                            file: customQuestions.filter(q => q.question_type === 'file'),
-                                            video: customQuestions.filter(q => q.question_type === 'video'),
-                                          };
+                                        {/* Anpassade frågor - individuella kort */}
+                                        {customQuestions.length > 0 && (
+                                          <div className="space-y-2">
+                                            {customQuestions.map((question, index) => {
+                                              const typeLabels = {
+                                                number: 'Siffra',
+                                                text: 'Text',
+                                                multiple_choice: 'Flerval',
+                                                yes_no: 'Ja/Nej',
+                                                date: 'Datum',
+                                                file: 'Fil',
+                                                video: 'Video',
+                                              };
 
-                                          const typeLabels = {
-                                            number: 'Sifferfrågor',
-                                            text: 'Textfrågor',
-                                            multiple_choice: 'Flervalsfrågor',
-                                            yes_no: 'Ja/Nej-frågor',
-                                            date: 'Datumfrågor',
-                                            file: 'Filfrågor',
-                                            video: 'Videofrågor',
-                                          };
-
-                                          return Object.entries(questionsByType).map(([type, questions]) => {
-                                            if (questions.length === 0) return null;
-                                            
-                                            return (
-                                              <div key={type} className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                                <h4 className="text-xs font-semibold text-white mb-2">
-                                                  {typeLabels[type as keyof typeof typeLabels]} ({questions.length})
-                                                </h4>
-                                                
-                                                <div className="space-y-2">
-                                                  {questions.map((question, index) => (
-                                                    <div key={question.id || index} className="space-y-1">
-                                                      <label className="text-xs text-white flex items-start">
-                                                        <span className="flex-1 leading-tight">
-                                                          {question.question_text}
-                                                        </span>
-                                                      </label>
-                                                      
-                                                      {question.question_type === 'text' && (
-                                                        <textarea
-                                                          className="w-full border border-white/20 bg-white/10 rounded p-2 text-xs text-white placeholder:text-white/60 resize-none"
-                                                          placeholder={question.placeholder_text || 'Skriv ditt svar...'}
-                                                          rows={2}
-                                                        />
-                                                      )}
-                                                      
-                                                      {question.question_type === 'yes_no' && (
-                                                        <div className="flex gap-1.5">
-                                                          <button 
-                                                            type="button"
-                                                            className="flex-1 bg-white/10 border border-white/20 rounded-md px-2 py-1 text-xs text-white transition-colors font-medium"
-                                                          >
-                                                            Ja
-                                                          </button>
-                                                          <button 
-                                                            type="button"
-                                                            className="flex-1 bg-white/10 border border-white/20 rounded-md px-2 py-1 text-xs text-white transition-colors font-medium"
-                                                          >
-                                                            Nej
-                                                          </button>
-                                                        </div>
-                                                      )}
-                                                      
-                                                      {question.question_type === 'multiple_choice' && (
-                                                        <div className="relative">
-                                                          <button
-                                                            type="button"
-                                                            className="w-full bg-white/10 border-white/20 text-white h-9 text-xs pr-10 cursor-pointer rounded border flex items-center px-3 hover:bg-white/20 transition-colors text-left"
-                                                          >
-                                                            <span className="flex-1">Välj alternativ</span>
-                                                            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-3 w-3 text-white/60 pointer-events-none" />
-                                                          </button>
-                                                        </div>
-                                                      )}
-                                                      
-                                                      {question.question_type === 'number' && (
-                                                        <div className="space-y-1.5">
-                                                          <div className="text-center text-sm font-semibold text-white">
-                                                            {question.min_value ?? 0}
-                                                          </div>
-                                                          <input
-                                                            type="range"
-                                                            min={question.min_value ?? 0}
-                                                            max={question.max_value ?? 100}
-                                                            defaultValue={question.min_value ?? 0}
-                                                            className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-secondary"
-                                                          />
-                                                        </div>
-                                                      )}
-                                                      
-                                                      {question.question_type === 'date' && (
-                                                        <input
-                                                          type="date"
-                                                          className="w-full border border-white/20 bg-white/10 rounded p-2 text-xs text-white placeholder:text-white/60 h-9"
-                                                          disabled
-                                                        />
-                                                      )}
-                                                      
-                                                      {(question.question_type === 'file' || question.question_type === 'video') && (
-                                                        <div className="border-2 border-dashed border-white/30 rounded p-2 text-center bg-white/5">
-                                                          {question.question_type === 'file' ? (
-                                                            <FileText className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
-                                                          ) : (
-                                                            <Video className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
-                                                          )}
-                                                          <p className="text-xs text-white/60">
-                                                            {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
-                                                          </p>
-                                                        </div>
-                                                      )}
+                                              return (
+                                                <div key={question.id || index} className="bg-white/10 rounded-lg p-3 border border-white/20">
+                                                  {/* Frågetext */}
+                                                  <div className="mb-2">
+                                                    <label className="text-xs font-medium text-white block leading-tight">
+                                                      {question.question_text}
+                                                    </label>
+                                                  </div>
+                                                  
+                                                  {/* Input förhandsvisning baserat på frågetyp */}
+                                                  {question.question_type === 'text' && (
+                                                    <textarea
+                                                      className="w-full border border-white/20 bg-white/10 rounded p-2 text-xs text-white placeholder:text-white/60 resize-none"
+                                                      placeholder={question.placeholder_text || 'Skriv ditt svar...'}
+                                                      rows={2}
+                                                    />
+                                                  )}
+                                                  
+                                                  {question.question_type === 'yes_no' && (
+                                                    <div className="flex gap-1.5">
+                                                      <button 
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                          e.preventDefault();
+                                                          const parent = e.currentTarget.parentElement;
+                                                          const buttons = parent?.querySelectorAll('button');
+                                                          buttons?.forEach(btn => {
+                                                            btn.classList.remove('bg-secondary', 'border-secondary', 'text-white');
+                                                            btn.classList.add('bg-white/10', 'border-white/20');
+                                                          });
+                                                          e.currentTarget.classList.remove('bg-white/10', 'border-white/20');
+                                                          e.currentTarget.classList.add('bg-secondary', 'border-secondary', 'text-white');
+                                                        }}
+                                                        className="flex-1 bg-white/10 border border-white/20 rounded-md px-2 py-1 text-xs text-white transition-colors font-medium"
+                                                      >
+                                                        Ja
+                                                      </button>
+                                                      <button 
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                          e.preventDefault();
+                                                          const parent = e.currentTarget.parentElement;
+                                                          const buttons = parent?.querySelectorAll('button');
+                                                          buttons?.forEach(btn => {
+                                                            btn.classList.remove('bg-secondary', 'border-secondary', 'text-white');
+                                                            btn.classList.add('bg-white/10', 'border-white/20');
+                                                          });
+                                                          e.currentTarget.classList.remove('bg-white/10', 'border-white/20');
+                                                          e.currentTarget.classList.add('bg-secondary', 'border-secondary', 'text-white');
+                                                        }}
+                                                        className="flex-1 bg-white/10 border border-white/20 rounded-md px-2 py-1 text-xs text-white transition-colors font-medium"
+                                                      >
+                                                        Nej
+                                                      </button>
                                                     </div>
-                                                  ))}
+                                                  )}
+                                                  
+                                                  {question.question_type === 'multiple_choice' && (
+                                                    <div className="space-y-1.5">
+                                                      {(question.options || []).map((option: string, optionIndex: number) => (
+                                                        <button
+                                                          key={optionIndex}
+                                                          type="button"
+                                                          onClick={(e) => {
+                                                            e.preventDefault();
+                                                            const parent = e.currentTarget.parentElement;
+                                                            const buttons = parent?.querySelectorAll('button');
+                                                            buttons?.forEach(btn => {
+                                                              btn.classList.remove('bg-secondary', 'border-secondary');
+                                                              btn.classList.add('bg-white/10', 'border-white/20');
+                                                            });
+                                                            e.currentTarget.classList.remove('bg-white/10', 'border-white/20');
+                                                            e.currentTarget.classList.add('bg-secondary', 'border-secondary');
+                                                          }}
+                                                          className="w-full bg-white/10 border border-white/20 rounded-md px-3 py-2 text-xs text-white text-left hover:bg-white/20 transition-colors"
+                                                        >
+                                                          {option}
+                                                        </button>
+                                                      ))}
+                                                    </div>
+                                                  )}
+                                                  
+                                                  {question.question_type === 'number' && (
+                                                    <div className="space-y-1.5">
+                                                      <div className="text-center text-sm font-semibold text-white">
+                                                        {question.min_value ?? 0}
+                                                      </div>
+                                                      <input
+                                                        type="range"
+                                                        min={question.min_value ?? 0}
+                                                        max={question.max_value ?? 100}
+                                                        defaultValue={question.min_value ?? 0}
+                                                        className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-secondary"
+                                                      />
+                                                    </div>
+                                                  )}
+                                                  
+                                                  {question.question_type === 'date' && (
+                                                    <input
+                                                      type="date"
+                                                      className="w-full border border-white/20 bg-white/10 rounded p-2 text-xs text-white placeholder:text-white/60 h-9"
+                                                      disabled
+                                                    />
+                                                  )}
+                                                  
+                                                  {(question.question_type === 'file' || question.question_type === 'video') && (
+                                                    <div className="border-2 border-dashed border-white/30 rounded p-2 text-center bg-white/5">
+                                                      {question.question_type === 'file' ? (
+                                                        <FileText className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
+                                                      ) : (
+                                                        <Video className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
+                                                      )}
+                                                      <p className="text-xs text-white/60">
+                                                        {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
+                                                      </p>
+                                                    </div>
+                                                  )}
                                                 </div>
-                                              </div>
-                                            );
-                                          });
-                                        })()}
+                                              );
+                                            })}
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                   </div>
