@@ -200,12 +200,11 @@ const handleJobCreated = useCallback((job: JobPosting) => {
             onInteractOutside={(e) => e.preventDefault()}
             onEscapeKeyDown={(e) => e.preventDefault()}
           >
-          <Card className="bg-white/10 backdrop-blur-sm border-transparent border-0 ring-0 shadow-none relative w-full mt-16 transition-all duration-200">
-            <CardHeader className="pb-4 pt-6">
+            <DialogHeader className="pb-4 pt-6">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-white flex-1 text-center text-xl">
+                <DialogTitle className="text-white flex-1 text-center text-xl">
                   Skapa jobb
-                </CardTitle>
+                </DialogTitle>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -215,11 +214,11 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-              <CardDescription className="text-white text-center text-sm leading-snug mt-2">
+              <DialogDescription className="text-white text-center text-sm leading-snug mt-2">
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 px-4 pb-4">
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 px-4 pb-4">
               <div className="space-y-2">
                 <Label htmlFor="job-title" className="text-white">Titel</Label>
                 <Input
@@ -373,8 +372,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                   Avbryt
                 </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
         </DialogContent>
       </Dialog>
 
