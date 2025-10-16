@@ -196,11 +196,11 @@ const handleJobCreated = useCallback((job: JobPosting) => {
           </Button>
         </DialogTrigger>
           <DialogContent 
-            className="max-w-md bg-parium-gradient border-none [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] shadow-lg sm:rounded-xl transition-all duration-200 ease-out animate-scale-in"
+            className="max-w-md bg-parium-gradient border-none p-0 [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] shadow-lg sm:rounded-xl transition-all duration-200 ease-out animate-scale-in"
             onInteractOutside={(e) => e.preventDefault()}
             onEscapeKeyDown={(e) => e.preventDefault()}
           >
-            <div className="pb-4 pt-6">
+            <div className="pb-4 pt-6 px-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-white flex-1 text-center text-xl font-semibold">
                   Skapa jobb
@@ -218,7 +218,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
               </p>
             </div>
-            <div className="space-y-4 px-4 pb-4">
+            <div className="space-y-4 px-6 pb-6">
               <div className="space-y-2">
                 <Label htmlFor="job-title" className="text-white">Titel</Label>
                 <Input
