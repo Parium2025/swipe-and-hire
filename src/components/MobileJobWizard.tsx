@@ -2521,11 +2521,12 @@ const MobileJobWizard = ({
                          {question.question_type === 'multiple_choice' && (
                             <div className="space-y-1.5">
                               <div className="relative">
-                                <Input
+                                <input
+                                  type="text"
                                   readOnly
                                   onClick={() => setOpenMultipleChoiceIndex(openMultipleChoiceIndex === index ? null : index)}
                                   placeholder="Välj alternativ..."
-                                  className="bg-white/5 border-white/20 text-white placeholder:text-white/60 text-xs px-2 py-1.5 pr-7 cursor-pointer h-auto"
+                                  className="w-full border border-white/20 bg-white/5 rounded px-2 py-1.5 pr-7 text-xs text-white placeholder:text-white/60 cursor-pointer focus:outline-none"
                                 />
                                 <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-white/60 pointer-events-none" />
                                 {openMultipleChoiceIndex === index && (
