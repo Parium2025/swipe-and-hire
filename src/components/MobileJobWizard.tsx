@@ -2494,25 +2494,11 @@ const MobileJobWizard = ({
 
                                     return (
                                       <div key={question.id || index} className="bg-white/10 rounded-lg p-3 border border-white/20">
-                                        {/* Frågetext och typ-badge */}
-                                        <div className="flex items-start gap-2 mb-2">
-                                          <div className="flex-1">
-                                            <label className="text-xs font-medium text-white flex items-start">
-                                              <span className="flex-1 leading-tight">
-                                                {question.question_text}
-                                              </span>
-                                            </label>
-                                            <div className="flex items-center gap-1.5 mt-1">
-                                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/20 text-white/80 border border-white/20">
-                                                Typ: {typeLabels[question.question_type as keyof typeof typeLabels]}
-                                              </span>
-                                              {question.is_required && (
-                                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/20 text-white border border-white/30">
-                                                  Obligatorisk
-                                                </span>
-                                              )}
-                                            </div>
-                                          </div>
+                                        {/* Frågetext */}
+                                        <div className="mb-2">
+                                          <label className="text-xs font-medium text-white block leading-tight">
+                                            {question.question_text}
+                                          </label>
                                         </div>
                                         
                                         {/* Input förhandsvisning baserat på frågetyp */}
