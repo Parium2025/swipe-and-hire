@@ -216,10 +216,10 @@ const JobSwipe = () => {
   const currentJob = jobs[currentJobIndex];
 
   return (
-    <div className="max-w-md mx-auto p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
+    <div className="max-w-md mx-auto p-3 sm:p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
       <div className="mb-4 text-center">
-        <h2 className="text-xl font-bold">Upptäck jobb</h2>
-        <p className="text-sm text-muted-foreground">
+        <h2 className="text-lg sm:text-xl font-bold">Upptäck jobb</h2>
+        <p className="text-xs sm:text-sm text-muted-foreground">
           {currentJobIndex + 1} av {jobs.length} jobb
         </p>
       </div>
@@ -319,24 +319,24 @@ const JobSwipe = () => {
         </Card>
 
         {/* Swipe buttons */}
-        <div className="flex justify-center gap-4 mt-6">
+        <div className="flex justify-center gap-4 sm:gap-6 mt-6">
           <Button
             variant="outline"
             size="lg"
-            className="rounded-full w-16 h-16 border-2 border-red-200 hover:border-red-300 hover:bg-red-50"
+            className="rounded-full w-14 h-14 sm:w-16 sm:h-16 border-2 border-red-200 hover:border-red-300 hover:bg-red-50 min-h-[56px] min-w-[56px]"
             onClick={(e) => { e.stopPropagation(); handleSwipe(currentJob.id, false); }}
             disabled={swiping}
           >
-            <X className="h-6 w-6 text-red-500" />
+            <X className="h-6 w-6 sm:h-7 sm:w-7 text-red-500" />
           </Button>
           
           <Button
             size="lg"
-            className="rounded-full w-16 h-16 bg-green-500 hover:bg-green-600 border-0"
+            className="rounded-full w-14 h-14 sm:w-16 sm:h-16 bg-green-500 hover:bg-green-600 border-0 min-h-[56px] min-w-[56px]"
             onClick={(e) => { e.stopPropagation(); handleSwipe(currentJob.id, true); }}
             disabled={swiping}
           >
-            <Heart className="h-6 w-6 text-white" />
+            <Heart className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
           </Button>
         </div>
 
