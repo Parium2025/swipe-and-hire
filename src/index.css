@@ -81,6 +81,7 @@ All colors MUST be HSL.
     ), linear-gradient(180deg, hsl(215 100% 12%), hsl(215 100% 12%));
     --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(200 100% 98%));
     --gradient-glass: linear-gradient(135deg, hsla(0 0% 100% / 0.1), hsla(0 0% 100% / 0.05));
+    --gradient-glass-strong: linear-gradient(135deg, hsla(0 0% 100% / 0.22), hsla(0 0% 100% / 0.14));
 
     /* Surface overlays */
     --surface-blue: 215 90% 15%;
@@ -421,6 +422,7 @@ All colors MUST be HSL.
   .bg-gradient-parium { background: var(--gradient-parium); }
   .bg-primary-gradient { background: var(--gradient-primary); }
   .bg-glass-surface { background: var(--gradient-glass); }
+  .bg-glass-strong { background: var(--gradient-glass-strong); }
   .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0); }
   .overflow-anchor-none { overflow-anchor: none; }
 
