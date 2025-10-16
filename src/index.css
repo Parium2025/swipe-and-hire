@@ -421,6 +421,7 @@ All colors MUST be HSL.
   .bg-parium-gradient { background: var(--gradient-parium); }
   .bg-gradient-parium { background: var(--gradient-parium); }
   .bg-primary-gradient { background: var(--gradient-primary); }
+  .bg-card-parium { background: var(--gradient-parium); }
   .bg-glass-surface { background: var(--gradient-glass); }
   .bg-glass-strong { background: var(--gradient-glass-strong); }
   .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0); }

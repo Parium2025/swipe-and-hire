@@ -200,7 +200,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
             onInteractOutside={(e) => e.preventDefault()}
             onEscapeKeyDown={(e) => e.preventDefault()}
           >
-          <Card className="bg-glass-strong backdrop-blur-md border-white/25 ring-0 shadow-none relative w-full mt-16 transition-all duration-200">
+          <Card className="bg-card-parium text-white backdrop-blur-sm border-transparent border-0 ring-0 shadow-none relative w-full mt-16 transition-all duration-200">
             <CardHeader className="pb-4 pt-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white flex-1 text-center text-xl">
