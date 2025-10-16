@@ -451,6 +451,7 @@ const MobileJobWizard = ({
   const [showHingePreview, setShowHingePreview] = useState(false);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [hingeMode, setHingeMode] = useState<'ad' | 'apply'>('ad');
+  const [openMultipleChoiceIndex, setOpenMultipleChoiceIndex] = useState<number | null>(null);
   const screenRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const BASE_WIDTH = 360;
@@ -2522,24 +2523,30 @@ const MobileJobWizard = ({
                               <div className="relative">
                                 <Input
                                   readOnly
+                                  onClick={() => setOpenMultipleChoiceIndex(openMultipleChoiceIndex === index ? null : index)}
                                   placeholder="Välj alternativ..."
-                                  className="bg-white/5 border-white/20 text-white placeholder:text-white/60 text-xs pr-8 cursor-pointer h-8"
+                                  className="bg-white/5 border-white/20 text-white placeholder:text-white/60 text-xs px-2 py-1.5 pr-7 cursor-pointer h-auto"
                                 />
                                 <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-white/60 pointer-events-none" />
-                                <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-40 overflow-y-auto shadow-lg">
-                                  {(question.options || []).filter(opt => opt.trim() !== '').map((option, optIndex) => (
-                                    <button
-                                      key={optIndex}
-                                      type="button"
-                                      className="w-full px-2.5 py-2 text-left hover:bg-gray-700 text-white text-xs border-b border-gray-700 last:border-b-0 flex items-center gap-2"
-                                    >
-                                      <div className="w-3 h-3 border border-white/40 rounded bg-white/5 flex items-center justify-center">
-                                        <Check className="w-2 h-2 text-white opacity-0" />
-                                      </div>
-                                      <span className="flex-1">{option}</span>
-                                    </button>
-                                  ))}
-                                </div>
+                                {openMultipleChoiceIndex === index && (
+                                  <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-40 overflow-y-auto shadow-lg">
+                                    {(question.options || []).filter(opt => opt.trim() !== '').map((option, optIndex) => (
+                                      <button
+                                        key={optIndex}
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                        }}
+                                        className="w-full px-2.5 py-2 text-left hover:bg-gray-700 text-white text-xs border-b border-gray-700 last:border-b-0 flex items-center gap-2"
+                                      >
+                                        <div className="w-3 h-3 border border-white/40 rounded bg-white/5 flex items-center justify-center">
+                                          <Check className="w-2 h-2 text-white opacity-0" />
+                                        </div>
+                                        <span className="flex-1">{option}</span>
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                             </div>
                           )}
