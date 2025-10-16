@@ -2522,7 +2522,7 @@ const MobileJobWizard = ({
                               options={(question.options || []).filter(opt => opt.trim() !== '')}
                               value=""
                               onSelect={() => {}}
-                              placeholder="Välj ett alternativ..."
+                              placeholder="Välj..."
                               searchPlaceholder="Sök..."
                               className="w-full bg-white/10 border-white/20 text-white h-8 text-xs"
                             />
