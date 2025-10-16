@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import FileUpload from './FileUpload';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -43,6 +43,7 @@ interface JobApplicationDialogProps {
 const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: JobApplicationDialogProps) => {
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [profile, setProfile] = useState<any>(null);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -138,194 +139,205 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
     }
   };
 
-  const renderQuestionRow = (question: any, index: number) => {
+  const renderQuestionCard = (question: any, index: number) => {
     const isStandardQuestion = standardQuestions.some(sq => sq.id === question.id);
-    const isRequired = 'required' in question ? question.required : question.is_required;
+    const isCompleted = answers[question.id] && answers[question.id] !== '';
     
     return (
-      <div key={question.id} className="border-b border-white/10 py-4 space-y-3">
-        {/* Question header */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-sm font-medium text-white">
-                {question.label || question.question_text}
-              </span>
-              {isRequired && (
-                <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
-                  Obligatorisk
-                </Badge>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-white/70 border-white/20">
-                {isStandardQuestion ? 'Grundinfo' : getQuestionTypeLabel(question.question_type)}
-              </Badge>
+      <Card key={question.id} className="w-full min-h-[400px] flex flex-col">
+        <CardContent className="p-6 flex flex-col h-full">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <Badge variant={isStandardQuestion ? "secondary" : "default"} className="text-xs">
+              {isStandardQuestion ? "Grundinfo" : "Anpassad fråga"}
+            </Badge>
+            <div className="text-xs text-muted-foreground">
+              {index + 1} av {allQuestions.length}
             </div>
           </div>
-        </div>
 
-        {/* Answer input */}
-        <div className="space-y-2">
-          {/* Standard questions */}
-          {isStandardQuestion && (
-            <Input
-              type={question.type}
-              placeholder={`Ange ${question.label.toLowerCase()}...`}
-              value={answers[question.id] || ''}
-              onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-              className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
-              disabled={question.id === 'email'}
-            />
-          )}
-
-          {/* Custom questions - yes/no */}
-          {!isStandardQuestion && question.question_type === 'yes_no' && (
-            <div className="flex gap-2">
-              <Button
-                variant={answers[question.id] === 'yes' ? "default" : "outline"}
-                onClick={() => handleAnswerChange(question.id, 'yes')}
-                className="flex-1 bg-white/5 border-white/20 hover:bg-white/10"
-                size="sm"
-              >
-                Ja
-              </Button>
-              <Button
-                variant={answers[question.id] === 'no' ? "default" : "outline"}
-                onClick={() => handleAnswerChange(question.id, 'no')}
-                className="flex-1 bg-white/5 border-white/20 hover:bg-white/10"
-                size="sm"
-              >
-                Nej
-              </Button>
+          {/* Question */}
+          <div className="flex-1 flex flex-col justify-center space-y-4">
+            <div className="text-center space-y-3">
+              <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                {question.icon || <User className="h-6 w-6 text-primary" />}
+              </div>
+              <h3 className="text-lg font-semibold">
+                {question.label || question.question_text}
+              </h3>
+              {question.required && (
+                <Badge variant="destructive" className="text-xs">Obligatorisk</Badge>
+              )}
             </div>
-          )}
 
-          {/* Custom questions - text */}
-          {!isStandardQuestion && question.question_type === 'text' && (
-            <Textarea
-              placeholder="Skriv ditt svar..."
-              value={answers[question.id] || ''}
-              onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-              className="min-h-[80px] bg-white/5 border-white/20 text-white placeholder:text-white/40"
-            />
-          )}
+            {/* Input */}
+            <div className="space-y-3 px-4">
+              {/* Standard questions */}
+              {isStandardQuestion && (
+                <Input
+                  type={question.type}
+                  placeholder={`Ange ${question.label.toLowerCase()}...`}
+                  value={answers[question.id] || ''}
+                  onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                  className="text-center text-lg"
+                  disabled={question.id === 'email'} // Email is read-only from auth
+                />
+              )}
 
-          {/* Custom questions - multiple choice */}
-          {!isStandardQuestion && question.question_type === 'multiple_choice' && (
-            <div className="flex flex-wrap gap-2">
-              {(() => {
-                let options = question.options;
-                if (typeof options === 'string') {
-                  try {
-                    options = JSON.parse(options);
-                  } catch (e) {
-                    options = [];
-                  }
-                }
-                
-                const selectedOptions = Array.isArray(answers[question.id]) 
-                  ? answers[question.id] 
-                  : answers[question.id] 
-                    ? [answers[question.id]] 
-                    : [];
+              {/* Custom questions */}
+              {!isStandardQuestion && question.question_type === 'yes_no' && (
+                <div className="flex gap-3 justify-center">
+                  <Button
+                    variant={answers[question.id] === 'yes' ? "default" : "outline"}
+                    onClick={() => handleAnswerChange(question.id, 'yes')}
+                    className="flex-1"
+                  >
+                    Ja
+                  </Button>
+                  <Button
+                    variant={answers[question.id] === 'no' ? "default" : "outline"}
+                    onClick={() => handleAnswerChange(question.id, 'no')}
+                    className="flex-1"
+                  >
+                    Nej
+                  </Button>
+                </div>
+              )}
 
-                return Array.isArray(options) && options.map((option, optIndex) => {
-                  const isSelected = selectedOptions.includes(option);
-                  return (
-                    <Button
-                      key={optIndex}
-                      variant={isSelected ? "default" : "outline"}
-                      onClick={() => {
-                        const currentSelected = Array.isArray(answers[question.id]) 
-                          ? answers[question.id] 
-                          : answers[question.id] 
-                            ? [answers[question.id]] 
-                            : [];
-                        
-                        let newSelected;
-                        if (isSelected) {
-                          newSelected = currentSelected.filter(item => item !== option);
-                        } else {
-                          newSelected = [...currentSelected, option];
-                        }
-                        
-                        handleAnswerChange(question.id, newSelected);
-                      }}
-                      className="bg-white/5 border-white/20 hover:bg-white/10"
-                      size="sm"
-                    >
-                      {option}
-                    </Button>
-                  );
-                });
-              })()}
+              {!isStandardQuestion && question.question_type === 'text' && (
+                <Textarea
+                  placeholder="Skriv ditt svar här..."
+                  value={answers[question.id] || ''}
+                  onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                  className="min-h-[100px] text-center"
+                />
+              )}
+
+              {!isStandardQuestion && question.question_type === 'multiple_choice' && (
+                <div className="grid gap-2">
+                  {(() => {
+                    let options = question.options;
+                    if (typeof options === 'string') {
+                      try {
+                        options = JSON.parse(options);
+                      } catch (e) {
+                        options = [];
+                      }
+                    }
+                    
+                    const selectedOptions = Array.isArray(answers[question.id]) 
+                      ? answers[question.id] 
+                      : answers[question.id] 
+                        ? [answers[question.id]] 
+                        : [];
+
+                    return Array.isArray(options) && options.map((option, optIndex) => {
+                      const isSelected = selectedOptions.includes(option);
+                      return (
+                        <Button
+                          key={optIndex}
+                          variant={isSelected ? "default" : "outline"}
+                          onClick={() => {
+                            const currentSelected = Array.isArray(answers[question.id]) 
+                              ? answers[question.id] 
+                              : answers[question.id] 
+                                ? [answers[question.id]] 
+                                : [];
+                            
+                            let newSelected;
+                            if (isSelected) {
+                              newSelected = currentSelected.filter(item => item !== option);
+                            } else {
+                              newSelected = [...currentSelected, option];
+                            }
+                            
+                            handleAnswerChange(question.id, newSelected);
+                          }}
+                          className="w-full"
+                        >
+                          {option}
+                        </Button>
+                      );
+                    });
+                  })()}
+                </div>
+              )}
+
+              {!isStandardQuestion && question.question_type === 'video' && (
+                <div className="space-y-3">
+                  <Input
+                    type="url"
+                    placeholder="Klistra in videolänk (YouTube, Vimeo, etc.)"
+                    value={answers[question.id] || ''}
+                    onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                    className="text-center"
+                  />
+                  <div className="text-center">
+                    <FileUpload
+                      questionType="video"
+                      acceptedFileTypes={['video/*']}
+                      maxFileSize={50 * 1024 * 1024}
+                      onFileUploaded={(url, fileName) => handleAnswerChange(question.id, url)}
+                      onFileRemoved={() => handleAnswerChange(question.id, '')}
+                      currentFile={answers[question.id] && answers[question.id].startsWith('http') && !answers[question.id].includes('youtube') && !answers[question.id].includes('vimeo') ? { url: answers[question.id], name: 'Uppladdad video' } : undefined}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
-          {/* Custom questions - video */}
-          {!isStandardQuestion && question.question_type === 'video' && (
-            <div className="space-y-2">
-              <Input
-                type="url"
-                placeholder="Videolänk (YouTube, Vimeo, etc.)"
-                value={answers[question.id] || ''}
-                onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
-              />
-            </div>
-          )}
-        </div>
-      </div>
+          {/* Progress indicator */}
+          <div className="flex justify-center mt-6">
+            {isCompleted ? (
+              <div className="w-3 h-3 rounded-full bg-primary" />
+            ) : (
+              <div className="w-3 h-3 rounded-full border-2 border-primary" />
+            )}
+          </div>
+        </CardContent>
+      </Card>
     );
-  };
-
-  const getQuestionTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      yes_no: 'Ja/Nej',
-      text: 'Text',
-      video: 'Video',
-      multiple_choice: 'Flerval'
-    };
-    return labels[type] || type;
   };
 
   const companyName = job.profiles?.company_name || 
     `${job.profiles?.first_name} ${job.profiles?.last_name}` || 
     'Företag';
 
-  const canSubmit = () => {
-    // Check all required standard questions
-    const requiredStandardQuestions = standardQuestions.filter(sq => sq.required);
-    for (const sq of requiredStandardQuestions) {
-      const answer = answers[sq.id];
-      if (!answer || answer === '') return false;
-    }
+  const canContinue = () => {
+    const currentQuestion = allQuestions[currentCardIndex];
+    if (!currentQuestion) return false;
     
-    // Check all required custom questions
-    const requiredCustomQuestions = questions.filter(q => q.is_required);
-    for (const q of requiredCustomQuestions) {
-      const answer = answers[`custom_${q.id}`];
-      if (q.question_type === 'multiple_choice') {
-        if (!Array.isArray(answer) || answer.length === 0) return false;
-      } else {
-        if (!answer || answer === '') return false;
-      }
-    }
+    const answer = answers[currentQuestion.id];
+    const isRequired = 'required' in currentQuestion ? currentQuestion.required : currentQuestion.is_required;
     
-    return true;
+    if (isRequired) {
+      return answer && answer !== '';
+    }
+    return true; // Optional questions can be skipped
   };
+
+  const nextCard = () => {
+    if (currentCardIndex < allQuestions.length - 1) {
+      setCurrentCardIndex(prev => prev + 1);
+    }
+  };
+
+  const prevCard = () => {
+    if (currentCardIndex > 0) {
+      setCurrentCardIndex(prev => prev - 1);
+    }
+  };
+
+  const isLastCard = currentCardIndex === allQuestions.length - 1;
+  const currentQuestion = allQuestions[currentCardIndex];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] p-0 rounded-[24px] overflow-hidden bg-parium-gradient text-white border-none shadow-none">
-        <DialogHeader className="sr-only">
-          <DialogTitle>Ansökan</DialogTitle>
-          <DialogDescription>Fyll i ansökningsformuläret</DialogDescription>
-        </DialogHeader>
-        <div className="relative flex flex-col max-h-[90vh]">
+      <DialogContent className="sm:max-w-[400px] max-h-[90vh] p-0 rounded-[24px] overflow-hidden bg-parium-gradient text-white border-none shadow-none">
+        <div className="relative h-[600px] flex flex-col">
           {/* Header */}
-          <div className="p-4 border-b border-white/20 bg-background/10 rounded-t-[24px] flex-shrink-0">
+          <div className="p-4 border-b border-white/20 bg-background/10 rounded-t-[24px]">
             <div className="flex items-center justify-between text-white">
               <div className="flex items-center gap-2">
                 <Heart className="h-5 w-5 text-primary" />
@@ -342,28 +354,58 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
             </div>
             <div className="mt-2">
               <h3 className="font-semibold text-lg">{job.title}</h3>
-              <p className="text-sm text-white/70">{companyName}</p>
+              <p className="text-sm text-muted-foreground">{companyName}</p>
             </div>
           </div>
 
-          {/* All questions in scrollable list */}
-          <div className="flex-1 overflow-y-auto px-4">
-            <div className="py-2">
-              {allQuestions.map((question, index) => renderQuestionRow(question, index))}
+          {/* Progress bar */}
+          <div className="px-4 py-2 bg-muted/30">
+            <div className="w-full bg-muted rounded-full h-1">
+              <div 
+                className="bg-primary h-1 rounded-full transition-all duration-300" 
+                style={{ width: `${((currentCardIndex + 1) / allQuestions.length) * 100}%` }}
+              />
             </div>
           </div>
 
-          {/* Submit button */}
-          <div className="p-4 border-t border-white/20 bg-background/10 flex-shrink-0">
-            <Button
-              onClick={handleSubmit}
-              disabled={submitting || !canSubmit()}
-              className="w-full"
-              size="lg"
-            >
-              <Heart className="h-4 w-4 mr-2" />
-              {submitting ? 'Skickar...' : 'Skicka ansökan'}
-            </Button>
+          {/* Question card */}
+          <div className="flex-1 p-4 overflow-hidden">
+            {currentQuestion && renderQuestionCard(currentQuestion, currentCardIndex)}
+          </div>
+
+          {/* Navigation */}
+          <div className="p-4 border-t bg-background">
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={prevCard}
+                disabled={currentCardIndex === 0}
+                className="flex-1"
+              >
+                <ChevronLeft className="h-4 w-4 mr-2" />
+                Tillbaka
+              </Button>
+              
+              {isLastCard ? (
+                <Button
+                  onClick={handleSubmit}
+                  disabled={submitting || !canContinue()}
+                  className="flex-1"
+                >
+                  <Heart className="h-4 w-4 mr-2" />
+                  {submitting ? 'Skickar...' : 'Skicka ansökan'}
+                </Button>
+              ) : (
+                <Button
+                  onClick={nextCard}
+                  disabled={!canContinue()}
+                  className="flex-1"
+                >
+                  Nästa
+                  <ChevronRight className="h-4 w-4 ml-2" />
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </DialogContent>

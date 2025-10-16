@@ -230,8 +230,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const [showRemoteWorkDropdown, setShowRemoteWorkDropdown] = useState(false);
   const [questionTypeSearchTerm, setQuestionTypeSearchTerm] = useState('');
   const [showQuestionTypeDropdown, setShowQuestionTypeDropdown] = useState(false);
-  const [openMultipleChoiceIndex, setOpenMultipleChoiceIndex] = useState<number | null>(null);
-  const [multipleChoiceAnswers, setMultipleChoiceAnswers] = useState<Record<number, string[]>>({});
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const occupationRef = useRef<HTMLDivElement>(null);
