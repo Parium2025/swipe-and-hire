@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Combobox } from '@/components/ui/combobox';
         // ... keep existing imports
         import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
         import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -17,7 +16,7 @@ import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES, getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Minus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users, GripVertical, ArrowDown, Pencil, Check } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Minus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users, GripVertical, ArrowDown, Pencil } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
@@ -451,8 +450,6 @@ const MobileJobWizard = ({
   const [showHingePreview, setShowHingePreview] = useState(false);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [hingeMode, setHingeMode] = useState<'ad' | 'apply'>('ad');
-  const [openMultipleChoiceIndex, setOpenMultipleChoiceIndex] = useState<number | null>(null);
-  const [multipleChoiceAnswers, setMultipleChoiceAnswers] = useState<Record<string, string[]>>({});
   const screenRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const BASE_WIDTH = 360;
@@ -2275,6 +2272,15 @@ const MobileJobWizard = ({
                             {/* Scrollable content */}
                             <div 
                               className="px-2 py-2 overflow-y-auto relative z-10 custom-scrollbar flex-1"
+                              onClick={(e) => {
+                                // Close all dropdowns when clicking anywhere in the scroll area
+                                const dropdowns = e.currentTarget.querySelectorAll('.bg-gray-800.border.border-gray-600');
+                                dropdowns.forEach(dropdown => {
+                                  if (!dropdown.classList.contains('hidden')) {
+                                    dropdown.classList.add('hidden');
+                                  }
+                                });
+                              }}
                               onScroll={(e) => {
                                 const target = e.currentTarget;
                                 setIsScrolledTop(target.scrollTop === 0);
@@ -2472,144 +2478,102 @@ const MobileJobWizard = ({
                                  </div>
                                </div>
 
-                                 {/* Anpassade frågor – enskilda kort */}
-                               {customQuestions.length > 0 && (
-                                 <div className="space-y-2">
-                                     {customQuestions.map((question, index) => (
-                                       <div key={question.id || index} className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                         {/* Frågetext */}
-                                         <label className="text-xs font-medium text-white mb-1 block">
-                                           {question.question_text}
-                                           {question.is_required && <span className="text-red-400 ml-1">*</span>}
-                                         </label>
+                               {/* Anpassade frågor – kompakt lista utan gruppering */}
+                              {customQuestions.length > 0 && (
+                                <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                  <div className="space-y-2">
+                                    {customQuestions.map((question, index) => (
+                                      <div key={question.id || index} className="py-1.5 border-b border-white/10 last:border-b-0">
+                                        {/* Frågetext */}
+                                        <label className="text-xs text-white leading-tight block mb-1">
+                                          {question.question_text}
+                                          {question.is_required && <span className="text-red-400 ml-1">*</span>}
+                                        </label>
 
-                                         {/* Input förhandsvisning baserat på frågetyp */}
-                                         {question.question_type === 'text' && (
-                           <textarea
-                             className="w-full border border-white/20 bg-white/5 rounded p-1.5 text-xs text-white placeholder:text-white/60 resize-none"
-                             placeholder={question.placeholder_text || 'Skriv ditt svar...'}
-                             rows={2}
-                           />
-                         )}
+                                        {/* Input förhandsvisning baserat på frågetyp */}
+                                        {question.question_type === 'text' && (
+                          <textarea
+                            className="w-full border border-white/20 bg-white/10 rounded p-2 text-xs text-white placeholder:text-white/60 resize-none"
+                            placeholder={question.placeholder_text || 'Skriv ditt svar...'}
+                            rows={2}
+                          />
+                        )}
 
-                         {question.question_type === 'yes_no' && (
-                            <div className="flex gap-2">
-                              <button 
-                                type="button"
-                                className="flex-1 bg-white/5 border border-white/20 rounded px-2 py-1 text-xs text-white transition-colors font-medium hover:bg-white/10 hover:border-white/30"
-                              >
-                                Ja
-                              </button>
-                              <button 
-                                type="button"
-                                className="flex-1 bg-white/5 border border-white/20 rounded px-2 py-1 text-xs text-white transition-colors font-medium hover:bg-white/10 hover:border-white/30"
-                              >
-                                Nej
-                              </button>
-                            </div>
-                          )}
+                        {question.question_type === 'yes_no' && (
+                          <div className="flex gap-1.5">
+                            <button 
+                              type="button"
+                              className="flex-1 bg-white/10 border border-white/20 rounded-md px-2 py-1 text-[10px] text-white transition-colors font-medium"
+                            >
+                              Ja
+                            </button>
+                            <button 
+                              type="button"
+                              className="flex-1 bg-white/10 border border-white/20 rounded-md px-2 py-1 text-[10px] text-white transition-colors font-medium"
+                            >
+                              Nej
+                            </button>
+                          </div>
+                        )}
 
 
-                         {question.question_type === 'multiple_choice' && (
-                            <div className="space-y-1.5">
-                              <div className="relative">
-                                <button
-                                  type="button"
-                                  onClick={() => setOpenMultipleChoiceIndex(openMultipleChoiceIndex === index ? null : index)}
-                                  className="w-full bg-white/5 border border-white/20 rounded px-2 py-1 pr-7 text-xs text-white text-left flex items-center hover:bg-white/10 transition-colors"
-                                >
-                                  <span className="flex-1 truncate">
-                                    {(() => {
-                                      const qKey = `q_${index}`;
-                                      const selected = multipleChoiceAnswers[qKey] || [];
-                                      return selected.length > 0 ? selected.join(', ') : 'Välj alternativ...';
-                                    })()}
-                                  </span>
-                                  <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-white/60 pointer-events-none" />
-                                </button>
-                                {openMultipleChoiceIndex === index && (
-                                  <div className="absolute top-full left-0 right-0 z-[9999] bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-40 overflow-y-auto shadow-lg pointer-events-auto">
-                                    {(question.options || []).filter(opt => opt.trim() !== '').map((option, optIndex) => {
-                                      const qKey = `q_${index}`;
-                                      const selected = multipleChoiceAnswers[qKey] || [];
-                                      const isSelected = selected.includes(option);
-                                      
-                                      return (
-                                        <button
-                                          key={optIndex}
-                                          type="button"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            const currentSelected = multipleChoiceAnswers[qKey] || [];
-                                            const newSelected = isSelected
-                                              ? currentSelected.filter(item => item !== option)
-                                              : [...currentSelected, option];
-                                            setMultipleChoiceAnswers(prev => ({
-                                              ...prev,
-                                              [qKey]: newSelected
-                                            }));
-                                          }}
-                                          className="w-full px-2.5 py-2 text-left hover:bg-gray-700 text-white text-xs border-b border-gray-700 last:border-b-0 flex items-center gap-2"
-                                        >
-                                          <div className="w-3 h-3 border border-white/40 rounded bg-white/5 flex items-center justify-center">
-                                            <Check className={`w-2 h-2 text-white transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`} />
-                                          </div>
-                                          <span className="flex-1">{option}</span>
-                                        </button>
-                                      );
-                                    })}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
+                        {question.question_type === 'multiple_choice' && (
+                          <div className="flex flex-wrap gap-1.5">
+                            {(question.options || []).filter(opt => opt.trim() !== '').map((option, optIndex) => (
+                              <span key={optIndex} className="text-[10px] px-2 py-0.5 rounded bg-white/10 border border-white/20 text-white">
+                                {option}
+                              </span>
+                            ))}
+                          </div>
+                        )}
 
 
                         {question.question_type === 'number' && (
-                           <div className="space-y-1.5">
-                             <div className="text-center text-xs font-semibold text-white" id={`number-value-${index}`}>
-                               {question.min_value ?? 0}
-                             </div>
-                             <input
-                               type="range"
-                               min={question.min_value ?? 0}
-                               max={question.max_value ?? 100}
-                               defaultValue={question.min_value ?? 0}
-                               className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-secondary [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
-                               onChange={(e) => {
-                                 const valueDisplay = document.getElementById(`number-value-${index}`);
-                                 if (valueDisplay) valueDisplay.textContent = e.target.value;
-                               }}
-                             />
-                           </div>
-                         )}
+                          <div className="space-y-1.5">
+                            <div className="text-center text-xs font-semibold text-white" id={`number-value-${index}`}>
+                              {question.min_value ?? 0}
+                            </div>
+                            <input
+                              type="range"
+                              min={question.min_value ?? 0}
+                              max={question.max_value ?? 100}
+                              defaultValue={question.min_value ?? 0}
+                              className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-secondary [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+                              onChange={(e) => {
+                                const valueDisplay = document.getElementById(`number-value-${index}`);
+                                if (valueDisplay) valueDisplay.textContent = e.target.value;
+                              }}
+                            />
+                          </div>
+                        )}
 
 
                         {question.question_type === 'date' && (
-                           <input
-                             type="date"
-                             className="w-full border border-white/20 bg-white/5 rounded p-1.5 text-xs text-white placeholder:text-white/60"
-                             placeholder={question.placeholder_text}
-                             disabled
-                           />
-                         )}
+                          <input
+                            type="date"
+                            className="w-full border border-white/20 bg-white/10 rounded p-2 text-xs text-white placeholder:text-white/60 h-9"
+                            placeholder={question.placeholder_text}
+                            disabled
+                          />
+                        )}
 
                         {(question.question_type === 'file' || question.question_type === 'video') && (
-                           <div className="border-2 border-dashed border-white/30 rounded p-2 text-center bg-white/5">
-                             {question.question_type === 'file' ? (
-                               <FileText className="h-3 w-3 mx-auto mb-1 text-white/60" />
-                             ) : (
-                               <Video className="h-3 w-3 mx-auto mb-1 text-white/60" />
-                             )}
-                             <p className="text-xs text-white/60">
-                               {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
-                             </p>
-                           </div>
-                         )}
-                                       </div>
-                                     ))}
-                                 </div>
-                               )}
+                          <div className="border-2 border-dashed border-white/30 rounded p-2 text-center bg-white/5">
+                            {question.question_type === 'file' ? (
+                              <FileText className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
+                            ) : (
+                              <Video className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
+                            )}
+                            <p className="text-xs text-white/60">
+                              {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
                               {/* Extra space borttaget för tätare layout */}
                             </div>

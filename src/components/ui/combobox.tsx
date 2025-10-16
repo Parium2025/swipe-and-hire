@@ -80,7 +80,7 @@ export function Combobox({
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-full p-0 bg-background text-foreground shadow-lg border border-border rounded-md z-[70]" 
+        className="w-full p-0 bg-popover text-popover-foreground shadow-md border rounded-md z-50" 
         side="bottom"
         align="start"
         sideOffset={4}
