@@ -1188,7 +1188,7 @@ const Auth = () => {
   // Använd rätt komponent baserat på skärmstorlek
   if (device === 'mobile') {
     return (
-      <>
+      <div className="min-h-screen w-full overflow-x-hidden relative">
         <AnimatedBackground />
         {/* Pull-to-refresh spinner */}
         <div 
@@ -1226,13 +1226,13 @@ const Auth = () => {
           initialMode={initialMode}
           initialRole={initialRole}
         />
-      </>
+      </div>
     );
   }
 
   if (device === 'tablet') {
     return (
-      <>
+      <div className="min-h-screen w-full overflow-x-hidden relative">
         <AnimatedBackground />
         {/* Pull-to-refresh spinner */}
         <div 
@@ -1262,12 +1262,12 @@ const Auth = () => {
           initialMode={initialMode}
           initialRole={initialRole}
         />
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="min-h-screen w-full overflow-x-hidden relative">
       <AnimatedBackground />
       {/* Pull-to-refresh spinner */}
       <div 
@@ -1297,7 +1297,7 @@ const Auth = () => {
         initialMode={initialMode}
         initialRole={initialRole}
       />
-    </>
+    </div>
   );
 };
 
