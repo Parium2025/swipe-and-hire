@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -187,6 +187,8 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-full max-h-full h-screen w-screen p-0 bg-gradient-to-br from-parium-blue via-parium-blue to-parium-dark border-none overflow-hidden">
+        <DialogTitle className="sr-only">Jobbförhandsvisning</DialogTitle>
+        <DialogDescription className="sr-only">Förhandsgranska jobbinformation och besvara frågor</DialogDescription>
         {/* Hinge-style fullscreen scrollable content */}
         <div className="h-full overflow-y-auto overflow-x-hidden snap-y snap-mandatory">
           
