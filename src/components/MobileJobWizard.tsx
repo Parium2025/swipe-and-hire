@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
         // ... keep existing imports
         import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
         import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -2517,18 +2518,14 @@ const MobileJobWizard = ({
 
 
                          {question.question_type === 'multiple_choice' && (
-                            <Select>
-                              <SelectTrigger className="w-full border-white/20 bg-white/5 text-white text-xs h-8">
-                                <SelectValue placeholder="Välj alternativ..." />
-                              </SelectTrigger>
-                              <SelectContent className="bg-background border-white/20">
-                                {(question.options || []).filter(opt => opt.trim() !== '').map((option, optIndex) => (
-                                  <SelectItem key={optIndex} value={option} className="text-xs">
-                                    {option}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <Combobox
+                              options={(question.options || []).filter(opt => opt.trim() !== '')}
+                              value=""
+                              onSelect={() => {}}
+                              placeholder="Välj ett alternativ..."
+                              searchPlaceholder="Sök..."
+                              className="w-full bg-white/10 border-white/20 text-white h-8 text-xs"
+                            />
                           )}
 
 
