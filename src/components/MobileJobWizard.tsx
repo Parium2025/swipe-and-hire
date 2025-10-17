@@ -163,22 +163,6 @@ const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQuestionIt
             <div className="text-white font-medium text-sm mb-1">
               {question.question_text || 'Ingen frågetext'}
             </div>
-            <div className="text-white text-xs mb-2">
-              Typ: {question.question_type === 'text' ? 'Text' : 
-                    question.question_type === 'yes_no' ? 'Ja/Nej' :
-                    question.question_type === 'multiple_choice' ? 'Flervalsval' :
-                    question.question_type === 'number' ? 'Siffra' :
-                    question.question_type === 'date' ? 'Datum' :
-                    question.question_type === 'file' ? 'Fil' :
-                    question.question_type === 'range' ? 'Intervall' :
-                    question.question_type === 'video' ? 'Video' : question.question_type}
-              {question.is_required && ' • Obligatorisk'}
-            </div>
-            {question.question_type === 'multiple_choice' && question.options && (
-              <div className="text-white text-xs">
-                Alternativ: {question.options.filter(o => o.trim()).join(', ')}
-              </div>
-            )}
           </div>
         </div>
         
