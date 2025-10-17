@@ -1144,7 +1144,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                   {/* Step 1: Grundinfo */}
                   {currentStep === 0 && (
                     <div className="space-y-3 max-w-2xl mx-auto w-full">
-                      <div className="space-y-1.5 bg-white/5 rounded-md p-2 border border-white/20">
+                      <div className="space-y-2">
                         <Label className="text-white font-medium text-sm">Jobbtitel *</Label>
                         <Input
                           value={formData.title}
@@ -1154,7 +1154,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         />
                       </div>
 
-                      <div className="space-y-1.5 bg-white/5 rounded-md p-2 border border-white/20">
+                      <div className="space-y-2">
                         <Label className="text-white font-medium text-sm">Yrke *</Label>
                         <div className="relative occupation-dropdown">
                           <Input
@@ -1200,7 +1200,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         </div>
                       </div>
 
-                      <div className="space-y-1.5 bg-white/5 rounded-md p-2 border border-white/20">
+                      <div className="space-y-2">
                         <Label className="text-white font-medium text-sm">Jobbeskrivning *</Label>
                         <Textarea
                           value={formData.description}
@@ -1213,7 +1213,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
 {/* Kravprofil borttagen för att matcha MobileJobWizard */}
 
-                      <div className="space-y-1.5 bg-white/5 rounded-md p-2 border border-white/20">
+                      <div className="space-y-2">
                         <Label className="text-white font-medium text-sm">Anställningsform *</Label>
                         <div className="relative employment-type-dropdown">
                           <Input
@@ -1243,7 +1243,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         </div>
                       </div>
 
-                      <div className="space-y-1.5 bg-white/5 rounded-md p-2 border border-white/20">
+                      <div className="space-y-2">
                         <Label className="text-white font-medium text-sm">Lönetyp</Label>
                         <div className="relative salary-type-dropdown">
                           <Input
@@ -1278,7 +1278,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                   {/* Step 2: Var finns jobbet? */}
                   {currentStep === 1 && (
                     <div className="space-y-3 max-w-2xl mx-auto w-full">
-                      <div className="space-y-1.5 bg-white/5 rounded-md p-2 border border-white/20">
+                      <div className="space-y-2">
                         <Label className="text-white font-medium text-sm">Var utförs arbetet? *</Label>
                         <div className="relative work-location-dropdown">
                           <Input
@@ -1308,7 +1308,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         </div>
                       </div>
 
-                      <div className="space-y-1.5 bg-white/5 rounded-md p-2 border border-white/20">
+                      <div className="space-y-2">
                         <Label className="text-white font-medium text-sm">Är distansarbete möjligt? *</Label>
                         <div className="relative remote-work-dropdown">
                           <Input
@@ -1338,7 +1338,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         </div>
                       </div>
 
-                      <div className="space-y-1.5 bg-white/5 rounded-md p-2 border border-white/20">
+                      <div className="space-y-2">
                         <Label className="text-white font-medium text-sm">Arbetsplatsens namn *</Label>
                         <Input
                           value={formData.workplace_name}
@@ -1348,7 +1348,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         />
                       </div>
 
-                      <div className="space-y-1.5 bg-white/5 rounded-md p-2 border border-white/20">
+                      <div className="space-y-2">
                         <Label className="text-white font-medium text-sm">Kontakt e-mail *</Label>
                         <Input
                           type="email"
@@ -1359,7 +1359,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         />
                       </div>
 
-                      <div className="space-y-1.5 bg-white/5 rounded-md p-2 border border-white/20">
+                      <div className="space-y-2">
                         <Label className="text-white font-medium text-sm">Gatuadress (frivilligt)</Label>
                         <Input
                           value={formData.workplace_address}
