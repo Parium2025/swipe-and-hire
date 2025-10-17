@@ -102,8 +102,8 @@ const WorkplacePostalCodeSelector = ({
     <div className={`space-y-4 ${className}`}>
       <div className="grid grid-cols-2 gap-3">
         {/* Postnummer input */}
-        <div className="space-y-2">
-          <Label className="text-white font-medium">Postnummer *</Label>
+        <div className="space-y-1.5 bg-white/5 rounded-md p-2 border border-white/20">
+          <Label className="text-white font-medium text-sm">Postnummer *</Label>
           <div className="relative">
             <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white z-10" />
             <Input
@@ -132,8 +132,8 @@ const WorkplacePostalCodeSelector = ({
         </div>
 
         {/* Ort input */}
-        <div className="space-y-2">
-          <Label className="text-white font-medium">Ort *</Label>
+        <div className="space-y-1.5 bg-white/5 rounded-md p-2 border border-white/20">
+          <Label className="text-white font-medium text-sm">Ort *</Label>
           <Input
             value={cityValue}
             onChange={(e) => onLocationChange(e.target.value)}

@@ -1801,7 +1801,7 @@ const MobileJobWizard = ({
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5 bg-white/5 rounded-md p-2 border border-white/20">
                   <Label className="text-white font-medium text-sm">Arbetsplatsens namn *</Label>
                   <Input
                     value={formData.workplace_name}
@@ -1811,7 +1811,7 @@ const MobileJobWizard = ({
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5 bg-white/5 rounded-md p-2 border border-white/20">
                   <Label className="text-white font-medium text-sm">Kontakt e-mail *</Label>
                   <Input
                     type="email"
@@ -1822,7 +1822,7 @@ const MobileJobWizard = ({
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5 bg-white/5 rounded-md p-2 border border-white/20">
                   <Label className="text-white font-medium text-sm">Gatuadress (frivilligt)</Label>
                   <Input
                     value={formData.workplace_address}
