@@ -2010,7 +2010,7 @@ const MobileJobWizard = ({
                                           }}
                                           variant="ghost"
                                           size="sm"
-                                          className="text-white/70 hover:text-white hover:bg-white/10 h-6 w-6 p-0 flex-shrink-0"
+                                          className="text-primary hover:text-primary hover:bg-primary/15 h-6 w-6 p-0 flex-shrink-0"
                                         >
                                           <Pencil className="h-3 w-3" />
                                         </Button>
