@@ -1444,51 +1444,15 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   items={customQuestions.map(q => q.id!)}
                                   strategy={verticalListSortingStrategy}
                                 >
-                                  <div className="space-y-4">
-                                    {/* Group questions by type */}
-                                    {(() => {
-                                      const groupedQuestions: Record<string, typeof customQuestions> = {
-                                        'yes_no': [],
-                                        'text': [],
-                                        'number': [],
-                                        'multiple_choice': []
-                                      };
-                                      
-                                      customQuestions.forEach(q => {
-                                        if (groupedQuestions[q.question_type]) {
-                                          groupedQuestions[q.question_type].push(q);
-                                        }
-                                      });
-
-                                      const typeLabels: Record<string, string> = {
-                                        'yes_no': 'Ja/Nej frågor',
-                                        'text': 'Textfrågor',
-                                        'number': 'Nummerfrågor',
-                                        'multiple_choice': 'Flervalsalternativ'
-                                      };
-
-                                      return Object.entries(groupedQuestions).map(([type, questions]) => {
-                                        if (questions.length === 0) return null;
-                                        
-                                        return (
-                                          <div key={type} className="space-y-2">
-                                            <h5 className="text-white/70 text-xs font-medium uppercase tracking-wider px-1">
-                                              {typeLabels[type]}
-                                            </h5>
-                                            <div className="space-y-3">
-                                              {questions.map((question) => (
-                                                <SortableQuestionItem
-                                                  key={question.id}
-                                                  question={question}
-                                                  onEdit={editCustomQuestion}
-                                                  onDelete={deleteCustomQuestion}
-                                                />
-                                              ))}
-                                            </div>
-                                          </div>
-                                        );
-                                      });
-                                    })()}
+                                  <div className="space-y-3">
+                                    {customQuestions.map((question) => (
+                                      <SortableQuestionItem
+                                        key={question.id}
+                                        question={question}
+                                        onEdit={editCustomQuestion}
+                                        onDelete={deleteCustomQuestion}
+                                      />
+                                    ))}
                                   </div>
                                 </SortableContext>
                               </DndContext>
