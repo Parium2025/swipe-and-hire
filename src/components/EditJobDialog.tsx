@@ -1518,7 +1518,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           {typeLabels[type as keyof typeof typeLabels]}
                                         </h4>
                                         {templates.map((template) => (
-                                          <div
+                                           <div
                                             key={template.id}
                                             className="w-full bg-white/5 rounded-md p-2 border border-white/20 flex items-center justify-between gap-2"
                                           >
@@ -1530,35 +1530,53 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                 {template.question_text}
                                               </div>
                                             </button>
-                                            <Button
-                                              onClick={async () => {
-                                                if (!(template as any).id) return;
-                                                try {
-                                                  const { error } = await supabase
-                                                    .from('job_question_templates')
-                                                    .delete()
-                                                    .eq('id', (template as any).id);
-                                                  
-                                                  if (error) throw error;
-                                                  
-                                                  setQuestionTemplates(prev => prev.filter(t => (t as any).id !== (template as any).id));
-                                                  toast({
-                                                    title: "Fråga borttagen"
+                                            <div className="flex items-center gap-1">
+                                              <Button
+                                                onClick={() => {
+                                                  // Edit template - open it in edit mode
+                                                  setEditingQuestion({
+                                                    ...(template as JobQuestion),
+                                                    template_id: (template as any).id
                                                   });
-                                                } catch (error) {
-                                                  console.error('Error deleting template:', error);
-                                                  toast({
-                                                    title: "Kunde inte ta bort frågan",
-                                                    variant: "destructive"
-                                                  });
-                                                }
-                                              }}
-                                              variant="ghost"
-                                              size="sm"
-                                              className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-6 w-6 p-0 flex-shrink-0"
-                                            >
-                                              <Trash2 className="h-3 w-3" />
-                                            </Button>
+                                                  setShowQuestionTemplates(false);
+                                                  setShowQuestionForm(true);
+                                                }}
+                                                variant="ghost"
+                                                size="sm"
+                                                className="text-white/70 hover:text-white hover:bg-white/10 h-6 w-6 p-0 flex-shrink-0"
+                                              >
+                                                <Pencil className="h-3 w-3" />
+                                              </Button>
+                                              <Button
+                                                onClick={async () => {
+                                                  if (!(template as any).id) return;
+                                                  try {
+                                                    const { error } = await supabase
+                                                      .from('job_question_templates')
+                                                      .delete()
+                                                      .eq('id', (template as any).id);
+                                                    
+                                                    if (error) throw error;
+                                                    
+                                                    setQuestionTemplates(prev => prev.filter(t => (t as any).id !== (template as any).id));
+                                                    toast({
+                                                      title: "Fråga borttagen"
+                                                    });
+                                                  } catch (error) {
+                                                    console.error('Error deleting template:', error);
+                                                    toast({
+                                                      title: "Kunde inte ta bort frågan",
+                                                      variant: "destructive"
+                                                    });
+                                                  }
+                                                }}
+                                                variant="ghost"
+                                                size="sm"
+                                                className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-6 w-6 p-0 flex-shrink-0"
+                                              >
+                                                <Trash2 className="h-3 w-3" />
+                                              </Button>
+                                            </div>
                                           </div>
                                         ))}
                                       </div>

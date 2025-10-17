@@ -1997,35 +1997,53 @@ const MobileJobWizard = ({
                                           {template.question_text}
                                         </div>
                                       </button>
-                                      <Button
-                                        onClick={async () => {
-                                          if (!template.id) return;
-                                          try {
-                                            const { error } = await supabase
-                                              .from('job_question_templates')
-                                              .delete()
-                                              .eq('id', template.id);
-                                            
-                                            if (error) throw error;
-                                            
-                                            setQuestionTemplates(prev => prev.filter(t => t.id !== template.id));
-                                            toast({
-                                              title: "Fråga borttagen"
+                                      <div className="flex items-center gap-1">
+                                        <Button
+                                          onClick={() => {
+                                            // Edit template - open it in edit mode
+                                            setEditingQuestion({
+                                              ...template,
+                                              template_id: template.id
                                             });
-                                          } catch (error) {
-                                            console.error('Error deleting template:', error);
-                                            toast({
-                                              title: "Kunde inte ta bort frågan",
-                                              variant: "destructive"
-                                            });
-                                          }
-                                        }}
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-6 w-6 p-0 flex-shrink-0"
-                                      >
-                                        <Trash2 className="h-3 w-3" />
-                                      </Button>
+                                            setShowQuestionTemplates(false);
+                                            setShowQuestionForm(true);
+                                          }}
+                                          variant="ghost"
+                                          size="sm"
+                                          className="text-white/70 hover:text-white hover:bg-white/10 h-6 w-6 p-0 flex-shrink-0"
+                                        >
+                                          <Pencil className="h-3 w-3" />
+                                        </Button>
+                                        <Button
+                                          onClick={async () => {
+                                            if (!template.id) return;
+                                            try {
+                                              const { error } = await supabase
+                                                .from('job_question_templates')
+                                                .delete()
+                                                .eq('id', template.id);
+                                              
+                                              if (error) throw error;
+                                              
+                                              setQuestionTemplates(prev => prev.filter(t => t.id !== template.id));
+                                              toast({
+                                                title: "Fråga borttagen"
+                                              });
+                                            } catch (error) {
+                                              console.error('Error deleting template:', error);
+                                              toast({
+                                                title: "Kunde inte ta bort frågan",
+                                                variant: "destructive"
+                                              });
+                                            }
+                                          }}
+                                          variant="ghost"
+                                          size="sm"
+                                          className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-6 w-6 p-0 flex-shrink-0"
+                                        >
+                                          <Trash2 className="h-3 w-3" />
+                                        </Button>
+                                      </div>
                                     </div>
                                   ))}
                                 </div>
