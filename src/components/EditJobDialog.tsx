@@ -1544,7 +1544,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                 size="sm"
                                                 className="text-primary hover:text-primary hover:bg-primary/15 h-6 w-6 p-0 flex-shrink-0"
                                               >
-                                                <Pencil className="h-3 w-3" />
+                                                <Pencil className="h-3 w-3 text-[hsl(var(--pure-white))]" />
                                               </Button>
                                               <Button
                                                 onClick={async () => {
