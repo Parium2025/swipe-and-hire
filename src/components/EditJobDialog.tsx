@@ -1514,7 +1514,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                     
                                     return (
                                       <div key={type} className="space-y-2">
-                                        <h4 className="text-white/70 text-sm font-semibold px-1 pt-2">
+                                        <h4 className="text-white text-sm font-semibold px-1 pt-2">
                                           {typeLabels[type as keyof typeof typeLabels]}
                                         </h4>
                                         {templates.map((template) => (
