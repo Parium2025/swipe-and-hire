@@ -160,7 +160,7 @@ const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQuestionIt
             size="sm"
             className="text-white/70 hover:text-white hover:bg-white/10 h-6 w-6 p-0"
           >
-            <Pencil className="h-3 w-3" />
+            <Pencil className="h-3 w-3 text-[hsl(var(--pure-white))]" />
           </Button>
           <Button
             onClick={() => onDelete(question.id!)}
