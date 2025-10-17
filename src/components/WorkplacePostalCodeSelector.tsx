@@ -110,7 +110,7 @@ const WorkplacePostalCodeSelector = ({
               value={postalCodeValue}
               onChange={handlePostalCodeChange}
               placeholder="XXX XX"
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pl-10 transition-all duration-150"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pl-10 transition-all duration-150"
               maxLength={6}
               autoComplete="off"
               autoCorrect="off"
@@ -138,7 +138,7 @@ const WorkplacePostalCodeSelector = ({
             value={cityValue}
             onChange={(e) => onLocationChange(e.target.value)}
             placeholder="Fylls i automatiskt"
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base transition-all duration-150"
+            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm transition-all duration-150"
             readOnly={foundLocation !== null}
             autoComplete="off"
             autoCorrect="off"

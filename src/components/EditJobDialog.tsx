@@ -1344,7 +1344,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           value={formData.workplace_name}
                           onChange={(e) => handleInputChange('workplace_name', e.target.value)}
                           placeholder={profile?.company_name ? `t.ex. ${profile.company_name}` : "t.ex. IKEA Kungens Kurva"}
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-10 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                         />
                       </div>
 
@@ -1355,7 +1355,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           value={formData.contact_email}
                           onChange={(e) => handleInputChange('contact_email', e.target.value)}
                           placeholder={user?.email || "kontakt@företag.se"}
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-10 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                         />
                       </div>
 
@@ -1365,7 +1365,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           value={formData.workplace_address}
                           onChange={(e) => handleInputChange('workplace_address', e.target.value)}
                           placeholder="t.ex. Modulvägen 1"
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-10 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                         />
                       </div>
 
@@ -1599,7 +1599,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   onChange={(e) => handleQuestionTypeSearch(e.target.value)}
                                   onClick={handleQuestionTypeClick}
                                   placeholder="Välj frågetyp"
-                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                                   readOnly
                                 />
                                 <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
@@ -1628,7 +1628,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   value={editingQuestion?.question_text || ''}
                                   onChange={(e) => updateQuestionField('question_text', e.target.value)}
                                   placeholder="T.ex. Beskriv dina erfarenheter inom..."
-                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
                                 />
                               </div>
                             )}
@@ -1640,7 +1640,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   value={editingQuestion?.question_text || ''}
                                   onChange={(e) => updateQuestionField('question_text', e.target.value)}
                                   placeholder="T.ex. Har du körkort?, Kan du arbeta helger?..."
-                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
                                 />
                               </div>
                             )}
@@ -1653,7 +1653,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                     value={editingQuestion?.question_text || ''}
                                     onChange={(e) => updateQuestionField('question_text', e.target.value)}
                                     placeholder="T.ex. Ålder, Antal års erfarenhet, Antal anställda..."
-                                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
                                   />
                                 </div>
                                 
@@ -1689,7 +1689,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   value={editingQuestion?.question_text || ''}
                                   onChange={(e) => updateQuestionField('question_text', e.target.value)}
                                   placeholder="T.ex. Vilka behörigheter har du?"
-                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
                                 />
                               </div>
                             )}
