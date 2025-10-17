@@ -1912,7 +1912,7 @@ const MobileJobWizard = ({
                 ) : showQuestionTemplates ? (
                   /* Template Selection */
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
+                    <div className="sticky top-0 z-10 bg-[hsl(var(--background))] pb-4 -mt-4 pt-4 flex items-center justify-between">
                       <h3 className="text-white font-medium text-lg">Välj fråga</h3>
                       <Button
                         onClick={() => {
