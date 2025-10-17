@@ -99,18 +99,18 @@ const WorkplacePostalCodeSelector = ({
   }, [onPostalCodeChange]);
 
   return (
-    <div className={`space-y-4 ${className}`}>
+    <div className={`space-y-3 ${className}`}>
       <div className="grid grid-cols-2 gap-3">
         {/* Postnummer input */}
-        <div className="space-y-2">
-          <Label className="text-white font-medium">Postnummer *</Label>
+        <div className="space-y-1.5 bg-white/5 rounded-md p-2 border border-white/20">
+          <Label className="text-white font-medium text-sm">Postnummer *</Label>
           <div className="relative">
             <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white z-10" />
             <Input
               value={postalCodeValue}
               onChange={handlePostalCodeChange}
               placeholder="XXX XX"
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pl-10 transition-all duration-150"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pl-10 transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
               maxLength={6}
               autoComplete="off"
               autoCorrect="off"
@@ -132,13 +132,13 @@ const WorkplacePostalCodeSelector = ({
         </div>
 
         {/* Ort input */}
-        <div className="space-y-2">
-          <Label className="text-white font-medium">Ort *</Label>
+        <div className="space-y-1.5 bg-white/5 rounded-md p-2 border border-white/20">
+          <Label className="text-white font-medium text-sm">Ort *</Label>
           <Input
             value={cityValue}
             onChange={(e) => onLocationChange(e.target.value)}
             placeholder="Fylls i automatiskt"
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base transition-all duration-150"
+            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm transition-all duration-150 focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
             readOnly={foundLocation !== null}
             autoComplete="off"
             autoCorrect="off"

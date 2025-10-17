@@ -421,8 +421,8 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Typ */}
-            <div className="space-y-2">
-              <Label htmlFor="question-type">Typ</Label>
+            <div className="space-y-1.5 bg-white/5 rounded-md p-2 border border-white/20">
+              <Label htmlFor="question-type" className="text-white font-medium text-sm">Typ</Label>
               <Select
                 value={questionDraft.question_type}
                 onValueChange={(value) => setQuestionDraft({ 
@@ -431,7 +431,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
                   options: value === 'multiple_choice' ? (questionDraft.options || ['']) : undefined
                 })}
               >
-                <SelectTrigger id="question-type">
+                <SelectTrigger id="question-type" className="bg-white/10 border-white/20 text-white h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -444,13 +444,14 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
             </div>
 
             {/* Rubrik */}
-            <div className="space-y-2">
-              <Label htmlFor="question-title">Rubrik</Label>
+            <div className="space-y-1.5 bg-white/5 rounded-md p-2 border border-white/20">
+              <Label htmlFor="question-title" className="text-white font-medium text-sm">Rubrik</Label>
               <Input
                 id="question-title"
                 value={questionDraft.question_text}
                 onChange={(e) => setQuestionDraft({ ...questionDraft, question_text: e.target.value })}
                 placeholder="Gillar du äpplen?"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
               />
             </div>
 
