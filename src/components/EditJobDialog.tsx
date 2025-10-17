@@ -1496,70 +1496,93 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           </Button>
 
                           <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                            {questionTemplates.filter(template => 
-                              template.question_text.toLowerCase().includes(questionSearchTerm.toLowerCase())
-                            ).length > 0 ? (
-                              <>
-                                {questionTemplates
-                                  .filter(template => 
-                                    template.question_text.toLowerCase().includes(questionSearchTerm.toLowerCase())
-                                  )
-                                  .map((template) => (
-                                  <div
-                                    key={template.id}
-                                    className="w-full bg-white/5 rounded-lg p-4 border border-white/20 flex items-center justify-between gap-3"
-                                  >
-                                    <button
-                                      onClick={() => useQuestionTemplate(template)}
-                                      className="flex-1 text-left hover:opacity-80 transition-opacity"
-                                    >
-                                      <div className="text-white font-medium text-sm mb-1">
-                                        {template.question_text}
-                                      </div>
-                                      <div className="text-white/95 text-xs">
-                                        {template.question_type === 'text' ? 'Text' : 
-                                         template.question_type === 'yes_no' ? 'Ja/Nej' :
-                                         template.question_type === 'multiple_choice' ? 'Flerval' :
-                                         template.question_type === 'number' ? 'Siffra' : template.question_type}
-                                      </div>
-                                    </button>
-                                    <Button
-                                      onClick={async () => {
-                                        if (!(template as any).id) return;
-                                        try {
-                                          const { error } = await supabase
-                                            .from('job_question_templates')
-                                            .delete()
-                                            .eq('id', (template as any).id);
-                                          
-                                          if (error) throw error;
-                                          
-                                          setQuestionTemplates(prev => prev.filter(t => (t as any).id !== (template as any).id));
-                                          toast({
-                                            title: "Fråga borttagen"
-                                          });
-                                        } catch (error) {
-                                          console.error('Error deleting template:', error);
-                                          toast({
-                                            title: "Kunde inte ta bort frågan",
-                                            variant: "destructive"
-                                          });
-                                        }
-                                      }}
-                                      variant="ghost"
-                                      size="sm"
-                                      className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0 flex-shrink-0"
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
+                            {(() => {
+                              const filteredTemplates = questionTemplates.filter(template => 
+                                template.question_text.toLowerCase().includes(questionSearchTerm.toLowerCase())
+                              );
+
+                              if (filteredTemplates.length === 0) {
+                                return (
+                                  <div className="text-white/60 text-sm text-center py-8">
+                                    Du har inga sparade frågor än
                                   </div>
-                                ))}
-                              </>
-                            ) : (
-                              <div className="text-white/60 text-sm text-center py-8">
-                                Du har inga sparade frågor än
-                              </div>
-                            )}
+                                );
+                              }
+
+                              const groupedQuestions = {
+                                yes_no: filteredTemplates.filter(t => t.question_type === 'yes_no'),
+                                text: filteredTemplates.filter(t => t.question_type === 'text'),
+                                number: filteredTemplates.filter(t => t.question_type === 'number'),
+                                multiple_choice: filteredTemplates.filter(t => t.question_type === 'multiple_choice'),
+                              };
+
+                              const typeLabels = {
+                                yes_no: 'Ja/Nej',
+                                text: 'Text',
+                                number: 'Siffra',
+                                multiple_choice: 'Flerval'
+                              };
+
+                              return (
+                                <>
+                                  {Object.entries(groupedQuestions).map(([type, templates]) => {
+                                    if (templates.length === 0) return null;
+                                    
+                                    return (
+                                      <div key={type} className="space-y-2">
+                                        <h4 className="text-white/70 text-sm font-semibold px-1 pt-2">
+                                          {typeLabels[type as keyof typeof typeLabels]}
+                                        </h4>
+                                        {templates.map((template) => (
+                                          <div
+                                            key={template.id}
+                                            className="w-full bg-white/5 rounded-lg p-4 border border-white/20 flex items-center justify-between gap-3"
+                                          >
+                                            <button
+                                              onClick={() => useQuestionTemplate(template)}
+                                              className="flex-1 text-left hover:opacity-80 transition-opacity"
+                                            >
+                                              <div className="text-white font-medium text-sm">
+                                                {template.question_text}
+                                              </div>
+                                            </button>
+                                            <Button
+                                              onClick={async () => {
+                                                if (!(template as any).id) return;
+                                                try {
+                                                  const { error } = await supabase
+                                                    .from('job_question_templates')
+                                                    .delete()
+                                                    .eq('id', (template as any).id);
+                                                  
+                                                  if (error) throw error;
+                                                  
+                                                  setQuestionTemplates(prev => prev.filter(t => (t as any).id !== (template as any).id));
+                                                  toast({
+                                                    title: "Fråga borttagen"
+                                                  });
+                                                } catch (error) {
+                                                  console.error('Error deleting template:', error);
+                                                  toast({
+                                                    title: "Kunde inte ta bort frågan",
+                                                    variant: "destructive"
+                                                  });
+                                                }
+                                              }}
+                                              variant="ghost"
+                                              size="sm"
+                                              className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0 flex-shrink-0"
+                                            >
+                                              <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    );
+                                  })}
+                                </>
+                              );
+                            })()}
                           </div>
 
                         </div>
