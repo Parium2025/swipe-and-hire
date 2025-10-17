@@ -1704,7 +1704,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                         value={option}
                                         onChange={(e) => updateOption(index, e.target.value)}
                                         placeholder={`Alternativ ${index + 1}`}
-                                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
                                       />
                                       <Button
                                         onClick={() => removeOption(index)}
