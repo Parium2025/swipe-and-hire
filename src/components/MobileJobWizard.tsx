@@ -146,42 +146,42 @@ const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQuestionIt
     <div
       ref={setNodeRef}
       style={style}
-      className="bg-white/5 rounded-lg p-4 border border-white/20"
+      className="bg-white/5 rounded-lg p-2.5 border border-white/20"
     >
-      <div className="flex items-start justify-between">
-        <div className="flex items-start gap-3 flex-1">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
           {/* Drag handle */}
           <div
             {...attributes}
             {...listeners}
-            className="text-white hover:text-white cursor-grab active:cursor-grabbing pt-1 touch-none"
+            className="text-white hover:text-white cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
           >
-            <GripVertical className="h-5 w-5" />
+            <GripVertical className="h-4 w-4" />
           </div>
           
-          <div className="flex-1">
-            <div className="text-white font-medium text-sm mb-1">
+          <div className="flex-1 min-w-0">
+            <div className="text-white font-medium text-xs leading-tight truncate">
               {question.question_text || 'Ingen frågetext'}
             </div>
           </div>
         </div>
         
-        <div className="flex items-center space-x-2 ml-4">
+        <div className="flex items-center space-x-1 ml-2 flex-shrink-0">
           <Button
             onClick={() => onEdit(question)}
             variant="ghost"
             size="sm"
-            className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
+            className="text-white/70 hover:text-white hover:bg-white/10 h-7 w-7 p-0"
           >
-            <Pencil className="h-4 w-4" />
+            <Pencil className="h-3.5 w-3.5" />
           </Button>
           <Button
             onClick={() => onDelete(question.id!)}
             variant="ghost"
             size="sm"
-            className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0"
+            className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-7 w-7 p-0"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>
