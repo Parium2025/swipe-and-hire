@@ -230,7 +230,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                     setHasUnsavedChanges(true);
                   }}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 h-9 text-sm"
                   autoComplete="off"
                 />
               </div>
@@ -247,7 +247,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-all duration-150 justify-between mt-1 text-left"
+                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-all duration-150 justify-between mt-1 text-left h-9 text-sm"
                       >
                         <span className="truncate text-left flex-1 px-1">
                           {selectedTemplate?.name || 'Ingen mall är vald'}
