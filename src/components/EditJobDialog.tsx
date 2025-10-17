@@ -1444,15 +1444,46 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   items={customQuestions.map(q => q.id!)}
                                   strategy={verticalListSortingStrategy}
                                 >
-                                  <div className="space-y-3">
-                                    {customQuestions.map((question) => (
-                                      <SortableQuestionItem
-                                        key={question.id}
-                                        question={question}
-                                        onEdit={editCustomQuestion}
-                                        onDelete={deleteCustomQuestion}
-                                      />
-                                    ))}
+                                  <div className="space-y-4">
+                                    {(() => {
+                                      const groupedQuestions = {
+                                        yes_no: customQuestions.filter(q => q.question_type === 'yes_no'),
+                                        text: customQuestions.filter(q => q.question_type === 'text'),
+                                        number: customQuestions.filter(q => q.question_type === 'number'),
+                                        multiple_choice: customQuestions.filter(q => q.question_type === 'multiple_choice'),
+                                      };
+
+                                      const typeLabels = {
+                                        yes_no: 'Ja/Nej',
+                                        text: 'Text',
+                                        number: 'Siffra',
+                                        multiple_choice: 'Flerval'
+                                      };
+
+                                      return (
+                                        <>
+                                          {Object.entries(groupedQuestions).map(([type, questions]) => {
+                                            if (questions.length === 0) return null;
+                                            
+                                            return (
+                                              <div key={type} className="space-y-2">
+                                                <h4 className="text-white/70 text-sm font-semibold px-1">
+                                                  {typeLabels[type as keyof typeof typeLabels]}
+                                                </h4>
+                                                {questions.map((question) => (
+                                                  <SortableQuestionItem
+                                                    key={question.id}
+                                                    question={question}
+                                                    onEdit={editCustomQuestion}
+                                                    onDelete={deleteCustomQuestion}
+                                                  />
+                                                ))}
+                                              </div>
+                                            );
+                                          })}
+                                        </>
+                                      );
+                                    })()}
                                   </div>
                                 </SortableContext>
                               </DndContext>
