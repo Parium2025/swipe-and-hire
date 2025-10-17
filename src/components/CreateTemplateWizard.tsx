@@ -912,7 +912,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                           value={editingQuestion.min_value ?? ''}
                           onChange={(e) => updateQuestionField('min_value', e.target.value ? parseInt(e.target.value) : undefined)}
                           placeholder="0"
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
                         />
                       </div>
                       <div className="space-y-2">
@@ -922,7 +922,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                           value={editingQuestion.max_value ?? ''}
                           onChange={(e) => updateQuestionField('max_value', e.target.value ? parseInt(e.target.value) : undefined)}
                           placeholder="100"
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
                         />
                       </div>
                     </div>
@@ -950,7 +950,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                               value={option}
                               onChange={(e) => updateOption(index, e.target.value)}
                               placeholder={`Alternativ ${index + 1}`}
-                              className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
                             />
                             <Button
                               onClick={() => removeOption(index)}
