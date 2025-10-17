@@ -1923,7 +1923,7 @@ const MobileJobWizard = ({
                         size="sm"
                         className="text-white/70 hover:text-white hover:bg-white/10"
                       >
-                        <X className="h-4 w-4" />
+                        <X className="h-4 w-4 text-[hsl(var(--pure-white))]" />
                       </Button>
                     </div>
 
