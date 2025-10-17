@@ -134,16 +134,16 @@ const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQuestionIt
     <div
       ref={setNodeRef}
       style={style}
-      className="bg-white/5 rounded-lg p-2.5 border border-white/20"
+      className="bg-white/5 rounded-md p-2 border border-white/20"
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 flex-1 min-w-0">
+        <div className="flex items-center gap-1.5 flex-1 min-w-0">
           <div
             {...attributes}
             {...listeners}
             className="text-white/40 hover:text-white/70 cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
           >
-            <GripVertical className="h-4 w-4" />
+            <GripVertical className="h-3.5 w-3.5" />
           </div>
           
           <div className="flex-1 min-w-0">
@@ -153,22 +153,22 @@ const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQuestionIt
           </div>
         </div>
         
-        <div className="flex items-center space-x-1 ml-2 flex-shrink-0">
+        <div className="flex items-center space-x-1 ml-1.5 flex-shrink-0">
           <Button
             onClick={() => onEdit(question)}
             variant="ghost"
             size="sm"
-            className="text-white/70 hover:text-white hover:bg-white/10 h-7 w-7 p-0"
+            className="text-white/70 hover:text-white hover:bg-white/10 h-6 w-6 p-0"
           >
-            <Pencil className="h-3.5 w-3.5" />
+            <Pencil className="h-3 w-3" />
           </Button>
           <Button
             onClick={() => onDelete(question.id!)}
             variant="ghost"
             size="sm"
-            className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-7 w-7 p-0"
+            className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-6 w-6 p-0"
           >
-            <Trash2 className="h-3.5 w-3.5" />
+            <Trash2 className="h-3 w-3" />
           </Button>
         </div>
       </div>
@@ -1976,7 +1976,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                                         {/* Anpassade frågor - individuella kort */}
                                         {customQuestions.length > 0 && (
-                                          <div className="space-y-2">
+                                          <div className="space-y-1.5">
                                             {customQuestions.map((question, index) => {
                                               const typeLabels = {
                                                 number: 'Siffra',
