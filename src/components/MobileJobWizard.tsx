@@ -1938,6 +1938,7 @@ const MobileJobWizard = ({
 
                     <Button
                       onClick={createNewQuestion}
+                      size="sm"
                       className="w-full bg-primary hover:bg-primary/90 text-white"
                     >
                       <Plus className="h-4 w-4 mr-1" />
