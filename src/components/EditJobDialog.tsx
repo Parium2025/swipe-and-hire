@@ -1520,13 +1520,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                         {templates.map((template) => (
                                           <div
                                             key={template.id}
-                                            className="w-full bg-white/5 rounded-lg p-4 border border-white/20 flex items-center justify-between gap-3"
+                                            className="w-full bg-white/5 rounded-md p-2 border border-white/20 flex items-center justify-between gap-2"
                                           >
                                             <button
                                               onClick={() => useQuestionTemplate(template)}
-                                              className="flex-1 text-left hover:opacity-80 transition-opacity"
+                                              className="flex-1 text-left hover:opacity-80 transition-opacity min-w-0"
                                             >
-                                              <div className="text-white font-medium text-sm">
+                                              <div className="text-white font-medium text-xs leading-tight truncate">
                                                 {template.question_text}
                                               </div>
                                             </button>
@@ -1555,9 +1555,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                               }}
                                               variant="ghost"
                                               size="sm"
-                                              className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0 flex-shrink-0"
+                                              className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-6 w-6 p-0 flex-shrink-0"
                                             >
-                                              <Trash2 className="h-4 w-4" />
+                                              <Trash2 className="h-3 w-3" />
                                             </Button>
                                           </div>
                                         ))}
