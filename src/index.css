@@ -70,6 +70,9 @@ All colors MUST be HSL.
 
     --radius: 0.5rem;
 
+    /* Pure colors tokens */
+    --pure-white: 0 0% 100%;
+
     /* Parium Brand Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(215 100% 12%), hsl(200 100% 60%));
     /* Soften and unify background to avoid visible "bands" at the bottom on iOS */
