@@ -53,6 +53,7 @@ interface SortableQuestionProps {
   updateOption: (questionIndex: number, optionIndex: number, value: string) => void;
   removeOption: (questionIndex: number, optionIndex: number) => void;
   getQuestionTypeLabel: (type: JobQuestion['question_type']) => string;
+  onEdit: (index: number) => void;
 }
 
 const SortableQuestionCard = ({
@@ -63,7 +64,8 @@ const SortableQuestionCard = ({
   addOption,
   updateOption,
   removeOption,
-  getQuestionTypeLabel
+  getQuestionTypeLabel,
+  onEdit
 }: SortableQuestionProps) => {
   const {
     attributes,
@@ -144,9 +146,7 @@ const SortableQuestionCard = ({
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
-                onClick={() => {
-                  // Expandera för redigering
-                }}
+                onClick={() => onEdit(index)}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
@@ -172,6 +172,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
   const [questions, setQuestions] = useState<JobQuestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [addingQuestion, setAddingQuestion] = useState(false);
+  const [editingQuestionIndex, setEditingQuestionIndex] = useState<number | null>(null);
   const [selectedType, setSelectedType] = useState<JobQuestion['question_type'] | null>(null);
   const [questionDraft, setQuestionDraft] = useState<JobQuestion | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -253,6 +254,30 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
     setAddingQuestion(false);
     setSelectedType(null);
     setQuestionDraft(null);
+  };
+
+  const startEditQuestion = (index: number) => {
+    setEditingQuestionIndex(index);
+    setQuestionDraft({ ...questions[index] });
+    setAddingQuestion(true);
+  };
+
+  const confirmEditQuestion = () => {
+    if (editingQuestionIndex !== null && questionDraft && questionDraft.question_text.trim()) {
+      const updated = [...questions];
+      updated[editingQuestionIndex] = questionDraft;
+      setQuestions(updated);
+      setAddingQuestion(false);
+      setEditingQuestionIndex(null);
+      setQuestionDraft(null);
+    }
+  };
+
+  const cancelEditQuestion = () => {
+    setAddingQuestion(false);
+    setEditingQuestionIndex(null);
+    setQuestionDraft(null);
+    setSelectedType(null);
   };
 
   const updateQuestion = (index: number, updates: Partial<JobQuestion>) => {
@@ -412,11 +437,13 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
         Skapa ny fråga
       </Button>
 
-      {/* Ny fråga dialog */}
+      {/* Ny/Redigera fråga dialog */}
       {addingQuestion && questionDraft && (
         <Card className="border-2 border-primary/50 bg-card">
           <CardHeader>
-            <CardTitle className="text-xl">Ny fråga</CardTitle>
+            <CardTitle className="text-xl">
+              {editingQuestionIndex !== null ? 'Redigera fråga' : 'Ny fråga'}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Typ */}
@@ -530,11 +557,11 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
 
             {/* Action buttons */}
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={cancelAddQuestion}>
+              <Button variant="outline" onClick={editingQuestionIndex !== null ? cancelEditQuestion : cancelAddQuestion}>
                 Avbryt
               </Button>
               <Button 
-                onClick={confirmAddQuestion}
+                onClick={editingQuestionIndex !== null ? confirmEditQuestion : confirmAddQuestion}
                 disabled={!questionDraft.question_text.trim()}
               >
                 Spara
@@ -569,6 +596,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
                     updateOption={updateOption}
                     removeOption={removeOption}
                     getQuestionTypeLabel={getQuestionTypeLabel}
+                    onEdit={startEditQuestion}
                   />
                 );
               })}
