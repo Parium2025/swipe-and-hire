@@ -875,7 +875,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       value={editingQuestion.question_text}
                       onChange={(e) => updateQuestionField('question_text', e.target.value)}
                       placeholder="T.ex. Beskriv dina erfarenheter inom..."
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
                     />
                   </div>
                 )}
@@ -887,7 +887,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       value={editingQuestion.question_text}
                       onChange={(e) => updateQuestionField('question_text', e.target.value)}
                       placeholder="T.ex. Har du körkort?, Kan du arbeta helger?..."
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
                     />
                   </div>
                 )}
@@ -900,7 +900,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                         value={editingQuestion.question_text}
                         onChange={(e) => updateQuestionField('question_text', e.target.value)}
                         placeholder="T.ex. Ålder, Antal års erfarenhet..."
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
                       />
                     </div>
                     
@@ -937,7 +937,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                         value={editingQuestion.question_text}
                         onChange={(e) => updateQuestionField('question_text', e.target.value)}
                         placeholder="T.ex. Vilka behörigheter har du?"
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
                       />
                     </div>
 

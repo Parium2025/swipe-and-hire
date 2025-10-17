@@ -451,6 +451,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
                 value={questionDraft.question_text}
                 onChange={(e) => setQuestionDraft({ ...questionDraft, question_text: e.target.value })}
                 placeholder="Gillar du äpplen?"
+                className="h-9 text-sm"
               />
             </div>
 
