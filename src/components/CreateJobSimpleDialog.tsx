@@ -304,7 +304,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                         </div>
 
                         {/* Template options */}
-                        <div className="max-h-64 overflow-y-auto bg-slate-800/95">
+                        <div className="max-h-[400px] overflow-y-auto bg-slate-800/95">
                           {/* Create new template option */}
                           <DropdownMenuItem
                             onClick={() => {
