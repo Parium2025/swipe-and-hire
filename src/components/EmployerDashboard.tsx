@@ -132,34 +132,34 @@ const EmployerDashboard = memo(() => {
       {/* Stats Overview - med skeleton när loading */}
       <div className="grid gap-2 grid-cols-1">
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="pb-1.5 px-3 pt-3">
-            <CardDescription className="text-white text-xs">Totalt annonser</CardDescription>
+          <CardHeader className="pb-1 px-2.5 pt-2.5">
+            <CardDescription className="text-white text-[11px]">Totalt annonser</CardDescription>
             {loading ? (
-              <Skeleton className="h-6 w-12 bg-white/20" />
+              <Skeleton className="h-5 w-10 bg-white/20" />
             ) : (
-              <CardTitle className="text-xl text-white">{jobs.length}</CardTitle>
+              <CardTitle className="text-lg text-white">{jobs.length}</CardTitle>
             )}
           </CardHeader>
         </Card>
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="pb-1.5 px-3 pt-3">
-            <CardDescription className="text-white text-xs">Aktiva annonser</CardDescription>
+          <CardHeader className="pb-1 px-2.5 pt-2.5">
+            <CardDescription className="text-white text-[11px]">Aktiva annonser</CardDescription>
             {loading ? (
-              <Skeleton className="h-6 w-12 bg-white/20" />
+              <Skeleton className="h-5 w-10 bg-white/20" />
             ) : (
-              <CardTitle className="text-xl text-white">
+              <CardTitle className="text-lg text-white">
                 {jobs.filter(job => job.is_active).length}
               </CardTitle>
             )}
           </CardHeader>
         </Card>
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="pb-1.5 px-3 pt-3">
-            <CardDescription className="text-white text-xs">Totala visningar</CardDescription>
+          <CardHeader className="pb-1 px-2.5 pt-2.5">
+            <CardDescription className="text-white text-[11px]">Totala visningar</CardDescription>
             {loading ? (
-              <Skeleton className="h-6 w-12 bg-white/20" />
+              <Skeleton className="h-5 w-10 bg-white/20" />
             ) : (
-              <CardTitle className="text-xl text-white">
+              <CardTitle className="text-lg text-white">
                 {jobs.reduce((sum, job) => sum + job.views_count, 0)}
               </CardTitle>
             )}
