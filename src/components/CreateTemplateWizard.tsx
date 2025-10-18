@@ -1643,7 +1643,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   
                   <div>
                     <p className="text-white text-sm mb-1">Anpassade frågor</p>
-                    <p className="text-white">{customQuestions.length} frågor</p>
+                    <p className="text-white">{customQuestions.length}</p>
                   </div>
                 </div>
               </div>
