@@ -231,7 +231,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                     setHasUnsavedChanges(true);
                   }}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 text-sm resize-none min-h-[36px] leading-tight py-2"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 text-sm resize-none min-h-[36px] leading-tight py-2 overflow-hidden"
                   autoComplete="off"
                   title={jobTitle}
                   rows={1}
