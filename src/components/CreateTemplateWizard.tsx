@@ -1610,37 +1610,32 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                 
                 <div className="bg-white/5 rounded-lg p-6 border border-white/20 space-y-4">
                   <div>
-                    <p className="text-white/60 text-sm mb-1">Mallnamn</p>
+                    <p className="text-white text-sm mb-1">Mallnamn</p>
                     <p className="text-white font-medium">{formData.name || '-'}</p>
                   </div>
                   
                   <div>
-                    <p className="text-white/60 text-sm mb-1">Jobbtitel</p>
+                    <p className="text-white text-sm mb-1">Jobbtitel</p>
                     <p className="text-white font-medium">{formData.title || '-'}</p>
                   </div>
                   
                   <div>
-                    <p className="text-white/60 text-sm mb-1">Yrke</p>
+                    <p className="text-white text-sm mb-1">Yrke</p>
                     <p className="text-white font-medium">{formData.occupation || '-'}</p>
                   </div>
                   
                   <div>
-                    <p className="text-white/60 text-sm mb-1">Beskrivning</p>
+                    <p className="text-white text-sm mb-1">Beskrivning</p>
                     <p className="text-white">{formData.description || '-'}</p>
                   </div>
                   
                   <div>
-                    <p className="text-white/60 text-sm mb-1">Arbetsplats</p>
+                    <p className="text-white text-sm mb-1">Arbetsplats</p>
                     <p className="text-white">{formData.workplace_name || '-'}</p>
                   </div>
                   
                   <div>
-                    <p className="text-white/60 text-sm mb-1">Plats</p>
-                    <p className="text-white">{formData.workplace_city || '-'}</p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-white/60 text-sm mb-1">Anpassade frågor</p>
+                    <p className="text-white text-sm mb-1">Anpassade frågor</p>
                     <p className="text-white">{customQuestions.length} frågor</p>
                   </div>
                 </div>
