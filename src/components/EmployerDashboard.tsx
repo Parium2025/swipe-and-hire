@@ -121,7 +121,7 @@ const EmployerDashboard = memo(() => {
 
 
   return (
-    <div className="space-y-4 pb-safe min-h-screen smooth-scroll touch-pan no-overscroll" style={{ WebkitOverflowScrolling: 'touch' }}>
+    <div className="space-y-3 pb-safe min-h-screen smooth-scroll touch-pan no-overscroll" style={{ WebkitOverflowScrolling: 'touch' }}>
       <div className="text-center px-2">
         <h1 className="text-xl font-bold text-white">Mina jobbannonser</h1>
         <p className="text-white mt-1 text-xs">
@@ -130,9 +130,9 @@ const EmployerDashboard = memo(() => {
       </div>
 
       {/* Stats Overview - med skeleton när loading */}
-      <div className="grid gap-3 grid-cols-1">
+      <div className="grid gap-2 grid-cols-1">
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="pb-2 px-4 pt-4">
+          <CardHeader className="pb-1.5 px-3 pt-3">
             <CardDescription className="text-white text-xs">Totalt annonser</CardDescription>
             {loading ? (
               <Skeleton className="h-6 w-12 bg-white/20" />
@@ -142,7 +142,7 @@ const EmployerDashboard = memo(() => {
           </CardHeader>
         </Card>
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="pb-2 px-4 pt-4">
+          <CardHeader className="pb-1.5 px-3 pt-3">
             <CardDescription className="text-white text-xs">Aktiva annonser</CardDescription>
             {loading ? (
               <Skeleton className="h-6 w-12 bg-white/20" />
@@ -154,7 +154,7 @@ const EmployerDashboard = memo(() => {
           </CardHeader>
         </Card>
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="pb-2 px-4 pt-4">
+          <CardHeader className="pb-1.5 px-3 pt-3">
             <CardDescription className="text-white text-xs">Totala visningar</CardDescription>
             {loading ? (
               <Skeleton className="h-6 w-12 bg-white/20" />
@@ -168,7 +168,7 @@ const EmployerDashboard = memo(() => {
       </div>
 
       {/* Job Listings - med skeleton när loading */}
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {loading ? (
           // Loading skeleton - 3 placeholder cards
           Array.from({ length: 3 }).map((_, i) => (
@@ -217,17 +217,17 @@ const EmployerDashboard = memo(() => {
               className="bg-white/10 backdrop-blur-sm border-white/20 cursor-pointer hover:bg-white/15 transition-colors"
               onClick={() => navigate(`/job-details/${job.id}`)}
             >
-              <CardHeader className="px-3 py-3">
-                <div className="flex flex-col justify-between items-start gap-3">
+              <CardHeader className="px-2.5 py-2.5">
+                <div className="flex flex-col justify-between items-start gap-2">
                   <div className="flex-1 w-full">
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-1.5">
                       <div className="flex items-start justify-between gap-2">
                         <CardTitle className="text-base text-white leading-tight flex-1">{job.title}</CardTitle>
                         <Badge variant={job.is_active ? "default" : "secondary"} className="text-xs whitespace-nowrap">
                           {job.is_active ? 'Aktiv' : 'Inaktiv'}
                         </Badge>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-white">
+                      <div className="flex flex-wrap items-center gap-1.5 text-xs text-white">
                         <div className="flex items-center gap-1">
                           <MapPin size={12} />
                           <span className="truncate max-w-[120px]">{job.location}</span>
@@ -253,19 +253,19 @@ const EmployerDashboard = memo(() => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="px-3 py-3 pt-0">
-                <p className="text-xs text-white mb-3 line-clamp-2">
+              <CardContent className="px-2.5 py-2.5 pt-0">
+                <p className="text-xs text-white mb-2 line-clamp-2">
                   {job.description}
                 </p>
                 
                 {formatSalary(job.salary_min, job.salary_max) && (
-                  <p className="text-xs font-medium mb-3 text-white">
+                  <p className="text-xs font-medium mb-2 text-white">
                     {formatSalary(job.salary_min, job.salary_max)}
                   </p>
                 )}
 
-                <div className="flex flex-col items-start justify-between gap-3">
-                  <div className="flex items-center gap-3 text-xs text-white">
+                <div className="flex flex-col items-start justify-between gap-2">
+                  <div className="flex items-center gap-2.5 text-xs text-white">
                     <div className="flex items-center gap-1">
                       <Eye size={12} />
                       <span className="whitespace-nowrap">{job.views_count} visningar</span>
