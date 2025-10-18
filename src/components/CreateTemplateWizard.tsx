@@ -1004,7 +1004,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     placeholder="t.ex. Standard Lagerarbetare"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-16 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
                 </div>
               </div>
@@ -1291,16 +1291,16 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   {/* Add question button - always visible */}
                   <Button
                     onClick={addCustomQuestion}
-                    variant="outline"
-                    className="w-full border-dashed border-2 hover:border-primary/50 bg-transparent text-white border-white/40"
+                    size="sm"
+                    className="w-full bg-primary hover:bg-primary/90 text-white"
                   >
-                    <Plus className="h-4 w-4 mr-2 text-[hsl(var(--pure-white))]" />
-                    Skapa ny fråga
+                    <Plus className="h-4 w-4 mr-1 text-[hsl(var(--pure-white))]" />
+                    Lägg till fråga
                   </Button>
                   
                   {customQuestions.length === 0 ? (
                     <div className="text-white text-sm bg-white/5 rounded-lg p-3 border border-white/20">
-                      Klicka på "Skapa ny fråga" ovan för att lägga till din första fråga
+                      Saknas något? Klicka på "Lägg till fråga" och skapa de frågor du vill att kandidaten ska svara på
                     </div>
                   ) : (
                     <>
