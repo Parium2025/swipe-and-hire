@@ -149,8 +149,13 @@ const WorkplacePostalCodeSelector = ({
             )}
           </div>
           
-          {/* Validering meddelande */}
-          {postalCodeValue && !isValid && !isLoading && !foundLocation && postalCodeValue.replace(/\D/g, '').length >= 5 && (
+          {/* Validering meddelande - visa ALDRIG om vi har cachad info för detta postnummer */}
+          {postalCodeValue && 
+           !isValid && 
+           !isLoading && 
+           !foundLocation && 
+           postalCodeValue.replace(/\D/g, '').length >= 5 && 
+           !(cachedInfo && postalCodeValue.replace(/\s+/g, '') === cachedInfo.postalCode.replace(/\s+/g, '')) && (
             <p className="text-xs text-red-300 mt-1">
               Postnummer ska vara 5 siffror (t.ex. 136 55)
             </p>
