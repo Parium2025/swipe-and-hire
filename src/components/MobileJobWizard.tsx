@@ -1595,7 +1595,7 @@ const MobileJobWizard = ({
           </div>
 
           {/* Scrollable Content */}
-          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-2">
             {/* Step 1: Grundinfo */}
             {currentStep === 0 && (
               <div className="space-y-3 max-w-2xl mx-auto w-full">
