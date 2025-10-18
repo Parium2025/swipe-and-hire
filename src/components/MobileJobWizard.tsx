@@ -2566,10 +2566,14 @@ const MobileJobWizard = ({
                                             <button
                                               type="button"
                                               onClick={() =>
-                                                setPreviewAnswers((prev) => ({
-                                                  ...prev,
-                                                  [question.id || `q_${index}`]: 'yes',
-                                                }))
+                                                setPreviewAnswers((prev) => {
+                                                  const key = question.id || `q_${index}`;
+                                                  const current = prev[key];
+                                                  return {
+                                                    ...prev,
+                                                    [key]: current === 'yes' ? '' : 'yes',
+                                                  };
+                                                })
                                               }
                                               className={
                                                 (previewAnswers[question.id || `q_${index}`] === 'yes'
@@ -2583,10 +2587,14 @@ const MobileJobWizard = ({
                                             <button
                                               type="button"
                                               onClick={() =>
-                                                setPreviewAnswers((prev) => ({
-                                                  ...prev,
-                                                  [question.id || `q_${index}`]: 'no',
-                                                }))
+                                                setPreviewAnswers((prev) => {
+                                                  const key = question.id || `q_${index}`;
+                                                  const current = prev[key];
+                                                  return {
+                                                    ...prev,
+                                                    [key]: current === 'no' ? '' : 'no',
+                                                  };
+                                                })
                                               }
                                               className={
                                                 (previewAnswers[question.id || `q_${index}`] === 'no'

@@ -2030,13 +2030,23 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                         onClick={(e) => {
                                                           e.preventDefault();
                                                           const parent = e.currentTarget.parentElement;
-                                                          const buttons = parent?.querySelectorAll('button');
-                                                          buttons?.forEach(btn => {
-                                                            btn.classList.remove('bg-secondary', 'border-secondary', 'text-white');
-                                                            btn.classList.add('bg-white/10', 'border-white/20');
+                                                          if (!parent) return;
+                                                          const yesBtn = parent.querySelector('button:nth-child(1)') as HTMLButtonElement | null;
+                                                          const noBtn = parent.querySelector('button:nth-child(2)') as HTMLButtonElement | null;
+
+                                                          const isSelected = e.currentTarget.classList.contains('bg-secondary');
+
+                                                          // Rensa båda först
+                                                          [yesBtn, noBtn].forEach(btn => {
+                                                            btn?.classList.remove('bg-secondary', 'border-secondary', 'text-white');
+                                                            btn?.classList.add('bg-white/10', 'border-white/20');
                                                           });
-                                                          e.currentTarget.classList.remove('bg-white/10', 'border-white/20');
-                                                          e.currentTarget.classList.add('bg-secondary', 'border-secondary', 'text-white');
+
+                                                          // Om klickad knapp inte redan var vald -> välj den, annars lämna avmarkerad
+                                                          if (!isSelected) {
+                                                            e.currentTarget.classList.remove('bg-white/10', 'border-white/20');
+                                                            e.currentTarget.classList.add('bg-secondary', 'border-secondary', 'text-white');
+                                                          }
                                                         }}
                                                         className="flex-1 bg-white/10 border border-white/20 rounded-md px-2 py-1 text-xs text-white transition-colors font-medium"
                                                       >
@@ -2047,13 +2057,23 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                         onClick={(e) => {
                                                           e.preventDefault();
                                                           const parent = e.currentTarget.parentElement;
-                                                          const buttons = parent?.querySelectorAll('button');
-                                                          buttons?.forEach(btn => {
-                                                            btn.classList.remove('bg-secondary', 'border-secondary', 'text-white');
-                                                            btn.classList.add('bg-white/10', 'border-white/20');
+                                                          if (!parent) return;
+                                                          const yesBtn = parent.querySelector('button:nth-child(1)') as HTMLButtonElement | null;
+                                                          const noBtn = parent.querySelector('button:nth-child(2)') as HTMLButtonElement | null;
+
+                                                          const isSelected = e.currentTarget.classList.contains('bg-secondary');
+
+                                                          // Rensa båda först
+                                                          [yesBtn, noBtn].forEach(btn => {
+                                                            btn?.classList.remove('bg-secondary', 'border-secondary', 'text-white');
+                                                            btn?.classList.add('bg-white/10', 'border-white/20');
                                                           });
-                                                          e.currentTarget.classList.remove('bg-white/10', 'border-white/20');
-                                                          e.currentTarget.classList.add('bg-secondary', 'border-secondary', 'text-white');
+
+                                                          // Om klickad knapp inte redan var vald -> välj den, annars lämna avmarkerad
+                                                          if (!isSelected) {
+                                                            e.currentTarget.classList.remove('bg-white/10', 'border-white/20');
+                                                            e.currentTarget.classList.add('bg-secondary', 'border-secondary', 'text-white');
+                                                          }
                                                         }}
                                                         className="flex-1 bg-white/10 border border-white/20 rounded-md px-2 py-1 text-xs text-white transition-colors font-medium"
                                                       >
