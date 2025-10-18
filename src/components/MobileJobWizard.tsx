@@ -1559,7 +1559,7 @@ const MobileJobWizard = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="max-w-md h-[90vh] max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
+        className="max-w-md h-[90vh] max-h-[650px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
         onInteractOutside={(e) => e.preventDefault()}
       >
         <AnimatedBackground showBubbles={false} />
@@ -1595,10 +1595,10 @@ const MobileJobWizard = ({
           </div>
 
           {/* Scrollable Content */}
-          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-3">
             {/* Step 1: Grundinfo */}
             {currentStep === 0 && (
-              <div className="space-y-3 max-w-2xl mx-auto w-full">
+              <div className="space-y-2 max-w-2xl mx-auto w-full">
                 <div className="space-y-2">
                   <Label className="text-white font-medium text-sm">Jobbtitel *</Label>
                   <Input
@@ -1737,7 +1737,7 @@ const MobileJobWizard = ({
 
             {/* Step 2: Var finns jobbet? */}
             {currentStep === 1 && (
-              <div className="space-y-3 max-w-2xl mx-auto w-full">
+              <div className="space-y-2 max-w-2xl mx-auto w-full">
                 <div className="space-y-2">
                   <Label className="text-white font-medium text-sm">Var utförs arbetet? *</Label>
                   <div className="relative work-location-dropdown">
