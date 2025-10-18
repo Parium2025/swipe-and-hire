@@ -232,6 +232,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                   placeholder="Namnge jobbet"
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 h-9 text-sm"
                   autoComplete="off"
+                  title={jobTitle}
                 />
               </div>
 
@@ -248,9 +249,10 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-all duration-150 justify-between mt-1 text-left"
+                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-all duration-150 justify-between mt-1 text-left h-auto min-h-9 py-2 whitespace-normal"
+                        title={selectedTemplate?.name || 'Ingen mall är vald'}
                       >
-                        <span className="truncate text-left flex-1 px-1 text-sm">
+                        <span className="text-left flex-1 px-1 text-sm whitespace-normal break-words pr-6">
                           {selectedTemplate?.name || 'Ingen mall är vald'}
                         </span>
                         <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2 transition-transform duration-150" />
@@ -313,7 +315,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                                     <span className="text-xs text-blue-400 ml-2">Standard</span>
                                   )}
                                 </div>
-                                <span className="text-xs text-white/60 mt-1 break-words line-clamp-2 sm:line-clamp-none">{template.title}</span>
+                                <span className="text-xs text-white/60 mt-1 break-words">{template.title}</span>
                               </button>
                               <div className="flex gap-1 flex-shrink-0">
                                 <Button
