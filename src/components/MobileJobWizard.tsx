@@ -2579,29 +2579,51 @@ const MobileJobWizard = ({
                                             <p className="text-[10px] text-white/60 mb-1">Alternativ:</p>
                                             <div className="space-y-1">
                                               {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => {
-                                                const selected = previewAnswers[question.id || `q_${index}`] === option;
+                                                const selectedAnswers = previewAnswers[question.id || `q_${index}`];
+                                                const answersArray = typeof selectedAnswers === 'string' 
+                                                  ? selectedAnswers.split('|||') 
+                                                  : [];
+                                                const selected = answersArray.includes(option);
+                                                
                                                 return (
                                                   <button
                                                     key={optIndex}
                                                     type="button"
-                                                    onClick={() =>
-                                                      setPreviewAnswers((prev) => ({
-                                                        ...prev,
-                                                        [question.id || `q_${index}`]: option,
-                                                      }))
-                                                    }
+                                                    onClick={() => {
+                                                      setPreviewAnswers((prev) => {
+                                                        const currentAnswers = prev[question.id || `q_${index}`];
+                                                        const answersArray = typeof currentAnswers === 'string'
+                                                          ? currentAnswers.split('|||').filter(a => a)
+                                                          : [];
+                                                        
+                                                        const newAnswers = answersArray.includes(option)
+                                                          ? answersArray.filter(a => a !== option)
+                                                          : [...answersArray, option];
+                                                        
+                                                        return {
+                                                          ...prev,
+                                                          [question.id || `q_${index}`]: newAnswers.join('|||'),
+                                                        };
+                                                      });
+                                                    }}
                                                     className={
                                                       (selected
-                                                        ? 'bg-secondary border border-secondary text-white '
+                                                        ? 'bg-secondary/40 border border-secondary text-white '
                                                         : 'bg-white/5 border border-white/10 text-white ') +
                                                       'w-full flex items-center gap-2 rounded px-2 py-1.5 hover:bg-white/10 transition-colors cursor-pointer'
                                                     }
                                                   >
                                                     <div className={
                                                       selected
-                                                        ? 'w-2.5 h-2.5 rounded-full bg-white flex-shrink-0'
-                                                        : 'w-2.5 h-2.5 rounded-full border border-white/40 flex-shrink-0'
-                                                    } />
+                                                        ? 'w-2.5 h-2.5 rounded-sm bg-white flex-shrink-0 flex items-center justify-center'
+                                                        : 'w-2.5 h-2.5 rounded-sm border border-white/40 flex-shrink-0'
+                                                    }>
+                                                      {selected && (
+                                                        <svg className="w-2 h-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                      )}
+                                                    </div>
                                                     <span className="text-xs text-white/90">{option}</span>
                                                   </button>
                                                 );
