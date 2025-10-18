@@ -2577,9 +2577,9 @@ const MobileJobWizard = ({
                                               }
                                               className={
                                                 (previewAnswers[question.id || `q_${index}`] === 'yes'
-                                                  ? 'bg-secondary border border-secondary text-white '
-                                                  : 'bg-white/10 border border-white/20 text-white ') +
-                                                'rounded-md px-2 py-1 text-xs transition-colors font-medium flex-1'
+                                                  ? 'bg-secondary/40 border-secondary text-white '
+                                                  : 'bg-white/10 border-white/20 text-white ') +
+                                                'border rounded-md px-2 py-1 text-xs transition-colors font-medium flex-1'
                                               }
                                             >
                                               Ja
@@ -2598,9 +2598,9 @@ const MobileJobWizard = ({
                                               }
                                               className={
                                                 (previewAnswers[question.id || `q_${index}`] === 'no'
-                                                  ? 'bg-secondary border border-secondary text-white '
-                                                  : 'bg-white/10 border border-white/20 text-white ') +
-                                                'rounded-md px-2 py-1 text-xs transition-colors font-medium flex-1'
+                                                  ? 'bg-secondary/40 border-secondary text-white '
+                                                  : 'bg-white/10 border-white/20 text-white ') +
+                                                'border rounded-md px-2 py-1 text-xs transition-colors font-medium flex-1'
                                               }
                                             >
                                               Nej
@@ -2640,12 +2640,12 @@ const MobileJobWizard = ({
                                                         };
                                                       });
                                                     }}
-                                                    className={
-                                                      (selected
-                                                        ? 'bg-secondary/40 border border-secondary text-white '
-                                                        : 'bg-white/5 border border-white/10 text-white ') +
-                                                      'w-full flex items-center gap-2 rounded px-2 py-1.5 hover:bg-white/10 transition-colors cursor-pointer'
-                                                    }
+                                                     className={
+                                                       (selected
+                                                         ? 'bg-secondary/40 border border-secondary text-white '
+                                                         : 'bg-white/5 border border-white/10 text-white ') +
+                                                       'w-full flex items-center gap-2 rounded px-2 py-1.5 transition-colors cursor-pointer'
+                                                     }
                                                   >
                                                     <div className={
                                                       selected
