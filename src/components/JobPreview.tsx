@@ -81,20 +81,50 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
 
       case 'yes_no':
         return (
-          <RadioGroup
-            value={currentAnswer || ''}
-            onValueChange={(value) => handleAnswerChange(questionId, value)}
-            className="space-y-4"
-          >
-            <div className="flex items-center space-x-3 p-4 rounded-lg bg-white/10 border border-white/20">
-              <RadioGroupItem value="yes" id={`${questionId}-yes`} className="text-white border-white/40" />
-              <Label htmlFor={`${questionId}-yes`} className="text-white text-lg cursor-pointer flex-1">Ja</Label>
-            </div>
-            <div className="flex items-center space-x-3 p-4 rounded-lg bg-white/10 border border-white/20">
-              <RadioGroupItem value="no" id={`${questionId}-no`} className="text-white border-white/40" />
-              <Label htmlFor={`${questionId}-no`} className="text-white text-lg cursor-pointer flex-1">Nej</Label>
-            </div>
-          </RadioGroup>
+          <div className="space-y-4">
+            <button
+              type="button"
+              onClick={() => {
+                // Toggle: om redan valt "yes", avmarkera, annars sätt till "yes"
+                handleAnswerChange(questionId, currentAnswer === 'yes' ? '' : 'yes');
+              }}
+              className={`w-full flex items-center space-x-3 p-4 rounded-lg border transition-all ${
+                currentAnswer === 'yes'
+                  ? 'bg-primary/20 border-primary'
+                  : 'bg-white/10 border-white/20 hover:bg-white/15'
+              }`}
+            >
+              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                currentAnswer === 'yes' ? 'border-primary' : 'border-white/40'
+              }`}>
+                {currentAnswer === 'yes' && (
+                  <div className="w-3 h-3 rounded-full bg-primary" />
+                )}
+              </div>
+              <span className="text-white text-lg flex-1 text-left">Ja</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                // Toggle: om redan valt "no", avmarkera, annars sätt till "no"
+                handleAnswerChange(questionId, currentAnswer === 'no' ? '' : 'no');
+              }}
+              className={`w-full flex items-center space-x-3 p-4 rounded-lg border transition-all ${
+                currentAnswer === 'no'
+                  ? 'bg-primary/20 border-primary'
+                  : 'bg-white/10 border-white/20 hover:bg-white/15'
+              }`}
+            >
+              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                currentAnswer === 'no' ? 'border-primary' : 'border-white/40'
+              }`}>
+                {currentAnswer === 'no' && (
+                  <div className="w-3 h-3 rounded-full bg-primary" />
+                )}
+              </div>
+              <span className="text-white text-lg flex-1 text-left">Nej</span>
+            </button>
+          </div>
         );
 
       case 'multiple_choice':
