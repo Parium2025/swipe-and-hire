@@ -40,6 +40,25 @@ const WorkplacePostalCodeSelector = ({
     onValidationChange?.(hasValidLocation);
   }, [hasValidLocation, onValidationChange]);
 
+  // Initialize from cached info immediately on mount
+  useEffect(() => {
+    if (cachedInfo && postalCodeValue.trim()) {
+      const cleanedCode = postalCodeValue.replace(/\s+/g, '');
+      const cachedCleanedCode = cachedInfo.postalCode.replace(/\s+/g, '');
+      
+      if (cleanedCode === cachedCleanedCode) {
+        setFoundLocation({
+          postalCode: cachedInfo.postalCode,
+          city: cachedInfo.city,
+          municipality: cachedInfo.municipality,
+          county: cachedInfo.county
+        });
+        setLastSuccessfulPostalCode(cleanedCode);
+        setIsValid(true);
+      }
+    }
+  }, [cachedInfo, postalCodeValue]);
+
   useEffect(() => {
     const fetchLocation = async () => {
       if (postalCodeValue.trim()) {
@@ -47,16 +66,9 @@ const WorkplacePostalCodeSelector = ({
         const isValidFormat = isValidSwedishPostalCode(cleanedCode);
         setIsValid(isValidFormat);
         
-        // Check if we have cached info for this postal code
+        // Check if we have cached info for this postal code - skip API call
         if (cachedInfo && cleanedCode === cachedInfo.postalCode.replace(/\s+/g, '')) {
-          setFoundLocation({
-            postalCode: cachedInfo.postalCode,
-            city: cachedInfo.city,
-            municipality: cachedInfo.municipality,
-            county: cachedInfo.county
-          });
-          setLastSuccessfulPostalCode(cleanedCode);
-          return;
+          return; // Already set in initialization useEffect
         }
         
         // Om samma postnummer som förra gången, behåll det befintliga
