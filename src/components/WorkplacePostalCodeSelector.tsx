@@ -122,7 +122,18 @@ const WorkplacePostalCodeSelector = ({
     const value = e.target.value;
     const formatted = formatPostalCodeInput(value);
     onPostalCodeChange(formatted);
-  }, [onPostalCodeChange]);
+
+    const digits = formatted.replace(/\D/g, '');
+    // När användaren skriver 1–4 siffror: rensa omedelbart tidigare träff så att varningen visas
+    if (digits.length >= 0 && digits.length < 5) {
+      setFoundLocation(null);
+      setIsValid(false);
+      setIsLoading(false);
+      if (!lastSuccessfulPostalCode.startsWith(digits)) {
+        setLastSuccessfulPostalCode('');
+      }
+    }
+  }, [onPostalCodeChange, lastSuccessfulPostalCode]);
 
   return (
     <div className={`space-y-4 ${className}`}>
