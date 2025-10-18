@@ -249,6 +249,14 @@ All colors MUST be HSL.
     margin-top: calc(-1 * env(safe-area-inset-top, 0));
     min-height: 100svh; /* Safari: small viewport height */
   }
+
+  /* EXCEPTION: Dialog panels should size to content, not full viewport */
+  .parium-panel,
+  .parium-panel.bg-parium-gradient {
+    min-height: auto !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
   
   /* Standalone mode använder full viewport */
   @media (display-mode: standalone) {
