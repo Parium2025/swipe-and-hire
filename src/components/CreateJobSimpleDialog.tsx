@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -222,7 +223,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
             <CardContent className="space-y-4 px-4 pb-4">
               <div className="space-y-2">
                 <Label htmlFor="job-title" className="text-white">Titel</Label>
-                <Input
+                <Textarea
                   id="job-title"
                   value={jobTitle}
                   onChange={(e) => {
@@ -230,9 +231,15 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                     setHasUnsavedChanges(true);
                   }}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 h-9 text-sm"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 text-sm resize-none min-h-[36px] leading-tight py-2"
                   autoComplete="off"
                   title={jobTitle}
+                  rows={1}
+                  onInput={(e) => {
+                    const target = e.target as HTMLTextAreaElement;
+                    target.style.height = 'auto';
+                    target.style.height = target.scrollHeight + 'px';
+                  }}
                 />
               </div>
 
