@@ -313,7 +313,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                                     <span className="text-xs text-blue-400 ml-2">Standard</span>
                                   )}
                                 </div>
-                                <span className="text-xs text-white/60 mt-1">{template.title}</span>
+                                <span className="text-xs text-white/60 mt-1 break-words line-clamp-2 sm:line-clamp-none">{template.title}</span>
                               </button>
                               <div className="flex gap-1 flex-shrink-0">
                                 <Button
