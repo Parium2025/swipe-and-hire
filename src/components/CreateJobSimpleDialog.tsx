@@ -457,7 +457,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
 
       {/* Delete Template Confirmation */}
       <AlertDialog open={!!templateToDelete} onOpenChange={(open) => !open && setTemplateToDelete(null)}>
-        <AlertDialogContent className="bg-slate-900/95 backdrop-blur-md border-slate-700/50">
+        <AlertDialogContent className="max-w-md bg-white/10 backdrop-blur-sm border-white/20 text-white shadow-lg">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white text-xl">Ta bort mall</AlertDialogTitle>
             <AlertDialogDescription className="text-white text-base">
@@ -466,7 +466,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-slate-700 hover:bg-slate-600 text-white border-slate-600">
+            <AlertDialogCancel className="bg-white/20 border-white/30 text-white hover:bg-white/30">
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
