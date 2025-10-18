@@ -121,45 +121,45 @@ const EmployerDashboard = memo(() => {
 
 
   return (
-    <div className="space-y-4 sm:space-y-6 pb-safe min-h-screen smooth-scroll touch-pan no-overscroll" style={{ WebkitOverflowScrolling: 'touch' }}>
+    <div className="space-y-4 pb-safe min-h-screen smooth-scroll touch-pan no-overscroll" style={{ WebkitOverflowScrolling: 'touch' }}>
       <div className="text-center px-2">
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">Mina jobbannonser</h1>
-        <p className="text-white mt-1 text-xs sm:text-sm md:text-base">
+        <h1 className="text-xl font-bold text-white">Mina jobbannonser</h1>
+        <p className="text-white mt-1 text-xs">
           Hantera dina publicerade tjänster
         </p>
       </div>
 
       {/* Stats Overview - med skeleton när loading */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+      <div className="grid gap-3 grid-cols-1">
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="pb-2 px-4 sm:px-6 pt-4 sm:pt-6">
-            <CardDescription className="text-white text-xs sm:text-sm">Totalt annonser</CardDescription>
+          <CardHeader className="pb-2 px-4 pt-4">
+            <CardDescription className="text-white text-xs">Totalt annonser</CardDescription>
             {loading ? (
-              <Skeleton className="h-6 sm:h-8 w-12 sm:w-16 bg-white/20" />
+              <Skeleton className="h-6 w-12 bg-white/20" />
             ) : (
-              <CardTitle className="text-xl sm:text-2xl text-white">{jobs.length}</CardTitle>
+              <CardTitle className="text-xl text-white">{jobs.length}</CardTitle>
             )}
           </CardHeader>
         </Card>
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="pb-2 px-4 sm:px-6 pt-4 sm:pt-6">
-            <CardDescription className="text-white text-xs sm:text-sm">Aktiva annonser</CardDescription>
+          <CardHeader className="pb-2 px-4 pt-4">
+            <CardDescription className="text-white text-xs">Aktiva annonser</CardDescription>
             {loading ? (
-              <Skeleton className="h-6 sm:h-8 w-12 sm:w-16 bg-white/20" />
+              <Skeleton className="h-6 w-12 bg-white/20" />
             ) : (
-              <CardTitle className="text-xl sm:text-2xl text-white">
+              <CardTitle className="text-xl text-white">
                 {jobs.filter(job => job.is_active).length}
               </CardTitle>
             )}
           </CardHeader>
         </Card>
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20 sm:col-span-2 md:col-span-1">
-          <CardHeader className="pb-2 px-4 sm:px-6 pt-4 sm:pt-6">
-            <CardDescription className="text-white text-xs sm:text-sm">Totala visningar</CardDescription>
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+          <CardHeader className="pb-2 px-4 pt-4">
+            <CardDescription className="text-white text-xs">Totala visningar</CardDescription>
             {loading ? (
-              <Skeleton className="h-6 sm:h-8 w-12 sm:w-16 bg-white/20" />
+              <Skeleton className="h-6 w-12 bg-white/20" />
             ) : (
-              <CardTitle className="text-xl sm:text-2xl text-white">
+              <CardTitle className="text-xl text-white">
                 {jobs.reduce((sum, job) => sum + job.views_count, 0)}
               </CardTitle>
             )}
@@ -168,7 +168,7 @@ const EmployerDashboard = memo(() => {
       </div>
 
       {/* Job Listings - med skeleton när loading */}
-      <div className="space-y-3 sm:space-y-4">
+      <div className="space-y-3">
         {loading ? (
           // Loading skeleton - 3 placeholder cards
           Array.from({ length: 3 }).map((_, i) => (
@@ -217,34 +217,34 @@ const EmployerDashboard = memo(() => {
               className="bg-white/10 backdrop-blur-sm border-white/20 cursor-pointer hover:bg-white/15 transition-colors"
               onClick={() => navigate(`/job-details/${job.id}`)}
             >
-              <CardHeader className="px-3 sm:px-4 md:px-6 py-3 sm:py-4">
-                <div className="flex flex-col sm:flex-row justify-between items-start gap-3">
+              <CardHeader className="px-3 py-3">
+                <div className="flex flex-col justify-between items-start gap-3">
                   <div className="flex-1 w-full">
                     <div className="flex flex-col gap-2">
                       <div className="flex items-start justify-between gap-2">
-                        <CardTitle className="text-base sm:text-lg md:text-xl text-white leading-tight flex-1">{job.title}</CardTitle>
+                        <CardTitle className="text-base text-white leading-tight flex-1">{job.title}</CardTitle>
                         <Badge variant={job.is_active ? "default" : "secondary"} className="text-xs whitespace-nowrap">
                           {job.is_active ? 'Aktiv' : 'Inaktiv'}
                         </Badge>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-white">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-white">
                         <div className="flex items-center gap-1">
-                          <MapPin size={12} className="sm:w-3.5 sm:h-3.5" />
-                          <span className="truncate max-w-[120px] sm:max-w-none">{job.location}</span>
+                          <MapPin size={12} />
+                          <span className="truncate max-w-[120px]">{job.location}</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Calendar size={12} className="sm:w-3.5 sm:h-3.5" />
+                          <Calendar size={12} />
                           {new Date(job.created_at).toLocaleDateString('sv-SE')}
                         </div>
                         {job.employment_type && (
-                          <Badge variant="outline" className="text-[10px] sm:text-xs bg-white/10 text-white border-white px-1.5 py-0">
+                          <Badge variant="outline" className="text-[10px] bg-white/10 text-white border-white px-1.5 py-0">
                             {getEmploymentTypeLabel(job.employment_type)}
                           </Badge>
                         )}
                       </div>
                     </div>
                   </div>
-                  <div className="hidden sm:flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                     <Switch
                       checked={job.is_active}
                       onCheckedChange={() => toggleJobStatus(job.id, job.is_active)}
@@ -253,30 +253,30 @@ const EmployerDashboard = memo(() => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 pt-0">
-                <p className="text-xs sm:text-sm text-white mb-3 sm:mb-4 line-clamp-2">
+              <CardContent className="px-3 py-3 pt-0">
+                <p className="text-xs text-white mb-3 line-clamp-2">
                   {job.description}
                 </p>
                 
                 {formatSalary(job.salary_min, job.salary_max) && (
-                  <p className="text-xs sm:text-sm font-medium mb-3 sm:mb-4 text-white">
+                  <p className="text-xs font-medium mb-3 text-white">
                     {formatSalary(job.salary_min, job.salary_max)}
                   </p>
                 )}
 
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-white">
+                <div className="flex flex-col items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 text-xs text-white">
                     <div className="flex items-center gap-1">
-                      <Eye size={12} className="sm:w-3.5 sm:h-3.5" />
+                      <Eye size={12} />
                       <span className="whitespace-nowrap">{job.views_count} visningar</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <MessageCircle size={12} className="sm:w-3.5 sm:h-3.5" />
+                      <MessageCircle size={12} />
                       <span className="whitespace-nowrap">{job.applications_count} intresserade</span>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <div className="flex items-center gap-2 w-full">
                     <Button 
                       variant="outline" 
                       size="sm"
@@ -284,7 +284,7 @@ const EmployerDashboard = memo(() => {
                         e.stopPropagation();
                         handleEditJob(job);
                       }}
-                      className="flex-1 sm:flex-none bg-white/10 border-white/20 text-white hover:bg-white/20 transition-all duration-150 active:scale-95 min-h-[44px] text-xs sm:text-sm"
+                      className="flex-1 bg-white/10 border-white/20 text-white hover:bg-white/20 transition-all duration-150 active:scale-95 min-h-[44px] text-xs"
                     >
                       <Edit size={14} className="mr-1" />
                       Redigera
@@ -296,7 +296,7 @@ const EmployerDashboard = memo(() => {
                         e.stopPropagation();
                         handleDeleteClick(job);
                       }}
-                      className="flex-1 sm:flex-none bg-white/10 border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-100 transition-all duration-150 active:scale-95 min-h-[44px] text-xs sm:text-sm"
+                      className="flex-1 bg-white/10 border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-100 transition-all duration-150 active:scale-95 min-h-[44px] text-xs"
                     >
                       <Trash2 size={14} className="mr-1" />
                       Ta bort
@@ -328,7 +328,7 @@ const EmployerDashboard = memo(() => {
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2 sm:gap-2 mt-4">
+          <AlertDialogFooter className="gap-2 mt-4">
             <AlertDialogCancel 
               onClick={() => {
                 setDeleteDialogOpen(false);
