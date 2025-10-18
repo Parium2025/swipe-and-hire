@@ -793,47 +793,40 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="max-w-md max-h-[650px] bg-parium-gradient text-white [&>button]:hidden p-0 gap-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
+      <DialogContent
+        className="
+          max-w-md sm:max-w-lg
+          w-[92vw] sm:w-full
+          max-h-[90svh]
+          p-0 gap-0
+          flex flex-col
+          overflow-hidden
+          border-none shadow-none
+          rounded-[24px] sm:rounded-2xl
+          bg-parium-gradient text-white
+        "
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <AnimatedBackground showBubbles={false} />
-        <div className="flex flex-col relative z-10">
+        <div className="flex flex-col min-h-0 relative z-10">
           {/* Header */}
-          <div className="relative flex items-center justify-center p-3 border-b border-white/20 flex-shrink-0 rounded-t-[24px] bg-background/10">
-            <DialogHeader className="text-center sm:text-center">
-              <DialogTitle className="text-white text-lg">
+          <div className="shrink-0 px-3 pt-3 pb-2 border-b border-white/10">
+            <div className="flex items-center justify-between mb-2">
+              <DialogTitle className="text-white text-sm font-medium">
                 {showQuestionForm ? 'Lägg till fråga' : (templateToEdit ? 'Redigera mall' : steps[currentStep].title)}
               </DialogTitle>
               {!showQuestionForm && (
-                <DialogDescription className="text-sm text-white/80">
+                <span className="text-white/60 text-xs">
                   Steg {currentStep + 1} av {steps.length}
-                </DialogDescription>
+                </span>
               )}
-            </DialogHeader>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={showQuestionForm ? () => setShowQuestionForm(false) : handleClose}
-              className="absolute right-4 top-4 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            </div>
+            {!showQuestionForm && <Progress value={progress} className="h-1" />}
           </div>
 
-          {/* Progress Bar */}
-          {!showQuestionForm && (
-            <div className="px-3 py-1.5 flex-shrink-0">
-              <Progress 
-                value={progress} 
-                className="h-1 bg-white/20 [&>div]:bg-white"
-              />
-            </div>
-          )}
-
           {/* Scrollable Content */}
-          <div ref={scrollContainerRef} className="overflow-y-auto p-3 space-y-2 max-h-[450px]">
+          <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto px-3 pb-3 space-y-2">
             
             {/* Question Form */}
             {showQuestionForm && editingQuestion && (
@@ -1391,7 +1384,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
           {/* Footer Navigation */}
           {!showQuestionForm && (
-            <div className="flex-shrink-0 p-4 border-t border-white/20 bg-background/10">
+            <div className="shrink-0 px-3 pb-3 pt-2 border-t border-white/10">
               <div className="flex gap-2">
                 {currentStep > 0 && (
                   <Button
