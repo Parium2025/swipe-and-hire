@@ -1634,6 +1634,13 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     <p className="text-white">{formData.workplace_name || '-'}</p>
                   </div>
                   
+                  {formData.workplace_address && (
+                    <div>
+                      <p className="text-white text-sm mb-1">Gatuadress</p>
+                      <p className="text-white">{formData.workplace_address}</p>
+                    </div>
+                  )}
+                  
                   <div>
                     <p className="text-white text-sm mb-1">Anpassade frågor</p>
                     <p className="text-white">{customQuestions.length} frågor</p>
