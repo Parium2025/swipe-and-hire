@@ -9,8 +9,9 @@ interface WorkplacePostalCodeSelectorProps {
   postalCodeValue: string;
   cityValue: string;
   onPostalCodeChange: (postalCode: string) => void;
-  onLocationChange: (location: string) => void;
+  onLocationChange: (location: string, postalCode?: string, municipality?: string, county?: string) => void;
   onValidationChange?: (isValid: boolean) => void;
+  cachedInfo?: {postalCode: string, city: string, municipality: string, county: string} | null;
   className?: string;
 }
 
@@ -20,6 +21,7 @@ const WorkplacePostalCodeSelector = ({
   onPostalCodeChange,
   onLocationChange,
   onValidationChange,
+  cachedInfo,
   className = ""
 }: WorkplacePostalCodeSelectorProps) => {
   const [foundLocation, setFoundLocation] = useState<PostalCodeResponse | null>(null);
@@ -45,6 +47,18 @@ const WorkplacePostalCodeSelector = ({
         const isValidFormat = isValidSwedishPostalCode(cleanedCode);
         setIsValid(isValidFormat);
         
+        // Check if we have cached info for this postal code
+        if (cachedInfo && cleanedCode === cachedInfo.postalCode.replace(/\s+/g, '')) {
+          setFoundLocation({
+            postalCode: cachedInfo.postalCode,
+            city: cachedInfo.city,
+            municipality: cachedInfo.municipality,
+            county: cachedInfo.county
+          });
+          setLastSuccessfulPostalCode(cleanedCode);
+          return;
+        }
+        
         // Om samma postnummer som förra gången, behåll det befintliga
         if (cleanedCode === lastSuccessfulPostalCode && foundLocation) {
           return;
@@ -58,8 +72,8 @@ const WorkplacePostalCodeSelector = ({
             
             if (location) {
               setLastSuccessfulPostalCode(cleanedCode);
-              // Skicka tillbaka bara orten (city)
-              onLocationChange(location.city);
+              // Skicka tillbaka full info för caching
+              onLocationChange(location.city, cleanedCode, location.municipality, location.county || '');
             } else {
               setLastSuccessfulPostalCode('');
             }
@@ -90,7 +104,7 @@ const WorkplacePostalCodeSelector = ({
     // Snabbare debounce för bättre användarupplevelse (200ms istället för 500ms)
     const timeoutId = setTimeout(fetchLocation, 200);
     return () => clearTimeout(timeoutId);
-  }, [postalCodeValue, onLocationChange, lastSuccessfulPostalCode, foundLocation]);
+  }, [postalCodeValue, onLocationChange, lastSuccessfulPostalCode, foundLocation, cachedInfo]);
 
   const handlePostalCodeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;

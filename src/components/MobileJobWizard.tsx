@@ -460,6 +460,7 @@ const MobileJobWizard = ({
   const [manualFocus, setManualFocus] = useState<number | null>(null);
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [editingImageUrl, setEditingImageUrl] = useState<string | null>(null);
+  const [cachedPostalCodeInfo, setCachedPostalCodeInfo] = useState<{postalCode: string, city: string, municipality: string, county: string} | null>(null);
   const [formData, setFormData] = useState<JobFormData>({
     title: jobTitle,
     description: selectedTemplate?.description || '',
@@ -1270,12 +1271,22 @@ const MobileJobWizard = ({
     handleInputChange('workplace_postal_code', postalCode);
   }, []);
 
-  const handleWorkplaceLocationChange = useCallback((location: string) => {
+  const handleWorkplaceLocationChange = useCallback((location: string, postalCode?: string, municipality?: string, county?: string) => {
     setFormData(prev => ({
       ...prev,
       workplace_city: location,
       location: location // Auto-update main location field from postal code
     }));
+    
+    // Cache postal code info if available
+    if (postalCode && location && municipality && county) {
+      setCachedPostalCodeInfo({
+        postalCode,
+        city: location,
+        municipality,
+        county
+      });
+    }
   }, []);
 
   const filteredCities = citySearchTerm.length > 0 ? filterCities(citySearchTerm) : [];
@@ -1389,6 +1400,7 @@ const MobileJobWizard = ({
       setCustomQuestions([]);
       setJobImageDisplayUrl(null);
       setOriginalImageUrl(null);
+      setCachedPostalCodeInfo(null);
       setInitialFormData(null);
       setHasUnsavedChanges(false);
       onOpenChange(false);
@@ -1424,6 +1436,7 @@ const MobileJobWizard = ({
     setCustomQuestions([]);
     setJobImageDisplayUrl(null);
     setOriginalImageUrl(null);
+    setCachedPostalCodeInfo(null);
     setInitialFormData(null);
     setHasUnsavedChanges(false);
     setShowUnsavedDialog(false);
@@ -1850,6 +1863,7 @@ const MobileJobWizard = ({
                   cityValue={formData.workplace_city}
                   onPostalCodeChange={handleWorkplacePostalCodeChange}
                   onLocationChange={handleWorkplaceLocationChange}
+                  cachedInfo={cachedPostalCodeInfo}
                 />
               </div>
             )}
