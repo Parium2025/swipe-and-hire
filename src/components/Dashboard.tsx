@@ -21,7 +21,7 @@ const Dashboard = memo(() => {
       </div>
 
       {/* Stats Grid */}
-      <div className="flex flex-wrap gap-1" >
+      <div className="flex flex-wrap gap-1 justify-center">
         <Card className="w-[160px] md:w-[180px] bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="flex flex-row items-center gap-1 space-y-0 p-2">
             <Briefcase className="h-3 w-3 text-white/70" />
