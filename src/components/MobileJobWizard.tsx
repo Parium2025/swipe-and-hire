@@ -1856,7 +1856,7 @@ const MobileJobWizard = ({
 
             {/* Step 3: Ansökningsfrågor */}
             {currentStep === 2 && (
-              <div className="space-y-6 max-w-2xl mx-auto w-full">
+              <div className="space-y-3 max-w-2xl mx-auto w-full">
                 {!showQuestionForm && !showQuestionTemplates ? (
                   <>
                     {/* Rubrik för automatiska frågor */}
@@ -1865,7 +1865,7 @@ const MobileJobWizard = ({
                     </h3>
 
                     {/* Automatiska frågor info */}
-                    <div className="bg-white/5 rounded-lg p-4 border border-white/20">
+                    <div className="bg-white/5 rounded-lg p-3 border border-white/20">
                       <div className="text-white text-sm space-y-1">
                         <p>• Namn och efternamn</p>
                         <p>• Ålder</p>
@@ -1880,7 +1880,7 @@ const MobileJobWizard = ({
                     </div>
 
                     {/* Anpassade frågor */}
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <h4 className="text-white font-medium">Anpassade frågor (valfritt)</h4>
                         <Button
@@ -1907,7 +1907,7 @@ const MobileJobWizard = ({
                             items={customQuestions.map(q => q.id!)}
                             strategy={verticalListSortingStrategy}
                           >
-                            <div className="space-y-3">
+                            <div className="space-y-2">
                               {customQuestions.map((question) => (
                                 <SortableQuestionItem
                                   key={question.id}
