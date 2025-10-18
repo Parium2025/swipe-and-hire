@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { searchOccupations } from '@/lib/occupations';
@@ -793,40 +793,47 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="
-          max-w-md sm:max-w-lg
-          w-[92vw] sm:w-full
-          max-h-[90svh]
-          p-0 gap-0
-          flex flex-col
-          overflow-hidden
-          border-none shadow-none
-          rounded-[24px] sm:rounded-2xl
-          bg-parium-gradient text-white
-        "
+      <DialogContent 
+        className="max-w-md h-[90vh] max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <AnimatedBackground showBubbles={false} />
-        <div className="flex flex-col min-h-0 relative z-10">
+        <div className="flex flex-col h-full relative z-10">
           {/* Header */}
-          <div className="shrink-0 px-3 pt-3 pb-2 border-b border-white/10">
-            <div className="flex items-center justify-between mb-2">
-              <DialogTitle className="text-white text-sm font-medium">
+          <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 rounded-t-[24px] bg-background/10">
+            <DialogHeader className="text-center sm:text-center">
+              <DialogTitle className="text-white text-lg">
                 {showQuestionForm ? 'Lägg till fråga' : (templateToEdit ? 'Redigera mall' : steps[currentStep].title)}
               </DialogTitle>
               {!showQuestionForm && (
-                <span className="text-white/60 text-xs">
+                <div className="text-sm text-white">
                   Steg {currentStep + 1} av {steps.length}
-                </span>
+                </div>
               )}
-            </div>
-            {!showQuestionForm && <Progress value={progress} className="h-1" />}
+            </DialogHeader>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={showQuestionForm ? () => setShowQuestionForm(false) : handleClose}
+              className="absolute right-4 top-4 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
 
+          {/* Progress Bar */}
+          {!showQuestionForm && (
+            <div className="px-4 py-2 flex-shrink-0">
+              <Progress 
+                value={progress} 
+                className="h-1 bg-white/20 [&>div]:bg-white"
+              />
+            </div>
+          )}
+
           {/* Scrollable Content */}
-          <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto px-3 pb-3 space-y-2">
+          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
             
             {/* Question Form */}
             {showQuestionForm && editingQuestion && (
@@ -839,7 +846,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       onChange={(e) => handleQuestionTypeSearch(e.target.value)}
                       onClick={handleQuestionTypeClick}
                       placeholder="Välj frågetyp"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer"
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
@@ -998,7 +1005,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     placeholder="t.ex. Standard Lagerarbetare"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
                 </div>
               </div>
@@ -1013,7 +1020,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
                     placeholder="t.ex. Lagerarbetare"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
                 </div>
 
@@ -1025,7 +1032,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       onChange={(e) => handleOccupationSearch(e.target.value)}
                       onFocus={() => setShowOccupationDropdown(occupationSearchTerm.length > 0)}
                       placeholder="t.ex. Mjukvaru- och systemutvecklare"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
                     
@@ -1082,7 +1089,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       onChange={(e) => handleEmploymentTypeSearch(e.target.value)}
                       onClick={handleEmploymentTypeClick}
                       placeholder="Välj anställningsform"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
@@ -1112,7 +1119,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       onChange={(e) => handleSalaryTypeSearch(e.target.value)}
                       onClick={handleSalaryTypeClick}
                       placeholder="Välj lönetyp"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
@@ -1142,7 +1149,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     value={formData.positions_count}
                     onChange={(e) => handleInputChange('positions_count', e.target.value)}
                     placeholder="1"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
                 </div>
               </div>
@@ -1159,7 +1166,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       onChange={(e) => handleWorkLocationSearch(e.target.value)}
                       onClick={handleWorkLocationClick}
                       placeholder="Välj arbetsplats"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
@@ -1189,7 +1196,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       onChange={(e) => handleRemoteWorkSearch(e.target.value)}
                       onClick={handleRemoteWorkClick}
                       placeholder="Välj alternativ"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
@@ -1217,7 +1224,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     value={formData.workplace_name}
                     onChange={(e) => handleInputChange('workplace_name', e.target.value)}
                     placeholder={profile?.company_name ? `t.ex. ${profile.company_name}` : "t.ex. IKEA Kungens Kurva"}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
                 </div>
 
@@ -1228,7 +1235,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     value={formData.contact_email}
                     onChange={(e) => handleInputChange('contact_email', e.target.value)}
                     placeholder={user?.email || "kontakt@företag.se"}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
                 </div>
 
@@ -1238,7 +1245,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     value={formData.workplace_address}
                     onChange={(e) => handleInputChange('workplace_address', e.target.value)}
                     placeholder="t.ex. Modulvägen 1"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-12 text-base focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
                 </div>
               </div>
@@ -1384,7 +1391,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
           {/* Footer Navigation */}
           {!showQuestionForm && (
-            <div className="shrink-0 px-3 pb-3 pt-2 border-t border-white/10">
+            <div className="flex-shrink-0 p-4 border-t border-white/20 bg-background/10">
               <div className="flex gap-2">
                 {currentStep > 0 && (
                   <Button

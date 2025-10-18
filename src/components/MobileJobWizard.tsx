@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
         // ... keep existing imports
         import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
-        import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+        import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
         import FileUpload from '@/components/FileUpload';
 import JobPreview from '@/components/JobPreview';
 import { useToast } from '@/hooks/use-toast';
@@ -1558,40 +1558,47 @@ const MobileJobWizard = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="
-          max-w-md sm:max-w-lg
-          w-[92vw] sm:w-full
-          max-h-[90svh]
-          p-0 gap-0
-          flex flex-col
-          overflow-hidden
-          border-none shadow-none
-          rounded-[24px] sm:rounded-2xl
-          bg-parium-gradient text-white
-        "
+      <DialogContent 
+        className="max-w-md h-[90vh] max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
         onInteractOutside={(e) => e.preventDefault()}
       >
         <AnimatedBackground showBubbles={false} />
-        <div className="flex flex-col min-h-0 relative z-10">
+        <div className="flex flex-col h-full relative z-10">
           {/* Header */}
-          <div className="shrink-0 px-3 pt-3 pb-2 border-b border-white/10">
-            <div className="flex items-center justify-between mb-2">
-              <DialogTitle className="text-white text-sm font-medium">
+          <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 rounded-t-[24px] bg-background/10">
+            <DialogHeader className="text-center sm:text-center">
+              <DialogTitle className="text-white text-lg">
                 {steps[currentStep].title}
               </DialogTitle>
-              <span className="text-white/60 text-xs">
+              <div className="text-sm text-white">
                 Steg {currentStep + 1} av {steps.length}
-              </span>
-            </div>
-            <Progress value={progress} className="h-1" />
+              </div>
+            </DialogHeader>
+            {!showQuestionTemplates && !showQuestionForm && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleClose}
+                className="absolute right-4 top-4 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          {/* Progress Bar */}
+          <div className="px-4 py-2 flex-shrink-0">
+            <Progress 
+              value={progress} 
+              className="h-1 bg-white/20 [&>div]:bg-white"
+            />
           </div>
 
           {/* Scrollable Content */}
-          <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto px-3 pb-3 space-y-2">
+          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
             {/* Step 1: Grundinfo */}
             {currentStep === 0 && (
-              <div className="space-y-2 max-w-2xl mx-auto w-full">
+              <div className="space-y-3 max-w-2xl mx-auto w-full">
                 <div className="space-y-2">
                   <Label className="text-white font-medium text-sm">Jobbtitel *</Label>
                   <Input
@@ -1663,6 +1670,8 @@ const MobileJobWizard = ({
                   />
                 </div>
 
+
+
                 <div className="space-y-2">
                   <Label className="text-white font-medium text-sm">Anställningsform *</Label>
                   <div className="relative employment-type-dropdown">
@@ -1730,7 +1739,7 @@ const MobileJobWizard = ({
 
             {/* Step 2: Var finns jobbet? */}
             {currentStep === 1 && (
-              <div className="space-y-2 max-w-2xl mx-auto w-full">
+              <div className="space-y-3 max-w-2xl mx-auto w-full">
                 <div className="space-y-2">
                   <Label className="text-white font-medium text-sm">Var utförs arbetet? *</Label>
                   <div className="relative work-location-dropdown">
@@ -2570,51 +2579,29 @@ const MobileJobWizard = ({
                                             <p className="text-[10px] text-white/60 mb-1">Alternativ:</p>
                                             <div className="space-y-1">
                                               {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => {
-                                                const selectedAnswers = previewAnswers[question.id || `q_${index}`];
-                                                const answersArray = typeof selectedAnswers === 'string' 
-                                                  ? selectedAnswers.split('|||') 
-                                                  : [];
-                                                const selected = answersArray.includes(option);
-                                                
+                                                const selected = previewAnswers[question.id || `q_${index}`] === option;
                                                 return (
                                                   <button
                                                     key={optIndex}
                                                     type="button"
-                                                    onClick={() => {
-                                                      setPreviewAnswers((prev) => {
-                                                        const currentAnswers = prev[question.id || `q_${index}`];
-                                                        const answersArray = typeof currentAnswers === 'string'
-                                                          ? currentAnswers.split('|||').filter(a => a)
-                                                          : [];
-                                                        
-                                                        const newAnswers = answersArray.includes(option)
-                                                          ? answersArray.filter(a => a !== option)
-                                                          : [...answersArray, option];
-                                                        
-                                                        return {
-                                                          ...prev,
-                                                          [question.id || `q_${index}`]: newAnswers.join('|||'),
-                                                        };
-                                                      });
-                                                    }}
+                                                    onClick={() =>
+                                                      setPreviewAnswers((prev) => ({
+                                                        ...prev,
+                                                        [question.id || `q_${index}`]: option,
+                                                      }))
+                                                    }
                                                     className={
                                                       (selected
-                                                        ? 'bg-secondary/40 border border-secondary text-white '
+                                                        ? 'bg-secondary border border-secondary text-white '
                                                         : 'bg-white/5 border border-white/10 text-white ') +
                                                       'w-full flex items-center gap-2 rounded px-2 py-1.5 hover:bg-white/10 transition-colors cursor-pointer'
                                                     }
                                                   >
                                                     <div className={
                                                       selected
-                                                        ? 'w-2.5 h-2.5 rounded-sm bg-white flex-shrink-0 flex items-center justify-center'
-                                                        : 'w-2.5 h-2.5 rounded-sm border border-white/40 flex-shrink-0'
-                                                    }>
-                                                      {selected && (
-                                                        <svg className="w-2 h-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                                        </svg>
-                                                      )}
-                                                    </div>
+                                                        ? 'w-2.5 h-2.5 rounded-full bg-white flex-shrink-0'
+                                                        : 'w-2.5 h-2.5 rounded-full border border-white/40 flex-shrink-0'
+                                                    } />
                                                     <span className="text-xs text-white/90">{option}</span>
                                                   </button>
                                                 );
@@ -2792,7 +2779,7 @@ const MobileJobWizard = ({
 
           {/* Navigation */}
           {!showQuestionTemplates && !showQuestionForm && (
-            <div className="shrink-0 px-3 pb-3 pt-2 border-t border-white/10">
+            <div className="flex items-center justify-between p-4 border-t border-white/20 flex-shrink-0">
               <Button
                 variant="ghost"
                 onClick={prevStep}
