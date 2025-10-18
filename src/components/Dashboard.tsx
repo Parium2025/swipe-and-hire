@@ -21,58 +21,50 @@ const Dashboard = memo(() => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-3 grid-cols-2">
+      <div className="grid gap-2 grid-cols-2 md:grid-cols-4">
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 pt-3">
-            <CardTitle className="text-xs font-medium text-white">
-              Totalt annonser
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-2">
+            <CardTitle className="text-[10px] font-medium text-white">Totalt annonser</CardTitle>
             <Briefcase className="h-3 w-3 text-white/70" />
           </CardHeader>
-          <CardContent className="px-3 pb-3">
-            <div className="text-xl font-bold text-white transition-all duration-300">
+          <CardContent className="px-2 pb-2">
+            <div className="text-base font-bold text-white transition-all duration-300">
               {isLoading ? '...' : stats.totalJobs}
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 pt-3">
-            <CardTitle className="text-xs font-medium text-white">
-              Aktiva annonser
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-2">
+            <CardTitle className="text-[10px] font-medium text-white">Aktiva annonser</CardTitle>
             <TrendingUp className="h-3 w-3 text-white/70" />
           </CardHeader>
-          <CardContent className="px-3 pb-3">
-            <div className="text-xl font-bold text-white transition-all duration-300">
+          <CardContent className="px-2 pb-2">
+            <div className="text-base font-bold text-white transition-all duration-300">
               {isLoading ? '...' : stats.activeJobs}
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 pt-3">
-            <CardTitle className="text-xs font-medium text-white">
-              Totala visningar
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-2">
+            <CardTitle className="text-[10px] font-medium text-white">Totala visningar</CardTitle>
             <Eye className="h-3 w-3 text-white/70" />
           </CardHeader>
-          <CardContent className="px-3 pb-3">
-            <div className="text-xl font-bold text-white transition-all duration-300">
+          <CardContent className="px-2 pb-2">
+            <div className="text-base font-bold text-white transition-all duration-300">
               {isLoading ? '...' : stats.totalViews}
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 pt-3">
-            <CardTitle className="text-xs font-medium text-white">
-              Ansökningar
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-2">
+            <CardTitle className="text-[10px] font-medium text-white">Ansökningar</CardTitle>
             <Users className="h-3 w-3 text-white/70" />
           </CardHeader>
-          <CardContent className="px-3 pb-3">
-            <div className="text-xl font-bold text-white transition-all duration-300">
+          <CardContent className="px-2 pb-2">
+            <div className="text-base font-bold text-white transition-all duration-300">
               {isLoading ? '...' : stats.totalApplications}
             </div>
           </CardContent>
