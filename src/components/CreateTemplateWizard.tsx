@@ -507,10 +507,11 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
              parseInt(formData.positions_count) > 0;
     }
     if (currentStep === 2) {
-      return formData.work_location_type && 
-             formData.remote_work_possible && 
-             formData.workplace_name.trim() && 
-             formData.contact_email.trim();
+      return (
+        !!formData.work_location_type &&
+        formData.workplace_name.trim() &&
+        formData.contact_email.trim()
+      );
     }
     return true;
   };
@@ -1390,12 +1391,12 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
           {/* Footer Navigation */}
           {!showQuestionForm && (
             <div className="flex-shrink-0 p-4 border-t border-white/20 bg-background/10">
-              <div className="flex gap-2">
+              <div className="flex items-center justify-between gap-2">
                 {currentStep > 0 && (
                   <Button
                     onClick={prevStep}
                     variant="outline"
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 shrink-0 min-w-[120px]"
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Tillbaka
@@ -1406,7 +1407,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   <Button
                     onClick={nextStep}
                     disabled={!validateCurrentStep()}
-                    className="bg-primary hover:bg-primary/90 text-white border border-white/20 hover:border-white/40"
+                    className="bg-primary hover:bg-primary/90 text-white border border-white/20 hover:border-white/40 shrink-0 min-w-[120px]"
                   >
                     Nästa
                     <ArrowRight className="h-4 w-4 ml-2" />
@@ -1417,7 +1418,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   <Button
                     onClick={handleSubmit}
                     disabled={loading || !validateCurrentStep()}
-                    className="flex-1 bg-primary hover:bg-primary/90"
+                    className="bg-primary hover:bg-primary/90 text-white shrink-0 min-w-[120px]"
                   >
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {templateToEdit ? 'Uppdatera mall' : 'Skapa mall'}
