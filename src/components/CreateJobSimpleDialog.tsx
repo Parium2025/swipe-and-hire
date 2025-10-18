@@ -457,7 +457,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
 
       {/* Delete Template Confirmation */}
       <AlertDialog open={!!templateToDelete} onOpenChange={(open) => !open && setTemplateToDelete(null)}>
-        <AlertDialogContent className="bg-gradient-to-br from-slate-900 to-slate-800 border-slate-700">
+        <AlertDialogContent className="bg-slate-900/95 backdrop-blur-md border-slate-700/50">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-white text-xl">Ta bort mall</AlertDialogTitle>
             <AlertDialogDescription className="text-white text-base">
