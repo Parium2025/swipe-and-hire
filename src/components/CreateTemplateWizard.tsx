@@ -510,9 +510,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       return formData.work_location_type && 
              formData.remote_work_possible && 
              formData.workplace_name.trim() && 
-             formData.contact_email.trim() && 
-             formData.workplace_postal_code.trim() && 
-             formData.workplace_city.trim();
+             formData.contact_email.trim();
     }
     return true;
   };
@@ -1408,7 +1406,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   <Button
                     onClick={nextStep}
                     disabled={!validateCurrentStep()}
-                    className="flex-1"
+                    className="bg-primary hover:bg-primary/90 text-white border border-white/20 hover:border-white/40"
                   >
                     Nästa
                     <ArrowRight className="h-4 w-4 ml-2" />
@@ -1419,7 +1417,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   <Button
                     onClick={handleSubmit}
                     disabled={loading || !validateCurrentStep()}
-                    className="flex-1"
+                    className="flex-1 bg-primary hover:bg-primary/90"
                   >
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {templateToEdit ? 'Uppdatera mall' : 'Skapa mall'}
