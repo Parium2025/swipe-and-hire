@@ -1102,7 +1102,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
           <AnimatedBackground showBubbles={false} />
-          <div className="flex flex-col h-full relative z-10">
+          <div className="flex flex-col md:h-auto relative z-10">
             {/* Header */}
             <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 rounded-t-[24px] bg-background/10">
               <DialogHeader className="text-center sm:text-center">
