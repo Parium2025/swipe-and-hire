@@ -1598,8 +1598,8 @@ const MobileJobWizard = ({
           <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
             {/* Step 1: Grundinfo */}
             {currentStep === 0 && (
-              <div className="space-y-3 max-w-2xl mx-auto w-full">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-4xl mx-auto w-full">
+                <div className="space-y-2 md:col-span-1">
                   <Label className="text-white font-medium text-sm">Jobbtitel *</Label>
                   <Input
                     value={formData.title}
@@ -1609,7 +1609,7 @@ const MobileJobWizard = ({
                   />
                 </div>
 
-                 <div className="space-y-2">
+                 <div className="space-y-2 md:col-span-1">
                   <Label className="text-white font-medium text-sm">Yrke *</Label>
                   <div className="relative occupation-dropdown">
                     <Input
@@ -1659,7 +1659,7 @@ const MobileJobWizard = ({
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 md:col-span-2">
                   <Label className="text-white font-medium text-sm">Jobbeskrivning *</Label>
                   <Textarea
                     value={formData.description}
@@ -1670,9 +1670,7 @@ const MobileJobWizard = ({
                   />
                 </div>
 
-
-
-                <div className="space-y-2">
+                <div className="space-y-2 md:col-span-1">
                   <Label className="text-white font-medium text-sm">Anställningsform *</Label>
                   <div className="relative employment-type-dropdown">
                     <Input
@@ -1703,7 +1701,7 @@ const MobileJobWizard = ({
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 md:col-span-1">
                   <Label className="text-white font-medium text-sm">Lönetyp</Label>
                   <div className="relative salary-type-dropdown">
                     <Input
@@ -1739,8 +1737,8 @@ const MobileJobWizard = ({
 
             {/* Step 2: Var finns jobbet? */}
             {currentStep === 1 && (
-              <div className="space-y-3 max-w-2xl mx-auto w-full">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-4xl mx-auto w-full">
+                <div className="space-y-2 md:col-span-1">
                   <Label className="text-white font-medium text-sm">Var utförs arbetet? *</Label>
                   <div className="relative work-location-dropdown">
                     <Input
@@ -1771,7 +1769,7 @@ const MobileJobWizard = ({
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 md:col-span-1">
                   <Label className="text-white font-medium text-sm">Är distansarbete möjligt? *</Label>
                   <div className="relative remote-work-dropdown">
                     <Input
@@ -1802,7 +1800,7 @@ const MobileJobWizard = ({
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 md:col-span-1">
                   <Label className="text-white font-medium text-sm">Arbetsplatsens namn *</Label>
                   <Input
                     value={formData.workplace_name}
@@ -1812,7 +1810,7 @@ const MobileJobWizard = ({
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 md:col-span-1">
                   <Label className="text-white font-medium text-sm">Kontakt e-mail *</Label>
                   <Input
                     type="email"
@@ -1823,7 +1821,7 @@ const MobileJobWizard = ({
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 md:col-span-2">
                   <Label className="text-white font-medium text-sm">Gatuadress (frivilligt)</Label>
                   <Input
                     value={formData.workplace_address}
@@ -1833,12 +1831,14 @@ const MobileJobWizard = ({
                   />
                 </div>
 
-                <WorkplacePostalCodeSelector
-                  postalCodeValue={formData.workplace_postal_code}
-                  cityValue={formData.workplace_city}
-                  onPostalCodeChange={handleWorkplacePostalCodeChange}
-                  onLocationChange={handleWorkplaceLocationChange}
-                />
+                <div className="md:col-span-2">
+                  <WorkplacePostalCodeSelector
+                    postalCodeValue={formData.workplace_postal_code}
+                    cityValue={formData.workplace_city}
+                    onPostalCodeChange={handleWorkplacePostalCodeChange}
+                    onLocationChange={handleWorkplaceLocationChange}
+                  />
+                </div>
               </div>
             )}
 
