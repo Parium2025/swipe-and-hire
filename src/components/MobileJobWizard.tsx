@@ -2578,13 +2578,27 @@ const MobileJobWizard = ({
                                             <p className="text-[10px] text-white/60 mb-1">Alternativ:</p>
                                             <div className="space-y-1">
                                               {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => (
-                                                <div
+                                                <button
                                                   key={optIndex}
-                                                  className="flex items-center gap-2 bg-white/5 rounded px-2 py-1.5 border border-white/10"
+                                                  type="button"
+                                                  onClick={(e) => {
+                                                    e.preventDefault();
+                                                    const parent = e.currentTarget.parentElement;
+                                                    const buttons = parent?.querySelectorAll('button');
+                                                    buttons?.forEach(btn => {
+                                                      const circle = btn.querySelector('.w-2\\.5');
+                                                      circle?.classList.remove('bg-white');
+                                                      circle?.classList.add('border-white/40');
+                                                    });
+                                                    const circle = e.currentTarget.querySelector('.w-2\\.5');
+                                                    circle?.classList.remove('border-white/40');
+                                                    circle?.classList.add('bg-white');
+                                                  }}
+                                                  className="w-full flex items-center gap-2 bg-white/5 rounded px-2 py-1.5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
                                                 >
                                                   <div className="w-2.5 h-2.5 rounded-full border border-white/40 flex-shrink-0"></div>
                                                   <span className="text-xs text-white/90">{option}</span>
-                                                </div>
+                                                </button>
                                               ))}
                                             </div>
                                           </div>
