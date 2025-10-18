@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
         // ... keep existing imports
         import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
-        import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+        import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
         import FileUpload from '@/components/FileUpload';
 import JobPreview from '@/components/JobPreview';
 import { useToast } from '@/hooks/use-toast';
@@ -1559,7 +1559,7 @@ const MobileJobWizard = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="max-w-md h-[90vh] max-h-[650px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
+        className="max-w-md max-h-[650px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
         onInteractOutside={(e) => e.preventDefault()}
       >
         <AnimatedBackground showBubbles={false} />
@@ -1570,9 +1570,9 @@ const MobileJobWizard = ({
               <DialogTitle className="text-white text-lg">
                 {steps[currentStep].title}
               </DialogTitle>
-              <div className="text-sm text-white">
+              <DialogDescription className="text-sm text-white/80">
                 Steg {currentStep + 1} av {steps.length}
-              </div>
+              </DialogDescription>
             </DialogHeader>
             {!showQuestionTemplates && !showQuestionForm && (
               <Button

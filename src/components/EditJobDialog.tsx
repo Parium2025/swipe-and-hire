@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES, normalizeEmploymentType, getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, GripVertical, Pencil, Briefcase, MapPin, Mail, Banknote, Users, FileText, Video, Bookmark, Heart, Building2 } from 'lucide-react';
@@ -1097,7 +1097,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent 
-          className="max-w-md h-[90vh] max-h-[650px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
+          className="max-w-md max-h-[650px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
@@ -1109,9 +1109,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                 <DialogTitle className="text-white text-lg">
                   {steps[currentStep].title}
                 </DialogTitle>
-                <div className="text-sm text-white">
+                <DialogDescription className="text-sm text-white/80">
                   Steg {currentStep + 1} av {steps.length}
-                </div>
+                </DialogDescription>
               </DialogHeader>
               {!showQuestionTemplates && !showQuestionForm && (
                 <Button
