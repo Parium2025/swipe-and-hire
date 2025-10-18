@@ -433,6 +433,7 @@ const MobileJobWizard = ({
   const [showRemoteWorkDropdown, setShowRemoteWorkDropdown] = useState(false);
   const [showHingePreview, setShowHingePreview] = useState(false);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
+  const [previewAnswers, setPreviewAnswers] = useState<Record<string, string>>({});
   const [hingeMode, setHingeMode] = useState<'ad' | 'apply'>('ad');
   const screenRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
@@ -2536,37 +2537,37 @@ const MobileJobWizard = ({
                                         
                                         {question.question_type === 'yes_no' && (
                                           <div className="flex gap-1.5">
-                                            <button 
+                                            <button
                                               type="button"
-                                              onClick={(e) => {
-                                                e.preventDefault();
-                                                const parent = e.currentTarget.parentElement;
-                                                const buttons = parent?.querySelectorAll('button');
-                                                buttons?.forEach(btn => {
-                                                  btn.classList.remove('bg-secondary', 'border-secondary', 'text-white');
-                                                  btn.classList.add('bg-white/10', 'border-white/20');
-                                                });
-                                                e.currentTarget.classList.remove('bg-white/10', 'border-white/20');
-                                                e.currentTarget.classList.add('bg-secondary', 'border-secondary', 'text-white');
-                                              }}
-                                              className="flex-1 bg-white/10 border border-white/20 rounded-md px-2 py-1 text-xs text-white transition-colors font-medium"
+                                              onClick={() =>
+                                                setPreviewAnswers((prev) => ({
+                                                  ...prev,
+                                                  [question.id || `q_${index}`]: 'yes',
+                                                }))
+                                              }
+                                              className={
+                                                (previewAnswers[question.id || `q_${index}`] === 'yes'
+                                                  ? 'bg-secondary border border-secondary text-white '
+                                                  : 'bg-white/10 border border-white/20 text-white ') +
+                                                'rounded-md px-2 py-1 text-xs transition-colors font-medium flex-1'
+                                              }
                                             >
                                               Ja
                                             </button>
-                                            <button 
+                                            <button
                                               type="button"
-                                              onClick={(e) => {
-                                                e.preventDefault();
-                                                const parent = e.currentTarget.parentElement;
-                                                const buttons = parent?.querySelectorAll('button');
-                                                buttons?.forEach(btn => {
-                                                  btn.classList.remove('bg-secondary', 'border-secondary', 'text-white');
-                                                  btn.classList.add('bg-white/10', 'border-white/20');
-                                                });
-                                                e.currentTarget.classList.remove('bg-white/10', 'border-white/20');
-                                                e.currentTarget.classList.add('bg-secondary', 'border-secondary', 'text-white');
-                                              }}
-                                              className="flex-1 bg-white/10 border border-white/20 rounded-md px-2 py-1 text-xs text-white transition-colors font-medium"
+                                              onClick={() =>
+                                                setPreviewAnswers((prev) => ({
+                                                  ...prev,
+                                                  [question.id || `q_${index}`]: 'no',
+                                                }))
+                                              }
+                                              className={
+                                                (previewAnswers[question.id || `q_${index}`] === 'no'
+                                                  ? 'bg-secondary border border-secondary text-white '
+                                                  : 'bg-white/10 border border-white/20 text-white ') +
+                                                'rounded-md px-2 py-1 text-xs transition-colors font-medium flex-1'
+                                              }
                                             >
                                               Nej
                                             </button>
@@ -2577,29 +2578,34 @@ const MobileJobWizard = ({
                                           <div className="space-y-1">
                                             <p className="text-[10px] text-white/60 mb-1">Alternativ:</p>
                                             <div className="space-y-1">
-                                              {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => (
-                                                <button
-                                                  key={optIndex}
-                                                  type="button"
-                                                  onClick={(e) => {
-                                                    e.preventDefault();
-                                                    const parent = e.currentTarget.parentElement;
-                                                    const buttons = parent?.querySelectorAll('button');
-                                                    buttons?.forEach(btn => {
-                                                      const circle = btn.querySelector('.w-2\\.5');
-                                                      circle?.classList.remove('bg-white');
-                                                      circle?.classList.add('border-white/40');
-                                                    });
-                                                    const circle = e.currentTarget.querySelector('.w-2\\.5');
-                                                    circle?.classList.remove('border-white/40');
-                                                    circle?.classList.add('bg-white');
-                                                  }}
-                                                  className="w-full flex items-center gap-2 bg-white/5 rounded px-2 py-1.5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
-                                                >
-                                                  <div className="w-2.5 h-2.5 rounded-full border border-white/40 flex-shrink-0"></div>
-                                                  <span className="text-xs text-white/90">{option}</span>
-                                                </button>
-                                              ))}
+                                              {question.options?.filter(opt => opt.trim() !== '').map((option, optIndex) => {
+                                                const selected = previewAnswers[question.id || `q_${index}`] === option;
+                                                return (
+                                                  <button
+                                                    key={optIndex}
+                                                    type="button"
+                                                    onClick={() =>
+                                                      setPreviewAnswers((prev) => ({
+                                                        ...prev,
+                                                        [question.id || `q_${index}`]: option,
+                                                      }))
+                                                    }
+                                                    className={
+                                                      (selected
+                                                        ? 'bg-secondary border border-secondary text-white '
+                                                        : 'bg-white/5 border border-white/10 text-white ') +
+                                                      'w-full flex items-center gap-2 rounded px-2 py-1.5 hover:bg-white/10 transition-colors cursor-pointer'
+                                                    }
+                                                  >
+                                                    <div className={
+                                                      selected
+                                                        ? 'w-2.5 h-2.5 rounded-full bg-white flex-shrink-0'
+                                                        : 'w-2.5 h-2.5 rounded-full border border-white/40 flex-shrink-0'
+                                                    } />
+                                                    <span className="text-xs text-white/90">{option}</span>
+                                                  </button>
+                                                );
+                                              })}
                                             </div>
                                           </div>
                                         )}
