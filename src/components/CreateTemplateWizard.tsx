@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, GripVertical, Search } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, GripVertical, Search, Pencil } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Switch } from '@/components/ui/switch';
@@ -34,6 +34,7 @@ import { CSS } from '@dnd-kit/utilities';
 
 interface JobQuestion {
   id?: string;
+  template_id?: string; // Link to template for syncing updates
   question_text: string;
   question_type: 'text' | 'yes_no' | 'multiple_choice' | 'number' | 'date' | 'file' | 'range' | 'video';
   options?: string[];
@@ -42,6 +43,7 @@ interface JobQuestion {
   min_value?: number;
   max_value?: number;
   placeholder_text?: string;
+  usage_count?: number;
 }
 
 interface TemplateFormData {
@@ -142,7 +144,7 @@ const SortableQuestionItem = ({
             size="sm"
             className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
           >
-            ✏️
+            <Pencil className="h-4 w-4" />
           </Button>
           <Button
             onClick={() => onDelete(question.id!)}
@@ -164,6 +166,9 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
   const [profile, setProfile] = useState<any>(null);
   const [customQuestions, setCustomQuestions] = useState<JobQuestion[]>([]);
   const [showQuestionForm, setShowQuestionForm] = useState(false);
+  const [showQuestionTemplates, setShowQuestionTemplates] = useState(false);
+  const [questionTemplates, setQuestionTemplates] = useState<JobQuestion[]>([]);
+  const [questionSearchTerm, setQuestionSearchTerm] = useState('');
   const [editingQuestion, setEditingQuestion] = useState<JobQuestion | null>(null);
   const [employmentTypeSearchTerm, setEmploymentTypeSearchTerm] = useState('');
   const [showEmploymentTypeDropdown, setShowEmploymentTypeDropdown] = useState(false);
@@ -248,8 +253,39 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
     if (open) {
       fetchProfile();
+      fetchQuestionTemplates();
     }
   }, [user, open]);
+
+  // Fetch question templates from database
+  const fetchQuestionTemplates = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('job_question_templates')
+        .select('*')
+        .eq('employer_id', user.id)
+        .order('question_text', { ascending: true });
+      
+      if (error) throw error;
+      
+      const mappedTemplates = (data || []).map(template => ({
+        id: template.id,
+        question_text: template.question_text,
+        question_type: template.question_type as 'text' | 'yes_no' | 'multiple_choice' | 'number' | 'date' | 'file' | 'range' | 'video',
+        options: template.options as string[] || [],
+        is_required: true,
+        order_index: 0,
+        placeholder_text: template.placeholder_text || undefined,
+        usage_count: template.usage_count
+      }));
+      
+      setQuestionTemplates(mappedTemplates as any);
+    } catch (error) {
+      console.error('Error fetching question templates:', error);
+    }
+  };
 
   // Load template data when editing
   useEffect(() => {
@@ -666,8 +702,12 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
   // Question management functions
   const addCustomQuestion = () => {
+    // Show template list first
+    setShowQuestionTemplates(true);
+  };
+  
+  const createNewQuestion = () => {
     const newQuestion: JobQuestion = {
-      id: `temp_${Date.now()}`,
       question_text: '',
       question_type: 'text',
       is_required: true,
@@ -675,11 +715,41 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       options: []
     };
     setEditingQuestion(newQuestion);
+    setShowQuestionTemplates(false);
     setShowQuestionForm(true);
   };
+  
+  const useQuestionTemplate = async (template: any) => {
+    // Filter out empty options before adding
+    const filteredOptions = template.options?.filter((opt: string) => opt.trim() !== '') || [];
+    
+    // Add template to questions with link to template
+    const newQuestion: JobQuestion = {
+      id: `temp_${Date.now()}`,
+      template_id: template.id, // Save template ID for syncing
+      question_text: template.question_text,
+      question_type: template.question_type,
+      is_required: true,
+      order_index: customQuestions.length,
+      options: filteredOptions
+    };
+    
+    setCustomQuestions(prev => [...prev, newQuestion]);
+    setShowQuestionTemplates(false);
+    
+    // Increment usage count
+    try {
+      await supabase
+        .from('job_question_templates')
+        .update({ usage_count: template.usage_count + 1 })
+        .eq('id', template.id);
+    } catch (error) {
+      console.error('Error updating template usage:', error);
+    }
+  };
 
-  const saveCustomQuestion = () => {
-    if (!editingQuestion?.question_text.trim()) return;
+  const saveCustomQuestion = async () => {
+    if (!editingQuestion?.question_text.trim() || !user) return;
     
     const filteredQuestion = {
       ...editingQuestion,
@@ -688,12 +758,74 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         : editingQuestion.options
     };
     
-    if (customQuestions.find(q => q.id === filteredQuestion.id)) {
+    if (filteredQuestion.id) {
+      // Update existing question
       setCustomQuestions(prev => 
         prev.map(q => q.id === filteredQuestion.id ? filteredQuestion : q)
       );
+      
+      // If question is linked to a template, update the template too
+      if (filteredQuestion.template_id) {
+        try {
+          await supabase
+            .from('job_question_templates')
+            .update({
+              question_text: filteredQuestion.question_text,
+              question_type: filteredQuestion.question_type,
+              options: filteredQuestion.options,
+              placeholder_text: filteredQuestion.placeholder_text,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', filteredQuestion.template_id);
+          
+          // Refresh templates to show updated version
+          await fetchQuestionTemplates();
+        } catch (error) {
+          console.error('Error updating question template:', error);
+          toast({
+            title: "Kunde inte uppdatera mall",
+            description: "Frågan är uppdaterad men mallen kunde inte synkroniseras",
+            variant: "destructive",
+          });
+        }
+      }
     } else {
-      setCustomQuestions(prev => [...prev, filteredQuestion]);
+      // Add new question
+      const newQuestion = {
+        ...filteredQuestion,
+        id: `temp_${Date.now()}`,
+        order_index: customQuestions.length
+      };
+      setCustomQuestions(prev => [...prev, newQuestion]);
+      
+      // Save as template for future use
+      try {
+        const { data, error } = await supabase
+          .from('job_question_templates')
+          .insert({
+            employer_id: user.id,
+            question_text: filteredQuestion.question_text,
+            question_type: filteredQuestion.question_type,
+            options: filteredQuestion.options,
+            placeholder_text: filteredQuestion.placeholder_text
+          })
+          .select()
+          .single();
+        
+        if (error) throw error;
+        
+        // Link the new question to its template
+        if (data) {
+          setCustomQuestions(prev => 
+            prev.map(q => q.id === newQuestion.id ? { ...q, template_id: data.id } : q)
+          );
+        }
+        
+        // Refresh templates
+        await fetchQuestionTemplates();
+      } catch (error) {
+        console.error('Error saving question template:', error);
+      }
     }
     
     setShowQuestionForm(false);
@@ -811,14 +943,16 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                 </div>
               )}
             </DialogHeader>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={showQuestionForm ? () => setShowQuestionForm(false) : handleClose}
-              className="absolute right-4 top-4 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            {!showQuestionForm && !showQuestionTemplates && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleClose}
+                className="absolute right-4 top-4 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
           </div>
 
           {/* Progress Bar */}
@@ -1253,68 +1387,216 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
             {/* Step 3: Ansökningsfrågor - EXAKT SAMMA SOM MOBILEJOBWIZARD */}
             {!showQuestionForm && currentStep === 3 && (
               <div className="space-y-6 max-w-2xl mx-auto w-full">
-                {/* Rubrik för automatiska frågor */}
-                <h3 className="text-white text-sm font-medium text-center">
-                  Dessa frågor fylls automatiskt från jobbsökarens profil
-                </h3>
+                {!showQuestionTemplates ? (
+                  <>
+                    {/* Rubrik för automatiska frågor */}
+                    <h3 className="text-white text-sm font-medium text-center">
+                      Dessa frågor fylls automatiskt från jobbsökarens profil
+                    </h3>
 
-                {/* Automatiska frågor info */}
-                <div className="bg-white/5 rounded-lg p-4 border border-white/20">
-                  <div className="text-white text-sm space-y-1">
-                    <p>• Namn och efternamn</p>
-                    <p>• Ålder</p>
-                    <p>• E-post</p>
-                    <p>• Telefonnummer</p>
-                    <p>• Ort/stad</p>
-                    <p>• Presentation</p>
-                    <p>• CV</p>
-                    <p>• Nuvarande anställningsform</p>
-                    <p>• Tillgänglighet</p>
-                  </div>
-                </div>
+                    {/* Automatiska frågor info */}
+                    <div className="bg-white/5 rounded-lg p-4 border border-white/20">
+                      <div className="text-white text-sm space-y-1">
+                        <p>• Namn och efternamn</p>
+                        <p>• Ålder</p>
+                        <p>• E-post</p>
+                        <p>• Telefonnummer</p>
+                        <p>• Ort/stad</p>
+                        <p>• Presentation</p>
+                        <p>• CV</p>
+                        <p>• Nuvarande anställningsform</p>
+                        <p>• Tillgänglighet</p>
+                      </div>
+                    </div>
 
-                {/* Anpassade frågor */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-white font-medium">Anpassade frågor (valfritt)</h4>
+                    {/* Anpassade frågor */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-white font-medium">Anpassade frågor (valfritt)</h4>
+                        <Button
+                          onClick={addCustomQuestion}
+                          size="sm"
+                          className="bg-primary hover:bg-primary/90 text-white"
+                        >
+                          <Plus className="h-4 w-4 mr-1 text-[hsl(var(--pure-white))]" />
+                          Lägg till fråga
+                        </Button>
+                      </div>
+                      
+                      {customQuestions.length === 0 ? (
+                        <div className="text-white text-sm bg-white/5 rounded-lg p-3 border border-white/20">
+                          Saknas något? Klicka på "Lägg till fråga" och skapa de frågor du vill att kandidaten ska svara på
+                        </div>
+                      ) : (
+                        <DndContext
+                          sensors={sensors}
+                          collisionDetection={closestCenter}
+                          onDragEnd={handleDragEnd}
+                        >
+                          <SortableContext
+                            items={customQuestions.map(q => q.id!)}
+                            strategy={verticalListSortingStrategy}
+                          >
+                            <div className="space-y-3">
+                              {customQuestions.map((question) => (
+                                <SortableQuestionItem
+                                  key={question.id}
+                                  question={question}
+                                  onEdit={editCustomQuestion}
+                                  onDelete={deleteCustomQuestion}
+                                />
+                              ))}
+                            </div>
+                          </SortableContext>
+                        </DndContext>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  /* Template Selection */
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-white font-medium text-lg">Välj fråga</h3>
+                      <Button
+                        onClick={() => {
+                          setShowQuestionTemplates(false);
+                          setQuestionSearchTerm('');
+                        }}
+                        variant="ghost"
+                        size="sm"
+                        className="text-white/70 hover:text-white hover:bg-white/10"
+                      >
+                        <X className="h-4 w-4 text-[hsl(var(--pure-white))]" />
+                      </Button>
+                    </div>
+
+                    <div className="relative">
+                      <Input
+                        value={questionSearchTerm}
+                        onChange={(e) => setQuestionSearchTerm(e.target.value)}
+                        placeholder="Sök efter fråga..."
+                        className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
+                      />
+                    </div>
+
                     <Button
-                      onClick={addCustomQuestion}
+                      onClick={createNewQuestion}
                       size="sm"
-                      className="bg-primary hover:bg-primary/90 text-white"
+                      className="w-full bg-primary hover:bg-primary/90 text-white"
                     >
                       <Plus className="h-4 w-4 mr-1 text-[hsl(var(--pure-white))]" />
-                      Lägg till fråga
+                      Skapa ny fråga
                     </Button>
-                  </div>
-                  
-                  {customQuestions.length === 0 ? (
-                    <div className="text-white text-sm bg-white/5 rounded-lg p-3 border border-white/20">
-                      Saknas något? Klicka på "Lägg till fråga" och skapa de frågor du vill att kandidaten ska svara på
+
+                    <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                      {(() => {
+                        const filteredTemplates = questionTemplates.filter(template => 
+                          template.question_text.toLowerCase().includes(questionSearchTerm.toLowerCase())
+                        );
+
+                        if (filteredTemplates.length === 0) {
+                          return (
+                            <div className="text-white/60 text-sm text-center py-8">
+                              Du har inga sparade frågor än
+                            </div>
+                          );
+                        }
+
+                        const groupedQuestions = {
+                          yes_no: filteredTemplates.filter(t => t.question_type === 'yes_no'),
+                          text: filteredTemplates.filter(t => t.question_type === 'text'),
+                          number: filteredTemplates.filter(t => t.question_type === 'number'),
+                          multiple_choice: filteredTemplates.filter(t => t.question_type === 'multiple_choice'),
+                        };
+
+                        const typeLabels = {
+                          yes_no: 'Ja/Nej',
+                          text: 'Text',
+                          number: 'Siffra',
+                          multiple_choice: 'Flerval'
+                        };
+
+                        return (
+                          <>
+                            {Object.entries(groupedQuestions).map(([type, templates]) => {
+                              if (templates.length === 0) return null;
+                              
+                              return (
+                                <div key={type} className="space-y-2">
+                                  <h4 className="text-white text-sm font-semibold px-1 pt-2">
+                                    {typeLabels[type as keyof typeof typeLabels]}
+                                  </h4>
+                                  {templates.map((template) => (
+                                    <div
+                                      key={template.id}
+                                      className="w-full bg-white/5 rounded-md p-2 border border-white/20 flex items-center justify-between gap-2"
+                                    >
+                                      <button
+                                        onClick={() => useQuestionTemplate(template)}
+                                        className="flex-1 text-left hover:opacity-80 transition-opacity min-w-0"
+                                      >
+                                        <div className="text-white font-medium text-xs leading-tight truncate">
+                                          {template.question_text}
+                                        </div>
+                                      </button>
+                                      <div className="flex items-center gap-1">
+                                        <Button
+                                          onClick={() => {
+                                            // Edit template - open it in edit mode
+                                            setEditingQuestion({
+                                              ...template,
+                                              template_id: template.id
+                                            });
+                                            setShowQuestionTemplates(false);
+                                            setShowQuestionForm(true);
+                                          }}
+                                          variant="ghost"
+                                          size="sm"
+                                          className="text-primary hover:text-primary hover:bg-primary/15 h-6 w-6 p-0 flex-shrink-0"
+                                        >
+                                          <Pencil className="h-3 w-3 text-[hsl(var(--pure-white))]" />
+                                        </Button>
+                                        <Button
+                                          onClick={async () => {
+                                            if (!template.id) return;
+                                            try {
+                                              const { error } = await supabase
+                                                .from('job_question_templates')
+                                                .delete()
+                                                .eq('id', template.id);
+                                              
+                                              if (error) throw error;
+                                              
+                                              setQuestionTemplates(prev => prev.filter(t => t.id !== template.id));
+                                              toast({
+                                                title: "Fråga borttagen"
+                                              });
+                                            } catch (error) {
+                                              console.error('Error deleting template:', error);
+                                              toast({
+                                                title: "Kunde inte ta bort frågan",
+                                                variant: "destructive"
+                                              });
+                                            }
+                                          }}
+                                          variant="ghost"
+                                          size="sm"
+                                          className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-6 w-6 p-0 flex-shrink-0"
+                                        >
+                                          <Trash2 className="h-3 w-3" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            })}
+                          </>
+                        );
+                      })()}
                     </div>
-                  ) : (
-                    <DndContext
-                      sensors={sensors}
-                      collisionDetection={closestCenter}
-                      onDragEnd={handleDragEnd}
-                    >
-                      <SortableContext
-                        items={customQuestions.map(q => q.id!)}
-                        strategy={verticalListSortingStrategy}
-                      >
-                        <div className="space-y-3">
-                          {customQuestions.map((question) => (
-                            <SortableQuestionItem
-                              key={question.id}
-                              question={question}
-                              onEdit={editCustomQuestion}
-                              onDelete={deleteCustomQuestion}
-                            />
-                          ))}
-                        </div>
-                      </SortableContext>
-                    </DndContext>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             )}
 
