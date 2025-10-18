@@ -123,13 +123,11 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     const template = templates.find(t => t.id === templateId);
     if (template) {
       setSelectedTemplate(template as any);
-      if (!jobTitle) {
-        setJobTitle(template.title);
-      }
+      setJobTitle(template.title);
       setHasUnsavedChanges(true);
     }
     setTemplateMenuOpen(false);
-  }, [templates, jobTitle]);
+  }, [templates]);
 
   // Filter templates based on search term
   const filteredTemplates = useMemo(
