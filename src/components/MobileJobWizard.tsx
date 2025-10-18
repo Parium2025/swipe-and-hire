@@ -1666,7 +1666,7 @@ const MobileJobWizard = ({
                     onChange={(e) => handleInputChange('description', e.target.value)}
                     placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
                     rows={3}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 p-2 text-sm resize-none leading-tight focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 p-2 text-sm resize-none leading-tight focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0 min-h-[80px] sm:min-h-[200px]"
                   />
                 </div>
 
