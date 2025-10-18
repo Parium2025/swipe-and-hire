@@ -1563,7 +1563,7 @@ const MobileJobWizard = ({
         onInteractOutside={(e) => e.preventDefault()}
       >
         <AnimatedBackground showBubbles={false} />
-        <div className="flex flex-col h-full relative z-10">
+        <div className="flex flex-col max-h-[90vh] relative z-10 overflow-hidden">
           {/* Header */}
           <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 rounded-t-[24px] bg-background/10">
             <DialogHeader className="text-center sm:text-center">
@@ -1595,7 +1595,7 @@ const MobileJobWizard = ({
           </div>
 
           {/* Scrollable Content */}
-          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-2">
+          <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto p-4 space-y-2">
             {/* Step 1: Grundinfo */}
             {currentStep === 0 && (
               <div className="space-y-1.5 max-w-2xl mx-auto w-full">
