@@ -196,7 +196,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
           </Button>
         </DialogTrigger>
           <DialogContent 
-            className="w-[92vw] max-w-xl sm:max-w-2xl bg-card-parium text-white backdrop-blur-md border-white/20 [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl transition-all duration-200 ease-out animate-scale-in"
+            className="max-w-md bg-card-parium text-white backdrop-blur-md border-white/20 [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl transition-all duration-200 ease-out animate-scale-in"
             onInteractOutside={(e) => e.preventDefault()}
             onEscapeKeyDown={(e) => e.preventDefault()}
           >
@@ -259,7 +259,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent 
-                      className="w-[28rem] sm:w-[36rem] bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-96 animate-scale-in"
+                      className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-96 animate-scale-in"
                       side="bottom"
                       align="center"
                       alignOffset={0}
