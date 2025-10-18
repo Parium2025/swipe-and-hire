@@ -150,7 +150,7 @@ const WorkplacePostalCodeSelector = ({
           </div>
           
           {/* Validering meddelande */}
-          {postalCodeValue && !isValid && postalCodeValue.replace(/\D/g, '').length >= 5 && (
+          {postalCodeValue && !isValid && !isLoading && !foundLocation && postalCodeValue.replace(/\D/g, '').length >= 5 && (
             <p className="text-xs text-red-300 mt-1">
               Postnummer ska vara 5 siffror (t.ex. 136 55)
             </p>
