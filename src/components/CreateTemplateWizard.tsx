@@ -106,38 +106,33 @@ const SortableQuestionItem = ({
     <div
       ref={setNodeRef}
       style={style}
-      className="bg-white/5 rounded-lg p-4 border border-white/20"
+      className="bg-white/5 rounded-md p-2 border border-white/20"
     >
-      <div className="flex items-start justify-between">
-        <div className="flex items-start gap-3 flex-1">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5 flex-1 min-w-0">
           <div
             {...attributes}
             {...listeners}
-            className="text-white hover:text-white cursor-grab active:cursor-grabbing pt-1 touch-none"
+            className="text-white hover:text-white cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
           >
-            <GripVertical className="h-5 w-5" />
+            <GripVertical className="h-3.5 w-3.5" />
           </div>
           
-          <div className="flex-1">
-            <div className="text-white font-medium text-sm mb-1">
+          <div className="flex-1 min-w-0">
+            <div className="text-white font-medium text-xs leading-tight truncate">
               {question.question_text || 'Ingen frågetext'}
             </div>
-            <div className="text-white text-xs mb-2">
+            <div className="text-white/60 text-xs leading-tight truncate">
               Typ: {question.question_type === 'text' ? 'Text' : 
                     question.question_type === 'yes_no' ? 'Ja/Nej' :
-                    question.question_type === 'multiple_choice' ? 'Flervalsval' :
+                    question.question_type === 'multiple_choice' ? 'Flerval' :
                     question.question_type === 'number' ? 'Siffra' : question.question_type}
               {question.is_required && ' • Obligatorisk'}
             </div>
-            {question.question_type === 'multiple_choice' && question.options && (
-              <div className="text-white text-xs">
-                Alternativ: {question.options.filter(o => o.trim()).join(', ')}
-              </div>
-            )}
           </div>
         </div>
         
-        <div className="flex items-center space-x-2 ml-4">
+        <div className="flex items-center space-x-1 ml-1.5 flex-shrink-0">
           <Button
             onClick={() => onEdit(question)}
             variant="ghost"
