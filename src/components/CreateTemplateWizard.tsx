@@ -142,17 +142,17 @@ const SortableQuestionItem = ({
             onClick={() => onEdit(question)}
             variant="ghost"
             size="sm"
-            className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
+            className="text-white/70 hover:text-white hover:bg-white/10 h-6 w-6 p-0"
           >
-            <Pencil className="h-4 w-4" />
+            <Pencil className="h-3 w-3 text-[hsl(var(--pure-white))]" />
           </Button>
           <Button
             onClick={() => onDelete(question.id!)}
             variant="ghost"
             size="sm"
-            className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0"
+            className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-6 w-6 p-0"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-3 w-3" />
           </Button>
         </div>
       </div>
@@ -703,6 +703,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
   // Question management functions
   const addCustomQuestion = () => {
     // Show template list first
+    setEditingQuestion(null);
+    setShowQuestionForm(false);
     setShowQuestionTemplates(true);
   };
   
