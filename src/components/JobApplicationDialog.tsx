@@ -318,7 +318,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] p-0 rounded-[24px] overflow-hidden bg-parium-gradient text-white border-none shadow-none">
+      <DialogContent className="max-w-md max-h-[90vh] p-0 rounded-[24px] overflow-hidden bg-parium-gradient text-white border-none shadow-none">
         <div className="relative flex flex-col max-h-[90vh]">
           {/* Header */}
           <div className="p-4 border-b border-white/20 bg-background/10 rounded-t-[24px] flex-shrink-0">

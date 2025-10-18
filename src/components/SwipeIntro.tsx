@@ -342,7 +342,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
         onMouseLeave={handleMouseLeave}
       >
         <div 
-          className="text-center max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto px-4 transition-transform duration-300"
+          className="text-center max-w-sm mx-auto px-4 transition-transform duration-300"
           style={{
             transform: `translateX(${dragOffset}px)`,
             transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
