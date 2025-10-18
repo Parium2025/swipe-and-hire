@@ -21,9 +21,9 @@ const Dashboard = memo(() => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-2 grid-cols-2 md:grid-cols-4">
+      <div className="grid gap-1 grid-cols-2 md:grid-cols-4">
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-2">
+          <CardHeader className="flex flex-row items-center gap-1 space-y-0 p-2">
             <Briefcase className="h-3 w-3 text-white/70" />
             <CardTitle className="text-[10px] font-medium text-white">Totalt annonser</CardTitle>
           </CardHeader>
@@ -35,7 +35,7 @@ const Dashboard = memo(() => {
         </Card>
 
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-2">
+          <CardHeader className="flex flex-row items-center gap-1 space-y-0 p-2">
             <TrendingUp className="h-3 w-3 text-white/70" />
             <CardTitle className="text-[10px] font-medium text-white">Aktiva annonser</CardTitle>
           </CardHeader>
@@ -47,7 +47,7 @@ const Dashboard = memo(() => {
         </Card>
 
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-2">
+          <CardHeader className="flex flex-row items-center gap-1 space-y-0 p-2">
             <Eye className="h-3 w-3 text-white/70" />
             <CardTitle className="text-[10px] font-medium text-white">Totala visningar</CardTitle>
           </CardHeader>
@@ -59,7 +59,7 @@ const Dashboard = memo(() => {
         </Card>
 
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-2">
+          <CardHeader className="flex flex-row items-center gap-1 space-y-0 p-2">
             <Users className="h-3 w-3 text-white/70" />
             <CardTitle className="text-[10px] font-medium text-white">Ansökningar</CardTitle>
           </CardHeader>
