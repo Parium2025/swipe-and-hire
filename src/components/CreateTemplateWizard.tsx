@@ -833,11 +833,11 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
           )}
 
           {/* Scrollable Content */}
-          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-1.5">
             
             {/* Question Form */}
             {showQuestionForm && editingQuestion && (
-              <div className="space-y-4">
+              <div className="space-y-1.5">
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Frågetyp *</Label>
                   <div className="relative question-type-dropdown">
@@ -998,7 +998,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
             {/* Step 0: Mallnamn */}
             {!showQuestionForm && currentStep === 0 && (
-              <div className="space-y-4 max-w-2xl mx-auto w-full">
+              <div className="space-y-1.5 max-w-2xl mx-auto w-full">
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Mallnamn *</Label>
                   <Input
@@ -1013,7 +1013,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
             {/* Step 1: Grundinfo - EXAKT SAMMA SOM MOBILEJOBWIZARD */}
             {!showQuestionForm && currentStep === 1 && (
-              <div className="space-y-4 max-w-2xl mx-auto w-full">
+              <div className="space-y-1.5 max-w-2xl mx-auto w-full">
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Jobbtitel *</Label>
                   <Input
@@ -1157,7 +1157,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
             {/* Step 2: Var finns jobbet - EXAKT SAMMA SOM MOBILEJOBWIZARD */}
             {!showQuestionForm && currentStep === 2 && (
-              <div className="space-y-4 max-w-2xl mx-auto w-full">
+              <div className="space-y-1.5 max-w-2xl mx-auto w-full">
                 <div className="space-y-2">
                   <Label className="text-white font-medium">Var utförs arbetet? *</Label>
                   <div className="relative work-location-dropdown">

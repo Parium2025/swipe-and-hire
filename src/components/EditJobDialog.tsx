@@ -1134,7 +1134,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
             </div>
 
             {/* Scrollable Content */}
-            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-1.5">
               {!job ? (
                 <div className="py-10 text-center text-white">
                   <p>Laddar annons...</p>
@@ -1143,7 +1143,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                 <>
                   {/* Step 1: Grundinfo */}
                   {currentStep === 0 && (
-                    <div className="space-y-3 max-w-2xl mx-auto w-full">
+                    <div className="space-y-1.5 max-w-2xl mx-auto w-full">
                       <div className="space-y-2">
                         <Label className="text-white font-medium text-sm">Jobbtitel *</Label>
                         <Input
@@ -1277,7 +1277,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                   {/* Step 2: Var finns jobbet? */}
                   {currentStep === 1 && (
-                    <div className="space-y-3 max-w-2xl mx-auto w-full">
+                    <div className="space-y-1.5 max-w-2xl mx-auto w-full">
                       <div className="space-y-2">
                         <Label className="text-white font-medium text-sm">Var utförs arbetet? *</Label>
                         <div className="relative work-location-dropdown">
