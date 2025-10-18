@@ -1097,7 +1097,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent 
-          className="max-w-md h-[90vh] md:h-auto max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
+          className="max-w-md h-auto max-h-[90vh] md:max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
@@ -1134,7 +1134,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
             </div>
 
             {/* Scrollable Content */}
-            <div ref={scrollContainerRef} className="overflow-y-auto p-4 space-y-1.5 flex-1 md:flex-none md:overflow-visible">
+            <div ref={scrollContainerRef} className="overflow-y-auto p-4 space-y-1.5">
               {!job ? (
                 <div className="py-10 text-center text-white">
                   <p>Laddar annons...</p>
