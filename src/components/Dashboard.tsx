@@ -80,7 +80,7 @@ const Dashboard = memo(() => {
       </div>
 
       {/* Create Job Button */}
-      <div className="flex justify-center">
+      <div className="flex justify-start">
         <CreateJobSimpleDialog 
           onJobCreated={() => {
             invalidateJobs();
