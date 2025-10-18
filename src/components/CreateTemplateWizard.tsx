@@ -122,13 +122,6 @@ const SortableQuestionItem = ({
             <div className="text-white font-medium text-xs leading-tight truncate">
               {question.question_text || 'Ingen frågetext'}
             </div>
-            <div className="text-white/60 text-xs leading-tight truncate">
-              Typ: {question.question_type === 'text' ? 'Text' : 
-                    question.question_type === 'yes_no' ? 'Ja/Nej' :
-                    question.question_type === 'multiple_choice' ? 'Flerval' :
-                    question.question_type === 'number' ? 'Siffra' : question.question_type}
-              {question.is_required && ' • Obligatorisk'}
-            </div>
           </div>
         </div>
         
