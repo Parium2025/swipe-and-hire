@@ -943,6 +943,19 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                 <X className="h-4 w-4" />
               </Button>
             )}
+            {showQuestionForm && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setShowQuestionForm(false);
+                  setEditingQuestion(null);
+                }}
+                className="absolute right-4 top-4 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
           </div>
 
           {/* Progress Bar */}
