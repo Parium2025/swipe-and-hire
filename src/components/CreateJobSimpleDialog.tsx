@@ -249,13 +249,13 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-all duration-150 justify-between mt-1 text-left h-auto min-h-9 py-2 whitespace-normal"
+                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-all duration-150 justify-between mt-1 text-left h-auto min-h-9 py-2"
                         title={selectedTemplate?.name || 'Ingen mall är vald'}
                       >
-                        <span className="text-left flex-1 px-1 text-sm whitespace-normal break-words pr-6">
+                        <span className="text-left flex-1 px-1 text-sm break-words line-clamp-2 sm:line-clamp-none pr-6">
                           {selectedTemplate?.name || 'Ingen mall är vald'}
                         </span>
-                        <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2 transition-transform duration-150" />
+                        <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2 transition-transform duration-150 absolute right-2 top-1/2 -translate-y-1/2" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent 
