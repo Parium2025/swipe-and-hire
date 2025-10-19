@@ -48,72 +48,80 @@ const EmployerSettings = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-white">Inställningar</h1>
-        <p className="text-white/70">Hantera dina kontoinställningar och preferenser</p>
+    <div className="space-y-8 max-w-4xl mx-auto">
+      <div className="text-center mb-6">
+        <h1 className="text-2xl font-semibold text-white mb-1">Inställningar</h1>
+        <p className="text-sm text-white">Hantera dina kontoinställningar och preferenser</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Kontoinformation</CardTitle>
-          <CardDescription>Din grundläggande kontoinformation</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>E-postadress</Label>
-            <Input value={user?.email || ''} disabled />
+      <div className="bg-white/5 border border-white/10 rounded-lg">
+        <div className="px-6 py-4 border-b border-white/10">
+          <h3 className="text-lg font-semibold text-white">Kontoinformation</h3>
+          <p className="text-sm text-white">Din grundläggande kontoinformation</p>
+        </div>
+        <div className="p-6 space-y-5">
+          <div className="space-y-1.5">
+            <Label htmlFor="email" className="text-sm text-white">E-postadress</Label>
+            <Input 
+              id="email"
+              value={user?.email || ''} 
+              disabled 
+              className="bg-white/5 border-white/10 text-white/70 h-9 text-sm cursor-not-allowed"
+            />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Ändra lösenord</CardTitle>
-          <CardDescription>Uppdatera ditt kontolösenord</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="current-password">Nuvarande lösenord</Label>
+      <div className="bg-white/5 border border-white/10 rounded-lg">
+        <div className="px-6 py-4 border-b border-white/10">
+          <h3 className="text-lg font-semibold text-white">Ändra lösenord</h3>
+          <p className="text-sm text-white">Uppdatera ditt kontolösenord</p>
+        </div>
+        <div className="p-6 space-y-5">
+          <div className="space-y-1.5">
+            <Label htmlFor="current-password" className="text-sm text-white">Nuvarande lösenord</Label>
             <Input
               id="current-password"
               type="password"
               value={passwordData.currentPassword}
               onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
             />
           </div>
-          <div>
-            <Label htmlFor="new-password">Nytt lösenord</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="new-password" className="text-sm text-white">Nytt lösenord</Label>
             <Input
               id="new-password"
               type="password"
               value={passwordData.newPassword}
               onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
             />
           </div>
-          <div>
-            <Label htmlFor="confirm-password">Bekräfta nytt lösenord</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="confirm-password" className="text-sm text-white">Bekräfta nytt lösenord</Label>
             <Input
               id="confirm-password"
               type="password"
               value={passwordData.confirmPassword}
               onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
             />
           </div>
-          <Button onClick={handlePasswordUpdate}>Uppdatera lösenord</Button>
-        </CardContent>
-      </Card>
+          <Button onClick={handlePasswordUpdate} className="h-9 text-sm">Uppdatera lösenord</Button>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Aviseringar</CardTitle>
-          <CardDescription>Hantera dina aviseringsinställningar</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <div className="bg-white/5 border border-white/10 rounded-lg">
+        <div className="px-6 py-4 border-b border-white/10">
+          <h3 className="text-lg font-semibold text-white">Aviseringar</h3>
+          <p className="text-sm text-white">Hantera dina aviseringsinställningar</p>
+        </div>
+        <div className="p-6 space-y-5">
           <div className="flex items-center justify-between">
             <div>
-              <Label>E-postaviseringar</Label>
-              <p className="text-sm text-muted-foreground">Få aviseringar via e-post</p>
+              <Label className="text-sm text-white">E-postaviseringar</Label>
+              <p className="text-sm text-white">Få aviseringar via e-post</p>
             </div>
             <Switch
               checked={notifications.emailNotifications}
@@ -123,8 +131,8 @@ const EmployerSettings = () => {
           
           <div className="flex items-center justify-between">
             <div>
-              <Label>Nya ansökningar</Label>
-              <p className="text-sm text-muted-foreground">När någon söker dina jobb</p>
+              <Label className="text-sm text-white">Nya ansökningar</Label>
+              <p className="text-sm text-white">När någon söker dina jobb</p>
             </div>
             <Switch
               checked={notifications.newApplications}
@@ -134,8 +142,8 @@ const EmployerSettings = () => {
 
           <div className="flex items-center justify-between">
             <div>
-              <Label>Meddelanden från kandidater</Label>
-              <p className="text-sm text-muted-foreground">När kandidater skickar meddelanden</p>
+              <Label className="text-sm text-white">Meddelanden från kandidater</Label>
+              <p className="text-sm text-white">När kandidater skickar meddelanden</p>
             </div>
             <Switch
               checked={notifications.messagesFromCandidates}
@@ -145,16 +153,16 @@ const EmployerSettings = () => {
 
           <div className="flex items-center justify-between">
             <div>
-              <Label>Veckorapporter</Label>
-              <p className="text-sm text-muted-foreground">Få veckovisa statistikrapporter</p>
+              <Label className="text-sm text-white">Veckorapporter</Label>
+              <p className="text-sm text-white">Få veckovisa statistikrapporter</p>
             </div>
             <Switch
               checked={notifications.weeklyReports}
               onCheckedChange={(checked) => setNotifications({...notifications, weeklyReports: checked})}
             />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
