@@ -125,15 +125,18 @@ const WorkplacePostalCodeSelector = ({
 
     const digits = formatted.replace(/\D/g, '');
     // När användaren skriver 1–4 siffror: rensa omedelbart tidigare träff så att varningen visas
-    if (digits.length >= 0 && digits.length < 5) {
+    if (digits.length > 0 && digits.length < 5) {
       setFoundLocation(null);
       setIsValid(false);
       setIsLoading(false);
-      if (!lastSuccessfulPostalCode.startsWith(digits)) {
-        setLastSuccessfulPostalCode('');
-      }
+      setLastSuccessfulPostalCode('');
+    } else if (digits.length === 0) {
+      setFoundLocation(null);
+      setIsValid(false);
+      setIsLoading(false);
+      setLastSuccessfulPostalCode('');
     }
-  }, [onPostalCodeChange, lastSuccessfulPostalCode]);
+  }, [onPostalCodeChange]);
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -163,7 +166,6 @@ const WorkplacePostalCodeSelector = ({
           {/* Validering meddelande - visa när 1-4 siffror eller när 5+ siffror men ogiltigt */}
           {postalCodeValue && 
            !isLoading && 
-           !(cachedInfo && postalCodeValue.replace(/\s+/g, '') === cachedInfo.postalCode.replace(/\s+/g, '')) &&
            !foundLocation &&
            (
              (postalCodeValue.replace(/\D/g, '').length > 0 && postalCodeValue.replace(/\D/g, '').length < 5) ||
