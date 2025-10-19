@@ -345,13 +345,13 @@ const CompanyReviews = () => {
         {/* Kommentarer */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4" />
-            <h3 className="font-semibold text-base">Kommentarer</h3>
+            <MessageSquare className="h-4 w-4 text-white" />
+            <h3 className="font-semibold text-base text-white">Kommentarer</h3>
           </div>
 
           {/* Informationstext för arbetsgivare */}
           <div className="bg-white/5 p-3 rounded-lg">
-            <p className="text-xs text-white text-center italic">
+            <p className="text-xs text-white text-center">
               (Här lämnar jobbsökarna kommentarer om de vill samt betyg)
             </p>
           </div>
