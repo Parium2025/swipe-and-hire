@@ -862,30 +862,30 @@ const Profile = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-8">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-white">Min Profil</h1>
-        <p className="text-white">
-          Hantera din profilinformation och inställningar
+        <h1 className="text-2xl font-semibold text-white mb-2">Min Profil</h1>
+        <p className="text-white/70 text-sm">
+          Hantera din personliga information
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Profile Image/Video Card */}
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader>
-            <CardTitle className="text-white text-center">
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
+          <div className="p-4 space-y-2">
+            <h3 className="text-base font-semibold text-white text-center">
               Profilbild/Profilvideo
-            </CardTitle>
-            <CardDescription className="text-white text-center">
+            </h3>
+            <p className="text-white/60 text-center text-sm">
               Ladda upp en kort profilvideo eller en bild och gör ditt första intryck minnesvärt
-            </CardDescription>
+            </p>
             
             {/* Video and Camera Icons */}
             <div className="flex items-center justify-center space-x-4">
               {/* Video option */}
               <div className="relative">
-                <div className="w-16 h-16 rounded-full border-4 border-white/20 p-2 bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-sm">
+                <div className="w-16 h-16 rounded-full border-4 border-white/10 p-2 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-sm">
                   <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
                     <Video className="h-5 w-5 text-white" />
                   </div>
@@ -902,7 +902,7 @@ const Profile = () => {
 
               {/* Image option */}
               <div className="relative">
-                <div className="w-16 h-16 rounded-full border-4 border-white/20 p-2 bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-sm">
+                <div className="w-16 h-16 rounded-full border-4 border-white/10 p-2 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-sm">
                   <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
                     <Camera className="h-5 w-5 text-white" />
                   </div>
@@ -912,8 +912,8 @@ const Profile = () => {
                 </div>
               </div>
             </div>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center space-y-4">
+          </div>
+          <div className="p-4 flex flex-col items-center space-y-4">
             <div className="relative">
               {(isProfileVideo && !!profileImageUrl) ? (
                 <ProfileVideo
@@ -921,14 +921,14 @@ const Profile = () => {
                   coverImageUrl={coverImageUrl || profile?.profile_image_url || undefined}
                   userInitials={`${firstName.charAt(0)}${lastName.charAt(0)}`}
                   alt="Profile video"
-                  className="w-32 h-32 border-4 border-white/20 hover:border-white/40 transition-all rounded-full overflow-hidden"
+                  className="w-32 h-32 border-4 border-white/10 hover:border-white/20 transition-all rounded-full overflow-hidden"
                 />
               ) : (
                 <div 
                   className="cursor-pointer" 
                   onClick={() => document.getElementById('profile-image')?.click()}
                 >
-                  <Avatar className="h-32 w-32 border-4 border-white/20 hover:border-white/40 transition-all">
+                  <Avatar className="h-32 w-32 border-4 border-white/10 hover:border-white/20 transition-all">
                     {(profileImageUrl || coverImageUrl) ? (
                       <AvatarImage src={profileImageUrl || coverImageUrl} alt="Profilbild" />
                     ) : null}
@@ -1034,21 +1034,21 @@ const Profile = () => {
                 )}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Profile Information */}
-        <Card className="lg:col-span-2 bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white">
-              <User className="h-5 w-5" />
-              Profilinformation
-            </CardTitle>
-            <CardDescription className="text-white">
-              Uppdatera din personliga information
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        <div className="lg:col-span-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
+          <div className="p-4 border-b border-white/10">
+            <h3 className="flex items-center gap-2 text-base font-semibold text-white">
+              <User className="h-4 w-4" />
+              Personlig Information
+            </h3>
+            <p className="text-white/60 text-sm mt-1">
+              Uppdatera din grundläggande profilinformation
+            </p>
+          </div>
+          <div className="p-4">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Personal Information */}
               <div className="space-y-4">
@@ -1068,8 +1068,8 @@ const Profile = () => {
                         }
                       }}
                       onBlur={() => setErrors(prev => ({ ...prev, firstName: firstName.trim() ? undefined : 'Förnamn är obligatoriskt.' }))}
-                      aria-invalid={!!errors.firstName}
-                      className={`bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 ${errors.firstName ? 'border-red-400' : ''}`}
+                       aria-invalid={!!errors.firstName}
+                      className={`bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 ${errors.firstName ? 'border-red-400' : ''}`}
                     />
                     {errors.firstName && <p className="text-xs text-red-300">{errors.firstName}</p>}
                   </div>
@@ -1089,8 +1089,8 @@ const Profile = () => {
                         }
                       }}
                       onBlur={() => setErrors(prev => ({ ...prev, lastName: lastName.trim() ? undefined : 'Efternamn är obligatoriskt.' }))}
-                      aria-invalid={!!errors.lastName}
-                      className={`bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 ${errors.lastName ? 'border-red-400' : ''}`}
+                       aria-invalid={!!errors.lastName}
+                      className={`bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 ${errors.lastName ? 'border-red-400' : ''}`}
                     />
                     {errors.lastName && <p className="text-xs text-red-300">{errors.lastName}</p>}
                   </div>
@@ -1134,7 +1134,7 @@ const Profile = () => {
                         }}
                         onBlur={() => setErrors(prev => ({ ...prev, phone: phone.trim() ? (isValidSwedishPhone(phone) ? undefined : 'Ange ett giltigt svenskt nummer (+46 eller 0).') : 'Telefonnummer är obligatoriskt.' }))}
                         aria-invalid={!!errors.phone}
-                        className={`pl-10 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 ${errors.phone ? 'border-red-400' : ''}`}
+                        className={`pl-10 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 ${errors.phone ? 'border-red-400' : ''}`}
                       />
                     </div>
                     {errors.phone && <p className="text-xs text-red-300">{errors.phone}</p>}
@@ -1143,7 +1143,7 @@ const Profile = () => {
               </div>
 
               {/* Contact Information */}
-              <div className="space-y-4 pt-4 border-t border-white/20">
+              <div className="space-y-4 pt-4 border-t border-white/10">
                 <div className="flex items-center gap-2 mb-2">
                   <Mail className="h-4 w-4 text-white" />
                   <Label className="text-base font-medium text-white">Kontaktinformation</Label>
@@ -1154,7 +1154,7 @@ const Profile = () => {
                     <Label className="text-white">E-post</Label>
                     <div className="relative group">
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-white z-10" />
-                      <div className="flex h-10 w-full rounded-md border bg-white/5 backdrop-blur-sm border-white/20 text-white pl-10 pr-3 py-2 text-sm min-w-0">
+                      <div className="flex h-10 w-full rounded-md border bg-white/5 backdrop-blur-sm border-white/10 text-white pl-10 pr-3 py-2 text-sm min-w-0">
                         <span 
                           className="truncate hover:overflow-visible hover:whitespace-normal hover:break-all transition-all duration-200" 
                           title={user?.email || ''}
@@ -1178,7 +1178,7 @@ const Profile = () => {
               </div>
 
               {/* Bio */}
-              <div className="space-y-2 pt-4 border-t border-white/20">
+              <div className="space-y-2 pt-4 border-t border-white/10">
                 <Label htmlFor="bio" className="text-white">Presentation</Label>
                 <Textarea
                   id="bio"
@@ -1186,7 +1186,7 @@ const Profile = () => {
                   value={bio}
                   onChange={(e) => handleBioChange(e.target.value)}
                   rows={4}
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                  className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50"
                 />
                 <div className="flex justify-end">
                   <span className="text-xs text-white">
@@ -1198,7 +1198,7 @@ const Profile = () => {
               {/* Job Seeker Specific Information */}
               {!isEmployer && (
                 <>
-                  <div className="space-y-4 pt-4 border-t border-white/20">
+                  <div className="space-y-4 pt-4 border-t border-white/10">
                     <div className="flex items-center gap-2 mb-2">
                       <Briefcase className="h-4 w-4 text-white" />
                       <Label className="text-base font-medium text-white">Anställningsinformation</Label>
@@ -1213,7 +1213,7 @@ const Profile = () => {
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="outline"
-                              className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                              className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 transition-colors justify-between"
                             >
                               <span className="truncate">
                                 {employmentStatus ? (
@@ -1277,7 +1277,7 @@ const Profile = () => {
                             <DropdownMenuTrigger asChild>
                               <Button
                                 variant="outline"
-                                className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                                className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 transition-colors justify-between"
                               >
                                 <span className="truncate">
                                   {workingHours ? (
@@ -1322,7 +1322,7 @@ const Profile = () => {
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="outline"
-                              className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                              className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 transition-colors justify-between"
                             >
                               <span className="truncate">
                                 {availability ? (
@@ -1371,7 +1371,7 @@ const Profile = () => {
                     )}
                   </div>
 
-                  <div className="space-y-4 pt-4 border-t border-white/20">
+                  <div className="space-y-4 pt-4 border-t border-white/10">
                     <div className="flex items-center gap-2 mb-4">
                       <FileText className="h-4 w-4 text-white" />
                       <Label className="text-base font-medium text-white">CV</Label>
@@ -1400,7 +1400,7 @@ const Profile = () => {
 
               {/* Employer-specific fields */}
               {isEmployer && (
-                <div className="space-y-4 pt-4 border-t border-white/20">
+                <div className="space-y-4 pt-4 border-t border-white/10">
                   <div className="flex items-center gap-2 mb-2">
                     <Building className="h-4 w-4 text-white" />
                     <Label className="text-base font-medium text-white">Företagsinformation</Label>
@@ -1414,7 +1414,7 @@ const Profile = () => {
                         placeholder="Mitt Företag AB"
                         value={companyName}
                         onChange={(e) => setCompanyName(e.target.value)}
-                        className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                        className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50"
                       />
                     </div>
 
@@ -1425,7 +1425,7 @@ const Profile = () => {
                         placeholder="556123-4567"
                         value={orgNumber}
                         onChange={(e) => setOrgNumber(e.target.value)}
-                        className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                        className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50"
                       />
                     </div>
                   </div>
@@ -1440,8 +1440,8 @@ const Profile = () => {
                 {loading ? 'Sparar...' : 'Spara ändringar'}
               </Button>
             </form>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Image Editors */}
