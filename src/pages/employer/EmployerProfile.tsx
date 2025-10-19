@@ -273,24 +273,24 @@ const EmployerProfile = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="text-center">
-        <h1 className="text-2xl font-semibold text-white mb-2">Min Profil</h1>
-        <p className="text-white/70 text-sm">Hantera din personliga information</p>
+        <h1 className="text-2xl font-semibold text-white mb-1">Min Profil</h1>
+        <p className="text-white/60 text-sm">Hantera din personliga information</p>
       </div>
 
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
-        <div className="p-4 border-b border-white/10">
-          <h3 className="text-base font-semibold text-white text-center">Personlig Information</h3>
-          <p className="text-white/60 text-center text-sm mt-1">
+        <div className="p-3 border-b border-white/10">
+          <h3 className="text-base font-medium text-white text-center">Personlig Information</h3>
+          <p className="text-white/60 text-center text-xs mt-0.5">
             Uppdatera din grundläggande profilinformation
           </p>
         </div>
-        <div className="p-4 space-y-4">
-          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="first_name" className="text-white">Förnamn</Label>
+        <div className="p-3 space-y-3">
+          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="first_name" className="text-white text-sm">Förnamn</Label>
                 <Input
                   id="first_name"
                   value={formData.first_name}
@@ -298,8 +298,8 @@ const EmployerProfile = () => {
                   className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="last_name" className="text-white">Efternamn</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="last_name" className="text-white text-sm">Efternamn</Label>
                 <Input
                   id="last_name"
                   value={formData.last_name}
@@ -309,8 +309,8 @@ const EmployerProfile = () => {
               </div>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-white">E-post</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-white text-sm">E-post</Label>
               <Input
                 id="email"
                 value={user?.email || ''}
@@ -319,8 +319,8 @@ const EmployerProfile = () => {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="role" className="text-white">Roll</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="role" className="text-white text-sm">Roll</Label>
               <Input
                 id="role"
                 value={userRole?.role === 'employer' ? 'Admin' : userRole?.role === 'recruiter' ? 'Rekryteringsadmin' : userRole?.role || 'Användare'}
@@ -329,8 +329,8 @@ const EmployerProfile = () => {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="location" className="text-white">Plats</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="location" className="text-white text-sm">Plats</Label>
               <Input
                 id="location"
                 value={formData.location}
@@ -340,8 +340,8 @@ const EmployerProfile = () => {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="phone" className="text-white">Telefonnummer (frivilligt)</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="phone" className="text-white text-sm">Telefonnummer (frivilligt)</Label>
               <Input
                 id="phone"
                 value={formData.phone}
@@ -351,8 +351,8 @@ const EmployerProfile = () => {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="bio" className="text-white">Om mig</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="bio" className="text-white text-sm">Om mig</Label>
               <Textarea
                 id="bio"
                 value={formData.bio}
@@ -361,13 +361,13 @@ const EmployerProfile = () => {
                 className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50"
               />
               <div className="text-right">
-                <span className="text-white text-sm">
+                <span className="text-white/70 text-xs">
                   {formData.bio.trim() === '' ? 0 : formData.bio.trim().split(/\s+/).length} ord
                 </span>
               </div>
             </div>
 
-            <div className="flex justify-center pt-4">
+            <div className="flex justify-center pt-2">
               <Button 
                 type="submit"
                 disabled={loading}
@@ -389,21 +389,21 @@ const EmployerProfile = () => {
 
       {/* Social Media Links Section */}
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
-        <div className="p-4 border-b border-white/10">
-          <h3 className="text-base font-semibold text-white text-center">Sociala medier</h3>
-          <p className="text-white/60 text-center text-sm mt-1">
+        <div className="p-3 border-b border-white/10">
+          <h3 className="text-base font-medium text-white text-center">Sociala medier</h3>
+          <p className="text-white/60 text-center text-xs mt-0.5">
             Lägg till dina sociala medier-profiler
           </p>
         </div>
-        <div className="p-4 space-y-4">
+        <div className="p-3 space-y-3">
           {/* Existing social media links */}
           {formData.social_media_links.length > 0 && (
-            <div className="space-y-3">
-              <Label className="text-white">Dina sociala medier</Label>
+            <div className="space-y-2.5">
+              <Label className="text-white text-sm">Dina sociala medier</Label>
               {formData.social_media_links.map((link, index) => {
                 const Icon = getPlatformIcon(link.platform);
                 return (
-                  <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-3 gap-3">
+                  <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-2.5 gap-2.5">
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <Icon className="h-5 w-5 text-white flex-shrink-0" />
                       <div className="min-w-0 flex-1">
@@ -440,9 +440,9 @@ const EmployerProfile = () => {
           )}
 
           {/* Add new social media link */}
-          <div className="space-y-3 border-t border-white/10 pt-4">
-            <Label className="text-white">Lägg till ny länk</Label>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="space-y-2.5 border-t border-white/10 pt-3">
+            <Label className="text-white text-sm">Lägg till ny länk</Label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
               <DropdownMenu modal={false} open={platformMenuOpen} onOpenChange={setPlatformMenuOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button
