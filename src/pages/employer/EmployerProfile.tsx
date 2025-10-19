@@ -273,109 +273,107 @@ const EmployerProfile = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h1 className="text-2xl font-semibold text-white mb-1">Min Profil</h1>
-        <p className="text-white/60 text-sm">Hantera din personliga information</p>
+    <div className="space-y-4">
+      <div className="text-center mb-3">
+        <h1 className="text-xl font-medium text-white">Min Profil</h1>
+        <p className="text-white/60 text-xs">Hantera din personliga information</p>
       </div>
 
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
-        <div className="p-3 border-b border-white/10">
-          <h3 className="text-base font-medium text-white text-center">Personlig Information</h3>
-          <p className="text-white/60 text-center text-xs mt-0.5">
-            Uppdatera din grundläggande profilinformation
-          </p>
+        <div className="px-3 py-2 border-b border-white/10">
+          <h3 className="text-sm font-medium text-white">Personlig Information</h3>
+          <p className="text-white/50 text-xs">Uppdatera din grundläggande profilinformation</p>
         </div>
-        <div className="p-3 space-y-3">
-          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-3">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="first_name" className="text-white text-sm">Förnamn</Label>
+        <div className="p-3 space-y-2.5">
+          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-2.5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+              <div className="space-y-1">
+                <Label htmlFor="first_name" className="text-white text-xs">Förnamn</Label>
                 <Input
                   id="first_name"
                   value={formData.first_name}
                   onChange={(e) => setFormData({...formData, first_name: e.target.value})}
-                  className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50"
+                  className="bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm h-9 hover:bg-white/10 placeholder:text-white/50"
                 />
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="last_name" className="text-white text-sm">Efternamn</Label>
+              <div className="space-y-1">
+                <Label htmlFor="last_name" className="text-white text-xs">Efternamn</Label>
                 <Input
                   id="last_name"
                   value={formData.last_name}
                   onChange={(e) => setFormData({...formData, last_name: e.target.value})}
-                  className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50"
+                  className="bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm h-9 hover:bg-white/10 placeholder:text-white/50"
                 />
               </div>
             </div>
             
-            <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-white text-sm">E-post</Label>
+            <div className="space-y-1">
+              <Label htmlFor="email" className="text-white text-xs">E-post</Label>
               <Input
                 id="email"
                 value={user?.email || ''}
                 readOnly
-                className="bg-white/5 backdrop-blur-sm border-white/10 text-white/70 cursor-not-allowed"
+                className="bg-white/5 backdrop-blur-sm border-white/10 text-white/70 text-sm h-9 cursor-not-allowed"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="role" className="text-white text-sm">Roll</Label>
+            <div className="space-y-1">
+              <Label htmlFor="role" className="text-white text-xs">Roll</Label>
               <Input
                 id="role"
                 value={userRole?.role === 'employer' ? 'Admin' : userRole?.role === 'recruiter' ? 'Rekryteringsadmin' : userRole?.role || 'Användare'}
                 readOnly
-                className="bg-white/5 backdrop-blur-sm border-white/10 text-white/70 cursor-not-allowed"
+                className="bg-white/5 backdrop-blur-sm border-white/10 text-white/70 text-sm h-9 cursor-not-allowed"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="location" className="text-white text-sm">Plats</Label>
+            <div className="space-y-1">
+              <Label htmlFor="location" className="text-white text-xs">Plats</Label>
               <Input
                 id="location"
                 value={formData.location}
                 onChange={(e) => setFormData({...formData, location: e.target.value})}
                 placeholder="T.ex. Stockholm, Sverige"
-                className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50"
+                className="bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm h-9 hover:bg-white/10 placeholder:text-white/50"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="phone" className="text-white text-sm">Telefonnummer (frivilligt)</Label>
+            <div className="space-y-1">
+              <Label htmlFor="phone" className="text-white text-xs">Telefonnummer (frivilligt)</Label>
               <Input
                 id="phone"
                 value={formData.phone}
                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
                 placeholder="T.ex. 070-123 45 67"
-                className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50"
+                className="bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm h-9 hover:bg-white/10 placeholder:text-white/50"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="bio" className="text-white text-sm">Om mig</Label>
+            <div className="space-y-1">
+              <Label htmlFor="bio" className="text-white text-xs">Om mig</Label>
               <Textarea
                 id="bio"
                 value={formData.bio}
                 onChange={(e) => setFormData({...formData, bio: e.target.value})}
-                rows={4}
-                className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50"
+                rows={3}
+                className="bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm hover:bg-white/10 placeholder:text-white/50"
               />
               <div className="text-right">
-                <span className="text-white/70 text-xs">
+                <span className="text-white/50 text-xs">
                   {formData.bio.trim() === '' ? 0 : formData.bio.trim().split(/\s+/).length} ord
                 </span>
               </div>
             </div>
 
-            <div className="flex justify-center pt-2">
+            <div className="flex justify-center pt-1">
               <Button 
                 type="submit"
                 disabled={loading}
-                className="w-full"
+                className="w-full h-9 text-sm"
               >
                 {loading ? (
                   <>
-                    <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"></div>
+                    <div className="animate-spin w-3 h-3 border-2 border-current border-t-transparent rounded-full mr-2"></div>
                     Sparar...
                   </>
                 ) : (
@@ -389,25 +387,23 @@ const EmployerProfile = () => {
 
       {/* Social Media Links Section */}
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
-        <div className="p-3 border-b border-white/10">
-          <h3 className="text-base font-medium text-white text-center">Sociala medier</h3>
-          <p className="text-white/60 text-center text-xs mt-0.5">
-            Lägg till dina sociala medier-profiler
-          </p>
+        <div className="px-3 py-2 border-b border-white/10">
+          <h3 className="text-sm font-medium text-white">Sociala medier</h3>
+          <p className="text-white/50 text-xs">Lägg till dina sociala medier-profiler</p>
         </div>
-        <div className="p-3 space-y-3">
+        <div className="p-3 space-y-2.5">
           {/* Existing social media links */}
           {formData.social_media_links.length > 0 && (
-            <div className="space-y-2.5">
-              <Label className="text-white text-sm">Dina sociala medier</Label>
+            <div className="space-y-2">
+              <Label className="text-white text-xs">Dina sociala medier</Label>
               {formData.social_media_links.map((link, index) => {
                 const Icon = getPlatformIcon(link.platform);
                 return (
-                  <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-2.5 gap-2.5">
+                  <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-2 gap-2">
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <Icon className="h-5 w-5 text-white flex-shrink-0" />
+                      <Icon className="h-4 w-4 text-white flex-shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <div className="text-white font-medium">{getPlatformLabel(link.platform)}</div>
+                        <div className="text-white text-sm font-medium">{getPlatformLabel(link.platform)}</div>
                         <a 
                           href={link.url} 
                           target="_blank" 
@@ -440,16 +436,16 @@ const EmployerProfile = () => {
           )}
 
           {/* Add new social media link */}
-          <div className="space-y-2.5 border-t border-white/10 pt-3">
-            <Label className="text-white text-sm">Lägg till ny länk</Label>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+          <div className="space-y-2 border-t border-white/10 pt-2.5">
+            <Label className="text-white text-xs">Lägg till ny länk</Label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               <DropdownMenu modal={false} open={platformMenuOpen} onOpenChange={setPlatformMenuOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 transition-colors justify-between text-left"
+                    className="w-full bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm h-9 hover:bg-white/10 transition-colors justify-between text-left"
                   >
-                    <span className="truncate text-left flex-1 px-1">
+                    <span className="truncate text-left flex-1 px-1 text-sm">
                       {newSocialLink.platform ? SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label : 'Välj plattform'}
                     </span>
                     <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
@@ -503,16 +499,16 @@ const EmployerProfile = () => {
                   newSocialLink.platform === 'instagram' ? 'https://instagram.com/dittnamn' :
                   'https://din-webbsida.se'
                 }
-                className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 md:col-span-1"
+                className="bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm h-9 hover:bg-white/10 placeholder:text-white/50 md:col-span-1"
               />
 
               <Button
                 type="button"
                 onClick={addSocialLink}
                 disabled={!newSocialLink.platform || !newSocialLink.url.trim()}
-                className="bg-primary/80 hover:bg-primary text-white"
+                className="bg-primary/80 hover:bg-primary text-white h-9 text-sm"
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-3 w-3 mr-1.5" />
                 Lägg till
               </Button>
             </div>
@@ -520,9 +516,9 @@ const EmployerProfile = () => {
 
           {/* Display social media links if any exist */}
           {formData.social_media_links.length > 0 && (
-            <div className="border-t border-white/10 pt-4">
-              <Label className="text-white mb-3 block">Förhandsvisning</Label>
-              <div className="flex flex-wrap gap-3">
+            <div className="border-t border-white/10 pt-2.5">
+              <Label className="text-white text-xs mb-2 block">Förhandsvisning</Label>
+              <div className="flex flex-wrap gap-2">
                 {formData.social_media_links.map((link, index) => {
                   const Icon = getPlatformIcon(link.platform);
                   return (
@@ -530,11 +526,11 @@ const EmployerProfile = () => {
                       key={index}
                       variant="outline"
                       onClick={() => window.open(link.url, '_blank')}
-                      className="bg-white/5 border-white/10 text-white hover:bg-white/10 transition-colors"
+                      className="bg-white/5 border-white/10 text-white text-xs h-8 hover:bg-white/10 transition-colors"
                     >
-                      <Icon className="h-4 w-4 mr-2" />
+                      <Icon className="h-3 w-3 mr-1.5" />
                       {getPlatformLabel(link.platform)}
-                      <ExternalLink className="h-3 w-3 ml-2" />
+                      <ExternalLink className="h-2.5 w-2.5 ml-1.5" />
                     </Button>
                   );
                 })}
