@@ -125,9 +125,6 @@ const EmployerDashboard = memo(() => {
     <div className="space-y-3 pb-safe min-h-screen smooth-scroll touch-pan no-overscroll" style={{ WebkitOverflowScrolling: 'touch' }}>
       <div className="text-center px-2">
         <h1 className="text-xl font-bold text-white">Mina jobbannonser</h1>
-        <p className="text-white mt-1 text-xs">
-          Hantera dina publicerade tjänster
-        </p>
       </div>
 
       {/* Stats Overview */}
