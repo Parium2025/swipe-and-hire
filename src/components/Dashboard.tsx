@@ -24,7 +24,7 @@ const Dashboard = memo(() => {
       <div className="flex flex-wrap gap-3 justify-center">
         <Card className="w-[240px] md:w-[280px] bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-4">
-            <Briefcase className="h-5 w-5 text-white/70" />
+            <Briefcase className="h-5 w-5 text-white" />
             <CardTitle className="text-sm font-medium text-white">Totalt annonser</CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4">
@@ -36,7 +36,7 @@ const Dashboard = memo(() => {
 
         <Card className="w-[240px] md:w-[280px] bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-4">
-            <TrendingUp className="h-5 w-5 text-white/70" />
+            <TrendingUp className="h-5 w-5 text-white" />
             <CardTitle className="text-sm font-medium text-white">Aktiva annonser</CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4">
@@ -48,7 +48,7 @@ const Dashboard = memo(() => {
 
         <Card className="w-[240px] md:w-[280px] bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-4">
-            <Eye className="h-5 w-5 text-white/70" />
+            <Eye className="h-5 w-5 text-white" />
             <CardTitle className="text-sm font-medium text-white">Totala visningar</CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4">
@@ -60,7 +60,7 @@ const Dashboard = memo(() => {
 
         <Card className="w-[240px] md:w-[280px] bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-4">
-            <Users className="h-5 w-5 text-white/70" />
+            <Users className="h-5 w-5 text-white" />
             <CardTitle className="text-sm font-medium text-white">Ansökningar</CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4">
