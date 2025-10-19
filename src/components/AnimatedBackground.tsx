@@ -15,7 +15,7 @@ export const AnimatedBackground = memo(({ showBubbles = true }: AnimatedBackgrou
         <>
           {/* Animated floating elements with soft bounce - adjusted for sidebar on desktop */}
           <div className="absolute top-20 left-10 lg:left-[280px] w-4 h-4 bg-secondary/30 rounded-full animate-soft-bounce" style={{ animationDuration: '2s', animationDelay: '-0.3s', animationFillMode: 'backwards' }}></div>
-          <div className="absolute top-32 left-16 lg:left-[320px] w-2 h-2 bg-accent/40 rounded-full animate-soft-bounce" style={{ animationDuration: '2.5s', animationDelay: '-1.2s', animationFillMode: 'backwards' }}></div>
+          <div className="absolute top-16 left-16 lg:left-[320px] w-2 h-2 bg-accent/40 rounded-full animate-soft-bounce" style={{ animationDuration: '2.5s', animationDelay: '-1.2s', animationFillMode: 'backwards' }}></div>
           <div className="absolute top-24 left-20 lg:left-[300px] w-3 h-3 bg-secondary/20 rounded-full animate-soft-bounce" style={{ animationDuration: '3s', animationDelay: '-2.1s', animationFillMode: 'backwards' }}></div>
           
           <div className="absolute bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full animate-soft-bounce" style={{ animationDuration: '2.2s', animationDelay: '-0.8s', animationFillMode: 'backwards' }}></div>
