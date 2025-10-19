@@ -273,20 +273,20 @@ const EmployerProfile = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-white">Min Profil</h1>
-        <p className="text-white/90">Hantera din personliga information</p>
+        <h1 className="text-2xl font-semibold text-white mb-2">Min Profil</h1>
+        <p className="text-white/70 text-sm">Hantera din personliga information</p>
       </div>
 
-      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-        <CardHeader>
-          <CardTitle className="text-white text-center">Personlig Information</CardTitle>
-          <CardDescription className="text-white/80 text-center">
+      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
+        <div className="p-4 border-b border-white/10">
+          <h3 className="text-base font-semibold text-white text-center">Personlig Information</h3>
+          <p className="text-white/60 text-center text-sm mt-1">
             Uppdatera din grundläggande profilinformation
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          </p>
+        </div>
+        <div className="p-4 space-y-4">
           <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
@@ -295,7 +295,7 @@ const EmployerProfile = () => {
                   id="first_name"
                   value={formData.first_name}
                   onChange={(e) => setFormData({...formData, first_name: e.target.value})}
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                  className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50"
                 />
               </div>
               <div className="space-y-2">
@@ -304,7 +304,7 @@ const EmployerProfile = () => {
                   id="last_name"
                   value={formData.last_name}
                   onChange={(e) => setFormData({...formData, last_name: e.target.value})}
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                  className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50"
                 />
               </div>
             </div>
@@ -315,7 +315,7 @@ const EmployerProfile = () => {
                 id="email"
                 value={user?.email || ''}
                 readOnly
-                className="bg-white/5 backdrop-blur-sm border-white/20 text-white/70 cursor-not-allowed"
+                className="bg-white/5 backdrop-blur-sm border-white/10 text-white/70 cursor-not-allowed"
               />
             </div>
 
@@ -325,7 +325,7 @@ const EmployerProfile = () => {
                 id="role"
                 value={userRole?.role === 'employer' ? 'Admin' : userRole?.role === 'recruiter' ? 'Rekryteringsadmin' : userRole?.role || 'Användare'}
                 readOnly
-                className="bg-white/5 backdrop-blur-sm border-white/20 text-white/70 cursor-not-allowed"
+                className="bg-white/5 backdrop-blur-sm border-white/10 text-white/70 cursor-not-allowed"
               />
             </div>
 
@@ -336,7 +336,7 @@ const EmployerProfile = () => {
                 value={formData.location}
                 onChange={(e) => setFormData({...formData, location: e.target.value})}
                 placeholder="T.ex. Stockholm, Sverige"
-                className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50"
               />
             </div>
 
@@ -347,7 +347,7 @@ const EmployerProfile = () => {
                 value={formData.phone}
                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
                 placeholder="T.ex. 070-123 45 67"
-                className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50"
               />
             </div>
 
@@ -358,7 +358,7 @@ const EmployerProfile = () => {
                 value={formData.bio}
                 onChange={(e) => setFormData({...formData, bio: e.target.value})}
                 rows={4}
-                className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50"
               />
               <div className="text-right">
                 <span className="text-white text-sm">
@@ -384,18 +384,18 @@ const EmployerProfile = () => {
               </Button>
             </div>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Social Media Links Section */}
-      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-        <CardHeader>
-          <CardTitle className="text-white text-center">Sociala medier</CardTitle>
-          <CardDescription className="text-white/80 text-center">
+      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
+        <div className="p-4 border-b border-white/10">
+          <h3 className="text-base font-semibold text-white text-center">Sociala medier</h3>
+          <p className="text-white/60 text-center text-sm mt-1">
             Lägg till dina sociala medier-profiler
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          </p>
+        </div>
+        <div className="p-4 space-y-4">
           {/* Existing social media links */}
           {formData.social_media_links.length > 0 && (
             <div className="space-y-3">
@@ -403,7 +403,7 @@ const EmployerProfile = () => {
               {formData.social_media_links.map((link, index) => {
                 const Icon = getPlatformIcon(link.platform);
                 return (
-                  <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 gap-3">
+                  <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-3 gap-3">
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <Icon className="h-5 w-5 text-white flex-shrink-0" />
                       <div className="min-w-0 flex-1">
@@ -440,14 +440,14 @@ const EmployerProfile = () => {
           )}
 
           {/* Add new social media link */}
-          <div className="space-y-3 border-t border-white/20 pt-4">
+          <div className="space-y-3 border-t border-white/10 pt-4">
             <Label className="text-white">Lägg till ny länk</Label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <DropdownMenu modal={false} open={platformMenuOpen} onOpenChange={setPlatformMenuOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between text-left"
+                    className="w-full bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 transition-colors justify-between text-left"
                   >
                     <span className="truncate text-left flex-1 px-1">
                       {newSocialLink.platform ? SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label : 'Välj plattform'}
@@ -503,7 +503,7 @@ const EmployerProfile = () => {
                   newSocialLink.platform === 'instagram' ? 'https://instagram.com/dittnamn' :
                   'https://din-webbsida.se'
                 }
-                className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 md:col-span-1"
+                className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 md:col-span-1"
               />
 
               <Button
@@ -520,7 +520,7 @@ const EmployerProfile = () => {
 
           {/* Display social media links if any exist */}
           {formData.social_media_links.length > 0 && (
-            <div className="border-t border-white/20 pt-4">
+            <div className="border-t border-white/10 pt-4">
               <Label className="text-white mb-3 block">Förhandsvisning</Label>
               <div className="flex flex-wrap gap-3">
                 {formData.social_media_links.map((link, index) => {
@@ -530,7 +530,7 @@ const EmployerProfile = () => {
                       key={index}
                       variant="outline"
                       onClick={() => window.open(link.url, '_blank')}
-                      className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-colors"
+                      className="bg-white/5 border-white/10 text-white hover:bg-white/10 transition-colors"
                     >
                       <Icon className="h-4 w-4 mr-2" />
                       {getPlatformLabel(link.platform)}
@@ -541,8 +541,8 @@ const EmployerProfile = () => {
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
