@@ -12,6 +12,7 @@ import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2, AlertTriangle, Brie
 import EditJobDialog from '@/components/EditJobDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -180,147 +181,130 @@ const EmployerDashboard = memo(() => {
         </Card>
       </div>
 
-      {/* Job Listings - med skeleton när loading */}
-      <div className="space-y-2.5">
-        {loading ? (
-          // Loading skeleton - 3 placeholder cards
-          Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="flex-1 space-y-2">
-                    <Skeleton className="h-6 w-1/3 bg-white/20" />
-                    <div className="flex gap-4">
-                      <Skeleton className="h-4 w-20 bg-white/20" />
-                      <Skeleton className="h-4 w-20 bg-white/20" />
-                    </div>
-                  </div>
-                  <Skeleton className="h-6 w-12 bg-white/20" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-4 w-full bg-white/20 mb-2" />
-                <Skeleton className="h-4 w-2/3 bg-white/20 mb-4" />
-                <div className="flex justify-between">
-                  <div className="flex gap-4">
-                    <Skeleton className="h-4 w-16 bg-white/20" />
-                    <Skeleton className="h-4 w-16 bg-white/20" />
-                  </div>
-                  <div className="flex gap-2">
-                    <Skeleton className="h-8 w-20 bg-white/20" />
-                    <Skeleton className="h-8 w-20 bg-white/20" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        ) : jobs.length === 0 ? (
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-            <CardContent className="text-center py-12">
-              <h3 className="text-lg font-semibold mb-2 text-white">Inga annonser än</h3>
-              <p className="text-white mb-4">
-                Skapa din första jobbannons för att komma igång med rekrytering
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          jobs.map((job) => (
-            <Card 
-              key={job.id} 
-              className="bg-white/10 backdrop-blur-sm border-white/20 cursor-pointer hover:bg-white/15 transition-colors"
-              onClick={() => navigate(`/job-details/${job.id}`)}
-            >
-              <CardHeader className="px-2 py-2">
-                <div className="flex justify-between items-start gap-2">
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <CardTitle className="text-sm text-white leading-tight flex-1">{job.title}</CardTitle>
-                      <Badge 
-                        variant={job.is_active ? "default" : "secondary"} 
-                        className={`text-[10px] whitespace-nowrap ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-gray-500/20 text-gray-300 border-gray-500/30"}`}
-                      >
-                        {job.is_active ? 'Aktiv' : 'Inaktiv'}
-                      </Badge>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-1 text-[10px] text-white">
-                      <div className="flex items-center gap-0.5">
-                        <MapPin size={10} />
-                        <span className="truncate max-w-[100px]">{job.location}</span>
-                      </div>
-                      <div className="flex items-center gap-0.5">
-                        <Calendar size={10} />
-                        {new Date(job.created_at).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
-                      </div>
-                      {job.employment_type && (
-                        <Badge variant="outline" className="text-[9px] bg-white/10 text-white border-white/20 px-1 py-0">
-                          {getEmploymentTypeLabel(job.employment_type)}
+      {/* Jobs Table */}
+      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+        <CardHeader className="px-3 py-3">
+          <CardTitle className="text-base text-white">
+            Mina jobbannonser
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="px-2 pb-3">
+          <div className="overflow-x-auto -mx-2">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-white/20 hover:bg-white/5">
+                  <TableHead className="text-white font-semibold text-xs px-2">Titel</TableHead>
+                  <TableHead className="text-white font-semibold text-xs px-2">Status</TableHead>
+                  <TableHead className="text-white font-semibold text-xs text-center px-2">Ansökningar</TableHead>
+                  <TableHead className="text-white font-semibold text-xs text-center px-2">Visningar</TableHead>
+                  <TableHead className="text-white font-semibold text-xs px-2">Plats</TableHead>
+                  <TableHead className="text-white font-semibold text-xs px-2">Skapad</TableHead>
+                  <TableHead className="text-white font-semibold text-xs px-2">Åtgärder</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-white/60 py-8 text-xs">
+                      Laddar...
+                    </TableCell>
+                  </TableRow>
+                ) : jobs.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center !text-white py-8 font-medium text-xs">
+                      Inga jobbannonser än. Skapa din första annons!
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  jobs.map((job) => (
+                    <TableRow 
+                      key={job.id}
+                      className="border-white/10 hover:bg-white/5 cursor-pointer transition-colors"
+                      onClick={() => navigate(`/job-details/${job.id}`)}
+                    >
+                      <TableCell className="font-medium text-white px-2 py-3">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-xs line-clamp-2">{job.title}</span>
+                          {job.employment_type && (
+                            <Badge variant="outline" className="w-fit text-[10px] bg-white/5 text-white border-white/20">
+                              {getEmploymentTypeLabel(job.employment_type)}
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="px-2 py-3">
+                        <Badge 
+                          variant={job.is_active ? "default" : "secondary"}
+                          className={`text-xs whitespace-nowrap ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-gray-500/20 text-gray-300 border-gray-500/30"}`}
+                        >
+                          {job.is_active ? 'Aktiv' : 'Inaktiv'}
                         </Badge>
-                      )}
-                    </div>
-                  </div>
-                  <Switch
-                    checked={job.is_active}
-                    onCheckedChange={() => toggleJobStatus(job.id, job.is_active)}
-                    onClick={(e) => e.stopPropagation()}
-                    className="ml-1"
-                  />
-                </div>
-              </CardHeader>
-              <CardContent className="px-2 py-2 pt-0">
-                <p className="text-[10px] text-white/80 mb-1.5 line-clamp-2">
-                  {job.description}
-                </p>
-                
-                {formatSalary(job.salary_min, job.salary_max) && (
-                  <p className="text-[10px] font-medium mb-1.5 text-white">
-                    {formatSalary(job.salary_min, job.salary_max)}
-                  </p>
+                      </TableCell>
+                      <TableCell className="text-center px-2 py-3">
+                        <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs">
+                          {job.applications_count || 0}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center px-2 py-3">
+                        <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-xs">
+                          {job.views_count || 0}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-white px-2 py-3">
+                        <div className="flex items-center gap-1 text-xs">
+                          <MapPin size={12} />
+                          <span className="truncate max-w-[120px]">{job.location}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-white px-2 py-3">
+                        <div className="flex items-center gap-1 text-xs whitespace-nowrap">
+                          <Calendar size={12} />
+                          {new Date(job.created_at).toLocaleDateString('sv-SE', { 
+                            day: 'numeric', 
+                            month: 'short' 
+                          })}
+                        </div>
+                      </TableCell>
+                      <TableCell className="px-2 py-3">
+                        <div className="flex items-center gap-1">
+                          <Switch
+                            checked={job.is_active}
+                            onCheckedChange={() => toggleJobStatus(job.id, job.is_active)}
+                            onClick={(e) => e.stopPropagation()}
+                            className="scale-75"
+                          />
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditJob(job);
+                            }}
+                            className="h-7 px-2 bg-white/10 border-white/20 text-white hover:bg-white/20 text-[10px]"
+                          >
+                            <Edit size={12} />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteClick(job);
+                            }}
+                            className="h-7 px-2 bg-white/10 border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/40 text-[10px]"
+                          >
+                            <Trash2 size={12} />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
-
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 text-[10px] text-white">
-                    <div className="flex items-center gap-0.5">
-                      <Eye size={10} />
-                      <span>{job.views_count}</span>
-                    </div>
-                    <div className="flex items-center gap-0.5">
-                      <MessageCircle size={10} />
-                      <span>{job.applications_count}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-1.5">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditJob(job);
-                      }}
-                      className="h-7 px-2 bg-white/10 border-white/20 text-white hover:bg-white/20 text-[10px]"
-                    >
-                      <Edit size={12} className="mr-0.5" />
-                      Redigera
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteClick(job);
-                      }}
-                      className="h-7 px-2 bg-white/10 border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/40 text-[10px]"
-                    >
-                      <Trash2 size={12} className="mr-0.5" />
-                      Ta bort
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="border-white/20 text-white max-w-md w-[28rem] p-6 bg-gradient-to-br from-[hsl(215,100%,12%)] to-[hsl(215,90%,15%)] backdrop-blur-md rounded-xl shadow-2xl">
