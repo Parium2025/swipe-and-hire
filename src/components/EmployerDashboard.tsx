@@ -122,7 +122,7 @@ const EmployerDashboard = memo(() => {
 
 
   return (
-    <div className="space-y-3 pb-safe min-h-screen smooth-scroll touch-pan no-overscroll" style={{ WebkitOverflowScrolling: 'touch' }}>
+    <div className="space-y-4">
       <div className="text-center px-2">
         <h1 className="text-xl font-bold text-white">Mina jobbannonser</h1>
       </div>
