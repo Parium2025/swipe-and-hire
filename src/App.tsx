@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -37,17 +37,6 @@ const App = () => {
     return () => window.removeEventListener('load', start as any);
   }, []);
 
-  // Router-aware background: show only left cluster on /auth (desktop)
-  const RouterAwareBackground = () => {
-    const location = useLocation();
-    const deviceLocal = useDevice();
-    const isAuthRoute = location.pathname.startsWith('/auth');
-    if (isAuthRoute && deviceLocal === 'desktop') {
-      return <AnimatedBackground showBubbles hideRightBubbles disableDesktopShift />;
-    }
-    return <AnimatedBackground />;
-  };
-
   return (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -57,7 +46,7 @@ const App = () => {
         <UnsavedChangesProvider>
           <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
             {/* Global persistent background to avoid flicker between routes */}
-            <RouterAwareBackground />
+            <AnimatedBackground />
             
             <div className="relative z-10">
               {showHeader && <Header />}
