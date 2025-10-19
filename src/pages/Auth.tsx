@@ -1268,7 +1268,7 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden relative">
-      <AnimatedBackground showBubbles={false} />
+      <AnimatedBackground />
       {/* Pull-to-refresh spinner */}
       <div 
         className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
