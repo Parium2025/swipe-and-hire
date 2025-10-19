@@ -229,66 +229,63 @@ const EmployerDashboard = memo(() => {
               className="bg-white/10 backdrop-blur-sm border-white/20 cursor-pointer hover:bg-white/15 transition-colors"
               onClick={() => navigate(`/job-details/${job.id}`)}
             >
-              <CardHeader className="px-2.5 py-2.5">
-                <div className="flex flex-col justify-between items-start gap-2">
-                  <div className="flex-1 w-full">
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex items-start justify-between gap-2">
-                        <CardTitle className="text-base text-white leading-tight flex-1">{job.title}</CardTitle>
-                        <Badge variant={job.is_active ? "default" : "secondary"} className="text-xs whitespace-nowrap">
-                          {job.is_active ? 'Aktiv' : 'Inaktiv'}
+              <CardHeader className="px-2 py-2">
+                <div className="flex justify-between items-start gap-2">
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <CardTitle className="text-sm text-white leading-tight flex-1">{job.title}</CardTitle>
+                      <Badge variant={job.is_active ? "default" : "secondary"} className="text-[10px] whitespace-nowrap">
+                        {job.is_active ? 'Aktiv' : 'Inaktiv'}
+                      </Badge>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1 text-[10px] text-white">
+                      <div className="flex items-center gap-0.5">
+                        <MapPin size={10} />
+                        <span className="truncate max-w-[100px]">{job.location}</span>
+                      </div>
+                      <div className="flex items-center gap-0.5">
+                        <Calendar size={10} />
+                        {new Date(job.created_at).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
+                      </div>
+                      {job.employment_type && (
+                        <Badge variant="outline" className="text-[9px] bg-white/10 text-white border-white/20 px-1 py-0">
+                          {getEmploymentTypeLabel(job.employment_type)}
                         </Badge>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-1.5 text-xs text-white">
-                        <div className="flex items-center gap-1">
-                          <MapPin size={12} />
-                          <span className="truncate max-w-[120px]">{job.location}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar size={12} />
-                          {new Date(job.created_at).toLocaleDateString('sv-SE')}
-                        </div>
-                        {job.employment_type && (
-                          <Badge variant="outline" className="text-[10px] bg-white/10 text-white border-white px-1.5 py-0">
-                            {getEmploymentTypeLabel(job.employment_type)}
-                          </Badge>
-                        )}
-                      </div>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={job.is_active}
-                      onCheckedChange={() => toggleJobStatus(job.id, job.is_active)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
+                  <Switch
+                    checked={job.is_active}
+                    onCheckedChange={() => toggleJobStatus(job.id, job.is_active)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="ml-1"
+                  />
                 </div>
               </CardHeader>
-              <CardContent className="px-2.5 py-2.5 pt-0">
-                <p className="text-xs text-white mb-2 line-clamp-2">
+              <CardContent className="px-2 py-2 pt-0">
+                <p className="text-[10px] text-white/80 mb-1.5 line-clamp-2">
                   {job.description}
                 </p>
                 
                 {formatSalary(job.salary_min, job.salary_max) && (
-                  <p className="text-xs font-medium mb-2 text-white">
+                  <p className="text-[10px] font-medium mb-1.5 text-white">
                     {formatSalary(job.salary_min, job.salary_max)}
                   </p>
                 )}
 
-                <div className="flex flex-col items-start justify-between gap-2">
-                  <div className="flex items-center gap-2.5 text-xs text-white">
-                    <div className="flex items-center gap-1">
-                      <Eye size={12} />
-                      <span className="whitespace-nowrap">{job.views_count} visningar</span>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-[10px] text-white">
+                    <div className="flex items-center gap-0.5">
+                      <Eye size={10} />
+                      <span>{job.views_count}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <MessageCircle size={12} />
-                      <span className="whitespace-nowrap">{job.applications_count} intresserade</span>
+                    <div className="flex items-center gap-0.5">
+                      <MessageCircle size={10} />
+                      <span>{job.applications_count}</span>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2 w-full">
+                  <div className="flex items-center gap-1.5">
                     <Button 
                       variant="outline" 
                       size="sm"
@@ -296,9 +293,9 @@ const EmployerDashboard = memo(() => {
                         e.stopPropagation();
                         handleEditJob(job);
                       }}
-                      className="flex-1 bg-white/10 border-white/20 text-white hover:bg-white/20 transition-all duration-150 active:scale-95 min-h-[44px] text-xs"
+                      className="h-7 px-2 bg-white/10 border-white/20 text-white hover:bg-white/20 text-[10px]"
                     >
-                      <Edit size={14} className="mr-1" />
+                      <Edit size={12} className="mr-0.5" />
                       Redigera
                     </Button>
                     <Button 
@@ -308,9 +305,9 @@ const EmployerDashboard = memo(() => {
                         e.stopPropagation();
                         handleDeleteClick(job);
                       }}
-                      className="flex-1 bg-white/10 border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-100 transition-all duration-150 active:scale-95 min-h-[44px] text-xs"
+                      className="h-7 px-2 bg-white/10 border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/40 text-[10px]"
                     >
-                      <Trash2 size={14} className="mr-1" />
+                      <Trash2 size={12} className="mr-0.5" />
                       Ta bort
                     </Button>
                   </div>
