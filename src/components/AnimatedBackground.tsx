@@ -23,10 +23,6 @@ export const AnimatedBackground = memo(({ showBubbles = true }: AnimatedBackgrou
             {/* Pulsing light (left) */}
             <div className="absolute top-12 left-8 w-3 h-3 bg-accent/40 rounded-full animate-pulse" style={{ animationDuration: '1.8s', animationDelay: '-0.7s', animationFillMode: 'backwards' }}></div>
 
-            {/* Small star (left) */}
-            <div className="absolute top-1/4 left-1/3 w-1 h-1 bg-accent/60 rounded-full animate-pulse" style={{ animationDuration: '3s', animationDelay: '-1.8s', animationFillMode: 'backwards' }}>
-              <div className="absolute inset-0 bg-accent/40 rounded-full animate-ping" style={{ animationDuration: '3s', animationDelay: '-1.8s', animationFillMode: 'backwards' }}></div>
-            </div>
           </div>
         </>
       )}
