@@ -484,7 +484,7 @@ const CompanyProfile = () => {
               <Button 
                 type="submit" 
                 disabled={loading || !hasUnsavedChanges}
-                className="bg-white/90 text-parium-dark hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm"
+                className="border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm"
               >
                 {loading ? 'Sparar...' : 'Spara ändringar'}
               </Button>
