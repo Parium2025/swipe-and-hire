@@ -201,7 +201,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
         }
       }}>
         <DialogTrigger asChild>
-          <Button className="flex items-center gap-2">
+          <Button className="flex items-center gap-2 border border-white/30">
             <Plus size={16} />
             Skapa ny annons
           </Button>
