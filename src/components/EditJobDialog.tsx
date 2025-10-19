@@ -195,6 +195,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [editingImageUrl, setEditingImageUrl] = useState<string | null>(null);
   const [manualFocus, setManualFocus] = useState<number | null>(null);
+  const [cachedPostalCodeInfo, setCachedPostalCodeInfo] = useState<{postalCode: string, city: string, municipality: string, county: string} | null>(null);
   
   // Unsaved changes tracking
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -749,8 +750,22 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     handleInputChange('workplace_postal_code', value);
   };
 
-  const handleWorkplaceLocationChange = (value: string) => {
-    handleInputChange('workplace_city', value);
+  const handleWorkplaceLocationChange = (value: string, postalCode?: string, municipality?: string, county?: string) => {
+    setFormData(prev => ({
+      ...prev,
+      workplace_city: value,
+      location: value // Auto-update main location field from postal code
+    }));
+    
+    // Cache postal code info if available
+    if (postalCode && value && municipality && county) {
+      setCachedPostalCodeInfo({
+        postalCode,
+        city: value,
+        municipality,
+        county
+      });
+    }
   };
 
   // Close dropdowns when clicking outside
@@ -1374,6 +1389,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         cityValue={formData.workplace_city}
                         onPostalCodeChange={handleWorkplacePostalCodeChange}
                         onLocationChange={handleWorkplaceLocationChange}
+                        cachedInfo={cachedPostalCodeInfo}
                       />
                     </div>
                   )}
@@ -1897,7 +1913,19 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                           </div>
                                         )}
 
-                                        <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                        {formData.positions_count && parseInt(formData.positions_count) > 0 && (
+                                          <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
+                                            <h5 className="text-xs font-medium text-white mb-1 flex items-center whitespace-nowrap">
+                                              <Users className="h-2 w-2 mr-1 text-white" />
+                                              Antal rekryteringar
+                                            </h5>
+                                            <div className="text-xs text-white leading-relaxed break-words">
+                                              <div className="font-medium">{formatPositionsCount()}</div>
+                                            </div>
+                                          </div>
+                                        )}
+
+                                        <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
                                           <h5 className="text-xs font-medium text-white mb-1 flex items-center">
                                             <MapPin className="h-2 w-2 mr-1 text-white" />
                                             Arbetsplats
@@ -1911,7 +1939,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             )}
                                             {(formData.workplace_postal_code || formData.workplace_city) && (
                                               <div>
-                                                {formData.workplace_postal_code && formData.workplace_city ? (
+                                                {formData.workplace_city && cachedPostalCodeInfo?.county ? (
+                                                  <div>{formData.workplace_city}, {cachedPostalCodeInfo.county}</div>
+                                                ) : formData.workplace_postal_code && formData.workplace_city ? (
                                                   <div>{formData.workplace_postal_code} {formData.workplace_city}</div>
                                                 ) : formData.workplace_city ? (
                                                   <div>{formData.workplace_city}</div>
@@ -1923,18 +1953,6 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             )}
                                           </div>
                                         </div>
-
-                                        {formData.positions_count && parseInt(formData.positions_count) > 0 && (
-                                          <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
-                                            <h5 className="text-xs font-medium text-white mb-1 flex items-center whitespace-nowrap">
-                                              <Users className="h-2 w-2 mr-1 text-white" />
-                                              Antal rekryteringar
-                                            </h5>
-                                            <div className="text-xs text-white leading-relaxed break-words">
-                                              <div className="font-medium">{formatPositionsCount()}</div>
-                                            </div>
-                                          </div>
-                                        )}
 
                                         <div className="bg-white/10 rounded-lg p-2 border border-white/20">
                                           <h5 className="text-xs font-medium text-white mb-1 flex items-center">
