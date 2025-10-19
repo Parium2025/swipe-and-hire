@@ -562,6 +562,21 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     loadJobImage();
   }, [job, open]);
 
+  // Preload image when user reaches step 2 (jobbild section) to make preview faster
+  useEffect(() => {
+    if (jobImageDisplayUrl && currentStep >= 2 && open) {
+      const img = new Image();
+      img.src = jobImageDisplayUrl;
+      // Force browser to cache the image before preview
+      img.onload = () => {
+        console.log('Job image preloaded successfully');
+      };
+      img.onerror = (e) => {
+        console.error('Failed to preload job image:', e);
+      };
+    }
+  }, [jobImageDisplayUrl, currentStep, open]);
+
   // Sync incoming job to form
   useEffect(() => {
     if (job && open) {
