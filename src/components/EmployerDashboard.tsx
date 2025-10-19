@@ -2,13 +2,13 @@ import { useState, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2, AlertTriangle } from 'lucide-react';
+import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp } from 'lucide-react';
 import EditJobDialog from '@/components/EditJobDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
@@ -129,53 +129,54 @@ const EmployerDashboard = memo(() => {
         </p>
       </div>
 
-      {/* Stats Overview - med skeleton när loading */}
-      <div className="grid gap-2 grid-cols-1 md:grid-cols-4">
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="p-2">
-            <CardDescription className="text-white text-[9px] mb-0">Totalt annonser</CardDescription>
-            {loading ? (
-              <Skeleton className="h-4 w-6 bg-white/20" />
-            ) : (
-              <CardTitle className="text-sm text-white">{jobs.length}</CardTitle>
-            )}
+      {/* Stats Overview */}
+      <div className="flex flex-wrap gap-3 justify-center">
+        <Card className="w-[240px] md:w-[280px] bg-white/10 backdrop-blur-sm border-white/20">
+          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-4">
+            <Briefcase className="h-5 w-5 text-white" />
+            <CardTitle className="text-sm font-medium text-white">Totalt annonser</CardTitle>
           </CardHeader>
+          <CardContent className="px-4 pb-4">
+            <div className="text-2xl font-bold text-white transition-all duration-300">
+              {loading ? '...' : jobs.length}
+            </div>
+          </CardContent>
         </Card>
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="p-2">
-            <CardDescription className="text-white text-[9px] mb-0">Aktiva annonser</CardDescription>
-            {loading ? (
-              <Skeleton className="h-4 w-6 bg-white/20" />
-            ) : (
-              <CardTitle className="text-sm text-white">
-                {jobs.filter(job => job.is_active).length}
-              </CardTitle>
-            )}
+
+        <Card className="w-[240px] md:w-[280px] bg-white/10 backdrop-blur-sm border-white/20">
+          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-4">
+            <TrendingUp className="h-5 w-5 text-white" />
+            <CardTitle className="text-sm font-medium text-white">Aktiva annonser</CardTitle>
           </CardHeader>
+          <CardContent className="px-4 pb-4">
+            <div className="text-2xl font-bold text-white transition-all duration-300">
+              {loading ? '...' : jobs.filter(job => job.is_active).length}
+            </div>
+          </CardContent>
         </Card>
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="p-2">
-            <CardDescription className="text-white text-[9px] mb-0">Totala visningar</CardDescription>
-            {loading ? (
-              <Skeleton className="h-4 w-6 bg-white/20" />
-            ) : (
-              <CardTitle className="text-sm text-white">
-                {jobs.reduce((sum, job) => sum + job.views_count, 0)}
-              </CardTitle>
-            )}
+
+        <Card className="w-[240px] md:w-[280px] bg-white/10 backdrop-blur-sm border-white/20">
+          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-4">
+            <Eye className="h-5 w-5 text-white" />
+            <CardTitle className="text-sm font-medium text-white">Totala visningar</CardTitle>
           </CardHeader>
+          <CardContent className="px-4 pb-4">
+            <div className="text-2xl font-bold text-white transition-all duration-300">
+              {loading ? '...' : jobs.reduce((sum, job) => sum + job.views_count, 0)}
+            </div>
+          </CardContent>
         </Card>
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="p-2">
-            <CardDescription className="text-white text-[9px] mb-0">Ansökningar</CardDescription>
-            {loading ? (
-              <Skeleton className="h-4 w-6 bg-white/20" />
-            ) : (
-              <CardTitle className="text-sm text-white">
-                {jobs.reduce((sum, job) => sum + job.applications_count, 0)}
-              </CardTitle>
-            )}
+
+        <Card className="w-[240px] md:w-[280px] bg-white/10 backdrop-blur-sm border-white/20">
+          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-4">
+            <MessageCircle className="h-5 w-5 text-white" />
+            <CardTitle className="text-sm font-medium text-white">Ansökningar</CardTitle>
           </CardHeader>
+          <CardContent className="px-4 pb-4">
+            <div className="text-2xl font-bold text-white transition-all duration-300">
+              {loading ? '...' : jobs.reduce((sum, job) => sum + job.applications_count, 0)}
+            </div>
+          </CardContent>
         </Card>
       </div>
 
