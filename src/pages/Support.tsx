@@ -158,130 +158,124 @@ const Support = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-4 md:space-y-6 overflow-x-hidden">
-      <div className="text-center px-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-white">Kundtjänst</h1>
-        <p className="text-white text-sm md:text-base">
-          Vi hjälper dig gärna med dina frågor och problem
-        </p>
+    <div className="space-y-8 max-w-4xl mx-auto">
+      <div className="text-center mb-6">
+        <h1 className="text-2xl font-semibold text-white mb-1">Kundtjänst</h1>
+        <p className="text-sm text-white">Vi hjälper dig gärna med dina frågor och problem</p>
       </div>
 
-      <div className="px-4 pb-6 space-y-4 md:space-y-6 overflow-x-hidden">
-        {/* Support Form */}
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-            <CardHeader className="pb-3 md:pb-6">
-              <CardTitle className="text-white text-base md:text-lg">Skicka ett meddelande</CardTitle>
-              <CardDescription className="text-white text-sm">
-                Beskriv ditt problem eller din fråga så detaljerat som möjligt
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="category" className="text-white text-sm">Kategori</Label>
-                  <DropdownMenu modal={false}>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
-                      >
-                        <span className="truncate">
-                          {categoryOptions.find(o => o.value === category)?.label || 'Välj kategori'}
-                        </span>
-                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className="w-72 max-h-80 overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
-                      side="bottom"
-                      align="center"
-                      alignOffset={0}
-                      sideOffset={6}
-                      avoidCollisions={false}
-                      onCloseAutoFocus={(e) => e.preventDefault()}
-                    >
-                      {categoryOptions.map((opt) => {
-                        const isSelected = category === opt.value;
-                        return (
-                          <DropdownMenuItem
-                            key={opt.value}
-                            onClick={() => setCategory(opt.value)}
-                            className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white flex items-center justify-between"
-                          >
-                            <span>{opt.label}</span>
-                            {isSelected && <Check className="h-4 w-4 text-white" />}
-                          </DropdownMenuItem>
-                        );
-                      })}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="message" className="text-white text-sm">Meddelande</Label>
-                  <Textarea
-                    id="message"
-                    placeholder="Beskriv ditt problem eller din fråga detaljerat..."
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    rows={4}
-                    required
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 resize-none"
-                  />
-                </div>
-
-                <Button 
-                  type="submit" 
-                  className="w-full bg-primary hover:bg-primary/90 text-white h-11 md:h-10 font-medium" 
-                  disabled={loading}
+      {/* Support Form */}
+      <div className="bg-white/5 border border-white/10 rounded-lg">
+        <div className="px-6 py-4 border-b border-white/10">
+          <h3 className="text-lg font-semibold text-white">Skicka ett meddelande</h3>
+          <p className="text-sm text-white">Beskriv ditt problem eller din fråga så detaljerat som möjligt</p>
+        </div>
+        <div className="p-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-1.5">
+              <Label htmlFor="category" className="text-sm text-white">Kategori</Label>
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full h-9 bg-white/5 border-white/10 text-white hover:bg-white/10 transition-colors justify-between text-sm"
+                  >
+                    <span className="truncate text-left flex-1 px-1">
+                      {categoryOptions.find(o => o.value === category)?.label || 'Välj kategori'}
+                    </span>
+                    <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-80 bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white"
+                  side="bottom"
+                  align="center"
+                  alignOffset={0}
+                  sideOffset={8}
+                  avoidCollisions={false}
+                  onCloseAutoFocus={(e) => e.preventDefault()}
                 >
-                  {loading ? 'Skickar...' : 'Skicka meddelande'}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-
-        {/* Existing Tickets */}
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="pb-3 md:pb-6">
-            <CardTitle className="text-white text-base md:text-lg">Dina supportärenden</CardTitle>
-            <CardDescription className="text-white text-sm">
-              Översikt över dina tidigare och pågående supportärenden
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-0">
-            {ticketsLoading ? (
-              <div className="text-center text-white/70 py-8">
-                Laddar ärenden...
-              </div>
-            ) : tickets.length === 0 ? (
-              <div className="text-center text-white/70 py-8">
-                Inga supportärenden ännu
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {tickets.map((ticket) => (
-                  <div key={ticket.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 border border-white/20 rounded-lg bg-white/5">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex-shrink-0">
-                        {getStatusIcon(ticket.status)}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-medium text-white text-sm md:text-base truncate">{ticket.subject}</p>
-                        <p className="text-xs md:text-sm text-white/70">
-                          Ärende {ticket.id.slice(0, 8)} • Skapad {new Date(ticket.created_at).toLocaleDateString('sv-SE')}
-                        </p>
-                      </div>
-                    </div>
-                    <Badge className={`${getStatusColor(ticket.status)} border-white/20 text-xs self-start sm:self-center flex-shrink-0`}>
-                      {getStatusLabel(ticket.status)}
-                    </Badge>
+                  <div className="p-2">
+                    {categoryOptions.map((opt) => {
+                      const isSelected = category === opt.value;
+                      return (
+                        <DropdownMenuItem
+                          key={opt.value}
+                          onClick={() => setCategory(opt.value)}
+                          className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-2 px-3 text-white flex items-center justify-between rounded-md transition-colors"
+                        >
+                          <span className="text-sm">{opt.label}</span>
+                          {isSelected && <Check className="h-4 w-4 text-green-400" />}
+                        </DropdownMenuItem>
+                      );
+                    })}
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="message" className="text-sm text-white">Meddelande</Label>
+              <Textarea
+                id="message"
+                placeholder="Beskriv ditt problem eller din fråga detaljerat..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={4}
+                required
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 resize-none text-sm"
+              />
+            </div>
+
+            <Button 
+              type="submit" 
+              className="w-full h-9 text-sm" 
+              disabled={loading}
+            >
+              {loading ? 'Skickar...' : 'Skicka meddelande'}
+            </Button>
+          </form>
+        </div>
+      </div>
+
+      {/* Existing Tickets */}
+      <div className="bg-white/5 border border-white/10 rounded-lg">
+        <div className="px-6 py-4 border-b border-white/10">
+          <h3 className="text-lg font-semibold text-white">Dina supportärenden</h3>
+          <p className="text-sm text-white">Översikt över dina tidigare och pågående supportärenden</p>
+        </div>
+        <div className="p-6">
+          {ticketsLoading ? (
+            <div className="text-center text-white/70 py-8 text-sm">
+              Laddar ärenden...
+            </div>
+          ) : tickets.length === 0 ? (
+            <div className="text-center text-white/70 py-8 text-sm">
+              Inga supportärenden ännu
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {tickets.map((ticket) => (
+                <div key={ticket.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 border border-white/10 rounded-lg bg-white/5">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex-shrink-0">
+                      {getStatusIcon(ticket.status)}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium text-white text-sm truncate">{ticket.subject}</p>
+                      <p className="text-xs text-white/70">
+                        Ärende {ticket.id.slice(0, 8)} • Skapad {new Date(ticket.created_at).toLocaleDateString('sv-SE')}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge className={`${getStatusColor(ticket.status)} border-white/20 text-xs self-start sm:self-center flex-shrink-0`}>
+                    {getStatusLabel(ticket.status)}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
