@@ -16,8 +16,15 @@ const Dashboard = memo(() => {
 
   return (
     <div className="space-y-4">
-      <div className="text-center">
-        <h1 className="text-xl font-bold text-white">Dashboard</h1>
+      <div className="flex justify-between items-center">
+        <div className="text-left">
+          <h1 className="text-xl font-bold text-white">Dashboard</h1>
+        </div>
+        <CreateJobSimpleDialog 
+          onJobCreated={() => {
+            invalidateJobs();
+          }}
+        />
       </div>
 
       {/* Stats Grid */}
@@ -71,14 +78,6 @@ const Dashboard = memo(() => {
         </Card>
       </div>
 
-      {/* Create Job Button */}
-      <div className="flex justify-end">
-        <CreateJobSimpleDialog 
-          onJobCreated={() => {
-            invalidateJobs();
-          }}
-        />
-      </div>
 
       {/* Jobs Table */}
       <Card className="bg-white/10 backdrop-blur-sm border-white/20">

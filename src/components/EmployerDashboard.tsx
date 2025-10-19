@@ -10,7 +10,6 @@ import { useToast } from '@/hooks/use-toast';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp } from 'lucide-react';
 import EditJobDialog from '@/components/EditJobDialog';
-import CreateJobSimpleDialog from '@/components/CreateJobSimpleDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -124,18 +123,11 @@ const EmployerDashboard = memo(() => {
 
   return (
     <div className="space-y-3 pb-safe min-h-screen smooth-scroll touch-pan no-overscroll" style={{ WebkitOverflowScrolling: 'touch' }}>
-      <div className="flex justify-between items-center px-2">
-        <div className="text-left">
-          <h1 className="text-xl font-bold text-white">Mina jobbannonser</h1>
-          <p className="text-white mt-1 text-xs">
-            Hantera dina publicerade tjänster
-          </p>
-        </div>
-        <CreateJobSimpleDialog 
-          onJobCreated={() => {
-            invalidateJobs();
-          }}
-        />
+      <div className="text-center px-2">
+        <h1 className="text-xl font-bold text-white">Mina jobbannonser</h1>
+        <p className="text-white mt-1 text-xs">
+          Hantera dina publicerade tjänster
+        </p>
       </div>
 
       {/* Stats Overview */}
