@@ -14,9 +14,10 @@ export const AnimatedBackground = memo(({ showBubbles = true }: AnimatedBackgrou
       {showBubbles && (
         <>
           {/* Animated floating elements with soft bounce - adjusted for sidebar on desktop */}
-          <div className="absolute top-20 left-10 lg:left-[280px] w-4 h-4 bg-secondary/30 rounded-full animate-soft-bounce" style={{ animationDuration: '2s', animationDelay: '-0.3s', animationFillMode: 'backwards' }}></div>
-          <div className="absolute top-16 left-16 lg:left-[320px] w-2 h-2 bg-accent/40 rounded-full animate-soft-bounce" style={{ animationDuration: '2.5s', animationDelay: '-1.2s', animationFillMode: 'backwards' }}></div>
-          <div className="absolute top-24 left-20 lg:left-[300px] w-3 h-3 bg-secondary/20 rounded-full animate-soft-bounce" style={{ animationDuration: '3s', animationDelay: '-2.1s', animationFillMode: 'backwards' }}></div>
+          <div className="absolute top-12 left-10 lg:left-[280px] w-3 h-3 bg-accent/40 rounded-full animate-soft-bounce" style={{ animationDuration: '2s', animationDelay: '-0.3s', animationFillMode: 'backwards' }}></div>
+          <div className="absolute top-24 left-14 lg:left-[300px] w-4 h-4 bg-secondary/30 rounded-full animate-soft-bounce" style={{ animationDuration: '2.5s', animationDelay: '-1.2s', animationFillMode: 'backwards' }}></div>
+          <div className="absolute top-28 left-24 lg:left-[350px] w-3 h-3 bg-accent/30 rounded-full animate-soft-bounce" style={{ animationDuration: '3s', animationDelay: '-2.1s', animationFillMode: 'backwards' }}></div>
+          <div className="absolute top-40 left-12 lg:left-[290px] w-2 h-2 bg-secondary/40 rounded-full animate-soft-bounce" style={{ animationDuration: '2.3s', animationDelay: '-0.5s', animationFillMode: 'backwards' }}></div>
           
           <div className="absolute bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full animate-soft-bounce" style={{ animationDuration: '2.2s', animationDelay: '-0.8s', animationFillMode: 'backwards' }}></div>
           <div className="absolute bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full animate-soft-bounce" style={{ animationDuration: '2.8s', animationDelay: '-1.5s', animationFillMode: 'backwards' }}></div>
