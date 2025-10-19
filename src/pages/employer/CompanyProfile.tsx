@@ -209,127 +209,113 @@ const CompanyProfile = () => {
 
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-white">Företagsprofil</h1>
-        <p className="text-white/90">Hantera företagsinformation och logga</p>
+    <div className="space-y-8 max-w-4xl mx-auto">
+      <div className="text-center mb-6">
+        <h1 className="text-2xl font-semibold text-white mb-1">Företagslogga</h1>
+        <p className="text-sm text-white/70">Ladda upp din företagslogga för att bygga kännedom och förtroende</p>
       </div>
 
-      {/* Företagslogga sektion */}
-      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-        <CardHeader>
-          <CardTitle className="text-white text-center">
-            Företagslogga
-          </CardTitle>
-          <CardDescription className="text-white/80 text-center">
-            Ladda upp din företagslogga för att bygga kännedom och förtroende
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center space-y-4">
-          <div className="relative">
-            {formData.company_logo_url ? (
-              <div className="w-40 h-40 rounded-full overflow-hidden bg-white/10 backdrop-blur-sm border-2 border-white/20 flex items-center justify-center">
-                <img 
-                  src={formData.company_logo_url} 
-                  alt="Företagslogga" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : (
-              <div className="w-40 h-40 rounded-full bg-white/10 backdrop-blur-sm border-2 border-dashed border-white/40 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-white/80 mb-1">
-                    {formData.company_name ? 
-                      formData.company_name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2) : 
-                      'HM'
-                    }
-                  </div>
-                  <Building2 className="h-6 w-6 text-white/60 mx-auto" />
+      {/* Företagslogga sektion - Minimalistisk */}
+      <div className="flex flex-col items-center space-y-4 py-6">
+        <div className="relative">
+          {formData.company_logo_url ? (
+            <div className="w-32 h-32 rounded-full overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center">
+              <img 
+                src={formData.company_logo_url} 
+                alt="Företagslogga" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="w-32 h-32 rounded-full bg-white/5 border border-dashed border-white/20 flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-2xl font-semibold text-white/60 mb-1">
+                  {formData.company_name ? 
+                    formData.company_name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2) : 
+                    'HM'
+                  }
                 </div>
+                <Building2 className="h-5 w-5 text-white/40 mx-auto" />
               </div>
-            )}
-          </div>
+            </div>
+          )}
+        </div>
 
-          <div className="flex gap-2">
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => document.getElementById('logo-upload')?.click()}
+            disabled={isUploadingLogo}
+            className="bg-white/5 border-white/10 text-white/90 hover:bg-white/10 text-sm"
+          >
+            {isUploadingLogo ? (
+              <>
+                <div className="animate-spin w-3 h-3 border-2 border-current border-t-transparent rounded-full mr-2"></div>
+                Laddar upp...
+              </>
+            ) : (
+              <>
+                <Camera className="h-3 w-3 mr-2" />
+                {formData.company_logo_url ? 'Byt logga' : 'Ladda upp'}
+              </>
+            )}
+          </Button>
+
+          {formData.company_logo_url && (
             <Button 
               variant="outline" 
-              onClick={() => document.getElementById('logo-upload')?.click()}
+              size="sm"
+              onClick={handleLogoDelete}
               disabled={isUploadingLogo}
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:scale-105 transition-transform duration-200"
+              className="bg-white/5 border-white/10 text-white/90 hover:bg-red-500/20 text-sm"
             >
-              {isUploadingLogo ? (
-                <>
-                  <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2"></div>
-                  Laddar upp...
-                </>
-              ) : (
-                <>
-                  <Camera className="h-4 w-4 mr-2" />
-                  {formData.company_logo_url ? 'Byt logga' : 'Ladda upp en logga'}
-                </>
-              )}
+              <Trash2 className="h-3 w-3" />
             </Button>
+          )}
+        </div>
 
-            {formData.company_logo_url && (
-              <Button 
-                variant="outline" 
-                onClick={handleLogoDelete}
-                disabled={isUploadingLogo}
-                className="bg-red-500/20 border-red-400/40 text-red-100 hover:bg-red-500/30 hover:scale-105 transition-transform duration-200"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
+        <input
+          id="logo-upload"
+          type="file"
+          accept="image/*"
+          onChange={handleLogoChange}
+          className="hidden"
+          disabled={isUploadingLogo}
+        />
+      </div>
 
-          <input
-            id="logo-upload"
-            type="file"
-            accept="image/*"
-            onChange={handleLogoChange}
-            className="hidden"
-            disabled={isUploadingLogo}
-          />
-        </CardContent>
-      </Card>
+      {/* Företagsinformation - Minimalistisk */}
+      <div className="mt-8">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-semibold text-white mb-1">Företagsinformation</h2>
+          <p className="text-sm text-white/70">Uppdatera företagsprofil för att synas bättre för kandidater</p>
+        </div>
 
-      {/* Företagsinformation */}
-      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-        <CardHeader>
-          <CardTitle className="text-white text-center">Företagsinformation</CardTitle>
-          <CardDescription className="text-white/80 text-center">
-            Uppdatera företagsprofil för att synas bättre för kandidater
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="company_name" className="text-white">Företagsnamn</Label>
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
+          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="company_name" className="text-sm text-white/80">Företagsnamn</Label>
                 <Input
                   id="company_name"
                   value={formData.company_name}
                   onChange={(e) => setFormData({...formData, company_name: e.target.value})}
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="org_number" className="text-white">Organisationsnummer (frivillig)</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="org_number" className="text-sm text-white/80">Organisationsnummer (frivillig)</Label>
                 <Input
                   id="org_number"
                   value={formData.org_number}
                   onChange={(e) => {
-                    let value = e.target.value.replace(/[^0-9]/g, ''); // Remove everything except numbers
-                    
-                    // Auto-format with dash after 6 digits
+                    let value = e.target.value.replace(/[^0-9]/g, '');
                     if (value.length > 6) {
                       value = value.slice(0, 6) + '-' + value.slice(6, 10);
                     }
-                    
                     setFormData({...formData, org_number: value});
-                    
-                    // Validate organization number
                     const digitsOnly = value.replace(/-/g, '');
                     if (value && digitsOnly.length !== 10) {
                       setOrgNumberError('Organisationsnummer måste vara exakt 10 siffror');
@@ -339,26 +325,26 @@ const CompanyProfile = () => {
                   }}
                   placeholder="XXXXXX-XXXX"
                   inputMode="numeric"
-                  maxLength={11} // 10 digits + 1 dash
-                  className={`bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 ${orgNumberError ? 'border-red-500' : ''}`}
+                  maxLength={11}
+                  className={`bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm ${orgNumberError ? 'border-red-500/50' : ''}`}
                 />
                 {orgNumberError && (
-                  <p className="text-red-400 text-sm mt-1">{orgNumberError}</p>
+                  <p className="text-red-400/80 text-xs mt-1">{orgNumberError}</p>
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="industry" className="text-white">Bransch</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="industry" className="text-sm text-white/80">Bransch</Label>
                 <DropdownMenu modal={false} open={industryMenuOpen} onOpenChange={setIndustryMenuOpen}>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
-                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
+                      className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between h-9 text-sm font-normal"
                     >
-                      <span className="truncate text-left flex-1 px-1">
+                      <span className="truncate text-left flex-1 px-1 text-white/90">
                         {formData.industry || 'Välj bransch'}
                       </span>
-                      <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
+                      <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent 
@@ -370,7 +356,6 @@ const CompanyProfile = () => {
                     avoidCollisions={false}
                     onCloseAutoFocus={(e) => e.preventDefault()}
                   >
-                    {/* Search input */}
                     <div className="p-3 border-b border-slate-600/30 sticky top-0 bg-slate-700/95 backdrop-blur-md">
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
@@ -388,7 +373,6 @@ const CompanyProfile = () => {
                       </div>
                     </div>
                    
-                    {/* Industry options */}
                     <div className="overflow-y-auto max-h-80 overscroll-contain">
                       {SWEDISH_INDUSTRIES
                         .filter(industryOption => 
@@ -412,7 +396,6 @@ const CompanyProfile = () => {
                           </DropdownMenuItem>
                         ))}
                       
-                      {/* Custom value option if no matches and search term exists */}
                       {searchTerm.trim().length >= 2 &&
                         !SWEDISH_INDUSTRIES.some(industryOption => 
                           industryOption.toLowerCase().includes(searchTerm.toLowerCase())
@@ -430,7 +413,6 @@ const CompanyProfile = () => {
                         </DropdownMenuItem>
                       )}
                       
-                      {/* Show message if no results */}
                       {searchTerm.trim().length >= 3 && 
                         SWEDISH_INDUSTRIES.filter(industryOption => 
                           industryOption.toLowerCase().includes(searchTerm.toLowerCase())
@@ -444,16 +426,16 @@ const CompanyProfile = () => {
                 </DropdownMenu>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="employee_count" className="text-white">Antal anställda</Label>
-                <Select 
-                  value={formData.employee_count} 
+              <div className="space-y-1.5">
+                <Label htmlFor="employee_count" className="text-sm text-white/80">Antal anställda</Label>
+                <Select
+                  value={formData.employee_count}
                   onValueChange={(value) => setFormData({...formData, employee_count: value})}
                 >
-                  <SelectTrigger className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10">
-                    <SelectValue placeholder="Välj antal anställda" />
+                  <SelectTrigger className="bg-white/5 border-white/10 text-white h-9 text-sm">
+                    <SelectValue placeholder="Välj antal" className="text-white/90" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-slate-800/95 backdrop-blur-md border-slate-600/30 text-white z-50">
                     <SelectItem value="1-10 anställda">1-10 anställda</SelectItem>
                     <SelectItem value="11-50 anställda">11-50 anställda</SelectItem>
                     <SelectItem value="51-200 anställda">51-200 anställda</SelectItem>
@@ -463,57 +445,53 @@ const CompanyProfile = () => {
                 </Select>
               </div>
 
-              <div className="md:col-span-2 space-y-2">
-                <Label htmlFor="address" className="text-white">Huvudkontor</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="address" className="text-sm text-white/80">Huvudkontor</Label>
                 <Input
                   id="address"
                   value={formData.address}
                   onChange={(e) => setFormData({...formData, address: e.target.value})}
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                  placeholder="Hammarby Backen 89555"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
                 />
               </div>
 
-              <div className="md:col-span-2 space-y-2">
-                <Label htmlFor="website" className="text-white">Webbsida</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="website" className="text-sm text-white/80">Webbsida</Label>
                 <Input
-                  id="website" 
+                  id="website"
                   value={formData.website}
                   onChange={(e) => setFormData({...formData, website: e.target.value})}
-                  placeholder="https://exempel.se"
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                  placeholder="parium.se"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
                 />
-              </div>
-
-              <div className="md:col-span-2 space-y-2">
-                <Label htmlFor="company_description" className="text-white">Företagsbeskrivning</Label>
-                <Textarea
-                  id="company_description"
-                  value={formData.company_description}
-                  onChange={(e) => setFormData({...formData, company_description: e.target.value})}
-                  rows={4}
-                  placeholder="Beskriv ditt företag, kultur och värderingar..."
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                />
-                <div className="text-right">
-                  <span className="text-white text-sm">
-                    {formData.company_description.trim() === '' ? 0 : formData.company_description.trim().split(/\s+/).length} ord
-                  </span>
-                </div>
               </div>
             </div>
 
-            <div className="pt-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="company_description" className="text-sm text-white/80">Företagsbeskrivning</Label>
+              <Textarea
+                id="company_description"
+                value={formData.company_description}
+                onChange={(e) => setFormData({...formData, company_description: e.target.value})}
+                placeholder="Vi säljer bilar"
+                rows={4}
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 resize-none text-sm"
+              />
+            </div>
+
+            <div className="flex justify-end pt-2">
               <Button 
                 type="submit" 
-                className="w-full" 
-                disabled={loading}
+                disabled={loading || !hasUnsavedChanges}
+                className="bg-white/90 text-parium-dark hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm"
               >
                 {loading ? 'Sparar...' : 'Spara ändringar'}
               </Button>
             </div>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Image Editor */}
       <ImageEditor
