@@ -212,7 +212,7 @@ const CompanyProfile = () => {
     <div className="space-y-8 max-w-4xl mx-auto">
       <div className="text-center mb-6">
         <h1 className="text-2xl font-semibold text-white mb-1">Företagslogga</h1>
-        <p className="text-sm text-white/70">Ladda upp din företagslogga för att bygga kännedom och förtroende</p>
+        <p className="text-sm text-white">Ladda upp din företagslogga för att bygga kännedom och förtroende</p>
       </div>
 
       {/* Företagslogga sektion - Minimalistisk */}
@@ -289,14 +289,14 @@ const CompanyProfile = () => {
       <div className="mt-8">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-semibold text-white mb-1">Företagsinformation</h2>
-          <p className="text-sm text-white/70">Uppdatera företagsprofil för att synas bättre för kandidater</p>
+          <p className="text-sm text-white">Uppdatera företagsprofil för att synas bättre för kandidater</p>
         </div>
 
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
           <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="company_name" className="text-sm text-white/80">Företagsnamn</Label>
+                <Label htmlFor="company_name" className="text-sm text-white">Företagsnamn</Label>
                 <Input
                   id="company_name"
                   value={formData.company_name}
@@ -306,7 +306,7 @@ const CompanyProfile = () => {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="org_number" className="text-sm text-white/80">Organisationsnummer (frivillig)</Label>
+                <Label htmlFor="org_number" className="text-sm text-white">Organisationsnummer (frivillig)</Label>
                 <Input
                   id="org_number"
                   value={formData.org_number}
@@ -334,7 +334,7 @@ const CompanyProfile = () => {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="industry" className="text-sm text-white/80">Bransch</Label>
+                <Label htmlFor="industry" className="text-sm text-white">Bransch</Label>
                 <DropdownMenu modal={false} open={industryMenuOpen} onOpenChange={setIndustryMenuOpen}>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -427,7 +427,7 @@ const CompanyProfile = () => {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="employee_count" className="text-sm text-white/80">Antal anställda</Label>
+                <Label htmlFor="employee_count" className="text-sm text-white">Antal anställda</Label>
                 <Select
                   value={formData.employee_count}
                   onValueChange={(value) => setFormData({...formData, employee_count: value})}
@@ -446,7 +446,7 @@ const CompanyProfile = () => {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="address" className="text-sm text-white/80">Huvudkontor</Label>
+                <Label htmlFor="address" className="text-sm text-white">Huvudkontor</Label>
                 <Input
                   id="address"
                   value={formData.address}
@@ -457,7 +457,7 @@ const CompanyProfile = () => {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="website" className="text-sm text-white/80">Webbsida</Label>
+                <Label htmlFor="website" className="text-sm text-white">Webbsida</Label>
                 <Input
                   id="website"
                   value={formData.website}
@@ -469,7 +469,7 @@ const CompanyProfile = () => {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="company_description" className="text-sm text-white/80">Företagsbeskrivning</Label>
+              <Label htmlFor="company_description" className="text-sm text-white">Företagsbeskrivning</Label>
               <Textarea
                 id="company_description"
                 value={formData.company_description}
