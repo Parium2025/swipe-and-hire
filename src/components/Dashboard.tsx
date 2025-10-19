@@ -32,7 +32,7 @@ const Dashboard = memo(() => {
 
       {/* Stats Grid */}
       <div className="flex flex-wrap gap-3 justify-center">
-        <Card className="w-[240px] md:w-[280px] bg-white/10 backdrop-blur-sm border-white/20">
+        <Card className="w-[240px] md:w-[280px] bg-white/5 backdrop-blur-sm border-white/20">
           <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-4">
             <Briefcase className="h-5 w-5 text-white" />
             <CardTitle className="text-sm font-medium text-white">Totalt annonser</CardTitle>
@@ -44,7 +44,7 @@ const Dashboard = memo(() => {
           </CardContent>
         </Card>
 
-        <Card className="w-[240px] md:w-[280px] bg-white/10 backdrop-blur-sm border-white/20">
+        <Card className="w-[240px] md:w-[280px] bg-white/5 backdrop-blur-sm border-white/20">
           <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-4">
             <TrendingUp className="h-5 w-5 text-white" />
             <CardTitle className="text-sm font-medium text-white">Aktiva annonser</CardTitle>
@@ -56,7 +56,7 @@ const Dashboard = memo(() => {
           </CardContent>
         </Card>
 
-        <Card className="w-[240px] md:w-[280px] bg-white/10 backdrop-blur-sm border-white/20">
+        <Card className="w-[240px] md:w-[280px] bg-white/5 backdrop-blur-sm border-white/20">
           <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-4">
             <Eye className="h-5 w-5 text-white" />
             <CardTitle className="text-sm font-medium text-white">Totala visningar</CardTitle>
@@ -68,7 +68,7 @@ const Dashboard = memo(() => {
           </CardContent>
         </Card>
 
-        <Card className="w-[240px] md:w-[280px] bg-white/10 backdrop-blur-sm border-white/20">
+        <Card className="w-[240px] md:w-[280px] bg-white/5 backdrop-blur-sm border-white/20">
           <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-4">
             <Users className="h-5 w-5 text-white" />
             <CardTitle className="text-sm font-medium text-white">Ansökningar</CardTitle>
@@ -83,7 +83,7 @@ const Dashboard = memo(() => {
 
 
       {/* Jobs Table */}
-      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+      <Card className="bg-white/5 backdrop-blur-sm border-white/20">
         <CardHeader className="px-3 py-3">
           <CardTitle className="text-base text-white">
             Utlagda jobb av {profile?.company_name || 'ditt företag'}
