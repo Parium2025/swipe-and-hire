@@ -124,7 +124,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     if (template) {
       setSelectedTemplate(template as any);
       setJobTitle(template.title);
-      setHasUnsavedChanges(true);
     }
     setTemplateMenuOpen(false);
   }, [templates]);
@@ -385,7 +384,6 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                         size="icon"
                         onClick={() => {
                           setSelectedTemplate(null);
-                          setHasUnsavedChanges(true);
                         }}
                         className="mt-1 h-9 w-9 flex-shrink-0 text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150"
                         title="Ta bort vald mall"
