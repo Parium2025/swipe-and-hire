@@ -7,15 +7,16 @@ import { memo } from 'react';
 interface AnimatedBackgroundProps {
   showBubbles?: boolean;
   hideRightBubbles?: boolean;
+  disableDesktopShift?: boolean;
 }
 
-export const AnimatedBackground = memo(({ showBubbles = true, hideRightBubbles = false }: AnimatedBackgroundProps) => {
+export const AnimatedBackground = memo(({ showBubbles = true, hideRightBubbles = false, disableDesktopShift = false }: AnimatedBackgroundProps) => {
   return (
     <div className="fixed inset-0 pointer-events-none z-0">
       {showBubbles && (
         <>
           {/* Cluster shifted as a whole on desktop to avoid overlapping the sidebar */}
-          <div className="absolute inset-0 lg:translate-x-[280px] transition-transform">
+          <div className={`absolute inset-0 ${disableDesktopShift ? '' : 'lg:translate-x-[280px]'} transition-transform`}>
             {/* Animated floating elements with soft bounce (left cluster) */}
             <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-soft-bounce" style={{ animationDuration: '2s', animationDelay: '-0.3s', animationFillMode: 'backwards' }}></div>
             <div className="absolute top-32 left-16 w-2 h-2 bg-accent/40 rounded-full animate-soft-bounce" style={{ animationDuration: '2.5s', animationDelay: '-1.2s', animationFillMode: 'backwards' }}></div>

@@ -37,13 +37,15 @@ const App = () => {
     return () => window.removeEventListener('load', start as any);
   }, []);
 
-  // Router-aware background: disable global bubbles on /auth (desktop only)
+  // Router-aware background: show only left cluster on /auth (desktop)
   const RouterAwareBackground = () => {
     const location = useLocation();
     const deviceLocal = useDevice();
     const isAuthRoute = location.pathname.startsWith('/auth');
-    const showGlobalBubbles = !(isAuthRoute && deviceLocal === 'desktop');
-    return <AnimatedBackground showBubbles={showGlobalBubbles} />;
+    if (isAuthRoute && deviceLocal === 'desktop') {
+      return <AnimatedBackground showBubbles hideRightBubbles disableDesktopShift />;
+    }
+    return <AnimatedBackground />;
   };
 
   return (
