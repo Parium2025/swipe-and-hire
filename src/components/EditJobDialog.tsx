@@ -1287,6 +1287,18 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           )}
                         </div>
                       </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-white font-medium text-sm">Antal rekryteringar *</Label>
+                        <Input
+                          type="number"
+                          min="1"
+                          value={formData.positions_count}
+                          onChange={(e) => handleInputChange('positions_count', e.target.value)}
+                          placeholder="1"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                        />
+                      </div>
                     </div>
                   )}
 
