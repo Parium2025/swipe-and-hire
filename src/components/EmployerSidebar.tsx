@@ -200,10 +200,7 @@ export function EmployerSidebar() {
 
   return (
     <Sidebar 
-      className={`border-r-0 ${collapsed ? 'w-16' : 'w-64'}`}
-      style={{
-        background: 'linear-gradient(180deg, hsl(215 80% 18%) 0%, hsl(215 70% 22%) 100%)'
-      }}
+      className={`border-r-0 bg-transparent ${collapsed ? 'w-16' : 'w-64'}`}
       collapsible="icon"
     >
       <SidebarContent className="gap-0">
