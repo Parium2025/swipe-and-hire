@@ -19,6 +19,7 @@ import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import FileUpload from '@/components/FileUpload';
 import ImageEditor from '@/components/ImageEditor';
 import { createSignedUrl } from '@/utils/storageUtils';
+import { getCachedPostalCodeInfo } from '@/lib/postalCodeAPI';
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import {
   DndContext,
@@ -576,6 +577,30 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
       };
     }
   }, [jobImageDisplayUrl, currentStep, open]);
+
+  // Preload postal code information early to make location fields faster
+  useEffect(() => {
+    const preloadPostalCodeInfo = async () => {
+      if (job?.workplace_postal_code && open && !cachedPostalCodeInfo) {
+        try {
+          const info = await getCachedPostalCodeInfo(job.workplace_postal_code);
+          if (info) {
+            setCachedPostalCodeInfo({
+              postalCode: job.workplace_postal_code,
+              city: info.city,
+              municipality: info.municipality,
+              county: info.county
+            });
+            console.log('Postal code info preloaded successfully');
+          }
+        } catch (error) {
+          console.error('Failed to preload postal code info:', error);
+        }
+      }
+    };
+    
+    preloadPostalCodeInfo();
+  }, [job?.workplace_postal_code, open, cachedPostalCodeInfo]);
 
   // Sync incoming job to form
   useEffect(() => {
