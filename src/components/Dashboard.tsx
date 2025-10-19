@@ -17,14 +17,17 @@ const Dashboard = memo(() => {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <div className="text-left">
+        <div className="flex-1"></div>
+        <div className="text-center flex-1">
           <h1 className="text-xl font-bold text-white">Dashboard</h1>
         </div>
-        <CreateJobSimpleDialog 
-          onJobCreated={() => {
-            invalidateJobs();
-          }}
-        />
+        <div className="flex-1 flex justify-end">
+          <CreateJobSimpleDialog 
+            onJobCreated={() => {
+              invalidateJobs();
+            }}
+          />
+        </div>
       </div>
 
       {/* Stats Grid */}
