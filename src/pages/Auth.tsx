@@ -1233,7 +1233,7 @@ const Auth = () => {
   if (device === 'tablet') {
     return (
       <div className="min-h-screen w-full overflow-x-hidden relative">
-        <AnimatedBackground />
+      {/* Background handled by RouterAwareBackground and AuthDesktop */}
         {/* Pull-to-refresh spinner */}
         <div 
           className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
@@ -1268,7 +1268,7 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden relative">
-      <AnimatedBackground hideRightBubbles />
+      {/* Background handled in App and AuthDesktop to avoid duplicates */}
       {/* Pull-to-refresh spinner */}
       <div 
         className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"

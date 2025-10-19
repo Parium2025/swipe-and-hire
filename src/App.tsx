@@ -37,12 +37,13 @@ const App = () => {
     return () => window.removeEventListener('load', start as any);
   }, []);
 
-  // Router-aware background: hide right bubbles on /auth (desktop only)
+  // Router-aware background: disable global bubbles on /auth (desktop only)
   const RouterAwareBackground = () => {
     const location = useLocation();
     const deviceLocal = useDevice();
     const isAuthRoute = location.pathname.startsWith('/auth');
-    return <AnimatedBackground hideRightBubbles={isAuthRoute && deviceLocal === 'desktop'} />;
+    const showGlobalBubbles = !(isAuthRoute && deviceLocal === 'desktop');
+    return <AnimatedBackground showBubbles={showGlobalBubbles} />;
   };
 
   return (
