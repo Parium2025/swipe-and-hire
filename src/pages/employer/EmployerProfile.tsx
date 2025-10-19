@@ -273,90 +273,90 @@ const EmployerProfile = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="text-center mb-3">
-        <h1 className="text-xl font-medium text-white">Min Profil</h1>
-        <p className="text-white/60 text-xs">Hantera din personliga information</p>
+    <div className="space-y-8 max-w-4xl mx-auto">
+      <div className="text-center mb-6">
+        <h1 className="text-2xl font-semibold text-white mb-1">Min Profil</h1>
+        <p className="text-sm text-white">Hantera din personliga information</p>
       </div>
 
-      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
-        <div className="px-3 py-2 border-b border-white/10">
-          <h3 className="text-sm font-medium text-white">Personlig Information</h3>
-          <p className="text-white/50 text-xs">Uppdatera din grundläggande profilinformation</p>
+      <div className="bg-white/5 border border-white/10 rounded-lg">
+        <div className="px-6 py-4 border-b border-white/10">
+          <h3 className="text-lg font-semibold text-white">Personlig Information</h3>
+          <p className="text-sm text-white">Uppdatera din grundläggande profilinformation</p>
         </div>
-        <div className="p-3 space-y-2.5">
-          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-2.5">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+        <div className="p-6 space-y-5">
+          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <Label htmlFor="first_name" className="text-white text-xs">Förnamn</Label>
+                <Label htmlFor="first_name" className="text-sm text-white">Förnamn</Label>
                 <Input
                   id="first_name"
                   value={formData.first_name}
                   onChange={(e) => setFormData({...formData, first_name: e.target.value})}
-                  className="bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm h-9 hover:bg-white/10 placeholder:text-white/50"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="last_name" className="text-white text-xs">Efternamn</Label>
+                <Label htmlFor="last_name" className="text-sm text-white">Efternamn</Label>
                 <Input
                   id="last_name"
                   value={formData.last_name}
                   onChange={(e) => setFormData({...formData, last_name: e.target.value})}
-                  className="bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm h-9 hover:bg-white/10 placeholder:text-white/50"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
                 />
               </div>
             </div>
             
             <div className="space-y-1">
-              <Label htmlFor="email" className="text-white text-xs">E-post</Label>
+              <Label htmlFor="email" className="text-sm text-white">E-post</Label>
               <Input
                 id="email"
                 value={user?.email || ''}
                 readOnly
-                className="bg-white/5 backdrop-blur-sm border-white/10 text-white/70 text-sm h-9 cursor-not-allowed"
+                className="bg-white/5 border-white/10 text-white/70 h-9 text-sm cursor-not-allowed"
               />
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="role" className="text-white text-xs">Roll</Label>
+              <Label htmlFor="role" className="text-sm text-white">Roll</Label>
               <Input
                 id="role"
                 value={userRole?.role === 'employer' ? 'Admin' : userRole?.role === 'recruiter' ? 'Rekryteringsadmin' : userRole?.role || 'Användare'}
                 readOnly
-                className="bg-white/5 backdrop-blur-sm border-white/10 text-white/70 text-sm h-9 cursor-not-allowed"
+                className="bg-white/5 border-white/10 text-white/70 h-9 text-sm cursor-not-allowed"
               />
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="location" className="text-white text-xs">Plats</Label>
+              <Label htmlFor="location" className="text-sm text-white">Plats</Label>
               <Input
                 id="location"
                 value={formData.location}
                 onChange={(e) => setFormData({...formData, location: e.target.value})}
                 placeholder="T.ex. Stockholm, Sverige"
-                className="bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm h-9 hover:bg-white/10 placeholder:text-white/50"
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
               />
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="phone" className="text-white text-xs">Telefonnummer (frivilligt)</Label>
+              <Label htmlFor="phone" className="text-sm text-white">Telefonnummer (frivilligt)</Label>
               <Input
                 id="phone"
                 value={formData.phone}
                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
                 placeholder="T.ex. 070-123 45 67"
-                className="bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm h-9 hover:bg-white/10 placeholder:text-white/50"
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
               />
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="bio" className="text-white text-xs">Om mig</Label>
+              <Label htmlFor="bio" className="text-sm text-white">Om mig</Label>
               <Textarea
                 id="bio"
                 value={formData.bio}
                 onChange={(e) => setFormData({...formData, bio: e.target.value})}
                 rows={3}
-                className="bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm hover:bg-white/10 placeholder:text-white/50"
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 text-sm"
               />
               <div className="text-right">
                 <span className="text-white/50 text-xs">
@@ -386,16 +386,16 @@ const EmployerProfile = () => {
       </div>
 
       {/* Social Media Links Section */}
-      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
-        <div className="px-3 py-2 border-b border-white/10">
-          <h3 className="text-sm font-medium text-white">Sociala medier</h3>
-          <p className="text-white/50 text-xs">Lägg till dina sociala medier-profiler</p>
+      <div className="bg-white/5 border border-white/10 rounded-lg">
+        <div className="px-6 py-4 border-b border-white/10">
+          <h3 className="text-lg font-semibold text-white">Sociala medier</h3>
+          <p className="text-sm text-white">Lägg till dina sociala medier-profiler</p>
         </div>
-        <div className="p-3 space-y-2.5">
+        <div className="p-6 space-y-5">
           {/* Existing social media links */}
           {formData.social_media_links.length > 0 && (
             <div className="space-y-2">
-              <Label className="text-white text-xs">Dina sociala medier</Label>
+              <Label className="text-sm text-white">Dina sociala medier</Label>
               {formData.social_media_links.map((link, index) => {
                 const Icon = getPlatformIcon(link.platform);
                 return (
@@ -436,14 +436,14 @@ const EmployerProfile = () => {
           )}
 
           {/* Add new social media link */}
-          <div className="space-y-2 border-t border-white/10 pt-2.5">
-            <Label className="text-white text-xs">Lägg till ny länk</Label>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <div className="space-y-4 border-t border-white/10 pt-4">
+            <Label className="text-sm text-white">Lägg till ny länk</Label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <DropdownMenu modal={false} open={platformMenuOpen} onOpenChange={setPlatformMenuOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm h-9 hover:bg-white/10 transition-colors justify-between text-left"
+                    className="w-full bg-white/5 border-white/10 text-white text-sm h-9 hover:bg-white/10 transition-colors justify-between text-left"
                   >
                     <span className="truncate text-left flex-1 px-1 text-sm">
                       {newSocialLink.platform ? SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label : 'Välj plattform'}
@@ -499,7 +499,7 @@ const EmployerProfile = () => {
                   newSocialLink.platform === 'instagram' ? 'https://instagram.com/dittnamn' :
                   'https://din-webbsida.se'
                 }
-                className="bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm h-9 hover:bg-white/10 placeholder:text-white/50 md:col-span-1"
+                className="bg-white/5 border-white/10 text-white text-sm h-9 placeholder:text-white/40 md:col-span-1"
               />
 
               <Button
@@ -516,8 +516,8 @@ const EmployerProfile = () => {
 
           {/* Display social media links if any exist */}
           {formData.social_media_links.length > 0 && (
-            <div className="border-t border-white/10 pt-2.5">
-              <Label className="text-white text-xs mb-2 block">Förhandsvisning</Label>
+            <div className="border-t border-white/10 pt-4">
+              <Label className="text-sm text-white mb-2 block">Förhandsvisning</Label>
               <div className="flex flex-wrap gap-2">
                 {formData.social_media_links.map((link, index) => {
                   const Icon = getPlatformIcon(link.platform);
