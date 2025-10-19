@@ -164,11 +164,15 @@ export function EmployerSidebar() {
   useEffect(() => {
     const handleUnsavedCancel = () => {
       console.log('Unsaved cancel event received - closing sidebar');
-      if (isMobile) {
-        setOpenMobile(false);
-      } else {
-        setOpen(false);
+      // Endast stäng sidebaren på mobil/tablet (skärmar under 768px)
+      if (isMobile || window.innerWidth < 768) {
+        if (isMobile) {
+          setOpenMobile(false);
+        } else {
+          setOpen(false);
+        }
       }
+      // På desktop (768px+) låt sidebaren vara öppen
     };
 
     window.addEventListener('unsaved-cancel', handleUnsavedCancel);
