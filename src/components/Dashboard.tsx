@@ -33,50 +33,50 @@ const Dashboard = memo(() => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
         <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-3 sm:p-4">
-            <Briefcase className="h-4 w-4 sm:h-5 sm:w-5 text-white flex-shrink-0" />
-            <CardTitle className="text-xs sm:text-sm font-medium text-white">Totalt annonser</CardTitle>
+          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-3 md:p-4">
+            <Briefcase className="h-4 w-4 md:h-4 md:w-4 text-white flex-shrink-0" />
+            <CardTitle className="text-xs md:text-xs font-medium text-white">Totalt annonser</CardTitle>
           </CardHeader>
-          <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
-            <div className="text-xl sm:text-2xl font-bold text-white transition-all duration-300">
+          <CardContent className="px-3 md:px-4 pb-3 md:pb-4">
+            <div className="text-xl md:text-xl font-bold text-white transition-all duration-300">
               {isLoading ? '...' : stats.totalJobs}
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-3 sm:p-4">
-            <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-white flex-shrink-0" />
-            <CardTitle className="text-xs sm:text-sm font-medium text-white">Aktiva annonser</CardTitle>
+          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-3 md:p-4">
+            <TrendingUp className="h-4 w-4 md:h-4 md:w-4 text-white flex-shrink-0" />
+            <CardTitle className="text-xs md:text-xs font-medium text-white">Aktiva annonser</CardTitle>
           </CardHeader>
-          <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
-            <div className="text-xl sm:text-2xl font-bold text-white transition-all duration-300">
+          <CardContent className="px-3 md:px-4 pb-3 md:pb-4">
+            <div className="text-xl md:text-xl font-bold text-white transition-all duration-300">
               {isLoading ? '...' : stats.activeJobs}
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-3 sm:p-4">
-            <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-white flex-shrink-0" />
-            <CardTitle className="text-xs sm:text-sm font-medium text-white">Totala visningar</CardTitle>
+          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-3 md:p-4">
+            <Eye className="h-4 w-4 md:h-4 md:w-4 text-white flex-shrink-0" />
+            <CardTitle className="text-xs md:text-xs font-medium text-white">Totala visningar</CardTitle>
           </CardHeader>
-          <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
-            <div className="text-xl sm:text-2xl font-bold text-white transition-all duration-300">
+          <CardContent className="px-3 md:px-4 pb-3 md:pb-4">
+            <div className="text-xl md:text-xl font-bold text-white transition-all duration-300">
               {isLoading ? '...' : stats.totalViews}
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-3 sm:p-4">
-            <Users className="h-4 w-4 sm:h-5 sm:w-5 text-white flex-shrink-0" />
-            <CardTitle className="text-xs sm:text-sm font-medium text-white">Ansökningar</CardTitle>
+          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-3 md:p-4">
+            <Users className="h-4 w-4 md:h-4 md:w-4 text-white flex-shrink-0" />
+            <CardTitle className="text-xs md:text-xs font-medium text-white">Ansökningar</CardTitle>
           </CardHeader>
-          <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
-            <div className="text-xl sm:text-2xl font-bold text-white transition-all duration-300">
+          <CardContent className="px-3 md:px-4 pb-3 md:pb-4">
+            <div className="text-xl md:text-xl font-bold text-white transition-all duration-300">
               {isLoading ? '...' : stats.totalApplications}
             </div>
           </CardContent>
@@ -86,12 +86,12 @@ const Dashboard = memo(() => {
 
       {/* Jobs Table */}
       <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-        <CardHeader className="px-3 py-3">
-          <CardTitle className="text-base text-white">
+        <CardHeader className="px-3 md:px-4 py-3 md:py-4">
+          <CardTitle className="text-sm md:text-base text-white">
             Utlagda jobb av {profile?.company_name || 'ditt företag'}
           </CardTitle>
         </CardHeader>
-        <CardContent className="px-2 pb-3">
+        <CardContent className="px-2 md:px-3 pb-3 md:pb-4">
           <div className="overflow-x-auto -mx-2" style={{ WebkitOverflowScrolling: 'touch' }}>
             <Table>
               <TableHeader>
