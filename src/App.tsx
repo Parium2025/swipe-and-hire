@@ -25,13 +25,21 @@ import { AnimatedBackground } from "@/components/AnimatedBackground";
 
 const queryClient = new QueryClient();
 
-const App = () => {
-  const device = useDevice();
+// Background that adapts to route and device; must live inside Router
+const RouterAwareBackground = () => {
   const location = useLocation();
-  const showHeader = false; // Header removed for cleaner UI
-
+  const device = useDevice();
   const isAuthRoute = location.pathname.startsWith('/auth');
   const isDesktop = device === 'desktop';
+  return isAuthRoute && isDesktop ? (
+    <AnimatedBackground hideRightBubbles disableDesktopShift />
+  ) : (
+    <AnimatedBackground />
+  );
+};
+
+const App = () => {
+  const showHeader = false; // Header removed for cleaner UI
 
   const [animReady, setAnimReady] = useState(false);
   useEffect(() => {
@@ -50,11 +58,7 @@ const App = () => {
         <UnsavedChangesProvider>
           <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
             {/* Global persistent background to avoid flicker between routes */}
-            {isAuthRoute && isDesktop ? (
-              <AnimatedBackground hideRightBubbles disableDesktopShift />
-            ) : (
-              <AnimatedBackground />
-            )}
+            <RouterAwareBackground />
             
             <div className="relative z-10">
               {showHeader && <Header />}
