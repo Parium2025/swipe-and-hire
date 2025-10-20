@@ -5,7 +5,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
 import { useToast } from '@/hooks/use-toast';
 import AnimatedIntro from '@/components/AnimatedIntro';
-import { AnimatedBackground } from '@/components/AnimatedBackground';
 import AuthMobile from '@/components/AuthMobile';
 import AuthTablet from '@/components/AuthTablet';
 import AuthDesktop from '@/components/AuthDesktop';
@@ -1189,7 +1188,6 @@ const Auth = () => {
   if (device === 'mobile') {
     return (
       <div className="min-h-screen w-full overflow-x-hidden relative">
-        <AnimatedBackground />
         {/* Pull-to-refresh spinner */}
         <div 
           className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
@@ -1233,7 +1231,6 @@ const Auth = () => {
   if (device === 'tablet') {
     return (
       <div className="min-h-screen w-full overflow-x-hidden relative">
-        <AnimatedBackground />
         {/* Pull-to-refresh spinner */}
         <div 
           className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
@@ -1268,7 +1265,6 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden relative">
-      <AnimatedBackground />
       {/* Pull-to-refresh spinner */}
       <div 
         className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
