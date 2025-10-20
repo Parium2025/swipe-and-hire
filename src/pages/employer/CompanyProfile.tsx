@@ -292,9 +292,9 @@ const CompanyProfile = () => {
           <p className="text-sm text-white">Uppdatera företagsprofil för att synas bättre för kandidater</p>
         </div>
 
-        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
-          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
+          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-5 md:space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="company_name" className="text-sm text-white">Företagsnamn</Label>
                 <Input
