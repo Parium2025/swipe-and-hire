@@ -862,58 +862,58 @@ const Profile = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 px-4">
+    <div className="max-w-2xl mx-auto space-y-4 px-4 py-6">
       <div className="text-center">
-        <h1 className="text-2xl font-semibold text-white mb-2">Min Profil</h1>
-        <p className="text-white/70 text-sm">
+        <h1 className="text-xl font-semibold text-white mb-1">Min Profil</h1>
+        <p className="text-white/60 text-xs">
           Hantera din personliga information
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Profile Image/Video Card */}
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
-          <div className="p-4 space-y-2">
-            <h3 className="text-base font-semibold text-white text-center">
+          <div className="p-3 space-y-2">
+            <h3 className="text-sm font-semibold text-white text-center">
               Profilbild/Profilvideo
             </h3>
-            <p className="text-white/60 text-center text-sm">
+            <p className="text-white/60 text-center text-xs">
               Ladda upp en kort profilvideo eller en bild och gör ditt första intryck minnesvärt
             </p>
             
             {/* Video and Camera Icons */}
-            <div className="flex items-center justify-center space-x-4">
+            <div className="flex items-center justify-center space-x-3">
               {/* Video option */}
               <div className="relative">
-                <div className="w-16 h-16 rounded-full border-4 border-white/10 p-2 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-sm">
+                <div className="w-12 h-12 rounded-full border-2 border-white/10 p-1.5 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-sm">
                   <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
-                    <Video className="h-5 w-5 text-white" />
+                    <Video className="h-4 w-4 text-white" />
                   </div>
                 </div>
-                <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
-                  <Play className="h-2 w-2 text-primary animate-pulse" />
+                <div className="absolute -top-0.5 -right-0.5 bg-white rounded-full p-0.5 shadow-lg">
+                  <Play className="h-1.5 w-1.5 text-primary animate-pulse" />
                 </div>
               </div>
 
               {/* "eller" text */}
-              <div className="text-white text-sm font-medium flex-shrink-0">
+              <div className="text-white text-xs font-medium flex-shrink-0">
                 eller
               </div>
 
               {/* Image option */}
               <div className="relative">
-                <div className="w-16 h-16 rounded-full border-4 border-white/10 p-2 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-sm">
+                <div className="w-12 h-12 rounded-full border-2 border-white/10 p-1.5 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-sm">
                   <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
-                    <Camera className="h-5 w-5 text-white" />
+                    <Camera className="h-4 w-4 text-white" />
                   </div>
                 </div>
-                <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
-                  <Camera className="h-2 w-2 text-primary" />
+                <div className="absolute -top-0.5 -right-0.5 bg-white rounded-full p-0.5 shadow-lg">
+                  <Camera className="h-1.5 w-1.5 text-primary" />
                 </div>
               </div>
             </div>
           </div>
-          <div className="p-4 flex flex-col items-center space-y-4">
+          <div className="p-3 flex flex-col items-center space-y-3">
             <div className="relative">
               {(isProfileVideo && !!profileImageUrl) ? (
                 <ProfileVideo
@@ -921,18 +921,18 @@ const Profile = () => {
                   coverImageUrl={coverImageUrl || profile?.profile_image_url || undefined}
                   userInitials={`${firstName.charAt(0)}${lastName.charAt(0)}`}
                   alt="Profile video"
-                  className="w-32 h-32 border-4 border-white/10 hover:border-white/20 transition-all rounded-full overflow-hidden"
+                  className="w-24 h-24 border-2 border-white/10 hover:border-white/20 transition-all rounded-full overflow-hidden"
                 />
               ) : (
                 <div 
                   className="cursor-pointer" 
                   onClick={() => document.getElementById('profile-image')?.click()}
                 >
-                  <Avatar className="h-32 w-32 border-4 border-white/10 hover:border-white/20 transition-all">
+                  <Avatar className="h-24 w-24 border-2 border-white/10 hover:border-white/20 transition-all">
                     {(profileImageUrl || coverImageUrl) ? (
                       <AvatarImage src={profileImageUrl || coverImageUrl} alt="Profilbild" />
                     ) : null}
-                    <AvatarFallback delayMs={0} className="text-2xl font-semibold bg-white/15 text-white">
+                    <AvatarFallback delayMs={0} className="text-xl font-semibold bg-white/15 text-white">
                       {((firstName?.trim()?.[0]?.toUpperCase() || '') + (lastName?.trim()?.[0]?.toUpperCase() || '')) || '?'}
                     </AvatarFallback>
                   </Avatar>
@@ -946,9 +946,9 @@ const Profile = () => {
                     e.stopPropagation();
                     deleteProfileMedia();
                   }}
-                  className="absolute -top-2 -right-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                  className="absolute -top-1 -right-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-1.5 shadow-lg transition-colors"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3 w-3" />
                 </button>
               )}
 
@@ -962,23 +962,23 @@ const Profile = () => {
               />
             </div>
 
-            <div className="space-y-2 text-center">
+            <div className="space-y-1 text-center">
               <Label 
                 htmlFor="profile-image" 
-                className="text-white/70 cursor-pointer hover:text-white transition-colors text-center text-sm"
+                className="text-white/70 cursor-pointer hover:text-white transition-colors text-center text-xs"
               >
                 Klicka för att välja en bild eller video (max 30 sek)
               </Label>
               
               {isUploadingVideo && (
-                <Badge variant="secondary" className="bg-blue-500/20 text-blue-100 animate-pulse">
-                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-100 mr-2"></div>
+                <Badge variant="secondary" className="bg-blue-500/20 text-blue-100 animate-pulse text-xs">
+                  <div className="animate-spin rounded-full h-2 w-2 border-b-2 border-blue-100 mr-1"></div>
                   Laddar upp video...
                 </Badge>
               )}
               
               {(isProfileVideo && !!profileImageUrl) && !isUploadingVideo && (
-                <Badge variant="secondary" className="bg-white/20 text-white">
+                <Badge variant="secondary" className="bg-white/20 text-white text-xs">
                   {profile?.video_url ? 'Video' : 'Bild'} uppladdad!
                 </Badge>
               )}
@@ -986,7 +986,7 @@ const Profile = () => {
 
             {/* Cover controls when no video is present */}
             {!isProfileVideo && coverImageUrl && (
-              <div className="flex items-center justify-center gap-2 mt-2">
+              <div className="flex items-center justify-center gap-1.5 mt-1">
                 <Badge variant="secondary" className="bg-white/20 text-white text-xs font-normal">
                   Cover-bild vald
                 </Badge>
@@ -995,13 +995,13 @@ const Profile = () => {
 
             {/* Cover image upload for videos */}
             {(isProfileVideo && !!profileImageUrl) && (
-              <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
+              <div className="flex flex-col items-center space-y-2 mt-2 p-3 rounded-lg bg-white/5 w-full">
                 <Button 
                   variant="outline" 
                   size="sm"
                   onClick={() => document.getElementById('cover-image')?.click()}
                   disabled={isUploadingCover}
-                  className="bg-white/20 border-white/30 text-white hover:bg-white/30 disabled:opacity-50 transition-all duration-200"
+                  className="bg-white/20 border-white/30 text-white hover:bg-white/30 disabled:opacity-50 transition-all duration-200 text-xs h-8"
                 >
                   {(profile?.profile_image_url || coverImageUrl) ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
                 </Button>
@@ -1017,14 +1017,14 @@ const Profile = () => {
                 {isUploadingCover && (
                   <div className="flex flex-col items-center w-full">
                     <Badge variant="secondary" className="bg-blue-500/20 text-blue-100 text-xs animate-pulse">
-                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-100 mr-1"></div>
+                      <div className="animate-spin rounded-full h-2 w-2 border-b-2 border-blue-100 mr-1"></div>
                       Laddar upp cover-bild...
                     </Badge>
                   </div>
                 )}
                 
                 {coverImageUrl && !isUploadingCover && (
-                  <div className="flex flex-col items-center space-y-2 w-full">
+                  <div className="flex flex-col items-center space-y-1 w-full">
                      <div className="flex items-center justify-center">
                        <Badge variant="secondary" className="bg-white/20 text-white text-xs font-normal whitespace-nowrap">
                           Cover-bild uppladdad!
@@ -1039,22 +1039,22 @@ const Profile = () => {
 
         {/* Profile Information */}
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
-          <div className="p-4 border-b border-white/10">
-            <h3 className="flex items-center gap-2 text-base font-semibold text-white">
-              <User className="h-4 w-4" />
+          <div className="p-3 border-b border-white/10">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-white">
+              <User className="h-3.5 w-3.5" />
               Personlig Information
             </h3>
-            <p className="text-white/60 text-sm mt-1">
+            <p className="text-white/60 text-xs mt-0.5">
               Uppdatera din grundläggande profilinformation
             </p>
           </div>
-          <div className="p-4">
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="p-3">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {/* Personal Information */}
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-white">
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="firstName" className="text-white text-xs">
                       Förnamn <span className="text-white">*</span>
                     </Label>
                     <Input
@@ -1069,13 +1069,13 @@ const Profile = () => {
                       }}
                       onBlur={() => setErrors(prev => ({ ...prev, firstName: firstName.trim() ? undefined : 'Förnamn är obligatoriskt.' }))}
                        aria-invalid={!!errors.firstName}
-                      className={`bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 ${errors.firstName ? 'border-red-400' : ''}`}
+                      className={`bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 h-9 text-sm ${errors.firstName ? 'border-red-400' : ''}`}
                     />
                     {errors.firstName && <p className="text-xs text-red-300">{errors.firstName}</p>}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-white">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="lastName" className="text-white text-xs">
                       Efternamn <span className="text-white">*</span>
                     </Label>
                     <Input
@@ -1090,13 +1090,13 @@ const Profile = () => {
                       }}
                       onBlur={() => setErrors(prev => ({ ...prev, lastName: lastName.trim() ? undefined : 'Efternamn är obligatoriskt.' }))}
                        aria-invalid={!!errors.lastName}
-                      className={`bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 ${errors.lastName ? 'border-red-400' : ''}`}
+                      className={`bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 h-9 text-sm ${errors.lastName ? 'border-red-400' : ''}`}
                     />
                     {errors.lastName && <p className="text-xs text-red-300">{errors.lastName}</p>}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <Label htmlFor="birthDate" className="text-white">
                       Födelsedatum <span className="text-white">*</span>
