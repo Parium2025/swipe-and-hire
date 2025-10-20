@@ -488,7 +488,7 @@ const SearchJobs = () => {
             
             {/* Combined Job and Company Search */}
             <div className="space-y-2 relative z-[10000]">
-              <Label htmlFor="search" className="text-xs font-medium text-white flex items-center gap-2">
+              <Label htmlFor="search" className="text-sm font-medium text-white flex items-center gap-2">
                 <Search className="h-3 w-3" />
                 Sök
               </Label>
@@ -522,7 +522,7 @@ const SearchJobs = () => {
                     {/* Company Suggestions */}
                     {companySuggestions.length > 0 && (
                       <div>
-                        <div className="p-2 border-b border-white/10 text-xs text-white/70 font-medium flex items-center gap-2">
+                        <div className="p-2 border-b border-white/10 text-sm text-white/70 font-medium flex items-center gap-2">
                           <Building className="h-4 w-4" />
                           Företag
                         </div>
@@ -542,12 +542,12 @@ const SearchJobs = () => {
                               </div>
                               <div>
                                 <div className="font-medium text-sm text-white">{company.name}</div>
-                                <div className="text-xs text-white/60">
+                                <div className="text-sm text-white/60">
                                   {company.jobCount} {company.jobCount === 1 ? 'jobb' : 'jobb'}
                                 </div>
                               </div>
                             </div>
-                            <div className="text-xs text-white/50">Välj →</div>
+                            <div className="text-sm text-white/50">Välj →</div>
                           </div>
                         ))}
                       </div>
@@ -556,7 +556,7 @@ const SearchJobs = () => {
                     {/* Job Title Suggestions */}
                     {jobTitleSuggestions.length > 0 && (
                       <div>
-                        <div className="p-2 border-b border-white/10 text-xs text-white/70 font-medium flex items-center gap-2">
+                        <div className="p-2 border-b border-white/10 text-sm text-white/70 font-medium flex items-center gap-2">
                           <Briefcase className="h-4 w-4" />
                           Yrken
                         </div>
@@ -576,12 +576,12 @@ const SearchJobs = () => {
                               </div>
                               <div>
                                 <div className="font-medium text-sm text-white">{suggestion.title}</div>
-                                <div className="text-xs text-white/60">
+                                <div className="text-sm text-white/60">
                                   {suggestion.category.label}
                                 </div>
                               </div>
                             </div>
-                            <div className="text-xs text-white/50">Välj →</div>
+                            <div className="text-sm text-white/50">Välj →</div>
                           </div>
                         ))}
                       </div>
@@ -595,7 +595,7 @@ const SearchJobs = () => {
 
             {/* Yrke Filter - Direct dropdown */}
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-white flex items-center gap-2">
+              <Label className="text-sm font-medium text-white flex items-center gap-2">
                 <Briefcase className="h-3 w-3" />
                 Yrkesområde
               </Label>
@@ -735,7 +735,7 @@ const SearchJobs = () => {
 
             {/* Multi-Select Location */}
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-white flex items-center gap-2">
+              <Label className="text-sm font-medium text-white flex items-center gap-2">
                 <MapPin className="h-3 w-3" />
                 Plats
               </Label>
@@ -835,12 +835,12 @@ const SearchJobs = () => {
               {selectedLocations.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-2">
                   {selectedLocations.slice(0, 3).map((location) => (
-                    <Badge key={location} variant="secondary" className="text-xs bg-white/10 text-white border-white/20">
+                    <Badge key={location} variant="secondary" className="text-sm bg-white/10 text-white border-white/20">
                       {location}
                     </Badge>
                   ))}
                   {selectedLocations.length > 3 && (
-                    <Badge variant="secondary" className="text-xs bg-white/10 text-white border-white/20">
+                    <Badge variant="secondary" className="text-sm bg-white/10 text-white border-white/20">
                       +{selectedLocations.length - 3} till
                     </Badge>
                   )}
@@ -850,7 +850,7 @@ const SearchJobs = () => {
 
             {/* Employment Type */}
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-white flex items-center gap-2">
+              <Label className="text-sm font-medium text-white flex items-center gap-2">
                 <Clock className="h-3 w-3" />
                 Anställning
               </Label>
@@ -927,7 +927,7 @@ const SearchJobs = () => {
                       <Badge 
                         key={typeValue} 
                         variant="secondary" 
-                        className="text-xs bg-white/10 text-white border-white/20 gap-2 hover:bg-white/20 cursor-pointer" 
+                        className="text-sm bg-white/10 text-white border-white/20 gap-2 hover:bg-white/20 cursor-pointer" 
                         onClick={() => {
                           setSelectedEmploymentTypes(prev => prev.filter(t => t !== typeValue));
                         }}
@@ -938,7 +938,7 @@ const SearchJobs = () => {
                     );
                   })}
                   {selectedEmploymentTypes.length > 3 && (
-                    <Badge variant="secondary" className="text-xs bg-white/10 text-white border-white/20">
+                    <Badge variant="secondary" className="text-sm bg-white/10 text-white border-white/20">
                       +{selectedEmploymentTypes.length - 3} till
                     </Badge>
                   )}
@@ -955,7 +955,7 @@ const SearchJobs = () => {
               <div className="flex flex-wrap gap-2">
                 {selectedSubcategories.map((subcategory) => (
                   <Badge key={subcategory} variant="secondary" className="gap-2 bg-white/10 hover:bg-white/20 text-white border-white/20">
-                    <span className="text-xs">{subcategory}</span>
+                    <span className="text-sm">{subcategory}</span>
                     <button 
                       onClick={() => {
                         const newSubcategories = selectedSubcategories.filter(s => s !== subcategory);
@@ -1108,10 +1108,10 @@ const SearchJobs = () => {
                         
                         {/* Job Footer */}
                         <div className="flex items-center gap-3 pt-2 border-t border-white/10">
-                          <Badge variant="outline" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs">
+                          <Badge variant="outline" className="bg-green-500/20 text-green-300 border-green-500/30 text-sm">
                             {formatSalary(job.salary_min, job.salary_max)}
                           </Badge>
-                          <span className="text-xs text-white">
+                          <span className="text-sm text-white">
                             {new Date(job.created_at).toLocaleDateString('sv-SE', {
                               day: 'numeric',
                               month: 'short'
@@ -1122,7 +1122,7 @@ const SearchJobs = () => {
                       
                       {/* Action Buttons */}
                       <div className="flex flex-col gap-2">
-                        <Button size="sm" className="h-8 px-3 text-xs">
+                        <Button size="sm" className="h-8 px-3 text-sm">
                           <ExternalLink className="h-3 w-3 mr-1" />
                           Ansök nu
                         </Button>

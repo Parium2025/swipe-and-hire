@@ -117,7 +117,7 @@ const Subscription = () => {
               >
                 {plan.recommended && (
                   <div className="absolute top-2 left-4">
-                    <Badge className="bg-white/20 text-white text-xs">
+                    <Badge className="bg-white/20 text-white text-sm">
                       Rekommenderad
                     </Badge>
                   </div>

@@ -360,7 +360,7 @@ const EmployerProfile = () => {
                 className="bg-white/5 border-white/10 text-white placeholder:text-white/40 text-sm"
               />
               <div className="text-right">
-                <span className="text-white/50 text-xs">
+                <span className="text-white/50 text-sm">
                   {formData.bio.trim() === '' ? 0 : formData.bio.trim().split(/\s+/).length} ord
                 </span>
               </div>
@@ -510,7 +510,7 @@ const EmployerProfile = () => {
                           key={index}
                           variant="outline"
                           onClick={() => window.open(link.url, '_blank')}
-                          className="bg-white/5 border-white/10 text-white text-xs h-8 hover:bg-white/10 transition-colors"
+                          className="bg-white/5 border-white/10 text-white text-sm h-8 hover:bg-white/10 transition-colors"
                         >
                           <Icon className="h-3 w-3 mr-1.5" />
                           {getPlatformLabel(link.platform)}

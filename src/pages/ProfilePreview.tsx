@@ -457,13 +457,13 @@ export default function ProfilePreview() {
                   <div className="space-y-2">
                     {data.working_hours && (
                       <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                        <span className="text-xs text-white/80 font-medium">Arbetstid</span>
+                        <span className="text-sm text-white/80 font-medium">Arbetstid</span>
                         <p className="text-sm text-white">{data.working_hours}</p>
                       </div>
                     )}
                     {data.availability && (
                       <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                        <span className="text-xs text-white/80 font-medium">Kan börja</span>
+                        <span className="text-sm text-white/80 font-medium">Kan börja</span>
                         <p className="text-sm text-white">{data.availability}</p>
                       </div>
                     )}

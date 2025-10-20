@@ -987,7 +987,7 @@ const Profile = () => {
             {/* Cover controls when no video is present */}
             {!isProfileVideo && coverImageUrl && (
               <div className="flex items-center justify-center gap-2 mt-2">
-                <Badge variant="secondary" className="bg-white/20 text-white text-xs font-normal">
+                <Badge variant="secondary" className="bg-white/20 text-white text-sm font-normal">
                   Cover-bild vald
                 </Badge>
               </div>
@@ -1016,7 +1016,7 @@ const Profile = () => {
                 
                 {isUploadingCover && (
                   <div className="flex flex-col items-center w-full">
-                    <Badge variant="secondary" className="bg-blue-500/20 text-blue-100 text-xs animate-pulse">
+                    <Badge variant="secondary" className="bg-blue-500/20 text-blue-100 text-sm animate-pulse">
                       <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-100 mr-1"></div>
                       Laddar upp cover-bild...
                     </Badge>
@@ -1026,7 +1026,7 @@ const Profile = () => {
                 {coverImageUrl && !isUploadingCover && (
                   <div className="flex flex-col items-center space-y-2 w-full">
                      <div className="flex items-center justify-center">
-                       <Badge variant="secondary" className="bg-white/20 text-white text-xs font-normal whitespace-nowrap">
+                       <Badge variant="secondary" className="bg-white/20 text-white text-sm font-normal whitespace-nowrap">
                           Cover-bild uppladdad!
                         </Badge>
                      </div>
@@ -1071,7 +1071,7 @@ const Profile = () => {
                        aria-invalid={!!errors.firstName}
                       className={`bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 ${errors.firstName ? 'border-red-400' : ''}`}
                     />
-                    {errors.firstName && <p className="text-xs text-red-300">{errors.firstName}</p>}
+                    {errors.firstName && <p className="text-sm text-red-300">{errors.firstName}</p>}
                   </div>
 
                   <div className="space-y-2">
@@ -1092,7 +1092,7 @@ const Profile = () => {
                        aria-invalid={!!errors.lastName}
                       className={`bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 ${errors.lastName ? 'border-red-400' : ''}`}
                     />
-                    {errors.lastName && <p className="text-xs text-red-300">{errors.lastName}</p>}
+                    {errors.lastName && <p className="text-sm text-red-300">{errors.lastName}</p>}
                   </div>
                 </div>
 
@@ -1112,7 +1112,7 @@ const Profile = () => {
                     {age !== null && (
                       <p className="text-sm text-white">Ålder: {age} år</p>
                     )}
-                    {errors.birthDate && <p className="text-xs text-red-300">{errors.birthDate}</p>}
+                    {errors.birthDate && <p className="text-sm text-red-300">{errors.birthDate}</p>}
                   </div>
 
                   <div className="space-y-2 md:space-y-1.5">
@@ -1137,7 +1137,7 @@ const Profile = () => {
                         className={`pl-10 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 ${errors.phone ? 'border-red-400' : ''}`}
                       />
                     </div>
-                    {errors.phone && <p className="text-xs text-red-300">{errors.phone}</p>}
+                    {errors.phone && <p className="text-sm text-red-300">{errors.phone}</p>}
                   </div>
                 </div>
               </div>
@@ -1172,7 +1172,7 @@ const Profile = () => {
                       onLocationChange={setUserLocation}
                       onValidationChange={setHasValidLocation}
                     />
-                    {errors.userLocation && !hasValidLocation && <p className="text-xs text-red-300">{errors.userLocation}</p>}
+                    {errors.userLocation && !hasValidLocation && <p className="text-sm text-red-300">{errors.userLocation}</p>}
                   </div>
                 </div>
               </div>
@@ -1189,7 +1189,7 @@ const Profile = () => {
                   className="bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50"
                 />
                 <div className="flex justify-end">
-                  <span className="text-xs text-white">
+                  <span className="text-sm text-white">
                     {countWords(bio)}/100 ord
                   </span>
                 </div>
@@ -1266,7 +1266,7 @@ const Profile = () => {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                        {errors.employmentStatus && <p className="text-xs text-red-300">{errors.employmentStatus}</p>}
+                        {errors.employmentStatus && <p className="text-sm text-red-300">{errors.employmentStatus}</p>}
                       </div>
 
                       {/* Visa arbetstid endast om användaren har valt något OCH det inte är arbetssökande */}

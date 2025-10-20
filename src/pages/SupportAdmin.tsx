@@ -284,7 +284,7 @@ const SupportAdmin = () => {
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="flex items-center gap-2">
                         {getStatusIcon(ticket.status)}
-                        <Badge className={`${getStatusColor(ticket.status)} text-xs`}>
+                        <Badge className={`${getStatusColor(ticket.status)} text-sm`}>
                           {getStatusLabel(ticket.status)}
                         </Badge>
                       </div>
@@ -292,10 +292,10 @@ const SupportAdmin = () => {
                     <p className="text-white font-medium text-sm truncate mb-1">
                       {ticket.subject}
                     </p>
-                    <p className="text-white/70 text-xs mb-2">
+                    <p className="text-white/70 text-sm mb-2">
                       {ticket.profiles?.first_name} {ticket.profiles?.last_name}
                     </p>
-                    <p className="text-white/50 text-xs">
+                    <p className="text-white/50 text-sm">
                       {new Date(ticket.created_at).toLocaleString('sv-SE')}
                     </p>
                   </div>
@@ -325,7 +325,7 @@ const SupportAdmin = () => {
                       value={selectedTicket.status}
                       onValueChange={(value) => updateTicketStatus(selectedTicket.id, value)}
                     >
-                      <SelectTrigger className="w-32 h-8 text-xs bg-white/10 border-white/20 text-white">
+                      <SelectTrigger className="w-32 h-8 text-sm bg-white/10 border-white/20 text-white">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-background border-border">
@@ -381,13 +381,13 @@ const SupportAdmin = () => {
                           }`}
                         >
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-white text-xs font-medium">
+                            <span className="text-white text-sm font-medium">
                               {message.is_admin_reply 
                                 ? 'Admin (Du)' 
                                 : `${message.profiles?.first_name} ${message.profiles?.last_name}`
                               }
                             </span>
-                            <span className="text-white/50 text-xs">
+                            <span className="text-white/50 text-sm">
                               {new Date(message.created_at).toLocaleString('sv-SE')}
                             </span>
                           </div>

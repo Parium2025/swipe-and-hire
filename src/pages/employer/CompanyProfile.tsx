@@ -329,7 +329,7 @@ const CompanyProfile = () => {
                   className={`bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 ${orgNumberError ? 'border-red-500/50' : ''}`}
                 />
                 {orgNumberError && (
-                  <p className="text-red-400/80 text-xs mt-1">{orgNumberError}</p>
+                  <p className="text-red-400/80 text-sm mt-1">{orgNumberError}</p>
                 )}
               </div>
 

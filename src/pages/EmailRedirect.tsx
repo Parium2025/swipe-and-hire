@@ -149,7 +149,7 @@ const EmailRedirect = () => {
                   )}
                 </Button>
 
-                <div className="text-xs text-primary-foreground/60 text-center">
+                <div className="text-sm text-primary-foreground/60 text-center">
                   eller
                 </div>
 
@@ -173,7 +173,7 @@ const EmailRedirect = () => {
           </div>
 
           <div className="mt-6 p-4 bg-blue-500/20 rounded-lg">
-            <p className="text-xs text-primary-foreground/80">
+            <p className="text-sm text-primary-foreground/80">
               💡 <strong>Tips:</strong> Nästa gång, öppna emails direkt i Safari för smidigast upplevelse.
             </p>
           </div>

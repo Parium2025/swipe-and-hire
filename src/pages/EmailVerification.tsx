@@ -177,7 +177,7 @@ const EmailVerification = () => {
               variant={verificationMethod === 'email' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setVerificationMethod('email')}
-              className="text-xs"
+              className="text-sm"
             >
               <Mail className="h-3 w-3 mr-1" />
               Email
@@ -186,7 +186,7 @@ const EmailVerification = () => {
               variant={verificationMethod === 'qr' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setVerificationMethod('qr')}
-              className="text-xs"
+              className="text-sm"
             >
               <Smartphone className="h-3 w-3 mr-1" />
               QR-kod
@@ -195,7 +195,7 @@ const EmailVerification = () => {
               variant={verificationMethod === 'pin' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setVerificationMethod('pin')}
-              className="text-xs"
+              className="text-sm"
             >
               <Key className="h-3 w-3 mr-1" />
               PIN-kod
@@ -220,7 +220,7 @@ const EmailVerification = () => {
                   Kopiera bekräftelselänk
                 </Button>
               </div>
-              <p className="text-xs text-primary-foreground/60 text-center">
+              <p className="text-sm text-primary-foreground/60 text-center">
                 Kolla din inkorg och följ länken i emailet
               </p>
             </div>

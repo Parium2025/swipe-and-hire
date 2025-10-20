@@ -263,12 +263,12 @@ const Support = () => {
                     </div>
                     <div className="min-w-0">
                       <p className="font-medium text-white text-sm truncate">{ticket.subject}</p>
-                      <p className="text-xs text-white/70">
+                      <p className="text-sm text-white/70">
                         Ärende {ticket.id.slice(0, 8)} • Skapad {new Date(ticket.created_at).toLocaleDateString('sv-SE')}
                       </p>
                     </div>
                   </div>
-                  <Badge className={`${getStatusColor(ticket.status)} border-white/20 text-xs self-start sm:self-center flex-shrink-0`}>
+                  <Badge className={`${getStatusColor(ticket.status)} border-white/20 text-sm self-start sm:self-center flex-shrink-0`}>
                     {getStatusLabel(ticket.status)}
                   </Badge>
                 </div>

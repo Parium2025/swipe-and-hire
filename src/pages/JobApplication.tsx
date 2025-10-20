@@ -699,7 +699,7 @@ const JobApplication = () => {
           {submitting ? 'Skickar ansökan...' : 'Skicka ansökan'}
         </Button>
         
-        <p className="text-xs text-gray-500 text-center mt-2">
+        <p className="text-sm text-gray-500 text-center mt-2">
           När jag skickar in ansökan godkänner jag <span className="text-blue-600">Integritetspolicy</span> och att Simplex
           Bemanning AB får lagra mina personuppgifter för att kunna hantera min ansökan.
         </p>

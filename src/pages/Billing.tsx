@@ -150,12 +150,12 @@ const Billing = () => {
                       {paymentMethod.type} •••• {paymentMethod.last4}
                     </span>
                     {paymentMethod.isDefault && (
-                      <Badge variant="secondary" className="bg-white/20 text-white text-xs">
+                      <Badge variant="secondary" className="bg-white/20 text-white text-sm">
                         Standard
                       </Badge>
                     )}
                   </div>
-                  <p className="text-xs text-white/70">
+                  <p className="text-sm text-white/70">
                     Upphör {paymentMethod.expiryMonth}/{paymentMethod.expiryYear}
                   </p>
                 </div>
@@ -163,7 +163,7 @@ const Billing = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                className="bg-white/5 border border-white/10 text-white hover:bg-white/10 w-full sm:w-auto h-8 text-xs"
+                className="bg-white/5 border border-white/10 text-white hover:bg-white/10 w-full sm:w-auto h-8 text-sm"
               >
                 <Plus className="h-3 w-3 mr-2" />
                 Lägg till kort
@@ -190,7 +190,7 @@ const Billing = () => {
                       <Calendar className="h-4 w-4 text-white flex-shrink-0" />
                       <div className="min-w-0">
                         <h3 className="font-medium text-white text-sm truncate">{monthData.monthName}</h3>
-                        <p className="text-xs text-white/70">
+                        <p className="text-sm text-white/70">
                           {monthData.payments.length} betalning{monthData.payments.length !== 1 ? 'ar' : ''}
                         </p>
                       </div>
@@ -200,7 +200,7 @@ const Billing = () => {
                         <p className="font-semibold text-white text-sm">
                           {getTotalForMonth(monthData.payments)} kr
                         </p>
-                        <p className="text-xs text-white/70">Totalt</p>
+                        <p className="text-sm text-white/70">Totalt</p>
                       </div>
                       {expandedMonths[monthData.month] ? (
                         <ChevronUp className="h-4 w-4 text-white/70" />
@@ -223,7 +223,7 @@ const Billing = () => {
                               {getStatusIcon(payment.status)}
                               <div className="min-w-0">
                                 <p className="font-medium text-white text-sm">{payment.description}</p>
-                                <p className="text-xs text-white/70">
+                                <p className="text-sm text-white/70">
                                   {formatDate(payment.date)} • {getStatusText(payment.status)}
                                 </p>
                               </div>
@@ -233,7 +233,7 @@ const Billing = () => {
                                 <p className="font-semibold text-white text-sm">
                                   {payment.amount} {payment.currency}
                                 </p>
-                                <p className="text-xs text-white/70">
+                                <p className="text-sm text-white/70">
                                   #{payment.invoice}
                                 </p>
                               </div>
@@ -270,7 +270,7 @@ const Billing = () => {
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 text-center">
               <CreditCard className="h-10 w-10 text-white/50 mx-auto mb-4" />
               <h3 className="font-medium text-white mb-2 text-sm">Ingen betalningshistorik</h3>
-              <p className="text-xs text-white/70">
+              <p className="text-sm text-white/70">
                 Du har inga betalningar att visa än. När du gör ditt första köp kommer det att visas här.
               </p>
             </div>

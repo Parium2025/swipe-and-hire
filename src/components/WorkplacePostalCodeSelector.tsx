@@ -169,7 +169,7 @@ const WorkplacePostalCodeSelector = ({
            !foundLocation &&
            postalCodeValue.replace(/\D/g, '').length > 0 && 
            postalCodeValue.replace(/\D/g, '').length < 5 && (
-            <p className="text-xs text-red-300 mt-1">
+            <p className="text-sm text-red-300 mt-1">
               Postnummer ska vara 5 siffror (t.ex. 111 11)
             </p>
           )}
@@ -225,7 +225,7 @@ const WorkplacePostalCodeSelector = ({
               <p className="text-sm text-white font-medium">
                 Postnummer {postalCodeValue} hittades inte
               </p>
-              <p className="text-xs text-white/70 mt-0.5">
+              <p className="text-sm text-white/70 mt-0.5">
                 Du kan ange orten manuellt ovan
               </p>
             </div>
@@ -244,7 +244,7 @@ const WorkplacePostalCodeSelector = ({
               <p className="text-sm text-white font-medium">
                 Söker i svensk postnummerdatabas...
               </p>
-              <p className="text-xs text-white/70 mt-0.5">
+              <p className="text-sm text-white/70 mt-0.5">
                 16,000+ postnummer tillgängliga
               </p>
             </div>
