@@ -130,39 +130,39 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
     switch (currentStep) {
       case 0:
         return (
-          <div className="text-center space-y-8 py-8">
-            <div className="space-y-6">
+          <div className="text-center space-y-6 md:space-y-8 py-6 md:py-8">
+            <div className="space-y-4 md:space-y-6">
               <div className="h-2" />
               
-              <div className="space-y-6">
-                <h1 className="text-4xl font-bold text-white animate-fade-in leading-tight">Välkommen till Parium</h1>
+              <div className="space-y-4 md:space-y-6">
+                <h1 className="text-3xl md:text-4xl font-bold text-white animate-fade-in leading-tight">Välkommen till Parium</h1>
                 
                 <div className="space-y-1">
-                  <p className="text-xl md:text-2xl text-white animate-fade-in leading-relaxed drop-shadow-sm font-semibold">Låt oss sätta upp din arbetsgivarprofil</p>
+                  <p className="text-lg md:text-xl lg:text-2xl text-white animate-fade-in leading-relaxed drop-shadow-sm font-semibold">Låt oss sätta upp din arbetsgivarprofil</p>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 max-w-2xl mx-auto">
-              <div className="space-y-3 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white/5 p-4 rounded-xl cursor-pointer" style={{animationDelay: '0.2s'}}>
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
-                  <Briefcase className="h-8 w-8 text-white transition-transform duration-300 hover:rotate-12" />
+            <div className="grid grid-cols-1 gap-4 md:gap-6 max-w-2xl mx-auto">
+              <div className="space-y-3 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white/5 p-3 md:p-4 rounded-xl cursor-pointer touch-manipulation" style={{animationDelay: '0.2s'}}>
+                <div className="p-3 md:p-4 rounded-full w-14 h-14 md:w-16 md:h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
+                  <Briefcase className="h-7 w-7 md:h-8 md:w-8 text-white transition-transform duration-300 hover:rotate-12" />
                 </div>
                 <h3 className="text-white text-center font-semibold">Skapa och hantera jobbannonser</h3>
               </div>
 
-              <div className="space-y-3 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white/5 p-4 rounded-xl cursor-pointer" style={{animationDelay: '0.4s'}}>
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
-                  <Users className="h-8 w-8 text-white transition-transform duration-300 hover:rotate-12" />
+              <div className="space-y-3 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white/5 p-3 md:p-4 rounded-xl cursor-pointer touch-manipulation" style={{animationDelay: '0.4s'}}>
+                <div className="p-3 md:p-4 rounded-full w-14 h-14 md:w-16 md:h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
+                  <Users className="h-7 w-7 md:h-8 md:w-8 text-white transition-transform duration-300 hover:rotate-12" />
                 </div>
-                <h3 className="text-white text-center font-semibold">Få ansökningar från kvalificerade kandidater</h3>
+                <h3 className="text-white text-center font-semibold text-sm md:text-base">Få ansökningar från kvalificerade kandidater</h3>
               </div>
 
-              <div className="space-y-3 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white/5 p-4 rounded-xl cursor-pointer" style={{animationDelay: '0.6s'}}>
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
-                  <Target className="h-8 w-8 text-white transition-transform duration-300 hover:rotate-12" />
+              <div className="space-y-3 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white/5 p-3 md:p-4 rounded-xl cursor-pointer touch-manipulation" style={{animationDelay: '0.6s'}}>
+                <div className="p-3 md:p-4 rounded-full w-14 h-14 md:w-16 md:h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
+                  <Target className="h-7 w-7 md:h-8 md:w-8 text-white transition-transform duration-300 hover:rotate-12" />
                 </div>
-                <h3 className="text-white text-center font-semibold">Hitta rätt talang snabbt och enkelt</h3>
+                <h3 className="text-white text-center font-semibold text-sm md:text-base">Hitta rätt talang snabbt och enkelt</h3>
               </div>
             </div>
           </div>
@@ -181,45 +181,45 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               </p>
             </div>
 
-            <div className="space-y-4 max-w-md mx-auto">
+            <div className="space-y-4 md:space-y-6 max-w-md mx-auto">
               {formData.companyLogoUrl ? (
                 <div className="text-center space-y-4">
-                  <div className="w-32 h-32 mx-auto bg-white/20 backdrop-blur-sm rounded-lg border-2 border-white/20 flex items-center justify-center overflow-hidden">
+                  <div className="w-28 h-28 md:w-32 md:h-32 mx-auto bg-white/20 backdrop-blur-sm rounded-lg border-2 border-white/20 flex items-center justify-center overflow-hidden">
                     <img 
                       src={formData.companyLogoUrl} 
                       alt="Företagslogga" 
                       className="max-w-full max-h-full object-contain"
                     />
                   </div>
-                  <p className="text-sm text-white">Logga uppladdad!</p>
+                  <p className="text-xs md:text-sm text-white">Logga uppladdad!</p>
                   <Button 
                     variant="outline" 
                     onClick={() => document.getElementById('logo-upload')?.click()}
                     disabled={isUploadingLogo}
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:scale-105 transition-transform duration-200"
+                    className="h-11 md:h-10 bg-white/10 border-white/20 text-white hover:bg-white/20 hover:scale-105 transition-transform duration-200 text-xs md:text-sm touch-manipulation"
                   >
                     Byt logga
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <Label htmlFor="logo-upload" className="block text-sm font-medium text-white">
+                  <Label htmlFor="logo-upload" className="block text-xs md:text-sm font-medium text-white">
                     Företagslogga (valfritt)
                   </Label>
                   <div 
-                    className="w-full h-32 border-2 border-dashed border-white/20 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-white/40 hover:bg-white/5 transition-all duration-300"
+                    className="w-full h-28 md:h-32 border-2 border-dashed border-white/20 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-white/40 hover:bg-white/5 transition-all duration-300 touch-manipulation"
                     onClick={() => document.getElementById('logo-upload')?.click()}
                   >
                     {isUploadingLogo ? (
                       <div className="text-center">
-                        <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full mx-auto mb-2"></div>
-                        <p className="text-sm text-white">Laddar upp...</p>
+                        <div className="animate-spin w-5 h-5 md:w-6 md:h-6 border-2 border-white border-t-transparent rounded-full mx-auto mb-2"></div>
+                        <p className="text-xs md:text-sm text-white">Laddar upp...</p>
                       </div>
                     ) : (
                       <>
-                        <Upload className="w-8 h-8 text-white mb-2" />
-                        <p className="text-sm text-white">Klicka för att ladda upp logga</p>
-                        <p className="text-xs text-white/60 mt-1">PNG, JPG eller GIF (max 10MB)</p>
+                        <Upload className="w-7 h-7 md:w-8 md:h-8 text-white mb-2" />
+                        <p className="text-xs md:text-sm text-white">Klicka för att ladda upp logga</p>
+                        <p className="text-[10px] md:text-xs text-white/60 mt-1">PNG, JPG eller GIF (max 10MB)</p>
                       </>
                     )}
                   </div>

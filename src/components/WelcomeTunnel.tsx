@@ -631,58 +631,58 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <h2 className="text-2xl font-bold mb-2 text-white">Låt oss lära känna dig</h2>
             </div>
             
-            <div className="space-y-4 max-w-md mx-auto">
+            <div className="space-y-4 md:space-y-6 max-w-md mx-auto">
                <div>
-                 <Label htmlFor="firstName" className="text-white">Förnamn</Label>
+                 <Label htmlFor="firstName" className="text-white text-xs md:text-sm">Förnamn</Label>
                  <Input 
                    id="firstName" 
                    value={formData.firstName} 
                    onChange={(e) => handleInputChange('firstName', e.target.value)} 
                    placeholder="Ditt förnamn" 
-                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60" 
+                   className="h-11 md:h-10 text-xs md:text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 touch-manipulation" 
                  />
                </div>
                <div>
-                 <Label htmlFor="lastName" className="text-white">Efternamn</Label>
+                 <Label htmlFor="lastName" className="text-white text-xs md:text-sm">Efternamn</Label>
                  <Input 
                    id="lastName" 
                    value={formData.lastName} 
                    onChange={(e) => handleInputChange('lastName', e.target.value)} 
                    placeholder="Ditt efternamn" 
-                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60" 
+                   className="h-11 md:h-10 text-xs md:text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 touch-manipulation" 
                  />
                </div>
                <div>
-                 <Label htmlFor="email" className="text-white">E-post</Label>
+                 <Label htmlFor="email" className="text-white text-xs md:text-sm">E-post</Label>
                  <Input 
                    id="email" 
                    type="email"
                    value={formData.email} 
                    onChange={(e) => handleInputChange('email', e.target.value)} 
                    placeholder="Din e-postadress" 
-                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60" 
+                   className="h-11 md:h-10 text-xs md:text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 touch-manipulation" 
                  />
                </div>
                  <div>
-                  <Label htmlFor="birthDate" className="text-white">Födelsedatum</Label>
+                  <Label htmlFor="birthDate" className="text-white text-xs md:text-sm">Födelsedatum</Label>
                   <BirthDatePicker
                     value={formData.birthDate}
                     onChange={(date) => handleInputChange('birthDate', date)}
                     placeholder="Välj födelsedatum"
-                    className="w-full"
+                    className="w-full h-11 md:h-10"
                     popoverAlign="center"
                     popoverAlignOffset={-240}
                     alignToIcon={true}
                   />
                   {formData.birthDate && calculateAge(formData.birthDate) !== null && (
-                    <p className="text-sm text-white mt-1">
+                    <p className="text-xs md:text-sm text-white mt-1">
                       {calculateAge(formData.birthDate)} år gammal
                     </p>
                   )}
                 </div>
                <div>
-                 <Label htmlFor="phone" className="text-white">
-                   <Phone className="h-4 w-4 inline mr-2" />
+                 <Label htmlFor="phone" className="text-white text-xs md:text-sm">
+                   <Phone className="h-3 w-3 md:h-4 md:w-4 inline mr-2" />
                    Telefonnummer
                  </Label>
                   <Input 
@@ -691,7 +691,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     required
                     value={formData.phone} 
                     onChange={(e) => handlePhoneChange(e.target.value)} 
-                    className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60" 
+                    className="h-11 md:h-10 text-xs md:text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 touch-manipulation" 
                     placeholder="Skriv in ditt telefonnummer" 
                   />
                  
@@ -703,12 +703,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                  onValidationChange={setHasValidLocation}
                />
                  <div>
-                  <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget? <span className="text-white">*</span></Label>
+                  <Label htmlFor="employmentStatus" className="text-white text-xs md:text-sm font-medium">Vad gör du i dagsläget? <span className="text-white">*</span></Label>
                   <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="outline"
-                          className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                          className="w-full h-11 md:h-10 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between text-xs md:text-sm touch-manipulation"
                         >
                         <span className="truncate">
                           {formData.employmentStatus ? (
@@ -765,12 +765,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               {/* Visa arbetstid-frågan endast om användaren har valt något OCH det inte är arbetssökande */}
               {formData.employmentStatus && formData.employmentStatus !== 'arbetssokande' && (
                  <div>
-                   <Label htmlFor="workingHours" className="text-white text-sm font-medium">Hur mycket jobbar du idag? <span className="text-white">*</span></Label>
+                   <Label htmlFor="workingHours" className="text-white text-xs md:text-sm font-medium">Hur mycket jobbar du idag? <span className="text-white">*</span></Label>
                    <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="outline"
-                          className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                          className="w-full h-11 md:h-10 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between text-xs md:text-sm touch-manipulation"
                         >
                          <span className="truncate">
                            {formData.workingHours ? (
@@ -808,12 +808,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               {/* Visa tillgänglighet-frågan endast om användaren har valt något i employment status */}
               {formData.employmentStatus && (
                  <div>
-                   <Label htmlFor="availability" className="text-white text-sm font-medium">När kan du börja nytt jobb? <span className="text-white">*</span></Label>
+                   <Label htmlFor="availability" className="text-white text-xs md:text-sm font-medium">När kan du börja nytt jobb? <span className="text-white">*</span></Label>
                    <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="outline"
-                          className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                          className="w-full h-11 md:h-10 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between text-xs md:text-sm touch-manipulation"
                         >
                          <span className="truncate">
                            {formData.availability ? (
@@ -1037,12 +1037,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <p className="text-white">Ge en kortare beskrivning om dig själv?</p>
             </div>
 
-            <div className="space-y-4 max-w-md mx-auto">
+            <div className="space-y-4 md:space-y-6 max-w-md mx-auto">
               <div>
-                <Label htmlFor="bio" className="text-white">Frivilligt</Label>
+                <Label htmlFor="bio" className="text-white text-xs md:text-sm">Frivilligt</Label>
                 <Textarea
                   id="bio"
-                  className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60" 
+                  className="h-24 md:h-32 text-xs md:text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 p-3 md:p-4 touch-manipulation" 
                   value={formData.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
                   placeholder="Berätta kort om dig själv..."
