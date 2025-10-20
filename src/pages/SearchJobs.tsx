@@ -26,6 +26,9 @@ interface Job {
   salary_max?: number;
   description: string;
   created_at: string;
+  profiles?: {
+    company_name: string | null;
+  };
 }
 
 const SearchJobs = () => {
@@ -1082,7 +1085,7 @@ const SearchJobs = () => {
                           <div className="flex flex-wrap items-center gap-3 text-white text-sm">
                             <div className="flex items-center gap-1">
                               <Building className="h-3 w-3" />
-                              {job.company_name}
+                              {job.profiles?.company_name || 'Okänt företag'}
                             </div>
                             <div className="flex items-center gap-1">
                               <MapPin className="h-3 w-3" />
