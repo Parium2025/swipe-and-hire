@@ -30,6 +30,7 @@ import EmployerSettings from '@/pages/employer/EmployerSettings';
 import DeveloperControls from '@/components/DeveloperControls';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRightLeft } from 'lucide-react';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 
 const Index = () => {
   const { user, profile, userRole, signOut, loading, switchRole } = useAuth();
@@ -254,9 +255,10 @@ const Index = () => {
 
     return (
       <SidebarProvider>
-        <div className="min-h-screen w-full flex smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="min-h-screen w-full flex smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <AnimatedBackground />
           {uiReady ? <AppSidebar /> : null}
-          <div className="flex-1 flex flex-col min-w-0">
+          <div className="flex-1 flex flex-col min-w-0 relative z-10">
             <header className="sticky top-0 z-40 h-16 flex items-center justify-between border-b border-white/20 bg-white/10 backdrop-blur-md px-6">
               <div className="flex items-center gap-4">
                 <SidebarTrigger className="text-white hover:bg-white/20" />
