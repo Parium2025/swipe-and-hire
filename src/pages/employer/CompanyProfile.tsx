@@ -301,7 +301,7 @@ const CompanyProfile = () => {
                   id="company_name"
                   value={formData.company_name}
                   onChange={(e) => setFormData({...formData, company_name: e.target.value})}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-xs"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 !text-xs"
                 />
               </div>
 
@@ -326,7 +326,7 @@ const CompanyProfile = () => {
                   placeholder="XXXXXX-XXXX"
                   inputMode="numeric"
                   maxLength={11}
-                  className={`bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-xs ${orgNumberError ? 'border-red-500/50' : ''}`}
+                  className={`bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 !text-xs ${orgNumberError ? 'border-red-500/50' : ''}`}
                 />
                 {orgNumberError && (
                   <p className="text-red-400/80 text-xs mt-1">{orgNumberError}</p>
@@ -339,9 +339,9 @@ const CompanyProfile = () => {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
-                      className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between h-9 text-xs font-normal"
+                      className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between h-9 !text-xs font-normal"
                     >
-                      <span className="truncate text-left flex-1 px-1 text-white/90">
+                      <span className="truncate text-left flex-1 px-1 text-white/90 !text-xs">
                         {formData.industry || 'Välj bransch'}
                       </span>
                       <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2" />
@@ -432,15 +432,15 @@ const CompanyProfile = () => {
                   value={formData.employee_count}
                   onValueChange={(value) => setFormData({...formData, employee_count: value})}
                 >
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white h-9 text-xs">
-                    <SelectValue placeholder="Välj antal" className="text-white/90" />
+                  <SelectTrigger className="bg-white/5 border-white/10 text-white h-9 !text-xs">
+                    <SelectValue placeholder="Välj antal" className="text-white/90 !text-xs" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800/95 backdrop-blur-md border-slate-600/30 text-white z-50">
-                    <SelectItem value="1-10 anställda">1-10 anställda</SelectItem>
-                    <SelectItem value="11-50 anställda">11-50 anställda</SelectItem>
-                    <SelectItem value="51-200 anställda">51-200 anställda</SelectItem>
-                    <SelectItem value="201-1000 anställda">201-1000 anställda</SelectItem>
-                    <SelectItem value="1000+ anställda">1000+ anställda</SelectItem>
+                  <SelectContent className="bg-slate-800/95 backdrop-blur-md border-slate-600/30 text-white z-50 !text-xs">
+                    <SelectItem value="1-10 anställda" className="!text-xs">1-10 anställda</SelectItem>
+                    <SelectItem value="11-50 anställda" className="!text-xs">11-50 anställda</SelectItem>
+                    <SelectItem value="51-200 anställda" className="!text-xs">51-200 anställda</SelectItem>
+                    <SelectItem value="201-1000 anställda" className="!text-xs">201-1000 anställda</SelectItem>
+                    <SelectItem value="1000+ anställda" className="!text-xs">1000+ anställda</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -452,7 +452,7 @@ const CompanyProfile = () => {
                   value={formData.address}
                   onChange={(e) => setFormData({...formData, address: e.target.value})}
                   placeholder="Hammarby Backen 89555"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-xs"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 !text-xs"
                 />
               </div>
 
@@ -463,7 +463,7 @@ const CompanyProfile = () => {
                   value={formData.website}
                   onChange={(e) => setFormData({...formData, website: e.target.value})}
                   placeholder="parium.se"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-xs"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 !text-xs"
                 />
               </div>
             </div>
@@ -476,7 +476,7 @@ const CompanyProfile = () => {
                 onChange={(e) => setFormData({...formData, company_description: e.target.value})}
                 placeholder="Vi säljer bilar"
                 rows={4}
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 resize-none text-xs"
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 resize-none !text-xs"
               />
             </div>
 
