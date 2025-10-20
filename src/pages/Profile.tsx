@@ -862,7 +862,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 px-4">
+    <div className="max-w-2xl mx-auto space-y-6 px-4">
       <div className="text-center">
         <h1 className="text-2xl font-semibold text-white mb-2">Min Profil</h1>
         <p className="text-white/70 text-sm">
@@ -870,7 +870,7 @@ const Profile = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto">
+      <div className="space-y-6">
         {/* Profile Image/Video Card */}
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
           <div className="p-4 space-y-2">
