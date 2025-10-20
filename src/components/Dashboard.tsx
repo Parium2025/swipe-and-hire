@@ -15,7 +15,7 @@ const Dashboard = memo(() => {
   const navigate = useNavigate();
 
   return (
-    <div className="space-y-4 max-w-7xl mx-auto px-8">
+    <div className="space-y-4 max-w-6xl mx-auto px-12">
       <div className="flex justify-between items-center">
         <div className="flex-1"></div>
         <div className="text-center flex-1">
