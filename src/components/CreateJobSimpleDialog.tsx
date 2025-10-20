@@ -411,7 +411,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                       <DropdownMenuContent 
                         className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-[60vh] animate-scale-in"
                         side="bottom"
-                        align="center"
+                        align="start"
                         alignOffset={0}
                         sideOffset={8}
                         onCloseAutoFocus={(e) => e.preventDefault()}
