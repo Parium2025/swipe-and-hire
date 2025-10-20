@@ -13,6 +13,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/hooks/useAuth';
 
 import { createSmartSearchConditions, expandSearchTerms } from '@/lib/smartSearch';
+import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { swedishCities } from '@/lib/swedishCities';
 interface Job {
@@ -1078,7 +1079,7 @@ const SearchJobs = () => {
                           <h3 className="text-lg font-semibold text-white group-hover:text-white/90 transition-colors">
                             {job.title}
                           </h3>
-                          <div className="flex flex-wrap items-center gap-3 text-white/70 text-sm">
+                          <div className="flex flex-wrap items-center gap-3 text-white text-sm">
                             <div className="flex items-center gap-1">
                               <Building className="h-3 w-3" />
                               {job.company_name}
@@ -1089,13 +1090,13 @@ const SearchJobs = () => {
                             </div>
                             <div className="flex items-center gap-1">
                               <Clock className="h-3 w-3" />
-                              {job.employment_type}
+                              {getEmploymentTypeLabel(job.employment_type)}
                             </div>
                           </div>
                         </div>
                         
                         {/* Job Description */}
-                        <p className="text-white/60 text-sm leading-relaxed">
+                        <p className="text-white text-sm leading-relaxed">
                           {job.description.length > 150 
                             ? `${job.description.substring(0, 150)}...` 
                             : job.description
@@ -1107,7 +1108,7 @@ const SearchJobs = () => {
                           <Badge variant="outline" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs">
                             {formatSalary(job.salary_min, job.salary_max)}
                           </Badge>
-                          <span className="text-xs text-white/50">
+                          <span className="text-xs text-white">
                             {new Date(job.created_at).toLocaleDateString('sv-SE', {
                               day: 'numeric',
                               month: 'short'
