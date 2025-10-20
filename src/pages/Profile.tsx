@@ -1432,7 +1432,7 @@ const Profile = () => {
                 </div>
               )}
 
-              <div className="flex justify-end">
+              <div className="flex justify-center">
                 <Button 
                   type="submit" 
                   className="border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm" 
