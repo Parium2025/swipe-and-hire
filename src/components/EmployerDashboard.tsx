@@ -122,7 +122,7 @@ const EmployerDashboard = memo(() => {
 
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-7xl mx-auto px-8">
       <div className="flex justify-between items-center">
         <div className="flex-1"></div>
         <div className="text-center flex-1">
