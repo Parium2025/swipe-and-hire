@@ -135,50 +135,50 @@ const EmployerDashboard = memo(() => {
       </div>
 
       {/* Stats Overview */}
-      <div className="flex flex-wrap gap-3 justify-center">
-        <Card className="w-[240px] md:w-[280px] bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-4">
-            <Briefcase className="h-5 w-5 text-white" />
-            <CardTitle className="text-sm font-medium text-white">Totalt annonser</CardTitle>
+      <div className="flex flex-wrap gap-2 lg:gap-2.5 2xl:gap-3 justify-center">
+        <Card className="w-[240px] md:w-[280px] lg:w-[200px] xl:w-[220px] 2xl:w-[280px] bg-white/5 backdrop-blur-sm border-white/20">
+          <CardHeader className="flex flex-row items-center gap-1.5 lg:gap-2 2xl:gap-2 space-y-0 p-3 lg:p-3 2xl:p-4">
+            <Briefcase className="h-4 w-4 lg:h-4 lg:w-4 2xl:h-5 2xl:w-5 text-white" />
+            <CardTitle className="text-xs lg:text-xs 2xl:text-sm font-medium text-white">Totalt annonser</CardTitle>
           </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <div className="text-2xl font-bold text-white transition-all duration-300">
+          <CardContent className="px-3 pb-3 lg:px-3 lg:pb-3 2xl:px-4 2xl:pb-4">
+            <div className="text-xl lg:text-xl 2xl:text-2xl font-bold text-white transition-all duration-300">
               {loading ? '...' : jobs.length}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="w-[240px] md:w-[280px] bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-4">
-            <TrendingUp className="h-5 w-5 text-white" />
-            <CardTitle className="text-sm font-medium text-white">Aktiva annonser</CardTitle>
+        <Card className="w-[240px] md:w-[280px] lg:w-[200px] xl:w-[220px] 2xl:w-[280px] bg-white/5 backdrop-blur-sm border-white/20">
+          <CardHeader className="flex flex-row items-center gap-1.5 lg:gap-2 2xl:gap-2 space-y-0 p-3 lg:p-3 2xl:p-4">
+            <TrendingUp className="h-4 w-4 lg:h-4 lg:w-4 2xl:h-5 2xl:w-5 text-white" />
+            <CardTitle className="text-xs lg:text-xs 2xl:text-sm font-medium text-white">Aktiva annonser</CardTitle>
           </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <div className="text-2xl font-bold text-white transition-all duration-300">
+          <CardContent className="px-3 pb-3 lg:px-3 lg:pb-3 2xl:px-4 2xl:pb-4">
+            <div className="text-xl lg:text-xl 2xl:text-2xl font-bold text-white transition-all duration-300">
               {loading ? '...' : jobs.filter(job => job.is_active).length}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="w-[240px] md:w-[280px] bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-4">
-            <Eye className="h-5 w-5 text-white" />
-            <CardTitle className="text-sm font-medium text-white">Totala visningar</CardTitle>
+        <Card className="w-[240px] md:w-[280px] lg:w-[200px] xl:w-[220px] 2xl:w-[280px] bg-white/5 backdrop-blur-sm border-white/20">
+          <CardHeader className="flex flex-row items-center gap-1.5 lg:gap-2 2xl:gap-2 space-y-0 p-3 lg:p-3 2xl:p-4">
+            <Eye className="h-4 w-4 lg:h-4 lg:w-4 2xl:h-5 2xl:w-5 text-white" />
+            <CardTitle className="text-xs lg:text-xs 2xl:text-sm font-medium text-white">Totala visningar</CardTitle>
           </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <div className="text-2xl font-bold text-white transition-all duration-300">
+          <CardContent className="px-3 pb-3 lg:px-3 lg:pb-3 2xl:px-4 2xl:pb-4">
+            <div className="text-xl lg:text-xl 2xl:text-2xl font-bold text-white transition-all duration-300">
               {loading ? '...' : jobs.reduce((sum, job) => sum + job.views_count, 0)}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="w-[240px] md:w-[280px] bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-4">
-            <MessageCircle className="h-5 w-5 text-white" />
-            <CardTitle className="text-sm font-medium text-white">Ansökningar</CardTitle>
+        <Card className="w-[240px] md:w-[280px] lg:w-[200px] xl:w-[220px] 2xl:w-[280px] bg-white/5 backdrop-blur-sm border-white/20">
+          <CardHeader className="flex flex-row items-center gap-1.5 lg:gap-2 2xl:gap-2 space-y-0 p-3 lg:p-3 2xl:p-4">
+            <MessageCircle className="h-4 w-4 lg:h-4 lg:w-4 2xl:h-5 2xl:w-5 text-white" />
+            <CardTitle className="text-xs lg:text-xs 2xl:text-sm font-medium text-white">Ansökningar</CardTitle>
           </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <div className="text-2xl font-bold text-white transition-all duration-300">
+          <CardContent className="px-3 pb-3 lg:px-3 lg:pb-3 2xl:px-4 2xl:pb-4">
+            <div className="text-xl lg:text-xl 2xl:text-2xl font-bold text-white transition-all duration-300">
               {loading ? '...' : jobs.reduce((sum, job) => sum + job.applications_count, 0)}
             </div>
           </CardContent>
