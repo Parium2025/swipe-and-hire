@@ -214,27 +214,27 @@ const handleJobCreated = useCallback((job: JobPosting) => {
             onEscapeKeyDown={(e) => e.preventDefault()}
           >
           <Card className="bg-white/10 backdrop-blur-sm border-white/20 ring-0 shadow-none relative w-full transition-all duration-200">
-            <CardHeader className="pb-4 pt-6">
+            <CardHeader className="pb-3 pt-4 md:pb-4 md:pt-6">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-white flex-1 text-center text-xl">
+                <CardTitle className="text-white flex-1 text-center text-base md:text-xl">
                   Skapa jobb
                 </CardTitle>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={handleClose}
-                  className="absolute right-2 top-2 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+                  className="absolute right-2 top-2 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10 touch-manipulation"
                 >
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-              <CardDescription className="text-white text-center text-sm leading-snug mt-2">
+              <CardDescription className="text-white text-center text-xs md:text-sm leading-snug mt-1 md:mt-2">
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 px-4 pb-4">
-              <div className="space-y-2">
-                <Label htmlFor="job-title" className="text-white">Titel</Label>
+            <CardContent className="space-y-3 md:space-y-4 px-3 md:px-4 pb-3 md:pb-4">
+              <div className="space-y-1.5 md:space-y-2">
+                <Label htmlFor="job-title" className="text-white text-xs md:text-sm">Titel</Label>
                 <Textarea
                   id="job-title"
                   ref={titleRef}
@@ -247,7 +247,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                     target.style.height = target.scrollHeight + 'px';
                   }}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 text-sm resize-none min-h-[36px] leading-tight py-2 overflow-hidden"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 text-xs md:text-sm resize-none min-h-[44px] md:min-h-[36px] leading-tight py-2 overflow-hidden touch-manipulation"
                   autoComplete="off"
                   title={jobTitle}
                   rows={1}
@@ -259,10 +259,10 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="job-template" className="text-white">Jobbmall</Label>
+              <div className="space-y-1.5 md:space-y-2">
+                <Label htmlFor="job-template" className="text-white text-xs md:text-sm">Jobbmall</Label>
                 {loadingTemplates ? (
-                  <div className="flex items-center gap-2 text-sm text-white/70 py-2">
+                  <div className="flex items-center gap-2 text-xs md:text-sm text-white/70 py-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Laddar mallar...
                   </div>
@@ -273,10 +273,10 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="flex-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-all duration-150 justify-between mt-1 text-left h-auto min-h-[44px] py-3 whitespace-normal touch-manipulation"
+                          className="flex-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-all duration-150 justify-between mt-1 text-left h-auto min-h-[48px] md:min-h-[44px] py-3 whitespace-normal touch-manipulation"
                           title={selectedTemplate?.name || 'Ingen mall är vald'}
                         >
-                          <span className="text-left flex-1 px-1 text-sm whitespace-normal break-words pr-6">
+                          <span className="text-left flex-1 px-1 text-xs md:text-sm whitespace-normal break-words pr-6">
                             {selectedTemplate?.name || 'Ingen mall är vald'}
                           </span>
                           <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2 transition-transform duration-150" />
@@ -513,10 +513,10 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                         onClick={() => {
                           setSelectedTemplate(null);
                         }}
-                        className="mt-1 h-9 w-9 flex-shrink-0 text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150"
+                        className="mt-1 h-11 w-11 md:h-9 md:w-9 flex-shrink-0 text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150 touch-manipulation"
                         title="Ta bort vald mall"
                       >
-                        <X className="h-4 w-4" />
+                        <X className="h-5 w-5 md:h-4 md:w-4" />
                       </Button>
                     )}
                   </div>
