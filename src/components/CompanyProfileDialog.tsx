@@ -408,7 +408,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
               {/* Kommentarsfält eller informationstext */}
               {isOwnProfile ? (
                 <div className="bg-white/5 p-3 rounded-lg">
-                  <p className="text-xs text-white text-center">
+                  <p className="text-sm text-white text-center">
                     (Här lämnar jobbsökarna kommentarer om de vill samt betyg)
                   </p>
                 </div>
@@ -509,7 +509,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                                   />
                                 ))}
                               </div>
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-sm text-muted-foreground">
                                 {new Date(review.created_at).toLocaleDateString("sv-SE")}
                               </span>
                             </div>

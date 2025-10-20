@@ -221,7 +221,7 @@ export function EmployerSidebar() {
                 <p className="font-medium text-white text-sm truncate">
                   {profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
                 </p>
-                <p className="text-xs text-white truncate">
+                <p className="text-sm text-white truncate">
                   {profile?.industry || 'Admin'}
                 </p>
               </div>
@@ -231,7 +231,7 @@ export function EmployerSidebar() {
 
         {/* Main Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white text-xs uppercase tracking-wide px-4">
+          <SidebarGroupLabel className="text-white text-sm uppercase tracking-wide px-4">
             Huvudmeny
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -266,7 +266,7 @@ export function EmployerSidebar() {
 
         {/* Business Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white text-xs uppercase tracking-wide px-4">
+          <SidebarGroupLabel className="text-white text-sm uppercase tracking-wide px-4">
             Företag
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -301,7 +301,7 @@ export function EmployerSidebar() {
 
         {/* Support Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white text-xs uppercase tracking-wide px-4">
+          <SidebarGroupLabel className="text-white text-sm uppercase tracking-wide px-4">
             Support
           </SidebarGroupLabel>
           <SidebarGroupContent>

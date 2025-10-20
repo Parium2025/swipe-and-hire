@@ -156,7 +156,7 @@ export function AppSidebar() {
                 <p className="text-sm font-medium truncate">
                   {profile?.first_name} {profile?.last_name}
                 </p>
-                <p className="text-xs text-sidebar-foreground/70 truncate">
+                <p className="text-sm text-sidebar-foreground/70 truncate">
                   {userRole?.role === 'employer' ? 'Arbetsgivare' : 'Jobbsökare'}
                 </p>
               </div>
@@ -168,7 +168,7 @@ export function AppSidebar() {
         <div className="space-y-4">
           {/* Profile Section */}
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-white">
+            <SidebarGroupLabel className="text-sm font-semibold uppercase tracking-wider text-white">
               {collapsed ? <User className="h-4 w-4" /> : 'Profil'}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -194,7 +194,7 @@ export function AppSidebar() {
 
           {/* Business Section */}
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-white">
+            <SidebarGroupLabel className="text-sm font-semibold uppercase tracking-wider text-white">
               {collapsed ? <Building className="h-4 w-4" /> : 'Ekonomi'}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -219,7 +219,7 @@ export function AppSidebar() {
 
           {/* Support Section */}
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-white">
+            <SidebarGroupLabel className="text-sm font-semibold uppercase tracking-wider text-white">
               {collapsed ? <MessageCircle className="h-4 w-4" /> : 'Support'}
             </SidebarGroupLabel>
             <SidebarGroupContent>

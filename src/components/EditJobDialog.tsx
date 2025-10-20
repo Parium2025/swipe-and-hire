@@ -148,7 +148,7 @@ const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQuestionIt
           </div>
           
           <div className="flex-1 min-w-0">
-            <div className="text-white font-medium text-xs leading-tight truncate">
+            <div className="text-white font-medium text-sm leading-tight truncate">
               {question.question_text || 'Ingen frågetext'}
             </div>
           </div>
@@ -364,10 +364,10 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   };
 
   const getEmailTextSize = (email: string) => {
-    if (!email) return 'text-xs';
+    if (!email) return 'text-sm';
     
     const length = email.length;
-    if (length <= 15) return 'text-xs';
+    if (length <= 15) return 'text-sm';
     if (length <= 25) return 'text-[10px]';
     if (length <= 35) return 'text-[9px]';
     return 'text-[8px]';
@@ -397,17 +397,17 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     const titleLength = jobTitle.length;
     const metaLength = metaLine.length;
 
-    let companySizeClass = 'text-xs';
+    let companySizeClass = 'text-sm';
     let titleSizeClass = 'text-lg';
     let metaSizeClass = 'text-sm';
 
     if (titleLength > 50) {
       titleSizeClass = 'text-base';
-      companySizeClass = 'text-xs';
-      metaSizeClass = 'text-xs';
+      companySizeClass = 'text-sm';
+      metaSizeClass = 'text-sm';
     } else if (titleLength > 30) {
       titleSizeClass = 'text-lg';
-      companySizeClass = 'text-xs';
+      companySizeClass = 'text-sm';
       metaSizeClass = 'text-sm';
     } else if (titleLength < 20) {
       titleSizeClass = 'text-xl';
@@ -416,13 +416,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     }
 
     if (companyLength > 15) {
-      companySizeClass = 'text-xs';
+      companySizeClass = 'text-sm';
     } else if (companyLength < 8) {
       companySizeClass = 'text-sm';
     }
 
     if (metaLength > 20) {
-      metaSizeClass = 'text-xs';
+      metaSizeClass = 'text-sm';
     } else if (metaLength < 10) {
       metaSizeClass = 'text-sm';
     }
@@ -1593,7 +1593,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                               onClick={() => useQuestionTemplate(template)}
                                               className="flex-1 text-left hover:opacity-80 transition-opacity min-w-0"
                                             >
-                                              <div className="text-white font-medium text-xs leading-tight truncate">
+                                              <div className="text-white font-medium text-sm leading-tight truncate">
                                                 {template.question_text}
                                               </div>
                                             </button>
@@ -1870,8 +1870,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   
                                   <div className={showApplicationForm ? 'flex flex-col h-full' : 'hidden'}>
                                     <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 border-b border-white/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem]">
-                                      <div className="text-xs font-bold text-white">Ansökningsformulär</div>
-                                      <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white/80 hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
+                                      <div className="text-sm font-bold text-white">Ansökningsformulär</div>
+                                      <button onClick={() => setShowApplicationForm(false)} className="text-sm text-white/80 hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
                                     </div>
 
                                     <div 
@@ -1899,7 +1899,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             )}
                                             <button 
                                               onClick={() => setShowCompanyProfile(true)}
-                                              className="text-xs font-bold text-white hover:text-primary transition-colors cursor-pointer"
+                                              className="text-sm font-bold text-white hover:text-primary transition-colors cursor-pointer"
                                             >
                                               {profile?.company_name || 'Företagsnamn'}
                                             </button>
@@ -1908,14 +1908,14 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                                         {formData.occupation && (
                                           <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
-                                            <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                            <h5 className="text-sm font-medium text-white mb-1 flex items-center">
                                               <Briefcase className="h-2 w-2 mr-1 text-white" />
                                               Yrke
                                             </h5>
                                             <div className="text-white">
                                               <div 
                                                 ref={occupationRef}
-                                                className="text-xs leading-relaxed break-words inline-block pr-2 overflow-visible"
+                                                className="text-sm leading-relaxed break-words inline-block pr-2 overflow-visible"
                                               >
                                                 {formData.occupation}
                                               </div>
@@ -1925,8 +1925,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                                         {formData.description && (
                                           <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
-                                            <h5 className="text-xs font-medium text-white mb-1">Jobbeskrivning</h5>
-                                            <div className="text-xs text-white leading-relaxed whitespace-pre-wrap break-words [&>*]:mb-1 [&>*:last-child]:mb-0">
+                                            <h5 className="text-sm font-medium text-white mb-1">Jobbeskrivning</h5>
+                                            <div className="text-sm text-white leading-relaxed whitespace-pre-wrap break-words [&>*]:mb-1 [&>*:last-child]:mb-0">
                                               {formData.description.split('\n').map((line, index) => {
                                                 const trimmedLine = line.trim();
                                                 const bulletMatch = trimmedLine.match(/^([•\-\*]|\d+[\.\)])\s*(.*)$/);
@@ -1953,11 +1953,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                                         {(formData.salary_min || formData.salary_max || formData.salary_type) && (
                                           <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
-                                            <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                            <h5 className="text-sm font-medium text-white mb-1 flex items-center">
                                               <Banknote className="h-2 w-2 mr-1 text-white" />
                                               Lön
                                             </h5>
-                                            <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
+                                            <div className="text-sm text-white leading-relaxed break-words space-y-0.5">
                                               {formatSalaryInfo().map((info, index) => (
                                                 <div key={index} className="font-medium">{info}</div>
                                               ))}
@@ -1967,22 +1967,22 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                                         {formData.positions_count && parseInt(formData.positions_count) > 0 && (
                                           <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
-                                            <h5 className="text-xs font-medium text-white mb-1 flex items-center whitespace-nowrap">
+                                            <h5 className="text-sm font-medium text-white mb-1 flex items-center whitespace-nowrap">
                                               <Users className="h-2 w-2 mr-1 text-white" />
                                               Antal rekryteringar
                                             </h5>
-                                            <div className="text-xs text-white leading-relaxed break-words">
+                                            <div className="text-sm text-white leading-relaxed break-words">
                                               <div className="font-medium">{formatPositionsCount()}</div>
                                             </div>
                                           </div>
                                         )}
 
                                         <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
-                                          <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                          <h5 className="text-sm font-medium text-white mb-1 flex items-center">
                                             <MapPin className="h-2 w-2 mr-1 text-white" />
                                             Arbetsplats
                                           </h5>
-                                          <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
+                                          <div className="text-sm text-white leading-relaxed break-words space-y-0.5">
                                             {formData.workplace_name && (
                                               <div className="font-medium">{formData.workplace_name}</div>
                                             )}
@@ -2007,11 +2007,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                         </div>
 
                                         <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                          <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                          <h5 className="text-sm font-medium text-white mb-1 flex items-center">
                                             <Mail className="h-2 w-2 mr-1 text-white" />
                                             Kontakt
                                           </h5>
-                                          <div className="text-xs text-white leading-relaxed break-words">
+                                          <div className="text-sm text-white leading-relaxed break-words">
                                             {formData.contact_email && (
                                               <a 
                                                 href={`mailto:${formData.contact_email}`}
@@ -2025,8 +2025,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
                                         {formData.requirements && (
                                           <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                            <h4 className="text-xs font-semibold text-white mb-1">Kvalifikationer</h4>
-                                            <p className="text-xs text-white leading-relaxed">
+                                            <h4 className="text-sm font-semibold text-white mb-1">Kvalifikationer</h4>
+                                            <p className="text-sm text-white leading-relaxed">
                                               {formData.requirements.length > 100 
                                                 ? formData.requirements.substring(0, 100) + '...' 
                                                 : formData.requirements
@@ -2036,7 +2036,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                         )}
 
                                         <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                          <p className="text-xs text-white mb-3 leading-relaxed">
+                                          <p className="text-sm text-white mb-3 leading-relaxed">
                                             Följande information samlas automatiskt in från alla kandidater som har sökt:
                                           </p>
                                           
@@ -2053,7 +2053,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                               'Nuvarande anställningsform',
                                               'Tillgänglighet',
                                             ].map((label, idx) => (
-                                              <div key={idx} className="text-xs flex">
+                                              <div key={idx} className="text-sm flex">
                                                 <span className="flex-shrink-0 mr-1 text-white">•</span>
                                                 <span className="flex-1 text-white leading-tight break-words">{label}</span>
                                               </div>
@@ -2079,7 +2079,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                 <div key={question.id || index} className="bg-white/10 rounded-lg p-3 border border-white/20">
                                                   {/* Frågetext */}
                                                   <div className="mb-2">
-                                                    <label className="text-xs font-medium text-white block leading-tight">
+                                                    <label className="text-sm font-medium text-white block leading-tight">
                                                       {question.question_text}
                                                     </label>
                                                   </div>
@@ -2087,7 +2087,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                   {/* Input förhandsvisning baserat på frågetyp */}
                                                   {question.question_type === 'text' && (
                                                     <textarea
-                                                      className="w-full border border-white/20 bg-white/10 rounded p-2 text-xs text-white placeholder:text-white/60 resize-none"
+                                                      className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white/60 resize-none"
                                                       placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                                       rows={2}
                                                     />
