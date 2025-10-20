@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -37,6 +37,12 @@ const App = () => {
     return () => window.removeEventListener('load', start as any);
   }, []);
 
+  const RouteBackground = () => {
+    const location = useLocation();
+    const disableBubbles = location.pathname === '/auth';
+    return <AnimatedBackground showBubbles={!disableBubbles} />;
+  };
+
   return (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -45,8 +51,7 @@ const App = () => {
       <BrowserRouter>
         <UnsavedChangesProvider>
           <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
-            {/* Global persistent background to avoid flicker between routes */}
-            <AnimatedBackground />
+            <RouteBackground />
             
             <div className="relative z-10">
               {showHeader && <Header />}
