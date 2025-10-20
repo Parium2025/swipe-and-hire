@@ -22,12 +22,12 @@ const EmployerLayout = ({ children, developerView, onViewChange }: EmployerLayou
         <AnimatedBackground showBubbles={true} />
         <EmployerSidebar />
         <div className="flex-1 flex flex-col overflow-x-hidden relative z-10">
-          <header className="sticky top-0 z-40 h-12 sm:h-14 flex items-center justify-between border-b border-white/20 bg-white/10 backdrop-blur-sm px-3">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger className="text-white hover:bg-white/20 h-9 w-9 sm:h-8 sm:w-8" />
+          <header className="sticky top-0 z-40 h-12 flex items-center justify-between border-b border-white/20 bg-white/10 backdrop-blur-sm px-2 md:px-3">
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <SidebarTrigger className="text-white hover:bg-white/20 h-8 w-8" />
               <div>
-                <h1 className="text-base sm:text-lg font-bold text-white">Parium</h1>
-                <p className="text-[10px] sm:text-xs text-white">
+                <h1 className="text-sm md:text-base font-bold text-white">Parium</h1>
+                <p className="text-[9px] md:text-[10px] text-white">
                   Admin: {profile?.first_name} {profile?.last_name}
                 </p>
               </div>

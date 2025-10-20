@@ -143,22 +143,22 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
     const isRequired = 'required' in question ? question.required : question.is_required;
     
     return (
-      <div key={question.id} className="border-b border-white/10 py-4 space-y-3">
+      <div key={question.id} className="border-b border-white/10 py-2 md:py-3 space-y-2">
         {/* Question header */}
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start justify-between gap-2">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-sm font-medium text-white">
+            <div className="flex items-center gap-1.5 mb-1">
+              <span className="text-xs md:text-sm font-medium text-white">
                 {question.label || question.question_text}
               </span>
               {isRequired && (
-                <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
+                <Badge variant="destructive" className="text-[9px] md:text-[10px] px-1 py-0">
                   Obligatorisk
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-white/70 border-white/20">
+            <div className="flex items-center gap-1.5">
+              <Badge variant="outline" className="text-[9px] md:text-[10px] px-1 py-0 text-white/70 border-white/20">
                 {isStandardQuestion ? 'Grundinfo' : getQuestionTypeLabel(question.question_type)}
               </Badge>
             </div>
@@ -166,7 +166,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
         </div>
 
         {/* Answer input */}
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {/* Standard questions */}
           {isStandardQuestion && (
             <Input
@@ -174,7 +174,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
               placeholder={`Ange ${question.label.toLowerCase()}...`}
               value={answers[question.id] || ''}
               onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-              className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
+              className="bg-white/5 border-white/20 text-white placeholder:text-white/40 h-8 md:h-9 text-xs md:text-sm"
               disabled={question.id === 'email'}
             />
           )}
@@ -207,7 +207,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
               placeholder="Skriv ditt svar..."
               value={answers[question.id] || ''}
               onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-              className="min-h-[80px] bg-white/5 border-white/20 text-white placeholder:text-white/40"
+              className="min-h-[60px] md:min-h-[70px] bg-white/5 border-white/20 text-white placeholder:text-white/40 text-xs md:text-sm"
             />
           )}
 
@@ -321,43 +321,42 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
       <DialogContent className="max-w-md max-h-[90vh] p-0 rounded-[24px] overflow-hidden bg-parium-gradient text-white border-none shadow-none">
         <div className="relative flex flex-col max-h-[90vh]">
           {/* Header */}
-          <div className="p-4 border-b border-white/20 bg-background/10 rounded-t-[24px] flex-shrink-0">
+          <div className="p-2 md:p-3 border-b border-white/20 bg-background/10 rounded-t-[24px] flex-shrink-0">
             <div className="flex items-center justify-between text-white">
-              <div className="flex items-center gap-2">
-                <Heart className="h-5 w-5 text-primary" />
-                <span className="font-semibold text-sm">Ansökan</span>
+              <div className="flex items-center gap-1.5">
+                <Heart className="h-4 w-4 text-primary" />
+                <span className="font-semibold text-xs md:text-sm">Ansökan</span>
               </div>
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={() => onOpenChange(false)}
-                className="text-white/80 hover:text-white hover:bg-white/10"
+                className="text-white/80 hover:text-white hover:bg-white/10 h-7 w-7 p-0"
               >
                 ✕
               </Button>
             </div>
-            <div className="mt-2">
-              <h3 className="font-semibold text-lg">{job.title}</h3>
-              <p className="text-sm text-white/70">{companyName}</p>
+            <div className="mt-1.5">
+              <h3 className="font-semibold text-base md:text-lg">{job.title}</h3>
+              <p className="text-xs md:text-sm text-white/70">{companyName}</p>
             </div>
           </div>
 
           {/* All questions in scrollable list */}
-          <div className="flex-1 overflow-y-auto px-4">
+          <div className="flex-1 overflow-y-auto px-2 md:px-3">
             <div className="py-2">
               {allQuestions.map((question, index) => renderQuestionRow(question, index))}
             </div>
           </div>
 
           {/* Submit button */}
-          <div className="p-4 border-t border-white/20 bg-background/10 flex-shrink-0">
+          <div className="p-2 md:p-3 border-t border-white/20 bg-background/10 flex-shrink-0">
             <Button
               onClick={handleSubmit}
               disabled={submitting || !canSubmit()}
-              className="w-full"
-              size="lg"
+              className="w-full h-9 md:h-10"
             >
-              <Heart className="h-4 w-4 mr-2" />
+              <Heart className="h-3.5 w-3.5 mr-1.5" />
               {submitting ? 'Skickar...' : 'Skicka ansökan'}
             </Button>
           </div>

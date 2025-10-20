@@ -6,16 +6,16 @@ export const Header = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="container mx-auto px-2 md:px-3 h-12 md:h-14 flex items-center justify-between">
         <Button
           onClick={() => navigate('/')}
           variant="ghost"
-          className="flex items-center gap-3 p-2 hover:bg-accent/50 rounded-lg transition-colors"
+          className="flex items-center gap-1.5 md:gap-2 p-1.5 md:p-2 hover:bg-accent/50 rounded-lg transition-colors"
         >
           <img 
             src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
             alt="Parium" 
-            className="h-8 w-auto"
+            className="h-6 md:h-7 w-auto"
             width="128"
             height="32"
             loading="eager"
@@ -24,7 +24,7 @@ export const Header = () => {
         </Button>
         
         {/* Space for future navigation items */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 md:gap-2">
           {/* Future: User profile, notifications, etc. */}
         </div>
       </div>
