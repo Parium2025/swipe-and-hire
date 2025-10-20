@@ -57,7 +57,7 @@ const App = () => {
       <BrowserRouter>
         <UnsavedChangesProvider>
           <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
-            {/* Global persistent background to avoid flicker between routes */}
+            {/* Global persistent background to avoid flicker between routes. */}
             <RouterAwareBackground />
             
             <div className="relative z-10">
