@@ -311,20 +311,20 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] p-0 bg-gradient-to-br from-[hsl(215,100%,12%)] via-[hsl(215,90%,18%)] to-[hsl(215,100%,12%)] border-white/20">
         <ScrollArea className="max-h-[90vh] [&>div>div]:!overflow-y-scroll [&>div>div]:scrollbar-hide">
-          <div className="p-3 md:p-4 text-white">
-            <DialogHeader className="mb-3 md:mb-4">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-12 w-12 md:h-14 md:w-14">
+          <div className="p-2 md:p-4 text-white">
+            <DialogHeader className="mb-2 md:mb-4">
+              <div className="flex items-center gap-2 md:gap-3">
+                <Avatar className="h-10 w-10 md:h-14 md:w-14">
                   <AvatarImage src={company.company_logo_url} alt={company.company_name} />
                   <AvatarFallback>
-                    <Building2 className="h-5 w-5 md:h-6 md:w-6" />
+                    <Building2 className="h-4 w-4 md:h-6 md:w-6" />
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <DialogTitle className="text-base md:text-xl text-white">{company.company_name}</DialogTitle>
-                  <div className="flex items-center gap-1.5 mt-0.5">
+                  <DialogTitle className="text-sm md:text-xl text-white">{company.company_name}</DialogTitle>
+                  <div className="flex items-center gap-1 md:gap-1.5 mt-0.5">
                     <Star className="h-3 w-3 md:h-4 md:w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-xs md:text-sm text-white">
+                    <span className="text-[10px] md:text-sm text-white">
                       {averageRating} ({reviews.length} {reviews.length === 1 ? 'recension' : 'recensioner'})
                     </span>
                   </div>
@@ -333,30 +333,30 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
             </DialogHeader>
 
             {/* Översikt */}
-            <div className="space-y-2 md:space-y-3 mb-3 md:mb-4">
-              <h3 className="font-semibold text-sm md:text-base text-white">Översikt</h3>
-              <p className="text-xs md:text-sm text-white/90">
+            <div className="space-y-1 md:space-y-3 mb-2 md:mb-4">
+              <h3 className="font-semibold text-xs md:text-base text-white">Översikt</h3>
+              <p className="text-[10px] md:text-sm text-white/90 leading-tight md:leading-normal">
                 {company.company_description || "Ingen beskrivning tillgänglig."}
               </p>
             </div>
 
-            <Separator className="my-3 md:my-4" />
+            <Separator className="my-2 md:my-4" />
 
             {/* Företagsinformation */}
-            <div className="space-y-2 md:space-y-3 mb-3 md:mb-4">
-              <h3 className="font-semibold text-sm md:text-base text-white">Företagsinformation</h3>
+            <div className="space-y-1 md:space-y-3 mb-2 md:mb-4">
+              <h3 className="font-semibold text-xs md:text-base text-white">Företagsinformation</h3>
               
-              <div className="grid gap-2 md:gap-2.5">
+              <div className="grid gap-1.5 md:gap-2.5">
                 {company.website && (
-                  <div className="flex items-center gap-2 md:gap-2.5">
-                    <Globe className="h-4 w-4 md:h-5 md:w-5 text-white flex-shrink-0" />
+                  <div className="flex items-center gap-1.5 md:gap-2.5">
+                    <Globe className="h-3 w-3 md:h-5 md:w-5 text-white flex-shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-xs md:text-sm font-medium text-white">Webbplats</p>
+                      <p className="text-[10px] md:text-sm font-medium text-white">Webbplats</p>
                       <a 
                         href={company.website.startsWith('http') ? company.website : `https://${company.website}`} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-xs md:text-sm text-white/90 hover:underline truncate block"
+                        className="text-[10px] md:text-sm text-white/90 hover:underline truncate block"
                       >
                         {company.website}
                       </a>
@@ -365,58 +365,58 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                 )}
 
                 {company.industry && (
-                  <div className="flex items-center gap-2 md:gap-2.5">
-                    <Briefcase className="h-4 w-4 md:h-5 md:w-5 text-white flex-shrink-0" />
+                  <div className="flex items-center gap-1.5 md:gap-2.5">
+                    <Briefcase className="h-3 w-3 md:h-5 md:w-5 text-white flex-shrink-0" />
                     <div>
-                      <p className="text-xs md:text-sm font-medium text-white">Bransch</p>
-                      <p className="text-xs md:text-sm text-white/90">{company.industry}</p>
+                      <p className="text-[10px] md:text-sm font-medium text-white">Bransch</p>
+                      <p className="text-[10px] md:text-sm text-white/90">{company.industry}</p>
                     </div>
                   </div>
                 )}
 
                 {company.employee_count && (
-                  <div className="flex items-center gap-2 md:gap-2.5">
-                    <Users className="h-4 w-4 md:h-5 md:w-5 text-white flex-shrink-0" />
+                  <div className="flex items-center gap-1.5 md:gap-2.5">
+                    <Users className="h-3 w-3 md:h-5 md:w-5 text-white flex-shrink-0" />
                     <div>
-                      <p className="text-xs md:text-sm font-medium text-white">Företagsstorlek</p>
-                      <p className="text-xs md:text-sm text-white/90">{company.employee_count} anställda</p>
+                      <p className="text-[10px] md:text-sm font-medium text-white">Företagsstorlek</p>
+                      <p className="text-[10px] md:text-sm text-white/90">{company.employee_count} anställda</p>
                     </div>
                   </div>
                 )}
 
                 {company.address && (
-                  <div className="flex items-center gap-2 md:gap-2.5">
-                    <MapPin className="h-4 w-4 md:h-5 md:w-5 text-white flex-shrink-0" />
+                  <div className="flex items-center gap-1.5 md:gap-2.5">
+                    <MapPin className="h-3 w-3 md:h-5 md:w-5 text-white flex-shrink-0" />
                     <div>
-                      <p className="text-xs md:text-sm font-medium text-white">Huvudkontor</p>
-                      <p className="text-xs md:text-sm text-white/90">{company.address}</p>
+                      <p className="text-[10px] md:text-sm font-medium text-white">Huvudkontor</p>
+                      <p className="text-[10px] md:text-sm text-white/90">{company.address}</p>
                     </div>
                   </div>
                 )}
               </div>
             </div>
 
-            <Separator className="my-3 md:my-4" />
+            <Separator className="my-2 md:my-4" />
 
             {/* Kommentarer / Recensioner */}
-            <div className="space-y-2 md:space-y-3">
-              <div className="flex items-center gap-1.5 md:gap-2">
-                <MessageSquare className="h-4 w-4 md:h-5 md:w-5" />
-                <h3 className="font-semibold text-sm md:text-base">Kommentarer</h3>
+            <div className="space-y-1.5 md:space-y-3">
+              <div className="flex items-center gap-1 md:gap-2">
+                <MessageSquare className="h-3 w-3 md:h-5 md:w-5" />
+                <h3 className="font-semibold text-xs md:text-base">Kommentarer</h3>
               </div>
 
               {/* Kommentarsfält eller informationstext */}
               {isOwnProfile ? (
-                <div className="bg-white/5 p-2 md:p-2.5 rounded-lg">
-                  <p className="text-[10px] md:text-xs text-white text-center">
+                <div className="bg-white/5 p-1.5 md:p-2.5 rounded-lg">
+                  <p className="text-[9px] md:text-xs text-white text-center leading-tight">
                     Här lämnar jobbsökaren en kommentar vad de vill samt betyg
                   </p>
                 </div>
               ) : (
-                <div className="bg-white/5 p-2.5 md:p-3 rounded-lg space-y-2 md:space-y-2.5">
+                <div className="bg-white/5 p-2 md:p-3 rounded-lg space-y-1.5 md:space-y-2.5">
                   <div>
-                    <label className="text-xs md:text-sm font-medium mb-1.5 block text-white">Betyg</label>
-                    <div className="flex gap-1.5">
+                    <label className="text-[10px] md:text-sm font-medium mb-1 block text-white">Betyg</label>
+                    <div className="flex gap-1">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
                           key={star}
@@ -425,7 +425,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                           className="transition-colors touch-manipulation"
                         >
                           <Star
-                            className={`h-5 w-5 md:h-6 md:w-6 ${
+                            className={`h-4 w-4 md:h-6 md:w-6 ${
                               star <= newRating
                                 ? "fill-yellow-400 text-yellow-400"
                                 : "text-muted-foreground"
@@ -437,24 +437,24 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                   </div>
 
                   <div>
-                    <label className="text-xs md:text-sm font-medium mb-1.5 block text-white">Din kommentar</label>
+                    <label className="text-[10px] md:text-sm font-medium mb-1 block text-white">Din kommentar</label>
                     <Textarea
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       placeholder=""
-                      className="min-h-[80px] md:min-h-[100px] text-xs md:text-sm touch-manipulation"
+                      className="min-h-[60px] md:min-h-[100px] text-[10px] md:text-sm touch-manipulation"
                     />
                   </div>
 
-                  <div className="flex items-center gap-1.5 md:gap-2">
+                  <div className="flex items-center gap-1 md:gap-2">
                     <input
                       type="checkbox"
                       id="anonymous"
                       checked={isAnonymous}
                       onChange={(e) => setIsAnonymous(e.target.checked)}
-                      className="rounded h-4 w-4 touch-manipulation"
+                      className="rounded h-3 w-3 md:h-4 md:w-4 touch-manipulation"
                     />
-                    <label htmlFor="anonymous" className="text-xs md:text-sm text-white">
+                    <label htmlFor="anonymous" className="text-[10px] md:text-sm text-white">
                       Publicera anonymt
                     </label>
                   </div>
@@ -462,46 +462,46 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                   <Button 
                     onClick={handleSubmitReview} 
                     disabled={submitting}
-                    className="w-full h-11 md:h-10 text-xs md:text-sm touch-manipulation"
+                    className="w-full h-9 md:h-10 text-[10px] md:text-sm touch-manipulation"
                   >
-                    <Send className="h-4 w-4 mr-2" />
+                    <Send className="h-3 w-3 md:h-4 md:w-4 mr-1.5" />
                     {submitting ? "Skickar..." : "Skicka kommentar"}
                   </Button>
                 </div>
               )}
 
               {/* Lista med kommentarer */}
-              <div className="space-y-2 md:space-y-3 mt-3 md:mt-4">
+              <div className="space-y-1.5 md:space-y-3 mt-2 md:mt-4">
                 {reviews.length === 0 ? (
-                  <p className="text-center text-white/70 py-4 md:py-6 text-xs md:text-sm">
+                  <p className="text-center text-white/70 py-3 md:py-6 text-[10px] md:text-sm">
                     Inga kommentarer än. Var först med att dela dina erfarenheter!
                   </p>
                 ) : (
                   reviews.map((review) => (
-                    <div key={review.id} className="border border-white/10 rounded-lg p-2.5 md:p-3 space-y-1.5 md:space-y-2">
+                    <div key={review.id} className="border border-white/10 rounded-lg p-2 md:p-3 space-y-1 md:space-y-2">
                       <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-2 md:gap-2.5">
-                          <Avatar className="h-8 w-8 md:h-9 md:w-9">
-                            <AvatarFallback className="text-xs md:text-sm">
+                        <div className="flex items-center gap-1.5 md:gap-2.5">
+                          <Avatar className="h-6 w-6 md:h-9 md:w-9">
+                            <AvatarFallback className="text-[10px] md:text-sm">
                               {review.is_anonymous
                                 ? "A"
                                 : review.profiles?.first_name?.[0] || "U"}
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-medium text-xs md:text-sm text-white">
+                            <p className="font-medium text-[10px] md:text-sm text-white">
                               {review.is_anonymous
                                 ? "Anonym"
                                 : `${review.profiles?.first_name || ""} ${
                                     review.profiles?.last_name?.[0] || ""
                                   }.`}
                             </p>
-                            <div className="flex items-center gap-1.5 md:gap-2">
+                            <div className="flex items-center gap-1 md:gap-2">
                               <div className="flex">
                                 {[...Array(5)].map((_, i) => (
                                   <Star
                                     key={i}
-                                    className={`h-3 w-3 md:h-3.5 md:w-3.5 ${
+                                    className={`h-2.5 w-2.5 md:h-3.5 md:w-3.5 ${
                                       i < (review.rating || 0)
                                         ? "fill-yellow-400 text-yellow-400"
                                         : "text-muted-foreground"
@@ -509,14 +509,14 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                                   />
                                 ))}
                               </div>
-                              <span className="text-[10px] md:text-xs text-white/60">
+                              <span className="text-[9px] md:text-xs text-white/60">
                                 {new Date(review.created_at).toLocaleDateString("sv-SE")}
                               </span>
                             </div>
                           </div>
                         </div>
                       </div>
-                      <p className="text-xs md:text-sm text-white/80 mt-1.5">{review.comment}</p>
+                      <p className="text-[10px] md:text-sm text-white/80 mt-1 leading-tight md:leading-normal">{review.comment}</p>
                     </div>
                   ))
                 )}
