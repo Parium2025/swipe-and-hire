@@ -32,7 +32,7 @@ const RouterAwareBackground = () => {
   const isAuthRoute = location.pathname.startsWith('/auth');
   const isDesktop = device === 'desktop';
   return isAuthRoute && isDesktop ? (
-    <AnimatedBackground hideRightBubbles disableDesktopShift />
+    <AnimatedBackground disableDesktopShift />
   ) : (
     <AnimatedBackground />
   );
