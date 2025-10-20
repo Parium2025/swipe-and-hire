@@ -366,6 +366,163 @@ const EmployerProfile = () => {
               </div>
             </div>
 
+            {/* Social Media Links Section */}
+            <div className="border-t border-white/10 pt-5 space-y-4">
+              <div>
+                <h4 className="text-base font-semibold text-white mb-1">Sociala medier</h4>
+                <p className="text-sm text-white">Lägg till dina sociala medier-profiler</p>
+              </div>
+
+              {/* Existing social media links */}
+              {formData.social_media_links.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-sm text-white">Dina sociala medier</Label>
+                  {formData.social_media_links.map((link, index) => {
+                    const Icon = getPlatformIcon(link.platform);
+                    return (
+                      <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-2 gap-2">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <Icon className="h-4 w-4 text-white flex-shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <div className="text-white text-sm font-medium">{getPlatformLabel(link.platform)}</div>
+                            <a 
+                              href={link.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1 break-all max-w-full"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <span className="truncate max-w-xs sm:max-w-sm md:max-w-md">
+                                {link.url}
+                              </span>
+                              <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                            </a>
+                          </div>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeSocialLink(index);
+                          }}
+                          className="bg-red-500/20 border-red-400/40 text-red-300 hover:bg-red-500/30 flex-shrink-0"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Add new social media link */}
+              <div className="space-y-4 md:space-y-3">
+                <Label className="text-sm text-white">Lägg till ny länk</Label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-3">
+                  <DropdownMenu modal={false} open={platformMenuOpen} onOpenChange={setPlatformMenuOpen}>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full bg-white/5 border-white/10 text-white text-sm h-9 hover:bg-white/10 transition-colors justify-between text-left"
+                      >
+                        <span className="truncate text-left flex-1 px-1 text-sm">
+                          {newSocialLink.platform ? SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label : 'Välj plattform'}
+                        </span>
+                        <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent 
+                      className="w-80 bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden"
+                      side="top"
+                      align="center"
+                      alignOffset={0}
+                      sideOffset={8}
+                      avoidCollisions={false}
+                      onCloseAutoFocus={(e) => e.preventDefault()}
+                    >
+                      {/* Platform options */}
+                      <div className="p-2">
+                        {SOCIAL_PLATFORMS.map((platform) => {
+                          const isDisabled = formData.social_media_links.some(link => link.platform === platform.value);
+                          return (
+                            <DropdownMenuItem
+                              key={platform.value}
+                              onSelect={(e) => e.preventDefault()}
+                              className={`cursor-pointer hover:bg-white/10 active:bg-white/15 transition-colors px-3 py-2 focus:bg-white/10 rounded-md ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                              onClick={() => {
+                                if (!isDisabled) {
+                                  setNewSocialLink({...newSocialLink, platform: platform.value as SocialMediaLink['platform']});
+                                  setPlatformMenuOpen(false);
+                                }
+                              }}
+                              disabled={isDisabled}
+                            >
+                              <div className="flex items-center gap-2 w-full">
+                                <platform.icon className="h-4 w-4 flex-shrink-0" />
+                                <span className="text-white text-sm">
+                                  {platform.label} {isDisabled && '(redan tillagd)'}
+                                </span>
+                              </div>
+                            </DropdownMenuItem>
+                          );
+                        })}
+                      </div>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  <Input
+                    value={newSocialLink.url}
+                    onChange={(e) => setNewSocialLink({...newSocialLink, url: e.target.value})}
+                    placeholder={
+                      newSocialLink.platform === 'linkedin' ? 'https://linkedin.com/in/dittnamn' :
+                      newSocialLink.platform === 'twitter' ? 'https://twitter.com/dittnamn' :
+                      newSocialLink.platform === 'instagram' ? 'https://instagram.com/dittnamn' :
+                      'https://din-webbsida.se'
+                    }
+                    className="bg-white/5 border-white/10 text-white text-sm h-9 placeholder:text-white/40 md:col-span-1"
+                  />
+
+                  <Button
+                    type="button"
+                    onClick={addSocialLink}
+                    disabled={!newSocialLink.platform || !newSocialLink.url.trim()}
+                    className={cn(
+                      "bg-primary/80 hover:bg-primary text-white h-9 text-sm",
+                      newSocialLink.platform && newSocialLink.url.trim() && "border border-white/30"
+                    )}
+                  >
+                    <Plus className="h-3 w-3 mr-1.5" />
+                    Lägg till
+                  </Button>
+                </div>
+              </div>
+
+              {/* Display social media links if any exist */}
+              {formData.social_media_links.length > 0 && (
+                <div className="border-t border-white/10 pt-4 md:pt-3">
+                  <Label className="text-sm text-white mb-2 block">Förhandsvisning</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {formData.social_media_links.map((link, index) => {
+                      const Icon = getPlatformIcon(link.platform);
+                      return (
+                        <Button
+                          key={index}
+                          variant="outline"
+                          onClick={() => window.open(link.url, '_blank')}
+                          className="bg-white/5 border-white/10 text-white text-xs h-8 hover:bg-white/10 transition-colors"
+                        >
+                          <Icon className="h-3 w-3 mr-1.5" />
+                          {getPlatformLabel(link.platform)}
+                          <ExternalLink className="h-2.5 w-2.5 ml-1.5" />
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="flex justify-center pt-1">
               <Button 
                 type="submit"
@@ -383,164 +540,6 @@ const EmployerProfile = () => {
               </Button>
             </div>
           </form>
-        </div>
-      </div>
-
-      {/* Social Media Links Section */}
-      <div className="bg-white/5 border border-white/10 rounded-lg">
-        <div className="px-6 py-4 md:px-4 md:py-3 border-b border-white/10">
-          <h3 className="text-lg font-semibold text-white">Sociala medier</h3>
-          <p className="text-sm text-white">Lägg till dina sociala medier-profiler</p>
-        </div>
-        <div className="p-6 md:p-4 space-y-5 md:space-y-3">
-          {/* Existing social media links */}
-          {formData.social_media_links.length > 0 && (
-            <div className="space-y-2">
-              <Label className="text-sm text-white">Dina sociala medier</Label>
-              {formData.social_media_links.map((link, index) => {
-                const Icon = getPlatformIcon(link.platform);
-                return (
-                  <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-2 gap-2">
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <Icon className="h-4 w-4 text-white flex-shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <div className="text-white text-sm font-medium">{getPlatformLabel(link.platform)}</div>
-                        <a 
-                          href={link.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1 break-all max-w-full"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <span className="truncate max-w-xs sm:max-w-sm md:max-w-md">
-                            {link.url}
-                          </span>
-                          <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                        </a>
-                      </div>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeSocialLink(index);
-                      }}
-                      className="bg-red-500/20 border-red-400/40 text-red-300 hover:bg-red-500/30 flex-shrink-0"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Add new social media link */}
-          <div className="space-y-4 md:space-y-3">
-            <Label className="text-sm text-white">Lägg till ny länk</Label>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-3">
-              <DropdownMenu modal={false} open={platformMenuOpen} onOpenChange={setPlatformMenuOpen}>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full bg-white/5 border-white/10 text-white text-sm h-9 hover:bg-white/10 transition-colors justify-between text-left"
-                  >
-                    <span className="truncate text-left flex-1 px-1 text-sm">
-                      {newSocialLink.platform ? SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label : 'Välj plattform'}
-                    </span>
-                    <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent 
-                  className="w-80 bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden"
-                  side="top"
-                  align="center"
-                  alignOffset={0}
-                  sideOffset={8}
-                  avoidCollisions={false}
-                  onCloseAutoFocus={(e) => e.preventDefault()}
-                >
-                  {/* Platform options */}
-                  <div className="p-2">
-                    {SOCIAL_PLATFORMS.map((platform) => {
-                      const isDisabled = formData.social_media_links.some(link => link.platform === platform.value);
-                      return (
-                        <DropdownMenuItem
-                          key={platform.value}
-                          onSelect={(e) => e.preventDefault()}
-                          className={`cursor-pointer hover:bg-white/10 active:bg-white/15 transition-colors px-3 py-2 focus:bg-white/10 rounded-md ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                          onClick={() => {
-                            if (!isDisabled) {
-                              setNewSocialLink({...newSocialLink, platform: platform.value as SocialMediaLink['platform']});
-                              setPlatformMenuOpen(false);
-                            }
-                          }}
-                          disabled={isDisabled}
-                        >
-                          <div className="flex items-center gap-2 w-full">
-                            <platform.icon className="h-4 w-4 flex-shrink-0" />
-                            <span className="text-white text-sm">
-                              {platform.label} {isDisabled && '(redan tillagd)'}
-                            </span>
-                          </div>
-                        </DropdownMenuItem>
-                      );
-                    })}
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <Input
-                value={newSocialLink.url}
-                onChange={(e) => setNewSocialLink({...newSocialLink, url: e.target.value})}
-                placeholder={
-                  newSocialLink.platform === 'linkedin' ? 'https://linkedin.com/in/dittnamn' :
-                  newSocialLink.platform === 'twitter' ? 'https://twitter.com/dittnamn' :
-                  newSocialLink.platform === 'instagram' ? 'https://instagram.com/dittnamn' :
-                  'https://din-webbsida.se'
-                }
-                className="bg-white/5 border-white/10 text-white text-sm h-9 placeholder:text-white/40 md:col-span-1"
-              />
-
-              <Button
-                type="button"
-                onClick={addSocialLink}
-                disabled={!newSocialLink.platform || !newSocialLink.url.trim()}
-                className={cn(
-                  "bg-primary/80 hover:bg-primary text-white h-9 text-sm",
-                  newSocialLink.platform && newSocialLink.url.trim() && "border border-white/30"
-                )}
-              >
-                <Plus className="h-3 w-3 mr-1.5" />
-                Lägg till
-              </Button>
-            </div>
-          </div>
-
-          {/* Display social media links if any exist */}
-          {formData.social_media_links.length > 0 && (
-            <div className="border-t border-white/10 pt-4 md:pt-3">
-              <Label className="text-sm text-white mb-2 block">Förhandsvisning</Label>
-              <div className="flex flex-wrap gap-2">
-                {formData.social_media_links.map((link, index) => {
-                  const Icon = getPlatformIcon(link.platform);
-                  return (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      onClick={() => window.open(link.url, '_blank')}
-                      className="bg-white/5 border-white/10 text-white text-xs h-8 hover:bg-white/10 transition-colors"
-                    >
-                      <Icon className="h-3 w-3 mr-1.5" />
-                      {getPlatformLabel(link.platform)}
-                      <ExternalLink className="h-2.5 w-2.5 ml-1.5" />
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
