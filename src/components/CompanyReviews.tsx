@@ -268,7 +268,7 @@ const CompanyReviews = () => {
               <h2 className="text-xl font-semibold text-white">{company.company_name}</h2>
               <div className="flex items-center gap-2 mt-0.5">
                 <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                <span className="text-xs text-white">
+                <span className="text-sm text-white">
                   {averageRating} ({reviews.length} {reviews.length === 1 ? 'recension' : 'recensioner'})
                 </span>
               </div>
@@ -295,12 +295,12 @@ const CompanyReviews = () => {
               <div className="flex items-center gap-2.5">
                 <Globe className="h-4 w-4 text-white flex-shrink-0" />
                 <div>
-                  <p className="text-xs font-medium text-white">Webbplats</p>
+                  <p className="text-sm font-medium text-white">Webbplats</p>
                   <a 
                     href={company.website.startsWith('http') ? company.website : `https://${company.website}`} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-xs text-white hover:underline"
+                    className="text-sm text-white hover:underline"
                   >
                     {company.website}
                   </a>
@@ -312,8 +312,8 @@ const CompanyReviews = () => {
               <div className="flex items-center gap-2.5">
                 <Briefcase className="h-4 w-4 text-white flex-shrink-0" />
                 <div>
-                  <p className="text-xs font-medium text-white">Bransch</p>
-                  <p className="text-xs text-white">{company.industry}</p>
+                  <p className="text-sm font-medium text-white">Bransch</p>
+                  <p className="text-sm text-white">{company.industry}</p>
                 </div>
               </div>
             )}
@@ -322,8 +322,8 @@ const CompanyReviews = () => {
               <div className="flex items-center gap-2.5">
                 <Users className="h-4 w-4 text-white flex-shrink-0" />
                 <div>
-                  <p className="text-xs font-medium text-white">Företagsstorlek</p>
-                  <p className="text-xs text-white">{company.employee_count}</p>
+                  <p className="text-sm font-medium text-white">Företagsstorlek</p>
+                  <p className="text-sm text-white">{company.employee_count}</p>
                 </div>
               </div>
             )}
@@ -332,8 +332,8 @@ const CompanyReviews = () => {
               <div className="flex items-center gap-2.5">
                 <MapPin className="h-4 w-4 text-white flex-shrink-0" />
                 <div>
-                  <p className="text-xs font-medium text-white">Huvudkontor</p>
-                  <p className="text-xs text-white">{company.address}</p>
+                  <p className="text-sm font-medium text-white">Huvudkontor</p>
+                  <p className="text-sm text-white">{company.address}</p>
                 </div>
               </div>
             )}
@@ -351,7 +351,7 @@ const CompanyReviews = () => {
 
           {/* Informationstext för arbetsgivare */}
           <div className="bg-white/5 p-3 rounded-lg">
-            <p className="text-xs text-white text-center">
+            <p className="text-sm text-white text-center">
               (Här lämnar jobbsökarna kommentarer om de vill samt betyg)
             </p>
           </div>
@@ -368,7 +368,7 @@ const CompanyReviews = () => {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2.5">
                       <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-white/20 text-white text-xs">
+                        <AvatarFallback className="bg-white/20 text-white text-sm">
                           {review.is_anonymous
                             ? "A"
                             : review.profiles?.first_name?.[0] || "U"}
@@ -384,14 +384,14 @@ const CompanyReviews = () => {
                         </p>
                         <div className="flex items-center gap-2">
                           {renderStars(review.rating)}
-                          <span className="text-xs text-white/70">
+                          <span className="text-sm text-white/70">
                             {new Date(review.created_at).toLocaleDateString("sv-SE")}
                           </span>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <p className="text-xs text-white mt-2">{review.comment}</p>
+                  <p className="text-sm text-white mt-2">{review.comment}</p>
                 </div>
               ))
             )}
