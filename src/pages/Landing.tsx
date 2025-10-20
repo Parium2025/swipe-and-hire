@@ -1,29 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import LandingNav from '@/components/LandingNav';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Button } from '@/components/ui/button';
-import { Zap, Video, Heart, ArrowRight, Sparkles } from 'lucide-react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { Zap, Video, Heart } from 'lucide-react';
+import { motion } from 'framer-motion';
 const HERO_URL = '/assets/hero-woman-left-hand-verified.jpg';
 
 const Landing = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const { scrollY } = useScroll();
-  const heroY = useTransform(scrollY, [0, 500], [0, 150]);
-  const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
-
-  // Track mouse position for subtle interactive effects
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
 
   // Redirect authenticated users
   useEffect(() => {
@@ -74,121 +61,73 @@ const Landing = () => {
       <LandingNav onLoginClick={handleLogin} />
       
       {/* Hero Section */}
-      <section className="relative pt-24 sm:pt-28 md:pt-32 pb-16 sm:pb-20 px-4 sm:px-6 md:px-12 lg:px-24 min-h-screen flex items-center overflow-hidden">
-        {/* Background Image with Parallax */}
-        <motion.img
+      <section className="relative pt-24 sm:pt-28 md:pt-32 pb-16 sm:pb-20 px-4 sm:px-6 md:px-12 lg:px-24 min-h-screen flex items-center">
+        {/* Background Image */}
+        <img
           src={HERO_URL}
           alt="Parium hero – kvinna håller telefonen i vänster hand"
           className="absolute inset-0 w-full h-full object-cover object-center md:object-[60%_center] lg:object-[45%_center] will-change-transform select-none"
           loading="eager"
           decoding="sync"
           fetchPriority="high"
-          style={{ 
-            backfaceVisibility: 'hidden', 
-            y: heroY,
-            scale: 1.1
-          }}
+          style={{ backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}
         />
-        {/* Enhanced Overlay with Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/85 via-primary/45 to-transparent md:from-primary/75 md:via-primary/25" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-primary/20" />
+        {/* Overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/80 via-primary/40 to-transparent md:from-primary/70 md:via-primary/20" />
         
-        {/* Ambient Light Effect */}
-        <motion.div 
-          className="absolute w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none hidden md:block"
-          style={{
-            background: 'radial-gradient(circle, hsl(var(--secondary)) 0%, transparent 70%)',
-            left: mousePosition.x - 192,
-            top: mousePosition.y - 192,
-          }}
-        />
-        
-        <motion.div 
-          className="max-w-7xl mx-auto relative z-10 w-full"
-          style={{ opacity: heroOpacity }}
-        >
+        <div className="max-w-7xl mx-auto relative z-10 w-full">
           <div className="flex flex-col items-start text-left max-w-2xl">
             {/* Hero Content */}
-            <motion.div 
-              className="space-y-4 sm:space-y-6 md:space-y-8 mb-6 sm:mb-8 md:mb-12"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-            >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/10 border border-secondary/20 backdrop-blur-sm mb-4">
-                <Sparkles className="w-4 h-4 text-secondary animate-pulse" />
-                <span className="text-xs sm:text-sm font-medium text-secondary">Framtidens rekryteringsplattform</span>
-              </div>
-              
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-secondary/90">
+            <div className="space-y-4 sm:space-y-6 md:space-y-8 animate-fade-in mb-6 sm:mb-8 md:mb-12">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
                 Verktyget som matchar på riktigt
               </h1>
               
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 leading-relaxed">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white leading-relaxed">
                 Vi förändrar hur människor och företag hittar varandra. Framtiden börjar med ett swipe.
               </p>
-            </motion.div>
+            </div>
 
             {/* Two Main CTAs */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full max-w-xl">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.6 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
                 onClick={() => navigate('/auth', { state: { mode: 'register', role: 'job_seeker' } })}
-                whileHover={{ scale: 1.03, y: -4 }}
-                whileTap={{ scale: 0.98 }}
-                className="relative bg-white/5 backdrop-blur-md border border-white/20 text-white p-4 sm:p-5 rounded-xl cursor-pointer hover:shadow-2xl transition-all duration-500 group min-h-[80px] sm:min-h-[90px] overflow-hidden"
+                className="bg-white/10 backdrop-blur-sm border border-white/20 text-white p-4 sm:p-5 rounded-lg cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105 group min-h-[80px] sm:min-h-[90px]"
               >
-                {/* Gradient Border Effect */}
-                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-secondary/20 via-primary-glow/20 to-secondary/20 blur-xl" />
-                
-                {/* Shimmer Effect */}
-                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                      Jag söker jobb
-                    </h3>
-                    <ArrowRight className="w-5 h-5 transform group-hover:translate-x-2 transition-transform text-secondary" />
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-base sm:text-lg font-bold text-white">Jag söker jobb</h3>
+                  <div className="transform group-hover:translate-x-2 transition-transform text-white">
+                    →
                   </div>
-                  <p className="text-white/80 text-xs sm:text-sm">
-                    Hitta ditt drömjobb snabbt och enkelt. Swipea dig till rätt match.
-                  </p>
                 </div>
+                <p className="text-white text-xs sm:text-sm">
+                  Hitta ditt drömjobb snabbt och enkelt. Swipea dig till rätt match.
+                </p>
               </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.6 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
                 onClick={() => navigate('/auth', { state: { mode: 'register', role: 'employer' } })}
-                whileHover={{ scale: 1.03, y: -4 }}
-                whileTap={{ scale: 0.98 }}
-                className="relative bg-white/5 backdrop-blur-md border border-white/20 text-white p-4 sm:p-5 rounded-xl cursor-pointer hover:shadow-2xl transition-all duration-500 group min-h-[80px] sm:min-h-[90px] overflow-hidden"
+                className="bg-white/10 backdrop-blur-sm border border-white/20 text-white p-4 sm:p-5 rounded-lg cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-105 group min-h-[80px] sm:min-h-[90px]"
               >
-                {/* Gradient Border Effect */}
-                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-secondary/20 via-primary-glow/20 to-secondary/20 blur-xl" />
-                
-                {/* Shimmer Effect */}
-                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                      Jag söker personal
-                    </h3>
-                    <ArrowRight className="w-5 h-5 transform group-hover:translate-x-2 transition-transform text-secondary" />
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-base sm:text-lg font-bold text-white">Jag söker personal</h3>
+                  <div className="transform group-hover:translate-x-2 transition-transform text-white">
+                    →
                   </div>
-                  <p className="text-white/80 text-xs sm:text-sm">
-                    Hitta rätt kandidater effektivt. Swipea dig till perfekta medarbetare.
-                  </p>
                 </div>
+                <p className="text-white text-xs sm:text-sm">
+                  Hitta rätt kandidater effektivt. Swipea dig till perfekta medarbetare.
+                </p>
               </motion.div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* Features Section */}
@@ -214,50 +153,32 @@ const Landing = () => {
               return (
                 <motion.div
                   key={feature.title}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
-                  transition={{ 
-                    delay: index * 0.15, 
-                    duration: 0.6,
-                    ease: "easeOut"
-                  }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
                   whileHover={{ 
                     scale: 1.05,
                     rotateY: 5,
-                    z: 50,
-                    transition: { duration: 0.3 }
+                    transition: { duration: 0.2 }
                   }}
-                  className="relative bg-white/5 backdrop-blur-md rounded-2xl p-6 sm:p-8 border border-white/10 hover:border-secondary/40 transition-all duration-500 group overflow-hidden"
+                  className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-white/10 hover:bg-white/10 hover:border-secondary/30 transition-all duration-300 group"
                   style={{ transformStyle: 'preserve-3d' }}
                 >
-                  {/* Animated Gradient Border */}
-                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                    <div className="absolute inset-0 bg-gradient-to-r from-secondary/0 via-secondary/30 to-primary-glow/30 blur-xl animate-pulse" />
-                  </div>
-                  
-                  {/* Shine Effect */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-                    <div className="absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white/10 group-hover:animate-shine" />
-                  </div>
-                  
-                  <div className="relative z-10">
-                    <div className="mb-4 sm:mb-6">
-                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-secondary/30 to-primary-glow/20 flex items-center justify-center group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 relative">
-                        <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-secondary relative z-10" />
-                        <div className="absolute inset-0 bg-secondary/30 rounded-xl blur-xl group-hover:blur-2xl transition-all duration-300" />
-                        <div className="absolute inset-0 bg-secondary/20 rounded-xl blur-2xl opacity-0 group-hover:opacity-100 animate-pulse transition-all duration-300" />
-                      </div>
+                  <div className="mb-4 sm:mb-6">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-secondary/20 flex items-center justify-center group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 relative">
+                      <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-secondary animate-pulse" />
+                      <div className="absolute inset-0 bg-secondary/20 rounded-xl blur-xl group-hover:blur-2xl transition-all duration-300" />
                     </div>
-                    
-                    <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 group-hover:text-secondary transition-colors duration-300 bg-clip-text">
-                      {feature.title}
-                    </h3>
-                    
-                    <p className="text-white/70 group-hover:text-white/90 leading-relaxed text-sm sm:text-base transition-colors duration-300">
-                      {feature.description}
-                    </p>
                   </div>
+                  
+                  <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 group-hover:text-secondary transition-colors duration-300">
+                    {feature.title}
+                  </h3>
+                  
+                  <p className="text-white/70 leading-relaxed text-sm sm:text-base">
+                    {feature.description}
+                  </p>
                 </motion.div>
               );
             })}

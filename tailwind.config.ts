@@ -136,23 +136,14 @@ export default {
 						transform: 'translateY(-15%)',
 						animationTimingFunction: 'cubic-bezier(0, 0, 0.2, 1)'
 					}
-				},
-				'shine': {
-					'0%': {
-						left: '-100%'
-					},
-					'100%': {
-						left: '200%'
-					}
 				}
 			},
-			animation: {
+				animation: {
 					'accordion-down': 'accordion-down 0.2s ease-out',
 					'accordion-up': 'accordion-up 0.2s ease-out',
 					'fade-in': 'fade-in 0.3s ease-out',
 					'scale-in': 'scale-in 0.3s ease-out',
 					'gradient': 'gradient 15s ease infinite',
-					'shine': 'shine 2s ease-in-out',
 					// Override default Tailwind bounce globally to our soft bounce
 					'bounce': 'soft-bounce 2s ease-in-out infinite',
 					'soft-bounce': 'soft-bounce 2s ease-in-out infinite'
