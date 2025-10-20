@@ -25,7 +25,7 @@ import { AnimatedBackground } from "@/components/AnimatedBackground";
 
 const queryClient = new QueryClient();
 
-// Background that adapts to route and device; must live inside Router
+// Background that adapts to route and device; must live inside Router  
 const RouterAwareBackground = () => {
   const location = useLocation();
   const device = useDevice();
