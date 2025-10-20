@@ -126,7 +126,7 @@ const EmployerDashboard = memo(() => {
       <div className="flex justify-between items-center">
         <div className="flex-1"></div>
         <div className="text-center flex-1">
-          <h1 className="text-xl md:text-2xl font-bold text-white">Mina jobbannonser</h1>
+          <h1 className="text-xl font-bold text-white">Mina jobbannonser</h1>
         </div>
         <div className="flex-1 flex justify-end">
           {/* Spacer to match "Skapa ny annons"-knappens radhöjd på Dashboard */}
@@ -135,50 +135,50 @@ const EmployerDashboard = memo(() => {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
         <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-3 md:p-4">
-            <Briefcase className="h-4 w-4 md:h-5 md:w-5 text-white" />
-            <CardTitle className="text-xs md:text-sm font-medium text-white">Totalt annonser</CardTitle>
+          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-3">
+            <Briefcase className="h-4 w-4 text-white" />
+            <CardTitle className="text-xs font-medium text-white">Totalt annonser</CardTitle>
           </CardHeader>
-          <CardContent className="px-3 pb-3 md:px-4 md:pb-4">
-            <div className="text-xl md:text-2xl font-bold text-white transition-all duration-300">
+          <CardContent className="px-3 pb-3">
+            <div className="text-xl font-bold text-white transition-all duration-300">
               {loading ? '...' : jobs.length}
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-3 md:p-4">
-            <TrendingUp className="h-4 w-4 md:h-5 md:w-5 text-white" />
-            <CardTitle className="text-xs md:text-sm font-medium text-white">Aktiva annonser</CardTitle>
+          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-3">
+            <TrendingUp className="h-4 w-4 text-white" />
+            <CardTitle className="text-xs font-medium text-white">Aktiva annonser</CardTitle>
           </CardHeader>
-          <CardContent className="px-3 pb-3 md:px-4 md:pb-4">
-            <div className="text-xl md:text-2xl font-bold text-white transition-all duration-300">
+          <CardContent className="px-3 pb-3">
+            <div className="text-xl font-bold text-white transition-all duration-300">
               {loading ? '...' : jobs.filter(job => job.is_active).length}
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-3 md:p-4">
-            <Eye className="h-4 w-4 md:h-5 md:w-5 text-white" />
-            <CardTitle className="text-xs md:text-sm font-medium text-white">Totala visningar</CardTitle>
+          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-3">
+            <Eye className="h-4 w-4 text-white" />
+            <CardTitle className="text-xs font-medium text-white">Totala visningar</CardTitle>
           </CardHeader>
-          <CardContent className="px-3 pb-3 md:px-4 md:pb-4">
-            <div className="text-xl md:text-2xl font-bold text-white transition-all duration-300">
+          <CardContent className="px-3 pb-3">
+            <div className="text-xl font-bold text-white transition-all duration-300">
               {loading ? '...' : jobs.reduce((sum, job) => sum + job.views_count, 0)}
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-3 md:p-4">
-            <Users className="h-4 w-4 md:h-5 md:w-5 text-white" />
-            <CardTitle className="text-xs md:text-sm font-medium text-white">Ansökningar</CardTitle>
+          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-3">
+            <Users className="h-4 w-4 text-white" />
+            <CardTitle className="text-xs font-medium text-white">Ansökningar</CardTitle>
           </CardHeader>
-          <CardContent className="px-3 pb-3 md:px-4 md:pb-4">
-            <div className="text-xl md:text-2xl font-bold text-white transition-all duration-300">
+          <CardContent className="px-3 pb-3">
+            <div className="text-xl font-bold text-white transition-all duration-300">
               {loading ? '...' : jobs.reduce((sum, job) => sum + job.applications_count, 0)}
             </div>
           </CardContent>
@@ -187,36 +187,36 @@ const EmployerDashboard = memo(() => {
 
       {/* Jobs Table */}
       <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-        <CardHeader className="px-3 py-2 md:px-4 md:py-3">
-          <CardTitle className="text-sm md:text-base text-white">
+        <CardHeader className="px-3 py-2">
+          <CardTitle className="text-sm text-white">
             Mina jobbannonser
           </CardTitle>
         </CardHeader>
-        <CardContent className="px-2 pb-2 md:px-3 md:pb-3">
+        <CardContent className="px-2 pb-2">
           <div className="overflow-x-auto -mx-2">
             <Table>
               <TableHeader>
                 <TableRow className="border-white/20 hover:bg-white/5">
-                  <TableHead className="text-white font-semibold text-xs md:text-sm px-2 md:px-3">Titel</TableHead>
-                  <TableHead className="text-white font-semibold text-xs md:text-sm px-2 md:px-3">Status</TableHead>
-                  <TableHead className="text-white font-semibold text-xs md:text-sm text-center px-2 md:px-3">Visningar</TableHead>
-                  <TableHead className="text-white font-semibold text-xs md:text-sm text-center px-2 md:px-3">Ansökningar</TableHead>
-                  <TableHead className="text-white font-semibold text-xs md:text-sm px-2 md:px-3">Plats</TableHead>
-                  <TableHead className="text-white font-semibold text-xs md:text-sm px-2 md:px-3">Rekryterare</TableHead>
-                  <TableHead className="text-white font-semibold text-xs md:text-sm px-2 md:px-3">Skapad</TableHead>
-                  <TableHead className="text-white font-semibold text-xs md:text-sm px-2 md:px-3">Åtgärder</TableHead>
+                  <TableHead className="text-white font-semibold text-xs px-2">Titel</TableHead>
+                  <TableHead className="text-white font-semibold text-xs px-2">Status</TableHead>
+                  <TableHead className="text-white font-semibold text-xs text-center px-2">Visningar</TableHead>
+                  <TableHead className="text-white font-semibold text-xs text-center px-2">Ansökningar</TableHead>
+                  <TableHead className="text-white font-semibold text-xs px-2">Plats</TableHead>
+                  <TableHead className="text-white font-semibold text-xs px-2">Rekryterare</TableHead>
+                  <TableHead className="text-white font-semibold text-xs px-2">Skapad</TableHead>
+                  <TableHead className="text-white font-semibold text-xs px-2">Åtgärder</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center text-white/60 py-8 text-xs md:text-sm">
+                    <TableCell colSpan={8} className="text-center text-white/60 py-8 text-xs">
                       Laddar...
                     </TableCell>
                   </TableRow>
                 ) : jobs.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center !text-white py-8 font-medium text-xs md:text-sm">
+                    <TableCell colSpan={8} className="text-center !text-white py-8 font-medium text-xs">
                       Inga jobbannonser än. Skapa din första annons!
                     </TableCell>
                   </TableRow>
@@ -227,63 +227,63 @@ const EmployerDashboard = memo(() => {
                       className="border-white/10 hover:bg-white/5 cursor-pointer transition-colors"
                       onClick={() => navigate(`/job-details/${job.id}`)}
                     >
-                      <TableCell className="font-medium text-white px-2 md:px-3 py-2 md:py-3">
+                      <TableCell className="font-medium text-white px-2 py-2">
                         <div className="flex flex-col gap-1">
-                          <span className="text-xs md:text-sm line-clamp-2">{job.title}</span>
+                          <span className="text-xs line-clamp-2">{job.title}</span>
                           {job.employment_type && (
-                            <Badge variant="outline" className="w-fit text-[10px] md:text-xs bg-white/5 text-white border-white/20">
+                            <Badge variant="outline" className="w-fit text-[10px] bg-white/5 text-white border-white/20">
                               {getEmploymentTypeLabel(job.employment_type)}
                             </Badge>
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="px-2 md:px-3 py-2 md:py-3">
+                      <TableCell className="px-2 py-2">
                         <Badge
                           variant={job.is_active ? "default" : "secondary"}
-                          className={`text-xs md:text-sm whitespace-nowrap ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-gray-500/20 text-gray-300 border-gray-500/30"}`}
+                          className={`text-xs whitespace-nowrap ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-gray-500/20 text-gray-300 border-gray-500/30"}`}
                         >
                           {job.is_active ? 'Aktiv' : 'Inaktiv'}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-center px-2 md:px-3 py-2 md:py-3">
-                        <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-xs md:text-sm">
+                      <TableCell className="text-center px-2 py-2">
+                        <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-xs">
                           {job.views_count || 0}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-center px-2 md:px-3 py-2 md:py-3">
-                        <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs md:text-sm">
+                      <TableCell className="text-center px-2 py-2">
+                        <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs">
                           {job.applications_count || 0}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-white px-2 md:px-3 py-2 md:py-3">
-                        <div className="flex items-center gap-1 text-xs md:text-sm">
-                          <MapPin size={12} className="md:w-4 md:h-4" />
+                      <TableCell className="text-white px-2 py-2">
+                        <div className="flex items-center gap-1 text-xs">
+                          <MapPin size={12} />
                           <span className="truncate max-w-[120px]">{job.location}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-white px-2 md:px-3 py-2 md:py-3">
-                        <span className="text-xs md:text-sm truncate max-w-[150px] block">
+                      <TableCell className="text-white px-2 py-2">
+                        <span className="text-xs truncate max-w-[150px] block">
                           {job.employer_profile?.first_name && job.employer_profile?.last_name
                             ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
                             : '-'}
                         </span>
                       </TableCell>
-                      <TableCell className="text-white px-2 md:px-3 py-2 md:py-3">
-                        <div className="flex items-center gap-1 text-xs md:text-sm whitespace-nowrap">
-                          <Calendar size={12} className="md:w-4 md:h-4" />
+                      <TableCell className="text-white px-2 py-2">
+                        <div className="flex items-center gap-1 text-xs whitespace-nowrap">
+                          <Calendar size={12} />
                           {new Date(job.created_at).toLocaleDateString('sv-SE', { 
                             day: 'numeric', 
                             month: 'short' 
                           })}
                         </div>
                       </TableCell>
-                      <TableCell className="px-2 md:px-3 py-2 md:py-3">
+                      <TableCell className="px-2 py-2">
                         <div className="flex items-center gap-1">
                           <Switch
                             checked={job.is_active}
                             onCheckedChange={() => toggleJobStatus(job.id, job.is_active)}
                             onClick={(e) => e.stopPropagation()}
-                            className="scale-75 md:scale-90"
+                            className="scale-75"
                           />
                           <Button 
                             variant="outline" 
@@ -292,9 +292,9 @@ const EmployerDashboard = memo(() => {
                               e.stopPropagation();
                               handleEditJob(job);
                             }}
-                            className="h-7 px-2 md:h-8 md:px-3 bg-white/10 border-white/20 text-white hover:bg-white/20 text-[10px] md:text-xs"
+                            className="h-7 px-2 bg-white/10 border-white/20 text-white hover:bg-white/20 text-[10px]"
                           >
-                            <Edit size={12} className="md:w-4 md:h-4" />
+                            <Edit size={12} />
                           </Button>
                           <Button 
                             variant="outline" 
@@ -303,9 +303,9 @@ const EmployerDashboard = memo(() => {
                               e.stopPropagation();
                               handleDeleteClick(job);
                             }}
-                            className="h-7 px-2 md:h-8 md:px-3 bg-white/10 border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/40 text-[10px] md:text-xs"
+                            className="h-7 px-2 bg-white/10 border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/40 text-[10px]"
                           >
-                            <Trash2 size={12} className="md:w-4 md:h-4" />
+                            <Trash2 size={12} />
                           </Button>
                         </div>
                       </TableCell>
