@@ -21,6 +21,17 @@ export default {
 			fontFamily: {
 				'sans': ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
 			},
+			fontSize: {
+				'xs': ['0.75rem', { lineHeight: '1rem' }],      // 12px
+				'sm': ['0.875rem', { lineHeight: '1.25rem' }],  // 14px - NY BASE SIZE!
+				'base': ['0.875rem', { lineHeight: '1.5rem' }], // 14px - samma som sm
+				'lg': ['1rem', { lineHeight: '1.5rem' }],       // 16px
+				'xl': ['1.125rem', { lineHeight: '1.75rem' }],  // 18px
+				'2xl': ['1.25rem', { lineHeight: '1.75rem' }],  // 20px
+				'3xl': ['1.5rem', { lineHeight: '2rem' }],      // 24px
+				'4xl': ['1.875rem', { lineHeight: '2.25rem' }], // 30px
+				'5xl': ['2.25rem', { lineHeight: '2.5rem' }],   // 36px
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
