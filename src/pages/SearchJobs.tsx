@@ -1056,7 +1056,7 @@ const SearchJobs = () => {
       {/* Removed collapsible job categories section - now handled in dropdown above */}
 
       {/* Results Section */}
-      <div className="space-y-4" data-results>
+      <div className="space-y-4 max-w-4xl mx-auto" data-results>
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-flex items-center gap-2">
