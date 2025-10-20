@@ -296,17 +296,17 @@ const CompanyProfile = () => {
           <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-5 md:space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="company_name" className="text-sm text-white">Företagsnamn</Label>
+                <Label htmlFor="company_name" className="text-xs text-white">Företagsnamn</Label>
                 <Input
                   id="company_name"
                   value={formData.company_name}
                   onChange={(e) => setFormData({...formData, company_name: e.target.value})}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-xs"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="org_number" className="text-sm text-white">Organisationsnummer (frivillig)</Label>
+                <Label htmlFor="org_number" className="text-xs text-white">Organisationsnummer (frivillig)</Label>
                 <Input
                   id="org_number"
                   value={formData.org_number}
@@ -326,7 +326,7 @@ const CompanyProfile = () => {
                   placeholder="XXXXXX-XXXX"
                   inputMode="numeric"
                   maxLength={11}
-                  className={`bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm ${orgNumberError ? 'border-red-500/50' : ''}`}
+                  className={`bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-xs ${orgNumberError ? 'border-red-500/50' : ''}`}
                 />
                 {orgNumberError && (
                   <p className="text-red-400/80 text-xs mt-1">{orgNumberError}</p>
@@ -334,12 +334,12 @@ const CompanyProfile = () => {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="industry" className="text-sm text-white">Bransch</Label>
+                <Label htmlFor="industry" className="text-xs text-white">Bransch</Label>
                 <DropdownMenu modal={false} open={industryMenuOpen} onOpenChange={setIndustryMenuOpen}>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
-                      className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between h-9 text-sm font-normal"
+                      className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between h-9 text-xs font-normal"
                     >
                       <span className="truncate text-left flex-1 px-1 text-white/90">
                         {formData.industry || 'Välj bransch'}
@@ -427,12 +427,12 @@ const CompanyProfile = () => {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="employee_count" className="text-sm text-white">Antal anställda</Label>
+                <Label htmlFor="employee_count" className="text-xs text-white">Antal anställda</Label>
                 <Select
                   value={formData.employee_count}
                   onValueChange={(value) => setFormData({...formData, employee_count: value})}
                 >
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white h-9 text-sm">
+                  <SelectTrigger className="bg-white/5 border-white/10 text-white h-9 text-xs">
                     <SelectValue placeholder="Välj antal" className="text-white/90" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800/95 backdrop-blur-md border-slate-600/30 text-white z-50">
@@ -446,37 +446,37 @@ const CompanyProfile = () => {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="address" className="text-sm text-white">Huvudkontor</Label>
+                <Label htmlFor="address" className="text-xs text-white">Huvudkontor</Label>
                 <Input
                   id="address"
                   value={formData.address}
                   onChange={(e) => setFormData({...formData, address: e.target.value})}
                   placeholder="Hammarby Backen 89555"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-xs"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="website" className="text-sm text-white">Webbsida</Label>
+                <Label htmlFor="website" className="text-xs text-white">Webbsida</Label>
                 <Input
                   id="website"
                   value={formData.website}
                   onChange={(e) => setFormData({...formData, website: e.target.value})}
                   placeholder="parium.se"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-xs"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="company_description" className="text-sm text-white">Företagsbeskrivning</Label>
+              <Label htmlFor="company_description" className="text-xs text-white">Företagsbeskrivning</Label>
               <Textarea
                 id="company_description"
                 value={formData.company_description}
                 onChange={(e) => setFormData({...formData, company_description: e.target.value})}
                 placeholder="Vi säljer bilar"
                 rows={4}
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 resize-none text-sm"
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 resize-none text-xs"
               />
             </div>
 
@@ -484,7 +484,7 @@ const CompanyProfile = () => {
               <Button 
                 type="submit" 
                 disabled={loading || !hasUnsavedChanges}
-                className="border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm"
+                className="border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-xs"
               >
                 {loading ? 'Sparar...' : 'Spara ändringar'}
               </Button>
