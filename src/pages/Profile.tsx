@@ -1039,7 +1039,7 @@ const Profile = () => {
 
         {/* Profile Information */}
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
-          <div className="p-4 border-b border-white/10">
+          <div className="p-4 md:p-3 border-b border-white/10">
             <h3 className="flex items-center gap-2 text-base font-semibold text-white">
               <User className="h-4 w-4" />
               Personlig Information
@@ -1048,11 +1048,11 @@ const Profile = () => {
               Uppdatera din grundläggande profilinformation
             </p>
           </div>
-          <div className="p-4">
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="p-4 md:p-3">
+            <form onSubmit={handleSubmit} className="space-y-6 md:space-y-3">
               {/* Personal Information */}
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4 md:space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
                   <div className="space-y-2">
                     <Label htmlFor="firstName" className="text-white">
                       Förnamn <span className="text-white">*</span>
@@ -1096,8 +1096,8 @@ const Profile = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
+                  <div className="space-y-2 md:space-y-1.5">
                     <Label htmlFor="birthDate" className="text-white">
                       Födelsedatum <span className="text-white">*</span>
                     </Label>
@@ -1115,7 +1115,7 @@ const Profile = () => {
                     {errors.birthDate && <p className="text-xs text-red-300">{errors.birthDate}</p>}
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 md:space-y-1.5">
                     <Label htmlFor="phone" className="text-white">
                       Telefon <span className="text-white">*</span>
                     </Label>
@@ -1143,14 +1143,14 @@ const Profile = () => {
               </div>
 
               {/* Contact Information */}
-              <div className="space-y-4 pt-4 border-t border-white/10">
+              <div className="space-y-4 md:space-y-3 pt-4 md:pt-3 border-t border-white/10">
                 <div className="flex items-center gap-2 mb-2">
                   <Mail className="h-4 w-4 text-white" />
                   <Label className="text-base font-medium text-white">Kontaktinformation</Label>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
+                  <div className="space-y-2 md:space-y-1.5">
                     <Label className="text-white">E-post</Label>
                     <div className="relative group">
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-white z-10" />
@@ -1165,7 +1165,7 @@ const Profile = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 md:space-y-1.5">
                     <PostalCodeSelector
                       postalCodeValue={postalCode}
                       onPostalCodeChange={setPostalCode}
@@ -1178,7 +1178,7 @@ const Profile = () => {
               </div>
 
               {/* Bio */}
-              <div className="space-y-2 pt-4 border-t border-white/10">
+              <div className="space-y-2 md:space-y-1.5 pt-4 md:pt-3 border-t border-white/10">
                 <Label htmlFor="bio" className="text-white">Presentation</Label>
                 <Textarea
                   id="bio"
@@ -1198,14 +1198,14 @@ const Profile = () => {
               {/* Job Seeker Specific Information */}
               {!isEmployer && (
                 <>
-                  <div className="space-y-4 pt-4 border-t border-white/10">
+                  <div className="space-y-4 md:space-y-3 pt-4 md:pt-3 border-t border-white/10">
                     <div className="flex items-center gap-2 mb-2">
                       <Briefcase className="h-4 w-4 text-white" />
                       <Label className="text-base font-medium text-white">Anställningsinformation</Label>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
+                      <div className="space-y-2 md:space-y-1.5">
                         <Label htmlFor="employmentStatus" className="text-white">
                           Anställningsstatus <span className="text-white">*</span>
                         </Label>
@@ -1271,7 +1271,7 @@ const Profile = () => {
 
                       {/* Visa arbetstid endast om användaren har valt något OCH det inte är arbetssökande */}
                       {employmentStatus && employmentStatus !== 'arbetssokande' && (
-                        <div className="space-y-2">
+                        <div className="space-y-2 md:space-y-1.5">
                           <Label htmlFor="workingHours" className="text-white">Hur mycket jobbar du idag? <span className="text-white">*</span></Label>
                           <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
@@ -1371,7 +1371,7 @@ const Profile = () => {
                     )}
                   </div>
 
-                  <div className="space-y-4 pt-4 border-t border-white/10">
+                  <div className="space-y-4 md:space-y-3 pt-4 md:pt-3 border-t border-white/10">
                     <div className="flex items-center gap-2 mb-4">
                       <FileText className="h-4 w-4 text-white" />
                       <Label className="text-base font-medium text-white">CV</Label>
@@ -1400,14 +1400,14 @@ const Profile = () => {
 
               {/* Employer-specific fields */}
               {isEmployer && (
-                <div className="space-y-4 pt-4 border-t border-white/10">
+                <div className="space-y-4 md:space-y-3 pt-4 md:pt-3 border-t border-white/10">
                   <div className="flex items-center gap-2 mb-2">
                     <Building className="h-4 w-4 text-white" />
                     <Label className="text-base font-medium text-white">Företagsinformation</Label>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
+                    <div className="space-y-2 md:space-y-1.5">
                       <Label htmlFor="companyName" className="text-white">Företagsnamn</Label>
                       <Input
                         id="companyName"
@@ -1418,7 +1418,7 @@ const Profile = () => {
                       />
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2 md:space-y-1.5">
                       <Label htmlFor="orgNumber" className="text-white">Organisationsnummer</Label>
                       <Input
                         id="orgNumber"
