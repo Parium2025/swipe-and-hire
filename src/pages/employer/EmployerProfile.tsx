@@ -369,7 +369,7 @@ const EmployerProfile = () => {
               <Button 
                 type="submit"
                 disabled={loading}
-                className="w-full h-9 text-sm"
+                className="border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm"
               >
                 {loading ? (
                   <>
