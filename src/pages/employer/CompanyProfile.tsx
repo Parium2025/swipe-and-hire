@@ -209,104 +209,100 @@ const CompanyProfile = () => {
 
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto">
-      <div className="text-center mb-4">
-        <h1 className="text-xl font-semibold text-white mb-1">Företagslogga</h1>
-        <p className="text-xs text-white">Ladda upp din företagslogga för att bygga kännedom och förtroende</p>
+    <div className="space-y-4 max-w-6xl mx-auto px-12">
+      <div className="flex justify-between items-center">
+        <div className="flex-1"></div>
+        <div className="text-center flex-1">
+          <h1 className="text-xl font-bold text-white">Företagsprofil</h1>
+        </div>
+        <div className="flex-1"></div>
       </div>
 
-      {/* Företagslogga sektion - Minimalistisk */}
-      <div className="flex flex-col items-center space-y-4 py-6">
-        <div className="relative">
-          {formData.company_logo_url ? (
-            <div className="w-32 h-32 rounded-full overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center">
-              <img 
-                src={formData.company_logo_url} 
-                alt="Företagslogga" 
-                className="w-full h-full object-cover"
-              />
-            </div>
-          ) : (
-            <div className="w-32 h-32 rounded-full bg-white/5 border border-dashed border-white/20 flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-2xl font-semibold text-white/60 mb-1">
-                  {formData.company_name ? 
-                    formData.company_name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2) : 
-                    'HM'
-                  }
+      {/* Företagslogga och information - Kompakt */}
+      <div className="bg-white/5 backdrop-blur-sm border-white/20 rounded-lg">
+        <div className="p-3">
+          <div className="flex items-center gap-6 mb-4">
+            <div className="relative flex-shrink-0">
+              {formData.company_logo_url ? (
+                <div className="w-20 h-20 rounded-full overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center">
+                  <img 
+                    src={formData.company_logo_url} 
+                    alt="Företagslogga" 
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <Building2 className="h-5 w-5 text-white/40 mx-auto" />
-              </div>
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-white/5 border border-dashed border-white/20 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-lg font-semibold text-white/60">
+                      {formData.company_name ? 
+                        formData.company_name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2) : 
+                        'HM'
+                      }
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => document.getElementById('logo-upload')?.click()}
-            disabled={isUploadingLogo}
-            className="bg-white/5 border-white/10 text-white/90 hover:bg-white/10 text-sm"
-          >
-            {isUploadingLogo ? (
-              <>
-                <div className="animate-spin w-3 h-3 border-2 border-current border-t-transparent rounded-full mr-2"></div>
-                Laddar upp...
-              </>
-            ) : (
-              <>
-                <Camera className="h-3 w-3 mr-2" />
-                {formData.company_logo_url ? 'Byt logga' : 'Ladda upp'}
-              </>
-            )}
-          </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => document.getElementById('logo-upload')?.click()}
+                disabled={isUploadingLogo}
+                className="bg-white/5 border-white/10 text-white/90 hover:bg-white/10 text-xs h-8"
+              >
+                {isUploadingLogo ? (
+                  <>
+                    <div className="animate-spin w-3 h-3 border-2 border-current border-t-transparent rounded-full mr-1.5"></div>
+                    Laddar upp...
+                  </>
+                ) : (
+                  <>
+                    <Camera className="h-3 w-3 mr-1.5" />
+                    {formData.company_logo_url ? 'Byt' : 'Ladda upp'}
+                  </>
+                )}
+              </Button>
 
-          {formData.company_logo_url && (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleLogoDelete}
+              {formData.company_logo_url && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleLogoDelete}
+                  disabled={isUploadingLogo}
+                  className="bg-white/5 border-white/10 text-white/90 hover:bg-red-500/20 text-xs h-8"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+
+            <input
+              id="logo-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleLogoChange}
+              className="hidden"
               disabled={isUploadingLogo}
-              className="bg-white/5 border-white/10 text-white/90 hover:bg-red-500/20 text-sm"
-            >
-              <Trash2 className="h-3 w-3" />
-            </Button>
-          )}
-        </div>
+            />
+          </div>
 
-        <input
-          id="logo-upload"
-          type="file"
-          accept="image/*"
-          onChange={handleLogoChange}
-          className="hidden"
-          disabled={isUploadingLogo}
-        />
-      </div>
-
-      {/* Företagsinformation - Minimalistisk */}
-      <div className="mt-6">
-        <div className="text-center mb-4">
-          <h2 className="text-xl font-semibold text-white mb-1">Företagsinformation</h2>
-          <p className="text-xs text-white">Uppdatera företagsprofil för att synas bättre för kandidater</p>
-        </div>
-
-        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
-          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-3">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label htmlFor="company_name" className="text-xs text-white">Företagsnamn</Label>
+          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div className="space-y-0.5">
+                <Label htmlFor="company_name" className="text-[10px] text-white font-medium">Företagsnamn</Label>
                 <Input
                   id="company_name"
                   value={formData.company_name}
                   onChange={(e) => setFormData({...formData, company_name: e.target.value})}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-8 text-xs"
                 />
               </div>
 
-              <div className="space-y-1">
-                <Label htmlFor="org_number" className="text-xs text-white">Organisationsnummer (frivillig)</Label>
+              <div className="space-y-0.5">
+                <Label htmlFor="org_number" className="text-[10px] text-white font-medium">Organisationsnummer (frivillig)</Label>
                 <Input
                   id="org_number"
                   value={formData.org_number}
@@ -326,20 +322,20 @@ const CompanyProfile = () => {
                   placeholder="XXXXXX-XXXX"
                   inputMode="numeric"
                   maxLength={11}
-                  className={`bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm ${orgNumberError ? 'border-red-500/50' : ''}`}
+                  className={`bg-white/5 border-white/10 text-white placeholder:text-white/40 h-8 text-xs ${orgNumberError ? 'border-red-500/50' : ''}`}
                 />
                 {orgNumberError && (
                   <p className="text-red-400/80 text-xs mt-1">{orgNumberError}</p>
                 )}
               </div>
 
-              <div className="space-y-1">
-                <Label htmlFor="industry" className="text-xs text-white">Bransch</Label>
+              <div className="space-y-0.5">
+                <Label htmlFor="industry" className="text-[10px] text-white font-medium">Bransch</Label>
                 <DropdownMenu modal={false} open={industryMenuOpen} onOpenChange={setIndustryMenuOpen}>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
-                      className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between h-9 text-sm font-normal"
+                      className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between h-8 text-xs font-normal"
                     >
                       <span className="truncate text-left flex-1 px-1 text-white/90">
                         {formData.industry || 'Välj bransch'}
@@ -426,13 +422,13 @@ const CompanyProfile = () => {
                 </DropdownMenu>
               </div>
 
-              <div className="space-y-1">
-                <Label htmlFor="employee_count" className="text-xs text-white">Antal anställda</Label>
+              <div className="space-y-0.5">
+                <Label htmlFor="employee_count" className="text-[10px] text-white font-medium">Antal anställda</Label>
                 <Select
                   value={formData.employee_count}
                   onValueChange={(value) => setFormData({...formData, employee_count: value})}
                 >
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white h-9 text-sm">
+                  <SelectTrigger className="bg-white/5 border-white/10 text-white h-8 text-xs">
                     <SelectValue placeholder="Välj antal" className="text-white/90" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800/95 backdrop-blur-md border-slate-600/30 text-white z-50">
@@ -445,38 +441,38 @@ const CompanyProfile = () => {
                 </Select>
               </div>
 
-              <div className="space-y-1">
-                <Label htmlFor="address" className="text-xs text-white">Huvudkontor</Label>
+              <div className="space-y-0.5">
+                <Label htmlFor="address" className="text-[10px] text-white font-medium">Huvudkontor</Label>
                 <Input
                   id="address"
                   value={formData.address}
                   onChange={(e) => setFormData({...formData, address: e.target.value})}
                   placeholder="Hammarby Backen 89555"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-8 text-xs"
                 />
               </div>
 
-              <div className="space-y-1">
-                <Label htmlFor="website" className="text-xs text-white">Webbsida</Label>
+              <div className="space-y-0.5">
+                <Label htmlFor="website" className="text-[10px] text-white font-medium">Webbsida</Label>
                 <Input
                   id="website"
                   value={formData.website}
                   onChange={(e) => setFormData({...formData, website: e.target.value})}
                   placeholder="parium.se"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-8 text-xs"
                 />
               </div>
             </div>
 
-            <div className="space-y-1">
-              <Label htmlFor="company_description" className="text-xs text-white">Företagsbeskrivning</Label>
+            <div className="space-y-0.5">
+              <Label htmlFor="company_description" className="text-[10px] text-white font-medium">Företagsbeskrivning</Label>
               <Textarea
                 id="company_description"
                 value={formData.company_description}
                 onChange={(e) => setFormData({...formData, company_description: e.target.value})}
                 placeholder="Vi säljer bilar"
-                rows={4}
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 resize-none text-sm"
+                rows={3}
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 resize-none text-xs"
               />
             </div>
 
@@ -484,7 +480,7 @@ const CompanyProfile = () => {
               <Button 
                 type="submit" 
                 disabled={loading || !hasUnsavedChanges}
-                className="border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm"
+                className="border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed font-medium h-8 px-4 text-xs"
               >
                 {loading ? 'Sparar...' : 'Spara ändringar'}
               </Button>
