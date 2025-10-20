@@ -254,9 +254,9 @@ const Index = () => {
 
     return (
       <SidebarProvider>
-        <div className="min-h-screen flex w-full overflow-x-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="min-h-screen w-full flex smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
           {uiReady ? <AppSidebar /> : null}
-          <div className="flex-1 flex flex-col overflow-x-hidden relative z-10">
+          <div className="flex-1 flex flex-col min-w-0">
             <header className="sticky top-0 z-40 h-16 flex items-center justify-between border-b border-white/20 bg-white/10 backdrop-blur-md px-6">
               <div className="flex items-center gap-4">
                 <SidebarTrigger className="text-white hover:bg-white/20" />
@@ -277,7 +277,7 @@ const Index = () => {
               </div>
             </header>
             
-            <main className="flex-1 overflow-y-auto overflow-x-hidden p-6">
+            <main className="flex-1 overflow-y-auto p-6">
               {renderSidebarContent()}
               {showTourOverlay && (
                 <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
