@@ -1572,18 +1572,18 @@ const MobileJobWizard = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="parium-panel max-w-full sm:max-w-md h-auto max-h-[90vh] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
+        className="parium-panel max-w-md h-auto max-h-[85vh] md:max-h-[750px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
         onInteractOutside={(e) => e.preventDefault()}
       >
         <AnimatedBackground showBubbles={false} />
-        <div className="flex flex-col h-full max-h-[90vh] relative z-10">
+        <div className="flex flex-col h-full max-h-[85vh] md:max-h-[750px] relative z-10">
           {/* Header */}
-          <div className="relative flex items-center justify-center p-2 md:p-3 border-b border-white/20 flex-shrink-0 rounded-t-[24px] bg-background/10">
+          <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 rounded-t-[24px] bg-background/10">
             <DialogHeader className="text-center sm:text-center">
-              <DialogTitle className="text-white text-sm md:text-base">
+              <DialogTitle className="text-white text-lg">
                 {steps[currentStep].title}
               </DialogTitle>
-              <div className="text-xs text-white">
+              <div className="text-sm text-white">
                 Steg {currentStep + 1} av {steps.length}
               </div>
             </DialogHeader>
@@ -1592,15 +1592,15 @@ const MobileJobWizard = ({
                 variant="ghost"
                 size="icon"
                 onClick={handleClose}
-                className="absolute right-2 top-2 h-7 w-7 md:h-8 md:w-8 text-white/70 hover:text-white hover:bg-white/10 touch-manipulation"
+                className="absolute right-4 top-4 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
               >
-                <X className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                <X className="h-4 w-4" />
               </Button>
             )}
           </div>
 
           {/* Progress Bar */}
-          <div className="px-3 md:px-4 py-1.5 md:py-2 flex-shrink-0">
+          <div className="px-4 py-2 flex-shrink-0">
             <Progress 
               value={progress} 
               className="h-1 bg-white/20 [&>div]:bg-white"
@@ -1608,42 +1608,42 @@ const MobileJobWizard = ({
           </div>
 
           {/* Scrollable Content */}
-          <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto p-2.5 md:p-3 space-y-2" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto p-4 space-y-2">
             {/* Step 1: Grundinfo */}
             {currentStep === 0 && (
               <div className="space-y-1.5 max-w-2xl mx-auto w-full">
-                <div className="space-y-1.5">
-                  <Label className="text-white font-medium text-xs md:text-sm">Jobbtitel *</Label>
+                <div className="space-y-2">
+                  <Label className="text-white font-medium text-sm">Jobbtitel *</Label>
                   <Input
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
                     placeholder="t.ex. Lagerarbetare"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-11 md:h-9 text-xs md:text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0 touch-manipulation"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
                 </div>
 
-                 <div className="space-y-1.5">
-                  <Label className="text-white font-medium text-xs md:text-sm">Yrke *</Label>
+                 <div className="space-y-2">
+                  <Label className="text-white font-medium text-sm">Yrke *</Label>
                   <div className="relative occupation-dropdown">
                     <Input
                       value={formData.occupation}
                       onChange={(e) => handleOccupationSearch(e.target.value)}
                       onFocus={() => setShowOccupationDropdown(occupationSearchTerm.length > 0)}
                       placeholder="t.ex. Mjukvaru- och systemutvecklare"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-11 md:h-9 text-xs md:text-sm pr-10 focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0 touch-manipulation"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
                     
                     {/* Occupation Dropdown */}
                     {showOccupationDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-[100] bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto shadow-xl">
+                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
                         {/* Show filtered occupations */}
                         {filteredOccupations.map((occupation, index) => (
                           <button
                             key={`${occupation}-${index}`}
                             type="button"
                             onClick={() => handleOccupationSelect(occupation)}
-                            className="w-full px-3 py-2 text-left hover:bg-gray-700 text-white text-xs md:text-sm border-b border-gray-700 last:border-b-0 touch-manipulation"
+                            className="w-full px-3 py-2 text-left hover:bg-gray-700 text-white text-sm border-b border-gray-700 last:border-b-0"
                           >
                             <div className="font-medium">{occupation}</div>
                           </button>
@@ -1672,41 +1672,41 @@ const MobileJobWizard = ({
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label className="text-white font-medium text-xs md:text-sm">Jobbeskrivning *</Label>
+                <div className="space-y-2">
+                  <Label className="text-white font-medium text-sm">Jobbeskrivning *</Label>
                   <Textarea
                     value={formData.description}
                     onChange={(e) => handleInputChange('description', e.target.value)}
                     placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
                     rows={3}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 p-2 text-xs md:text-sm resize-none leading-tight focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0 min-h-[80px] md:min-h-[120px] touch-manipulation"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 p-2 text-sm resize-none leading-tight focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0 min-h-[80px] sm:min-h-[200px]"
                   />
                 </div>
 
 
 
-                <div className="space-y-1.5">
-                  <Label className="text-white font-medium text-xs md:text-sm">Anställningsform *</Label>
+                <div className="space-y-2">
+                  <Label className="text-white font-medium text-sm">Anställningsform *</Label>
                   <div className="relative employment-type-dropdown">
                     <Input
                       value={employmentTypeSearchTerm || (formData.employment_type ? EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label || '' : '')}
                       onChange={(e) => handleEmploymentTypeSearch(e.target.value)}
                       onClick={handleEmploymentTypeClick}
                       placeholder="Välj anställningsform"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-11 md:h-9 text-xs md:text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0 touch-manipulation"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                     
                     {/* Employment Type Dropdown */}
                     {showEmploymentTypeDropdown && (
-                       <div className="absolute top-full left-0 right-0 z-[100] bg-gray-800 border border-gray-600 rounded-md mt-1 shadow-xl max-h-64 overflow-y-auto">
+                       <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 shadow-lg">
                         {filteredEmploymentTypes.map((type) => (
                           <button
                             key={type.value}
                             type="button"
                             onClick={() => handleEmploymentTypeSelect(type)}
-                            className="w-full px-3 py-2 text-left hover:bg-gray-700 text-white text-xs md:text-sm border-b border-gray-700 last:border-b-0 touch-manipulation"
+                            className="w-full px-3 py-2 text-left hover:bg-gray-700 text-white text-sm border-b border-gray-700 last:border-b-0"
                           >
                             <div className="font-medium">{type.label}</div>
                           </button>
@@ -1716,28 +1716,28 @@ const MobileJobWizard = ({
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label className="text-white font-medium text-xs md:text-sm">Lönetyp</Label>
+                <div className="space-y-2">
+                  <Label className="text-white font-medium text-sm">Lönetyp</Label>
                   <div className="relative salary-type-dropdown">
                     <Input
                       value={salaryTypeSearchTerm || (formData.salary_type ? salaryTypes.find(t => t.value === formData.salary_type)?.label || '' : '')}
                       onChange={(e) => handleSalaryTypeSearch(e.target.value)}
                       onClick={handleSalaryTypeClick}
                       placeholder="Välj lönetyp"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-11 md:h-9 text-xs md:text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0 touch-manipulation"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                     
                     {/* Salary Type Dropdown */}
                     {showSalaryTypeDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-[100] bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto shadow-xl">
+                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
                         {filteredSalaryTypes.map((type) => (
                           <button
                             key={type.value}
                             type="button"
                             onClick={() => handleSalaryTypeSelect(type)}
-                            className="w-full px-3 py-2 text-left hover:bg-gray-700 text-white text-xs md:text-sm border-b border-gray-700 last:border-b-0 touch-manipulation"
+                            className="w-full px-3 py-2 text-left hover:bg-gray-700 text-white text-sm border-b border-gray-700 last:border-b-0"
                           >
                             <div className="font-medium">{type.label}</div>
                           </button>
@@ -1747,15 +1747,15 @@ const MobileJobWizard = ({
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label className="text-white font-medium text-xs md:text-sm">Antal personer att rekrytera</Label>
+                <div className="space-y-2">
+                  <Label className="text-white font-medium text-sm">Antal personer att rekrytera</Label>
                   <Input
                     type="number"
                     min="1"
                     value={formData.positions_count}
                     onChange={(e) => handleInputChange('positions_count', e.target.value)}
                     placeholder="1"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-11 md:h-9 text-xs md:text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0 touch-manipulation"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
                 </div>
 
@@ -1765,15 +1765,15 @@ const MobileJobWizard = ({
             {/* Step 2: Var finns jobbet? */}
             {currentStep === 1 && (
               <div className="space-y-1.5 max-w-2xl mx-auto w-full">
-                <div className="space-y-1.5">
-                  <Label className="text-white font-medium text-xs md:text-sm">Var utförs arbetet? *</Label>
+                <div className="space-y-2">
+                  <Label className="text-white font-medium text-sm">Var utförs arbetet? *</Label>
                   <div className="relative work-location-dropdown">
                     <Input
                       value={workLocationSearchTerm || (formData.work_location_type ? workLocationTypes.find(t => t.value === formData.work_location_type)?.label || '' : '')}
                       onChange={(e) => handleWorkLocationSearch(e.target.value)}
                       onClick={handleWorkLocationClick}
                       placeholder="Välj arbetsplats"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-11 md:h-9 text-xs md:text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0 touch-manipulation"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
@@ -1786,7 +1786,7 @@ const MobileJobWizard = ({
                             key={type.value}
                             type="button"
                             onClick={() => handleWorkLocationSelect(type)}
-                            className="w-full px-3 py-2 text-left hover:bg-gray-700 text-white text-xs md:text-sm border-b border-gray-700 last:border-b-0 touch-manipulation"
+                            className="w-full px-3 py-2 text-left hover:bg-gray-700 text-white text-sm border-b border-gray-700 last:border-b-0"
                           >
                             <div className="font-medium">{type.label}</div>
                           </button>
@@ -1796,28 +1796,28 @@ const MobileJobWizard = ({
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label className="text-white font-medium text-xs md:text-sm">Är distansarbete möjligt? *</Label>
+                <div className="space-y-2">
+                  <Label className="text-white font-medium text-sm">Är distansarbete möjligt? *</Label>
                   <div className="relative remote-work-dropdown">
                     <Input
                       value={remoteWorkSearchTerm || (formData.remote_work_possible ? remoteWorkOptions.find(t => t.value === formData.remote_work_possible)?.label || '' : '')}
                       onChange={(e) => handleRemoteWorkSearch(e.target.value)}
                       onClick={handleRemoteWorkClick}
                       placeholder="Välj alternativ"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-11 md:h-9 text-xs md:text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0 touch-manipulation"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                     
                     {/* Remote Work Dropdown */}
                     {showRemoteWorkDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-[100] bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto shadow-xl">
+                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
                         {filteredRemoteWorkOptions.map((type) => (
                           <button
                             key={type.value}
                             type="button"
                             onClick={() => handleRemoteWorkSelect(type)}
-                            className="w-full px-3 py-2 text-left hover:bg-gray-700 text-white text-xs md:text-sm border-b border-gray-700 last:border-b-0 touch-manipulation"
+                            className="w-full px-3 py-2 text-left hover:bg-gray-700 text-white text-sm border-b border-gray-700 last:border-b-0"
                           >
                             <div className="font-medium">{type.label}</div>
                           </button>
@@ -1827,34 +1827,34 @@ const MobileJobWizard = ({
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label className="text-white font-medium text-xs md:text-sm">Arbetsplatsens namn *</Label>
+                <div className="space-y-2">
+                  <Label className="text-white font-medium text-sm">Arbetsplatsens namn *</Label>
                   <Input
                     value={formData.workplace_name}
                     onChange={(e) => handleInputChange('workplace_name', e.target.value)}
                     placeholder={profile?.company_name ? `t.ex. ${profile.company_name}` : "t.ex. IKEA Kungens Kurva"}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-11 md:h-9 text-xs md:text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0 touch-manipulation"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label className="text-white font-medium text-xs md:text-sm">Kontakt e-mail *</Label>
+                <div className="space-y-2">
+                  <Label className="text-white font-medium text-sm">Kontakt e-mail *</Label>
                   <Input
                     type="email"
                     value={formData.contact_email}
                     onChange={(e) => handleInputChange('contact_email', e.target.value)}
                     placeholder={user?.email || "kontakt@företag.se"}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-11 md:h-9 text-xs md:text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0 touch-manipulation"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label className="text-white font-medium text-xs md:text-sm">Gatuadress (frivilligt)</Label>
+                <div className="space-y-2">
+                  <Label className="text-white font-medium text-sm">Gatuadress (frivilligt)</Label>
                   <Input
                     value={formData.workplace_address}
                     onChange={(e) => handleInputChange('workplace_address', e.target.value)}
                     placeholder="t.ex. Modulvägen 1"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-11 md:h-9 text-xs md:text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0 touch-manipulation"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                   />
                 </div>
 
@@ -1874,13 +1874,13 @@ const MobileJobWizard = ({
                 {!showQuestionForm && !showQuestionTemplates ? (
                   <>
                     {/* Rubrik för automatiska frågor */}
-                    <h3 className="text-white text-xs md:text-sm font-medium text-center">
+                    <h3 className="text-white text-sm font-medium text-center">
                       Dessa frågor fylls automatiskt från jobbsökarens profil
                     </h3>
 
                     {/* Automatiska frågor info */}
-                    <div className="bg-white/5 rounded-lg p-2 md:p-3 border border-white/20">
-                      <div className="text-white text-xs md:text-sm space-y-1">
+                    <div className="bg-white/5 rounded-lg p-3 border border-white/20">
+                      <div className="text-white text-sm space-y-1">
                         <p>• Namn och efternamn</p>
                         <p>• Ålder</p>
                         <p>• E-post</p>
@@ -1894,13 +1894,13 @@ const MobileJobWizard = ({
                     </div>
 
                     {/* Anpassade frågor */}
-                    <div className="space-y-2 md:space-y-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <h4 className="text-white font-medium text-xs md:text-sm">Anpassade frågor (valfritt)</h4>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-white font-medium">Anpassade frågor (valfritt)</h4>
                         <Button
                           onClick={addCustomQuestion}
                           size="sm"
-                          className="bg-primary hover:bg-primary/90 text-white h-9 md:h-8 text-xs md:text-sm touch-manipulation"
+                          className="bg-primary hover:bg-primary/90 text-white"
                         >
                           <Plus className="h-4 w-4 mr-1 text-[hsl(var(--pure-white))]" />
                           Lägg till fråga
@@ -1908,7 +1908,7 @@ const MobileJobWizard = ({
                       </div>
                       
                       {customQuestions.length === 0 ? (
-                        <div className="text-white text-xs md:text-sm bg-white/5 rounded-lg p-2 md:p-3 border border-white/20">
+                        <div className="text-white text-sm bg-white/5 rounded-lg p-3 border border-white/20">
                           Saknas något? Klicka på "Lägg till fråga" och skapa de frågor du vill att kandidaten ska svara på
                         </div>
                       ) : (
@@ -1938,9 +1938,9 @@ const MobileJobWizard = ({
                   </>
                 ) : showQuestionTemplates ? (
                   /* Template Selection */
-                  <div className="space-y-3 md:space-y-4">
+                  <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-white font-medium text-base md:text-lg">Välj fråga</h3>
+                      <h3 className="text-white font-medium text-lg">Välj fråga</h3>
                       <Button
                         onClick={() => {
                           setShowQuestionTemplates(false);
@@ -1948,7 +1948,7 @@ const MobileJobWizard = ({
                         }}
                         variant="ghost"
                         size="sm"
-                        className="text-white/70 hover:text-white hover:bg-white/10 h-9 md:h-8 touch-manipulation"
+                        className="text-white/70 hover:text-white hover:bg-white/10"
                       >
                         <X className="h-4 w-4 text-[hsl(var(--pure-white))]" />
                       </Button>
@@ -1959,14 +1959,14 @@ const MobileJobWizard = ({
                         value={questionSearchTerm}
                         onChange={(e) => setQuestionSearchTerm(e.target.value)}
                         placeholder="Sök efter fråga..."
-                        className="bg-white/5 border-white/20 text-white placeholder:text-white/40 h-11 md:h-10 text-xs md:text-sm touch-manipulation"
+                        className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
                       />
                     </div>
 
                     <Button
                       onClick={createNewQuestion}
                       size="sm"
-                      className="w-full bg-primary hover:bg-primary/90 text-white h-11 md:h-10 text-xs md:text-sm touch-manipulation"
+                      className="w-full bg-primary hover:bg-primary/90 text-white"
                     >
                       <Plus className="h-4 w-4 mr-1 text-[hsl(var(--pure-white))]" />
                       Skapa ny fråga
@@ -2083,9 +2083,9 @@ const MobileJobWizard = ({
                   </div>
                 ) : (
                   /* Question Form */
-                  <div className="space-y-3 md:space-y-4">
+                  <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-white font-medium text-base md:text-lg">
+                      <h3 className="text-white font-medium text-lg">
                         {editingQuestion?.id?.startsWith('temp_') ? 'Redigera fråga' : 'Ny fråga'}
                       </h3>
                       <Button
@@ -2096,23 +2096,23 @@ const MobileJobWizard = ({
                         }}
                         variant="ghost"
                         size="sm"
-                        className="text-white/70 hover:text-white hover:bg-white/10 h-9 md:h-8 touch-manipulation"
+                        className="text-white/70 hover:text-white hover:bg-white/10"
                       >
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
 
-                    <div className="space-y-3 md:space-y-4">
+                    <div className="space-y-4">
                       {/* Question Type */}
-                      <div className="space-y-1.5 md:space-y-2">
-                        <Label className="text-white font-medium text-xs md:text-sm">Frågetyp *</Label>
+                      <div className="space-y-2">
+                        <Label className="text-white font-medium">Frågetyp *</Label>
                         <div className="relative question-type-dropdown">
                           <Input
                             value={questionTypeSearchTerm || (editingQuestion?.question_type ? questionTypes.find(t => t.value === editingQuestion.question_type)?.label || '' : '')}
                             onChange={(e) => handleQuestionTypeSearch(e.target.value)}
                             onClick={handleQuestionTypeClick}
                             placeholder="Välj frågetyp"
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-11 md:h-9 text-xs md:text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0 touch-manipulation"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
                             readOnly
                           />
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
@@ -2200,21 +2200,21 @@ const MobileJobWizard = ({
 
                       {/* Rubrik for multiple choice */}
                       {editingQuestion?.question_type === 'multiple_choice' && (
-                        <div className="space-y-1.5 md:space-y-2">
-                          <Label className="text-white font-medium text-xs md:text-sm">Rubrik *</Label>
+                        <div className="space-y-2">
+                          <Label className="text-white font-medium">Rubrik *</Label>
                           <Input
                             value={editingQuestion?.question_text || ''}
                             onChange={(e) => updateQuestionField('question_text', e.target.value)}
                             placeholder="T.ex. Vilka behörigheter har du?"
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-11 md:h-9 text-xs md:text-sm touch-manipulation"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
                           />
                         </div>
                       )}
 
                       {/* Multiple Choice Options */}
                       {editingQuestion?.question_type === 'multiple_choice' && (
-                        <div className="space-y-1.5 md:space-y-2">
-                          <Label className="text-white font-medium text-xs md:text-sm">Svarsalternativ</Label>
+                        <div className="space-y-2">
+                          <Label className="text-white font-medium">Svarsalternativ</Label>
                           <div className="space-y-2">
                             {(editingQuestion.options || []).map((option, index) => (
                               <div key={index} className="flex items-center space-x-2">
@@ -2222,13 +2222,13 @@ const MobileJobWizard = ({
                                   value={option}
                                   onChange={(e) => updateOption(index, e.target.value)}
                                   placeholder={`Alternativ ${index + 1}`}
-                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-11 md:h-9 text-xs md:text-sm touch-manipulation"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
                                 />
                                 <Button
                                   onClick={() => removeOption(index)}
                                   variant="ghost"
                                   size="sm"
-                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-11 w-11 md:h-9 md:w-9 touch-manipulation"
+                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -2238,7 +2238,7 @@ const MobileJobWizard = ({
                               onClick={addOption}
                               variant="outline"
                               size="sm"
-                              className="border-white/40 text-white bg-transparent hover:bg-transparent hover:border-white/60 h-10 md:h-9 text-xs md:text-sm touch-manipulation"
+                              className="border-white/40 text-white bg-transparent hover:bg-transparent hover:border-white/60"
                             >
                               <Plus className="h-4 w-4 mr-1 text-[hsl(var(--pure-white))]" />
                               Lägg till alternativ
@@ -2255,15 +2255,15 @@ const MobileJobWizard = ({
                           checked={editingQuestion?.is_required || false}
                           onCheckedChange={(checked) => updateQuestionField('is_required', checked)}
                         />
-                        <Label className="text-white font-medium text-xs md:text-sm">Obligatorisk fråga</Label>
+                        <Label className="text-white font-medium">Obligatorisk fråga</Label>
                       </div>
 
                       {/* Save Button */}
-                      <div className="flex justify-end pt-3 md:pt-4">
+                      <div className="flex justify-end pt-4">
                         <Button
                           onClick={saveCustomQuestion}
                           disabled={!editingQuestion?.question_text?.trim()}
-                          className="bg-primary hover:bg-primary/90 text-white h-11 md:h-10 text-xs md:text-sm touch-manipulation"
+                          className="bg-primary hover:bg-primary/90 text-white"
                         >
                           Spara fråga
                         </Button>
@@ -2276,10 +2276,10 @@ const MobileJobWizard = ({
 
             {/* Step 4: Förhandsvisning */}
             {currentStep === 3 && (
-              <div className="space-y-4 md:space-y-6 max-w-2xl mx-auto w-full">
+              <div className="space-y-6 max-w-2xl mx-auto w-full">
                 {/* Mobile Mockup Preview - Mobilansökningsformulär */}
-                <div className="flex flex-col items-center space-y-3 md:space-y-4">
-                  <h3 className="text-white font-medium text-xs md:text-sm text-center">Så kommer ansökningsformuläret att se ut på mobil. (Testa att trycka på mobilens skärm)</h3>
+                <div className="flex flex-col items-center space-y-4">
+                  <h3 className="text-white font-medium">Så kommer ansökningsformuläret att se ut på mobil. (Testa att trycka på mobilens skärm)</h3>
                   
                    {/* Phone mockup med ansökningsformulär + tooltip */}
                   <div className="relative flex items-center justify-center gap-4">
@@ -2774,9 +2774,9 @@ const MobileJobWizard = ({
                 </div>
 
                 {/* Image upload section */}
-                <div className="bg-white/5 rounded-lg p-3 md:p-4 border border-white/20">
-                  <div className="text-white font-medium mb-2 md:mb-3 text-xs md:text-sm">Jobbild (valfritt)</div>
-                  <p className="text-white text-xs md:text-sm mb-3 md:mb-4">
+                <div className="bg-white/5 rounded-lg p-4 border border-white/20">
+                  <div className="text-white font-medium mb-3">Jobbild (valfritt)</div>
+                  <p className="text-white text-sm mb-4">
                     Ladda upp en bild som representerar jobbet eller arbetsplatsen
                   </p>
                   
@@ -2812,11 +2812,11 @@ const MobileJobWizard = ({
                       </div>
                       
                       {/* Bildkontroller */}
-                      <div className="mt-3 md:mt-4 space-y-2 md:space-y-3">
+                      <div className="mt-4 space-y-3">
                         <div className="flex justify-center">
                           <button
                             onClick={openImageEditor}
-                            className="px-4 py-2 md:py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-xs md:text-sm font-medium h-11 md:h-10 touch-manipulation"
+                            className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium"
                           >
                             Justera bild
                           </button>
@@ -2835,12 +2835,12 @@ const MobileJobWizard = ({
 
           {/* Navigation */}
           {!showQuestionTemplates && !showQuestionForm && (
-            <div className="flex items-center justify-between p-3 md:p-4 border-t border-white/20 flex-shrink-0 gap-2">
+            <div className="flex items-center justify-between p-4 border-t border-white/20 flex-shrink-0">
               <Button
                 variant="ghost"
                 onClick={prevStep}
                 disabled={currentStep === 0}
-                className="text-white hover:text-white hover:bg-white/10 disabled:opacity-30 border border-white/40 hover:border-white/60 h-11 md:h-10 text-xs md:text-sm touch-manipulation"
+                className="text-white hover:text-white hover:bg-white/10 disabled:opacity-30 border border-white/40 hover:border-white/60"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Tillbaka
@@ -2850,7 +2850,7 @@ const MobileJobWizard = ({
                 <Button
                   onClick={handleSubmit}
                   disabled={loading || !validateCurrentStep()}
-                  className="bg-green-600/80 hover:bg-green-600 text-white px-4 md:px-6 h-11 md:h-10 text-xs md:text-sm touch-manipulation"
+                  className="bg-green-600/80 hover:bg-green-600 text-white px-6"
                 >
                   {loading ? (
                     <>
@@ -2868,7 +2868,7 @@ const MobileJobWizard = ({
                 <Button
                   onClick={nextStep}
                   disabled={!validateCurrentStep()}
-                  className="bg-primary hover:bg-primary/90 text-white px-4 md:px-6 border border-white/20 hover:border-white/40 h-11 md:h-10 text-xs md:text-sm touch-manipulation"
+                  className="bg-primary hover:bg-primary/90 text-white px-6 border border-white/20 hover:border-white/40"
                 >
                   Nästa
                   <ArrowRight className="h-4 w-4 ml-2" />

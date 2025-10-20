@@ -8,14 +8,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Loader2, ChevronDown, Search, X, Trash2, Pencil } from 'lucide-react';
 import MobileJobWizard from '@/components/MobileJobWizard';
 import CreateTemplateWizard from '@/components/CreateTemplateWizard';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
-import { useIsMobile } from '@/hooks/use-mobile';
 import type { JobPosting } from '@/hooks/useJobsData';
 
 interface JobTemplate {
@@ -57,7 +55,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
-  const isMobile = useIsMobile();
 
   const titleRef = useRef<HTMLTextAreaElement | null>(null);
   const adjustTitleHeight = useCallback((el?: HTMLTextAreaElement | null) => {
@@ -209,32 +206,32 @@ const handleJobCreated = useCallback((job: JobPosting) => {
           </Button>
         </DialogTrigger>
           <DialogContent 
-            className="max-w-full sm:max-w-md bg-card-parium text-white backdrop-blur-md border-white/20 [&>button]:hidden overflow-y-auto shadow-lg rounded-[24px] sm:rounded-xl transition-all duration-200 ease-out animate-scale-in"
+            className="max-w-md bg-card-parium text-white backdrop-blur-md border-white/20 [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl transition-all duration-200 ease-out animate-scale-in"
             onInteractOutside={(e) => e.preventDefault()}
             onEscapeKeyDown={(e) => e.preventDefault()}
           >
           <Card className="bg-white/10 backdrop-blur-sm border-white/20 ring-0 shadow-none relative w-full transition-all duration-200">
-            <CardHeader className="pb-3 pt-4 md:pb-4 md:pt-6">
+            <CardHeader className="pb-4 pt-6">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-white flex-1 text-center text-base md:text-xl">
+                <CardTitle className="text-white flex-1 text-center text-xl">
                   Skapa jobb
                 </CardTitle>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={handleClose}
-                  className="absolute right-2 top-2 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10 touch-manipulation"
+                  className="absolute right-2 top-2 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
                 >
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-              <CardDescription className="text-white text-center text-xs md:text-sm leading-snug mt-1 md:mt-2">
+              <CardDescription className="text-white text-center text-sm leading-snug mt-2">
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3 md:space-y-4 px-3 md:px-4 pb-3 md:pb-4">
-              <div className="space-y-1.5 md:space-y-2">
-                <Label htmlFor="job-title" className="text-white text-xs md:text-sm">Titel</Label>
+            <CardContent className="space-y-4 px-4 pb-4">
+              <div className="space-y-2">
+                <Label htmlFor="job-title" className="text-white">Titel</Label>
                 <Textarea
                   id="job-title"
                   ref={titleRef}
@@ -247,7 +244,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                     target.style.height = target.scrollHeight + 'px';
                   }}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 text-xs md:text-sm resize-none min-h-[44px] md:min-h-[36px] leading-tight py-2 overflow-hidden touch-manipulation"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 text-sm resize-none min-h-[36px] leading-tight py-2 overflow-hidden"
                   autoComplete="off"
                   title={jobTitle}
                   rows={1}
@@ -259,138 +256,12 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                 />
               </div>
 
-              <div className="space-y-1.5 md:space-y-2">
-                <Label htmlFor="job-template" className="text-white text-xs md:text-sm">Jobbmall</Label>
+              <div className="space-y-2">
+                <Label htmlFor="job-template" className="text-white">Jobbmall</Label>
                 {loadingTemplates ? (
-                  <div className="flex items-center gap-2 text-xs md:text-sm text-white/70 py-2">
+                  <div className="flex items-center gap-2 text-sm text-white/70 py-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Laddar mallar...
-                  </div>
-                ) : isMobile ? (
-                  <div className="flex items-start gap-2">
-                    <Sheet open={templateMenuOpen} onOpenChange={setTemplateMenuOpen}>
-                      <SheetTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-all duration-150 justify-between mt-1 text-left h-auto min-h-[48px] md:min-h-[44px] py-3 whitespace-normal touch-manipulation"
-                          title={selectedTemplate?.name || 'Ingen mall är vald'}
-                        >
-                          <span className="text-left flex-1 px-1 text-xs md:text-sm whitespace-normal break-words pr-6">
-                            {selectedTemplate?.name || 'Ingen mall är vald'}
-                          </span>
-                          <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2 transition-transform duration-150" />
-                        </Button>
-                      </SheetTrigger>
-                      <SheetContent side="bottom" className="bg-slate-800/98 backdrop-blur-md border-white/20 text-white h-[85vh] rounded-t-3xl">
-                        <SheetHeader className="border-b border-white/10 pb-4">
-                          <SheetTitle className="text-white text-xl">Välj jobbmall</SheetTitle>
-                          <SheetDescription className="text-white/70">
-                            Välj en mall att använda eller skapa en ny
-                          </SheetDescription>
-                        </SheetHeader>
-                        
-                        <div className="mt-4 space-y-3">
-                          {/* Search input */}
-                          <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/60" />
-                            <Input
-                              placeholder="Sök mall..."
-                              value={searchTerm}
-                              onChange={(e) => setSearchTerm(e.target.value)}
-                              className="pl-11 h-12 bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-xl text-base"
-                              autoComplete="off"
-                            />
-                          </div>
-
-                          {/* Template options */}
-                          <div className="space-y-2 max-h-[calc(85vh-180px)] overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-                            {/* Create new template option */}
-                            <Button
-                              onClick={() => {
-                                setTemplateMenuOpen(false);
-                                setOpen(false);
-                                setShowTemplateWizard(true);
-                              }}
-                              variant="outline"
-                              className="w-full justify-start h-auto min-h-[64px] p-4 text-left bg-white/5 border-white/20 hover:bg-white/10 touch-manipulation"
-                            >
-                              <div className="flex flex-col gap-1">
-                                <span className="font-medium text-base text-white">+ Skapa en ny mall</span>
-                                <span className="text-sm text-white/60">Skapa en återanvändbar jobbmall</span>
-                              </div>
-                            </Button>
-                            
-                            {filteredTemplates.map((template) => (
-                              <div
-                                key={template.id}
-                                className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
-                              >
-                                <button
-                                  onClick={() => handleTemplateSelect(template.id, template.name)}
-                                  className="flex flex-col flex-1 text-left min-h-[56px] justify-center touch-manipulation"
-                                >
-                                  <div className="flex items-center justify-between">
-                                    <span className="font-medium text-base text-white">{template.name}</span>
-                                    {template.is_default && (
-                                      <span className="text-xs text-blue-400 ml-2">Standard</span>
-                                    )}
-                                  </div>
-                                  <span className="text-sm text-white/60 mt-1 line-clamp-2">{template.title}</span>
-                                </button>
-                                <div className="flex gap-2 flex-shrink-0">
-                                  <Button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setTemplateToEdit(template);
-                                      setTemplateMenuOpen(false);
-                                      setOpen(false);
-                                      setShowTemplateWizard(true);
-                                    }}
-                                    variant="ghost"
-                                    size="icon"
-                                    className="text-white/70 hover:text-white hover:bg-white/10 h-11 w-11 touch-manipulation"
-                                  >
-                                    <Pencil className="h-5 w-5" />
-                                  </Button>
-                                  <Button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setTemplateToDelete(template);
-                                    }}
-                                    variant="ghost"
-                                    size="icon"
-                                    className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-11 w-11 touch-manipulation"
-                                  >
-                                    <Trash2 className="h-5 w-5" />
-                                  </Button>
-                                </div>
-                              </div>
-                            ))}
-                            
-                            {filteredTemplates.length === 0 && searchTerm && (
-                              <div className="py-12 text-center text-white/60 text-base">
-                                Ingen mall hittades
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </SheetContent>
-                    </Sheet>
-                    
-                    {selectedTemplate && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setSelectedTemplate(null);
-                        }}
-                        className="mt-1 h-11 w-11 flex-shrink-0 text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150 touch-manipulation"
-                        title="Ta bort vald mall"
-                      >
-                        <X className="h-5 w-5" />
-                      </Button>
-                    )}
                   </div>
                 ) : (
                   <div className="flex items-start gap-2">
@@ -409,11 +280,12 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent 
-                        className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-[60vh] animate-scale-in"
+                        className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-96 animate-scale-in"
                         side="bottom"
-                        align="start"
+                        align="center"
                         alignOffset={0}
                         sideOffset={8}
+                        avoidCollisions={false}
                         onCloseAutoFocus={(e) => e.preventDefault()}
                       >
                         {/* Search input */}
@@ -513,10 +385,10 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                         onClick={() => {
                           setSelectedTemplate(null);
                         }}
-                        className="mt-1 h-11 w-11 md:h-9 md:w-9 flex-shrink-0 text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150 touch-manipulation"
+                        className="mt-1 h-9 w-9 flex-shrink-0 text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150"
                         title="Ta bort vald mall"
                       >
-                        <X className="h-5 w-5 md:h-4 md:w-4" />
+                        <X className="h-4 w-4" />
                       </Button>
                     )}
                   </div>

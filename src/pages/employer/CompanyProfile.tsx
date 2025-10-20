@@ -11,21 +11,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { useSidebar } from '@/components/ui/sidebar';
 import ImageEditor from '@/components/ImageEditor';
-import { Upload, Building2, Edit, Camera, ChevronDown, Search, Check, Trash2, Linkedin, Twitter, Instagram, Globe, ExternalLink, Plus } from 'lucide-react';
+import { Upload, Building2, Edit, Camera, ChevronDown, Search, Check, Trash2 } from 'lucide-react';
 import { SWEDISH_INDUSTRIES } from '@/lib/industries';
 import { supabase } from '@/integrations/supabase/client';
-
-interface SocialMediaLink {
-  platform: 'linkedin' | 'twitter' | 'instagram' | 'annat';
-  url: string;
-}
-
-const SOCIAL_PLATFORMS = [
-  { value: 'linkedin' as const, label: 'LinkedIn', icon: Linkedin },
-  { value: 'twitter' as const, label: 'Twitter/X', icon: Twitter },
-  { value: 'instagram' as const, label: 'Instagram', icon: Instagram },
-  { value: 'annat' as const, label: 'Annat', icon: Globe },
-];
 
 
 const CompanyProfile = () => {
@@ -52,15 +40,7 @@ const CompanyProfile = () => {
     company_description: profile?.company_description || '',
     employee_count: profile?.employee_count || '',
     company_logo_url: (profile as any)?.company_logo_url || '',
-    social_media_links: (profile as any)?.social_media_links || [] as SocialMediaLink[],
   });
-
-  const [newSocialLink, setNewSocialLink] = useState({
-    platform: '' as SocialMediaLink['platform'] | '',
-    url: ''
-  });
-
-  const [platformMenuOpen, setPlatformMenuOpen] = useState(false);
 
   // Validation state
   const [orgNumberError, setOrgNumberError] = useState('');
@@ -77,7 +57,6 @@ const CompanyProfile = () => {
         company_description: profile.company_description || '',
         employee_count: profile.employee_count || '',
         company_logo_url: (profile as any)?.company_logo_url || '',
-        social_media_links: (profile as any)?.social_media_links || [],
       };
       
       setFormData(values);
@@ -89,12 +68,9 @@ const CompanyProfile = () => {
   const checkForChanges = useCallback(() => {
     if (!originalValues.company_name) return false; // Not loaded yet
     
-    const hasChanges = Object.keys(formData).some(key => {
-      if (key === 'social_media_links') {
-        return JSON.stringify(formData[key]) !== JSON.stringify(originalValues[key]);
-      }
-      return formData[key] !== originalValues[key];
-    });
+    const hasChanges = Object.keys(formData).some(
+      key => formData[key] !== originalValues[key]
+    );
 
     setHasUnsavedChanges(hasChanges);
     return hasChanges;
@@ -197,118 +173,6 @@ const CompanyProfile = () => {
     });
   };
 
-  const validateUrl = (url: string, platform: string) => {
-    if (!url.trim()) return true;
-    
-    try {
-      const validUrl = new URL(url);
-      
-      if (platform === 'linkedin') {
-        return validUrl.hostname === 'www.linkedin.com' || validUrl.hostname === 'linkedin.com';
-      }
-      
-      if (platform === 'twitter') {
-        return validUrl.hostname === 'www.twitter.com' || validUrl.hostname === 'twitter.com' || 
-               validUrl.hostname === 'www.x.com' || validUrl.hostname === 'x.com';
-      }
-      
-      if (platform === 'instagram') {
-        return validUrl.hostname === 'www.instagram.com' || validUrl.hostname === 'instagram.com';
-      }
-      
-      return true; // For "annat" allow any valid URL
-    } catch {
-      return false;
-    }
-  };
-
-  const addSocialLink = async () => {
-    if (!newSocialLink.platform || !newSocialLink.url.trim()) {
-      toast({
-        title: "Ofullständig information",
-        description: "Välj en plattform och ange en URL",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!validateUrl(newSocialLink.url, newSocialLink.platform)) {
-      toast({
-        title: "Ogiltig URL",
-        description: `Ange en giltig URL för ${SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label}`,
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Check if platform already exists
-    const existingPlatform = formData.social_media_links.find(link => link.platform === newSocialLink.platform);
-    if (existingPlatform) {
-      toast({
-        title: "Plattform finns redan",
-        description: "Du har redan lagt till denna plattform. Ta bort den först om du vill ändra länken.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const updatedLinks = [...formData.social_media_links, newSocialLink as SocialMediaLink];
-    const updatedFormData = {
-      ...formData,
-      social_media_links: updatedLinks
-    };
-
-    try {
-      // Save immediately to database
-      await updateProfile(updatedFormData as any);
-      
-      // Update local state
-      setFormData(updatedFormData);
-      setOriginalValues(updatedFormData);
-      setHasUnsavedChanges(false);
-      
-      setNewSocialLink({ platform: '', url: '' });
-      
-      toast({
-        title: "Länk tillagd",
-        description: `${SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label}-länken har lagts till`,
-      });
-    } catch (error) {
-      toast({
-        title: "Fel",
-        description: "Kunde inte spara länken. Försök igen.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const removeSocialLink = async (index: number) => {
-    const linkToRemove = formData.social_media_links[index];
-    const updatedLinks = formData.social_media_links.filter((_, i) => i !== index);
-    const updatedFormData = { ...formData, social_media_links: updatedLinks };
-
-    try {
-      // Save immediately to database
-      await updateProfile(updatedFormData as any);
-      
-      // Update local state
-      setFormData(updatedFormData);
-      setOriginalValues(updatedFormData);
-      setHasUnsavedChanges(false);
-      
-      toast({
-        title: "Länk borttagen",
-        description: `${getPlatformLabel(linkToRemove.platform)}-länken har tagits bort`,
-      });
-    } catch (error) {
-      toast({
-        title: "Fel",
-        description: "Kunde inte ta bort länken. Försök igen.",
-        variant: "destructive"
-      });
-    }
-  };
-
   const handleSave = async () => {
     // Validate organization number before saving
     if (formData.org_number && formData.org_number.replace(/-/g, '').length !== 10) {
@@ -318,18 +182,6 @@ const CompanyProfile = () => {
         variant: "destructive"
       });
       return;
-    }
-
-    // Validate all social media URLs
-    for (const link of formData.social_media_links) {
-      if (!validateUrl(link.url, link.platform)) {
-        toast({
-          title: "Ogiltig URL",
-          description: `Kontrollera URL:en för ${SOCIAL_PLATFORMS.find(p => p.value === link.platform)?.label}`,
-          variant: "destructive"
-        });
-        return;
-      }
     }
 
     try {
@@ -353,17 +205,6 @@ const CompanyProfile = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const getPlatformIcon = (platform: SocialMediaLink['platform']) => {
-    const platformData = SOCIAL_PLATFORMS.find(p => p.value === platform);
-    if (!platformData) return Globe;
-    return platformData.icon;
-  };
-
-  const getPlatformLabel = (platform: SocialMediaLink['platform']) => {
-    const platformData = SOCIAL_PLATFORMS.find(p => p.value === platform);
-    return platformData?.label || 'Okänd plattform';
   };
 
 
@@ -649,117 +490,6 @@ const CompanyProfile = () => {
               </Button>
             </div>
           </form>
-        </div>
-      </div>
-
-      {/* Social Media Links Section */}
-      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
-        <div className="p-4 border-b border-white/10">
-          <h3 className="text-base font-semibold text-white">Sociala medier</h3>
-          <p className="text-sm text-white/60 mt-1">Lägg till företagets sociala medier-profiler</p>
-        </div>
-        <div className="p-4 space-y-4">
-          {/* Existing social media links */}
-          {formData.social_media_links.length > 0 && (
-            <div className="space-y-2">
-              {formData.social_media_links.map((link, index) => {
-                const Icon = getPlatformIcon(link.platform);
-                return (
-                  <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-2 gap-2">
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <Icon className="h-4 w-4 text-white flex-shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <div className="text-white text-sm font-medium">{getPlatformLabel(link.platform)}</div>
-                        <a 
-                          href={link.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1 break-all max-w-full"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <span className="truncate max-w-xs sm:max-w-sm md:max-w-md">
-                            {link.url}
-                          </span>
-                          <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                        </a>
-                      </div>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeSocialLink(index);
-                      }}
-                      className="bg-red-500/20 border-red-400/40 text-red-300 hover:bg-red-500/30 flex-shrink-0 text-sm h-8"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Add new social media link */}
-          <div className="space-y-3 border-t border-white/10 pt-4">
-            <Label className="text-sm text-white">Lägg till ny länk</Label>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <DropdownMenu modal={false} open={platformMenuOpen} onOpenChange={setPlatformMenuOpen}>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full bg-white/5 border-white/10 text-white text-sm h-9 hover:bg-white/10 transition-colors justify-between text-left"
-                  >
-                    <span className="truncate text-left flex-1 px-1 text-sm">
-                      {newSocialLink.platform ? SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label : 'Välj plattform'}
-                    </span>
-                    <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent 
-                  className="w-48 bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
-                  side="bottom"
-                  align="start"
-                  sideOffset={4}
-                >
-                  {SOCIAL_PLATFORMS.map((platform) => {
-                    const Icon = platform.icon;
-                    return (
-                      <DropdownMenuItem
-                        key={platform.value}
-                        onSelect={(e) => e.preventDefault()}
-                        onClick={() => {
-                          setNewSocialLink(prev => ({ ...prev, platform: platform.value }));
-                          setPlatformMenuOpen(false);
-                        }}
-                        className="cursor-pointer hover:bg-slate-600/70 focus:bg-slate-600/70 py-2 px-3 text-white flex items-center gap-2"
-                      >
-                        <Icon className="h-4 w-4" />
-                        <span>{platform.label}</span>
-                      </DropdownMenuItem>
-                    );
-                  })}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <Input
-                value={newSocialLink.url}
-                onChange={(e) => setNewSocialLink(prev => ({ ...prev, url: e.target.value }))}
-                placeholder="https://din-webbsida.se"
-                className="md:col-span-2 bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
-              />
-            </div>
-
-            <Button
-              onClick={addSocialLink}
-              disabled={!newSocialLink.platform || !newSocialLink.url.trim()}
-              className="w-full bg-white/10 border border-white/20 text-white hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed h-9 text-sm"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Lägg till
-            </Button>
-          </div>
         </div>
       </div>
 

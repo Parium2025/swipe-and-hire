@@ -6,17 +6,15 @@ import { memo } from 'react';
  */
 interface AnimatedBackgroundProps {
   showBubbles?: boolean;
-  hideRightBubbles?: boolean;
-  disableDesktopShift?: boolean;
 }
 
-export const AnimatedBackground = memo(({ showBubbles = true, hideRightBubbles = false, disableDesktopShift = false }: AnimatedBackgroundProps) => {
+export const AnimatedBackground = memo(({ showBubbles = true }: AnimatedBackgroundProps) => {
   return (
     <div className="fixed inset-0 pointer-events-none z-0">
       {showBubbles && (
         <>
           {/* Cluster shifted as a whole on desktop to avoid overlapping the sidebar */}
-          <div className={`absolute inset-0 transition-transform ${disableDesktopShift ? '' : 'lg:translate-x-[280px]'}`}>
+          <div className="absolute inset-0 lg:translate-x-[280px] transition-transform">
             {/* Animated floating elements with soft bounce (left cluster) */}
             <div className="absolute top-20 left-10 w-4 h-4 bg-secondary/30 rounded-full animate-soft-bounce" style={{ animationDuration: '2s', animationDelay: '-0.3s', animationFillMode: 'backwards' }}></div>
             <div className="absolute top-32 left-16 w-2 h-2 bg-accent/40 rounded-full animate-soft-bounce" style={{ animationDuration: '2.5s', animationDelay: '-1.2s', animationFillMode: 'backwards' }}></div>
@@ -31,34 +29,27 @@ export const AnimatedBackground = memo(({ showBubbles = true, hideRightBubbles =
             </div>
           </div>
 
-          {/* Right-side bubbles (conditionally shown) */}
-          {!hideRightBubbles && (
-            <>
-              <div className="absolute bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full animate-soft-bounce" style={{ animationDuration: '2.2s', animationDelay: '-0.8s', animationFillMode: 'backwards' }}></div>
-              <div className="absolute bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full animate-soft-bounce" style={{ animationDuration: '2.8s', animationDelay: '-1.5s', animationFillMode: 'backwards' }}></div>
-              <div className="absolute bottom-36 right-24 w-2 h-2 bg-accent/35 rounded-full animate-soft-bounce" style={{ animationDuration: '2.3s', animationDelay: '-0.5s', animationFillMode: 'backwards' }}></div>
+          {/* Right-side bubbles remain unchanged */}
+          <div className="absolute bottom-40 right-20 w-5 h-5 bg-accent/30 rounded-full animate-soft-bounce" style={{ animationDuration: '2.2s', animationDelay: '-0.8s', animationFillMode: 'backwards' }}></div>
+          <div className="absolute bottom-32 right-16 w-3 h-3 bg-secondary/25 rounded-full animate-soft-bounce" style={{ animationDuration: '2.8s', animationDelay: '-1.5s', animationFillMode: 'backwards' }}></div>
+          <div className="absolute bottom-36 right-24 w-2 h-2 bg-accent/35 rounded-full animate-soft-bounce" style={{ animationDuration: '2.3s', animationDelay: '-0.5s', animationFillMode: 'backwards' }}></div>
 
-              {/* Pulsing lights (right) */}
-              <div className="absolute top-10 right-10 w-3 h-3 bg-secondary/40 rounded-full animate-pulse" style={{ animationDuration: '1.5s', animationDelay: '-0.4s', animationFillMode: 'backwards' }}></div>
-              <div className="absolute top-16 right-20 w-2 h-2 bg-accent/30 rounded-full animate-pulse" style={{ animationDuration: '2s', animationDelay: '-1.0s', animationFillMode: 'backwards' }}></div>
+          {/* Pulsing lights (right) */}
+          <div className="absolute top-10 right-10 w-3 h-3 bg-secondary/40 rounded-full animate-pulse" style={{ animationDuration: '1.5s', animationDelay: '-0.4s', animationFillMode: 'backwards' }}></div>
+          <div className="absolute top-16 right-20 w-2 h-2 bg-accent/30 rounded-full animate-pulse" style={{ animationDuration: '2s', animationDelay: '-1.0s', animationFillMode: 'backwards' }}></div>
 
-              {/* Center bubble above "ett" in main text */}
-              <div className="absolute top-[45%] left-1/2 -translate-x-1/2 w-2 h-2 bg-white/50 rounded-full animate-pulse" style={{ animationDuration: '2.2s', animationDelay: '-0.9s', animationFillMode: 'backwards' }}></div>
-
-              {/* Small star (right) */}
-              <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-secondary/60 rounded-full animate-pulse" style={{ animationDuration: '2.5s', animationDelay: '-1.3s', animationFillMode: 'backwards' }}>
-                <div className="absolute inset-0 bg-secondary/40 rounded-full animate-ping" style={{ animationDuration: '2.5s', animationDelay: '-1.3s', animationFillMode: 'backwards' }}></div>
-              </div>
-            </>
-          )}
+          {/* Small star (right) */}
+          <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-secondary/60 rounded-full animate-pulse" style={{ animationDuration: '2.5s', animationDelay: '-1.3s', animationFillMode: 'backwards' }}>
+            <div className="absolute inset-0 bg-secondary/40 rounded-full animate-ping" style={{ animationDuration: '2.5s', animationDelay: '-1.3s', animationFillMode: 'backwards' }}></div>
+          </div>
         </>
       )}
       
       {/* Decorative glow effect in bottom right corner - always shown */}
-      <div className="absolute -right-32 -bottom-32 w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[28rem] lg:h-[28rem] opacity-40 sm:opacity-50 md:opacity-70 lg:opacity-80 pointer-events-none pwa-bottom-glow">
-        <div className="absolute inset-0 bg-primary-glow/50 rounded-full blur-[120px]"></div>
-        <div className="absolute inset-4 bg-primary-glow/40 rounded-full blur-[100px]"></div>
-        <div className="absolute inset-8 bg-primary-glow/35 rounded-full blur-[80px]"></div>
+      <div className="absolute -right-32 w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 opacity-25 sm:opacity-30 md:opacity-40 lg:opacity-60 pointer-events-none pwa-bottom-glow">
+        <div className="absolute inset-0 bg-primary-glow/40 rounded-full blur-[120px]"></div>
+        <div className="absolute inset-4 bg-primary-glow/30 rounded-full blur-[100px]"></div>
+        <div className="absolute inset-8 bg-primary-glow/25 rounded-full blur-[80px]"></div>
       </div>
     </div>
   );

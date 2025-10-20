@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -25,20 +25,8 @@ import { AnimatedBackground } from "@/components/AnimatedBackground";
 
 const queryClient = new QueryClient();
 
-// Background that adapts to route and device; must live inside Router  
-const RouterAwareBackground = () => {
-  const location = useLocation();
-  const device = useDevice();
-  const isAuthRoute = location.pathname.startsWith('/auth');
-  const isDesktop = device === 'desktop';
-  return isAuthRoute && isDesktop ? (
-    <AnimatedBackground disableDesktopShift />
-  ) : (
-    <AnimatedBackground />
-  );
-};
-
 const App = () => {
+  const device = useDevice();
   const showHeader = false; // Header removed for cleaner UI
 
   const [animReady, setAnimReady] = useState(false);
@@ -57,8 +45,8 @@ const App = () => {
       <BrowserRouter>
         <UnsavedChangesProvider>
           <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
-            {/* Global background to avoid flicker between route transitions */}
-            <RouterAwareBackground />
+            {/* Global persistent background to avoid flicker between routes */}
+            <AnimatedBackground />
             
             <div className="relative z-10">
               {showHeader && <Header />}
