@@ -408,8 +408,8 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
               {/* Kommentarsfält eller informationstext */}
               {isOwnProfile ? (
                 <div className="bg-white/5 p-2 md:p-2.5 rounded-lg">
-                  <p className="text-[10px] md:text-xs text-white/70 text-center">
-                    (Här lämnar jobbsökarna kommentarer om de vill samt betyg)
+                  <p className="text-[10px] md:text-xs text-white text-center">
+                    Här lämnar jobbsökaren en kommentar vad de vill samt betyg
                   </p>
                 </div>
               ) : (
@@ -441,7 +441,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                     <Textarea
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
-                      placeholder="Dela dina erfarenheter av detta företag..."
+                      placeholder=""
                       className="min-h-[80px] md:min-h-[100px] text-xs md:text-sm touch-manipulation"
                     />
                   </div>
