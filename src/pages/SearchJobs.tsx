@@ -465,34 +465,34 @@ const SearchJobs = () => {
       
       {/* Main content */}
       {/* Hero Section */}
-      <div className="text-center space-y-3 py-4" data-onboarding="search-hero">
-        <h1 className="text-4xl font-extrabold text-white">
+      <div className="text-center space-y-2 py-3">
+        <h1 className="text-2xl font-bold text-white">
           Ditt nästa steg
         </h1>
-        <p className="text-xl text-white/90 max-w-2xl mx-auto">
+        <p className="text-sm text-white/90 max-w-2xl mx-auto">
           Enkel, smart och snabb jobbsökning. Välj yrkesområde eller sök fritt - vi hjälper dig hitta rätt
         </p>
       </div>
 
       {/* Advanced Search - Modern & Integrated */}
-      <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-        <CardHeader className="pb-4">
+      <Card className="bg-white/5 backdrop-blur-sm border-white/20">
+        <CardHeader className="pb-3">
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4">
           {/* Search Fields Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             
             {/* Combined Job and Company Search */}
-            <div className="space-y-3 relative z-[10000]">
-              <Label htmlFor="search" data-onboarding="search-label" className="text-base font-medium text-white flex items-center gap-2">
-                <Search className="h-4 w-4" />
+            <div className="space-y-2 relative z-[10000]">
+              <Label htmlFor="search" className="text-xs font-medium text-white flex items-center gap-2">
+                <Search className="h-3 w-3" />
                 Sök
               </Label>
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/50" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
                 <Input
                   id="search"
-                  placeholder="Sök yrke eller företag"
+                  placeholder="Sök yrke eller företag..."
                   value={searchTerm}
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
@@ -500,7 +500,7 @@ const SearchJobs = () => {
                   }}
                   onFocus={() => setShowSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                  className="pl-12 h-12 text-base bg-white/5 backdrop-blur-sm border-white/20 text-white placeholder:text-white/50 hover:bg-white/10 focus:bg-white/10 transition-colors"
+                  className="pl-10 h-10 text-sm bg-white/5 border-white/10 text-white placeholder:text-white/40"
                 />
                 {searchTerm && (
                   <button 
@@ -590,21 +590,21 @@ const SearchJobs = () => {
             </div>
 
             {/* Yrke Filter - Direct dropdown */}
-            <div className="space-y-3">
-              <Label className="text-base font-medium text-white flex items-center gap-2">
-                <Filter className="h-4 w-4" />
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-white flex items-center gap-2">
+                <Briefcase className="h-3 w-3" />
                 Yrkesområde
               </Label>
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                    className="w-full h-10 bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between text-sm"
                   >
                     <span className="truncate">
                       {selectedSubcategories.length > 0 
-                        ? `${selectedSubcategories.length} yrken valda`
-                        : 'Välj yrkesområde'
+                        ? `${selectedSubcategories.length} valda`
+                        : 'Välj yrkeso...'
                       }
                     </span>
                     <div className="flex items-center gap-2">
@@ -730,9 +730,9 @@ const SearchJobs = () => {
             </div>
 
             {/* Multi-Select Location */}
-            <div className="space-y-3">
-              <Label className="text-base font-medium text-white flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-white flex items-center gap-2">
+                <MapPin className="h-3 w-3" />
                 Plats
               </Label>
               <div className="relative">
@@ -740,14 +740,14 @@ const SearchJobs = () => {
                   <DropdownMenuTrigger asChild>
                     <Button 
                       variant="outline" 
-                      className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                      className="w-full h-10 bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between text-sm"
                     >
                        <span className="truncate">
                          {selectedLocations.length === 0 
-                           ? 'Välj ort eller sök fritt'
+                           ? 'Välj ort eller...'
                            : selectedLocations.length === 1 
                            ? selectedLocations[0]
-                           : `${selectedLocations.length} orter valda`
+                           : `${selectedLocations.length} valda`
                          }
                        </span>
                       <ChevronDown className="h-4 w-4 flex-shrink-0" />
@@ -845,16 +845,16 @@ const SearchJobs = () => {
             </div>
 
             {/* Employment Type */}
-            <div className="space-y-3">
-              <Label className="text-base font-medium text-white flex items-center gap-2">
-                <Clock className="h-4 w-4" />
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-white flex items-center gap-2">
+                <Clock className="h-3 w-3" />
                 Anställning
               </Label>
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full h-12 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between"
+                    className="w-full h-10 bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between text-sm"
                   >
                     <span className="truncate">
                       {selectedEmploymentTypes.length === 0 
@@ -995,10 +995,10 @@ const SearchJobs = () => {
           )}
 
           {/* Results Summary */}
-          <div className={`flex flex-col sm:flex-row items-center gap-4 pt-4 border-t border-white/10 ${jobs.length === 0 ? 'justify-center' : 'justify-between'}`}>
+          <div className={`flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-white/10 ${jobs.length === 0 ? 'justify-center' : 'justify-between'}`}>
             <div className={`flex items-center gap-2 flex-wrap ${jobs.length === 0 ? 'justify-center text-center mx-auto' : ''}`}>
-              <span className="text-2xl font-bold text-white">{jobs.length}</span>
-              <span className="text-white">jobb hittades</span>
+              <span className="text-xl font-bold text-white">{jobs.length}</span>
+              <span className="text-sm text-white">jobb hittades</span>
               {(searchTerm || selectedLocations.length > 0 || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentTypes.length > 0) && (
                 <>
                   <span className="text-white/70">•</span>
@@ -1056,78 +1056,74 @@ const SearchJobs = () => {
       {/* Removed collapsible job categories section - now handled in dropdown above */}
 
       {/* Results Section */}
-      <div className="space-y-6" data-results>
+      <div className="space-y-4" data-results>
         {loading ? (
-          <div className="text-center py-16">
-            <div className="inline-flex items-center gap-3">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <p className="text-lg text-muted-foreground">Söker bland tusentals jobb...</p>
+          <div className="text-center py-12">
+            <div className="inline-flex items-center gap-2">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+              <p className="text-sm text-white/70">Söker bland tusentals jobb...</p>
             </div>
           </div>
         ) : (
           <>
             {/* Job Cards */}
-            <div className="grid gap-6">
+            <div className="grid gap-4">
               {jobs.map((job) => (
-                <Card key={job.id} className="group hover:shadow-xl transition-all duration-300 border-l-4 border-l-transparent hover:border-l-primary">
-                  <CardContent className="p-8">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1 space-y-4">
+                <Card key={job.id} className="group bg-white/5 backdrop-blur-sm border-white/20 hover:bg-white/10 transition-all duration-200">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="flex-1 space-y-3">
                         {/* Job Header */}
-                        <div className="flex items-start justify-between">
-                          <div className="space-y-2">
-                            <h3 className="text-2xl font-bold group-hover:text-primary transition-colors">
-                              {job.title}
-                            </h3>
-                            <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
-                              <div className="flex items-center gap-2 font-medium">
-                                <Building className="h-5 w-5" />
-                                {job.company_name}
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <MapPin className="h-5 w-5" />
-                                {job.location}
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Clock className="h-5 w-5" />
-                                {job.employment_type}
-                              </div>
+                        <div className="space-y-1">
+                          <h3 className="text-lg font-semibold text-white group-hover:text-white/90 transition-colors">
+                            {job.title}
+                          </h3>
+                          <div className="flex flex-wrap items-center gap-3 text-white/70 text-sm">
+                            <div className="flex items-center gap-1">
+                              <Building className="h-3 w-3" />
+                              {job.company_name}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              {job.location}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {job.employment_type}
                             </div>
                           </div>
                         </div>
                         
                         {/* Job Description */}
-                        <p className="text-muted-foreground text-lg leading-relaxed">
-                          {job.description.length > 200 
-                            ? `${job.description.substring(0, 200)}...` 
+                        <p className="text-white/60 text-sm leading-relaxed">
+                          {job.description.length > 150 
+                            ? `${job.description.substring(0, 150)}...` 
                             : job.description
                           }
                         </p>
                         
                         {/* Job Footer */}
-                        <div className="flex items-center justify-between pt-4 border-t">
-                          <div className="flex items-center gap-4">
-                            <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50 text-base px-3 py-1">
-                              {formatSalary(job.salary_min, job.salary_max)}
-                            </Badge>
-                            <span className="text-sm text-muted-foreground">
-                              {new Date(job.created_at).toLocaleDateString('sv-SE', {
-                                day: 'numeric',
-                                month: 'long'
-                              })}
-                            </span>
-                          </div>
+                        <div className="flex items-center gap-3 pt-2 border-t border-white/10">
+                          <Badge variant="outline" className="bg-green-500/20 text-green-300 border-green-500/30 text-xs">
+                            {formatSalary(job.salary_min, job.salary_max)}
+                          </Badge>
+                          <span className="text-xs text-white/50">
+                            {new Date(job.created_at).toLocaleDateString('sv-SE', {
+                              day: 'numeric',
+                              month: 'short'
+                            })}
+                          </span>
                         </div>
                       </div>
                       
                       {/* Action Buttons */}
-                      <div className="flex flex-col gap-3 ml-8">
-                        <Button size="lg" className="px-8">
-                          <ExternalLink className="h-5 w-5 mr-2" />
+                      <div className="flex flex-col gap-2">
+                        <Button size="sm" className="h-8 px-3 text-xs">
+                          <ExternalLink className="h-3 w-3 mr-1" />
                           Ansök nu
                         </Button>
-                        <Button variant="outline" size="lg">
-                          <Heart className="h-5 w-5" />
+                        <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-white/5 border-white/20 hover:bg-white/10">
+                          <Heart className="h-3 w-3" />
                         </Button>
                       </div>
                     </div>
