@@ -14,6 +14,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { Linkedin, Twitter, ExternalLink, Instagram, Trash2, Plus, Globe, ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface SocialMediaLink {
   platform: 'linkedin' | 'twitter' | 'instagram' | 'annat';
@@ -387,11 +388,11 @@ const EmployerProfile = () => {
 
       {/* Social Media Links Section */}
       <div className="bg-white/5 border border-white/10 rounded-lg">
-        <div className="px-6 py-4 border-b border-white/10">
+        <div className="px-6 py-4 md:px-4 md:py-3 border-b border-white/10">
           <h3 className="text-lg font-semibold text-white">Sociala medier</h3>
           <p className="text-sm text-white">Lägg till dina sociala medier-profiler</p>
         </div>
-        <div className="p-6 space-y-5">
+        <div className="p-6 md:p-4 space-y-5 md:space-y-3">
           {/* Existing social media links */}
           {formData.social_media_links.length > 0 && (
             <div className="space-y-2">
@@ -436,9 +437,9 @@ const EmployerProfile = () => {
           )}
 
           {/* Add new social media link */}
-          <div className="space-y-4 border-t border-white/10 pt-4">
+          <div className="space-y-4 md:space-y-3 border-t border-white/10 pt-4 md:pt-3">
             <Label className="text-sm text-white">Lägg till ny länk</Label>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-3">
               <DropdownMenu modal={false} open={platformMenuOpen} onOpenChange={setPlatformMenuOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -506,7 +507,10 @@ const EmployerProfile = () => {
                 type="button"
                 onClick={addSocialLink}
                 disabled={!newSocialLink.platform || !newSocialLink.url.trim()}
-                className="bg-primary/80 hover:bg-primary text-white h-9 text-sm"
+                className={cn(
+                  "bg-primary/80 hover:bg-primary text-white h-9 text-sm",
+                  newSocialLink.platform && newSocialLink.url.trim() && "border border-white/30"
+                )}
               >
                 <Plus className="h-3 w-3 mr-1.5" />
                 Lägg till
@@ -516,7 +520,7 @@ const EmployerProfile = () => {
 
           {/* Display social media links if any exist */}
           {formData.social_media_links.length > 0 && (
-            <div className="border-t border-white/10 pt-4">
+            <div className="border-t border-white/10 pt-4 md:pt-3">
               <Label className="text-sm text-white mb-2 block">Förhandsvisning</Label>
               <div className="flex flex-wrap gap-2">
                 {formData.social_media_links.map((link, index) => {
