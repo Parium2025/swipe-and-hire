@@ -210,9 +210,9 @@ const CompanyProfile = () => {
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-semibold text-white mb-1">Företagslogga</h1>
-        <p className="text-sm text-white">Ladda upp din företagslogga för att bygga kännedom och förtroende</p>
+      <div className="text-center mb-4">
+        <h1 className="text-xl font-semibold text-white mb-1">Företagslogga</h1>
+        <p className="text-xs text-white">Ladda upp din företagslogga för att bygga kännedom och förtroende</p>
       </div>
 
       {/* Företagslogga sektion - Minimalistisk */}
@@ -286,17 +286,17 @@ const CompanyProfile = () => {
       </div>
 
       {/* Företagsinformation - Minimalistisk */}
-      <div className="mt-8">
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-semibold text-white mb-1">Företagsinformation</h2>
-          <p className="text-sm text-white">Uppdatera företagsprofil för att synas bättre för kandidater</p>
+      <div className="mt-6">
+        <div className="text-center mb-4">
+          <h2 className="text-xl font-semibold text-white mb-1">Företagsinformation</h2>
+          <p className="text-xs text-white">Uppdatera företagsprofil för att synas bättre för kandidater</p>
         </div>
 
-        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
-          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-5 md:space-y-3">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="company_name" className="text-sm text-white">Företagsnamn</Label>
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
+          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="company_name" className="text-xs text-white">Företagsnamn</Label>
                 <Input
                   id="company_name"
                   value={formData.company_name}
@@ -305,8 +305,8 @@ const CompanyProfile = () => {
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="org_number" className="text-sm text-white">Organisationsnummer (frivillig)</Label>
+              <div className="space-y-1">
+                <Label htmlFor="org_number" className="text-xs text-white">Organisationsnummer (frivillig)</Label>
                 <Input
                   id="org_number"
                   value={formData.org_number}
@@ -333,8 +333,8 @@ const CompanyProfile = () => {
                 )}
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="industry" className="text-sm text-white">Bransch</Label>
+              <div className="space-y-1">
+                <Label htmlFor="industry" className="text-xs text-white">Bransch</Label>
                 <DropdownMenu modal={false} open={industryMenuOpen} onOpenChange={setIndustryMenuOpen}>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -426,8 +426,8 @@ const CompanyProfile = () => {
                 </DropdownMenu>
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="employee_count" className="text-sm text-white">Antal anställda</Label>
+              <div className="space-y-1">
+                <Label htmlFor="employee_count" className="text-xs text-white">Antal anställda</Label>
                 <Select
                   value={formData.employee_count}
                   onValueChange={(value) => setFormData({...formData, employee_count: value})}
@@ -445,8 +445,8 @@ const CompanyProfile = () => {
                 </Select>
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="address" className="text-sm text-white">Huvudkontor</Label>
+              <div className="space-y-1">
+                <Label htmlFor="address" className="text-xs text-white">Huvudkontor</Label>
                 <Input
                   id="address"
                   value={formData.address}
@@ -456,8 +456,8 @@ const CompanyProfile = () => {
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="website" className="text-sm text-white">Webbsida</Label>
+              <div className="space-y-1">
+                <Label htmlFor="website" className="text-xs text-white">Webbsida</Label>
                 <Input
                   id="website"
                   value={formData.website}
@@ -468,8 +468,8 @@ const CompanyProfile = () => {
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="company_description" className="text-sm text-white">Företagsbeskrivning</Label>
+            <div className="space-y-1">
+              <Label htmlFor="company_description" className="text-xs text-white">Företagsbeskrivning</Label>
               <Textarea
                 id="company_description"
                 value={formData.company_description}
@@ -480,7 +480,7 @@ const CompanyProfile = () => {
               />
             </div>
 
-            <div className="flex justify-end pt-2">
+            <div className="flex justify-center pt-1">
               <Button 
                 type="submit" 
                 disabled={loading || !hasUnsavedChanges}
