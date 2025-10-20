@@ -202,6 +202,7 @@ const EmployerDashboard = memo(() => {
                   <TableHead className="text-white font-semibold text-xs text-center px-2">Visningar</TableHead>
                   <TableHead className="text-white font-semibold text-xs text-center px-2">Ansökningar</TableHead>
                   <TableHead className="text-white font-semibold text-xs px-2">Plats</TableHead>
+                  <TableHead className="text-white font-semibold text-xs px-2">Rekryterare</TableHead>
                   <TableHead className="text-white font-semibold text-xs px-2">Skapad</TableHead>
                   <TableHead className="text-white font-semibold text-xs px-2">Åtgärder</TableHead>
                 </TableRow>
@@ -209,13 +210,13 @@ const EmployerDashboard = memo(() => {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-white/60 py-8 text-xs">
+                    <TableCell colSpan={8} className="text-center text-white/60 py-8 text-xs">
                       Laddar...
                     </TableCell>
                   </TableRow>
                 ) : jobs.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center !text-white py-8 font-medium text-xs">
+                    <TableCell colSpan={8} className="text-center !text-white py-8 font-medium text-xs">
                       Inga jobbannonser än. Skapa din första annons!
                     </TableCell>
                   </TableRow>
@@ -259,6 +260,13 @@ const EmployerDashboard = memo(() => {
                           <MapPin size={12} />
                           <span className="truncate max-w-[120px]">{job.location}</span>
                         </div>
+                      </TableCell>
+                      <TableCell className="text-white px-2 py-2">
+                        <span className="text-xs truncate max-w-[150px] block">
+                          {job.employer_profile?.first_name && job.employer_profile?.last_name
+                            ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
+                            : '-'}
+                        </span>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
                         <div className="flex items-center gap-1 text-xs whitespace-nowrap">

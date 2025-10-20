@@ -19,6 +19,10 @@ export interface JobPosting {
   applications_count: number;
   created_at: string;
   updated_at: string;
+  employer_profile?: {
+    first_name: string;
+    last_name: string;
+  };
 }
 
 export const useJobsData = () => {
@@ -32,7 +36,13 @@ export const useJobsData = () => {
       
       const { data, error } = await supabase
         .from('job_postings')
-        .select('*')
+        .select(`
+          *,
+          employer_profile:employer_id (
+            first_name,
+            last_name
+          )
+        `)
         .eq('employer_id', user.id)
         .order('created_at', { ascending: false });
 
