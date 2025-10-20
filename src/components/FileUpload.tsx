@@ -214,7 +214,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                   ? 'Släpp filen här...'
                   : 'Klicka för att välja fil'}
               </p>
-              <p className="text-xs text-white">
+              <p className="text-sm text-white">
                 {getAcceptedTypesText()} (max {Math.round(maxFileSize / 1024 / 1024)}MB)
               </p>
             </>

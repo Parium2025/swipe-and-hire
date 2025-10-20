@@ -366,7 +366,7 @@ const JobTemplatesOverview = () => {
                     <div className="flex items-center gap-2 mb-1">
                       <CardTitle className="text-xl text-white">{template.name}</CardTitle>
                       {template.is_default && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-200 border border-blue-400/30">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium bg-blue-500/20 text-blue-200 border border-blue-400/30">
                           <Star size={12} className="mr-1" />
                           Standard
                         </span>

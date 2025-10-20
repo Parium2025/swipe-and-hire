@@ -684,7 +684,7 @@ const AuthTablet = ({
                         {resetPasswordSent && (
                           <div className="mt-4 p-3 rounded-lg text-center">
                             <p className="text-sm mb-3 font-medium text-white">Återställningsmail skickat!</p>
-                            <div className="text-xs text-muted-foreground bg-secondary/10 p-2 rounded border-l-4 border-secondary mb-3">
+                            <div className="text-sm text-muted-foreground bg-secondary/10 p-2 rounded border-l-4 border-secondary mb-3">
                               <p className="font-medium text-white">Tips:</p>
                               <p className="text-white">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där</p>
                             </div>
@@ -692,7 +692,7 @@ const AuthTablet = ({
                                size="sm"
                                onClick={handleResetPasswordEmail}
                                disabled={resetLoading}
-                               className="bg-parium-navy hover:bg-parium-navy/90 text-white text-xs"
+                               className="bg-parium-navy hover:bg-parium-navy/90 text-white text-sm"
                              >
                                {resetLoading ? "Skickar..." : "Skicka igen"}
                              </Button>
@@ -814,7 +814,7 @@ const AuthTablet = ({
                                     required
                                   />
                                  {jobSeekerData.phoneError && (
-                                   <p className="text-destructive text-xs mt-1">{jobSeekerData.phoneError}</p>
+                                   <p className="text-destructive text-sm mt-1">{jobSeekerData.phoneError}</p>
                                  )}
                               </div>
                            )}
@@ -1074,7 +1074,7 @@ const AuthTablet = ({
                                 />
                               ))}
                             </div>
-                            <p className="text-xs text-muted-foreground mt-1">
+                            <p className="text-sm text-muted-foreground mt-1">
                               {passwordStrength < 3 && 'Svagt lösenord'}
                               {passwordStrength >= 3 && passwordStrength < 5 && 'Medel lösenord'}
                               {passwordStrength >= 5 && 'Starkt lösenord'}
@@ -1098,7 +1098,7 @@ const AuthTablet = ({
                 {showResend && (
                   <div className="mt-4 p-4 bg-primary/10 backdrop-blur-sm border border-primary/20 rounded-lg text-center">
                     <p className="text-sm mb-3 text-white font-medium">Kolla din e-post för bekräftelselänk</p>
-                    <div className="text-xs text-primary-foreground/80 bg-primary/10 p-2 rounded border-l-4 border-primary mb-3">
+                    <div className="text-sm text-primary-foreground/80 bg-primary/10 p-2 rounded border-l-4 border-primary mb-3">
                       <p className="text-white">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där</p>
                     </div>
                     <Button

@@ -973,7 +973,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   <Input type="file" id="coverImage" accept="image/*" className="hidden" onChange={handleCoverChange} disabled={isUploadingCover} />
                   
                   {isUploadingCover && (
-                    <Badge variant="secondary" className="bg-blue-500/20 text-blue-100 text-xs animate-pulse">
+                    <Badge variant="secondary" className="bg-blue-500/20 text-blue-100 text-sm animate-pulse">
                       <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-100 mr-1"></div>
                       Laddar upp cover-bild...
                     </Badge>
@@ -981,7 +981,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   
                   {formData.coverImageUrl && !isUploadingCover && (
                     <div className="flex items-center justify-center">
-                       <Badge variant="secondary" className="bg-white/20 text-white text-xs">
+                       <Badge variant="secondary" className="bg-white/20 text-white text-sm">
                           Cover-bild uppladdad!
                         </Badge>
                     </div>
@@ -1048,7 +1048,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   placeholder="Berätta kort om dig själv..."
                 />
                 <div className="flex justify-end mt-1">
-                  <span className="text-xs text-white">
+                  <span className="text-sm text-white">
                     {countWords(formData.bio)}/100 ord
                   </span>
                 </div>

@@ -160,7 +160,7 @@ const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQuestionIt
           </div>
           
           <div className="flex-1 min-w-0">
-            <div className="text-white font-medium text-xs leading-tight truncate">
+            <div className="text-white font-medium text-sm leading-tight truncate">
               {question.question_text || 'Ingen frågetext'}
             </div>
           </div>
@@ -264,9 +264,9 @@ const MobileJobWizard = ({
     } else if (length <= 50) {
       return { fontSize: 'text-sm', lineHeight: 'leading-tight' };
     } else if (length <= 70) {
-      return { fontSize: 'text-xs', lineHeight: 'leading-tight' };
+      return { fontSize: 'text-sm', lineHeight: 'leading-tight' };
     } else {
-      return { fontSize: 'text-xs', lineHeight: 'leading-none' };
+      return { fontSize: 'text-sm', lineHeight: 'leading-none' };
     }
   };
   
@@ -378,18 +378,18 @@ const MobileJobWizard = ({
     const metaLength = metaLine.length;
 
     // More aggressive sizing for better visual balance
-    let companySizeClass = 'text-xs'; // Start smaller for company
+    let companySizeClass = 'text-sm'; // Start smaller for company
     let titleSizeClass = 'text-lg';   // Make title more prominent 
     let metaSizeClass = 'text-sm';    // Readable meta info
 
     // Adjust title size based on length - this is the hero element
     if (titleLength > 50) {
       titleSizeClass = 'text-base';
-      companySizeClass = 'text-xs';
-      metaSizeClass = 'text-xs';
+      companySizeClass = 'text-sm';
+      metaSizeClass = 'text-sm';
     } else if (titleLength > 30) {
       titleSizeClass = 'text-lg';
-      companySizeClass = 'text-xs';
+      companySizeClass = 'text-sm';
       metaSizeClass = 'text-sm';
     } else if (titleLength < 20) {
       titleSizeClass = 'text-xl';
@@ -399,14 +399,14 @@ const MobileJobWizard = ({
 
     // Adjust company name - keep it subtle but readable
     if (companyLength > 15) {
-      companySizeClass = 'text-xs';
+      companySizeClass = 'text-sm';
     } else if (companyLength < 8) {
       companySizeClass = 'text-sm';
     }
 
     // Ensure meta info is always readable
     if (metaLength > 20) {
-      metaSizeClass = 'text-xs';
+      metaSizeClass = 'text-sm';
     } else if (metaLength < 10) {
       metaSizeClass = 'text-sm';
     }
@@ -1148,10 +1148,10 @@ const MobileJobWizard = ({
 
   // Smart email text sizing based on email length
   const getEmailTextSize = (email: string) => {
-    if (!email) return 'text-xs';
+    if (!email) return 'text-sm';
     
     const length = email.length;
-    if (length <= 15) return 'text-xs'; // Short emails get normal size
+    if (length <= 15) return 'text-sm'; // Short emails get normal size
     if (length <= 25) return 'text-[10px]'; // Medium emails get smaller
     if (length <= 35) return 'text-[9px]'; // Long emails get even smaller
     return 'text-[8px]'; // Very long emails get tiny
@@ -2019,7 +2019,7 @@ const MobileJobWizard = ({
                                         onClick={() => useQuestionTemplate(template)}
                                         className="flex-1 text-left hover:opacity-80 transition-opacity min-w-0"
                                       >
-                                        <div className="text-white font-medium text-xs leading-tight truncate">
+                                        <div className="text-white font-medium text-sm leading-tight truncate">
                                           {template.question_text}
                                         </div>
                                       </button>
@@ -2316,8 +2316,8 @@ const MobileJobWizard = ({
                            {/* Form container (toggle) */}
                            <div className={showApplicationForm ? 'flex flex-col h-full' : 'hidden'}>
                              <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 border-b border-white/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem]">
-                               <div className="text-xs font-bold text-white">Ansökningsformulär</div>
-                               <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white/80 hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
+                               <div className="text-sm font-bold text-white">Ansökningsformulär</div>
+                               <button onClick={() => setShowApplicationForm(false)} className="text-sm text-white/80 hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
                              </div>
 
                             {/* Scrollable content */}
@@ -2359,7 +2359,7 @@ const MobileJobWizard = ({
                                        onClick={() => {
                                          setShowCompanyProfile(true);
                                        }}
-                                       className="text-xs font-bold text-white hover:text-primary transition-colors cursor-pointer"
+                                       className="text-sm font-bold text-white hover:text-primary transition-colors cursor-pointer"
                                      >
                                        {profile?.company_name || 'Företagsnamn'}
                                      </button>
@@ -2369,14 +2369,14 @@ const MobileJobWizard = ({
                                 {/* Yrke */}
                                 {formData.occupation && (
                                    <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
-                                    <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                    <h5 className="text-sm font-medium text-white mb-1 flex items-center">
                                       <Briefcase className="h-2 w-2 mr-1 text-white" />
                                       Yrke
                                     </h5>
                                      <div className="text-white">
                                        <div 
                                          ref={occupationRef}
-                                         className="text-xs leading-relaxed break-words inline-block pr-2 overflow-visible"
+                                         className="text-sm leading-relaxed break-words inline-block pr-2 overflow-visible"
                                        >
                                          {formData.occupation}
                                        </div>
@@ -2387,8 +2387,8 @@ const MobileJobWizard = ({
                                 {/* Jobbeskrivning */}
                                 {formData.description && (
                                   <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
-                                    <h5 className="text-xs font-medium text-white mb-1">Jobbeskrivning</h5>
-                                    <div className="text-xs text-white leading-relaxed whitespace-pre-wrap break-words [&>*]:mb-1 [&>*:last-child]:mb-0">
+                                    <h5 className="text-sm font-medium text-white mb-1">Jobbeskrivning</h5>
+                                    <div className="text-sm text-white leading-relaxed whitespace-pre-wrap break-words [&>*]:mb-1 [&>*:last-child]:mb-0">
                                       {formData.description.split('\n').map((line, index) => {
                                         const trimmedLine = line.trim();
                                         // Detect bullet points (•, -, *, numbers with dots/parentheses)
@@ -2417,11 +2417,11 @@ const MobileJobWizard = ({
                                {/* Lön */}
                                {(formData.salary_min || formData.salary_max || formData.salary_type) && (
                                  <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
-                                   <h5 className="text-xs font-medium text_white mb-1 flex items-center">
-                                     <Banknote className="h-2 w-2 mr-1 text-white" />
-                                     Lön
-                                   </h5>
-                                    <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
+                                   <h5 className="text-sm font-medium text_white mb-1 flex items-center">
+                                      <Banknote className="h-2 w-2 mr-1 text-white" />
+                                      Lön
+                                    </h5>
+                                    <div className="text-sm text-white leading-relaxed break-words space-y-0.5">
                                       {formatSalaryInfo().map((info, index) => (
                                         <div key={index} className="font-medium">{info}</div>
                                       ))}
@@ -2432,11 +2432,11 @@ const MobileJobWizard = ({
 
                                 {/* Arbetsplats */}
                                 <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                  <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                  <h5 className="text-sm font-medium text-white mb-1 flex items-center">
                                     <MapPin className="h-2 w-2 mr-1 text-white" />
                                     Arbetsplats
                                   </h5>
-                                   <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
+                                   <div className="text-sm text-white leading-relaxed break-words space-y-0.5">
                                      {formData.workplace_name && (
                                        <div className="font-medium">{formData.workplace_name}</div>
                                      )}
@@ -2461,11 +2461,11 @@ const MobileJobWizard = ({
                                  {/* Antal rekryteringar */}
                                  {formData.positions_count && parseInt(formData.positions_count) > 0 && (
                                    <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
-                                     <h5 className="text-xs font-medium text-white mb-1 flex items_center whitespace-nowrap">
+                                     <h5 className="text-sm font-medium text-white mb-1 flex items-center whitespace-nowrap">
                                        <Users className="h-2 w-2 mr-1 text-white" />
                                        Antal rekryteringar
                                      </h5>
-                                      <div className="text-xs text-white leading-relaxed break-words">
+                                      <div className="text-sm text-white leading-relaxed break-words">
                                         <div className="font-medium">{formatPositionsCount()}</div>
                                       </div>
                                    </div>
@@ -2473,11 +2473,11 @@ const MobileJobWizard = ({
 
                                 {/* Kontakt */}
                                <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                  <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                  <h5 className="text-sm font-medium text-white mb-1 flex items-center">
                                     <Mail className="h-2 w-2 mr-1 text-white" />
                                     Kontakt
                                   </h5>
-                                    <div className="text-xs text-white leading-relaxed break-words">
+                                    <div className="text-sm text-white leading-relaxed break-words">
                                       {formData.contact_email && (
                                         <a 
                                           href={`mailto:${formData.contact_email}`}
@@ -2492,8 +2492,8 @@ const MobileJobWizard = ({
                               {/* Krav och kvalifikationer */}
                               {formData.requirements && (
                                 <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                  <h4 className="text-xs font-semibold text-white mb-1">Kvalifikationer</h4>
-                                  <p className="text-xs text-white leading-relaxed">
+                                  <h4 className="text-sm font-semibold text-white mb-1">Kvalifikationer</h4>
+                                  <p className="text-sm text-white leading-relaxed">
                                     {formData.requirements.length > 100 
                                       ? formData.requirements.substring(0, 100) + '...' 
                                       : formData.requirements
@@ -2504,7 +2504,7 @@ const MobileJobWizard = ({
 
                                {/* Följande information samlas automatiskt in från alla kandidater */}
                                <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                 <p className="text-xs text-white mb-3 leading-relaxed">
+                                 <p className="text-sm text-white mb-3 leading-relaxed">
                                    Följande information samlas automatiskt in från alla kandidater som har sökt:
                                  </p>
                                  
@@ -2521,7 +2521,7 @@ const MobileJobWizard = ({
                                      'Nuvarande anställningsform',
                                      'Tillgänglighet',
                                    ].map((label, idx) => (
-                                     <div key={idx} className="text-xs flex">
+                                     <div key={idx} className="text-sm flex">
                                        <span className="flex-shrink-0 mr-1 text-white">•</span>
                                        <span className="flex-1 text-white leading-tight break-words">{label}</span>
                                      </div>
@@ -2547,7 +2547,7 @@ const MobileJobWizard = ({
                                       <div key={question.id || index} className="bg-white/10 rounded-lg p-3 border border-white/20">
                                         {/* Frågetext */}
                                         <div className="mb-2">
-                                          <label className="text-xs font-medium text-white block leading-tight">
+                                          <label className="text-sm font-medium text-white block leading-tight">
                                             {question.question_text}
                                           </label>
                                         </div>
@@ -2555,7 +2555,7 @@ const MobileJobWizard = ({
                                         {/* Input förhandsvisning baserat på frågetyp */}
                                         {question.question_type === 'text' && (
                                           <textarea
-                                            className="w-full border border-white/20 bg-white/10 rounded p-2 text-xs text-white placeholder:text-white/60 resize-none"
+                                            className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white/60 resize-none"
                                             placeholder={question.placeholder_text || 'Skriv ditt svar...'}
                                             rows={2}
                                           />
@@ -2579,7 +2579,7 @@ const MobileJobWizard = ({
                                                 (previewAnswers[question.id || `q_${index}`] === 'yes'
                                                   ? 'bg-secondary/40 border-secondary text-white '
                                                   : 'bg-white/10 border-white/20 text-white ') +
-                                                'border rounded-md px-2 py-1 text-xs transition-colors font-medium flex-1'
+                                                'border rounded-md px-2 py-1 text-sm transition-colors font-medium flex-1'
                                               }
                                             >
                                               Ja
@@ -2600,7 +2600,7 @@ const MobileJobWizard = ({
                                                 (previewAnswers[question.id || `q_${index}`] === 'no'
                                                   ? 'bg-secondary/40 border-secondary text-white '
                                                   : 'bg-white/10 border-white/20 text-white ') +
-                                                'border rounded-md px-2 py-1 text-xs transition-colors font-medium flex-1'
+                                                'border rounded-md px-2 py-1 text-sm transition-colors font-medium flex-1'
                                               }
                                             >
                                               Nej
@@ -2658,7 +2658,7 @@ const MobileJobWizard = ({
                                                         </svg>
                                                       )}
                                                     </div>
-                                                    <span className="text-xs text-white/90">{option}</span>
+                                                    <span className="text-sm text-white/90">{option}</span>
                                                   </button>
                                                 );
                                               })}
@@ -2688,7 +2688,7 @@ const MobileJobWizard = ({
                                         {question.question_type === 'date' && (
                                           <input
                                             type="date"
-                                            className="w-full border border-white/20 bg-white/10 rounded p-2 text-xs text-white placeholder:text-white/60 h-9"
+                                            className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white/60 h-9"
                                             placeholder={question.placeholder_text}
                                             disabled
                                           />
@@ -2701,7 +2701,7 @@ const MobileJobWizard = ({
                                             ) : (
                                               <Video className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
                                             )}
-                                            <p className="text-xs text-white/60">
+                                            <p className="text-sm text-white/60">
                                               {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
                                             </p>
                                           </div>
@@ -2821,7 +2821,7 @@ const MobileJobWizard = ({
                             Justera bild
                           </button>
                         </div>
-                        <p className="text-xs text-white text-center">
+                        <p className="text-sm text-white text-center">
                           Klicka för att zooma, panorera och justera bilden
                         </p>
                       </div>

@@ -231,11 +231,11 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
                 {currentStepData.title}
               </h3>
               
-              <Badge variant="outline" className="mb-3 border-white/20 text-white bg-white/20 text-xs">
+              <Badge variant="outline" className="mb-3 border-white/20 text-white bg-white/20 text-sm">
                 {currentStep + 1} av {steps.length}
               </Badge>
               
-              <p className="text-white/80 text-xs leading-relaxed mb-4">
+              <p className="text-white/80 text-sm leading-relaxed mb-4">
                 {currentStepData.description}
               </p>
               
@@ -245,7 +245,7 @@ const AppOnboardingTour = ({ onComplete }: AppOnboardingTourProps) => {
                   <Button 
                     onClick={handleNext}
                     size="sm"
-                    className="min-w-[80px] text-xs px-3 py-1 h-8"
+                    className="min-w-[80px] text-sm px-3 py-1 h-8"
                   >
                     {currentStep === steps.length - 1 ? 'Nu kör vi!' : 'Nästa'}
                     {currentStep !== steps.length - 1 && <ArrowRight className="h-3 w-3 ml-1" />}

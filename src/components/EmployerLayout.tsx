@@ -25,7 +25,7 @@ const EmployerLayout = ({ children, developerView, onViewChange }: EmployerLayou
               <SidebarTrigger className="text-white hover:bg-white/20 h-8 w-8" />
               <div>
                 <h1 className="text-lg font-bold text-white">Parium</h1>
-                <p className="text-xs text-white">
+                <p className="text-sm text-white">
                   Admin: {profile?.first_name} {profile?.last_name}
                 </p>
               </div>

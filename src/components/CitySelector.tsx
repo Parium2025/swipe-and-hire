@@ -220,7 +220,7 @@ const CitySelector = ({
                 onClick={() => handleCitySelect(city.name)}
               >
                 <div className="font-medium text-white">{city.name}</div>
-                <div className="text-xs text-white/60">
+                <div className="text-sm text-white/60">
                   Klicka för att se postnummer
                 </div>
               </div>
@@ -252,7 +252,7 @@ const CitySelector = ({
             ref={postalSuggestionsRef}
             className="absolute z-50 w-full mt-1 bg-slate-800/95 backdrop-blur-sm border border-white/20 rounded-lg shadow-lg max-h-48 overflow-y-auto"
           >
-            <div className="px-4 py-2 text-xs text-white/60 border-b border-white/20">
+            <div className="px-4 py-2 text-sm text-white/60 border-b border-white/20">
               Postnummer för {cityValue}:
             </div>
             {filteredPostalCodes.map((postalCode, index) => (
@@ -278,15 +278,15 @@ const CitySelector = ({
               className="px-4 py-2 cursor-pointer transition-colors hover:bg-white/20 text-white"
               onClick={handleCitySuggestionAccept}
             >
-              <div className="text-xs text-white/60">Förslag baserat på postnummer:</div>
+              <div className="text-sm text-white/60">Förslag baserat på postnummer:</div>
               <div className="font-medium text-white">{suggestedCity}</div>
-              <div className="text-xs text-white/40">Klicka för att välja</div>
+              <div className="text-sm text-white/40">Klicka för att välja</div>
             </div>
           </div>
         )}
         
         {postalCodeValue && !isValidPostalCodeFormat(postalCodeValue) && postalCodeValue.replace(/\D/g, '').length >= 5 && (
-          <p className="text-xs text-red-300 mt-1">
+          <p className="text-sm text-red-300 mt-1">
             Postnummer ska vara i formatet XXX XX (t.ex. 123 45)
           </p>
         )}

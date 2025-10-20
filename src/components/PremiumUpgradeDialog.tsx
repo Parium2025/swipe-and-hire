@@ -71,7 +71,7 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
             <DialogDescription className="text-center space-y-3 pt-3">
               <span className="font-medium text-sm block text-white/90">Uppgradera nu</span>
               <div className="space-y-3 text-white">
-                <p className="text-xs leading-relaxed">
+                <p className="text-sm leading-relaxed">
                   Du kan uppgradera direkt här på webben eller besöka:
                 </p>
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-primary/40 mx-auto w-fit">
@@ -79,7 +79,7 @@ export const PremiumUpgradeDialog = ({ open, onOpenChange, isAppOverride }: Prem
                     parium.se
                   </p>
                 </div>
-                <p className="text-xs text-white/80">
+                <p className="text-sm text-white/80">
                   Välj det alternativ som passar dig bäst.
                 </p>
               </div>

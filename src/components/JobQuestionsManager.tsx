@@ -109,15 +109,15 @@ const SortableQuestionCard = ({
                 <div className="flex items-center gap-2 mt-1">
                   <Badge 
                     variant="outline" 
-                    className="text-xs text-white/80 border-white/30 bg-white/5"
+                    className="text-sm text-white/80 border-white/30 bg-white/5"
                   >
                     Typ: {getQuestionTypeLabel(question.question_type)}
                   </Badge>
                   <Badge 
                     variant={question.is_required ? "default" : "outline"}
                     className={question.is_required 
-                      ? "text-xs bg-white/20 text-white border-white/30" 
-                      : "text-xs text-white/60 border-white/20 bg-transparent"
+                      ? "text-sm bg-white/20 text-white border-white/30" 
+                      : "text-sm text-white/60 border-white/20 bg-transparent"
                     }
                   >
                     {question.is_required ? 'Obligatorisk' : 'Frivillig'}
@@ -128,7 +128,7 @@ const SortableQuestionCard = ({
               {/* Alternativ för flervalsfrågor */}
               {question.question_type === 'multiple_choice' && question.options && question.options.length > 0 && (
                 <div className="pl-2 border-l-2 border-white/20">
-                  <p className="text-xs text-white/60 mb-1">Alternativ:</p>
+                  <p className="text-sm text-white/60 mb-1">Alternativ:</p>
                   <div className="space-y-1">
                     {question.options.map((option, idx) => (
                       <p key={idx} className="text-sm text-white/80">
@@ -491,7 +491,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
                 placeholder="Beskrivning av frågan..."
                 rows={4}
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Används när en fråga kan behöva förtydligas.
               </p>
             </div>

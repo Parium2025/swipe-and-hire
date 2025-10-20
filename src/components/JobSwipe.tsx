@@ -219,7 +219,7 @@ const JobSwipe = () => {
     <div className="max-w-md mx-auto p-3 sm:p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
       <div className="mb-4 text-center">
         <h2 className="text-lg sm:text-xl font-bold">Upptäck jobb</h2>
-        <p className="text-xs sm:text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           {currentJobIndex + 1} av {jobs.length} jobb
         </p>
       </div>
@@ -310,7 +310,7 @@ const JobSwipe = () => {
                   <Mail className="h-4 w-4 mr-2" />
                   Maila arbetsgivaren
                 </Button>
-                <p className="text-xs text-muted-foreground mt-1 text-center">
+                <p className="text-sm text-muted-foreground mt-1 text-center">
                   {currentJob.contact_email}
                 </p>
               </div>

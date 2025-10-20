@@ -119,7 +119,7 @@ const SortableQuestionItem = ({
           </div>
           
           <div className="flex-1 min-w-0">
-            <div className="text-white font-medium text-xs leading-tight truncate">
+            <div className="text-white font-medium text-sm leading-tight truncate">
               {question.question_text || 'Ingen frågetext'}
             </div>
           </div>
@@ -1538,7 +1538,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                                         onClick={() => useQuestionTemplate(template)}
                                         className="flex-1 text-left hover:opacity-80 transition-opacity min-w-0"
                                       >
-                                        <div className="text-white font-medium text-xs leading-tight truncate">
+                                        <div className="text-white font-medium text-sm leading-tight truncate">
                                           {template.question_text}
                                         </div>
                                       </button>

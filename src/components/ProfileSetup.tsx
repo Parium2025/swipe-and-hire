@@ -384,7 +384,7 @@ const ProfileSetup = () => {
                 {loading ? 'Sparar profil...' : 'Skapa profil'}
               </Button>
               
-              <p className="text-xs text-muted-foreground text-center">
+              <p className="text-sm text-muted-foreground text-center">
                 Du kan alltid uppdatera din profil senare
               </p>
             </div>

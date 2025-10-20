@@ -293,7 +293,7 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
                   className="min-h-32 text-lg"
                   rows={4}
                 />
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   {formData.bio.length}/500 tecken
                 </p>
               </div>

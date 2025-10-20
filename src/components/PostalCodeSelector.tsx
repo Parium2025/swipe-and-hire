@@ -106,7 +106,7 @@ const PostalCodeSelector = ({
         
         {/* Validering meddelande */}
         {postalCodeValue && !isValid && postalCodeValue.replace(/\D/g, '').length >= 5 && (
-          <p className="text-xs text-red-300 mt-1">
+          <p className="text-sm text-red-300 mt-1">
             Postnummer ska vara 5 siffror (t.ex. 136 55)
           </p>
         )}
@@ -130,7 +130,7 @@ const PostalCodeSelector = ({
                 )}
               </p>
               {foundLocation.county && (
-                <p className="text-xs text-white">{foundLocation.county}</p>
+                <p className="text-sm text-white">{foundLocation.county}</p>
               )}
             </div>
           </div>
@@ -150,7 +150,7 @@ const PostalCodeSelector = ({
               <p className="text-sm text-yellow-200">
                 Postnummer {postalCodeValue} hittades inte
               </p>
-              <p className="text-xs text-yellow-300/70">
+              <p className="text-sm text-yellow-300/70">
                 Kontrollera att postnumret är korrekt
               </p>
             </div>
@@ -169,7 +169,7 @@ const PostalCodeSelector = ({
               <p className="text-sm text-white font-medium">
                 Söker i svensk postnummerdatabas...
               </p>
-              <p className="text-xs text-white/70">
+              <p className="text-sm text-white/70">
                 16,000+ postnummer tillgängliga
               </p>
             </div>
