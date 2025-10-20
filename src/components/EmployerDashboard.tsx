@@ -162,24 +162,24 @@ const EmployerDashboard = memo(() => {
 
         <Card className="bg-white/5 backdrop-blur-sm border-white/20">
           <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-3">
-            <Users className="h-4 w-4 text-white" />
-            <CardTitle className="text-xs font-medium text-white">Ansökningar</CardTitle>
-          </CardHeader>
-          <CardContent className="px-3 pb-3">
-            <div className="text-xl font-bold text-white transition-all duration-300">
-              {loading ? '...' : jobs.reduce((sum, job) => sum + job.applications_count, 0)}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-3">
             <Eye className="h-4 w-4 text-white" />
             <CardTitle className="text-xs font-medium text-white">Totala visningar</CardTitle>
           </CardHeader>
           <CardContent className="px-3 pb-3">
             <div className="text-xl font-bold text-white transition-all duration-300">
               {loading ? '...' : jobs.reduce((sum, job) => sum + job.views_count, 0)}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white/5 backdrop-blur-sm border-white/20">
+          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-3">
+            <Users className="h-4 w-4 text-white" />
+            <CardTitle className="text-xs font-medium text-white">Ansökningar</CardTitle>
+          </CardHeader>
+          <CardContent className="px-3 pb-3">
+            <div className="text-xl font-bold text-white transition-all duration-300">
+              {loading ? '...' : jobs.reduce((sum, job) => sum + job.applications_count, 0)}
             </div>
           </CardContent>
         </Card>
