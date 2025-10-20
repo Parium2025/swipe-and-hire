@@ -1432,13 +1432,15 @@ const Profile = () => {
                 </div>
               )}
 
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={loading}
-              >
-                {loading ? 'Sparar...' : 'Spara ändringar'}
-              </Button>
+              <div className="flex justify-end">
+                <Button 
+                  type="submit" 
+                  className="border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm" 
+                  disabled={loading}
+                >
+                  {loading ? 'Sparar...' : 'Spara ändringar'}
+                </Button>
+              </div>
             </form>
           </div>
         </div>
