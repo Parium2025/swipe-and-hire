@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp } from 'lucide-react';
+import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
 import EditJobDialog from '@/components/EditJobDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
@@ -174,7 +174,7 @@ const EmployerDashboard = memo(() => {
 
         <Card className="bg-white/5 backdrop-blur-sm border-white/20">
           <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-3">
-            <MessageCircle className="h-4 w-4 text-white" />
+            <Users className="h-4 w-4 text-white" />
             <CardTitle className="text-xs font-medium text-white">Ansökningar</CardTitle>
           </CardHeader>
           <CardContent className="px-3 pb-3">
