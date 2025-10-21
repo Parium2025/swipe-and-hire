@@ -2320,27 +2320,27 @@ const MobileJobWizard = ({
                                <button onClick={() => setShowApplicationForm(false)} className="text-sm text-white/80 hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
                              </div>
 
-                            {/* Scrollable content */}
-                            <div 
-                              className="px-2 py-2 overflow-y-auto relative z-10 custom-scrollbar flex-1"
-                              onClick={(e) => {
-                                // Close all dropdowns when clicking anywhere in the scroll area
-                                const dropdowns = e.currentTarget.querySelectorAll('.bg-gray-800.border.border-gray-600');
-                                dropdowns.forEach(dropdown => {
-                                  if (!dropdown.classList.contains('hidden')) {
-                                    dropdown.classList.add('hidden');
-                                  }
-                                });
-                              }}
-                              onScroll={(e) => {
-                                const target = e.currentTarget;
-                                setIsScrolledTop(target.scrollTop === 0);
-                              }}
-                            >
-                             <div className="space-y-3 pb-3">{/* Minimal botten-padding */}
-                              
-                                 {/* Företagsinformation */}
-                                 <div className="bg-white/10 rounded-lg p-2 border border-white/20 relative">
+                             {/* Scrollable content */}
+                             <div 
+                               className="px-2 py-2 overflow-y-auto relative z-10 custom-scrollbar flex-1"
+                               onClick={(e) => {
+                                 // Close all dropdowns when clicking anywhere in the scroll area
+                                 const dropdowns = e.currentTarget.querySelectorAll('.bg-gray-800.border.border-gray-600');
+                                 dropdowns.forEach(dropdown => {
+                                   if (!dropdown.classList.contains('hidden')) {
+                                     dropdown.classList.add('hidden');
+                                   }
+                                 });
+                               }}
+                               onScroll={(e) => {
+                                 const target = e.currentTarget;
+                                 setIsScrolledTop(target.scrollTop === 0);
+                               }}
+                             >
+                              <div className="space-y-1.5 pb-2">{/* Minimal botten-padding */}
+                               
+                                  {/* Företagsinformation */}
+                                  <div className="bg-white/10 rounded-lg p-1.5 border border-white/20 relative">
                                    <div className="flex items-center">
                                     {profile?.company_logo_url ? (
                                       <div className="w-4 h-4 rounded-full mr-1 overflow-hidden bg-white/10 flex items-center justify-center">
@@ -2366,29 +2366,29 @@ const MobileJobWizard = ({
                                    </div>
                                   </div>
 
-                                {/* Yrke */}
-                                {formData.occupation && (
-                                   <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
-                                    <h5 className="text-sm font-medium text-white mb-1 flex items-center">
-                                      <Briefcase className="h-2 w-2 mr-1 text-white" />
-                                      Yrke
-                                    </h5>
-                                     <div className="text-white">
-                                       <div 
-                                         ref={occupationRef}
-                                         className="text-sm leading-relaxed break-words inline-block pr-2 overflow-visible"
-                                       >
-                                         {formData.occupation}
-                                       </div>
-                                     </div>
-                                  </div>
-                                )}
+                                 {/* Yrke */}
+                                 {formData.occupation && (
+                                    <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
+                                     <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                       <Briefcase className="h-2 w-2 mr-1 text-white" />
+                                       Yrke
+                                     </h5>
+                                      <div className="text-white">
+                                        <div 
+                                          ref={occupationRef}
+                                          className="text-xs leading-relaxed break-words inline-block pr-2 overflow-visible"
+                                        >
+                                          {formData.occupation}
+                                        </div>
+                                      </div>
+                                   </div>
+                                 )}
 
-                                {/* Jobbeskrivning */}
-                                {formData.description && (
-                                  <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
-                                    <h5 className="text-sm font-medium text-white mb-1">Jobbeskrivning</h5>
-                                    <div className="text-sm text-white leading-relaxed whitespace-pre-wrap break-words [&>*]:mb-1 [&>*:last-child]:mb-0">
+                                 {/* Jobbeskrivning */}
+                                 {formData.description && (
+                                   <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
+                                     <h5 className="text-xs font-medium text-white mb-0.5">Jobbeskrivning</h5>
+                                     <div className="text-xs text-white leading-relaxed whitespace-pre-wrap break-words [&>*]:mb-0.5 [&>*:last-child]:mb-0">
                                       {formData.description.split('\n').map((line, index) => {
                                         const trimmedLine = line.trim();
                                         // Detect bullet points (•, -, *, numbers with dots/parentheses)
@@ -2416,12 +2416,12 @@ const MobileJobWizard = ({
 
                                {/* Lön */}
                                {(formData.salary_min || formData.salary_max || formData.salary_type) && (
-                                 <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
-                                   <h5 className="text-sm font-medium text_white mb-1 flex items-center">
-                                      <Banknote className="h-2 w-2 mr-1 text-white" />
-                                      Lön
-                                    </h5>
-                                    <div className="text-sm text-white leading-relaxed break-words space-y-0.5">
+                                  <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
+                                    <h5 className="text-xs font-medium text_white mb-0.5 flex items-center">
+                                       <Banknote className="h-2 w-2 mr-1 text-white" />
+                                       Lön
+                                     </h5>
+                                     <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
                                       {formatSalaryInfo().map((info, index) => (
                                         <div key={index} className="font-medium">{info}</div>
                                       ))}
@@ -2430,13 +2430,13 @@ const MobileJobWizard = ({
                                )}
 
 
-                                {/* Arbetsplats */}
-                                <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                  <h5 className="text-sm font-medium text-white mb-1 flex items-center">
-                                    <MapPin className="h-2 w-2 mr-1 text-white" />
-                                    Arbetsplats
-                                  </h5>
-                                   <div className="text-sm text-white leading-relaxed break-words space-y-0.5">
+                                 {/* Arbetsplats */}
+                                 <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
+                                   <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                     <MapPin className="h-2 w-2 mr-1 text-white" />
+                                     Arbetsplats
+                                   </h5>
+                                    <div className="text-xs text-white leading-relaxed break-words space-y-0.5">
                                      {formData.workplace_name && (
                                        <div className="font-medium">{formData.workplace_name}</div>
                                      )}
@@ -2458,26 +2458,26 @@ const MobileJobWizard = ({
                                    </div>
                                  </div>
 
-                                 {/* Antal rekryteringar */}
-                                 {formData.positions_count && parseInt(formData.positions_count) > 0 && (
-                                   <div className="bg-white/10 rounded-lg p-2 border border-white/20 mb-2">
-                                     <h5 className="text-sm font-medium text-white mb-1 flex items-center whitespace-nowrap">
-                                       <Users className="h-2 w-2 mr-1 text-white" />
-                                       Antal rekryteringar
-                                     </h5>
-                                      <div className="text-sm text-white leading-relaxed break-words">
-                                        <div className="font-medium">{formatPositionsCount()}</div>
-                                      </div>
-                                   </div>
-                                 )}
+                                  {/* Antal rekryteringar */}
+                                  {formData.positions_count && parseInt(formData.positions_count) > 0 && (
+                                    <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
+                                      <h5 className="text-xs font-medium text-white mb-0.5 flex items-center whitespace-nowrap">
+                                        <Users className="h-2 w-2 mr-1 text-white" />
+                                        Antal rekryteringar
+                                      </h5>
+                                       <div className="text-xs text-white leading-relaxed break-words">
+                                         <div className="font-medium">{formatPositionsCount()}</div>
+                                       </div>
+                                    </div>
+                                  )}
 
-                                {/* Kontakt */}
-                               <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                  <h5 className="text-sm font-medium text-white mb-1 flex items-center">
-                                    <Mail className="h-2 w-2 mr-1 text-white" />
-                                    Kontakt
-                                  </h5>
-                                    <div className="text-sm text-white leading-relaxed break-words">
+                                 {/* Kontakt */}
+                                <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
+                                   <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                     <Mail className="h-2 w-2 mr-1 text-white" />
+                                     Kontakt
+                                   </h5>
+                                     <div className="text-xs text-white leading-relaxed break-words">
                                       {formData.contact_email && (
                                         <a 
                                           href={`mailto:${formData.contact_email}`}
@@ -2491,9 +2491,9 @@ const MobileJobWizard = ({
 
                               {/* Krav och kvalifikationer */}
                               {formData.requirements && (
-                                <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                  <h4 className="text-sm font-semibold text-white mb-1">Kvalifikationer</h4>
-                                  <p className="text-sm text-white leading-relaxed">
+                                 <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
+                                   <h4 className="text-xs font-semibold text-white mb-0.5">Kvalifikationer</h4>
+                                   <p className="text-xs text-white leading-relaxed">
                                     {formData.requirements.length > 100 
                                       ? formData.requirements.substring(0, 100) + '...' 
                                       : formData.requirements
@@ -2503,63 +2503,63 @@ const MobileJobWizard = ({
                               )}
 
                                {/* Följande information samlas automatiskt in från alla kandidater */}
-                               <div className="bg-white/10 rounded-lg p-2 border border-white/20">
-                                 <p className="text-sm text-white mb-3 leading-relaxed">
-                                   Följande information samlas automatiskt in från alla kandidater som har sökt:
-                                 </p>
-                                 
-                                 <div className="space-y-1.5">
-                                   {[
-                                     'Namn',
-                                     'Efternamn',
-                                     'Ålder',
-                                     'E-post',
-                                     'Telefonnummer',
-                                     'Ort/stad',
-                                     'Presentation',
-                                     'CV',
-                                     'Nuvarande anställningsform',
-                                     'Tillgänglighet',
-                                   ].map((label, idx) => (
-                                     <div key={idx} className="text-sm flex">
-                                       <span className="flex-shrink-0 mr-1 text-white">•</span>
-                                       <span className="flex-1 text-white leading-tight break-words">{label}</span>
-                                     </div>
-                                   ))}
-                                 </div>
-                               </div>
+                                <div className="bg-white/10 rounded-lg p-1.5 border border-white/20">
+                                  <p className="text-xs text-white mb-2 leading-relaxed">
+                                    Följande information samlas automatiskt in från alla kandidater som har sökt:
+                                  </p>
+                                  
+                                  <div className="space-y-1">
+                                    {[
+                                      'Namn',
+                                      'Efternamn',
+                                      'Ålder',
+                                      'E-post',
+                                      'Telefonnummer',
+                                      'Ort/stad',
+                                      'Presentation',
+                                      'CV',
+                                      'Nuvarande anställningsform',
+                                      'Tillgänglighet',
+                                    ].map((label, idx) => (
+                                      <div key={idx} className="text-xs flex">
+                                        <span className="flex-shrink-0 mr-1 text-white">•</span>
+                                        <span className="flex-1 text-white leading-tight break-words">{label}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
 
                               {/* Anpassade frågor - individuella kort */}
                               {customQuestions.length > 0 && (
-                                <div className="space-y-1.5">
-                                  {customQuestions.map((question, index) => {
-                                    const typeLabels = {
-                                      number: 'Siffra',
-                                      text: 'Text',
-                                      multiple_choice: 'Flerval',
-                                      yes_no: 'Ja/Nej',
-                                      date: 'Datum',
-                                      file: 'Fil',
-                                      video: 'Video',
-                                    };
+                                 <div className="space-y-1.5">
+                                   {customQuestions.map((question, index) => {
+                                     const typeLabels = {
+                                       number: 'Siffra',
+                                       text: 'Text',
+                                       multiple_choice: 'Flerval',
+                                       yes_no: 'Ja/Nej',
+                                       date: 'Datum',
+                                       file: 'Fil',
+                                       video: 'Video',
+                                     };
 
-                                    return (
-                                      <div key={question.id || index} className="bg-white/10 rounded-lg p-3 border border-white/20">
-                                        {/* Frågetext */}
-                                        <div className="mb-2">
-                                          <label className="text-sm font-medium text-white block leading-tight">
-                                            {question.question_text}
-                                          </label>
-                                        </div>
+                                     return (
+                                       <div key={question.id || index} className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                         {/* Frågetext */}
+                                         <div className="mb-1.5">
+                                           <label className="text-xs font-medium text-white block leading-tight">
+                                             {question.question_text}
+                                           </label>
+                                         </div>
                                         
-                                        {/* Input förhandsvisning baserat på frågetyp */}
-                                        {question.question_type === 'text' && (
-                                          <textarea
-                                            className="w-full border border-white/20 bg-white/10 rounded p-2 text-sm text-white placeholder:text-white/60 resize-none"
-                                            placeholder={question.placeholder_text || 'Skriv ditt svar...'}
-                                            rows={2}
-                                          />
-                                        )}
+                                         {/* Input förhandsvisning baserat på frågetyp */}
+                                         {question.question_type === 'text' && (
+                                           <textarea
+                                             className="w-full border border-white/20 bg-white/10 rounded p-1.5 text-xs text-white placeholder:text-white/60 resize-none"
+                                             placeholder={question.placeholder_text || 'Skriv ditt svar...'}
+                                             rows={2}
+                                           />
+                                         )}
                                         
                                         {question.question_type === 'yes_no' && (
                                           <div className="flex gap-1.5">
