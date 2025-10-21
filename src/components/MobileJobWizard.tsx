@@ -2359,7 +2359,7 @@ const MobileJobWizard = ({
                                        onClick={() => {
                                          setShowCompanyProfile(true);
                                        }}
-                                       className="text-sm font-bold text-white hover:text-primary transition-colors cursor-pointer"
+                                       className="text-xs font-bold text-white hover:text-primary transition-colors cursor-pointer whitespace-normal break-words leading-tight"
                                      >
                                        {profile?.company_name || 'Företagsnamn'}
                                      </button>
@@ -2576,10 +2576,10 @@ const MobileJobWizard = ({
                                                 })
                                               }
                                               className={
-                                                (previewAnswers[question.id || `q_${index}`] === 'yes'
-                                                  ? 'bg-secondary/40 border-secondary text-white '
-                                                  : 'bg-white/10 border-white/20 text-white ') +
-                                                'border rounded-md px-2 py-1 text-sm transition-colors font-medium flex-1'
+                                              (previewAnswers[question.id || `q_${index}`] === 'yes'
+                                                   ? 'bg-secondary/40 border-secondary text-white '
+                                                   : 'bg-white/10 border-white/20 text-white ') +
+                                                 'border rounded-md px-1.5 py-0.5 text-xs transition-colors font-medium flex-1'
                                               }
                                             >
                                               Ja
@@ -2597,10 +2597,10 @@ const MobileJobWizard = ({
                                                 })
                                               }
                                               className={
-                                                (previewAnswers[question.id || `q_${index}`] === 'no'
-                                                  ? 'bg-secondary/40 border-secondary text-white '
-                                                  : 'bg-white/10 border-white/20 text-white ') +
-                                                'border rounded-md px-2 py-1 text-sm transition-colors font-medium flex-1'
+                                              (previewAnswers[question.id || `q_${index}`] === 'no'
+                                                   ? 'bg-secondary/40 border-secondary text-white '
+                                                   : 'bg-white/10 border-white/20 text-white ') +
+                                                 'border rounded-md px-1.5 py-0.5 text-xs transition-colors font-medium flex-1'
                                               }
                                             >
                                               Nej
@@ -2644,21 +2644,21 @@ const MobileJobWizard = ({
                                                        (selected
                                                          ? 'bg-secondary/40 border border-secondary text-white '
                                                          : 'bg-white/5 border border-white/10 text-white ') +
-                                                       'w-full flex items-center gap-2 rounded px-2 py-1.5 transition-colors cursor-pointer'
-                                                     }
+                                                        'w-full flex items-center gap-2 rounded px-2 py-1 transition-colors cursor-pointer'
+                                                      }
                                                   >
-                                                    <div className={
-                                                      selected
-                                                        ? 'w-2.5 h-2.5 rounded-sm bg-white flex-shrink-0 flex items-center justify-center'
-                                                        : 'w-2.5 h-2.5 rounded-sm border border-white/40 flex-shrink-0'
-                                                    }>
-                                                      {selected && (
-                                                        <svg className="w-2 h-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                                        </svg>
-                                                      )}
+                                                     <div className={
+                                                       selected
+                                                         ? 'w-2 h-2 rounded-sm bg-white flex-shrink-0 flex items-center justify-center'
+                                                         : 'w-2 h-2 rounded-sm border border-white/40 flex-shrink-0'
+                                                     }>
+                                                       {selected && (
+                                                         <svg className="w-1.5 h-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                                         </svg>
+                                                       )}
                                                     </div>
-                                                    <span className="text-sm text-white/90">{option}</span>
+                                                     <span className="text-xs text-white/90">{option}</span>
                                                   </button>
                                                 );
                                               })}

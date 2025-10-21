@@ -1897,12 +1897,12 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                 <Building2 className="h-2 w-2 text-primary-foreground" />
                                               </div>
                                             )}
-                                            <button 
-                                              onClick={() => setShowCompanyProfile(true)}
-                                              className="text-sm font-bold text-white hover:text-primary transition-colors cursor-pointer"
-                                            >
-                                              {profile?.company_name || 'Företagsnamn'}
-                                            </button>
+                                             <button 
+                                               onClick={() => setShowCompanyProfile(true)}
+                                               className="text-xs font-bold text-white hover:text-primary transition-colors cursor-pointer whitespace-normal break-words leading-tight"
+                                             >
+                                               {profile?.company_name || 'Företagsnamn'}
+                                             </button>
                                           </div>
                                         </div>
 
@@ -2118,7 +2118,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                             e.currentTarget.classList.add('bg-secondary/40', 'border-secondary', 'text-white');
                                                           }
                                                         }}
-                                                        className="flex-1 bg-white/10 border border-white/20 rounded-md px-2 py-1 text-sm text-white transition-colors font-medium"
+                                                        className="flex-1 bg-white/10 border border-white/20 rounded-md px-1.5 py-0.5 text-xs text-white transition-colors font-medium"
                                                       >
                                                         Ja
                                                       </button>
@@ -2145,7 +2145,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                             e.currentTarget.classList.add('bg-secondary/40', 'border-secondary', 'text-white');
                                                           }
                                                         }}
-                                                        className="flex-1 bg-white/10 border border-white/20 rounded-md px-2 py-1 text-sm text-white transition-colors font-medium"
+                                                        className="flex-1 bg-white/10 border border-white/20 rounded-md px-1.5 py-0.5 text-xs text-white transition-colors font-medium"
                                                       >
                                                         Nej
                                                       </button>
@@ -2169,7 +2169,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                              e.currentTarget.classList.remove('bg-white/10', 'border-white/20');
                                                              e.currentTarget.classList.add('bg-secondary/40', 'border-secondary');
                                                           }}
-                                                          className="w-full bg-white/10 border border-white/20 rounded-md px-3 py-2 text-sm text-white text-left transition-colors"
+                                                          className="w-full bg-white/10 border border-white/20 rounded-md px-2 py-1 text-xs text-white text-left transition-colors"
                                                         >
                                                           {option}
                                                         </button>
@@ -2178,8 +2178,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                   )}
                                                   
                                                   {question.question_type === 'number' && (
-                                                    <div className="space-y-1.5">
-                                                      <div className="text-center text-sm font-semibold text-white">
+                                                     <div className="space-y-1.5">
+                                                       <div className="text-center text-xs font-semibold text-white">
                                                         {question.min_value ?? 0}
                                                       </div>
                                                       <input
@@ -2207,7 +2207,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                                       ) : (
                                                         <Video className="h-3 w-3 mx-auto mb-0.5 text-white/60" />
                                                       )}
-                                                      <p className="text-sm text-white/60">
+                                                      <p className="text-xs text-white/60">
                                                         {question.question_type === 'file' ? 'Välj fil' : 'Spela in video'}
                                                       </p>
                                                     </div>
