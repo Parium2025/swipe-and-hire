@@ -321,24 +321,24 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
       <DialogContent className="max-w-md max-h-[90vh] p-0 rounded-[24px] overflow-hidden bg-parium-gradient text-white border-none shadow-none">
         <div className="relative flex flex-col max-h-[90vh]">
           {/* Header */}
-          <div className="p-4 border-b border-white/20 bg-background/10 rounded-t-[24px] flex-shrink-0">
+          <div className="p-2 md:p-4 border-b border-white/20 bg-background/10 rounded-t-[24px] flex-shrink-0">
             <div className="flex items-center justify-between text-white">
-              <div className="flex items-center gap-2">
-                <Heart className="h-5 w-5 text-primary" />
-                <span className="font-semibold text-sm">Ansökan</span>
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <Heart className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+                <span className="font-semibold text-xs md:text-sm">Ansökan</span>
               </div>
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={() => onOpenChange(false)}
-                className="text-white/80 hover:text-white hover:bg-white/10"
+                className="text-white/80 hover:text-white hover:bg-white/10 h-6 w-6 md:h-8 md:w-8 p-0"
               >
                 ✕
               </Button>
             </div>
-            <div className="mt-2">
-              <h3 className="font-semibold text-lg">{job.title}</h3>
-              <p className="text-sm text-white/70">{companyName}</p>
+            <div className="mt-1.5 md:mt-2">
+              <h3 className="font-semibold text-sm md:text-lg leading-tight">{job.title}</h3>
+              <p className="text-xs md:text-sm text-white/70">{companyName}</p>
             </div>
           </div>
 
