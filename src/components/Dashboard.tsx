@@ -126,8 +126,8 @@ const Dashboard = memo(() => {
                     >
                       <TableCell className="font-medium text-white px-2 py-2">
                         <div className="flex flex-col gap-1">
-                          <span className="text-sm" title={job.title}>
-                            {smartTruncate(job.title, 60)}
+                          <span className="text-sm leading-relaxed break-words" title={job.title}>
+                            {job.title}
                           </span>
                           {job.employment_type && (
                             <Badge variant="outline" className="w-fit text-[10px] bg-white/5 text-white border-white/20">
@@ -156,8 +156,8 @@ const Dashboard = memo(() => {
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
                         <div className="flex items-center gap-1 text-sm" title={job.location}>
-                          <MapPin size={12} />
-                          <span>{smartTruncate(job.location, 20)}</span>
+                          <MapPin size={12} className="flex-shrink-0" />
+                          <span className="break-words leading-tight">{job.location}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
