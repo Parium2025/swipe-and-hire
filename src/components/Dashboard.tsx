@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { JobTitleCell } from '@/components/JobTitleCell';
+import { TruncatedText } from '@/components/TruncatedText';
 
 const Dashboard = memo(() => {
   const { jobs, stats, isLoading, invalidateJobs } = useJobsData();
@@ -146,17 +147,18 @@ const Dashboard = memo(() => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
-                        <div className="flex items-center gap-1 text-sm" title={job.location}>
+                        <div className="flex items-center gap-1 text-sm">
                           <MapPin size={12} className="flex-shrink-0" />
-                          <span className="break-words leading-tight">{job.location}</span>
+                          <TruncatedText text={job.location} className="break-words leading-tight" />
                         </div>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
-                        <span className="text-sm truncate max-w-[150px] block">
-                          {job.employer_profile?.first_name && job.employer_profile?.last_name
+                        <TruncatedText 
+                          text={job.employer_profile?.first_name && job.employer_profile?.last_name
                             ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
                             : '-'}
-                        </span>
+                          className="text-sm truncate max-w-[150px] block"
+                        />
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
                         <div className="flex items-center gap-1 text-sm whitespace-nowrap">

@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { JobTitleCell } from '@/components/JobTitleCell';
+import { TruncatedText } from '@/components/TruncatedText';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -251,16 +252,17 @@ const EmployerDashboard = memo(() => {
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
                         <div className="flex items-center gap-1 text-sm">
-                          <MapPin size={12} />
-                          <span className="truncate max-w-[120px]">{job.location}</span>
+                          <MapPin size={12} className="flex-shrink-0" />
+                          <TruncatedText text={job.location} className="truncate max-w-[120px]" />
                         </div>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
-                        <span className="text-sm truncate max-w-[150px] block">
-                          {job.employer_profile?.first_name && job.employer_profile?.last_name
+                        <TruncatedText 
+                          text={job.employer_profile?.first_name && job.employer_profile?.last_name
                             ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
                             : '-'}
-                        </span>
+                          className="text-sm truncate max-w-[150px] block"
+                        />
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
                         <div className="flex items-center gap-1 text-sm whitespace-nowrap">
