@@ -743,19 +743,19 @@ const CompanyProfile = () => {
                     placeholder="https://din-webbsida.se"
                     value={newSocialLink.url}
                     onChange={(e) => setNewSocialLink(prev => ({ ...prev, url: e.target.value }))}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm md:col-span-2"
+                    className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
                   />
-                </div>
 
-                <Button
-                  type="button"
-                  onClick={addSocialLink}
-                  variant="outline"
-                  className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 h-9 text-sm"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Lägg till
-                </Button>
+                  <Button
+                    type="button"
+                    onClick={addSocialLink}
+                    variant="outline"
+                    className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 h-9 text-sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Lägg till
+                  </Button>
+                </div>
               </div>
             </div>
 
