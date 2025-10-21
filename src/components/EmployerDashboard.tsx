@@ -195,7 +195,8 @@ const EmployerDashboard = memo(() => {
         </CardHeader>
         <CardContent className="px-2 pb-2">
           <div className="overflow-x-auto -mx-2">
-            <Table>
+            <TooltipProvider delayDuration={300}>
+              <Table>
               <TableHeader>
                 <TableRow className="border-white/20 hover:bg-white/5">
                   <TableHead className="text-white font-semibold text-sm px-2">Titel</TableHead>
@@ -230,7 +231,14 @@ const EmployerDashboard = memo(() => {
                     >
                       <TableCell className="font-medium text-white px-2 py-2">
                         <div className="flex flex-col gap-1">
-                          <span className="text-sm line-clamp-2">{job.title}</span>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="text-sm line-clamp-2 cursor-help">{job.title}</span>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="bg-white/95 backdrop-blur-sm border-white/20 text-gray-900 font-medium max-w-xs">
+                              <p>{job.title}</p>
+                            </TooltipContent>
+                          </Tooltip>
                           {job.employment_type && (
                             <Badge variant="outline" className="w-fit text-[10px] bg-white/5 text-white border-white/20">
                               {getEmploymentTypeLabel(job.employment_type)}
@@ -257,26 +265,35 @@ const EmployerDashboard = memo(() => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
-                        <TooltipProvider delayDuration={300}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="flex items-center gap-1 text-sm cursor-help">
-                                <MapPin size={12} />
-                                <span className="truncate max-w-[200px]">{job.location}</span>
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent side="top" className="bg-white/95 backdrop-blur-sm border-white/20 text-gray-900 font-medium">
-                              <p>{job.location}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="flex items-center gap-1 text-sm cursor-help">
+                              <MapPin size={12} />
+                              <span className="truncate max-w-[200px]">{job.location}</span>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="bg-white/95 backdrop-blur-sm border-white/20 text-gray-900 font-medium">
+                            <p>{job.location}</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
-                        <span className="text-sm truncate max-w-[150px] block">
-                          {job.employer_profile?.first_name && job.employer_profile?.last_name
-                            ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
-                            : '-'}
-                        </span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="text-sm truncate max-w-[150px] block cursor-help">
+                              {job.employer_profile?.first_name && job.employer_profile?.last_name
+                                ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
+                                : '-'}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="bg-white/95 backdrop-blur-sm border-white/20 text-gray-900 font-medium">
+                            <p>
+                              {job.employer_profile?.first_name && job.employer_profile?.last_name
+                                ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
+                                : '-'}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
                         <div className="flex items-center gap-1 text-sm whitespace-nowrap">
@@ -323,7 +340,8 @@ const EmployerDashboard = memo(() => {
                   ))
                 )}
               </TableBody>
-            </Table>
+              </Table>
+            </TooltipProvider>
           </div>
         </CardContent>
       </Card>
