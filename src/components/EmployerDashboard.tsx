@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import EditJobDialog from '@/components/EditJobDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
@@ -256,10 +257,19 @@ const EmployerDashboard = memo(() => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
-                        <div className="flex items-center gap-1 text-sm">
-                          <MapPin size={12} />
-                          <span className="truncate max-w-[200px]">{job.location}</span>
-                        </div>
+                        <TooltipProvider delayDuration={300}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center gap-1 text-sm cursor-help">
+                                <MapPin size={12} />
+                                <span className="truncate max-w-[200px]">{job.location}</span>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="bg-white/95 backdrop-blur-sm border-white/20 text-gray-900 font-medium">
+                              <p>{job.location}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
                         <span className="text-sm truncate max-w-[150px] block">
