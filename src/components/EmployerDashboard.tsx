@@ -264,7 +264,7 @@ const EmployerDashboard = memo(() => {
                         <div className="flex items-center gap-1 text-sm">
                           <MapPin size={12} />
                           <TruncatedTooltip content={job.location}>
-                            <span className="truncate max-w-[200px]">{job.location}</span>
+                            <span className="truncate max-w-[200px] block">{job.location}</span>
                           </TruncatedTooltip>
                         </div>
                       </TableCell>
