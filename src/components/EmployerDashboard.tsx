@@ -258,7 +258,7 @@ const EmployerDashboard = memo(() => {
                       <TableCell className="text-white px-2 py-2">
                         <div className="flex items-center gap-1 text-sm">
                           <MapPin size={12} />
-                          <span className="truncate max-w-[200px]">{job.location}</span>
+                          <span className="truncate max-w-[240px]">{job.location}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
