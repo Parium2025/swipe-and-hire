@@ -2284,7 +2284,7 @@ const MobileJobWizard = ({
                    {/* Phone mockup med ansökningsformulär + tooltip */}
                   <div className="relative flex items-center justify-center gap-4">
                     
-                    <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px]">
+                    <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[280px]">
                     {/* Tooltip framför mobilen som pekar på företagsnamnet */}
                     {showCompanyTooltip && showApplicationForm && isScrolledTop && (
                       <div className="pointer-events-none absolute z-[999] top-8 -left-28 flex items-center gap-1">
