@@ -9,7 +9,8 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { TruncatedTooltip } from '@/components/TruncatedTooltip';
 import EditJobDialog from '@/components/EditJobDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
@@ -231,14 +232,9 @@ const EmployerDashboard = memo(() => {
                     >
                       <TableCell className="font-medium text-white px-2 py-2">
                         <div className="flex flex-col gap-1">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="text-sm line-clamp-2 cursor-help">{job.title}</span>
-                            </TooltipTrigger>
-                            <TooltipContent side="top" className="bg-white/95 backdrop-blur-sm border-white/20 text-gray-900 font-medium max-w-xs">
-                              <p>{job.title}</p>
-                            </TooltipContent>
-                          </Tooltip>
+                          <TruncatedTooltip content={job.title} className="text-sm line-clamp-2 cursor-help">
+                            {job.title}
+                          </TruncatedTooltip>
                           {job.employment_type && (
                             <Badge variant="outline" className="w-fit text-[10px] bg-white/5 text-white border-white/20">
                               {getEmploymentTypeLabel(job.employment_type)}
@@ -265,35 +261,22 @@ const EmployerDashboard = memo(() => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="flex items-center gap-1 text-sm cursor-help">
-                              <MapPin size={12} />
-                              <span className="truncate max-w-[200px]">{job.location}</span>
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent side="top" className="bg-white/95 backdrop-blur-sm border-white/20 text-gray-900 font-medium">
-                            <p>{job.location}</p>
-                          </TooltipContent>
-                        </Tooltip>
+                        <TruncatedTooltip content={job.location} className="flex items-center gap-1 text-sm cursor-help">
+                          <MapPin size={12} />
+                          <span className="truncate max-w-[200px]">{job.location}</span>
+                        </TruncatedTooltip>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="text-sm truncate max-w-[150px] block cursor-help">
-                              {job.employer_profile?.first_name && job.employer_profile?.last_name
-                                ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
-                                : '-'}
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent side="top" className="bg-white/95 backdrop-blur-sm border-white/20 text-gray-900 font-medium">
-                            <p>
-                              {job.employer_profile?.first_name && job.employer_profile?.last_name
-                                ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
-                                : '-'}
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
+                        <TruncatedTooltip 
+                          content={job.employer_profile?.first_name && job.employer_profile?.last_name
+                            ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
+                            : '-'}
+                          className="text-sm truncate max-w-[150px] block cursor-help"
+                        >
+                          {job.employer_profile?.first_name && job.employer_profile?.last_name
+                            ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
+                            : '-'}
+                        </TruncatedTooltip>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
                         <div className="flex items-center gap-1 text-sm whitespace-nowrap">
