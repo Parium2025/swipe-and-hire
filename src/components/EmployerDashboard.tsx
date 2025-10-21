@@ -9,8 +9,6 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { TruncatedTooltip } from '@/components/TruncatedTooltip';
 import EditJobDialog from '@/components/EditJobDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
@@ -196,8 +194,7 @@ const EmployerDashboard = memo(() => {
         </CardHeader>
         <CardContent className="px-2 pb-2">
           <div className="overflow-x-auto -mx-2">
-            <TooltipProvider delayDuration={300}>
-              <Table>
+            <Table>
               <TableHeader>
                 <TableRow className="border-white/20 hover:bg-white/5">
                   <TableHead className="text-white font-semibold text-sm px-2">Titel</TableHead>
@@ -232,9 +229,7 @@ const EmployerDashboard = memo(() => {
                     >
                       <TableCell className="font-medium text-white px-2 py-2">
                         <div className="flex flex-col gap-1">
-                          <TruncatedTooltip content={job.title}>
-                            <span className="text-sm line-clamp-2">{job.title}</span>
-                          </TruncatedTooltip>
+                          <span className="text-sm line-clamp-2">{job.title}</span>
                           {job.employment_type && (
                             <Badge variant="outline" className="w-fit text-[10px] bg-white/5 text-white border-white/20">
                               {getEmploymentTypeLabel(job.employment_type)}
@@ -263,23 +258,15 @@ const EmployerDashboard = memo(() => {
                       <TableCell className="text-white px-2 py-2">
                         <div className="flex items-center gap-1 text-sm">
                           <MapPin size={12} />
-                          <TruncatedTooltip content={job.location}>
-                            <span className="truncate max-w-[200px] block">{job.location}</span>
-                          </TruncatedTooltip>
+                          <span className="truncate max-w-[120px]">{job.location}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
-                        <TruncatedTooltip 
-                          content={job.employer_profile?.first_name && job.employer_profile?.last_name
+                        <span className="text-sm truncate max-w-[150px] block">
+                          {job.employer_profile?.first_name && job.employer_profile?.last_name
                             ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
                             : '-'}
-                        >
-                          <span className="text-sm truncate max-w-[150px] block">
-                            {job.employer_profile?.first_name && job.employer_profile?.last_name
-                              ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
-                              : '-'}
-                          </span>
-                        </TruncatedTooltip>
+                        </span>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
                         <div className="flex items-center gap-1 text-sm whitespace-nowrap">
@@ -326,8 +313,7 @@ const EmployerDashboard = memo(() => {
                   ))
                 )}
               </TableBody>
-              </Table>
-            </TooltipProvider>
+            </Table>
           </div>
         </CardContent>
       </Card>
