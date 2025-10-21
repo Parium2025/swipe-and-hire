@@ -696,12 +696,12 @@ const CompanyProfile = () => {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className="w-full bg-white/5 border-white/10 text-white text-sm h-9 hover:bg-white/10 transition-colors justify-between text-left"
+                        className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 h-9 text-sm justify-between font-normal"
                       >
-                        <span className="truncate text-left flex-1 px-1 text-sm">
+                        <span className="truncate text-left flex-1 px-1">
                           {newSocialLink.platform ? SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label : 'Välj plattform'}
                         </span>
-                        <ChevronDown className="h-5 w-5 flex-shrink-0 opacity-50 ml-2" />
+                        <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent 
