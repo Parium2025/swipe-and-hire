@@ -232,8 +232,8 @@ const EmployerDashboard = memo(() => {
                     >
                       <TableCell className="font-medium text-white px-2 py-2">
                         <div className="flex flex-col gap-1">
-                          <TruncatedTooltip content={job.title} className="text-sm line-clamp-2 cursor-help">
-                            {job.title}
+                          <TruncatedTooltip content={job.title}>
+                            <span className="text-sm line-clamp-2">{job.title}</span>
                           </TruncatedTooltip>
                           {job.employment_type && (
                             <Badge variant="outline" className="w-fit text-[10px] bg-white/5 text-white border-white/20">
@@ -261,10 +261,12 @@ const EmployerDashboard = memo(() => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
-                        <TruncatedTooltip content={job.location} className="flex items-center gap-1 text-sm cursor-help">
+                        <div className="flex items-center gap-1 text-sm">
                           <MapPin size={12} />
-                          <span className="truncate max-w-[200px]">{job.location}</span>
-                        </TruncatedTooltip>
+                          <TruncatedTooltip content={job.location}>
+                            <span className="truncate max-w-[200px]">{job.location}</span>
+                          </TruncatedTooltip>
+                        </div>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
                         <TruncatedTooltip 
