@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect, ReactNode } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
 interface TruncatedTooltipProps {
   content: string;
@@ -22,20 +23,27 @@ export const TruncatedTooltip = ({ content, children, className }: TruncatedTool
       setIsTruncated(isOverflowing);
     };
 
-    checkTruncation();
+    // Small delay to ensure element is rendered
+    const timer = setTimeout(checkTruncation, 100);
     window.addEventListener('resize', checkTruncation);
     
-    return () => window.removeEventListener('resize', checkTruncation);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', checkTruncation);
+    };
   }, [content]);
 
+  // Remove cursor-help from className when not truncated
+  const baseClassName = className?.replace('cursor-help', '').trim();
+
   if (!isTruncated) {
-    return <div ref={textRef} className={className}>{children}</div>;
+    return <div ref={textRef} className={baseClassName}>{children}</div>;
   }
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div ref={textRef} className={className}>
+        <div ref={textRef} className={cn(baseClassName, 'cursor-help')}>
           {children}
         </div>
       </TooltipTrigger>
