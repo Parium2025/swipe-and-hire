@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { smartTruncate } from '@/lib/smartTruncate';
 
 const Dashboard = memo(() => {
   const { jobs, stats, isLoading, invalidateJobs } = useJobsData();
@@ -126,9 +125,7 @@ const Dashboard = memo(() => {
                     >
                       <TableCell className="font-medium text-white px-2 py-2">
                         <div className="flex flex-col gap-1">
-                          <span className="text-sm leading-relaxed break-words" title={job.title}>
-                            {job.title}
-                          </span>
+                          <span className="text-sm line-clamp-2">{job.title}</span>
                           {job.employment_type && (
                             <Badge variant="outline" className="w-fit text-[10px] bg-white/5 text-white border-white/20">
                               {getEmploymentTypeLabel(job.employment_type)}
