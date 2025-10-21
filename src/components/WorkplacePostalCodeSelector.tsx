@@ -71,11 +71,6 @@ const WorkplacePostalCodeSelector = ({
           return; // Already set in initialization useEffect
         }
         
-        // Om samma postnummer som förra gången, behåll det befintliga
-        if (cleanedCode === lastSuccessfulPostalCode && foundLocation) {
-          return;
-        }
-        
         if (isValidFormat && cleanedCode.length === 5) {
           setIsLoading(true);
           try {
