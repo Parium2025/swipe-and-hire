@@ -14,6 +14,7 @@ import ImageEditor from '@/components/ImageEditor';
 import { Upload, Building2, Edit, Camera, ChevronDown, Search, Check, Trash2, Linkedin, Twitter, Instagram, Globe, ExternalLink, Plus } from 'lucide-react';
 import { SWEDISH_INDUSTRIES } from '@/lib/industries';
 import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
 
 interface SocialMediaLink {
   platform: 'linkedin' | 'twitter' | 'instagram' | 'annat';
@@ -748,8 +749,11 @@ const CompanyProfile = () => {
                   <Button
                     type="button"
                     onClick={addSocialLink}
-                    variant="outline"
-                    className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 h-9 text-sm"
+                    disabled={!newSocialLink.platform || !newSocialLink.url.trim()}
+                    className={cn(
+                      "w-full bg-primary/80 hover:bg-primary text-white h-9 text-sm",
+                      newSocialLink.platform && newSocialLink.url.trim() && "border border-white/30"
+                    )}
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Lägg till
