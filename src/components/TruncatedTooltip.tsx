@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 interface TruncatedTooltipProps {
   content: string;
-  children: React.ReactElement; // exactly one child element
+  children: React.ReactElement;
   className?: string;
 }
 
@@ -22,23 +22,30 @@ export const TruncatedTooltip: React.FC<TruncatedTooltipProps> = ({ content, chi
   }, []);
 
   useEffect(() => {
-    const el = ref.current as HTMLElement | null;
+    const el = ref.current;
     if (!el) return;
 
     const check = () => {
-      const horizontallyTruncated = el.scrollWidth > el.clientWidth + 1;
-      const verticallyTruncated = el.scrollHeight > el.clientHeight + 1;
-      setIsTruncated(horizontallyTruncated || verticallyTruncated);
+      // More aggressive check with smaller threshold
+      const isHorizontallyTruncated = el.scrollWidth > el.clientWidth;
+      const isVerticallyTruncated = el.scrollHeight > el.clientHeight;
+      
+      setIsTruncated(isHorizontallyTruncated || isVerticallyTruncated);
     };
 
-    const timer = setTimeout(check, 50);
+    // Multiple checks to ensure we catch it
+    const timer1 = setTimeout(check, 0);
+    const timer2 = setTimeout(check, 100);
+    const timer3 = setTimeout(check, 300);
+    
     window.addEventListener('resize', check);
-
     const ro = new ResizeObserver(check);
     ro.observe(el);
 
     return () => {
-      clearTimeout(timer);
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
       window.removeEventListener('resize', check);
       ro.disconnect();
     };
@@ -60,16 +67,21 @@ export const TruncatedTooltip: React.FC<TruncatedTooltipProps> = ({ content, chi
     className: cn((childElement.props as any)?.className, className, isTruncated ? 'cursor-help' : ''),
   } as any);
 
+  // Show tooltip if on fine pointer device and text is truncated
   if (!isFinePointer || !isTruncated) {
     return childWithProps;
   }
 
   return (
-    <Tooltip>
+    <Tooltip delayDuration={200}>
       <TooltipTrigger asChild>
         {childWithProps}
       </TooltipTrigger>
-      <TooltipContent side="top" className="bg-white/95 backdrop-blur-sm border-white/20 text-gray-900 font-medium max-w-xs z-50">
+      <TooltipContent 
+        side="top" 
+        className="bg-white/95 backdrop-blur-sm border-white/20 text-gray-900 font-medium max-w-xs z-50"
+        sideOffset={5}
+      >
         <p>{content}</p>
       </TooltipContent>
     </Tooltip>
