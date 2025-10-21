@@ -23,22 +23,30 @@ export function TruncatedText({ text, className, children }: TruncatedTextProps)
       // Check if text is truncated by comparing scrollHeight with clientHeight
       // or scrollWidth with clientWidth
       const truncated = 
-        element.scrollHeight > element.clientHeight ||
-        element.scrollWidth > element.clientWidth;
+        element.scrollHeight > element.clientHeight + 2 ||
+        element.scrollWidth > element.clientWidth + 2;
       
       setIsTruncated(truncated);
     };
 
-    // Check truncation on mount and when text changes
-    checkTruncation();
+    // Check truncation after a short delay to ensure rendering is complete
+    const timeouts = [
+      setTimeout(checkTruncation, 50),
+      setTimeout(checkTruncation, 150),
+      setTimeout(checkTruncation, 300)
+    ];
 
     // Also check on resize
-    const resizeObserver = new ResizeObserver(checkTruncation);
+    const resizeObserver = new ResizeObserver(() => {
+      setTimeout(checkTruncation, 50);
+    });
+    
     if (textRef.current) {
       resizeObserver.observe(textRef.current);
     }
 
     return () => {
+      timeouts.forEach(clearTimeout);
       resizeObserver.disconnect();
     };
   }, [text]);
@@ -54,7 +62,7 @@ export function TruncatedText({ text, className, children }: TruncatedTextProps)
 
   // Text is truncated, wrap in tooltip
   return (
-    <TooltipProvider delayDuration={300}>
+    <TooltipProvider delayDuration={200}>
       <Tooltip>
         <TooltipTrigger asChild>
           <span ref={textRef} className={className}>
@@ -63,9 +71,9 @@ export function TruncatedText({ text, className, children }: TruncatedTextProps)
         </TooltipTrigger>
         <TooltipContent 
           side="top" 
-          className="max-w-md bg-white/95 text-gray-900 border-white/20 shadow-xl"
+          className="max-w-md bg-white/95 text-gray-900 border-white/20 shadow-xl z-50"
         >
-          <p className="text-sm leading-relaxed">{text}</p>
+          <p className="text-sm leading-relaxed break-words">{text}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
