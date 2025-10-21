@@ -1870,8 +1870,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   
                                   <div className={showApplicationForm ? 'flex flex-col h-full' : 'hidden'}>
                                     <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 border-b border-white/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem]">
-                                      <div className="text-sm font-bold text-white">Ansökningsformulär</div>
-                                      <button onClick={() => setShowApplicationForm(false)} className="text-sm text-white/80 hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
+                                    <div className="text-xs font-bold text-white">Ansökningsformulär</div>
+                                    <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white/80 hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
                                     </div>
 
                                      <div 
