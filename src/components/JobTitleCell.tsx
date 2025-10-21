@@ -11,8 +11,8 @@ interface JobTitleCellProps {
 export function JobTitleCell({ title, employmentType, className }: JobTitleCellProps) {
   return (
     <div className={cn("flex flex-col gap-1", className)}>
-      {/* Fix width to ensure identical wrapping across pages */}
-      <span className="text-sm line-clamp-2 max-w-[340px] sm:max-w-[380px]">
+      {/* Fixed width to ensure identical wrapping across Dashboard and Mina Annonser */}
+      <span className="text-sm line-clamp-2 w-[280px]">
         {title}
       </span>
       {employmentType && (
