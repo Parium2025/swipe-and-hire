@@ -12,8 +12,17 @@ import {
   Star, 
   Loader2, 
   Briefcase,
-  MessageSquare
+  MessageSquare,
+  Linkedin,
+  Twitter,
+  Instagram,
+  ExternalLink
 } from 'lucide-react';
+
+interface SocialMediaLink {
+  platform: 'linkedin' | 'twitter' | 'instagram' | 'annat';
+  url: string;
+}
 
 interface CompanyProfile {
   id: string;
@@ -25,6 +34,7 @@ interface CompanyProfile {
   industry?: string;
   employee_count?: string;
   address?: string;
+  social_media_links?: SocialMediaLink[];
 }
 
 interface CompanyReview {
@@ -71,7 +81,10 @@ const CompanyReviews = () => {
         },
         (payload) => {
           console.log('Profile updated:', payload);
-          setCompany(payload.new as CompanyProfile);
+          setCompany({
+            ...payload.new,
+            social_media_links: (payload.new.social_media_links as unknown as SocialMediaLink[]) || []
+          } as CompanyProfile);
         }
       )
       .subscribe();
@@ -153,7 +166,12 @@ const CompanyReviews = () => {
         return;
       }
 
-      setCompany(data);
+      if (data) {
+        setCompany({
+          ...data,
+          social_media_links: (data.social_media_links as unknown as SocialMediaLink[]) || []
+        } as CompanyProfile);
+      }
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -339,6 +357,59 @@ const CompanyReviews = () => {
             )}
           </div>
         </div>
+
+        {/* Sociala medier */}
+        {company.social_media_links && company.social_media_links.length > 0 && (
+          <>
+            <Separator className="my-6 bg-white/10" />
+            
+            <div className="space-y-3 mb-6">
+              <h3 className="font-semibold text-base text-white">Sociala medier</h3>
+              
+              <div className="grid gap-2.5">
+                {company.social_media_links.map((link, index) => {
+                  const getPlatformIcon = () => {
+                    switch(link.platform) {
+                      case 'linkedin': return Linkedin;
+                      case 'twitter': return Twitter;
+                      case 'instagram': return Instagram;
+                      default: return Globe;
+                    }
+                  };
+                  
+                  const getPlatformLabel = () => {
+                    switch(link.platform) {
+                      case 'linkedin': return 'LinkedIn';
+                      case 'twitter': return 'Twitter/X';
+                      case 'instagram': return 'Instagram';
+                      default: return 'Webbsida';
+                    }
+                  };
+                  
+                  const Icon = getPlatformIcon();
+                  
+                  return (
+                    <div key={index} className="flex items-center gap-2.5">
+                      <Icon className="h-4 w-4 text-white flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white">{getPlatformLabel()}</p>
+                        <a 
+                          href={link.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1 truncate"
+                        >
+                          <span className="truncate">{link.url}</span>
+                          <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        )}
 
         <Separator className="my-6 bg-white/10" />
 
