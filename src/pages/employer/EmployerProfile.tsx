@@ -471,12 +471,7 @@ const EmployerProfile = () => {
                   <Input
                     value={newSocialLink.url}
                     onChange={(e) => setNewSocialLink({...newSocialLink, url: e.target.value})}
-                    placeholder={
-                      newSocialLink.platform === 'linkedin' ? 'https://linkedin.com/in/dittnamn' :
-                      newSocialLink.platform === 'twitter' ? 'https://twitter.com/dittnamn' :
-                      newSocialLink.platform === 'instagram' ? 'https://instagram.com/dittnamn' :
-                      'https://din-webbsida.se'
-                    }
+                    placeholder="Klistra in din sociala medielänk här"
                     className="bg-white/5 border-white/10 text-white text-sm h-9 placeholder:text-white/40 md:col-span-1"
                   />
 
