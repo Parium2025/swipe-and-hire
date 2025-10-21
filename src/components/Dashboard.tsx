@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { smartTruncate } from '@/lib/smartTruncate';
 
 const Dashboard = memo(() => {
   const { jobs, stats, isLoading, invalidateJobs } = useJobsData();
@@ -125,7 +126,9 @@ const Dashboard = memo(() => {
                     >
                       <TableCell className="font-medium text-white px-2 py-2">
                         <div className="flex flex-col gap-1">
-                          <span className="text-sm line-clamp-2">{job.title}</span>
+                          <span className="text-sm" title={job.title}>
+                            {smartTruncate(job.title, 60)}
+                          </span>
                           {job.employment_type && (
                             <Badge variant="outline" className="w-fit text-[10px] bg-white/5 text-white border-white/20">
                               {getEmploymentTypeLabel(job.employment_type)}
@@ -152,9 +155,9 @@ const Dashboard = memo(() => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
-                        <div className="flex items-center gap-1 text-sm">
+                        <div className="flex items-center gap-1 text-sm" title={job.location}>
                           <MapPin size={12} />
-                          <span className="truncate max-w-[120px]">{job.location}</span>
+                          <span>{smartTruncate(job.location, 20)}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
