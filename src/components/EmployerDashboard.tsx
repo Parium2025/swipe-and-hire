@@ -201,7 +201,7 @@ const EmployerDashboard = memo(() => {
                   <TableHead className="text-white font-semibold text-sm px-2">Status</TableHead>
                   <TableHead className="text-white font-semibold text-sm text-center px-2">Visningar</TableHead>
                   <TableHead className="text-white font-semibold text-sm text-center px-2">Ansökningar</TableHead>
-                  <TableHead className="text-white font-semibold text-sm px-2">Plats</TableHead>
+                  <TableHead className="text-white font-semibold text-sm px-2 min-w-[260px]">Plats</TableHead>
                   <TableHead className="text-white font-semibold text-sm px-2">Rekryterare</TableHead>
                   <TableHead className="text-white font-semibold text-sm px-2">Skapad</TableHead>
                   <TableHead className="text-white font-semibold text-sm px-2">Åtgärder</TableHead>
@@ -255,7 +255,7 @@ const EmployerDashboard = memo(() => {
                           {job.applications_count || 0}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-white px-2 py-2">
+                      <TableCell className="text-white px-2 py-2 min-w-[260px]">
                         <div className="flex items-center gap-1 text-sm">
                           <MapPin size={12} />
                           <span className="truncate max-w-[360px]">{job.location}</span>
