@@ -71,7 +71,7 @@ export function TruncatedText({ text, className, children }: TruncatedTextProps)
         </TooltipTrigger>
         <TooltipContent 
           side="top" 
-          className="max-w-md bg-parium-blue text-white border-white/20 shadow-xl z-50"
+          className="max-w-md bg-white/5 backdrop-blur-sm text-white border-white/20 shadow-xl z-50"
         >
           <p className="text-sm leading-relaxed break-words">{text}</p>
         </TooltipContent>
