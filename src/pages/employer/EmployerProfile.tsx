@@ -416,7 +416,6 @@ const EmployerProfile = () => {
 
               {/* Add new social media link */}
               <div className="space-y-4 md:space-y-3">
-                <Label className="text-sm text-white">Lägg till ny länk</Label>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-3">
                   <DropdownMenu modal={false} open={platformMenuOpen} onOpenChange={setPlatformMenuOpen}>
                     <DropdownMenuTrigger asChild>
