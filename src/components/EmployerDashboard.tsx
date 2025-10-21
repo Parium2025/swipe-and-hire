@@ -13,6 +13,7 @@ import EditJobDialog from '@/components/EditJobDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { JobTitleCell } from '@/components/JobTitleCell';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -228,14 +229,7 @@ const EmployerDashboard = memo(() => {
                       onClick={() => navigate(`/job-details/${job.id}`)}
                     >
                       <TableCell className="font-medium text-white px-2 py-2">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-sm line-clamp-2">{job.title}</span>
-                          {job.employment_type && (
-                            <Badge variant="outline" className="w-fit text-[10px] bg-white/5 text-white border-white/20">
-                              {getEmploymentTypeLabel(job.employment_type)}
-                            </Badge>
-                          )}
-                        </div>
+                        <JobTitleCell title={job.title} employmentType={job.employment_type} />
                       </TableCell>
                       <TableCell className="px-2 py-2">
                         <Badge

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import { JobTitleCell } from '@/components/JobTitleCell';
 
 const Dashboard = memo(() => {
   const { jobs, stats, isLoading, invalidateJobs } = useJobsData();
@@ -124,14 +125,7 @@ const Dashboard = memo(() => {
                       onClick={() => navigate(`/job-details/${job.id}`)}
                     >
                       <TableCell className="font-medium text-white px-2 py-2">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-sm line-clamp-2">{job.title}</span>
-                          {job.employment_type && (
-                            <Badge variant="outline" className="w-fit text-[10px] bg-white/5 text-white border-white/20">
-                              {getEmploymentTypeLabel(job.employment_type)}
-                            </Badge>
-                          )}
-                        </div>
+                        <JobTitleCell title={job.title} employmentType={job.employment_type} />
                       </TableCell>
                       <TableCell className="px-2 py-2">
                         <Badge 
