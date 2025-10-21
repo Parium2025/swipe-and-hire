@@ -273,11 +273,12 @@ const EmployerDashboard = memo(() => {
                           content={job.employer_profile?.first_name && job.employer_profile?.last_name
                             ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
                             : '-'}
-                          className="text-sm truncate max-w-[150px] block cursor-help"
                         >
-                          {job.employer_profile?.first_name && job.employer_profile?.last_name
-                            ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
-                            : '-'}
+                          <span className="text-sm truncate max-w-[150px] block">
+                            {job.employer_profile?.first_name && job.employer_profile?.last_name
+                              ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
+                              : '-'}
+                          </span>
                         </TruncatedTooltip>
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
