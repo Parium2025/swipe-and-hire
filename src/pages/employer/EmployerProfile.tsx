@@ -277,13 +277,11 @@ const EmployerProfile = () => {
     <div className="space-y-8 max-w-4xl mx-auto">
       <div className="text-center mb-6">
         <h1 className="text-2xl font-semibold text-white mb-1">Min Profil</h1>
-        <p className="text-sm text-white">Hantera din personliga information</p>
       </div>
 
       <div className="bg-white/5 border border-white/10 rounded-lg">
         <div className="px-6 py-4 border-b border-white/10">
           <h3 className="text-lg font-semibold text-white">Personlig Information</h3>
-          <p className="text-sm text-white">Uppdatera din grundläggande profilinformation</p>
         </div>
         <div className="p-6 space-y-5">
           <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-5">
