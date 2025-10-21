@@ -12,10 +12,10 @@ interface JobTitleCellProps {
 export function JobTitleCell({ title, employmentType, className }: JobTitleCellProps) {
   return (
     <div className={cn("flex flex-col gap-1", className)}>
-      {/* Max 2 lines with ellipsis if text is longer */}
+      {/* Max 2 lines with ellipsis at natural wrap points */}
       <TruncatedText 
         text={title} 
-        className="text-sm line-clamp-2 w-[280px] block"
+        className="text-sm two-line-ellipsis w-[280px] block"
       />
       {employmentType && (
         <Badge variant="outline" className="w-fit text-[10px] bg-white/5 text-white border-white/20">
