@@ -336,7 +336,7 @@ const JobDetails = () => {
         {/* Kanban View */}
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
           {/* Inkorg */}
-          <div className="space-y-2">
+          <div className="bg-white/5 rounded-lg p-3">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-white font-semibold text-sm">Inkorg</h3>
               <Badge variant="outline" className="bg-yellow-500/20 text-yellow-300 border-yellow-500/40">
@@ -351,7 +351,7 @@ const JobDetails = () => {
           </div>
 
           {/* Granskar */}
-          <div className="space-y-2">
+          <div className="bg-white/5 rounded-lg p-3">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-white font-semibold text-sm">Granskar</h3>
               <Badge variant="outline" className="bg-blue-500/20 text-blue-300 border-blue-500/40">
@@ -366,7 +366,7 @@ const JobDetails = () => {
           </div>
 
           {/* Intervju */}
-          <div className="space-y-2">
+          <div className="bg-white/5 rounded-lg p-3">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-white font-semibold text-sm">Intervju</h3>
               <Badge variant="outline" className="bg-purple-500/20 text-purple-300 border-purple-500/40">
@@ -381,7 +381,7 @@ const JobDetails = () => {
           </div>
 
           {/* Erbjuden */}
-          <div className="space-y-2">
+          <div className="bg-white/5 rounded-lg p-3">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-white font-semibold text-sm">Erbjuden</h3>
               <Badge variant="outline" className="bg-green-500/20 text-green-300 border-green-500/40">
@@ -396,7 +396,7 @@ const JobDetails = () => {
           </div>
 
           {/* Anställd */}
-          <div className="space-y-2">
+          <div className="bg-white/5 rounded-lg p-3">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-white font-semibold text-sm">Anställd</h3>
               <Badge variant="outline" className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
