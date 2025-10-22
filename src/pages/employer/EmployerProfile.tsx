@@ -471,7 +471,7 @@ const EmployerProfile = () => {
                   <Input
                     value={newSocialLink.url}
                     onChange={(e) => setNewSocialLink({...newSocialLink, url: e.target.value})}
-                    placeholder="Klistra in din sociala medielänk här"
+                    placeholder="Klistra in din sociala medier länk här"
                     className="bg-white/5 border-white/10 text-white text-sm h-9 placeholder:text-white/40 md:col-span-1"
                   />
 
