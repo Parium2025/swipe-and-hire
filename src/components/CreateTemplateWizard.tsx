@@ -1613,21 +1613,25 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     <p className="text-white text-sm mb-1">Mallnamn</p>
                     <p className="text-white font-medium">{formData.name || '-'}</p>
                   </div>
+                  <div className="border-t border-white/30" />
                   
                   <div>
                     <p className="text-white text-sm mb-1">Jobbtitel</p>
                     <p className="text-white font-medium">{formData.title || '-'}</p>
                   </div>
+                  <div className="border-t border-white/30" />
                   
                   <div>
                     <p className="text-white text-sm mb-1">Yrke</p>
                     <p className="text-white font-medium">{formData.occupation || '-'}</p>
                   </div>
+                  <div className="border-t border-white/30" />
                   
                   <div>
                     <p className="text-white text-sm mb-1">Beskrivning</p>
                     <p className="text-white">{formData.description || '-'}</p>
                   </div>
+                  <div className="border-t border-white/30" />
                   
                   <div>
                     <p className="text-white text-sm mb-1">Arbetsplats</p>
@@ -1635,12 +1639,16 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   </div>
                   
                   {formData.workplace_address && (
-                    <div>
-                      <p className="text-white text-sm mb-1">Gatuadress</p>
-                      <p className="text-white">{formData.workplace_address}</p>
-                    </div>
+                    <>
+                      <div className="border-t border-white/30" />
+                      <div>
+                        <p className="text-white text-sm mb-1">Gatuadress</p>
+                        <p className="text-white">{formData.workplace_address}</p>
+                      </div>
+                    </>
                   )}
                   
+                  <div className="border-t border-white/30" />
                   <div>
                     <p className="text-white text-sm mb-1">Anpassade frågor</p>
                     <p className="text-white">{customQuestions.length}</p>
@@ -1680,7 +1688,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   <Button
                     onClick={handleSubmit}
                     disabled={loading || !validateCurrentStep()}
-                    className="bg-primary hover:bg-primary/90 text-white shrink-0 min-w-[120px]"
+                    className={`bg-primary hover:bg-primary/90 text-white shrink-0 min-w-[120px] ${(!loading && validateCurrentStep()) ? 'border border-white/30' : ''}`}
                   >
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {templateToEdit ? 'Uppdatera mall' : 'Skapa mall'}
