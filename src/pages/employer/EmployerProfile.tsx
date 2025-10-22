@@ -279,14 +279,10 @@ const EmployerProfile = () => {
         <h1 className="text-2xl font-semibold text-white mb-1">Min Profil</h1>
       </div>
 
-      <div className="bg-white/5 border border-white/10 rounded-lg">
-        <div className="px-6 py-4 border-b border-white/10">
-          <h3 className="text-lg font-semibold text-white">Personlig Information</h3>
-        </div>
-        <div className="p-6 space-y-5">
-          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
+      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
+        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-5 md:space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
+              <div className="space-y-1.5">
                 <Label htmlFor="first_name" className="text-sm text-white">Förnamn</Label>
                 <Input
                   id="first_name"
@@ -295,7 +291,7 @@ const EmployerProfile = () => {
                   className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
                 />
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <Label htmlFor="last_name" className="text-sm text-white">Efternamn</Label>
                 <Input
                   id="last_name"
@@ -306,7 +302,7 @@ const EmployerProfile = () => {
               </div>
             </div>
             
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <Label htmlFor="email" className="text-sm text-white">E-post</Label>
               <Input
                 id="email"
@@ -316,7 +312,7 @@ const EmployerProfile = () => {
               />
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <Label htmlFor="role" className="text-sm text-white">Roll</Label>
               <Input
                 id="role"
@@ -326,7 +322,7 @@ const EmployerProfile = () => {
               />
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <Label htmlFor="location" className="text-sm text-white">Plats</Label>
               <Input
                 id="location"
@@ -337,7 +333,7 @@ const EmployerProfile = () => {
               />
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <Label htmlFor="phone" className="text-sm text-white">Telefonnummer (frivilligt)</Label>
               <Input
                 id="phone"
@@ -348,7 +344,7 @@ const EmployerProfile = () => {
               />
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <Label htmlFor="bio" className="text-sm text-white">Om mig</Label>
               <Textarea
                 id="bio"
@@ -532,7 +528,6 @@ const EmployerProfile = () => {
               </Button>
             </div>
           </form>
-        </div>
       </div>
     </div>
   );
