@@ -20,6 +20,7 @@ import {
   Users,
   Eye
 } from 'lucide-react';
+import { TruncatedText } from '@/components/TruncatedText';
 import { useToast } from '@/hooks/use-toast';
 import {
   DropdownMenu,
@@ -272,8 +273,11 @@ const JobDetails = () => {
         {/* Job Title and Stats */}
         <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3">
           <div className="flex items-start justify-between mb-3">
-            <div>
-              <h1 className="text-xl font-bold text-white mb-2">{job.title}</h1>
+            <div className="flex-1 min-w-0">
+              <TruncatedText 
+                text={job.title}
+                className="text-xl font-bold text-white mb-2 two-line-ellipsis block"
+              />
               <div className="flex items-center gap-4 text-sm text-white/70">
                 <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
