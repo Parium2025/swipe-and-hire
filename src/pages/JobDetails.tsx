@@ -256,23 +256,10 @@ const JobDetails = () => {
 
   return (
     <div className="space-y-4 max-w-6xl mx-auto px-12 py-4 pb-safe min-h-screen">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate(-1)}
-            className="bg-white/10 border-2 border-white text-white hover:bg-white/20 transition-all duration-150 active:scale-95"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Tillbaka
-          </Button>
-        </div>
-
         {/* Job Title and Stats */}
         <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3">
           <div className="flex items-start justify-between mb-3">
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 pr-4">
               <TruncatedText 
                 text={job.title}
                 className="text-xl font-bold text-white mb-2 two-line-ellipsis block"
@@ -313,6 +300,14 @@ const JobDetails = () => {
                 </Badge>
               </div>
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(-1)}
+              className="text-white hover:bg-white/10 h-8 w-8 p-0"
+            >
+              <XCircle className="h-5 w-5" />
+            </Button>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
