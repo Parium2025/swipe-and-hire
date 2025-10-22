@@ -314,8 +314,8 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                             className="px-4 py-3 text-white hover:bg-slate-700/80 focus:bg-slate-700/80 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20"
                           >
                           <div className="flex flex-col">
-                              <span className="font-medium">+ Skapa en ny mall</span>
-                              <span className="text-sm text-white/60">Skapa en återanvändbar jobbmall</span>
+                              <span className="font-medium text-white">+ Skapa en ny mall</span>
+                              <span className="text-sm text-white">Skapa en återanvändbar jobbmall</span>
                             </div>
                           </DropdownMenuItem>
                           
@@ -331,12 +331,12 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                                   className="flex flex-col flex-1 text-left hover:opacity-80 transition-opacity"
                                 >
                                   <div className="flex items-center justify-between">
-                                    <span className="font-medium">{template.name}</span>
+                                    <span className="font-medium text-white">{template.name}</span>
                                     {template.is_default && (
                                       <span className="text-sm text-blue-400 ml-2">Standard</span>
                                     )}
                                   </div>
-                                  <span className="text-sm text-white/60 mt-1 break-words line-clamp-2 sm:line-clamp-none">{template.title}</span>
+                                  <span className="text-sm text-white mt-1 break-words line-clamp-2 sm:line-clamp-none">{template.title}</span>
                                 </button>
                                 <div className="flex gap-1 flex-shrink-0">
                                   <Button
