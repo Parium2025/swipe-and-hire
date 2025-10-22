@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import { useQuery } from '@tanstack/react-query';
 import { 
   Building2, 
   Globe, 
@@ -54,102 +54,13 @@ interface CompanyReview {
 const CompanyReviews = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [company, setCompany] = useState<CompanyProfile | null>(null);
-  const [reviews, setReviews] = useState<CompanyReview[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (user?.id) {
-      fetchCompanyData();
-      fetchReviews();
-    }
-  }, [user?.id]);
-
-  // Real-time lyssning för företagsprofil
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const profileChannel = supabase
-      .channel('profile-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'profiles',
-          filter: `user_id=eq.${user.id}`
-        },
-        (payload) => {
-          console.log('Profile updated:', payload);
-          setCompany({
-            ...payload.new,
-            social_media_links: (payload.new.social_media_links as unknown as SocialMediaLink[]) || []
-          } as CompanyProfile);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(profileChannel);
-    };
-  }, [user?.id]);
-
-  // Real-time lyssning för recensioner
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const reviewsChannel = supabase
-      .channel('reviews-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'company_reviews',
-          filter: `company_id=eq.${user.id}`
-        },
-        () => {
-          console.log('New review added');
-          fetchReviews();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'company_reviews',
-          filter: `company_id=eq.${user.id}`
-        },
-        () => {
-          console.log('Review updated');
-          fetchReviews();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'DELETE',
-          schema: 'public',
-          table: 'company_reviews',
-          filter: `company_id=eq.${user.id}`
-        },
-        () => {
-          console.log('Review deleted');
-          fetchReviews();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(reviewsChannel);
-    };
-  }, [user?.id]);
-
-  const fetchCompanyData = async () => {
-    if (!user?.id) return;
-
-    try {
+  // Fetch company data with React Query
+  const { data: company, isLoading: companyLoading } = useQuery({
+    queryKey: ['company-profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -163,59 +74,49 @@ const CompanyReviews = () => {
           description: "Kunde inte hämta företagsinformation",
           variant: "destructive"
         });
-        return;
+        return null;
       }
 
-      if (data) {
-        setCompany({
-          ...data,
-          social_media_links: (data.social_media_links as unknown as SocialMediaLink[]) || []
-        } as CompanyProfile);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return data ? {
+        ...data,
+        social_media_links: (data.social_media_links as unknown as SocialMediaLink[]) || []
+      } as CompanyProfile : null;
+    },
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const fetchReviews = async () => {
-    if (!user?.id) return;
-
-    try {
+  // Fetch reviews with React Query - using JOIN to avoid N+1 queries
+  const { data: reviews = [], isLoading: reviewsLoading } = useQuery({
+    queryKey: ['company-reviews', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      
       const { data, error } = await supabase
         .from('company_reviews')
-        .select('*')
+        .select(`
+          *,
+          profiles:user_id (
+            first_name,
+            last_name
+          )
+        `)
         .eq('company_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching reviews:', error);
-        return;
+        return [];
       }
 
-      // Fetch user profiles separately for non-anonymous reviews
-      const reviewsWithProfiles = await Promise.all(
-        (data || []).map(async (review) => {
-          if (review.is_anonymous || !review.user_id) {
-            return { ...review, profiles: undefined };
-          }
+      return (data || []) as CompanyReview[];
+    },
+    enabled: !!user?.id,
+    staleTime: 2 * 60 * 1000,
+  });
 
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('first_name, last_name')
-            .eq('user_id', review.user_id)
-            .maybeSingle();
+  const loading = companyLoading || reviewsLoading;
 
-          return { ...review, profiles: profileData || undefined };
-        })
-      );
-
-      setReviews(reviewsWithProfiles as CompanyReview[]);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
 
   const averageRating = reviews.length > 0
     ? (reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length).toFixed(1)
