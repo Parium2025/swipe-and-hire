@@ -167,11 +167,11 @@ const JobDetails = () => {
   };
 
   const ApplicationCard = ({ application }: { application: JobApplication }) => (
-    <Card className="bg-white/10 backdrop-blur-sm border-white/20 mb-3">
-      <CardContent className="p-4">
+    <Card className="bg-white/5 backdrop-blur-sm border-white/20 mb-2">
+      <CardContent className="p-3">
         <div className="flex items-start gap-3">
-          <Avatar className="h-10 w-10">
-            <AvatarFallback className="bg-primary text-white">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="bg-primary text-white text-xs">
               {getInitials(application.first_name, application.last_name)}
             </AvatarFallback>
           </Avatar>
@@ -255,7 +255,7 @@ const JobDetails = () => {
   }
 
   return (
-    <div className="space-y-6 px-4 py-6 sm:px-6 pb-safe min-h-screen">
+    <div className="space-y-4 px-4 py-4 sm:px-6 pb-safe min-h-screen">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button
@@ -270,10 +270,10 @@ const JobDetails = () => {
         </div>
 
         {/* Job Title and Stats */}
-        <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6">
-          <div className="flex items-start justify-between mb-4">
+        <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3">
+          <div className="flex items-start justify-between mb-3">
             <div>
-              <h1 className="text-2xl font-bold text-white mb-2">{job.title}</h1>
+              <h1 className="text-xl font-bold text-white mb-2">{job.title}</h1>
               <div className="flex items-center gap-4 text-sm text-white/70">
                 <div className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
@@ -286,20 +286,20 @@ const JobDetails = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="bg-white/5 rounded-lg p-3">
-              <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
+              <div className="flex items-center gap-2 text-white/60 text-sm mb-1">
                 <Eye className="h-4 w-4" />
                 Visningar
               </div>
-              <div className="text-2xl font-bold text-white">{job.views_count}</div>
+              <div className="text-xl font-bold text-white">{job.views_count}</div>
             </div>
             <div className="bg-white/5 rounded-lg p-3">
-              <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
+              <div className="flex items-center gap-2 text-white/60 text-sm mb-1">
                 <Users className="h-4 w-4" />
                 Ansökningar
               </div>
-              <div className="text-2xl font-bold text-white">{job.applications_count}</div>
+              <div className="text-xl font-bold text-white">{job.applications_count}</div>
             </div>
           </div>
         </div>
@@ -315,12 +315,12 @@ const JobDetails = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="kanban" className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <TabsContent value="kanban" className="mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
               {/* Inkorg */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-white font-semibold">Inkorg</h3>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-white font-semibold text-sm">Inkorg</h3>
                   <Badge variant="outline" className="bg-yellow-500/20 text-yellow-300 border-yellow-500/40">
                     {filterApplicationsByStatus('pending').length}
                   </Badge>
@@ -333,9 +333,9 @@ const JobDetails = () => {
               </div>
 
               {/* Granskar */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-white font-semibold">Granskar</h3>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-white font-semibold text-sm">Granskar</h3>
                   <Badge variant="outline" className="bg-blue-500/20 text-blue-300 border-blue-500/40">
                     {filterApplicationsByStatus('reviewing').length}
                   </Badge>
@@ -348,9 +348,9 @@ const JobDetails = () => {
               </div>
 
               {/* Intervju */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-white font-semibold">Intervju</h3>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-white font-semibold text-sm">Intervju</h3>
                   <Badge variant="outline" className="bg-purple-500/20 text-purple-300 border-purple-500/40">
                     {filterApplicationsByStatus('interview').length}
                   </Badge>
@@ -363,9 +363,9 @@ const JobDetails = () => {
               </div>
 
               {/* Erbjuden */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-white font-semibold">Erbjuden</h3>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-white font-semibold text-sm">Erbjuden</h3>
                   <Badge variant="outline" className="bg-green-500/20 text-green-300 border-green-500/40">
                     {filterApplicationsByStatus('offered').length}
                   </Badge>
@@ -378,9 +378,9 @@ const JobDetails = () => {
               </div>
 
               {/* Anställd */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-white font-semibold">Anställd</h3>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-white font-semibold text-sm">Anställd</h3>
                   <Badge variant="outline" className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
                     {filterApplicationsByStatus('hired').length}
                   </Badge>
@@ -394,11 +394,11 @@ const JobDetails = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="list" className="mt-6">
-            <div className="space-y-3">
+          <TabsContent value="list" className="mt-4">
+            <div className="space-y-2">
               {applications.map((app) => (
-                <Card key={app.id} className="bg-white/10 backdrop-blur-sm border-white/20">
-                  <CardContent className="p-4">
+                <Card key={app.id} className="bg-white/5 backdrop-blur-sm border-white/20">
+                  <CardContent className="p-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <Avatar className="h-12 w-12">
