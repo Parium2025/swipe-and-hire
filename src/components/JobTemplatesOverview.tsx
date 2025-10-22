@@ -331,8 +331,8 @@ const JobTemplatesOverview = () => {
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
           <DialogTrigger asChild>
             <Button onClick={resetForm} className="flex items-center gap-2">
-              <Plus size={16} />
               Skapa ny mall
+              <Plus size={16} />
             </Button>
           </DialogTrigger>
         </Dialog>
