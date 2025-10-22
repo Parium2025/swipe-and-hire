@@ -54,12 +54,8 @@ const EmployerSettings = () => {
         <p className="text-sm text-white">Hantera dina kontoinställningar och preferenser</p>
       </div>
 
-      <div className="bg-white/5 border border-white/10 rounded-lg">
-        <div className="px-6 py-4 border-b border-white/10">
-          <h3 className="text-lg font-semibold text-white">Kontoinformation</h3>
-          <p className="text-sm text-white">Din grundläggande kontoinformation</p>
-        </div>
-        <div className="p-6 space-y-5">
+      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
+        <div className="space-y-5 md:space-y-3">
           <div className="space-y-1.5">
             <Label htmlFor="email" className="text-sm text-white">E-postadress</Label>
             <Input 
@@ -72,12 +68,8 @@ const EmployerSettings = () => {
         </div>
       </div>
 
-      <div className="bg-white/5 border border-white/10 rounded-lg">
-        <div className="px-6 py-4 border-b border-white/10">
-          <h3 className="text-lg font-semibold text-white">Ändra lösenord</h3>
-          <p className="text-sm text-white">Uppdatera ditt kontolösenord</p>
-        </div>
-        <div className="p-6 space-y-5">
+      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
+        <div className="space-y-5 md:space-y-3">
           <div className="space-y-1.5">
             <Label htmlFor="current-password" className="text-sm text-white">Nuvarande lösenord</Label>
             <Input
@@ -116,12 +108,8 @@ const EmployerSettings = () => {
         </div>
       </div>
 
-      <div className="bg-white/5 border border-white/10 rounded-lg">
-        <div className="px-6 py-4 border-b border-white/10">
-          <h3 className="text-lg font-semibold text-white">Aviseringar</h3>
-          <p className="text-sm text-white">Hantera dina aviseringsinställningar</p>
-        </div>
-        <div className="p-6 space-y-5">
+      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
+        <div className="space-y-5 md:space-y-3">
           <div className="flex items-center justify-between">
             <div>
               <Label className="text-sm text-white">E-postaviseringar</Label>

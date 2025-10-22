@@ -256,7 +256,7 @@ const JobDetails = () => {
   return (
     <div className="space-y-4 max-w-6xl mx-auto px-12 py-4 pb-safe min-h-screen">
         {/* Job Title and Stats */}
-        <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3">
+        <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-6 md:p-4">
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1 min-w-0 pr-4">
               <TruncatedText 
