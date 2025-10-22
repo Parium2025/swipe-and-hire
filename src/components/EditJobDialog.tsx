@@ -2235,7 +2235,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                     ) : null}
                                     <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                                     <div 
-                                      className="absolute inset-0 flex flex-col justify-start items-center pt-10 p-3 text-white text-center cursor-pointer"
+                                      className="absolute inset-0 flex flex-col items-center pt-10 p-3 text-white text-center cursor-pointer overflow-y-auto overscroll-contain"
                                       onClick={() => setShowApplicationForm(true)}
                                     >
                                       {(() => {
