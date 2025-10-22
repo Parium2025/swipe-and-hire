@@ -468,7 +468,7 @@ const JobTemplatesOverview = () => {
               />
             </div>
 
-            <div className="border-t border-white/10 my-4"></div>
+            <div className="border-t border-white/30 my-4"></div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -495,7 +495,7 @@ const JobTemplatesOverview = () => {
               </div>
             </div>
 
-            <div className="border-t border-white/10 my-4"></div>
+            <div className="border-t border-white/30 my-4"></div>
 
             <div className="space-y-2">
               <Label htmlFor="description">Jobbeskrivning *</Label>
@@ -510,7 +510,7 @@ const JobTemplatesOverview = () => {
               />
             </div>
 
-            <div className="border-t border-white/10 my-4"></div>
+            <div className="border-t border-white/30 my-4"></div>
 
             <div className="space-y-2">
               <Label htmlFor="requirements">Krav och kvalifikationer</Label>
@@ -524,7 +524,7 @@ const JobTemplatesOverview = () => {
               />
             </div>
 
-            <div className="border-t border-white/10 my-4"></div>
+            <div className="border-t border-white/30 my-4"></div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -551,7 +551,7 @@ const JobTemplatesOverview = () => {
               </div>
             </div>
 
-            <div className="border-t border-white/10 my-4"></div>
+            <div className="border-t border-white/30 my-4"></div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -585,7 +585,7 @@ const JobTemplatesOverview = () => {
               </div>
             </div>
 
-            <div className="border-t border-white/10 my-4"></div>
+            <div className="border-t border-white/30 my-4"></div>
 
             <div className="space-y-2">
               <Label htmlFor="contact_email">Kontakt-email</Label>
@@ -599,7 +599,7 @@ const JobTemplatesOverview = () => {
               />
             </div>
 
-            <div className="border-t border-white/10 my-4"></div>
+            <div className="border-t border-white/30 my-4"></div>
 
             <div className="space-y-2">
               <Label htmlFor="application_instructions">Ansökningsinstruktioner</Label>
