@@ -468,6 +468,8 @@ const JobTemplatesOverview = () => {
               />
             </div>
 
+            <div className="border-t border-white/10 my-4"></div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="job-title">Jobbtitel *</Label>
@@ -493,6 +495,8 @@ const JobTemplatesOverview = () => {
               </div>
             </div>
 
+            <div className="border-t border-white/10 my-4"></div>
+
             <div className="space-y-2">
               <Label htmlFor="description">Jobbeskrivning *</Label>
               <Textarea
@@ -506,6 +510,8 @@ const JobTemplatesOverview = () => {
               />
             </div>
 
+            <div className="border-t border-white/10 my-4"></div>
+
             <div className="space-y-2">
               <Label htmlFor="requirements">Krav och kvalifikationer</Label>
               <Textarea
@@ -517,6 +523,8 @@ const JobTemplatesOverview = () => {
                 className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
               />
             </div>
+
+            <div className="border-t border-white/10 my-4"></div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -542,6 +550,8 @@ const JobTemplatesOverview = () => {
                 />
               </div>
             </div>
+
+            <div className="border-t border-white/10 my-4"></div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -575,6 +585,8 @@ const JobTemplatesOverview = () => {
               </div>
             </div>
 
+            <div className="border-t border-white/10 my-4"></div>
+
             <div className="space-y-2">
               <Label htmlFor="contact_email">Kontakt-email</Label>
               <Input
@@ -586,6 +598,8 @@ const JobTemplatesOverview = () => {
                 className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
               />
             </div>
+
+            <div className="border-t border-white/10 my-4"></div>
 
             <div className="space-y-2">
               <Label htmlFor="application_instructions">Ansökningsinstruktioner</Label>
@@ -603,7 +617,11 @@ const JobTemplatesOverview = () => {
               <Button 
                 onClick={editingTemplate ? handleEdit : handleCreate}
                 disabled={isSubmitting || !formData.name || !formData.title || !formData.description || !formData.location}
-                className="flex-1"
+                className={`flex-1 ${
+                  !isSubmitting && formData.name && formData.title && formData.description && formData.location 
+                    ? 'border border-white/30' 
+                    : ''
+                }`}
               >
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isSubmitting ? 'Sparar...' : (editingTemplate ? 'Uppdatera mall' : 'Skapa mall')}
