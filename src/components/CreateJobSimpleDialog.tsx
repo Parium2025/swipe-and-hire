@@ -399,7 +399,9 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                 <Button 
                   onClick={handleCreateJob}
                   disabled={loading || !jobTitle.trim()}
-                  className="flex-1 transition-all duration-150 active:scale-95"
+                  className={`flex-1 transition-all duration-150 active:scale-95 ${
+                    !loading && jobTitle.trim() ? 'border border-white/30' : ''
+                  }`}
                 >
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Skapa jobb
