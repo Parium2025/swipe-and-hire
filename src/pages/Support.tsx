@@ -227,13 +227,15 @@ const Support = () => {
               />
             </div>
 
-            <Button 
-              type="submit" 
-              className="w-full h-9 text-sm border border-white/30 font-medium" 
-              disabled={loading}
-            >
-              {loading ? 'Skickar...' : 'Skicka meddelande'}
-            </Button>
+            <div className="flex justify-center">
+              <Button 
+                type="submit" 
+                className="h-9 px-6 text-sm border border-white/30 font-medium" 
+                disabled={loading}
+              >
+                {loading ? 'Skickar...' : 'Skicka meddelande'}
+              </Button>
+            </div>
           </form>
         </div>
       </div>
