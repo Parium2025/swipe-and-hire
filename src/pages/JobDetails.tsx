@@ -303,9 +303,9 @@ const JobDetails = () => {
               variant="ghost"
               size="sm"
               onClick={() => navigate(-1)}
-              className="text-white hover:bg-white/10 h-8 w-8 p-0"
+              className="text-white h-8 w-8 p-0 hover:bg-transparent focus-visible:ring-0 focus:outline-none"
             >
-              <X className="h-6 w-6" />
+              <X className="h-7 w-7" />
             </Button>
           </div>
 
