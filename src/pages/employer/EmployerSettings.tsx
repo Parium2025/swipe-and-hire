@@ -108,7 +108,11 @@ const EmployerSettings = () => {
               className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
             />
           </div>
-          <Button onClick={handlePasswordUpdate} className="h-9 text-sm">Uppdatera lösenord</Button>
+          <div className="flex justify-center pt-1">
+            <Button onClick={handlePasswordUpdate} className="h-9 px-6 text-sm border border-white/30 font-medium">
+              Uppdatera lösenord
+            </Button>
+          </div>
         </div>
       </div>
 
