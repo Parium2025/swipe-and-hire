@@ -256,7 +256,7 @@ const JobDetails = () => {
   }
 
   return (
-    <div className="space-y-4 px-4 py-4 sm:px-6 pb-safe min-h-screen">
+    <div className="space-y-4 max-w-6xl mx-auto px-12 py-4 pb-safe min-h-screen">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button
