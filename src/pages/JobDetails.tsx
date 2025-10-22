@@ -278,12 +278,38 @@ const JobDetails = () => {
                 text={job.title}
                 className="text-xl font-bold text-white mb-2 two-line-ellipsis block"
               />
-              <div className="flex items-center gap-4 text-sm text-white/70">
-                <div className="flex items-center gap-1">
+              <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-1 text-white">
                   <MapPin className="h-4 w-4" />
                   {job.location}
                 </div>
-                <Badge variant={job.is_active ? 'default' : 'secondary'}>
+                <Badge 
+                  variant={job.is_active ? "default" : "secondary"}
+                  className={`text-sm whitespace-nowrap cursor-pointer ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-gray-500/20 text-gray-300 border-gray-500/30"}`}
+                  onClick={async () => {
+                    try {
+                      const { error } = await supabase
+                        .from('job_postings')
+                        .update({ is_active: !job.is_active })
+                        .eq('id', jobId);
+                      
+                      if (error) throw error;
+                      
+                      toast({
+                        title: job.is_active ? 'Jobb inaktiverat' : 'Jobb aktiverat',
+                        description: job.is_active ? 'Jobbet är nu inaktivt.' : 'Jobbet är nu aktivt.',
+                      });
+                      
+                      fetchJobData();
+                    } catch (error: any) {
+                      toast({
+                        title: 'Fel',
+                        description: error.message,
+                        variant: 'destructive',
+                      });
+                    }
+                  }}
+                >
                   {job.is_active ? 'Aktiv' : 'Inaktiv'}
                 </Badge>
               </div>
