@@ -873,7 +873,7 @@ const Profile = () => {
       <div className="space-y-6">
         {/* Profile Image/Video Card */}
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
-          <div className="p-4 space-y-2">
+          <div className="p-6 md:p-4 space-y-2">
             <h3 className="text-base font-semibold text-white text-center">
               Profilbild/Profilvideo
             </h3>
@@ -1039,7 +1039,7 @@ const Profile = () => {
 
         {/* Profile Information */}
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
-          <div className="p-4 md:p-3 border-b border-white/10">
+          <div className="p-6 md:p-4 border-b border-white/10">
             <h3 className="flex items-center gap-2 text-base font-semibold text-white">
               <User className="h-4 w-4" />
               Personlig Information
@@ -1048,7 +1048,7 @@ const Profile = () => {
               Uppdatera din grundläggande profilinformation
             </p>
           </div>
-          <div className="p-4 md:p-3">
+          <div className="p-6 md:p-4">
             <form onSubmit={handleSubmit} className="space-y-6 md:space-y-3">
               {/* Personal Information */}
               <div className="space-y-4 md:space-y-3">
