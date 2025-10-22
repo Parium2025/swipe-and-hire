@@ -1900,7 +1900,7 @@ const MobileJobWizard = ({
                         <Button
                           onClick={addCustomQuestion}
                           size="sm"
-                          className="bg-primary hover:bg-primary/90 text-white"
+                          className="bg-primary hover:bg-primary/90 text-white border border-white/30 px-6 font-medium"
                         >
                           <Plus className="h-4 w-4 mr-1 text-[hsl(var(--pure-white))]" />
                           Lägg till fråga
@@ -1963,14 +1963,16 @@ const MobileJobWizard = ({
                       />
                     </div>
 
-                    <Button
-                      onClick={createNewQuestion}
-                      size="sm"
-                      className="w-full bg-primary hover:bg-primary/90 text-white"
-                    >
-                      <Plus className="h-4 w-4 mr-1 text-[hsl(var(--pure-white))]" />
-                      Skapa ny fråga
-                    </Button>
+                    <div className="flex justify-center">
+                      <Button
+                        onClick={createNewQuestion}
+                        size="sm"
+                        className="bg-primary hover:bg-primary/90 text-white border border-white/30 px-6 font-medium"
+                      >
+                        <Plus className="h-4 w-4 mr-1 text-[hsl(var(--pure-white))]" />
+                        Skapa ny fråga
+                      </Button>
+                    </div>
 
                     <div className="space-y-3 max-h-[400px] overflow-y-auto">
                       {(() => {
