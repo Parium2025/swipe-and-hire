@@ -229,7 +229,7 @@ const Support = () => {
 
             <Button 
               type="submit" 
-              className="w-full h-9 text-sm" 
+              className="w-full h-9 text-sm border border-white/30 font-medium" 
               disabled={loading}
             >
               {loading ? 'Skickar...' : 'Skicka meddelande'}
