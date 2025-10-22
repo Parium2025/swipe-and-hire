@@ -433,8 +433,8 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
         onClick={addQuestion}
         className="w-full bg-primary hover:bg-primary/90 text-white"
       >
-        <Plus className="h-4 w-4 mr-2 text-[hsl(var(--pure-white))]" />
         Skapa ny fråga
+        <Plus className="h-4 w-4 ml-2 text-[hsl(var(--pure-white))]" />
       </Button>
 
       {/* Ny/Redigera fråga dialog */}
@@ -521,8 +521,8 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
                       setQuestionDraft({ ...questionDraft, options: [...options, ''] });
                     }}
                   >
-                    <Plus className="h-4 w-4 mr-1 text-[hsl(var(--pure-white))]" />
                     Lägg till alternativ
+                    <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
                   </Button>
                 </div>
                 <div className="space-y-2">

@@ -135,8 +135,8 @@ const ProfileSelector = ({ onProfileSelected }: ProfileSelectorProps) => {
               Hantera profiler
             </button>
             <button className="flex items-center gap-2 hover:text-primary-foreground/80 transition-colors">
-              <Plus className="h-4 w-4" />
               Lägg till profil
+              <Plus className="h-4 w-4" />
             </button>
           </div>
         </div>

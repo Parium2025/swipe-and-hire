@@ -350,8 +350,8 @@ const JobTemplatesOverview = () => {
               <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                 <DialogTrigger asChild>
                   <Button onClick={resetForm}>
-                    <Plus size={16} className="mr-2" />
                     Skapa första mallen
+                    <Plus size={16} className="ml-2" />
                   </Button>
                 </DialogTrigger>
               </Dialog>

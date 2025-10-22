@@ -165,8 +165,8 @@ const Billing = () => {
                 size="sm"
                 className="bg-white/5 border border-white/10 text-white hover:bg-white/10 w-full sm:w-auto h-8 text-sm"
               >
-                <Plus className="h-3 w-3 mr-2" />
                 Lägg till kort
+                <Plus className="h-3 w-3 ml-2" />
               </Button>
             </div>
           </div>

@@ -1477,8 +1477,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 size="sm"
                                 className="bg-primary hover:bg-primary/90 text-white"
                               >
-                                <Plus className="h-4 w-4 mr-1 text-[hsl(var(--pure-white))]" />
                                 Lägg till fråga
+                                <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
                               </Button>
                             </div>
                             
@@ -1542,8 +1542,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             size="sm"
                             className="w-full bg-primary hover:bg-primary/90 text-white"
                           >
-                            <Plus className="h-4 w-4 mr-1 text-[hsl(var(--pure-white))]" />
                             Skapa ny fråga
+                            <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
                           </Button>
 
                           <div className="space-y-3 max-h-[400px] overflow-y-auto">
@@ -1807,8 +1807,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                     size="sm"
                                     className="border-white/40 text-white bg-transparent hover:bg-transparent hover:border-white/60"
                                   >
-                                    <Plus className="h-4 w-4 mr-1 text-[hsl(var(--pure-white))]" />
                                     Lägg till alternativ
+                                    <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
                                   </Button>
                                 </div>
                               </div>

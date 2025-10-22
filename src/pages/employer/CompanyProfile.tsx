@@ -755,8 +755,8 @@ const CompanyProfile = () => {
                       newSocialLink.platform && newSocialLink.url.trim() && "border border-white/30"
                     )}
                   >
-                    <Plus className="h-4 w-4 mr-2" />
                     Lägg till
+                    <Plus className="h-4 w-4 ml-2" />
                   </Button>
                 </div>
               </div>
