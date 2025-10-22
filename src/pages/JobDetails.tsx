@@ -6,7 +6,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ArrowLeft, 
   Clock, 
@@ -318,14 +317,14 @@ const JobDetails = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="bg-white/5 rounded-lg p-3">
-              <div className="flex items-center gap-2 text-white/60 text-sm mb-1">
+              <div className="flex items-center gap-2 text-white text-sm mb-1">
                 <Eye className="h-4 w-4" />
                 Visningar
               </div>
               <div className="text-xl font-bold text-white">{job.views_count}</div>
             </div>
             <div className="bg-white/5 rounded-lg p-3">
-              <div className="flex items-center gap-2 text-white/60 text-sm mb-1">
+              <div className="flex items-center gap-2 text-white text-sm mb-1">
                 <Users className="h-4 w-4" />
                 Ansökningar
               </div>
@@ -334,129 +333,83 @@ const JobDetails = () => {
           </div>
         </div>
 
-        {/* Tabs for different views */}
-        <Tabs defaultValue="kanban" className="w-full">
-          <TabsList className="bg-white/10 border-white/20">
-            <TabsTrigger value="kanban" className="text-white data-[state=active]:bg-white/20">
-              Kanban
-            </TabsTrigger>
-            <TabsTrigger value="list" className="text-white data-[state=active]:bg-white/20">
-              Lista
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="kanban" className="mt-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
-              {/* Inkorg */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-white font-semibold text-sm">Inkorg</h3>
-                  <Badge variant="outline" className="bg-yellow-500/20 text-yellow-300 border-yellow-500/40">
-                    {filterApplicationsByStatus('pending').length}
-                  </Badge>
-                </div>
-                <div className="space-y-2">
-                  {filterApplicationsByStatus('pending').map((app) => (
-                    <ApplicationCard key={app.id} application={app} />
-                  ))}
-                </div>
-              </div>
-
-              {/* Granskar */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-white font-semibold text-sm">Granskar</h3>
-                  <Badge variant="outline" className="bg-blue-500/20 text-blue-300 border-blue-500/40">
-                    {filterApplicationsByStatus('reviewing').length}
-                  </Badge>
-                </div>
-                <div className="space-y-2">
-                  {filterApplicationsByStatus('reviewing').map((app) => (
-                    <ApplicationCard key={app.id} application={app} />
-                  ))}
-                </div>
-              </div>
-
-              {/* Intervju */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-white font-semibold text-sm">Intervju</h3>
-                  <Badge variant="outline" className="bg-purple-500/20 text-purple-300 border-purple-500/40">
-                    {filterApplicationsByStatus('interview').length}
-                  </Badge>
-                </div>
-                <div className="space-y-2">
-                  {filterApplicationsByStatus('interview').map((app) => (
-                    <ApplicationCard key={app.id} application={app} />
-                  ))}
-                </div>
-              </div>
-
-              {/* Erbjuden */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-white font-semibold text-sm">Erbjuden</h3>
-                  <Badge variant="outline" className="bg-green-500/20 text-green-300 border-green-500/40">
-                    {filterApplicationsByStatus('offered').length}
-                  </Badge>
-                </div>
-                <div className="space-y-2">
-                  {filterApplicationsByStatus('offered').map((app) => (
-                    <ApplicationCard key={app.id} application={app} />
-                  ))}
-                </div>
-              </div>
-
-              {/* Anställd */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-white font-semibold text-sm">Anställd</h3>
-                  <Badge variant="outline" className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
-                    {filterApplicationsByStatus('hired').length}
-                  </Badge>
-                </div>
-                <div className="space-y-2">
-                  {filterApplicationsByStatus('hired').map((app) => (
-                    <ApplicationCard key={app.id} application={app} />
-                  ))}
-                </div>
-              </div>
+        {/* Kanban View */}
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
+          {/* Inkorg */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-white font-semibold text-sm">Inkorg</h3>
+              <Badge variant="outline" className="bg-yellow-500/20 text-yellow-300 border-yellow-500/40">
+                {filterApplicationsByStatus('pending').length}
+              </Badge>
             </div>
-          </TabsContent>
-
-          <TabsContent value="list" className="mt-4">
             <div className="space-y-2">
-              {applications.map((app) => (
-                <Card key={app.id} className="bg-white/5 backdrop-blur-sm border-white/20">
-                  <CardContent className="p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <Avatar className="h-12 w-12">
-                          <AvatarFallback className="bg-primary text-white">
-                            {getInitials(app.first_name, app.last_name)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h4 className="text-white font-semibold">
-                            {app.first_name} {app.last_name}
-                          </h4>
-                          <div className="flex items-center gap-3 text-sm text-white/70 mt-1">
-                            <span>{app.email}</span>
-                            <span>{app.phone}</span>
-                            <span>{app.location}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <Badge variant="outline" className={getStatusColor(app.status)}>
-                        {getStatusLabel(app.status)}
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
+              {filterApplicationsByStatus('pending').map((app) => (
+                <ApplicationCard key={app.id} application={app} />
               ))}
             </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+
+          {/* Granskar */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-white font-semibold text-sm">Granskar</h3>
+              <Badge variant="outline" className="bg-blue-500/20 text-blue-300 border-blue-500/40">
+                {filterApplicationsByStatus('reviewing').length}
+              </Badge>
+            </div>
+            <div className="space-y-2">
+              {filterApplicationsByStatus('reviewing').map((app) => (
+                <ApplicationCard key={app.id} application={app} />
+              ))}
+            </div>
+          </div>
+
+          {/* Intervju */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-white font-semibold text-sm">Intervju</h3>
+              <Badge variant="outline" className="bg-purple-500/20 text-purple-300 border-purple-500/40">
+                {filterApplicationsByStatus('interview').length}
+              </Badge>
+            </div>
+            <div className="space-y-2">
+              {filterApplicationsByStatus('interview').map((app) => (
+                <ApplicationCard key={app.id} application={app} />
+              ))}
+            </div>
+          </div>
+
+          {/* Erbjuden */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-white font-semibold text-sm">Erbjuden</h3>
+              <Badge variant="outline" className="bg-green-500/20 text-green-300 border-green-500/40">
+                {filterApplicationsByStatus('offered').length}
+              </Badge>
+            </div>
+            <div className="space-y-2">
+              {filterApplicationsByStatus('offered').map((app) => (
+                <ApplicationCard key={app.id} application={app} />
+              ))}
+            </div>
+          </div>
+
+          {/* Anställd */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-white font-semibold text-sm">Anställd</h3>
+              <Badge variant="outline" className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
+                {filterApplicationsByStatus('hired').length}
+              </Badge>
+            </div>
+            <div className="space-y-2">
+              {filterApplicationsByStatus('hired').map((app) => (
+                <ApplicationCard key={app.id} application={app} />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
   );
 };
