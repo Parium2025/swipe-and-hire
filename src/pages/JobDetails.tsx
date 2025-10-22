@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
-  ArrowLeft, 
   Clock, 
   MapPin, 
   Mail, 
@@ -15,7 +14,7 @@ import {
   FileText,
   MoreVertical,
   CheckCircle,
-  XCircle,
+  X,
   Users,
   Eye
 } from 'lucide-react';
@@ -306,7 +305,7 @@ const JobDetails = () => {
               onClick={() => navigate(-1)}
               className="text-white hover:bg-white/10 h-8 w-8 p-0"
             >
-              <XCircle className="h-5 w-5" />
+              <X className="h-6 w-6" />
             </Button>
           </div>
 
