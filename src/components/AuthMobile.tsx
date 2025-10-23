@@ -524,7 +524,7 @@ const AuthMobile = ({
             <CardTitle className="text-white">Nytt lösenord</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handlePasswordReset} className="space-y-4">
+            <form onSubmit={handlePasswordReset} className="space-y-3 md:space-y-4">
               <div>
                 <Label htmlFor="newPassword" className="text-white">Nytt lösenord</Label>
                 <Input
@@ -533,7 +533,7 @@ const AuthMobile = ({
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                 />
               </div>
               <div>
@@ -544,10 +544,10 @@ const AuthMobile = ({
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                          className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full min-h-[44px]" disabled={loading}>
                 {loading ? "Sparar..." : "Spara nytt lösenord"}
               </Button>
               <div className="text-center">
@@ -658,7 +658,7 @@ const AuthMobile = ({
               className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden"
               style={{ WebkitOverflowScrolling: 'touch' }}
             >
-              <CardContent className={cn("p-6", isLogin && (showResetPassword || resetPasswordSent) && "pb-24")}>
+              <CardContent className={cn("p-4 md:p-6", isLogin && (showResetPassword || resetPasswordSent) && "pb-24")}>
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0 p-0 h-auto gap-2">
                     <TabsTrigger 
@@ -679,7 +679,7 @@ const AuthMobile = ({
                   <div className="relative">
                     {/* Login form - always in DOM, overlay swap */}
                     <div className={isLogin ? 'relative opacity-100 pointer-events-auto transition-none' : 'absolute inset-0 opacity-0 pointer-events-none transition-none'}>
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
                   <div className="relative overflow-anchor-none">
                         <Label htmlFor="email" className="text-white">
                           <Mail className="h-4 w-4 inline mr-2" />
@@ -696,7 +696,7 @@ const AuthMobile = ({
                           inputMode="email"
                           spellCheck={false}
                           autoCapitalize="none"
-                          className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                          className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                         />
                         {/* email suggestions removed for simpler UX */}
                       </div>
@@ -714,7 +714,7 @@ const AuthMobile = ({
                             required
                             name={`password-${role}`}
                             autoComplete={`${role}-current-password`}
-                            className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                            className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                           />
                           <button
                             type="button"
@@ -727,7 +727,7 @@ const AuthMobile = ({
                           </button>
                         </div>
                       </div>
-                       <Button type="submit" className="w-full bg-parium-navy hover:bg-parium-navy/90 text-white" disabled={loading}>
+                       <Button type="submit" className="w-full bg-parium-navy hover:bg-parium-navy/90 text-white min-h-[44px]" disabled={loading}>
                          {loading ? "Loggar in..." : "Logga in"}
                        </Button>
                        
@@ -776,7 +776,7 @@ const AuthMobile = ({
 
                    {/* Register form - always in DOM, overlay swap */}
                     <div className={isLogin ? 'absolute inset-0 opacity-0 pointer-events-none transition-none' : 'relative opacity-100 pointer-events-auto transition-none'}>
-                       <form onSubmit={handleSubmit} className="space-y-4">
+                       <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
                        {/* User Role Selection - First */}
                        <div>
                          <Label className="text-white">Jag är:</Label>
@@ -807,7 +807,7 @@ const AuthMobile = ({
                         </div>
 
                        {/* Account Information Section */}
-                        <div className="space-y-4 border-t border-white/20 pt-4">
+                        <div className="space-y-3 md:space-y-4 border-t border-white/20 pt-4">
                           {role === 'employer' && (
                             <div className="flex items-center gap-2 mb-2">
                               <User className="h-4 w-4 text-white" />
@@ -815,7 +815,7 @@ const AuthMobile = ({
                             </div>
                           )}
 
-                         <div className="grid grid-cols-2 gap-2">
+                         <div className="grid grid-cols-2 gap-2 md:gap-3">
                              <div>
                                <Label htmlFor="firstName" className="text-white">Förnamn *</Label>
                               <Input
@@ -829,7 +829,7 @@ const AuthMobile = ({
                                   }
                                 }}
                                 required
-                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                               />
                             </div>
                              <div>
@@ -845,7 +845,7 @@ const AuthMobile = ({
                                   }
                                 }}
                                 required
-                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                               />
                             </div>
                          </div>
@@ -866,7 +866,7 @@ const AuthMobile = ({
                              inputMode="email"
                              spellCheck={false}
                              autoCapitalize="none"
-                             className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                             className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                            />
                            {/* email suggestions removed for simpler UX */}
                          </div>
@@ -882,7 +882,7 @@ const AuthMobile = ({
                                     type="tel"
                                     value={jobSeekerData.phone}
                                     onChange={(e) => handlePhoneChange(e.target.value)}
-                                    className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                    className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                                     placeholder="070-123 45 67"
                                     required
                                   />
@@ -896,7 +896,7 @@ const AuthMobile = ({
                        {/* Employer-specific fields */}
                        {role === 'employer' && (
                          <>
-                           <div className="space-y-4 border-t border-white/20 pt-4">
+                            <div className="space-y-3 md:space-y-4 border-t border-white/20 pt-4">
                              <div className="flex items-center gap-2 mb-2">
                                <Building2 className="h-4 w-4 text-white" />
                                <Label className="text-white font-medium">Företagsinformation</Label>
@@ -909,7 +909,7 @@ const AuthMobile = ({
                                    value={employerData.companyName}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, companyName: e.target.value }))}
                                    placeholder="Mitt företag"
-                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                                    required
                                  />
                               </div>
@@ -921,7 +921,7 @@ const AuthMobile = ({
                                     <Button
                                       ref={triggerRef}
                                       variant="outline"
-                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
+                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left min-h-[44px]"
                                     >
                                        <span className="truncate text-left flex-1 px-1">
                                          {employerData.industry || 'Välj bransch'}
@@ -1019,7 +1019,7 @@ const AuthMobile = ({
                                     <Button
                                       ref={employeeCountTriggerRef}
                                       variant="outline"
-                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
+                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left min-h-[44px]"
                                     >
                                        <span className="truncate text-left flex-1 px-1">
                                          {employerData.employeeCount || 'Antal'}
@@ -1069,7 +1069,7 @@ const AuthMobile = ({
                                    value={employerData.address}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, address: e.target.value }))}
                                    placeholder="Ange din adress"
-                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                                    required
                                  />
                               </div>
@@ -1084,7 +1084,7 @@ const AuthMobile = ({
                                    value={employerData.website}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, website: e.target.value }))}
                                    placeholder="https://exempel.se"
-                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                                    required
                                  />
                               </div>
@@ -1118,7 +1118,7 @@ const AuthMobile = ({
                             required
                             name={`new-password-${role}`}
                             autoComplete={`${role}-new-password`}
-                            className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                            className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                           />
                            <button
                             type="button"
@@ -1159,7 +1159,7 @@ const AuthMobile = ({
                       
                        <Button 
                          type="submit" 
-                         className={`w-full bg-parium-navy hover:bg-parium-navy/90 text-white ${hasRegistered ? 'opacity-50 cursor-not-allowed' : ''}`}
+                         className={`w-full bg-parium-navy hover:bg-parium-navy/90 text-white min-h-[44px] ${hasRegistered ? 'opacity-50 cursor-not-allowed' : ''}`}
                          disabled={loading || hasRegistered}
                        >
                          {loading ? "Registrerar..." : "Registrera"}
@@ -1176,7 +1176,7 @@ const AuthMobile = ({
                       <p className="text-white">Hittar du oss inte? Kolla skräpposten – vi kanske gömmer oss där</p>
                     </div>
                     <Button
-                      className="bg-parium-navy hover:bg-parium-navy/90 text-white"
+                      className="bg-parium-navy hover:bg-parium-navy/90 text-white min-h-[44px]"
                       size="sm"
                       onClick={handleResendConfirmation}
                       disabled={resendLoading}

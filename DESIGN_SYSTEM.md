@@ -194,10 +194,95 @@ För skärmar över 1920px (TV, Chromecast, 4K) lägg till fluid-klasser:
 - Fluid scaling aktiveras endast på skärmar över 1920px bredd
 - Använd `3xl:` prefix för alla fluid-klasser
 
+## Mobile-First Design Patterns (<768px)
+
+### Grundprinciper
+
+1. **Padding:** Mobile MINDRE än desktop (`p-4 md:p-6`)
+2. **Touch targets:** Minimum 44x44px för alla interaktiva element
+3. **Spacing:** Kompakt på mobil (`gap-3 md:gap-4`, `space-y-3 md:space-y-4`)
+4. **Typography:** Samma storlek eller större, mer kontrast
+5. **Layout:** Mer vertikalt fokuserad, mindre whitespace
+
+### Touch-optimerade komponenter
+
+**Knappar:**
+```tsx
+<Button className="w-full min-h-[44px] bg-primary hover:bg-primary/90">
+  Klicka här
+</Button>
+```
+
+**Input-fält:**
+```tsx
+<Input className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-11 sm:h-9" />
+```
+
+**Select/Dropdown triggers:**
+```tsx
+<Button variant="outline" className="w-full min-h-[44px] justify-between">
+  <span>Välj alternativ</span>
+  <ChevronDown className="h-5 w-5" />
+</Button>
+```
+
+### Mobile-optimerade kort
+
+**Kompakt Card:**
+```tsx
+<Card className="bg-white/5 backdrop-blur-sm border-white/20">
+  <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-4 md:p-6">
+    <Icon className="h-5 w-5" />
+    <CardTitle className="text-base md:text-lg text-white">Titel</CardTitle>
+  </CardHeader>
+  <CardContent className="px-4 pb-4 md:px-6 md:pb-6 space-y-3 md:space-y-5">
+    {/* Content */}
+  </CardContent>
+</Card>
+```
+
+**Kompakt formulär:**
+```tsx
+<form className="space-y-3 md:space-y-4">
+  <div className="grid grid-cols-2 gap-2 md:gap-3">
+    <div>
+      <Label className="text-white text-sm">Label</Label>
+      <Input className="bg-white/5 border-white/10 text-white h-11 sm:h-9" />
+    </div>
+  </div>
+</form>
+```
+
+### Touch Target Guidelines
+
+- **Minimum storlek:** 44x44px (iOS HIG standard)
+- **Mellanrum:** 8px mellan interaktiva element
+- **Expandera touch-area:** Använd padding för små ikoner
+```tsx
+<button className="p-3 -m-3"> {/* Expanderar touch utan visuell ändring */}
+  <Icon className="h-4 w-4" />
+</button>
+```
+
+### Mobile Typography
+
+```tsx
+// Rubriker - mer prominent på mobil
+<h1 className="text-xl md:text-2xl"> {/* 20px mobil, 24px desktop */}
+<h2 className="text-lg md:text-xl">  {/* 18px mobil, 20px desktop */}
+
+// Body text - optimal läsbarhet
+<p className="text-sm md:text-base"> {/* 14px mobil, 16px desktop */}
+
+// Micro copy - spara utrymme
+<span className="text-xs md:text-sm"> {/* 12px mobil, 14px desktop */}
+```
+
 ## Viktiga principer
 
 1. **Alltid `backdrop-blur-sm`** på kort för djup och konsistens
-2. **Alltid `p-6 md:p-4`** på nya kort
+2. **Mobile-first padding:** `p-4 md:p-6` (mindre på mobil)
 3. **Använd semantiska tokens** - inga hårdkodade färger
-4. **Konsekvent spacing** - följ space-y patterns
-5. **Responsive design** - mobile-first approach
+4. **Konsekvent spacing** - följ mobile-first patterns
+5. **Touch-optimerat:** Minimum 44px höjd på alla knappar och interaktiva element
+6. **Responsive design** - mobile-first approach med progressiv förbättring

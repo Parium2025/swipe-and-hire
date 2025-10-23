@@ -229,7 +229,7 @@ const JobSwipe = () => {
           className={`overflow-hidden border-2 transition-all duration-300 ${swiping ? 'scale-95 opacity-50' : ''} cursor-pointer`}
           onClick={handleCardClick}
         >
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             {/* Company info */}
             <div className="flex items-center gap-2 mb-4">
               <Building2 className="h-5 w-5 text-muted-foreground" />
@@ -244,7 +244,7 @@ const JobSwipe = () => {
             <h3 className="text-2xl font-bold mb-4">{currentJob.title}</h3>
 
             {/* Location and type */}
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="flex flex-wrap gap-2 md:gap-3 mb-4">
               <Badge variant="outline" className="flex items-center gap-1">
                 <MapPin className="h-3 w-3" />
                 {currentJob.location}
