@@ -471,37 +471,37 @@ const EmployerDashboard = memo(() => {
       </Card>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="border-white/20 text-white max-w-md w-[28rem] p-6 bg-gradient-to-br from-[hsl(215,100%,12%)] to-[hsl(215,90%,15%)] backdrop-blur-md rounded-xl shadow-2xl">
-          <AlertDialogHeader className="space-y-2">
-            <div className="flex items-center gap-2.5">
-              <div className="bg-red-500/20 p-2 rounded-full">
+        <AlertDialogContent className="border-white/20 text-white max-w-[90vw] w-full md:max-w-md md:w-[28rem] p-4 md:p-6 bg-gradient-to-br from-[hsl(215,100%,12%)] to-[hsl(215,90%,15%)] backdrop-blur-md rounded-xl shadow-2xl mx-4">
+          <AlertDialogHeader className="space-y-3">
+            <div className="flex items-start gap-2.5">
+              <div className="bg-red-500/20 p-2 rounded-full flex-shrink-0">
                 <AlertTriangle className="h-4 w-4 text-red-400" />
               </div>
-              <AlertDialogTitle className="text-white text-base font-semibold">
+              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
                 Ta bort jobbannons
               </AlertDialogTitle>
             </div>
-            <AlertDialogDescription className="text-white text-sm leading-relaxed">
+            <AlertDialogDescription className="text-white/90 text-sm leading-relaxed break-words">
               {jobToDelete && (
                 <>
-                  Är du säker på att du vill ta bort <span className="font-semibold text-white">"{jobToDelete.title}"</span>? Denna åtgärd går inte att ångra.
+                  Är du säker på att du vill ta bort <span className="font-semibold text-white break-words">"{jobToDelete.title}"</span>? Denna åtgärd går inte att ångra.
                 </>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2 mt-4">
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2 mt-4">
             <AlertDialogCancel 
               onClick={() => {
                 setDeleteDialogOpen(false);
                 setJobToDelete(null);
               }}
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20 text-sm"
+              className="w-full sm:w-auto bg-white/10 border-white/20 text-white hover:bg-white/20 text-sm"
             >
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteJob}
-              className="bg-red-500 hover:bg-red-600 text-white border-0 text-sm"
+              className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white border-0 text-sm"
             >
               <Trash2 className="h-4 w-4 mr-1.5" />
               Ta bort
