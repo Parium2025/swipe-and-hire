@@ -433,42 +433,55 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
           {isMobile && showMobileTemplatePicker && (
             <>
               <div
-                className="fixed inset-0 z-[1000] bg-black/50"
+                className="fixed inset-0 z-[1000] bg-black/60 backdrop-blur-sm animate-in fade-in-0 duration-300"
                 onClick={() => setShowMobileTemplatePicker(false)}
               />
               <div
-                className="fixed inset-x-0 bottom-0 z-[1001] rounded-t-2xl bg-slate-800/95 backdrop-blur-md border-t border-slate-600/30 text-white shadow-xl"
+                className="fixed inset-x-0 bottom-0 z-[1001] rounded-t-3xl bg-slate-800/98 backdrop-blur-xl border-t border-slate-600/40 text-white shadow-2xl animate-in slide-in-from-bottom-0 duration-300 ease-out"
                 role="dialog"
                 aria-modal="true"
+                aria-label="Välj jobbmall"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="mx-auto max-w-md">
-                  <div className="relative px-4 pt-4 pb-2">
-                    <div className="absolute left-1/2 top-1.5 h-1.5 w-12 -translate-x-1/2 rounded-full bg-white/30" />
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">Välj mall</span>
+                  <div className="relative px-4 pt-5 pb-3">
+                    <div className="absolute left-1/2 top-2 h-1 w-16 -translate-x-1/2 rounded-full bg-white/40" />
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="font-semibold text-lg">Välj mall</span>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+                        className="h-9 w-9 text-white/60 hover:text-white hover:bg-white/15 rounded-full transition-all duration-150"
                         onClick={() => setShowMobileTemplatePicker(false)}
+                        aria-label="Stäng"
                       >
-                        <X className="h-4 w-4" />
+                        <X className="h-5 w-5" />
                       </Button>
                     </div>
                   </div>
                   <div
-                    className="px-4 pb-[calc(env(safe-area-inset-bottom)+12px)] max-h-[80dvh] max-h-[85vh] overflow-y-auto touch-pan-y"
-                    style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorY: 'contain' }}
+                    className="px-4 pb-[calc(env(safe-area-inset-bottom)+16px)] max-h-[75vh] overflow-y-auto touch-pan-y relative"
+                    style={{ 
+                      WebkitOverflowScrolling: 'touch', 
+                      overscrollBehaviorY: 'contain',
+                      scrollbarWidth: 'none',
+                      msOverflowStyle: 'none'
+                    }}
                   >
-                    <div className="pb-2 sticky top-0 bg-slate-800/95 backdrop-blur-md z-10 pt-2">
+                    <style>{`
+                      .overflow-y-auto::-webkit-scrollbar {
+                        display: none;
+                      }
+                    `}</style>
+                    
+                    <div className="pb-3 sticky top-0 bg-slate-800/98 backdrop-blur-xl z-10 pt-1">
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60" />
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
                         <Input
                           placeholder="Sök mall..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="pl-10 pr-4 h-10 bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-lg"
+                          className="pl-11 pr-4 h-11 bg-white/8 border-white/25 text-white placeholder:text-white/50 focus:border-white/50 focus:ring-2 focus:ring-white/20 rounded-xl transition-all duration-150"
                           autoComplete="off"
                         />
                       </div>
@@ -480,71 +493,83 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                         setOpen(false);
                         setShowTemplateWizard(true);
                       }}
-                      className="w-full text-left px-4 py-3 text-white hover:bg-slate-700/80 focus:bg-slate-700/80 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20 rounded-lg"
+                      className="w-full text-left px-4 py-4 mb-2 bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 text-white hover:from-blue-600/30 hover:to-purple-600/30 active:scale-[0.98] cursor-pointer transition-all duration-150 rounded-xl shadow-lg"
                     >
-                      <div className="flex flex-col">
-                        <span className="font-medium text-white">+ Skapa en ny mall</span>
-                        <span className="text-sm text-white">Skapa en återanvändbar jobbmall</span>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center h-10 w-10 rounded-full bg-white/10">
+                          <span className="text-xl font-light">+</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-white">Skapa en ny mall</span>
+                          <span className="text-sm text-white/70 mt-0.5">Skapa en återanvändbar jobbmall</span>
+                        </div>
                       </div>
                     </button>
 
-                    {filteredTemplates.map((template) => (
-                      <div
-                        key={template.id}
-                        className="px-4 py-3 text-white hover:bg-slate-700/80 focus:bg-slate-700/80 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20 last:border-b-0 rounded-lg"
-                      >
-                        <div className="flex items-center justify-between w-full gap-3">
-                          <button
-                            onClick={() => {
-                              handleTemplateSelect(template.id, template.name);
-                              setShowMobileTemplatePicker(false);
-                            }}
-                            className="flex flex-col flex-1 text-left hover:opacity-80 transition-opacity"
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="font-medium text-white">{template.name}</span>
-                              {template.is_default && (
-                                <span className="text-sm text-blue-400 ml-2">Standard</span>
-                              )}
-                            </div>
-                            <span className="text-sm text-white mt-1 break-words line-clamp-2">{template.title}</span>
-                          </button>
-                          <div className="flex gap-1 flex-shrink-0">
-                            <Button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setTemplateToEdit(template);
+                    <div className="space-y-1">
+                      {filteredTemplates.map((template) => (
+                        <div
+                          key={template.id}
+                          className="group px-4 py-4 text-white hover:bg-white/8 active:scale-[0.98] cursor-pointer transition-all duration-150 border-b border-slate-600/20 last:border-b-0 rounded-xl"
+                        >
+                          <div className="flex items-center justify-between w-full gap-3">
+                            <button
+                              onClick={() => {
+                                handleTemplateSelect(template.id, template.name);
                                 setShowMobileTemplatePicker(false);
-                                setOpen(false);
-                                setShowTemplateWizard(true);
                               }}
-                              variant="ghost"
-                              size="sm"
-                              className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8 p-0 flex-shrink-0"
+                              className="flex flex-col flex-1 text-left transition-opacity duration-150"
                             >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setTemplateToDelete(template);
-                              }}
-                              variant="ghost"
-                              size="sm"
-                              className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0 flex-shrink-0"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                              <div className="flex items-center justify-between">
+                                <span className="font-semibold text-white text-[15px]">{template.name}</span>
+                                {template.is_default && (
+                                  <span className="text-xs text-blue-400 font-medium ml-2 px-2 py-0.5 bg-blue-500/20 rounded-full">Standard</span>
+                                )}
+                              </div>
+                              <span className="text-sm text-white/70 mt-1.5 break-words line-clamp-2 leading-relaxed">{template.title}</span>
+                            </button>
+                            <div className="flex gap-2 flex-shrink-0">
+                              <Button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setTemplateToEdit(template);
+                                  setShowMobileTemplatePicker(false);
+                                  setOpen(false);
+                                  setShowTemplateWizard(true);
+                                }}
+                                variant="ghost"
+                                size="sm"
+                                className="text-white/60 hover:text-white hover:bg-white/15 active:scale-95 h-9 w-9 p-0 flex-shrink-0 rounded-lg transition-all duration-150"
+                                aria-label="Redigera mall"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setTemplateToDelete(template);
+                                }}
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-400 hover:text-red-300 hover:bg-red-500/20 active:scale-95 h-9 w-9 p-0 flex-shrink-0 rounded-lg transition-all duration-150"
+                                aria-label="Ta bort mall"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
 
                     {filteredTemplates.length === 0 && searchTerm && (
-                      <div className="px-4 py-6 text-center text-white/60">
-                        Ingen mall hittades
+                      <div className="px-4 py-8 text-center">
+                        <div className="text-white/40 text-sm">Ingen mall hittades</div>
+                        <div className="text-white/30 text-xs mt-1">Försök med ett annat sökord</div>
                       </div>
                     )}
+                    
+                    <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-slate-800/98 to-transparent pointer-events-none" />
                   </div>
                 </div>
               </div>
