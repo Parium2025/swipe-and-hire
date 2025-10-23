@@ -51,6 +51,7 @@ const EmployerDashboard = memo(() => {
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const listTopRef = useRef<HTMLDivElement>(null);
+  const didMountRef = useRef(false);
   
   const totalPages = Math.max(1, Math.ceil(jobs.length / pageSize));
   const pageJobs = useMemo(() => {
@@ -58,8 +59,12 @@ const EmployerDashboard = memo(() => {
     return jobs.slice(start, start + pageSize);
   }, [jobs, page]);
   
-  // Scroll to top when page changes
+  // Scroll to top when page changes (but not on initial mount)
   useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
     if (listTopRef.current) {
       listTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -211,8 +216,8 @@ const EmployerDashboard = memo(() => {
 
       {/* Jobs Table */}
       <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-        <CardHeader className="p-6 md:p-4">
-              <CardTitle className="text-sm text-white text-center md:text-left">
+        <CardHeader className="hidden md:block md:p-4">
+              <CardTitle className="text-sm text-white md:text-left">
                 Mina jobbannonser
               </CardTitle>
         </CardHeader>
