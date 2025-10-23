@@ -140,7 +140,7 @@ Detta dokument innehåller standardmallar och riktlinjer för att hålla designe
 ### Grid-layouts
 ```tsx
 // 2 kolumner på desktop, 1 på mobile
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3 3xl:fluid-gap-4">
 
 // 4 kolumner stats
 <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
@@ -148,7 +148,51 @@ Detta dokument innehåller standardmallar och riktlinjer för att hålla designe
 
 ### Padding/margin breakpoints
 - Använd `md:` prefix för tablet/desktop
+- Använd `3xl:` prefix för extra-stora skärmar (TV, Chromecast, 4K+)
 - Standard är mobile-first
+
+### Fluid Scaling för Extra-Large Screens (1920px+)
+
+För skärmar över 1920px (TV, Chromecast, 4K) lägg till fluid-klasser:
+
+**Stats-kort med fluid scaling:**
+```tsx
+<Card className="bg-white/5 backdrop-blur-sm border-white/20">
+  <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-6 md:p-4 3xl:fluid-p-6">
+    <Icon className="h-4 w-4 text-white" />
+    <CardTitle className="text-sm md:text-base 3xl:fluid-text-base text-white">Titel</CardTitle>
+  </CardHeader>
+  <CardContent className="px-6 pb-6 md:px-4 md:pb-4 3xl:fluid-px-6 3xl:fluid-py-6">
+    <div className="text-xl font-bold 3xl:fluid-text-2xl text-white">
+      {/* Content */}
+    </div>
+  </CardContent>
+</Card>
+```
+
+**Formulär med fluid scaling:**
+```tsx
+<div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4 3xl:fluid-p-6">
+  <form className="space-y-5 md:space-y-3 3xl:fluid-space-y-5">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3 3xl:fluid-gap-4">
+      <div className="space-y-1.5">
+        <Label className="text-white text-sm 3xl:fluid-text-base">Label</Label>
+        <Input className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 3xl:fluid-text-base" />
+      </div>
+    </div>
+  </form>
+</div>
+```
+
+**Tillgängliga fluid-klasser:**
+- **Text:** `.fluid-text-xs`, `.fluid-text-sm`, `.fluid-text-base`, `.fluid-text-lg`, `.fluid-text-xl`, `.fluid-text-2xl`
+- **Padding:** `.fluid-p-4`, `.fluid-p-6`, `.fluid-px-4`, `.fluid-px-6`, `.fluid-py-4`, `.fluid-py-6`
+- **Spacing:** `.fluid-gap-3`, `.fluid-gap-4`, `.fluid-space-y-3`, `.fluid-space-y-5`
+
+**Viktigt:**
+- Desktop-versionen (upp till 1920px) påverkas INTE
+- Fluid scaling aktiveras endast på skärmar över 1920px bredd
+- Använd `3xl:` prefix för alla fluid-klasser
 
 ## Viktiga principer
 

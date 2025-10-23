@@ -445,6 +445,35 @@ All colors MUST be HSL.
     bottom: -8rem; /* matches -bottom-32 by default */
     pointer-events: none;
   }
+
+  /* Fluid scaling for extra-large screens (TV, Chromecast, 4K+) */
+  @media (min-width: 1920px) {
+    /* Fluid typography - scales proportionally with viewport */
+    .fluid-text-xs { font-size: clamp(0.75rem, 0.6vw, 1rem); }
+    .fluid-text-sm { font-size: clamp(0.875rem, 0.7vw, 1.25rem); }
+    .fluid-text-base { font-size: clamp(1rem, 0.8vw, 1.5rem); }
+    .fluid-text-lg { font-size: clamp(1.125rem, 0.9vw, 1.75rem); }
+    .fluid-text-xl { font-size: clamp(1.25rem, 1vw, 2rem); }
+    .fluid-text-2xl { font-size: clamp(1.5rem, 1.2vw, 2.5rem); }
+    
+    /* Fluid padding - scales with viewport */
+    .fluid-p-4 { padding: clamp(1rem, 1.5vw, 2rem); }
+    .fluid-p-6 { padding: clamp(1.5rem, 2vw, 3rem); }
+    .fluid-px-4 { padding-left: clamp(1rem, 1.5vw, 2rem); padding-right: clamp(1rem, 1.5vw, 2rem); }
+    .fluid-px-6 { padding-left: clamp(1.5rem, 2vw, 3rem); padding-right: clamp(1.5rem, 2vw, 3rem); }
+    .fluid-py-4 { padding-top: clamp(1rem, 1.5vw, 2rem); padding-bottom: clamp(1rem, 1.5vw, 2rem); }
+    .fluid-py-6 { padding-top: clamp(1.5rem, 2vw, 3rem); padding-bottom: clamp(1.5rem, 2vw, 3rem); }
+    
+    /* Fluid spacing */
+    .fluid-gap-3 { gap: clamp(0.75rem, 1.2vw, 1.5rem); }
+    .fluid-gap-4 { gap: clamp(1rem, 1.5vw, 2rem); }
+    .fluid-space-y-3 > * + * { margin-top: clamp(0.75rem, 1.2vw, 1.5rem); }
+    .fluid-space-y-5 > * + * { margin-top: clamp(1.25rem, 1.8vw, 2.5rem); }
+    
+    /* Fluid container widths */
+    .max-w-4xl { max-width: min(80vw, 80rem); }
+    .max-w-6xl { max-width: min(85vw, 96rem); }
+  }
 }
 
 /* Desktop: lock glow to viewport with fixed positioning */
