@@ -209,21 +209,29 @@ const handleJobCreated = useCallback((job: JobPosting) => {
             className={`max-w-md bg-card-parium text-white backdrop-blur-md border-white/20 [&>button]:hidden max-h-[95vh] sm:max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl transition-all duration-200 ease-out animate-scale-in ${templateMenuOpen ? 'overflow-visible touch-pan-y' : 'overflow-y-auto'}`}
             onInteractOutside={(e) => {
               const target = e.target as HTMLElement | null;
-              if (target && target.closest('[data-radix-dropdown-menu-content]')) {
-                // Allow interacting/scrolling within dropdown content without closing dialog
+              if (
+                target &&
+                (target.closest('[data-radix-dropdown-menu-content]') ||
+                  target.closest('[data-radix-popper-content-wrapper]'))
+              ) {
+                // Keep dialog open when interacting inside dropdown (do not close)
                 e.preventDefault();
                 return;
               }
-              // Keep dialog open for other outside interactions
+              // For other outside interactions, keep dialog open as before
               e.preventDefault();
             }}
             onPointerDownOutside={(e) => {
               const target = (e.target as HTMLElement) ?? null;
-              if (target && target.closest('[data-radix-dropdown-menu-content]')) {
-                // Allow touch start within dropdown without closing dialog
-                e.preventDefault();
+              if (
+                target &&
+                (target.closest('[data-radix-dropdown-menu-content]') ||
+                  target.closest('[data-radix-popper-content-wrapper]'))
+              ) {
+                // IMPORTANT for iOS: do NOT preventDefault here so scroll can start
                 return;
               }
+              // Otherwise prevent closing on outside pointer down
               e.preventDefault();
             }}
             onEscapeKeyDown={(e) => e.preventDefault()}
