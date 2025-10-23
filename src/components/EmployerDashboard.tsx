@@ -124,7 +124,7 @@ const EmployerDashboard = memo(() => {
 
 
   return (
-    <div className="space-y-4 max-w-6xl mx-auto px-12">
+    <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12">
       <div className="flex justify-between items-center">
         <div className="flex-1"></div>
         <div className="text-center flex-1">
@@ -137,50 +137,50 @@ const EmployerDashboard = memo(() => {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 md:gap-2">
         <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-6 md:p-4">
-            <Briefcase className="h-4 w-4 text-white" />
-            <CardTitle className="text-sm font-medium text-white">Totalt annonser</CardTitle>
+          <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4">
+            <Briefcase className="h-3 w-3 md:h-4 md:w-4 text-white" />
+            <CardTitle className="text-xs md:text-sm font-medium text-white">Totalt annonser</CardTitle>
           </CardHeader>
-          <CardContent className="px-6 pb-6 md:px-4 md:pb-4">
-            <div className="text-xl font-bold text-white transition-all duration-300">
+          <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
+            <div className="text-lg md:text-xl font-bold text-white transition-all duration-300">
               {loading ? '...' : jobs.length}
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-6 md:p-4">
-            <TrendingUp className="h-4 w-4 text-white" />
-            <CardTitle className="text-sm font-medium text-white">Aktiva annonser</CardTitle>
+          <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4">
+            <TrendingUp className="h-3 w-3 md:h-4 md:w-4 text-white" />
+            <CardTitle className="text-xs md:text-sm font-medium text-white">Aktiva annonser</CardTitle>
           </CardHeader>
-          <CardContent className="px-6 pb-6 md:px-4 md:pb-4">
-            <div className="text-xl font-bold text-white transition-all duration-300">
+          <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
+            <div className="text-lg md:text-xl font-bold text-white transition-all duration-300">
               {loading ? '...' : jobs.filter(job => job.is_active).length}
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-6 md:p-4">
-            <Eye className="h-4 w-4 text-white" />
-            <CardTitle className="text-sm font-medium text-white">Totala visningar</CardTitle>
+          <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4">
+            <Eye className="h-3 w-3 md:h-4 md:w-4 text-white" />
+            <CardTitle className="text-xs md:text-sm font-medium text-white">Totala visningar</CardTitle>
           </CardHeader>
-          <CardContent className="px-6 pb-6 md:px-4 md:pb-4">
-            <div className="text-xl font-bold text-white transition-all duration-300">
+          <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
+            <div className="text-lg md:text-xl font-bold text-white transition-all duration-300">
               {loading ? '...' : jobs.reduce((sum, job) => sum + job.views_count, 0)}
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-2 space-y-0 p-6 md:p-4">
-            <Users className="h-4 w-4 text-white" />
-            <CardTitle className="text-sm font-medium text-white">Ansökningar</CardTitle>
+          <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4">
+            <Users className="h-3 w-3 md:h-4 md:w-4 text-white" />
+            <CardTitle className="text-xs md:text-sm font-medium text-white">Ansökningar</CardTitle>
           </CardHeader>
-          <CardContent className="px-6 pb-6 md:px-4 md:pb-4">
-            <div className="text-xl font-bold text-white transition-all duration-300">
+          <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
+            <div className="text-lg md:text-xl font-bold text-white transition-all duration-300">
               {loading ? '...' : jobs.reduce((sum, job) => sum + job.applications_count, 0)}
             </div>
           </CardContent>
