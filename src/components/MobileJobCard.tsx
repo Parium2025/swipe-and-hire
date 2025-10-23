@@ -24,7 +24,7 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete }: Mo
 
   return (
     <Card 
-      className="bg-white/5 backdrop-blur-sm border-white/20 min-h-[120px] cursor-pointer hover:bg-white/10 transition-colors"
+      className="bg-white/5 backdrop-blur-sm border-white/20 min-h-[120px] cursor-pointer transition-colors"
       onClick={handleCardClick}
     >
       <div className="p-3 space-y-2">
