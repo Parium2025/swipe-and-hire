@@ -70,7 +70,7 @@ const EmployerLayout = ({ children, developerView, onViewChange }: EmployerLayou
             </div>
           </div>
           
-          <main className="flex-1 overflow-y-auto overflow-x-hidden p-3">
+          <main className="flex-1 overflow-hidden p-3">
             {children}
           </main>
         </div>

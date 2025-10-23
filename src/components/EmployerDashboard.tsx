@@ -358,17 +358,19 @@ const EmployerDashboard = memo(() => {
               <>
                 <div ref={listTopRef} />
                 <div className="rounded-none bg-transparent ring-0 shadow-none">
-                  <div className="space-y-2 px-2 py-2 pb-24">
-                    {pageJobs.map((job) => (
-                      <MobileJobCard
-                        key={job.id}
-                        job={job}
-                        onToggleStatus={toggleJobStatus}
-                        onEdit={handleEditJob}
-                        onDelete={handleDeleteClick}
-                      />
-                    ))}
-                  </div>
+                  <ScrollArea className="h-[calc(100vh-280px)] min-h-[320px]">
+                    <div className="space-y-2 px-2 py-2 pb-24">
+                      {pageJobs.map((job) => (
+                        <MobileJobCard
+                          key={job.id}
+                          job={job}
+                          onToggleStatus={toggleJobStatus}
+                          onEdit={handleEditJob}
+                          onDelete={handleDeleteClick}
+                        />
+                      ))}
+                    </div>
+                  </ScrollArea>
                 </div>
 
                 {totalPages > 1 && (
