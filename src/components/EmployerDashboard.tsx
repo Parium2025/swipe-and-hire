@@ -218,10 +218,10 @@ const EmployerDashboard = memo(() => {
 
       {/* Jobs Table */}
       <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-        <CardHeader className="hidden md:block p-6 md:p-4">
-          <CardTitle className="text-sm text-white text-center md:text-left">
-            Mina jobbannonser
-          </CardTitle>
+        <CardHeader className="p-6 md:p-4">
+              <CardTitle className="text-sm text-white text-center md:text-left">
+                Mina jobbannonser
+              </CardTitle>
         </CardHeader>
         <CardContent className="px-6 pb-6 md:px-4 md:pb-4">
           {/* Desktop: Table view */}
@@ -346,11 +346,6 @@ const EmployerDashboard = memo(() => {
 
           {/* Mobile: Card view */}
           <div className="md:hidden">
-            {/* Mobile heading */}
-            <h2 className="text-center text-lg font-bold text-white mb-4">
-              Mina jobbannonser
-            </h2>
-            
             {loading ? (
               <div className="text-center text-white/60 py-8 text-sm">
                 Laddar...

@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Briefcase, Users, Eye, TrendingUp, MapPin, Calendar } from 'lucide-react';
 import { useJobsData } from '@/hooks/useJobsData';
+import CreateJobSimpleDialog from '@/components/CreateJobSimpleDialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
@@ -19,8 +20,18 @@ const Dashboard = memo(() => {
 
   return (
     <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12">
-      <div className="text-center">
-        <h1 className="text-xl font-bold text-white">Dashboard</h1>
+      <div className="flex justify-between items-center">
+        <div className="flex-1"></div>
+        <div className="text-center flex-1">
+          <h1 className="text-xl font-bold text-white">Dashboard</h1>
+        </div>
+        <div className="flex-1 flex justify-end">
+          <CreateJobSimpleDialog 
+            onJobCreated={() => {
+              invalidateJobs();
+            }}
+          />
+        </div>
       </div>
 
       {/* Stats Grid */}
