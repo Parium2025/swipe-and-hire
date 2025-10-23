@@ -35,12 +35,14 @@ const EmployerLayout = ({ children, developerView, onViewChange }: EmployerLayou
             </div>
             <div className="flex items-center gap-3">
               {(user?.email === 'fredrik.andits@icloud.com' || user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') && (
-                <DeveloperControls 
-                  onViewChange={onViewChange}
-                  currentView={developerView}
-                />
+                <div className="hidden md:block">
+                  <DeveloperControls 
+                    onViewChange={onViewChange}
+                    currentView={developerView}
+                  />
+                </div>
               )}
-              <CreateJobSimpleDialog 
+              <CreateJobSimpleDialog
                 onJobCreated={() => {
                   invalidateJobs();
                 }}

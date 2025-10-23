@@ -154,15 +154,8 @@ const EmployerDashboard = memo(() => {
 
   return (
     <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12">
-      <div className="flex justify-between items-center">
-        <div className="flex-1"></div>
-        <div className="text-center flex-1">
-          <h1 className="text-xl font-bold text-white">Mina jobbannonser</h1>
-        </div>
-        <div className="flex-1 flex justify-end">
-          {/* Spacer to match "Skapa ny annons"-knappens radhöjd på Dashboard */}
-          <div className="h-10 min-w-[160px]" aria-hidden="true" />
-        </div>
+      <div className="flex justify-center items-center mb-4">
+        <h1 className="text-xl md:text-2xl font-bold text-white">Mina jobbannonser</h1>
       </div>
 
       {/* Stats Overview */}
