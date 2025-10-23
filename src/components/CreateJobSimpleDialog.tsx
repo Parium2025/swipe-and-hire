@@ -207,7 +207,25 @@ const handleJobCreated = useCallback((job: JobPosting) => {
         </DialogTrigger>
           <DialogContent 
             className={`max-w-md bg-card-parium text-white backdrop-blur-md border-white/20 [&>button]:hidden max-h-[95vh] sm:max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl transition-all duration-200 ease-out animate-scale-in ${templateMenuOpen ? 'overflow-visible touch-pan-y' : 'overflow-y-auto'}`}
-            onInteractOutside={(e) => e.preventDefault()}
+            onInteractOutside={(e) => {
+              const target = e.target as HTMLElement | null;
+              if (target && target.closest('[data-radix-dropdown-menu-content]')) {
+                // Allow interacting/scrolling within dropdown content without closing dialog
+                e.preventDefault();
+                return;
+              }
+              // Keep dialog open for other outside interactions
+              e.preventDefault();
+            }}
+            onPointerDownOutside={(e) => {
+              const target = (e.target as HTMLElement) ?? null;
+              if (target && target.closest('[data-radix-dropdown-menu-content]')) {
+                // Allow touch start within dropdown without closing dialog
+                e.preventDefault();
+                return;
+              }
+              e.preventDefault();
+            }}
             onEscapeKeyDown={(e) => e.preventDefault()}
           >
           <Card className="bg-white/10 backdrop-blur-sm border-white/20 ring-0 shadow-none relative w-full transition-all duration-200">
