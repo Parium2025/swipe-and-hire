@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -487,49 +488,57 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       </div>
                     </div>
 
-                    <button
+                    <Card 
+                      className="mb-2 bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 shadow-none cursor-pointer hover:from-blue-600/30 hover:to-purple-600/30 transition-all duration-150"
                       onClick={() => {
                         setShowMobileTemplatePicker(false);
                         setOpen(false);
                         setShowTemplateWizard(true);
                       }}
-                      className="w-full text-left px-4 py-4 mb-2 bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 text-white hover:from-blue-600/30 hover:to-purple-600/30 active:scale-[0.98] cursor-pointer transition-all duration-150 rounded-xl shadow-lg"
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="p-3 flex items-center gap-3">
                         <div className="flex items-center justify-center h-10 w-10 rounded-full bg-white/10">
-                          <span className="text-xl font-light">+</span>
+                          <Plus className="h-5 w-5 text-white" />
                         </div>
                         <div className="flex flex-col">
-                          <span className="font-semibold text-white">Skapa en ny mall</span>
-                          <span className="text-sm text-white/70 mt-0.5">Skapa en återanvändbar jobbmall</span>
+                          <span className="font-semibold text-white text-sm">Skapa en ny mall</span>
+                          <span className="text-xs text-white/70 mt-0.5">Skapa en återanvändbar jobbmall</span>
                         </div>
                       </div>
-                    </button>
+                    </Card>
 
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                       {filteredTemplates.map((template) => (
-                        <div
+                        <Card 
                           key={template.id}
-                          className="group px-4 py-4 text-white hover:bg-white/8 active:scale-[0.98] cursor-pointer transition-all duration-150 border-b border-slate-600/20 last:border-b-0 rounded-xl"
+                          className="bg-transparent border border-white/30 shadow-none cursor-pointer transition-colors hover:bg-white/5 hover:border-white/50"
+                          onClick={() => {
+                            handleTemplateSelect(template.id, template.name);
+                            setShowMobileTemplatePicker(false);
+                          }}
                         >
-                          <div className="flex items-center justify-between w-full gap-3">
-                            <button
-                              onClick={() => {
-                                handleTemplateSelect(template.id, template.name);
-                                setShowMobileTemplatePicker(false);
-                              }}
-                              className="flex flex-col flex-1 text-left transition-opacity duration-150"
-                            >
-                              <div className="flex items-center justify-between">
-                                <span className="font-semibold text-white text-[15px]">{template.name}</span>
-                                {template.is_default && (
-                                  <span className="text-xs text-blue-400 font-medium ml-2 px-2 py-0.5 bg-blue-500/20 rounded-full">Standard</span>
-                                )}
+                          <div className="p-3 space-y-2">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-sm font-semibold text-white line-clamp-2 leading-tight">
+                                  {template.name}
+                                </h3>
                               </div>
-                              <span className="text-sm text-white/70 mt-1.5 break-words line-clamp-2 leading-relaxed">{template.title}</span>
-                            </button>
-                            <div className="flex gap-2 flex-shrink-0">
-                              <Button
+                              {template.is_default && (
+                                <Badge className="text-xs bg-blue-500/20 text-blue-300 border-blue-500/30 flex-shrink-0">
+                                  Standard
+                                </Badge>
+                              )}
+                            </div>
+
+                            <div className="text-xs text-white/70 line-clamp-2">
+                              {template.title}
+                            </div>
+
+                            <div className="flex gap-2 pt-1">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setTemplateToEdit(template);
@@ -537,28 +546,26 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                   setOpen(false);
                                   setShowTemplateWizard(true);
                                 }}
-                                variant="ghost"
-                                size="sm"
-                                className="text-white/60 hover:text-white hover:bg-white/15 active:scale-95 h-9 w-9 p-0 flex-shrink-0 rounded-lg transition-all duration-150"
-                                aria-label="Redigera mall"
+                                className="flex-1 h-11 bg-white/10 border-white/20 text-white hover:bg-white/20 text-sm"
                               >
-                                <Pencil className="h-4 w-4" />
+                                <Pencil className="h-4 w-4 mr-2" />
+                                Redigera
                               </Button>
-                              <Button
+                              <Button 
+                                variant="outline" 
+                                size="sm"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setTemplateToDelete(template);
                                 }}
-                                variant="ghost"
-                                size="sm"
-                                className="text-red-400 hover:text-red-300 hover:bg-red-500/20 active:scale-95 h-9 w-9 p-0 flex-shrink-0 rounded-lg transition-all duration-150"
-                                aria-label="Ta bort mall"
+                                className="flex-1 h-11 bg-white/10 border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/40 text-sm"
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Ta bort
                               </Button>
                             </div>
                           </div>
-                        </div>
+                        </Card>
                       ))}
                     </div>
 
