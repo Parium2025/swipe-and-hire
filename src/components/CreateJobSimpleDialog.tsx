@@ -206,7 +206,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
           </Button>
         </DialogTrigger>
           <DialogContent 
-            className="max-w-md bg-card-parium text-white backdrop-blur-md border-white/20 [&>button]:hidden max-h-[95vh] overflow-y-auto sm:max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl transition-all duration-200 ease-out animate-scale-in"
+            className={`max-w-md bg-card-parium text-white backdrop-blur-md border-white/20 [&>button]:hidden max-h-[95vh] sm:max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl transition-all duration-200 ease-out animate-scale-in ${templateMenuOpen ? 'overflow-visible touch-pan-y' : 'overflow-y-auto'}`}
             onInteractOutside={(e) => e.preventDefault()}
             onEscapeKeyDown={(e) => e.preventDefault()}
           >
@@ -280,9 +280,11 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent 
-                        className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-[60] pointer-events-auto rounded-lg text-white max-h-[65svh] sm:max-h-96 overflow-y-auto overscroll-contain touch-pan-y pb-[env(safe-area-inset-bottom)] animate-scale-in"
+                        className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white
+                                   max-h-[70vh] max-h-[60dvh] sm:max-h-96
+                                   overflow-y-auto [overscroll-behavior-y:contain] touch-pan-y
+                                   pt-1 pb-[calc(env(safe-area-inset-bottom)+8px)] animate-scale-in"
                         style={{ WebkitOverflowScrolling: 'touch' }}
-                        onTouchMove={(e) => e.stopPropagation()}
                         side="bottom"
                         align="center"
                         alignOffset={0}
