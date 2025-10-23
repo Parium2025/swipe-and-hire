@@ -62,7 +62,7 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete }: Mo
         </div>
 
         {/* Stats + Plats */}
-        <div className="flex items-center gap-3 text-xs text-white/80">
+        <div className="flex items-center gap-3 text-xs text-white">
           <div className="flex items-center gap-1">
             <Eye className="h-4 w-4" />
             <span>{job.views_count || 0}</span>
@@ -78,7 +78,7 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete }: Mo
         </div>
 
         {/* Datum */}
-        <div className="flex items-center gap-1 text-xs text-white/60">
+        <div className="flex items-center gap-1 text-xs text-white">
           <Calendar className="h-3 w-3" />
           <span>
             Skapad: {new Date(job.created_at).toLocaleDateString('sv-SE', { 
