@@ -1677,7 +1677,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   <Button
                     onClick={nextStep}
                     disabled={!validateCurrentStep()}
-                    className="bg-primary hover:bg-primary/90 text-white border border-white/20 hover:border-white/40 shrink-0 min-w-[120px]"
+                    className="bg-primary hover:bg-primary/90 text-white border border-white/30 shrink-0 min-w-[120px]"
                   >
                     Nästa
                     <ArrowRight className="h-4 w-4 ml-2" />

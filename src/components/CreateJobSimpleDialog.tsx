@@ -303,7 +303,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                         </div>
 
                         {/* Template options */}
-                        <div className="max-h-[400px] overflow-y-auto bg-slate-800/95">
+                        <div className="max-h-[400px] overflow-y-scroll bg-slate-800/95" style={{ WebkitOverflowScrolling: 'touch' }}>
                           {/* Create new template option */}
                           <DropdownMenuItem
                             onClick={() => {
