@@ -357,7 +357,7 @@ const EmployerDashboard = memo(() => {
             ) : (
               <>
                 <div ref={listTopRef} />
-                <div className="rounded-xl bg-[hsl(215,100%,12%)]/90 ring-1 ring-white/10 shadow-inner">
+                <div className="rounded-xl bg-white/5 ring-1 ring-white/10">
                   <ScrollArea className="max-h-[60vh] min-h-[320px]">
                     <div className="space-y-2 px-2 py-2">
                       {pageJobs.map((job) => (
