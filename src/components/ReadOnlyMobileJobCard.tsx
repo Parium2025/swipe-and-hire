@@ -66,10 +66,15 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
           </div>
         </div>
 
-        {/* Datum */}
+        {/* Rekryterare + Datum */}
         <div className="flex items-center gap-1 text-xs text-white">
           <Calendar className="h-3 w-3" />
           <span>
+            {job.employer_profile?.first_name && job.employer_profile?.last_name && (
+              <>
+                {job.employer_profile.first_name} {job.employer_profile.last_name} • {' '}
+              </>
+            )}
             Skapad: {new Date(job.created_at).toLocaleDateString('sv-SE', { 
               day: 'numeric', 
               month: 'short' 
