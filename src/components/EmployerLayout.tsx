@@ -4,6 +4,8 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import EmployerSidebar from '@/components/EmployerSidebar';
 import DeveloperControls from '@/components/DeveloperControls';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import CreateJobSimpleDialog from '@/components/CreateJobSimpleDialog';
+import { useJobsData } from '@/hooks/useJobsData';
 
 interface EmployerLayoutProps {
   children: ReactNode;
@@ -13,6 +15,7 @@ interface EmployerLayoutProps {
 
 const EmployerLayout = ({ children, developerView, onViewChange }: EmployerLayoutProps) => {
   const { user, profile } = useAuth();
+  const { invalidateJobs } = useJobsData();
 
   return (
     <SidebarProvider defaultOpen={true}>
@@ -37,6 +40,11 @@ const EmployerLayout = ({ children, developerView, onViewChange }: EmployerLayou
                   currentView={developerView}
                 />
               )}
+              <CreateJobSimpleDialog 
+                onJobCreated={() => {
+                  invalidateJobs();
+                }}
+              />
             </div>
           </header>
           
