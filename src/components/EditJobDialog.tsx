@@ -2371,7 +2371,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                 <Button
                   onClick={handleNext}
                   disabled={!canProceed()}
-                  className="bg-primary hover:bg-primary/90 text-white disabled:opacity-50"
+                  className="bg-primary hover:bg-primary/90 text-white disabled:opacity-50 border-2 border-white"
                 >
                   Nästa
                   <ArrowRight className="h-4 w-4 ml-2" />
