@@ -471,13 +471,13 @@ const EmployerDashboard = memo(() => {
       </Card>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="border-white/20 text-white max-w-[90vw] w-full md:max-w-md md:w-[28rem] p-4 md:p-6 bg-gradient-to-br from-[hsl(215,100%,12%)] to-[hsl(215,90%,15%)] backdrop-blur-md rounded-xl shadow-2xl mx-4">
+        <AlertDialogContent className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-gradient-to-br from-[hsl(215,100%,12%)] to-[hsl(215,90%,15%)] backdrop-blur-md rounded-xl shadow-2xl mx-0">
           <AlertDialogHeader className="space-y-3">
-            <div className="flex items-start gap-2.5">
+            <div className="flex items-center justify-center sm:justify-start gap-2.5">
               <div className="bg-red-500/20 p-2 rounded-full flex-shrink-0">
                 <AlertTriangle className="h-4 w-4 text-red-400" />
               </div>
-              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold text-center sm:text-left">
                 Ta bort jobbannons
               </AlertDialogTitle>
             </div>
