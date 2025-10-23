@@ -198,7 +198,7 @@ const CompanyReviews = () => {
         {/* Översikt */}
         <div className="space-y-3 mb-6">
           <h3 className="font-semibold text-base text-white">Översikt</h3>
-          <p className="text-sm text-white">
+          <p className="text-sm text-white whitespace-pre-line">
             {company.company_description || "Ingen beskrivning tillgänglig."}
           </p>
         </div>
