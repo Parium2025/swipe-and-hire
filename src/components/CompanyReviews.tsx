@@ -166,7 +166,7 @@ const CompanyReviews = () => {
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
       <div className="text-center mb-6">
-        <h1 className="text-2xl font-semibold text-white mb-1">Recensioner</h1>
+        <h1 className="text-xl md:text-2xl font-semibold text-white mb-1">Recensioner</h1>
         <p className="text-sm text-white">
           Se hur ditt företag upplevs av jobbsökare
         </p>

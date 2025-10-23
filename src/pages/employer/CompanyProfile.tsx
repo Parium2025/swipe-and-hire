@@ -370,7 +370,7 @@ const CompanyProfile = () => {
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
       <div className="text-center mb-6">
-        <h1 className="text-2xl font-semibold text-white mb-1">Företagslogga</h1>
+        <h1 className="text-xl md:text-2xl font-semibold text-white mb-1">Företagslogga</h1>
         <p className="text-white">Ladda upp din företagslogga för att bygga kännedom och förtroende</p>
       </div>
 
@@ -447,7 +447,7 @@ const CompanyProfile = () => {
       {/* Företagsinformation - Minimalistisk */}
       <div className="mt-8">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-semibold text-white mb-1">Företagsinformation</h2>
+          <h2 className="text-xl md:text-2xl font-semibold text-white mb-1">Företagsinformation</h2>
           <p className="text-white">Uppdatera företagsprofil för att synas bättre för kandidater</p>
         </div>
 
