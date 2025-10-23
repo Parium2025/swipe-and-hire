@@ -24,9 +24,18 @@ body {
   overscroll-behavior: none;
   overscroll-behavior-y: none;
   -webkit-overflow-scrolling: touch;
-  background: var(--gradient-parium);
-  background-color: hsl(215 100% 12%);
+  /* Mobilversion - ljusare bakgrund som matchar korten */
+  background: rgba(255, 255, 255, 0.05);
+  background-color: hsl(215 100% 15%);
   min-height: 100dvh;
+}
+
+@media (min-width: 768px) {
+  body {
+    /* Desktop - återgå till original mörk bakgrund */
+    background: var(--gradient-parium);
+    background-color: hsl(215 100% 12%);
+  }
 }
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
