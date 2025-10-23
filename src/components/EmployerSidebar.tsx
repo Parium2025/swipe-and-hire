@@ -182,6 +182,10 @@ export function EmployerSidebar() {
   const handleNavigation = (href: string) => {
     if (checkBeforeNavigation(href)) {
       navigate(href);
+      // Scrolla till toppen på mobil
+      if (isMobile || window.innerWidth < 768) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
       // Stäng endast mobilsidebaren efter navigation
       if (isMobile) {
         setOpenMobile(false);
