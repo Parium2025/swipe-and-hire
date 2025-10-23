@@ -208,6 +208,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
           </Button>
         </DialogTrigger>
         <DialogContent 
+          hideClose
           className="max-w-md bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[95vh] sm:max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl transition-all duration-200 ease-out animate-scale-in overflow-y-auto"
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
