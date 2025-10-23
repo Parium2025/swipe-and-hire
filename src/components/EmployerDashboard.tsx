@@ -1,4 +1,4 @@
-import { useState, memo } from 'react';
+import { useState, memo, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,6 +27,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const EmployerDashboard = memo(() => {
   const navigate = useNavigate();
@@ -37,6 +46,24 @@ const EmployerDashboard = memo(() => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { user, profile } = useAuth();
   const { toast } = useToast();
+  
+  // Pagination state for mobile
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const listTopRef = useRef<HTMLDivElement>(null);
+  
+  const totalPages = Math.max(1, Math.ceil(jobs.length / pageSize));
+  const pageJobs = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return jobs.slice(start, start + pageSize);
+  }, [jobs, page]);
+  
+  // Scroll to top when page changes
+  useEffect(() => {
+    if (listTopRef.current) {
+      listTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [page]);
 
   const toggleJobStatus = async (jobId: string, currentStatus: boolean) => {
     try {
@@ -328,19 +355,118 @@ const EmployerDashboard = memo(() => {
                 Inga jobbannonser än. Skapa din första annons!
               </div>
             ) : (
-              <ScrollArea className="h-[calc(100vh-480px)] min-h-[300px]">
-                <div className="space-y-2 pr-4">
-                  {jobs.map((job) => (
-                    <MobileJobCard
-                      key={job.id}
-                      job={job}
-                      onToggleStatus={toggleJobStatus}
-                      onEdit={handleEditJob}
-                      onDelete={handleDeleteClick}
-                    />
-                  ))}
+              <>
+                <div ref={listTopRef} />
+                <div className="rounded-xl bg-[hsl(215,100%,12%)]/90 ring-1 ring-white/10 shadow-inner">
+                  <ScrollArea className="max-h-[60vh] min-h-[320px]">
+                    <div className="space-y-2 px-2 py-2">
+                      {pageJobs.map((job) => (
+                        <MobileJobCard
+                          key={job.id}
+                          job={job}
+                          onToggleStatus={toggleJobStatus}
+                          onEdit={handleEditJob}
+                          onDelete={handleDeleteClick}
+                        />
+                      ))}
+                    </div>
+                  </ScrollArea>
                 </div>
-              </ScrollArea>
+
+                {totalPages > 1 && (
+                  <Pagination className="mt-3">
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setPage(p => Math.max(1, p - 1));
+                          }}
+                          className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+
+                      {page > 2 && (
+                        <>
+                          <PaginationItem>
+                            <PaginationLink
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setPage(1);
+                              }}
+                              className="cursor-pointer"
+                            >
+                              1
+                            </PaginationLink>
+                          </PaginationItem>
+                          {page > 3 && <PaginationEllipsis />}
+                        </>
+                      )}
+
+                      {page > 1 && (
+                        <PaginationItem>
+                          <PaginationLink
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setPage(page - 1);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            {page - 1}
+                          </PaginationLink>
+                        </PaginationItem>
+                      )}
+
+                      <PaginationItem>
+                        <PaginationLink isActive>
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+
+                      {page < totalPages && (
+                        <PaginationItem>
+                          <PaginationLink
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setPage(page + 1);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            {page + 1}
+                          </PaginationLink>
+                        </PaginationItem>
+                      )}
+
+                      {page < totalPages - 1 && (
+                        <>
+                          {page < totalPages - 2 && <PaginationEllipsis />}
+                          <PaginationItem>
+                            <PaginationLink
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setPage(totalPages);
+                              }}
+                              className="cursor-pointer"
+                            >
+                              {totalPages}
+                            </PaginationLink>
+                          </PaginationItem>
+                        </>
+                      )}
+
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setPage(p => Math.min(totalPages, p + 1));
+                          }}
+                          className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                )}
+              </>
             )}
           </div>
         </CardContent>
