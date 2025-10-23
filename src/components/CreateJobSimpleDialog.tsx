@@ -213,9 +213,19 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         >
           <Card className="bg-white/10 backdrop-blur-sm border-white/20 ring-0 shadow-none relative w-full transition-all duration-200">
             <CardHeader className="pb-4 pt-6">
-              <CardTitle className="text-white text-center text-xl">
-                Skapa jobb
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-white flex-1 text-center text-xl">
+                  Skapa jobb
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleClose}
+                  className="absolute right-2 top-2 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
               <CardDescription className="text-white text-center text-sm leading-snug mt-2">
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
               </CardDescription>
@@ -437,17 +447,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 <div className="mx-auto max-w-md">
                   <div className="relative px-4 pt-5 pb-3">
                     <div className="absolute left-1/2 top-2 h-1 w-16 -translate-x-1/2 rounded-full bg-white/40" />
-                    <div className="flex items-center justify-between mt-2">
+                    <div className="flex items-center justify-center mt-2">
                       <span className="font-semibold text-lg">Välj mall</span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-9 w-9 text-white/60 hover:text-white hover:bg-white/15 rounded-full transition-all duration-150"
-                        onClick={() => setShowMobileTemplatePicker(false)}
-                        aria-label="Stäng"
-                      >
-                        <X className="h-5 w-5" />
-                      </Button>
                     </div>
                   </div>
                   <div
