@@ -20,7 +20,7 @@ const Dashboard = memo(() => {
   return (
     <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12">
       <div className="text-center">
-        <h1 className="text-xl md:text-2xl font-bold text-white">Dashboard</h1>
+        <h1 className="text-xl md:text-2xl font-semibold text-white">Dashboard</h1>
       </div>
 
       {/* Stats Grid */}

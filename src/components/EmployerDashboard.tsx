@@ -160,7 +160,7 @@ const EmployerDashboard = memo(() => {
   return (
     <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12">
       <div className="flex justify-center items-center mb-4">
-        <h1 className="text-xl md:text-2xl font-bold text-white">Mina jobbannonser</h1>
+        <h1 className="text-xl md:text-2xl font-semibold text-white">Mina jobbannonser</h1>
       </div>
 
       {/* Stats Overview */}
