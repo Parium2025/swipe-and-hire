@@ -213,19 +213,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         >
           <Card className="bg-white/10 backdrop-blur-sm border-white/20 ring-0 shadow-none relative w-full transition-all duration-200">
             <CardHeader className="pb-4 pt-6">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-white flex-1 text-center text-xl">
-                  Skapa jobb
-                </CardTitle>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleClose}
-                  className="absolute right-2 top-2 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
+              <CardTitle className="text-white text-center text-xl">
+                Skapa jobb
+              </CardTitle>
               <CardDescription className="text-white text-center text-sm leading-snug mt-2">
                 Namnge ett jobb eller välj en utav dina färdig mallar för att komma igång
               </CardDescription>
