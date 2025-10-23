@@ -19,7 +19,10 @@ const EmployerLayout = ({ children, developerView, onViewChange }: EmployerLayou
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex w-full overflow-x-hidden smooth-scroll touch-pan relative bg-parium-gradient" style={{ WebkitOverflowScrolling: 'touch' }}>
+      {/* Fixed gradient background - covers viewport */}
+      <div className="fixed inset-0 bg-parium-gradient pointer-events-none z-0" />
+      
+      <div className="min-h-screen flex w-full overflow-x-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
         <AnimatedBackground showBubbles={false} />
         <EmployerSidebar />
         <div className="flex-1 flex flex-col overflow-x-hidden relative z-10">
