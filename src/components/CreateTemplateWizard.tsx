@@ -1677,7 +1677,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   <Button
                     onClick={nextStep}
                     disabled={!validateCurrentStep()}
-                    className="bg-primary hover:bg-primary/90 text-white border-2 border-white focus:ring-2 focus:ring-white/40 shrink-0 min-w-[120px]"
+                    className="bg-primary hover:bg-primary/90 text-white border border-white/20 hover:border-white/40 focus:ring-2 focus:ring-white/40 shrink-0 min-w-[120px]"
                   >
                     Nästa
                     <ArrowRight className="h-4 w-4 ml-2" />
@@ -1688,7 +1688,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   <Button
                     onClick={handleSubmit}
                     disabled={loading || !validateCurrentStep()}
-                    className={`bg-primary hover:bg-primary/90 text-white shrink-0 min-w-[120px] ${(!loading && validateCurrentStep()) ? 'border-2 border-white' : ''}`}
+                    className={`bg-primary hover:bg-primary/90 text-white shrink-0 min-w-[120px] ${(!loading && validateCurrentStep()) ? 'border border-white/20 hover:border-white/40' : ''}`}
                   >
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {templateToEdit ? 'Uppdatera mall' : 'Skapa mall'}

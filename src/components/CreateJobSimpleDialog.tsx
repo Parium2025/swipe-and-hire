@@ -280,8 +280,9 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent 
-                        className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white max-h-[65svh] sm:max-h-96 overflow-y-auto overscroll-contain touch-pan-y pb-[env(safe-area-inset-bottom)] animate-scale-in"
+                        className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-[60] pointer-events-auto rounded-lg text-white max-h-[65svh] sm:max-h-96 overflow-y-auto overscroll-contain touch-pan-y pb-[env(safe-area-inset-bottom)] animate-scale-in"
                         style={{ WebkitOverflowScrolling: 'touch' }}
+                        onTouchMove={(e) => e.stopPropagation()}
                         side="bottom"
                         align="center"
                         alignOffset={0}
