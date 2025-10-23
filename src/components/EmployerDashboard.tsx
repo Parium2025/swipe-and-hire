@@ -13,6 +13,7 @@ import EditJobDialog from '@/components/EditJobDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { JobTitleCell } from '@/components/JobTitleCell';
 import { TruncatedText } from '@/components/TruncatedText';
 import { MobileJobCard } from '@/components/MobileJobCard';
@@ -195,7 +196,7 @@ const EmployerDashboard = memo(() => {
             Mina jobbannonser
           </CardTitle>
         </CardHeader>
-        <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
+        <CardContent className="px-6 pb-6 md:px-4 md:pb-4">
           {/* Desktop: Table view */}
           <div className="hidden md:block">
             <div className="overflow-x-auto -mx-2">
@@ -317,7 +318,7 @@ const EmployerDashboard = memo(() => {
           </div>
 
           {/* Mobile: Card view */}
-          <div className="md:hidden space-y-2">
+          <div className="md:hidden">
             {loading ? (
               <div className="text-center text-white/60 py-8 text-sm">
                 Laddar...
@@ -327,15 +328,19 @@ const EmployerDashboard = memo(() => {
                 Inga jobbannonser än. Skapa din första annons!
               </div>
             ) : (
-              jobs.map((job) => (
-                <MobileJobCard
-                  key={job.id}
-                  job={job}
-                  onToggleStatus={toggleJobStatus}
-                  onEdit={handleEditJob}
-                  onDelete={handleDeleteClick}
-                />
-              ))
+              <ScrollArea className="h-[calc(100vh-480px)] min-h-[300px]">
+                <div className="space-y-2 pr-4">
+                  {jobs.map((job) => (
+                    <MobileJobCard
+                      key={job.id}
+                      job={job}
+                      onToggleStatus={toggleJobStatus}
+                      onEdit={handleEditJob}
+                      onDelete={handleDeleteClick}
+                    />
+                  ))}
+                </div>
+              </ScrollArea>
             )}
           </div>
         </CardContent>
