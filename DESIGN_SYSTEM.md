@@ -278,11 +278,45 @@ För skärmar över 1920px (TV, Chromecast, 4K) lägg till fluid-klasser:
 <span className="text-xs md:text-sm"> {/* 12px mobil, 14px desktop */}
 ```
 
+## Mobile-First Typography Scale
+
+### Headings
+- **H1**: `text-xl md:text-2xl` (20px → 24px)
+- **H2**: `text-lg md:text-xl` (18px → 20px)
+- **H3**: `text-base md:text-lg` (16px → 18px)
+
+### Body Text
+- **Standard**: `text-sm md:text-base` (14px → 16px)
+- **Compact**: `text-xs md:text-sm` (12px → 14px)
+
+### Inputs
+- **Standard**: `h-10 md:h-11` (40px → 44px)
+- **Small forms**: `h-9 md:h-10` (36px → 40px)
+- **Input text**: `text-base md:text-lg` with `py-2 md:py-3`
+
+## Container Padding Hierarchy
+
+### Side Padding
+- **Main container**: `px-3 md:px-12` (12px → 48px)
+- **Card outer**: `p-3 md:p-6` (12px → 24px)
+- **Card inner/compact**: `p-2 md:p-4` (8px → 16px)
+
+### Vertical Spacing
+- **Between sections**: `space-y-3 md:space-y-6` (12px → 24px)
+- **Between elements**: `space-y-2 md:space-y-4` (8px → 16px)
+- **Compact**: `space-y-1 md:space-y-2` (4px → 8px)
+
+### Grid Gaps
+- **Standard**: `gap-2 md:gap-4` (8px → 16px)
+- **Compact**: `gap-1.5 md:gap-2` (6px → 8px)
+
 ## Viktiga principer
 
 1. **Alltid `backdrop-blur-sm`** på kort för djup och konsistens
-2. **Mobile-first padding:** `p-4 md:p-6` (mindre på mobil)
+2. **Mobile-first padding:** Start small on mobile, increase on larger screens
 3. **Använd semantiska tokens** - inga hårdkodade färger
-4. **Konsekvent spacing** - följ mobile-first patterns
+4. **Konsekvent spacing** - följ mobile-first patterns (ovan)
 5. **Touch-optimerat:** Minimum 44px höjd på alla knappar och interaktiva element
 6. **Responsive design** - mobile-first approach med progressiv förbättring
+7. **Mobile-first typography**: Använd responsiva textstorlekar (t.ex. `text-xs md:text-sm`)
+8. **Kompakta mobile layouts**: Minska whitespace på mobil för app-känsla

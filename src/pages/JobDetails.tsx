@@ -167,22 +167,22 @@ const JobDetails = () => {
 
   const ApplicationCard = ({ application }: { application: JobApplication }) => (
     <Card className="bg-white/5 backdrop-blur-sm border-white/20 mb-2">
-      <CardContent className="p-3">
-        <div className="flex items-start gap-3">
-          <Avatar className="h-8 w-8">
+      <CardContent className="p-2 md:p-3">
+        <div className="flex items-start gap-2 md:gap-3">
+          <Avatar className="h-7 w-7 md:h-8 md:w-8">
             <AvatarFallback className="bg-primary text-white text-xs">
               {getInitials(application.first_name, application.last_name)}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-1">
-              <h4 className="text-white font-semibold text-sm truncate">
+            <div className="flex items-center justify-between mb-0.5 md:mb-1">
+              <h4 className="text-white font-semibold text-xs md:text-sm truncate">
                 {application.first_name} {application.last_name}
               </h4>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-white hover:bg-white/10">
-                    <MoreVertical className="h-4 w-4" />
+                  <Button variant="ghost" size="sm" className="h-7 w-7 md:h-8 md:w-8 p-0 text-white hover:bg-white/10">
+                    <MoreVertical className="h-3 w-3 md:h-4 md:w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-[hsl(215,100%,12%)] border-white/20">
@@ -219,7 +219,7 @@ const JobDetails = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            <div className="space-y-1 text-sm text-white/70">
+            <div className="space-y-0.5 md:space-y-1 text-xs md:text-sm text-white/70">
               <div className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
                 <span>{new Date(application.applied_at).toLocaleDateString('sv-SE')}</span>
@@ -254,9 +254,9 @@ const JobDetails = () => {
   }
 
   return (
-    <div className="space-y-4 max-w-6xl mx-auto px-12 py-4 pb-safe min-h-screen">
+    <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12 py-4 pb-safe min-h-screen">
         {/* Job Title and Stats */}
-        <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-6 md:p-4">
+        <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-6">
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1 min-w-0 pr-4">
               <TruncatedText 
@@ -309,28 +309,28 @@ const JobDetails = () => {
             </Button>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="bg-white/5 rounded-lg p-3">
-              <div className="flex items-center gap-2 text-white text-sm mb-1">
-                <Eye className="h-4 w-4" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+            <div className="bg-white/5 rounded-lg p-2 md:p-3">
+              <div className="flex items-center gap-1 md:gap-2 text-white text-xs md:text-sm mb-1">
+                <Eye className="h-3 w-3 md:h-4 md:w-4" />
                 Visningar
               </div>
-              <div className="text-xl font-bold text-white">{job.views_count}</div>
+              <div className="text-lg md:text-xl font-bold text-white">{job.views_count}</div>
             </div>
-            <div className="bg-white/5 rounded-lg p-3">
-              <div className="flex items-center gap-2 text-white text-sm mb-1">
-                <Users className="h-4 w-4" />
+            <div className="bg-white/5 rounded-lg p-2 md:p-3">
+              <div className="flex items-center gap-1 md:gap-2 text-white text-xs md:text-sm mb-1">
+                <Users className="h-3 w-3 md:h-4 md:w-4" />
                 Ansökningar
               </div>
-              <div className="text-xl font-bold text-white">{job.applications_count}</div>
+              <div className="text-lg md:text-xl font-bold text-white">{job.applications_count}</div>
             </div>
           </div>
         </div>
 
         {/* Kanban View */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3">
           {/* Inkorg */}
-          <div className="bg-white/5 rounded-lg p-3">
+          <div className="bg-white/5 rounded-lg p-2 md:p-3">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-white font-semibold text-sm">Inkorg</h3>
               <Badge variant="outline" className="bg-yellow-500/20 text-yellow-300 border-yellow-500/40">
@@ -345,7 +345,7 @@ const JobDetails = () => {
           </div>
 
           {/* Granskar */}
-          <div className="bg-white/5 rounded-lg p-3">
+          <div className="bg-white/5 rounded-lg p-2 md:p-3">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-white font-semibold text-sm">Granskar</h3>
               <Badge variant="outline" className="bg-blue-500/20 text-blue-300 border-blue-500/40">
@@ -360,7 +360,7 @@ const JobDetails = () => {
           </div>
 
           {/* Intervju */}
-          <div className="bg-white/5 rounded-lg p-3">
+          <div className="bg-white/5 rounded-lg p-2 md:p-3">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-white font-semibold text-sm">Intervju</h3>
               <Badge variant="outline" className="bg-purple-500/20 text-purple-300 border-purple-500/40">
@@ -375,7 +375,7 @@ const JobDetails = () => {
           </div>
 
           {/* Erbjuden */}
-          <div className="bg-white/5 rounded-lg p-3">
+          <div className="bg-white/5 rounded-lg p-2 md:p-3">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-white font-semibold text-sm">Erbjuden</h3>
               <Badge variant="outline" className="bg-green-500/20 text-green-300 border-green-500/40">
@@ -390,7 +390,7 @@ const JobDetails = () => {
           </div>
 
           {/* Anställd */}
-          <div className="bg-white/5 rounded-lg p-3">
+          <div className="bg-white/5 rounded-lg p-2 md:p-3">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-white font-semibold text-sm">Anställd</h3>
               <Badge variant="outline" className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40">

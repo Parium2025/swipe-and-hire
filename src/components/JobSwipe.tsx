@@ -229,7 +229,7 @@ const JobSwipe = () => {
           className={`overflow-hidden border-2 transition-all duration-300 ${swiping ? 'scale-95 opacity-50' : ''} cursor-pointer`}
           onClick={handleCardClick}
         >
-          <CardContent className="p-4 md:p-6">
+          <CardContent className="p-3 md:p-6 space-y-3 md:space-y-4">
             {/* Company info */}
             <div className="flex items-center gap-2 mb-4">
               <Building2 className="h-5 w-5 text-muted-foreground" />
@@ -241,10 +241,10 @@ const JobSwipe = () => {
             </div>
 
             {/* Job title */}
-            <h3 className="text-2xl font-bold mb-4">{currentJob.title}</h3>
+            <h3 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">{currentJob.title}</h3>
 
             {/* Location and type */}
-            <div className="flex flex-wrap gap-2 md:gap-3 mb-4">
+            <div className="flex flex-wrap gap-2 mb-2 md:mb-3">
               <Badge variant="outline" className="flex items-center gap-1">
                 <MapPin className="h-3 w-3" />
                 {currentJob.location}
@@ -258,8 +258,8 @@ const JobSwipe = () => {
             </div>
 
             {/* Salary */}
-            <div className="mb-4">
-              <div className="flex items-center gap-2 text-lg font-semibold text-green-600">
+            <div className="mb-3 md:mb-4">
+              <div className="flex items-center gap-1 md:gap-2 text-base md:text-lg font-semibold text-green-600">
                 <Euro className="h-5 w-5" />
                 {formatSalary(currentJob.salary_min, currentJob.salary_max)}
               </div>
@@ -271,21 +271,21 @@ const JobSwipe = () => {
             </div>
 
             {/* Description */}
-            <div className="mb-4">
-              <h4 className="font-semibold mb-2">Beskrivning</h4>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+            <div className="mb-3 md:mb-4">
+              <h4 className="font-semibold mb-1 md:mb-2 text-base md:text-lg">Beskrivning</h4>
+              <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
                 {currentJob.description}
               </p>
             </div>
 
             {/* Application Instructions */}
             {currentJob.application_instructions && (
-              <div className="mb-4">
-                <h4 className="font-semibold mb-2 flex items-center gap-2">
+              <div className="mb-2 md:mb-4">
+                <h4 className="font-semibold mb-1 md:mb-2 text-base md:text-lg flex items-center gap-2">
                   <Info className="h-4 w-4" />
                   Så här ansöker du
                 </h4>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
                   {currentJob.application_instructions}
                 </p>
               </div>
@@ -293,7 +293,7 @@ const JobSwipe = () => {
 
             {/* Contact Info */}
             {currentJob.contact_email && (
-              <div className="mb-6">
+              <div className="mb-3 md:mb-6">
                 <h4 className="font-semibold mb-2 flex items-center gap-2">
                   <Mail className="h-4 w-4" />
                   Kontakt

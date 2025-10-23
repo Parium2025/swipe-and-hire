@@ -104,8 +104,8 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
     switch (currentStep) {
       case 1:
         return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
+          <div className="space-y-4 md:space-y-6">
+            <div className="text-center mb-6 md:mb-8">
               <div className="bg-primary/10 p-4 rounded-full w-fit mx-auto mb-4">
                 <User className="h-8 w-8 text-primary" />
               </div>
@@ -113,7 +113,7 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
               <p className="text-muted-foreground">Låt oss börja med grunderna</p>
             </div>
             
-            <div className="space-y-4 max-w-md mx-auto">
+            <div className="space-y-3 md:space-y-4 max-w-md mx-auto">
               <div>
                 <Label htmlFor="firstName">Förnamn</Label>
                 <Input
@@ -121,7 +121,7 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
                   value={formData.firstName}
                   onChange={(e) => handleInputChange('firstName', e.target.value)}
                   placeholder="Ditt förnamn"
-                  className="text-lg py-3"
+                  className="py-2 md:py-3 text-base md:text-lg"
                 />
               </div>
               <div>
@@ -131,7 +131,7 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
                   value={formData.lastName}
                   onChange={(e) => handleInputChange('lastName', e.target.value)}
                   placeholder="Ditt efternamn"
-                  className="text-lg py-3"
+                  className="py-2 md:py-3 text-base md:text-lg"
                 />
               </div>
               <div>
@@ -141,7 +141,7 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
                   value={formData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
                   placeholder="+46 70 123 45 67"
-                  className="text-lg py-3"
+                  className="py-2 md:py-3 text-base md:text-lg"
                 />
               </div>
             </div>
@@ -150,8 +150,8 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
 
       case 2:
         return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
+          <div className="space-y-4 md:space-y-6">
+            <div className="text-center mb-6 md:mb-8">
               <div className="bg-primary/10 p-4 rounded-full w-fit mx-auto mb-4">
                 <Camera className="h-8 w-8 text-primary" />
               </div>
@@ -160,8 +160,8 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
             </div>
 
             <div className="max-w-md mx-auto">
-              <div className="text-center mb-6">
-                <Avatar className="h-32 w-32 mx-auto mb-4">
+              <div className="text-center mb-4 md:mb-6">
+                <Avatar className="h-24 w-24 md:h-32 md:w-32 mx-auto mb-4">
                   <AvatarImage src={formData.profileImageUrl} />
                   <AvatarFallback className="text-2xl">
                     {formData.firstName[0]}{formData.lastName[0]}
@@ -193,8 +193,8 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
 
       case 3:
         return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
+          <div className="space-y-4 md:space-y-6">
+            <div className="text-center mb-6 md:mb-8">
               <div className="bg-primary/10 p-4 rounded-full w-fit mx-auto mb-4">
                 <FileText className="h-8 w-8 text-primary" />
               </div>
@@ -262,8 +262,8 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
 
       case 4:
         return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
+          <div className="space-y-4 md:space-y-6">
+            <div className="text-center mb-6 md:mb-8">
               <div className="bg-primary/10 p-4 rounded-full w-fit mx-auto mb-4">
                 <MapPin className="h-8 w-8 text-primary" />
               </div>
@@ -271,7 +271,7 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
               <p className="text-muted-foreground">Gör dig intressant för arbetsgivare</p>
             </div>
 
-            <div className="space-y-4 max-w-md mx-auto">
+            <div className="space-y-3 md:space-y-4 max-w-md mx-auto">
               <div>
                 <Label htmlFor="location">Var bor du?</Label>
                 <Input
@@ -279,7 +279,7 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
                   value={formData.location}
                   onChange={(e) => handleInputChange('location', e.target.value)}
                   placeholder="t.ex. Stockholm, Göteborg"
-                  className="text-lg py-3"
+                  className="py-2 md:py-3 text-base md:text-lg"
                 />
               </div>
               
@@ -290,7 +290,7 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
                   value={formData.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
                   placeholder="Beskriv dig själv, dina intressen och vad du söker för jobb..."
-                  className="min-h-32 text-lg"
+                  className="min-h-24 md:min-h-32 text-sm md:text-base"
                   rows={4}
                 />
                 <p className="text-sm text-muted-foreground mt-1">
@@ -331,7 +331,7 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
         {/* Main content */}
         <div className="flex-1 flex items-center justify-center px-4 pb-6">
           <Card className="w-full max-w-2xl bg-background/95 border-2 border-primary-foreground/20">
-            <CardContent className="p-8">
+            <CardContent className="p-4 md:p-8">
               {renderStep()}
             </CardContent>
           </Card>
