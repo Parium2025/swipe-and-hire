@@ -209,7 +209,7 @@ const handleJobCreated = useCallback((job: JobPosting) => {
           </Button>
         </DialogTrigger>
           <DialogContent 
-            className="max-w-md bg-card-parium text-white backdrop-blur-md border-white/20 [&>button]:hidden max-h-[95vh] sm:max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl transition-all duration-200 ease-out animate-scale-in overflow-y-auto"
+            className="max-w-md bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[95vh] sm:max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl transition-all duration-200 ease-out animate-scale-in overflow-y-auto"
             onEscapeKeyDown={(e) => e.preventDefault()}
           >
           <Card className="bg-white/10 backdrop-blur-sm border-white/20 ring-0 shadow-none relative w-full transition-all duration-200">
@@ -296,11 +296,8 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent 
-                            className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white
-                                       max-h-[70vh] max-h-[60dvh] sm:max-h-96
-                                       overflow-y-auto [overscroll-behavior-y:contain] touch-pan-y
-                                       pt-1 pb-[calc(env(safe-area-inset-bottom)+8px)] animate-scale-in"
-                            style={{ WebkitOverflowScrolling: 'touch' }}
+                            className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[70vh] max-h-[60dvh] sm:max-h-96 overflow-y-auto [overscroll-behavior-y:contain] touch-pan-y pt-1 pb-[calc(env(safe-area-inset-bottom)+8px)] animate-scale-in"
+                            style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorY: 'contain' }}
                             side="bottom"
                             align="center"
                             alignOffset={0}
@@ -466,8 +463,8 @@ const handleJobCreated = useCallback((job: JobPosting) => {
                     </div>
                   </div>
                   <div
-                    className="px-4 pb-[calc(env(safe-area-inset-bottom)+12px)] max-h-[80dvh] max-h-[85vh] overflow-y-auto [overscroll-behavior-y:contain] touch-pan-y"
-                    style={{ WebkitOverflowScrolling: 'touch' }}
+                    className="px-4 pb-[calc(env(safe-area-inset-bottom)+12px)] max-h-[80dvh] max-h-[85vh] overflow-y-auto touch-pan-y"
+                    style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorY: 'contain' }}
                   >
                     <div className="pb-2 sticky top-0 bg-slate-800/95 backdrop-blur-md z-10 pt-2">
                       <div className="relative">
