@@ -15,6 +15,7 @@ import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { JobTitleCell } from '@/components/JobTitleCell';
 import { TruncatedText } from '@/components/TruncatedText';
+import { MobileJobCard } from '@/components/MobileJobCard';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -194,122 +195,148 @@ const EmployerDashboard = memo(() => {
             Mina jobbannonser
           </CardTitle>
         </CardHeader>
-        <CardContent className="px-6 pb-6 md:px-4 md:pb-4">
-          <div className="overflow-x-auto -mx-2">
-            <Table>
-              <TableHeader>
-                <TableRow className="border-white/20 hover:bg-white/5">
-                  <TableHead className="text-white font-semibold text-sm px-2">Titel</TableHead>
-                  <TableHead className="text-white font-semibold text-sm px-2">Status</TableHead>
-                  <TableHead className="text-white font-semibold text-sm text-center px-2">Visningar</TableHead>
-                  <TableHead className="text-white font-semibold text-sm text-center px-2">Ansökningar</TableHead>
-                  <TableHead className="text-white font-semibold text-sm px-2">Plats</TableHead>
-                  <TableHead className="text-white font-semibold text-sm px-2">Rekryterare</TableHead>
-                  <TableHead className="text-white font-semibold text-sm px-2">Skapad</TableHead>
-                  <TableHead className="text-white font-semibold text-sm px-2">Åtgärder</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center text-white/60 py-8 text-sm">
-                      Laddar...
-                    </TableCell>
+        <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
+          {/* Desktop: Table view */}
+          <div className="hidden md:block">
+            <div className="overflow-x-auto -mx-2">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-white/20 hover:bg-white/5">
+                    <TableHead className="text-white font-semibold text-sm px-2">Titel</TableHead>
+                    <TableHead className="text-white font-semibold text-sm px-2">Status</TableHead>
+                    <TableHead className="text-white font-semibold text-sm text-center px-2">Visningar</TableHead>
+                    <TableHead className="text-white font-semibold text-sm text-center px-2">Ansökningar</TableHead>
+                    <TableHead className="text-white font-semibold text-sm px-2">Plats</TableHead>
+                    <TableHead className="text-white font-semibold text-sm px-2">Rekryterare</TableHead>
+                    <TableHead className="text-white font-semibold text-sm px-2">Skapad</TableHead>
+                    <TableHead className="text-white font-semibold text-sm px-2">Åtgärder</TableHead>
                   </TableRow>
-                ) : jobs.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center !text-white py-8 font-medium text-sm">
-                      Inga jobbannonser än. Skapa din första annons!
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  jobs.map((job) => (
-                    <TableRow 
-                      key={job.id}
-                      className="border-white/10 hover:bg-white/5 cursor-pointer transition-colors"
-                      onClick={() => navigate(`/job-details/${job.id}`)}
-                    >
-                      <TableCell className="font-medium text-white px-2 py-2">
-                        <JobTitleCell title={job.title} employmentType={job.employment_type} />
-                      </TableCell>
-                      <TableCell className="px-2 py-2">
-                        <Badge
-                          variant={job.is_active ? "default" : "secondary"}
-                          className={`text-sm whitespace-nowrap ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-gray-500/20 text-gray-300 border-gray-500/30"}`}
-                        >
-                          {job.is_active ? 'Aktiv' : 'Inaktiv'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center px-2 py-2">
-                        <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-sm">
-                          {job.views_count || 0}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center px-2 py-2">
-                        <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-sm">
-                          {job.applications_count || 0}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-white px-2 py-2">
-                        <div className="flex items-center gap-1 text-sm">
-                          <MapPin size={12} className="flex-shrink-0" />
-                          <TruncatedText text={job.location} className="truncate max-w-[120px]" />
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-white px-2 py-2">
-                        <TruncatedText 
-                          text={job.employer_profile?.first_name && job.employer_profile?.last_name
-                            ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
-                            : '-'}
-                          className="text-sm truncate max-w-[150px] block"
-                        />
-                      </TableCell>
-                      <TableCell className="text-white px-2 py-2">
-                        <div className="flex items-center gap-1 text-sm whitespace-nowrap">
-                          <Calendar size={12} />
-                          {new Date(job.created_at).toLocaleDateString('sv-SE', { 
-                            day: 'numeric', 
-                            month: 'short' 
-                          })}
-                        </div>
-                      </TableCell>
-                      <TableCell className="px-2 py-2">
-                        <div className="flex items-center gap-1">
-                          <Switch
-                            checked={job.is_active}
-                            onCheckedChange={() => toggleJobStatus(job.id, job.is_active)}
-                            onClick={(e) => e.stopPropagation()}
-                            className="scale-75"
-                          />
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditJob(job);
-                            }}
-                            className="h-7 px-2 bg-white/10 border-white/20 text-white hover:bg-white/20 text-[10px]"
-                          >
-                            <Edit size={12} />
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteClick(job);
-                            }}
-                            className="h-7 px-2 bg-white/10 border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/40 text-[10px]"
-                          >
-                            <Trash2 size={12} />
-                          </Button>
-                        </div>
+                </TableHeader>
+                <TableBody>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center text-white/60 py-8 text-sm">
+                        Laddar...
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ) : jobs.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center !text-white py-8 font-medium text-sm">
+                        Inga jobbannonser än. Skapa din första annons!
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    jobs.map((job) => (
+                      <TableRow 
+                        key={job.id}
+                        className="border-white/10 hover:bg-white/5 cursor-pointer transition-colors"
+                        onClick={() => navigate(`/job-details/${job.id}`)}
+                      >
+                        <TableCell className="font-medium text-white px-2 py-2">
+                          <JobTitleCell title={job.title} employmentType={job.employment_type} />
+                        </TableCell>
+                        <TableCell className="px-2 py-2">
+                          <Badge
+                            variant={job.is_active ? "default" : "secondary"}
+                            className={`text-sm whitespace-nowrap ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-gray-500/20 text-gray-300 border-gray-500/30"}`}
+                          >
+                            {job.is_active ? 'Aktiv' : 'Inaktiv'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center px-2 py-2">
+                          <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-sm">
+                            {job.views_count || 0}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center px-2 py-2">
+                          <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-sm">
+                            {job.applications_count || 0}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-white px-2 py-2">
+                          <div className="flex items-center gap-1 text-sm">
+                            <MapPin size={12} className="flex-shrink-0" />
+                            <TruncatedText text={job.location} className="truncate max-w-[120px]" />
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-white px-2 py-2">
+                          <TruncatedText 
+                            text={job.employer_profile?.first_name && job.employer_profile?.last_name
+                              ? `${job.employer_profile.first_name} ${job.employer_profile.last_name}`
+                              : '-'}
+                            className="text-sm truncate max-w-[150px] block"
+                          />
+                        </TableCell>
+                        <TableCell className="text-white px-2 py-2">
+                          <div className="flex items-center gap-1 text-sm whitespace-nowrap">
+                            <Calendar size={12} />
+                            {new Date(job.created_at).toLocaleDateString('sv-SE', { 
+                              day: 'numeric', 
+                              month: 'short' 
+                            })}
+                          </div>
+                        </TableCell>
+                        <TableCell className="px-2 py-2">
+                          <div className="flex items-center gap-1">
+                            <Switch
+                              checked={job.is_active}
+                              onCheckedChange={() => toggleJobStatus(job.id, job.is_active)}
+                              onClick={(e) => e.stopPropagation()}
+                              className="scale-75"
+                            />
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditJob(job);
+                              }}
+                              className="h-7 px-2 bg-white/10 border-white/20 text-white hover:bg-white/20 text-[10px]"
+                            >
+                              <Edit size={12} />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteClick(job);
+                              }}
+                              className="h-7 px-2 bg-white/10 border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/40 text-[10px]"
+                            >
+                              <Trash2 size={12} />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+
+          {/* Mobile: Card view */}
+          <div className="md:hidden space-y-2">
+            {loading ? (
+              <div className="text-center text-white/60 py-8 text-sm">
+                Laddar...
+              </div>
+            ) : jobs.length === 0 ? (
+              <div className="text-center text-white py-8 font-medium text-sm">
+                Inga jobbannonser än. Skapa din första annons!
+              </div>
+            ) : (
+              jobs.map((job) => (
+                <MobileJobCard
+                  key={job.id}
+                  job={job}
+                  onToggleStatus={toggleJobStatus}
+                  onEdit={handleEditJob}
+                  onDelete={handleDeleteClick}
+                />
+              ))
+            )}
           </div>
         </CardContent>
       </Card>
