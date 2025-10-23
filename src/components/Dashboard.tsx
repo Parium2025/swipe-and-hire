@@ -10,6 +10,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { JobTitleCell } from '@/components/JobTitleCell';
 import { TruncatedText } from '@/components/TruncatedText';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { MobileJobCard } from '@/components/MobileJobCard';
 
 const Dashboard = memo(() => {
   const { jobs, stats, isLoading, invalidateJobs } = useJobsData();
@@ -87,12 +89,14 @@ const Dashboard = memo(() => {
       {/* Jobs Table */}
       <Card className="bg-white/5 backdrop-blur-sm border-white/20">
         <CardHeader className="p-6 md:p-4">
-          <CardTitle className="text-sm text-white">
+          <CardTitle className="text-sm text-white text-center md:text-left">
             Utlagda jobb av {profile?.company_name || 'ditt företag'}
           </CardTitle>
         </CardHeader>
         <CardContent className="px-6 pb-6 md:px-4 md:pb-4">
-          <div className="overflow-x-auto -mx-2">
+          
+          {/* Desktop: Table view */}
+          <div className="hidden md:block overflow-x-auto -mx-2">
             <Table>
               <TableHeader>
                 <TableRow className="border-white/20 hover:bg-white/5">
@@ -175,6 +179,36 @@ const Dashboard = memo(() => {
               </TableBody>
             </Table>
           </div>
+
+          {/* Mobile: Card list view */}
+          <div className="block md:hidden">
+            {isLoading ? (
+              <div className="text-center text-white/60 py-8 text-sm">
+                Laddar...
+              </div>
+            ) : jobs.length === 0 ? (
+              <div className="text-center text-white py-8 font-medium text-sm">
+                Inga jobbannonser än. Skapa din första annons!
+              </div>
+            ) : (
+              <div className="rounded-none bg-transparent ring-0 shadow-none">
+                <ScrollArea className="h-[calc(100vh-280px)] min-h-[320px]">
+                  <div className="space-y-2 px-2 py-2 pb-24">
+                    {jobs.map((job) => (
+                      <MobileJobCard
+                        key={job.id}
+                        job={job}
+                        onToggleStatus={() => {}}
+                        onEdit={() => {}}
+                        onDelete={() => {}}
+                      />
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            )}
+          </div>
+
         </CardContent>
       </Card>
     </div>
