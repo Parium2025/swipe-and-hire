@@ -481,7 +481,7 @@ const EmployerDashboard = memo(() => {
                 Ta bort jobbannons
               </AlertDialogTitle>
             </div>
-            <AlertDialogDescription className="text-white/90 text-sm leading-relaxed break-words">
+            <AlertDialogDescription className="text-white/90 text-sm leading-relaxed break-words text-center">
               {jobToDelete && (
                 <>
                   Är du säker på att du vill ta bort <span className="font-semibold text-white break-words">"{jobToDelete.title}"</span>? Denna åtgärd går inte att ångra.
