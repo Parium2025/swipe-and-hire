@@ -1,0 +1,84 @@
+import { memo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Eye, MessageCircle, MapPin, Calendar } from 'lucide-react';
+import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
+import type { JobPosting } from '@/hooks/useJobsData';
+
+interface ReadOnlyMobileJobCardProps {
+  job: JobPosting;
+}
+
+export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/job-details/${job.id}`);
+  };
+
+  return (
+    <Card 
+      className="bg-transparent border border-white/30 shadow-none min-h-[120px] cursor-pointer transition-colors hover:bg-white/5 hover:border-white/50"
+      onClick={handleCardClick}
+    >
+      <div className="p-3 space-y-2">
+        {/* Titel */}
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-semibold text-white line-clamp-2 leading-tight">
+              {job.title}
+            </h3>
+            {job.employment_type && (
+              <Badge 
+                variant="secondary" 
+                className="mt-1 text-xs bg-white/10 text-white border-white/20"
+              >
+                {getEmploymentTypeLabel(job.employment_type)}
+              </Badge>
+            )}
+          </div>
+        </div>
+
+        {/* Status Badge */}
+        <div>
+          <Badge
+            variant={job.is_active ? "default" : "secondary"}
+            className={`text-xs ${job.is_active ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-gray-500/20 text-gray-300 border-gray-500/30"}`}
+          >
+            {job.is_active ? 'Aktiv' : 'Inaktiv'}
+          </Badge>
+        </div>
+
+        {/* Stats + Plats */}
+        <div className="flex items-center gap-3 text-xs text-white">
+          <div className="flex items-center gap-1">
+            <Eye className="h-4 w-4" />
+            <span>{job.views_count || 0}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <MessageCircle className="h-4 w-4" />
+            <span>{job.applications_count || 0}</span>
+          </div>
+          <div className="flex items-center gap-1 flex-1 min-w-0">
+            <MapPin className="h-4 w-4 flex-shrink-0" />
+            <span className="truncate">{job.location}</span>
+          </div>
+        </div>
+
+        {/* Datum */}
+        <div className="flex items-center gap-1 text-xs text-white">
+          <Calendar className="h-3 w-3" />
+          <span>
+            Skapad: {new Date(job.created_at).toLocaleDateString('sv-SE', { 
+              day: 'numeric', 
+              month: 'short' 
+            })}
+          </span>
+        </div>
+      </div>
+    </Card>
+  );
+});
+
+ReadOnlyMobileJobCard.displayName = 'ReadOnlyMobileJobCard';

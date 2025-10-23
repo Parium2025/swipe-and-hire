@@ -11,7 +11,7 @@ import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { JobTitleCell } from '@/components/JobTitleCell';
 import { TruncatedText } from '@/components/TruncatedText';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MobileJobCard } from '@/components/MobileJobCard';
+import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 
 const Dashboard = memo(() => {
   const { jobs, stats, isLoading, invalidateJobs } = useJobsData();
@@ -195,12 +195,9 @@ const Dashboard = memo(() => {
                 <ScrollArea className="h-[calc(100vh-280px)] min-h-[320px]">
                   <div className="space-y-2 px-2 py-2 pb-24">
                     {jobs.map((job) => (
-                      <MobileJobCard
+                      <ReadOnlyMobileJobCard
                         key={job.id}
                         job={job}
-                        onToggleStatus={() => {}}
-                        onEdit={() => {}}
-                        onDelete={() => {}}
                       />
                     ))}
                   </div>
