@@ -156,10 +156,11 @@ const Dashboard = memo(() => {
                       <TableCell className="text-white px-2 py-2">
                         <div className="flex items-center gap-1 text-sm whitespace-nowrap">
                           <Calendar size={12} />
-                          {new Date(job.created_at).toLocaleDateString('sv-SE', { 
-                            day: 'numeric', 
-                            month: 'short' 
-                          })}
+                            {new Date(job.created_at).toLocaleDateString('sv-SE', { 
+                              day: 'numeric', 
+                              month: 'short',
+                              year: 'numeric'
+                            })}
                         </div>
                       </TableCell>
                     </TableRow>
