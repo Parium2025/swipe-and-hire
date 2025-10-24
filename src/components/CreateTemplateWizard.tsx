@@ -1499,10 +1499,10 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     <Button
                       onClick={createNewQuestion}
                       size="lg"
-                      className="w-full bg-primary hover:bg-primary/90 text-white border-2 border-white/20"
+                      className="w-full bg-primary hover:bg-primary/90 text-white border-2 border-white/20 py-6 text-base"
                     >
                       Skapa ny fråga
-                      <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
+                      <Plus className="h-5 w-5 ml-1 text-[hsl(var(--pure-white))]" />
                     </Button>
 
                     <div className="space-y-3 max-h-[400px] overflow-y-auto">
