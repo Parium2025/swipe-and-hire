@@ -522,6 +522,22 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       )
     : questionTypes;
 
+  // Close all transient UI elements when navigating between steps
+  const closeTransientUI = useCallback(() => {
+    setShowEmploymentTypeDropdown(false);
+    setShowSalaryTypeDropdown(false);
+    setShowWorkLocationDropdown(false);
+    setShowRemoteWorkDropdown(false);
+    setShowOccupationDropdown(false);
+    setShowQuestionTypeDropdown(false);
+    setShowQuestionTemplates(false);
+  }, []);
+
+  // Auto-close transient UI when step changes
+  useEffect(() => {
+    closeTransientUI();
+  }, [currentStep, closeTransientUI]);
+
   const validateCurrentStep = () => {
     if (currentStep === 0) {
       return formData.name.trim();
@@ -546,6 +562,9 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
   const nextStep = () => {
     if (validateCurrentStep() && currentStep < steps.length - 1) {
+      closeTransientUI();
+      const el = document.activeElement as HTMLElement | null;
+      if (el?.blur) el.blur();
       setCurrentStep(currentStep + 1);
       setTimeout(() => {
         if (scrollContainerRef.current) {
@@ -557,6 +576,9 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
   const prevStep = () => {
     if (currentStep > 0) {
+      closeTransientUI();
+      const el = document.activeElement as HTMLElement | null;
+      if (el?.blur) el.blur();
       setCurrentStep(currentStep - 1);
       setTimeout(() => {
         if (scrollContainerRef.current) {
