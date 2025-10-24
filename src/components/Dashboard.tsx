@@ -11,6 +11,7 @@ import { JobTitleCell } from '@/components/JobTitleCell';
 import { TruncatedText } from '@/components/TruncatedText';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
+import { formatDateShortSv } from '@/lib/date';
 
 const Dashboard = memo(() => {
   const { jobs, stats, isLoading, invalidateJobs } = useJobsData();
@@ -154,13 +155,9 @@ const Dashboard = memo(() => {
                         />
                       </TableCell>
                       <TableCell className="text-white px-2 py-2">
-                        <div className="flex items-center gap-1 text-sm whitespace-nowrap">
+                        <div className="flex items-center gap-1 text-sm whitespace-nowrap min-w-[110px]">
                           <Calendar size={12} />
-                            {new Date(job.created_at).toLocaleDateString('sv-SE', { 
-                              day: 'numeric', 
-                              month: 'short',
-                              year: 'numeric'
-                            })}
+                          {formatDateShortSv(job.created_at)}
                         </div>
                       </TableCell>
                     </TableRow>
