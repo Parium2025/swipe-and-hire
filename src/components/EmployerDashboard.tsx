@@ -298,7 +298,8 @@ const EmployerDashboard = memo(() => {
                             <Calendar size={12} />
                             {new Date(job.created_at).toLocaleDateString('sv-SE', { 
                               day: 'numeric', 
-                              month: 'short' 
+                              month: 'short',
+                              year: 'numeric'
                             })}
                           </div>
                         </TableCell>

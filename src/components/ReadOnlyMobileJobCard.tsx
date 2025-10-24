@@ -77,7 +77,8 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
             )}
             Skapad: {new Date(job.created_at).toLocaleDateString('sv-SE', { 
               day: 'numeric', 
-              month: 'short' 
+              month: 'short',
+              year: 'numeric'
             })}
           </span>
         </div>
