@@ -514,7 +514,7 @@ const EmployerProfile = () => {
             <div className="flex justify-center pt-1">
               <Button 
                 type="submit"
-                disabled={loading}
+                disabled={loading || !hasUnsavedChanges}
                 className="border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm"
               >
                 {loading ? (
