@@ -341,6 +341,22 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       });
       setCustomQuestions([]);
       setCurrentStep(0);
+      
+      // Nollställ alla search terms
+      setEmploymentTypeSearchTerm('');
+      setSalaryTypeSearchTerm('');
+      setWorkLocationSearchTerm('');
+      setRemoteWorkSearchTerm('');
+      setOccupationSearchTerm('');
+      setQuestionTypeSearchTerm('');
+      
+      // Stäng alla dropdowns
+      setShowEmploymentTypeDropdown(false);
+      setShowSalaryTypeDropdown(false);
+      setShowWorkLocationDropdown(false);
+      setShowRemoteWorkDropdown(false);
+      setShowOccupationDropdown(false);
+      setShowQuestionTypeDropdown(false);
     }
   }, [templateToEdit, open]);
 
