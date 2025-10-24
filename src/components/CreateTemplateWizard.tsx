@@ -1496,16 +1496,14 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       />
                     </div>
 
-                    <div className="border border-white/20 rounded-lg p-3 bg-white/5">
-                      <Button
-                        onClick={createNewQuestion}
-                        size="sm"
-                        className="w-full bg-primary hover:bg-primary/90 text-white"
-                      >
-                        Skapa ny fråga
-                        <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
-                      </Button>
-                    </div>
+                    <Button
+                      onClick={createNewQuestion}
+                      size="sm"
+                      className="w-full bg-primary hover:bg-primary/90 text-white"
+                    >
+                      Skapa ny fråga
+                      <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
+                    </Button>
 
                     <div className="space-y-3 max-h-[400px] overflow-y-auto">
                       {(() => {
