@@ -500,6 +500,37 @@ All colors MUST be HSL.
   }
 }
 
+/* Touch device button borders - automatic white borders on devices without hover capability */
+.touch-border-white {
+  @apply border border-white/20;
+}
+
+.touch-border-white-thick {
+  @apply border-2 border-white/20;
+}
+
+@media (hover: none) {
+  .touch-border-white {
+    border-color: hsla(0, 0%, 100%, 0.4) !important;
+  }
+  
+  .touch-border-white-thick {
+    @apply border-2;
+    border-color: hsla(0, 0%, 100%, 0.4) !important;
+  }
+}
+
+/* Keep hover behavior on desktop */
+@media (hover: hover) {
+  .touch-border-white:hover {
+    border-color: hsla(0, 0%, 100%, 0.4);
+  }
+  
+  .touch-border-white-thick:hover {
+    border-color: hsla(0, 0%, 100%, 0.4);
+  }
+}
+
 /* Animated circles for Auth and WelcomeTunnel backgrounds */
 .circles {
   position: absolute;

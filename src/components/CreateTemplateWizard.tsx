@@ -1181,7 +1181,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   <Button
                     onClick={saveCustomQuestion}
                     disabled={!editingQuestion.question_text?.trim()}
-                    className="bg-primary hover:bg-primary/90 text-white border-2 border-white/20"
+                    className="bg-primary hover:bg-primary/90 text-white touch-border-white-thick"
                   >
                     Spara fråga
                   </Button>
@@ -1476,7 +1476,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     <Button
                       onClick={addCustomQuestion}
                       size="sm"
-                      className="bg-primary hover:bg-primary/90 text-white border-2 border-white/20"
+                      className="bg-primary hover:bg-primary/90 text-white touch-border-white-thick"
                     >
                       Lägg till fråga
                       <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
@@ -1543,7 +1543,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       <Button
                         onClick={createNewQuestion}
                         size="sm"
-                        className="bg-primary hover:bg-primary/90 text-white border-2 border-white/20"
+                        className="bg-primary hover:bg-primary/90 text-white touch-border-white-thick"
                       >
                         Skapa ny fråga
                         <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
@@ -1736,7 +1736,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   <Button
                     onClick={nextStep}
                     disabled={!validateCurrentStep()}
-                    className="bg-primary hover:bg-primary/90 text-white border border-white/20 hover:border-white/40 focus:ring-2 focus:ring-white/40 shrink-0 min-w-[120px]"
+                    className="bg-primary hover:bg-primary/90 text-white touch-border-white focus:ring-2 focus:ring-white/40 shrink-0 min-w-[120px]"
                   >
                     Nästa
                     <ArrowRight className="h-4 w-4 ml-2" />
@@ -1747,7 +1747,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   <Button
                     onClick={handleSubmit}
                     disabled={loading || !validateCurrentStep()}
-                    className={`bg-primary hover:bg-primary/90 text-white shrink-0 min-w-[120px] ${(!loading && validateCurrentStep()) ? 'border border-white/20 hover:border-white/40' : ''}`}
+                    className={`bg-primary hover:bg-primary/90 text-white shrink-0 min-w-[120px] ${(!loading && validateCurrentStep()) ? 'touch-border-white' : ''}`}
                   >
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {templateToEdit ? 'Uppdatera mall' : 'Skapa mall'}

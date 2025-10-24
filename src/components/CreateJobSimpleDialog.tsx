@@ -503,7 +503,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       {filteredTemplates.map((template) => (
                         <Card 
                           key={template.id}
-                          className="bg-transparent border border-white/30 shadow-none cursor-pointer transition-colors hover:bg-white/5 hover:border-white/50"
+                          className="bg-transparent touch-border-white shadow-none cursor-pointer transition-colors hover:bg-white/5"
                           onClick={() => {
                             handleTemplateSelect(template.id, template.name);
                             setShowMobileTemplatePicker(false);

@@ -1826,7 +1826,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               <Button
                                 onClick={saveCustomQuestion}
                                 disabled={!editingQuestion?.question_text?.trim()}
-                                className="bg-primary hover:bg-primary/90 text-white border-2 border-white/20"
+                                className="bg-primary hover:bg-primary/90 text-white touch-border-white-thick"
                               >
                                 Spara fråga
                               </Button>
@@ -2371,7 +2371,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                 <Button
                   onClick={handleNext}
                   disabled={!canProceed()}
-                  className="bg-primary hover:bg-primary/90 text-white disabled:opacity-50 border border-white/40 hover:border-white/60"
+                  className="bg-primary hover:bg-primary/90 text-white disabled:opacity-50 touch-border-white"
                 >
                   Nästa
                   <ArrowRight className="h-4 w-4 ml-2" />
