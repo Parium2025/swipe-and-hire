@@ -2265,7 +2265,7 @@ const MobileJobWizard = ({
                         <Button
                           onClick={saveCustomQuestion}
                           disabled={!editingQuestion?.question_text?.trim()}
-                          className="bg-primary hover:bg-primary/90 text-white"
+                          className="bg-primary hover:bg-primary/90 text-white border-2 border-white/20"
                         >
                           Spara fråga
                         </Button>
