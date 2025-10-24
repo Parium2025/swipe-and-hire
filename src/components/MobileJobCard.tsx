@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2 } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import type { JobPosting } from '@/hooks/useJobsData';
+import { formatDateShortSv } from '@/lib/date';
 
 interface MobileJobCardProps {
   job: JobPosting;
@@ -86,11 +87,7 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete }: Mo
                 {job.employer_profile.first_name} {job.employer_profile.last_name} • {' '}
               </>
             )}
-            Skapad: {new Date(job.created_at).toLocaleDateString('sv-SE', { 
-              day: 'numeric', 
-              month: 'short',
-              year: 'numeric'
-            })}
+            Skapad: {formatDateShortSv(job.created_at)}
           </span>
         </div>
 

@@ -17,6 +17,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { JobTitleCell } from '@/components/JobTitleCell';
 import { TruncatedText } from '@/components/TruncatedText';
 import { MobileJobCard } from '@/components/MobileJobCard';
+import { formatDateShortSv } from '@/lib/date';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -294,13 +295,9 @@ const EmployerDashboard = memo(() => {
                           />
                         </TableCell>
                         <TableCell className="text-white px-2 py-2">
-                          <div className="flex items-center gap-1 text-sm whitespace-nowrap">
+                          <div className="flex items-center gap-1 text-sm whitespace-nowrap min-w-[110px]">
                             <Calendar size={12} />
-                            {new Date(job.created_at).toLocaleDateString('sv-SE', { 
-                              day: 'numeric', 
-                              month: 'short',
-                              year: 'numeric'
-                            })}
+                            {formatDateShortSv(job.created_at)}
                           </div>
                         </TableCell>
                         <TableCell className="px-2 py-2">
