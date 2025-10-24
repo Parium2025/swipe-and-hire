@@ -14,6 +14,7 @@ import { Progress } from '@/components/ui/progress';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Switch } from '@/components/ui/switch';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
+import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import {
   DndContext,
   closestCenter,
@@ -171,6 +172,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
   const [remoteWorkSearchTerm, setRemoteWorkSearchTerm] = useState('');
   const [showRemoteWorkDropdown, setShowRemoteWorkDropdown] = useState(false);
   const [questionSearchQuery, setQuestionSearchQuery] = useState('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
@@ -396,6 +399,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       ...prev,
       [field]: value
     }));
+    setHasUnsavedChanges(true);
   };
 
   const handleOccupationSearch = (value: string) => {
@@ -563,6 +567,14 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
   };
 
   const handleClose = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      resetAndClose();
+    }
+  };
+
+  const resetAndClose = () => {
     setCurrentStep(0);
     setFormData({
       name: '',
@@ -588,6 +600,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       pitch: ''
     });
     setCustomQuestions([]);
+    setHasUnsavedChanges(false);
+    setShowUnsavedDialog(false);
     onOpenChange(false);
   };
 
@@ -674,7 +688,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         });
       }
 
-      handleClose();
+      resetAndClose();
       onTemplateCreated();
 
     } catch (error) {
@@ -1699,6 +1713,13 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
           )}
         </div>
       </DialogContent>
+      
+      <UnsavedChangesDialog
+        open={showUnsavedDialog}
+        onOpenChange={setShowUnsavedDialog}
+        onConfirm={resetAndClose}
+        onCancel={() => setShowUnsavedDialog(false)}
+      />
     </Dialog>
   );
 };
