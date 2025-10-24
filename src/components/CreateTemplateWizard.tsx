@@ -1135,13 +1135,15 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                 </div>
 
                 <div className="flex justify-end pt-4">
-                  <Button
-                    onClick={saveCustomQuestion}
-                    disabled={!editingQuestion.question_text?.trim()}
-                    className="bg-primary hover:bg-primary/90 text-white"
-                  >
-                    Spara fråga
-                  </Button>
+                  <div className="border border-white/20 rounded-lg p-3 bg-white/5 inline-block">
+                    <Button
+                      onClick={saveCustomQuestion}
+                      disabled={!editingQuestion.question_text?.trim()}
+                      className="bg-primary hover:bg-primary/90 text-white"
+                    >
+                      Spara fråga
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
@@ -1496,14 +1498,16 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       />
                     </div>
 
-                    <Button
-                      onClick={createNewQuestion}
-                      size="sm"
-                      className="w-full bg-primary hover:bg-primary/90 text-white"
-                    >
-                      Skapa ny fråga
-                      <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
-                    </Button>
+                    <div className="border border-white/20 rounded-lg p-3 bg-white/5">
+                      <Button
+                        onClick={createNewQuestion}
+                        size="sm"
+                        className="w-full bg-primary hover:bg-primary/90 text-white"
+                      >
+                        Skapa ny fråga
+                        <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
+                      </Button>
+                    </div>
 
                     <div className="space-y-3 max-h-[400px] overflow-y-auto">
                       {(() => {
@@ -1619,7 +1623,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
             {/* Step 4: Förhandsvisning */}
             {!showQuestionForm && currentStep === 4 && (
-              <div className="space-y-6 max-w-2xl mx-auto w-full">
+              <div className="space-y-6 max-w-2xl mx-auto w-full overflow-y-auto max-h-[600px]">
                 <h3 className="text-white font-medium text-center">Mallöversikt</h3>
                 
                 <div className="bg-white/5 rounded-lg p-6 border border-white/20 space-y-4">
