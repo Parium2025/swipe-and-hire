@@ -927,7 +927,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
   const isLastStep = currentStep === steps.length - 1;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
         className="parium-panel max-w-md h-auto max-h-[90vh] md:max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
         onInteractOutside={(e) => e.preventDefault()}
@@ -1715,6 +1716,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
           )}
         </div>
       </DialogContent>
+      </Dialog>
       
       <UnsavedChangesDialog
         open={showUnsavedDialog}
@@ -1722,7 +1724,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         onConfirm={resetAndClose}
         onCancel={() => setShowUnsavedDialog(false)}
       />
-    </Dialog>
+    </>
   );
 };
 
