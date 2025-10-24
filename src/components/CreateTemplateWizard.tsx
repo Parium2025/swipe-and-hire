@@ -1430,14 +1430,16 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <h4 className="text-white font-medium">Anpassade frågor (valfritt)</h4>
-                        <Button
-                          onClick={addCustomQuestion}
-                          size="sm"
-                          className="bg-primary hover:bg-primary/90 text-white"
-                        >
-                          Lägg till fråga
-                          <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
-                        </Button>
+                        <div className="border border-white/20 rounded-lg p-3 bg-white/5">
+                          <Button
+                            onClick={addCustomQuestion}
+                            size="sm"
+                            className="bg-primary hover:bg-primary/90 text-white"
+                          >
+                            Lägg till fråga
+                            <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
+                          </Button>
+                        </div>
                       </div>
                       
                       {customQuestions.length === 0 ? (
@@ -1496,14 +1498,16 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       />
                     </div>
 
-                    <Button
-                      onClick={createNewQuestion}
-                      size="sm"
-                      className="w-full bg-primary hover:bg-primary/90 text-white"
-                    >
-                      Skapa ny fråga
-                      <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
-                    </Button>
+                    <div className="border border-white/20 rounded-lg p-3 bg-white/5">
+                      <Button
+                        onClick={createNewQuestion}
+                        size="sm"
+                        className="w-full bg-primary hover:bg-primary/90 text-white"
+                      >
+                        Skapa ny fråga
+                        <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
+                      </Button>
+                    </div>
 
                     <div className="space-y-3 max-h-[400px] overflow-y-auto">
                       {(() => {
