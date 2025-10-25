@@ -58,7 +58,7 @@ const CandidatesContent = () => {
       {/* Main Content */}
       <div className="space-y-4">
         {/* Header */}
-        <div className="text-center lg:text-left">
+        <div className="text-center">
           <h1 className="text-xl md:text-2xl font-semibold text-white mb-2">
             Alla kandidater ({isLoading ? '...' : stats.total})
           </h1>
