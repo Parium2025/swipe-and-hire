@@ -191,7 +191,7 @@ const Dashboard = memo(() => {
 
       {/* Result indicator */}
       {searchTerm && (
-        <div className="text-sm text-white/60">
+        <div className="text-sm text-white">
           Visar {filteredAndSortedJobs.length} av {jobs.length} annonser
         </div>
       )}

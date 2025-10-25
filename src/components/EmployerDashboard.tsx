@@ -331,9 +331,9 @@ const EmployerDashboard = memo(() => {
 
       {/* Result indicator */}
       {searchTerm && (
-        <div className="text-sm text-white/60 mb-4">
+        <div className="text-sm text-white mb-4">
           {filteredAndSortedJobs.length === 0 ? (
-            <span className="text-white/80">Inga annonser matchar din sökning</span>
+            <span>Inga annonser matchar din sökning</span>
           ) : (
             <span>
               Visar {filteredAndSortedJobs.length} av {jobs.length} annonser
