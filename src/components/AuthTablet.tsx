@@ -82,6 +82,9 @@ const AuthTablet = ({
   const [resetPasswordSent, setResetPasswordSent] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const [hasRegistered, setHasRegistered] = useState(false);
+  const [rememberMe, setRememberMe] = useState(() => {
+    return localStorage.getItem('parium-remember-me') === 'true';
+  });
 
   const triggerRef = useRef<HTMLButtonElement>(null);
   const employeeCountTriggerRef = useRef<HTMLButtonElement>(null);
@@ -654,6 +657,25 @@ const AuthTablet = ({
                           </button>
                         </div>
                       </div>
+                      
+                      {/* Håll mig inloggad checkbox */}
+                      <div className="flex items-center space-x-2 mb-4">
+                        <input
+                          type="checkbox"
+                          id="rememberMe"
+                          checked={rememberMe}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setRememberMe(checked);
+                            localStorage.setItem('parium-remember-me', checked.toString());
+                          }}
+                          className="w-4 h-4 rounded border-white/20 bg-white/5 text-parium-navy focus:ring-parium-navy focus:ring-offset-0"
+                        />
+                        <label htmlFor="rememberMe" className="text-sm text-white cursor-pointer select-none">
+                          Håll mig inloggad
+                        </label>
+                      </div>
+                      
                        <Button type="submit" className="w-full bg-parium-navy hover:bg-parium-navy/90 text-white" disabled={loading}>
                          {loading ? "Loggar in..." : "Logga in"}
                        </Button>

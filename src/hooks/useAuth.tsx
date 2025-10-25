@@ -114,6 +114,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         console.log('Auth state change:', event, session?.user?.id);
         
+        // Förbättrad felhantering för olika auth events
+        if (event === 'TOKEN_REFRESHED') {
+          console.log('✅ Token refreshed successfully');
+        } else if (event === 'SIGNED_OUT' && !session) {
+          // Visa meddelande bara vid oväntad utloggning (token refresh error)
+          setTimeout(() => {
+            toast({
+              title: 'Session utgången',
+              description: 'Din session har gått ut. Vänligen logga in igen.',
+              variant: 'destructive',
+              duration: 4000
+            });
+          }, 100);
+        }
+        
         // Update session and user state for all events
         setSession(session);
         setUser(session?.user ?? null);
@@ -827,12 +842,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Automatisk utloggning efter inaktivitet (30 minuter)
+  // Automatisk utloggning efter inaktivitet (5 minuter, eller 30 minuter om "Håll mig inloggad")
   useEffect(() => {
     if (!user) return; // Bara aktiv när användaren är inloggad
 
-    const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minuter i millisekunder
+    // Kolla om användaren valt "Håll mig inloggad"
+    const rememberMe = localStorage.getItem('parium-remember-me') === 'true';
+    const INACTIVITY_TIMEOUT = rememberMe ? 30 * 60 * 1000 : 5 * 60 * 1000; // 30 min eller 5 min
+    const WARNING_TIME = INACTIVITY_TIMEOUT - 30 * 1000; // 30 sekunder innan timeout
+    
     let timeoutId: NodeJS.Timeout;
+    let warningTimeoutId: NodeJS.Timeout;
     let lastActivityTime = Date.now();
 
     const resetTimer = () => {
@@ -841,9 +861,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
+      if (warningTimeoutId) {
+        clearTimeout(warningTimeoutId);
+      }
 
+      // Varning 30 sekunder innan utloggning
+      warningTimeoutId = setTimeout(() => {
+        toast({
+          title: 'Session går snart ut',
+          description: 'Du kommer loggas ut om 30 sekunder på grund av inaktivitet',
+          duration: 30000,
+          action: (
+            <button 
+              onClick={resetTimer}
+              className="px-3 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+            >
+              Stanna inloggad
+            </button>
+          )
+        });
+      }, WARNING_TIME);
+
+      // Faktisk utloggning
       timeoutId = setTimeout(() => {
-        console.log('🔒 Automatisk utloggning efter 30 minuters inaktivitet');
+        console.log('🔒 Automatisk utloggning efter inaktivitet');
         toast({
           title: 'Session utgången',
           description: 'Du har loggats ut efter inaktivitet',
@@ -878,6 +919,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
+      if (warningTimeoutId) {
+        clearTimeout(warningTimeoutId);
+      }
       if (throttleTimeout) {
         clearTimeout(throttleTimeout);
       }
@@ -885,7 +929,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         window.removeEventListener(event, throttledResetTimer);
       });
     };
-  }, [user]); // Bara beroende av user
+  }, [user, toast, signOut]); // Beroenden: user, toast, signOut
+
+  // Auto-logout när tab/browser stängs (om "Håll mig inloggad" inte är ikryssad)
+  useEffect(() => {
+    if (!user) return;
+
+    const handleBeforeUnload = () => {
+      const rememberMe = localStorage.getItem('parium-remember-me') === 'true';
+      
+      if (!rememberMe) {
+        // Logga ut användaren när fliken/browsern stängs
+        console.log('🔒 Loggar ut användare vid stängning av flik/browser');
+        // Synkron signOut via Supabase API
+        supabase.auth.signOut();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [user]);
 
   const value = {
     user,
