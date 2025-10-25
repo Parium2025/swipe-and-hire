@@ -41,7 +41,7 @@ export const JobSearchBar = ({
           placeholder={placeholder}
           value={searchInput}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/60"
+          className="pl-10 min-h-[44px] bg-white/5 border-white/20 text-white placeholder:text-white/60"
         />
       </div>
       
