@@ -35,7 +35,7 @@ export const JobSearchBar = ({
   return (
     <div className="flex flex-col md:flex-row gap-2">
       {/* Search field */}
-      <div className="relative flex-1">
+      <div className="relative flex-1 min-w-0">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
         <Input
           placeholder={placeholder}
@@ -50,7 +50,7 @@ export const JobSearchBar = ({
         <DropdownMenuTrigger asChild>
           <Button 
             variant="outline" 
-            className="w-full md:w-auto md:min-w-[180px] bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10"
+            className="w-full md:flex-1 md:min-w-0 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10"
           >
             <ArrowUpDown className="mr-2 h-4 w-4" />
             {sortLabels[sortBy]}
