@@ -669,7 +669,7 @@ const AuthDesktop = ({
                             setRememberMe(checked);
                             localStorage.setItem('parium-remember-me', checked.toString());
                           }}
-                          className="w-4 h-4 rounded border-white/20 bg-white/5 text-parium-navy focus:ring-parium-navy focus:ring-offset-0"
+                          className="w-4 h-4 rounded border-2 border-white/60 bg-transparent data-[state=checked]:bg-white/10 data-[state=checked]:border-white data-[state=checked]:text-white focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-0 transition-all cursor-pointer"
                         />
                         <label htmlFor="rememberMe" className="text-sm text-white cursor-pointer select-none">
                           Håll mig inloggad
