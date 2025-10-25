@@ -322,6 +322,13 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             </div>
                           </div>
 
+                          {/* Result indicator */}
+                          {searchTerm && (
+                            <div className="px-4 py-2 text-sm text-white/90 bg-slate-800/50 border-b border-slate-600/20">
+                              Visar {filteredTemplates.length} av {templates.length} mallar
+                            </div>
+                          )}
+
                           <div className="bg-slate-800/95 overflow-y-auto flex-1 pb-2">
                             <DropdownMenuItem
                               onClick={() => {
@@ -401,7 +408,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             
                             {filteredTemplates.length === 0 && searchTerm && (
                               <div className="px-4 py-8 text-center">
-                                <p className="text-white/80 mb-2">Ingen mall hittades för "{searchTerm}"</p>
+                                <p className="text-white/80 mb-2">
+                                  Ingen mall hittades för <span className="text-white font-medium">({searchTerm})</span>
+                                </p>
                                 <Button
                                   onClick={() => setSearchTerm('')}
                                   variant="ghost"
