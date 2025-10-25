@@ -286,7 +286,7 @@ const EmployerDashboard = memo(() => {
       <div className="flex flex-col md:flex-row gap-2 mb-4">
         {/* Search field */}
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white" />
           <Input
             placeholder="Sök efter titel, plats, anställningstyp..."
             value={searchInput}
