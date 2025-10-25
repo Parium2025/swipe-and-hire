@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+
 import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -25,58 +25,36 @@ import { useDevice } from "@/hooks/use-device";
 
 const queryClient = new QueryClient();
 
-// Wrapper component for animated routes
+// Routes without animations for crispy, instant navigation
 const AnimatedRoutes = () => {
-  const location = useLocation();
-  const device = useDevice();
-  const isMobile = device === 'mobile';
-
-  const PageWrapper = ({ children }: { children: React.ReactNode }) => {
-    if (!isMobile) return <>{children}</>;
-    
-    return (
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -20 }}
-        transition={{ duration: 0.2 }}
-      >
-        {children}
-      </motion.div>
-    );
-  };
-
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<Landing />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/home" element={<PageWrapper><Index /></PageWrapper>} />
-        <Route path="/consent" element={<PageWrapper><Index /></PageWrapper>} />
-        <Route path="/verify" element={<EmailVerification />} />
-        <Route path="/email-redirect" element={<EmailRedirect />} />
-        <Route path="/confirm" element={<EmailConfirm />} />
-        <Route path="/profile" element={<PageWrapper><Index /></PageWrapper>} />
-        <Route path="/profile-preview" element={<ProfilePreview />} />
-        <Route path="/search-jobs" element={<PageWrapper><Index /></PageWrapper>} />
-        <Route path="/subscription" element={<PageWrapper><Index /></PageWrapper>} />
-        <Route path="/support" element={<PageWrapper><Index /></PageWrapper>} />
-        <Route path="/admin" element={<PageWrapper><Index /></PageWrapper>} />
-        <Route path="/settings" element={<PageWrapper><Index /></PageWrapper>} />
-        <Route path="/billing" element={<PageWrapper><Index /></PageWrapper>} />
-        <Route path="/payment" element={<PageWrapper><Index /></PageWrapper>} />
-        <Route path="/dashboard" element={<PageWrapper><Index /></PageWrapper>} />
-        <Route path="/my-jobs" element={<PageWrapper><Index /></PageWrapper>} />
-        <Route path="/candidates" element={<PageWrapper><Index /></PageWrapper>} />
-        <Route path="/job-details/:jobId" element={<PageWrapper><Index /></PageWrapper>} />
-        <Route path="/company-profile" element={<PageWrapper><Index /></PageWrapper>} />
-        <Route path="/reviews" element={<PageWrapper><Index /></PageWrapper>} />
-        <Route path="/job-application/:jobId" element={<JobApplication />} />
-        <Route path="/reset-redirect" element={<ResetRedirect />} />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </AnimatePresence>
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/home" element={<Index />} />
+      <Route path="/consent" element={<Index />} />
+      <Route path="/verify" element={<EmailVerification />} />
+      <Route path="/email-redirect" element={<EmailRedirect />} />
+      <Route path="/confirm" element={<EmailConfirm />} />
+      <Route path="/profile" element={<Index />} />
+      <Route path="/profile-preview" element={<ProfilePreview />} />
+      <Route path="/search-jobs" element={<Index />} />
+      <Route path="/subscription" element={<Index />} />
+      <Route path="/support" element={<Index />} />
+      <Route path="/admin" element={<Index />} />
+      <Route path="/settings" element={<Index />} />
+      <Route path="/billing" element={<Index />} />
+      <Route path="/payment" element={<Index />} />
+      <Route path="/dashboard" element={<Index />} />
+      <Route path="/my-jobs" element={<Index />} />
+      <Route path="/candidates" element={<Index />} />
+      <Route path="/job-details/:jobId" element={<Index />} />
+      <Route path="/company-profile" element={<Index />} />
+      <Route path="/reviews" element={<Index />} />
+      <Route path="/job-application/:jobId" element={<JobApplication />} />
+      <Route path="/reset-redirect" element={<ResetRedirect />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 };
 
