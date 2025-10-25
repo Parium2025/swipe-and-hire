@@ -842,12 +842,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Automatisk utloggning efter inaktivitet (5 minuter, eller 30 minuter om "Håll mig inloggad")
-  // Auto-logout efter 16 timmars inaktivitet (per enhet)
+  // Auto-logout efter inaktivitet: 1 timme (standard) eller 16 timmar (om "Håll mig inloggad")
   useEffect(() => {
     if (!user) return; // Bara aktiv när användaren är inloggad
 
-    const INACTIVITY_TIMEOUT = 16 * 60 * 60 * 1000; // 16 timmar i millisekunder
+    // Kolla om användaren valt "Håll mig inloggad"
+    const rememberMe = localStorage.getItem('parium-remember-me') === 'true';
+    const INACTIVITY_TIMEOUT = rememberMe ? 16 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000; // 16 timmar ELLER 1 timme
     
     let timeoutId: NodeJS.Timeout;
 
@@ -856,9 +857,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         clearTimeout(timeoutId);
       }
 
-      // Automatisk utloggning efter 16 timmar
+      // Automatisk utloggning efter inaktivitet
       timeoutId = setTimeout(() => {
-        console.log('🔒 Automatisk utloggning efter 16 timmars inaktivitet');
+        const timeout = rememberMe ? '16 timmar' : '1 timme';
+        console.log(`🔒 Automatisk utloggning efter ${timeout} inaktivitet`);
         toast({
           title: 'Session utgången',
           description: 'Du har loggats ut efter inaktivitet',
