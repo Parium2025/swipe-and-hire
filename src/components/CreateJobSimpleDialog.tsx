@@ -264,7 +264,16 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                   </div>
                 ) : (
                   <div className="flex items-start gap-2">
-                    <DropdownMenu modal={false} open={templateMenuOpen} onOpenChange={setTemplateMenuOpen}>
+                    <DropdownMenu 
+                      modal={false} 
+                      open={templateMenuOpen} 
+                      onOpenChange={(isOpen) => {
+                        setTemplateMenuOpen(isOpen);
+                        if (isOpen) {
+                          setSearchTerm('');
+                        }
+                      }}
+                    >
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="outline"
@@ -313,8 +322,13 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                               />
                               {searchTerm && (
                                 <button
-                                  onClick={() => setSearchTerm('')}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setSearchTerm('');
+                                  }}
                                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white transition-colors"
+                                  type="button"
                                 >
                                   <X className="h-4 w-4" />
                                 </button>
