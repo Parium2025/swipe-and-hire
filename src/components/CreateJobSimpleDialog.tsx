@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -56,6 +56,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const isNavigatingBack = useRef(false);
 
 
   const fetchTemplates = useCallback(async () => {
@@ -185,10 +186,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   }, [onJobCreated]);
 
   const handleWizardBack = useCallback(() => {
+    isNavigatingBack.current = true;
     setShowDetailDialog(false);
     // Öppna mallvalssteget igen efter en kort delay
     requestAnimationFrame(() => {
       setOpen(true);
+      isNavigatingBack.current = false;
     });
   }, []);
 
@@ -481,7 +484,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         open={showDetailDialog}
         onOpenChange={(isOpen) => {
           setShowDetailDialog(isOpen);
-          if (!isOpen) {
+          if (!isOpen && !isNavigatingBack.current) {
             setJobTitle('');
             setSelectedTemplate(null);
           }
