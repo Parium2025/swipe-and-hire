@@ -10,6 +10,9 @@ import { CandidateProfileDialog } from './CandidateProfileDialog';
 interface CandidatesTableProps {
   applications: ApplicationData[];
   onUpdate: () => void;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
 }
 
 const statusConfig = {
@@ -19,7 +22,13 @@ const statusConfig = {
   rejected: { label: 'Avvisad', className: 'bg-red-500/20 text-red-300 border-red-500/30' },
 };
 
-export const CandidatesTable = ({ applications, onUpdate }: CandidatesTableProps) => {
+export function CandidatesTable({ 
+  applications, 
+  onUpdate, 
+  onLoadMore,
+  hasMore = false,
+  isLoadingMore = false 
+}: CandidatesTableProps) {
   const [selectedApplication, setSelectedApplication] = useState<ApplicationData | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -127,6 +136,18 @@ export const CandidatesTable = ({ applications, onUpdate }: CandidatesTableProps
           </TableBody>
         </Table>
       </div>
+      
+      {hasMore && onLoadMore && (
+        <div className="flex justify-center py-4">
+          <button
+            onClick={onLoadMore}
+            disabled={isLoadingMore}
+            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
+          >
+            {isLoadingMore ? 'Laddar fler...' : 'Visa fler kandidater'}
+          </button>
+        </div>
+      )}
 
       <CandidateProfileDialog
         application={selectedApplication}

@@ -37,7 +37,16 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const CandidatesContent = () => {
-  const { applications, stats, isLoading, refetch } = useApplicationsData();
+  const { 
+    applications, 
+    stats, 
+    isLoading, 
+    error, 
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage 
+  } = useApplicationsData();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
 
@@ -94,7 +103,11 @@ const CandidatesContent = () => {
       )}
 
       {/* Candidates Table */}
-      {isLoading ? (
+      {error ? (
+        <div className="text-center py-12 text-destructive">
+          Något gick fel vid hämtning av kandidater
+        </div>
+      ) : safeApplications.length === 0 && isLoading ? (
         <Card className="bg-white/5 border-white/10">
           <CardContent className="p-6">
             <div className="space-y-4">
@@ -113,7 +126,13 @@ const CandidatesContent = () => {
           </p>
         </div>
       ) : (
-        <CandidatesTable applications={filteredApplications} onUpdate={refetch} />
+        <CandidatesTable 
+          applications={filteredApplications} 
+          onUpdate={refetch}
+          onLoadMore={fetchNextPage}
+          hasMore={hasNextPage}
+          isLoadingMore={isFetchingNextPage}
+        />
       )}
     </div>
   );

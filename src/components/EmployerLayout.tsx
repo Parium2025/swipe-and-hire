@@ -6,6 +6,8 @@ import DeveloperControls from '@/components/DeveloperControls';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import CreateJobSimpleDialog from '@/components/CreateJobSimpleDialog';
 import { useJobsData } from '@/hooks/useJobsData';
+import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface EmployerLayoutProps {
   children: ReactNode;
@@ -16,6 +18,54 @@ interface EmployerLayoutProps {
 const EmployerLayout = ({ children, developerView, onViewChange }: EmployerLayoutProps) => {
   const { user, profile } = useAuth();
   const { invalidateJobs } = useJobsData();
+  const queryClient = useQueryClient();
+
+  // Prefetch applications on mount for instant /candidates load
+  useEffect(() => {
+    if (!user) return;
+
+    console.time('⏱️ Prefetch applications');
+    queryClient.prefetchInfiniteQuery({
+      queryKey: ['applications', user.id],
+      initialPageParam: 0,
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from('job_applications')
+          .select(`
+            id,
+            job_id,
+            applicant_id,
+            first_name,
+            last_name,
+            email,
+            status,
+            applied_at,
+            updated_at
+          `)
+          .order('applied_at', { ascending: false })
+          .range(0, 24);
+
+        console.timeEnd('⏱️ Prefetch applications');
+
+        if (error) throw error;
+        if (!data) return { items: [], hasMore: false };
+
+        const items = data;
+        const hasMore = items.length === 25;
+
+        // Write to snapshot
+        try {
+          const snapshot = {
+            items: items.slice(0, 50),
+            timestamp: Date.now(),
+          };
+          localStorage.setItem(`applications_snapshot_${user.id}`, JSON.stringify(snapshot));
+        } catch {}
+
+        return { items, hasMore };
+      },
+    });
+  }, [user, queryClient]);
 
   return (
     <SidebarProvider defaultOpen={true}>

@@ -1,6 +1,7 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useEffect, useState } from 'react';
 
 export interface ApplicationData {
   id: string;
@@ -24,24 +25,79 @@ export interface ApplicationData {
   profile_image_url?: string | null;
 }
 
+const PAGE_SIZE = 25;
+const SNAPSHOT_KEY_PREFIX = 'applications_snapshot_';
+const SNAPSHOT_EXPIRY_MS = 5 * 60 * 1000; // 5 min
+
+interface SnapshotData {
+  items: ApplicationData[];
+  timestamp: number;
+}
+
+// Read snapshot from localStorage
+const readSnapshot = (userId: string): ApplicationData[] => {
+  try {
+    const key = SNAPSHOT_KEY_PREFIX + userId;
+    const raw = localStorage.getItem(key);
+    if (!raw) return [];
+    
+    const snapshot: SnapshotData = JSON.parse(raw);
+    const age = Date.now() - snapshot.timestamp;
+    
+    if (age > SNAPSHOT_EXPIRY_MS) {
+      localStorage.removeItem(key);
+      return [];
+    }
+    
+    return snapshot.items;
+  } catch {
+    return [];
+  }
+};
+
+// Write snapshot to localStorage
+const writeSnapshot = (userId: string, items: ApplicationData[]) => {
+  try {
+    const key = SNAPSHOT_KEY_PREFIX + userId;
+    const snapshot: SnapshotData = {
+      items: items.slice(0, 50), // Max 50 items
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(key, JSON.stringify(snapshot));
+  } catch (e) {
+    console.warn('Failed to write snapshot:', e);
+  }
+};
+
 export const useApplicationsData = () => {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [jobTitles, setJobTitles] = useState<Record<string, string>>({});
 
-  const CACHE_KEY = user ? `applications_cache_${user.id}` : null;
-
-  const { data: applications = [], isLoading, error, refetch } = useQuery({
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = useInfiniteQuery({
     queryKey: ['applications', user?.id],
-    queryFn: async () => {
-      console.time('⏱️ DB optimized Applications query');
+    initialPageParam: 0,
+    queryFn: async ({ pageParam = 0 }) => {
+      console.time(`⏱️ Applications page ${pageParam}`);
       
       if (!user) {
-        console.timeEnd('⏱️ DB optimized Applications query');
-        return [];
+        console.timeEnd(`⏱️ Applications page ${pageParam}`);
+        return { items: [], hasMore: false };
       }
       
-      // RLS handles organization filtering - no need for explicit org filter
-      const { data, error } = await supabase
+      const from = pageParam * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      
+      // Fetch base data WITHOUT joins for speed
+      const { data: baseData, error: baseError } = await supabase
         .from('job_applications')
         .select(`
           id,
@@ -52,61 +108,94 @@ export const useApplicationsData = () => {
           email,
           status,
           applied_at,
-          updated_at,
-          job_postings!inner(
-            title
-          ),
-          profiles(
-            profile_image_url
-          )
+          updated_at
         `)
-        .order('applied_at', { ascending: false });
+        .order('applied_at', { ascending: false })
+        .range(from, to);
 
-      console.timeEnd('⏱️ DB optimized Applications query');
+      console.timeEnd(`⏱️ Applications page ${pageParam}`);
 
-      if (error) {
-        console.error('❌ Applications query error:', error);
-        throw error;
+      if (baseError) {
+        console.error('❌ Applications query error:', baseError);
+        throw baseError;
       }
 
-      if (!data) {
+      if (!baseData) {
         console.warn('⚠️ Applications query returned null');
-        return [];
+        return { items: [], hasMore: false };
       }
 
-      // Transform data to flatten the structure
-      const mapped = (data || []).map((app: any) => ({
-        ...app,
-        job_title: app.job_postings?.title,
-        profile_image_url: app.profiles?.profile_image_url,
-      })) as ApplicationData[];
+      const items = baseData as ApplicationData[];
+      const hasMore = items.length === PAGE_SIZE;
 
-      // Cache for instant next load
-      try {
-        if (CACHE_KEY) sessionStorage.setItem(CACHE_KEY, JSON.stringify(mapped));
-      } catch {}
+      // Write snapshot on first page
+      if (pageParam === 0 && items.length > 0) {
+        writeSnapshot(user.id, items);
+      }
 
-      return mapped;
+      return { items, hasMore };
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.hasMore ? allPages.length : undefined;
     },
     enabled: !!user,
-    staleTime: 2 * 60 * 1000,
-    gcTime: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     initialData: () => {
-      try {
-        return CACHE_KEY ? JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null') : undefined;
-      } catch {
-        return undefined;
-      }
+      if (!user) return undefined;
+      
+      const snapshot = readSnapshot(user.id);
+      if (snapshot.length === 0) return undefined;
+      
+      console.log('📸 Loaded snapshot:', snapshot.length, 'items');
+      return {
+        pages: [{ items: snapshot, hasMore: true }],
+        pageParams: [0],
+      };
     },
-    initialDataUpdatedAt: Date.now() - 30 * 1000,
   });
 
+  // Flatten all pages
+  const applications = data?.pages.flatMap(page => page.items) || [];
+
+  // Enrich with job titles in background
+  useEffect(() => {
+    if (applications.length === 0) return;
+
+    const uniqueJobIds = [...new Set(applications.map(app => app.job_id))];
+    const missingIds = uniqueJobIds.filter(id => !jobTitles[id]);
+    
+    if (missingIds.length === 0) return;
+
+    console.time('⏱️ Enrichment: job titles');
+    supabase
+      .from('job_postings')
+      .select('id, title')
+      .in('id', missingIds)
+      .then(({ data: jobData }) => {
+        console.timeEnd('⏱️ Enrichment: job titles');
+        
+        if (jobData) {
+          const titleMap = Object.fromEntries(
+            jobData.map(job => [job.id, job.title])
+          );
+          setJobTitles(prev => ({ ...prev, ...titleMap }));
+        }
+      });
+  }, [applications, jobTitles]);
+
+  // Merge titles into applications
+  const enrichedApplications = applications.map(app => ({
+    ...app,
+    job_title: jobTitles[app.job_id] || 'Läser in...',
+  }));
+
   const stats = {
-    total: applications.length,
-    new: applications.filter(app => app.status === 'pending').length,
-    reviewing: applications.filter(app => app.status === 'reviewing').length,
-    accepted: applications.filter(app => app.status === 'accepted').length,
-    rejected: applications.filter(app => app.status === 'rejected').length,
+    total: enrichedApplications.length,
+    new: enrichedApplications.filter(app => app.status === 'pending').length,
+    reviewing: enrichedApplications.filter(app => app.status === 'reviewing').length,
+    accepted: enrichedApplications.filter(app => app.status === 'accepted').length,
+    rejected: enrichedApplications.filter(app => app.status === 'rejected').length,
   };
 
   const invalidateApplications = () => {
@@ -114,11 +203,14 @@ export const useApplicationsData = () => {
   };
 
   return {
-    applications,
+    applications: enrichedApplications,
     stats,
     isLoading,
     error,
     refetch,
     invalidateApplications,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   };
 };
