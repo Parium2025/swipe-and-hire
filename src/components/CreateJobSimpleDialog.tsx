@@ -408,18 +408,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             
                             {filteredTemplates.length === 0 && searchTerm && (
                               <div className="px-4 py-8 text-center">
-                                <p className="text-white/80 mb-2">
+                                <p className="text-white/80">
                                   Ingen mall hittades för <span className="text-white font-medium">({searchTerm})</span>
                                 </p>
-                                <Button
-                                  onClick={() => setSearchTerm('')}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-white/60 hover:text-white hover:bg-white/10"
-                                >
-                                  <X className="h-4 w-4 mr-2" />
-                                  Rensa sökning
-                                </Button>
                               </div>
                             )}
                           </div>
