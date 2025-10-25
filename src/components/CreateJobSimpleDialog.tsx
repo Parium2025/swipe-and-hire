@@ -198,12 +198,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
 
   const handleTemplateWizardBack = useCallback(() => {
     setShowTemplateWizard(false);
-    // Vänta 100ms på att wizarden ska stänga helt
+    // Snabbare timing för mer responsiv känsla
     setTimeout(() => {
       setOpen(true);
-      // Vänta ytterligare 180ms på att dialogen ska öppnas innan dropdown öppnas
-      setTimeout(() => setTemplateMenuOpen(true), 180);
-    }, 100);
+      // Lägg till bounce-effekt på dropdown
+      setTimeout(() => setTemplateMenuOpen(true), 150);
+    }, 80);
   }, []);
 
   return (
@@ -301,7 +301,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
-                          className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 animate-scale-in z-50"
+                          className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 duration-200 z-50"
                           style={{ 
                             WebkitOverflowScrolling: 'touch', 
                             overscrollBehaviorY: 'contain', 
