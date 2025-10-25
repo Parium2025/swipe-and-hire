@@ -20,10 +20,10 @@ export const StatsGrid = ({ stats }: StatsGridProps) => {
         <Card key={index} className="bg-white/5 backdrop-blur-sm border-white/20">
           <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4 min-w-0 min-h-[36px] md:min-h-[40px]">
             <stat.icon className="h-3 w-3 md:h-4 md:w-4 text-white" />
-            <CardTitle className="text-xs md:text-sm font-medium text-white min-w-0 flex-1">
+            <CardTitle className="text-xs md:text-sm font-medium text-white min-w-0 flex-1 overflow-hidden">
               <TruncatedText 
                 text={stat.title} 
-                className="whitespace-nowrap truncate block"
+                className="w-full block whitespace-nowrap truncate"
               />
             </CardTitle>
           </CardHeader>

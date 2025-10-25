@@ -16,9 +16,27 @@ export function TruncatedText({ text, className, children }: TruncatedTextProps)
   const [isTruncated, setIsTruncated] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [supportsHover, setSupportsHover] = useState(false);
 
   useEffect(() => {
     setIsTouch(typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0));
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && "matchMedia" in window) {
+      const mqHover = window.matchMedia("(hover: hover)");
+      const mqFine = window.matchMedia("(pointer: fine)");
+      const update = () => setSupportsHover(mqHover.matches || mqFine.matches);
+      update();
+      mqHover.addEventListener?.("change", update);
+      mqFine.addEventListener?.("change", update);
+      return () => {
+        mqHover.removeEventListener?.("change", update);
+        mqFine.removeEventListener?.("change", update);
+      };
+    } else {
+      setSupportsHover(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -63,7 +81,7 @@ export function TruncatedText({ text, className, children }: TruncatedTextProps)
   }, [text]);
 
   const handleTap = () => {
-    if (isTouch) setIsOpen((o) => !o);
+    if (!supportsHover && isTouch) setIsOpen((o) => !o);
   };
 
   if (!isTruncated) {
@@ -78,9 +96,9 @@ export function TruncatedText({ text, className, children }: TruncatedTextProps)
   // Text is truncated, wrap in tooltip
   return (
     <TooltipProvider delayDuration={200}>
-      <Tooltip open={isTouch ? isOpen : undefined} onOpenChange={isTouch ? setIsOpen : undefined}>
+      <Tooltip open={!supportsHover ? isOpen : undefined} onOpenChange={!supportsHover ? setIsOpen : undefined}>
         <TooltipTrigger asChild>
-          <span ref={textRef} className={className} onClick={isTouch ? handleTap : undefined}>
+          <span ref={textRef} className={className} onClick={!supportsHover && isTouch ? handleTap : undefined}>
             {children || text}
           </span>
         </TooltipTrigger>
