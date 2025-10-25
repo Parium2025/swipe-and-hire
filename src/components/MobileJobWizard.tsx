@@ -117,6 +117,7 @@ interface MobileJobWizardProps {
   jobTitle: string;
   selectedTemplate: JobTemplate | null;
   onJobCreated: (job: any) => void;
+  onBack?: () => void;
 }
 
 // Sortable Question Item Component
@@ -194,7 +195,8 @@ const MobileJobWizard = ({
   onOpenChange, 
   jobTitle, 
   selectedTemplate, 
-  onJobCreated 
+  onJobCreated,
+  onBack
 }: MobileJobWizardProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   
@@ -1433,7 +1435,13 @@ const MobileJobWizard = ({
       setCachedPostalCodeInfo(null);
       setInitialFormData(null);
       setHasUnsavedChanges(false);
-      onOpenChange(false);
+      // Om onBack finns, använd den för att gå tillbaka till mallvalet
+      // Annars stäng helt (default beteende)
+      if (onBack) {
+        onBack();
+      } else {
+        onOpenChange(false);
+      }
     }
   };
 

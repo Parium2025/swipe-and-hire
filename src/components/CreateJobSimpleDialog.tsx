@@ -184,6 +184,14 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     onJobCreated(job);
   }, [onJobCreated]);
 
+  const handleWizardBack = useCallback(() => {
+    setShowDetailDialog(false);
+    // Öppna mallvalssteget igen efter en kort delay
+    requestAnimationFrame(() => {
+      setOpen(true);
+    });
+  }, []);
+
   return (
     <>
       <Dialog open={open} onOpenChange={(isOpen) => {
@@ -481,6 +489,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         jobTitle={jobTitle}
         selectedTemplate={selectedTemplate}
         onJobCreated={handleJobCreated}
+        onBack={handleWizardBack}
       />
 
       <CreateTemplateWizard
