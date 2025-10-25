@@ -211,15 +211,10 @@ export function EmployerSidebar() {
 
   // Prefetch applications data on hover/focus for instant navigation
   const prefetchApplications = () => {
-    const cachedOrgId = typeof window !== 'undefined' 
-      ? localStorage.getItem('org_id') 
-      : null;
-    const orgId = profile?.organization_id ?? cachedOrgId;
-    
-    if (!orgId || !user) return;
+    if (!user) return;
 
     queryClient.prefetchQuery({
-      queryKey: ['applications', orgId],
+      queryKey: ['applications', user.id],
       queryFn: async () => {
         const { data, error } = await supabase
           .from('job_applications')
@@ -231,15 +226,13 @@ export function EmployerSidebar() {
             status,
             applied_at,
             updated_at,
-            job_postings!inner(
-              title,
-              organization_id
+            job_postings(
+              title
             ),
             profiles(
               profile_image_url
             )
           `)
-          .eq('job_postings.organization_id', orgId)
           .order('applied_at', { ascending: false });
 
         if (error) throw error;

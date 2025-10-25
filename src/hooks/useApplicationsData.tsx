@@ -28,25 +28,19 @@ export const useApplicationsData = () => {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
 
-  // Use cached orgId as fallback for faster initial query
-  const cachedOrgId = typeof window !== 'undefined' 
-    ? localStorage.getItem('org_id') 
-    : null;
-  
-  const effectiveOrgId = profile?.organization_id ?? cachedOrgId ?? null;
-  const profileLoading = user && !effectiveOrgId;
+  const CACHE_KEY = user ? `applications_cache_${user.id}` : null;
 
   const { data: applications = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['applications', effectiveOrgId],
+    queryKey: ['applications', user?.id],
     queryFn: async () => {
-      console.time('⏱️ Applications query');
+      console.time('⏱️ DB optimized Applications query');
       
-      if (!user || !effectiveOrgId) {
-        console.timeEnd('⏱️ Applications query');
+      if (!user) {
+        console.timeEnd('⏱️ DB optimized Applications query');
         return [];
       }
       
-      // Lighter payload - only fetch fields needed for list view
+      // RLS handles organization filtering - no need for explicit org filter
       const { data, error } = await supabase
         .from('job_applications')
         .select(`
@@ -57,31 +51,44 @@ export const useApplicationsData = () => {
           status,
           applied_at,
           updated_at,
-          job_postings!inner(
-            title,
-            organization_id
+          job_postings(
+            title
           ),
           profiles(
             profile_image_url
           )
         `)
-        .eq('job_postings.organization_id', effectiveOrgId)
         .order('applied_at', { ascending: false });
 
-      console.timeEnd('⏱️ Applications query');
+      console.timeEnd('⏱️ DB optimized Applications query');
 
       if (error) throw error;
 
       // Transform data to flatten the structure
-      return (data || []).map((app: any) => ({
+      const mapped = (data || []).map((app: any) => ({
         ...app,
         job_title: app.job_postings?.title,
         profile_image_url: app.profiles?.profile_image_url,
       })) as ApplicationData[];
+
+      // Cache for instant next load
+      try {
+        if (CACHE_KEY) sessionStorage.setItem(CACHE_KEY, JSON.stringify(mapped));
+      } catch {}
+
+      return mapped;
     },
-    enabled: !!user && !!effectiveOrgId,
+    enabled: !!user,
     staleTime: 2 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
+    initialData: () => {
+      try {
+        return CACHE_KEY ? JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null') : undefined;
+      } catch {
+        return undefined;
+      }
+    },
+    initialDataUpdatedAt: Date.now() - 30 * 1000,
   });
 
   const stats = {
@@ -99,7 +106,7 @@ export const useApplicationsData = () => {
   return {
     applications,
     stats,
-    isLoading: isLoading || profileLoading,
+    isLoading,
     error,
     refetch,
     invalidateApplications,
