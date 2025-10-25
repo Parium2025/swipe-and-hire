@@ -325,7 +325,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           {/* Result indicator */}
                           {searchTerm && (
                             <div className="px-4 py-2 text-sm text-white/90 bg-slate-800/50 border-b border-slate-600/20">
-                              Visar {filteredTemplates.length} av {templates.length} mallar
+                              Visar <span className="text-white font-medium">{filteredTemplates.length}</span> av <span className="text-white font-medium">{templates.length}</span> mallar
                             </div>
                           )}
 
@@ -408,8 +408,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             
                             {filteredTemplates.length === 0 && searchTerm && (
                               <div className="px-4 py-8 text-center">
-                                <p className="text-white/80">
-                                  Ingen mall hittades för <span className="text-white font-medium">({searchTerm})</span>
+                                <p className="text-white font-medium">
+                                  Ingen mall hittades för ({searchTerm})
                                 </p>
                               </div>
                             )}
