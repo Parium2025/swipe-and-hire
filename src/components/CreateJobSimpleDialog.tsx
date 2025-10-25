@@ -279,14 +279,14 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
-                          className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[60vh] sm:max-h-[70vh] overflow-hidden flex flex-col touch-pan-y pt-0 pb-0 animate-scale-in"
+                          className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[50vh] overflow-hidden flex flex-col touch-pan-y pt-0 pb-0 animate-scale-in"
                           style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorY: 'contain' }}
-                          side="top"
+                          side="bottom"
                           align="center"
                           alignOffset={0}
                           sideOffset={8}
                           avoidCollisions={true}
-                          collisionPadding={8}
+                          collisionPadding={16}
                           onCloseAutoFocus={(e) => e.preventDefault()}
                           onWheel={(e) => e.stopPropagation()}
                           onTouchMoveCapture={(e) => e.stopPropagation()}
