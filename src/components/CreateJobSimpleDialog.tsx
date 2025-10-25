@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -57,17 +57,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const titleRef = useRef<HTMLTextAreaElement | null>(null);
-  const adjustTitleHeight = useCallback((el?: HTMLTextAreaElement | null) => {
-    const node = el ?? titleRef.current;
-    if (!node) return;
-    node.style.height = 'auto';
-    node.style.height = node.scrollHeight + 'px';
-  }, []);
-
-  useEffect(() => {
-    adjustTitleHeight();
-  }, [jobTitle, open, adjustTitleHeight]);
 
   const fetchTemplates = useCallback(async () => {
     if (!user) return;
@@ -233,14 +222,13 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 <Label htmlFor="job-title" className="text-white">Titel</Label>
                 <Textarea
                   id="job-title"
-                  ref={titleRef}
                   value={jobTitle}
-                onChange={(e) => {
-                  setJobTitle(e.target.value);
-                  setHasUnsavedChanges(true);
-                }}
+                  onChange={(e) => {
+                    setJobTitle(e.target.value);
+                    setHasUnsavedChanges(true);
+                  }}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 text-sm resize-none h-[44px] leading-[28px] py-2 overflow-hidden"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 text-sm resize-none h-[44px] !min-h-[44px] md:!min-h-[44px] leading-[28px] py-2 overflow-y-auto"
                   autoComplete="off"
                   title={jobTitle}
                   rows={1}
