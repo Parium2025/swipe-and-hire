@@ -843,48 +843,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   // Automatisk utloggning efter inaktivitet (5 minuter, eller 30 minuter om "Håll mig inloggad")
+  // Auto-logout efter 16 timmars inaktivitet (per enhet)
   useEffect(() => {
     if (!user) return; // Bara aktiv när användaren är inloggad
 
-    // Kolla om användaren valt "Håll mig inloggad"
-    const rememberMe = localStorage.getItem('parium-remember-me') === 'true';
-    const INACTIVITY_TIMEOUT = rememberMe ? 30 * 60 * 1000 : 5 * 60 * 1000; // 30 min eller 5 min
-    const WARNING_TIME = INACTIVITY_TIMEOUT - 30 * 1000; // 30 sekunder innan timeout
+    const INACTIVITY_TIMEOUT = 16 * 60 * 60 * 1000; // 16 timmar i millisekunder
     
     let timeoutId: NodeJS.Timeout;
-    let warningTimeoutId: NodeJS.Timeout;
-    let lastActivityTime = Date.now();
 
     const resetTimer = () => {
-      lastActivityTime = Date.now();
-      
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
-      if (warningTimeoutId) {
-        clearTimeout(warningTimeoutId);
-      }
 
-      // Varning 30 sekunder innan utloggning
-      warningTimeoutId = setTimeout(() => {
-        toast({
-          title: 'Session går snart ut',
-          description: 'Du kommer loggas ut om 30 sekunder på grund av inaktivitet',
-          duration: 30000,
-          action: (
-            <button 
-              onClick={resetTimer}
-              className="px-3 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-            >
-              Stanna inloggad
-            </button>
-          )
-        });
-      }, WARNING_TIME);
-
-      // Faktisk utloggning
+      // Automatisk utloggning efter 16 timmar
       timeoutId = setTimeout(() => {
-        console.log('🔒 Automatisk utloggning efter inaktivitet');
+        console.log('🔒 Automatisk utloggning efter 16 timmars inaktivitet');
         toast({
           title: 'Session utgången',
           description: 'Du har loggats ut efter inaktivitet',
@@ -919,9 +893,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
-      if (warningTimeoutId) {
-        clearTimeout(warningTimeoutId);
-      }
       if (throttleTimeout) {
         clearTimeout(throttleTimeout);
       }
@@ -930,28 +901,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     };
   }, [user, toast, signOut]); // Beroenden: user, toast, signOut
-
-  // Auto-logout när tab/browser stängs (om "Håll mig inloggad" inte är ikryssad)
-  useEffect(() => {
-    if (!user) return;
-
-    const handleBeforeUnload = () => {
-      const rememberMe = localStorage.getItem('parium-remember-me') === 'true';
-      
-      if (!rememberMe) {
-        // Logga ut användaren när fliken/browsern stängs
-        console.log('🔒 Loggar ut användare vid stängning av flik/browser');
-        // Synkron signOut via Supabase API
-        supabase.auth.signOut();
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [user]);
 
   const value = {
     user,
