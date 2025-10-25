@@ -151,7 +151,7 @@ const Dashboard = memo(() => {
             placeholder="Sök efter titel, plats, anställningstyp, rekryterare..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="pl-10 bg-white/5 backdrop-blur-sm border-white/20 text-white placeholder:text-white/60"
+            className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/60"
           />
         </div>
         
