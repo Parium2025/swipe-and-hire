@@ -732,22 +732,23 @@ const AuthMobile = ({
                       </div>
                       
                       {/* Håll mig inloggad checkbox */}
-                      <div className="flex items-center space-x-2 mb-4">
+                      <label htmlFor="rememberMe" className="mb-4 inline-flex items-center gap-2 cursor-pointer select-none group">
                         <input
-                          type="checkbox"
                           id="rememberMe"
+                          type="checkbox"
                           checked={rememberMe}
                           onChange={(e) => {
                             const checked = e.target.checked;
                             setRememberMe(checked);
                             localStorage.setItem('parium-remember-me', checked.toString());
                           }}
-                          className="w-4 h-4 rounded border-2 border-white/60 bg-transparent data-[state=checked]:bg-white/10 data-[state=checked]:border-white data-[state=checked]:text-white focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-0 transition-all cursor-pointer"
+                          className="sr-only peer"
                         />
-                        <label htmlFor="rememberMe" className="text-sm text-white cursor-pointer select-none">
-                          Håll mig inloggad
-                        </label>
-                      </div>
+                        <span className="h-4 w-4 rounded border-2 border-white/60 bg-transparent grid place-items-center transition-all peer-checked:bg-white/10 peer-checked:border-white group-hover:border-white/80">
+                          <Check className="h-3 w-3 text-white opacity-0 transition-opacity peer-checked:opacity-100" strokeWidth={3} />
+                        </span>
+                        <span className="text-sm text-white">Håll mig inloggad</span>
+                      </label>
                       
                        <Button type="submit" className="w-full bg-parium-navy hover:bg-parium-navy/90 text-white min-h-[44px]" disabled={loading}>
                          {loading ? "Loggar in..." : "Logga in"}
