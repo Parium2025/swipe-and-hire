@@ -60,8 +60,8 @@ export function CandidatesTable({
             />
           </svg>
         </div>
-        <h3 className="text-lg font-semibold text-foreground mb-2">Inga kandidater än</h3>
-        <p className="text-muted-foreground max-w-sm">
+        <h3 className="text-lg font-semibold text-white mb-2">Inga kandidater än</h3>
+        <p className="text-white max-w-sm">
           När någon söker till dina jobbannonser kommer deras ansökningar att visas här.
         </p>
       </div>
