@@ -272,14 +272,11 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
-                          className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-scroll flex flex-col pt-0 pb-0 animate-scale-in"
+                          className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 animate-scale-in"
                           style={{ 
                             WebkitOverflowScrolling: 'touch', 
                             overscrollBehaviorY: 'contain', 
-                            touchAction: 'pan-y',
-                            overflowY: 'scroll',
-                            msOverflowStyle: 'auto',
-                            scrollbarWidth: 'thin'
+                            touchAction: 'pan-y'
                           }}
                           side="bottom"
                           align="center"
