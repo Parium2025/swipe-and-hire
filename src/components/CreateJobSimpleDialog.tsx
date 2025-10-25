@@ -179,7 +179,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
 
   return (
     <>
-      <Dialog open={open} onOpenChange={(isOpen) => {
+      <Dialog modal={false} open={open} onOpenChange={(isOpen) => {
         setOpen(isOpen);
         if (!isOpen) {
           setJobTitle('');
@@ -280,6 +280,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           sideOffset={8}
                           avoidCollisions={true}
                           collisionPadding={16}
+                          onWheel={(e) => e.stopPropagation()}
                           onCloseAutoFocus={(e) => e.preventDefault()}
                         >
                           <div className="p-3 border-b border-slate-600/30 sticky top-0 bg-slate-800/95 backdrop-blur-md z-10">
