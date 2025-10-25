@@ -196,6 +196,14 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     });
   }, []);
 
+  const handleTemplateWizardBack = useCallback(() => {
+    setShowTemplateWizard(false);
+    requestAnimationFrame(() => {
+      setOpen(true);
+      setTimeout(() => setTemplateMenuOpen(true), 60);
+    });
+  }, []);
+
   return (
     <>
       <Dialog open={open} onOpenChange={(isOpen) => {
@@ -291,7 +299,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
-                          className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 animate-scale-in"
+                          className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 animate-scale-in z-50"
                           style={{ 
                             WebkitOverflowScrolling: 'touch', 
                             overscrollBehaviorY: 'contain', 
@@ -513,6 +521,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
             description: templateToEdit ? "Din mall har uppdaterats." : "Din nya mall är nu tillgänglig."
           });
         }}
+        onBack={handleTemplateWizardBack}
       />
 
       <AlertDialog open={!!templateToDelete} onOpenChange={(open) => !open && setTemplateToDelete(null)}>

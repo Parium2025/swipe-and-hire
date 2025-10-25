@@ -76,6 +76,7 @@ interface CreateTemplateWizardProps {
   onOpenChange: (open: boolean) => void;
   onTemplateCreated: () => void;
   templateToEdit?: any;
+  onBack?: () => void;
 }
 
 // Sortable Question Item Component
@@ -149,7 +150,7 @@ const SortableQuestionItem = ({
   );
 };
 
-const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateToEdit }: CreateTemplateWizardProps) => {
+const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateToEdit, onBack }: CreateTemplateWizardProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
@@ -640,7 +641,11 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
     setCustomQuestions([]);
     setHasUnsavedChanges(false);
     setShowUnsavedDialog(false);
-    onOpenChange(false);
+    if (onBack) {
+      onBack();
+    } else {
+      onOpenChange(false);
+    }
   };
 
   const handleSubmit = async () => {
