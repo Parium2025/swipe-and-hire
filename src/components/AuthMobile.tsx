@@ -744,8 +744,8 @@ const AuthMobile = ({
                           }}
                           className="sr-only peer"
                         />
-                        <span className="h-4 w-4 rounded border-2 border-white/60 bg-transparent grid place-items-center transition-all peer-checked:bg-white/10 peer-checked:border-white group-hover:border-white/80">
-                          <Check className="h-4 w-4 text-white scale-0 transition-transform duration-200 peer-checked:scale-100" strokeWidth={4} stroke="white" />
+                        <span className="relative h-4 w-4 rounded border-2 border-white/60 bg-transparent grid place-items-center transition-all peer-checked:bg-white/10 peer-checked:border-white group-hover:border-white/80 peer-checked:[&>svg]:opacity-100 peer-checked:[&>svg]:scale-100">
+                          <Check className="h-4 w-4 text-white opacity-0 scale-75 transition-all duration-200 pointer-events-none" strokeWidth={4} stroke="white" />
                         </span>
                         <span className="text-sm text-white">Håll mig inloggad</span>
                       </label>
