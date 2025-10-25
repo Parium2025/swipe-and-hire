@@ -6,9 +6,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
+import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users, Search, ArrowUpDown } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { expandSearchTerms } from '@/lib/smartSearch';
 import EditJobDialog from '@/components/EditJobDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
@@ -48,17 +56,76 @@ const EmployerDashboard = memo(() => {
   const { user, profile } = useAuth();
   const { toast } = useToast();
   
+  // Search and sort state
+  const [searchInput, setSearchInput] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'title-asc' | 'title-desc'>('newest');
+  
   // Pagination state for mobile
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const listTopRef = useRef<HTMLDivElement>(null);
   const didMountRef = useRef(false);
   
-  const totalPages = Math.max(1, Math.ceil(jobs.length / pageSize));
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchTerm(searchInput);
+      setPage(1); // Reset to first page when searching
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+  
+  // Filter and sort jobs
+  const filteredAndSortedJobs = useMemo(() => {
+    let result = [...jobs];
+    
+    // Filter based on search term
+    if (searchTerm.trim()) {
+      const expandedTerms = expandSearchTerms(searchTerm);
+      result = result.filter(job => {
+        const searchableText = [
+          job.title,
+          job.location,
+          job.employment_type,
+          job.description,
+          job.workplace_city
+        ].filter(Boolean).join(' ').toLowerCase();
+        
+        return expandedTerms.some(term => 
+          searchableText.includes(term.toLowerCase())
+        );
+      });
+    }
+    
+    // Sort
+    switch (sortBy) {
+      case 'oldest':
+        return result.sort((a, b) => 
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+      case 'title-asc':
+        return result.sort((a, b) => 
+          a.title.localeCompare(b.title, 'sv')
+        );
+      case 'title-desc':
+        return result.sort((a, b) => 
+          b.title.localeCompare(a.title, 'sv')
+        );
+      case 'newest':
+      default:
+        return result.sort((a, b) => 
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+    }
+  }, [jobs, searchTerm, sortBy]);
+  
+  const totalPages = Math.max(1, Math.ceil(filteredAndSortedJobs.length / pageSize));
   const pageJobs = useMemo(() => {
     const start = (page - 1) * pageSize;
-    return jobs.slice(start, start + pageSize);
-  }, [jobs, page]);
+    return filteredAndSortedJobs.slice(start, start + pageSize);
+  }, [filteredAndSortedJobs, page]);
   
   // Scroll to top when page changes (but not on initial mount)
   useEffect(() => {
@@ -215,6 +282,84 @@ const EmployerDashboard = memo(() => {
         </Card>
       </div>
 
+      {/* Search and Sort */}
+      <Card className="bg-white/5 backdrop-blur-sm border-white/20">
+        <CardContent className="p-3 md:p-4">
+          <div className="flex flex-col md:flex-row gap-2">
+            {/* Search field */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60" />
+              <Input
+                type="text"
+                placeholder="Sök efter titel, plats, anställningstyp..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/40 focus-visible:ring-white/40"
+              />
+            </div>
+            
+            {/* Sort dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="w-full md:w-auto md:min-w-[180px] bg-white/10 border-white/20 text-white hover:bg-white/20"
+                >
+                  <ArrowUpDown className="mr-2 h-4 w-4" />
+                  {sortBy === 'newest' && 'Nyast först'}
+                  {sortBy === 'oldest' && 'Äldst först'}
+                  {sortBy === 'title-asc' && 'Titel A-Ö'}
+                  {sortBy === 'title-desc' && 'Titel Ö-A'}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent 
+                align="end" 
+                className="bg-card/95 backdrop-blur-sm border-white/20 text-white z-50"
+                sideOffset={5}
+              >
+                <DropdownMenuItem 
+                  onClick={() => setSortBy('newest')}
+                  className="cursor-pointer hover:bg-white/10"
+                >
+                  Nyast först
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setSortBy('oldest')}
+                  className="cursor-pointer hover:bg-white/10"
+                >
+                  Äldst först
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setSortBy('title-asc')}
+                  className="cursor-pointer hover:bg-white/10"
+                >
+                  Titel A-Ö
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setSortBy('title-desc')}
+                  className="cursor-pointer hover:bg-white/10"
+                >
+                  Titel Ö-A
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          
+          {/* Result indicator */}
+          {searchTerm.trim() && (
+            <div className="mt-2 text-xs text-white/60">
+              {filteredAndSortedJobs.length === 0 ? (
+                <span className="text-white/80">Inga annonser matchar din sökning</span>
+              ) : (
+                <span>
+                  Visar {filteredAndSortedJobs.length} av {jobs.length} annonser
+                </span>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Jobs Table */}
       <Card className="bg-white/5 backdrop-blur-sm border-white/20">
         <CardHeader className="hidden md:block md:p-4">
@@ -246,14 +391,14 @@ const EmployerDashboard = memo(() => {
                         Laddar...
                       </TableCell>
                     </TableRow>
-                  ) : jobs.length === 0 ? (
+                  ) : filteredAndSortedJobs.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={8} className="text-center !text-white py-8 font-medium text-sm">
-                        Inga jobbannonser än. Skapa din första annons!
+                        {searchTerm.trim() ? 'Inga annonser matchar din sökning' : 'Inga jobbannonser än. Skapa din första annons!'}
                       </TableCell>
                     </TableRow>
                   ) : (
-                    jobs.map((job) => (
+                    filteredAndSortedJobs.map((job) => (
                       <TableRow 
                         key={job.id}
                         className="border-white/10 hover:bg-white/5 cursor-pointer transition-colors"
@@ -346,9 +491,9 @@ const EmployerDashboard = memo(() => {
               <div className="text-center text-white/60 py-8 text-sm">
                 Laddar...
               </div>
-            ) : jobs.length === 0 ? (
+            ) : filteredAndSortedJobs.length === 0 ? (
               <div className="text-center text-white py-8 font-medium text-sm">
-                Inga jobbannonser än. Skapa din första annons!
+                {searchTerm.trim() ? 'Inga annonser matchar din sökning' : 'Inga jobbannonser än. Skapa din första annons!'}
               </div>
             ) : (
               <>
