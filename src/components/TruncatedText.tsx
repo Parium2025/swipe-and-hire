@@ -14,42 +14,57 @@ interface TruncatedTextProps {
 export function TruncatedText({ text, className, children }: TruncatedTextProps) {
   const textRef = useRef<HTMLSpanElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
+  const [isTouch, setIsTouch] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    setIsTouch(typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0));
+  }, []);
 
   useEffect(() => {
     const checkTruncation = () => {
       const element = textRef.current;
       if (!element) return;
 
-      // Check if text is truncated by comparing scrollHeight with clientHeight
-      // or scrollWidth with clientWidth
-      const truncated = 
-        element.scrollHeight > element.clientHeight + 2 ||
-        element.scrollWidth > element.clientWidth + 2;
-      
+      // More robust truncation detection using integer comparisons
+      const truncated =
+        Math.ceil(element.scrollHeight) > Math.ceil(element.clientHeight) ||
+        Math.ceil(element.scrollWidth) > Math.ceil(element.clientWidth);
+
       setIsTruncated(truncated);
     };
 
-    // Check truncation after a short delay to ensure rendering is complete
+    // Schedule checks to ensure layout/fonts are ready
+    const raf = requestAnimationFrame(checkTruncation);
     const timeouts = [
       setTimeout(checkTruncation, 50),
       setTimeout(checkTruncation, 150),
-      setTimeout(checkTruncation, 300)
+      setTimeout(checkTruncation, 300),
     ];
 
-    // Also check on resize
+    // Ensure after fonts load
+    // @ts-ignore - document.fonts not in all TS lib targets
+    document.fonts?.ready?.then(() => setTimeout(checkTruncation, 0));
+
+    // Also check on resize of the element
     const resizeObserver = new ResizeObserver(() => {
       setTimeout(checkTruncation, 50);
     });
-    
+
     if (textRef.current) {
       resizeObserver.observe(textRef.current);
     }
 
     return () => {
+      cancelAnimationFrame(raf);
       timeouts.forEach(clearTimeout);
       resizeObserver.disconnect();
     };
   }, [text]);
+
+  const handleTap = () => {
+    if (isTouch) setIsOpen((o) => !o);
+  };
 
   if (!isTruncated) {
     // No truncation, just render the text normally
@@ -63,14 +78,14 @@ export function TruncatedText({ text, className, children }: TruncatedTextProps)
   // Text is truncated, wrap in tooltip
   return (
     <TooltipProvider delayDuration={200}>
-      <Tooltip>
+      <Tooltip open={isTouch ? isOpen : undefined} onOpenChange={isTouch ? setIsOpen : undefined}>
         <TooltipTrigger asChild>
-          <span ref={textRef} className={className}>
+          <span ref={textRef} className={className} onClick={isTouch ? handleTap : undefined}>
             {children || text}
           </span>
         </TooltipTrigger>
-        <TooltipContent 
-          side="top" 
+        <TooltipContent
+          side="top"
           className="max-w-md bg-white text-gray-900 border-gray-200 shadow-xl z-50"
         >
           <p className="text-sm leading-relaxed break-words">{text}</p>
