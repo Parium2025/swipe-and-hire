@@ -2,7 +2,6 @@ import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
-import { CandidateFilters } from '@/types/candidateFilters';
 
 export interface ApplicationData {
   id: string;
@@ -70,7 +69,7 @@ const writeSnapshot = (userId: string, items: ApplicationData[]) => {
   }
 };
 
-export const useApplicationsData = (filters?: CandidateFilters) => {
+export const useApplicationsData = (searchQuery: string = '', statusFilter: string = 'all') => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [jobTitles, setJobTitles] = useState<Record<string, string>>({});
@@ -84,7 +83,7 @@ export const useApplicationsData = (filters?: CandidateFilters) => {
     isFetchingNextPage,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ['applications', user?.id, filters],
+    queryKey: ['applications', user?.id, searchQuery, statusFilter],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       console.time(`⏱️ Applications page ${pageParam}`);
@@ -97,7 +96,7 @@ export const useApplicationsData = (filters?: CandidateFilters) => {
       const from = pageParam * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
       
-      // Build query with filters
+      // Build query with job title included via join
       let query = supabase
         .from('job_applications')
         .select(`
@@ -109,38 +108,23 @@ export const useApplicationsData = (filters?: CandidateFilters) => {
           email,
           phone,
           location,
+          bio,
           status,
           applied_at,
-          updated_at
+          updated_at,
+          job_postings!inner(title)
         `);
 
-      // Apply filters if provided
-      if (filters) {
-        // Status filter
-        if (filters.status.length > 0) {
-          query = query.in('status', filters.status);
-        }
+      // Apply status filter
+      if (statusFilter !== 'all') {
+        query = query.eq('status', statusFilter);
+      }
 
-        // Job IDs filter
-        if (filters.jobIds.length > 0) {
-          query = query.in('job_id', filters.jobIds);
-        }
-
-        // Phone search
-        if (filters.phone) {
-          query = query.ilike('phone', `%${filters.phone}%`);
-        }
-
-        // Location search
-        if (filters.location) {
-          query = query.ilike('location', `%${filters.location}%`);
-        }
-
-        // Global search (name, email)
-        if (filters.search) {
-          const searchTerm = filters.search.toLowerCase();
-          query = query.or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
-        }
+      // Apply powerful global search across all relevant fields including job title
+      if (searchQuery && searchQuery.trim()) {
+        const searchTerm = searchQuery.trim();
+        // Search across name, email, phone, location, bio, and job title
+        query = query.or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%,bio.ilike.%${searchTerm}%,job_postings.title.ilike.%${searchTerm}%`);
       }
 
       const { data: baseData, error: baseError } = await query
@@ -159,7 +143,13 @@ export const useApplicationsData = (filters?: CandidateFilters) => {
         return { items: [], hasMore: false };
       }
 
-      const items = baseData as ApplicationData[];
+      // Transform data to flatten job_postings
+      const items = baseData.map((item: any) => ({
+        ...item,
+        job_title: item.job_postings?.title || 'Okänt jobb',
+        job_postings: undefined, // Remove nested object
+      })) as ApplicationData[];
+      
       const hasMore = items.length === PAGE_SIZE;
 
       // Write snapshot on first page
@@ -192,7 +182,7 @@ export const useApplicationsData = (filters?: CandidateFilters) => {
   // Flatten all pages
   const applications = data?.pages.flatMap(page => page.items) || [];
 
-  // Enrich with job titles and filter by job metadata
+  // Enrich with additional job metadata if needed (kept for backwards compatibility)
   useEffect(() => {
     if (applications.length === 0) return;
 
@@ -201,13 +191,13 @@ export const useApplicationsData = (filters?: CandidateFilters) => {
     
     if (missingIds.length === 0) return;
 
-    console.time('⏱️ Enrichment: job titles');
+    console.time('⏱️ Enrichment: job metadata');
     supabase
       .from('job_postings')
-      .select('id, title, workplace_city, category, occupation, employment_type')
+      .select('id, title')
       .in('id', missingIds)
       .then(({ data: jobData }) => {
-        console.timeEnd('⏱️ Enrichment: job titles');
+        console.timeEnd('⏱️ Enrichment: job metadata');
         
         if (jobData) {
           const titleMap = Object.fromEntries(
@@ -218,21 +208,8 @@ export const useApplicationsData = (filters?: CandidateFilters) => {
       });
   }, [applications, jobTitles]);
 
-  // Merge titles into applications and apply client-side filters for job metadata
-  let enrichedApplications = applications.map(app => ({
-    ...app,
-    job_title: jobTitles[app.job_id] || 'Läser in...',
-  }));
-
-  // Apply job metadata filters client-side (cities, categories, occupations, employment types)
-  // This is necessary because these are on job_postings table
-  if (filters) {
-    enrichedApplications = enrichedApplications.filter(app => {
-      // We need to fetch job data to filter, but for now we'll do this differently
-      // For optimal performance, we should join in the main query
-      return true; // Placeholder - will be enhanced
-    });
-  }
+  // Applications already have job_title from the join
+  const enrichedApplications = applications;
 
   const stats = {
     total: enrichedApplications.length,

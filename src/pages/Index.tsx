@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import JobDetails from '@/pages/JobDetails';
 import JobTemplatesOverview from '@/components/JobTemplatesOverview';
@@ -33,20 +33,13 @@ import { ArrowRightLeft, Search } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { useApplicationsData } from '@/hooks/useApplicationsData';
 import { CandidatesTable } from '@/components/CandidatesTable';
-import { CandidatesAdvancedFilters } from '@/components/CandidatesAdvancedFilters';
-import { CandidateFilters, DEFAULT_FILTERS } from '@/types/candidateFilters';
+import { CandidatesFilters } from '@/components/CandidatesFilters';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const CandidatesContent = () => {
-  const [filters, setFilters] = useState<CandidateFilters>(DEFAULT_FILTERS);
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Merge search query into filters
-  const activeFilters = useMemo(() => ({
-    ...filters,
-    search: searchQuery,
-  }), [filters, searchQuery]);
+  const [selectedFilter, setSelectedFilter] = useState('all');
 
   const { 
     applications, 
@@ -57,7 +50,7 @@ const CandidatesContent = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage 
-  } = useApplicationsData(activeFilters);
+  } = useApplicationsData(searchQuery, selectedFilter);
 
   // Safety check to prevent null crash
   const safeApplications = applications || [];
@@ -67,10 +60,10 @@ const CandidatesContent = () => {
       {/* Filters Sidebar */}
       <aside className="hidden lg:block w-72 flex-shrink-0">
         <div className="sticky top-6">
-          <CandidatesAdvancedFilters
-            filters={filters}
-            onFiltersChange={setFilters}
+          <CandidatesFilters
             stats={stats}
+            selectedFilter={selectedFilter}
+            onFilterChange={setSelectedFilter}
           />
         </div>
       </aside>
@@ -94,7 +87,7 @@ const CandidatesContent = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
               <Input
                 type="text"
-                placeholder="Sök på namn, email eller tjänst..."
+                placeholder="Sök på namn, email, telefon, plats, jobb..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/60"
