@@ -15,6 +15,7 @@ import ProfilePreview from "./pages/ProfilePreview";
 import JobApplication from "./pages/JobApplication";
 import JobDetails from "./pages/JobDetails";
 import NotFound from "./pages/NotFound";
+import Candidates from "./pages/Candidates";
 // import MyJobs from "./pages/MyJobs";
 import { AuthProvider } from "@/hooks/useAuth";
 import { UnsavedChangesProvider } from "@/hooks/useUnsavedChanges";
@@ -67,6 +68,7 @@ const App = () => {
                   <Route path="/payment" element={<Index />} />
                   <Route path="/dashboard" element={<Index />} />
                   <Route path="/my-jobs" element={<Index />} />
+                  <Route path="/candidates" element={<Candidates />} />
                   <Route path="/job-details/:jobId" element={<Index />} />
                   <Route path="/company-profile" element={<Index />} />
                   <Route path="/reviews" element={<Index />} />
