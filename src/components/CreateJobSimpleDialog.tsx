@@ -294,14 +294,31 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                         >
                           <div className="p-3 border-b border-slate-600/30 sticky top-0 bg-slate-800/95 backdrop-blur-md z-10">
                             <div className="relative">
-                              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/80" />
                               <Input
+                                ref={(el) => {
+                                  if (el && templateMenuOpen) {
+                                    setTimeout(() => el.focus(), 0);
+                                  }
+                                }}
                                 placeholder="Sök mall..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-10 pr-4 h-10 bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-lg"
+                                onKeyDown={(e) => {
+                                  e.stopPropagation();
+                                }}
+                                className="pl-10 pr-10 h-10 bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-lg"
                                 autoComplete="off"
+                                autoFocus
                               />
+                              {searchTerm && (
+                                <button
+                                  onClick={() => setSearchTerm('')}
+                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white transition-colors"
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                              )}
                             </div>
                           </div>
 
@@ -311,6 +328,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                 setTemplateMenuOpen(false);
                                 setOpen(false);
                                 setShowTemplateWizard(true);
+                              }}
+                              onFocus={(e) => {
+                                const searchInput = e.currentTarget.closest('[role="menu"]')?.querySelector('input');
+                                if (searchInput && document.activeElement === searchInput) {
+                                  e.preventDefault();
+                                }
                               }}
                               className="px-4 py-3 text-white hover:bg-slate-700/80 focus:bg-slate-700/80 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20"
                             >
@@ -324,6 +347,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                               <DropdownMenuItem
                                 key={template.id}
                                 onSelect={(e) => e.preventDefault()}
+                                onFocus={(e) => {
+                                  const searchInput = e.currentTarget.closest('[role="menu"]')?.querySelector('input');
+                                  if (searchInput && document.activeElement === searchInput) {
+                                    e.preventDefault();
+                                  }
+                                }}
                                 className="px-4 py-3 text-white hover:bg-slate-700/80 focus:bg-slate-700/80 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20 last:border-b-0"
                               >
                                 <div className="flex items-center justify-between w-full gap-3">
@@ -371,8 +400,17 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             ))}
                             
                             {filteredTemplates.length === 0 && searchTerm && (
-                              <div className="px-4 py-6 text-center text-white/60">
-                                Ingen mall hittades
+                              <div className="px-4 py-8 text-center">
+                                <p className="text-white/80 mb-2">Ingen mall hittades för "{searchTerm}"</p>
+                                <Button
+                                  onClick={() => setSearchTerm('')}
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-white/60 hover:text-white hover:bg-white/10"
+                                >
+                                  <X className="h-4 w-4 mr-2" />
+                                  Rensa sökning
+                                </Button>
                               </div>
                             )}
                           </div>
