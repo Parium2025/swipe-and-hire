@@ -16,7 +16,6 @@ import MobileJobWizard from '@/components/MobileJobWizard';
 import CreateTemplateWizard from '@/components/CreateTemplateWizard';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import type { JobPosting } from '@/hooks/useJobsData';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface JobTemplate {
   id: string;
@@ -57,8 +56,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
-  const isMobile = useIsMobile();
-  const [showMobileTemplatePicker, setShowMobileTemplatePicker] = useState(false);
 
   const titleRef = useRef<HTMLTextAreaElement | null>(null);
   const adjustTitleHeight = useCallback((el?: HTMLTextAreaElement | null) => {
@@ -267,21 +264,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                   </div>
                 ) : (
                   <div className="flex items-start gap-2">
-                    {isMobile ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-all duration-150 justify-between mt-1 text-left h-auto min-h-9 py-2 whitespace-normal"
-                        title={selectedTemplate?.name || 'Ingen mall är vald'}
-                        onClick={() => setShowMobileTemplatePicker(true)}
-                      >
-                        <span className="text-left flex-1 px-1 text-sm whitespace-normal break-words pr-6">
-                          {selectedTemplate?.name || 'Ingen mall är vald'}
-                        </span>
-                        <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2 transition-transform duration-150" />
-                      </Button>
-                    ) : (
-                      <DropdownMenu modal={false} open={templateMenuOpen} onOpenChange={setTemplateMenuOpen}>
+                    <DropdownMenu modal={false} open={templateMenuOpen} onOpenChange={setTemplateMenuOpen}>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="outline"
@@ -395,7 +378,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           </div>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    )}
                     
                     {selectedTemplate && (
                       <Button
@@ -435,149 +417,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
               </div>
             </CardContent>
           </Card>
-          
-          {isMobile && showMobileTemplatePicker && (
-            <>
-              <div
-                className="fixed inset-0 z-[1000] bg-black/60 backdrop-blur-sm animate-in fade-in-0 duration-300"
-                onClick={() => setShowMobileTemplatePicker(false)}
-              />
-              <div
-                className="fixed inset-x-0 bottom-0 z-[1001] rounded-t-3xl bg-slate-800/98 backdrop-blur-xl border-t border-slate-600/40 text-white shadow-2xl animate-in slide-in-from-bottom-0 duration-300 ease-out"
-                role="dialog"
-                aria-modal="true"
-                aria-label="Välj jobbmall"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="mx-auto max-w-md">
-                  <div className="relative px-4 pt-5 pb-3">
-                    <div className="absolute left-1/2 top-2 h-1 w-16 -translate-x-1/2 rounded-full bg-white/40" />
-                    <div className="flex items-center justify-center mt-2">
-                      <span className="font-semibold text-lg">Välj mall</span>
-                    </div>
-                  </div>
-                  <div
-                    className="px-4 pb-[calc(env(safe-area-inset-bottom)+16px)] max-h-[75vh] overflow-y-auto touch-pan-y relative"
-                    style={{ 
-                      WebkitOverflowScrolling: 'touch', 
-                      overscrollBehaviorY: 'contain',
-                      scrollbarWidth: 'none',
-                      msOverflowStyle: 'none'
-                    }}
-                  >
-                    <style>{`
-                      .overflow-y-auto::-webkit-scrollbar {
-                        display: none;
-                      }
-                    `}</style>
-                    
-                    <div className="pb-3 sticky top-0 bg-slate-800/98 backdrop-blur-xl z-10 pt-1">
-                      <div className="relative">
-                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
-                        <Input
-                          placeholder="Sök mall..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="pl-11 pr-4 h-11 bg-white/8 border-white/25 text-white placeholder:text-white/50 focus:border-white/50 focus:ring-2 focus:ring-white/20 rounded-xl transition-all duration-150"
-                          autoComplete="off"
-                        />
-                      </div>
-                    </div>
-
-                    <Card 
-                      className="mb-2 bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 shadow-none cursor-pointer hover:from-blue-600/30 hover:to-purple-600/30 transition-all duration-150"
-                      onClick={() => {
-                        setShowMobileTemplatePicker(false);
-                        setOpen(false);
-                        setShowTemplateWizard(true);
-                      }}
-                    >
-                      <div className="p-3 flex items-center gap-3">
-                        <div className="flex items-center justify-center h-10 w-10 rounded-full bg-white/10">
-                          <Plus className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-white text-sm">Skapa en ny mall</span>
-                          <span className="text-xs text-white/70 mt-0.5">Skapa en återanvändbar jobbmall</span>
-                        </div>
-                      </div>
-                    </Card>
-
-                    <div className="space-y-2">
-                      {filteredTemplates.map((template) => (
-                        <Card 
-                          key={template.id}
-                          className="bg-transparent touch-border-white shadow-none cursor-pointer transition-colors hover:bg-white/5"
-                          onClick={() => {
-                            handleTemplateSelect(template.id, template.name);
-                            setShowMobileTemplatePicker(false);
-                          }}
-                        >
-                          <div className="p-3 space-y-2">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex-1 min-w-0">
-                                <h3 className="text-sm font-semibold text-white line-clamp-2 leading-tight">
-                                  {template.name}
-                                </h3>
-                              </div>
-                              {template.is_default && (
-                                <Badge className="text-xs bg-blue-500/20 text-blue-300 border-blue-500/30 flex-shrink-0">
-                                  Standard
-                                </Badge>
-                              )}
-                            </div>
-
-                            <div className="text-xs text-white/70 line-clamp-2">
-                              {template.title}
-                            </div>
-
-                            <div className="flex gap-2 pt-1">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setTemplateToEdit(template);
-                                  setShowMobileTemplatePicker(false);
-                                  setOpen(false);
-                                  setShowTemplateWizard(true);
-                                }}
-                                className="flex-1 h-11 bg-white/10 border-white/20 text-white hover:bg-white/20 text-sm"
-                              >
-                                <Pencil className="h-4 w-4 mr-2" />
-                                Redigera
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setTemplateToDelete(template);
-                                }}
-                                className="flex-1 h-11 bg-white/10 border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/40 text-sm"
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Ta bort
-                              </Button>
-                            </div>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-
-                    {filteredTemplates.length === 0 && searchTerm && (
-                      <div className="px-4 py-8 text-center">
-                        <div className="text-white/40 text-sm">Ingen mall hittades</div>
-                        <div className="text-white/30 text-xs mt-1">Försök med ett annat sökord</div>
-                      </div>
-                    )}
-                    
-                    <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-slate-800/98 to-transparent pointer-events-none" />
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
         </DialogContent>
       </Dialog>
 
