@@ -4,11 +4,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
+import { Eye, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
 import EditJobDialog from '@/components/EditJobDialog';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -170,103 +170,14 @@ const EmployerDashboard = memo(() => {
         <h1 className="text-xl md:text-2xl font-semibold text-white">Mina jobbannonser</h1>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 md:gap-2">
-        <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4 min-w-0 min-h-[36px] md:min-h-[40px]">
-            <Briefcase className="h-3 w-3 md:h-4 md:w-4 text-white" />
-            <CardTitle className="text-xs md:text-sm font-medium text-white whitespace-nowrap truncate">Totalt annonser</CardTitle>
-          </CardHeader>
-          <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
-            <div className="text-lg md:text-xl font-bold text-white transition-all duration-300">
-              {loading ? '...' : jobs.length}
-            </div>
-          </CardContent>
-        </Card>
+      <StatsGrid stats={statsCards} />
 
-        <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4 min-w-0 min-h-[36px] md:min-h-[40px]">
-            <TrendingUp className="h-3 w-3 md:h-4 md:w-4 text-white" />
-            <CardTitle className="text-xs md:text-sm font-medium text-white whitespace-nowrap truncate">Aktiva annonser</CardTitle>
-          </CardHeader>
-          <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
-            <div className="text-lg md:text-xl font-bold text-white transition-all duration-300">
-              {loading ? '...' : jobs.filter(job => job.is_active).length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4 min-w-0 min-h-[36px] md:min-h-[40px]">
-            <Eye className="h-3 w-3 md:h-4 md:w-4 text-white" />
-            <CardTitle className="text-xs md:text-sm font-medium text-white whitespace-nowrap truncate">Totala visningar</CardTitle>
-          </CardHeader>
-          <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
-            <div className="text-lg md:text-xl font-bold text-white transition-all duration-300">
-              {loading ? '...' : jobs.reduce((sum, job) => sum + job.views_count, 0)}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4 min-w-0 min-h-[36px] md:min-h-[40px]">
-            <Users className="h-3 w-3 md:h-4 md:w-4 text-white" />
-            <CardTitle className="text-xs md:text-sm font-medium text-white whitespace-nowrap truncate">Ansökningar</CardTitle>
-          </CardHeader>
-          <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
-            <div className="text-lg md:text-xl font-bold text-white transition-all duration-300">
-              {loading ? '...' : jobs.reduce((sum, job) => sum + job.applications_count, 0)}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Search and Sort */}
-      <div className="flex flex-col md:flex-row gap-2 mb-4">
-        {/* Search field */}
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white" />
-          <Input
-            placeholder="Sök efter titel, plats, anställningstyp..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/60"
-          />
-        </div>
-        
-        {/* Sort dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button 
-              variant="outline" 
-              className="w-full md:w-auto md:min-w-[180px] bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10"
-            >
-              <ArrowUpDown className="mr-2 h-4 w-4" />
-              {sortBy === 'newest' && 'Nyast först'}
-              {sortBy === 'oldest' && 'Äldst först'}
-              {sortBy === 'title-asc' && 'Titel A-Ö'}
-              {sortBy === 'title-desc' && 'Titel Ö-A'}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent 
-            align="end"
-            className="w-[200px]"
-          >
-            <DropdownMenuItem onClick={() => setSortBy('newest')}>
-              Nyast först
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setSortBy('oldest')}>
-              Äldst först
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setSortBy('title-asc')}>
-              Titel A-Ö
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setSortBy('title-desc')}>
-              Titel Ö-A
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      <JobSearchBar
+        searchInput={searchInput}
+        onSearchChange={setSearchInput}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+      />
 
       {/* Result indicator */}
       {searchTerm && (
