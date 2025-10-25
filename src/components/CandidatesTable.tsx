@@ -89,7 +89,7 @@ export function CandidatesTable({
               return (
                 <TableRow
                   key={application.id}
-                  className="border-white/10 hover:bg-white/5 cursor-pointer transition-colors"
+                  className="border-white/10 hover:bg-white/5 cursor-pointer transition-all duration-150 active:bg-white/10 active:scale-[0.99]"
                   onClick={() => handleRowClick(application)}
                 >
                   <TableCell>

@@ -813,3 +813,30 @@ All colors MUST be HSL.
   }
 }
 
+/* Mobile Scroll Optimization - Premium Touch Experience */
+@media (max-width: 768px) {
+  /* Apply to all elements for consistent mobile scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+  
+  /* Scroll containers with native momentum */
+  .scroll-container {
+    scroll-behavior: smooth;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevent body scroll bounce */
+  body {
+    overscroll-behavior-y: none;
+  }
+  
+  /* Improve touch interaction on all interactive elements */
+  button, a, [role="button"], [onclick] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+}
+

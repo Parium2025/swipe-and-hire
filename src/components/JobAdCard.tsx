@@ -70,21 +70,21 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
             <button
               aria-label="Nej tack"
               onClick={onNope}
-              className="w-7 h-7 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors"
+              className="w-7 h-7 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-all duration-150 active:scale-90 active:shadow-md"
             >
               <X className="h-3.5 w-3.5 text-white" />
             </button>
             <button
               aria-label="Spara jobb"
               onClick={onSave}
-              className="w-7 h-7 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors"
+              className="w-7 h-7 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-all duration-150 active:scale-90 active:shadow-md"
             >
               <Bookmark className="h-3.5 w-3.5 text-white" />
             </button>
             <button
               aria-label="Gilla jobbet"
               onClick={onLike}
-              className="w-7 h-7 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors"
+              className="w-7 h-7 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-all duration-150 active:scale-90 active:shadow-md"
             >
               <Heart className="h-3.5 w-3.5 text-white fill-white" />
             </button>

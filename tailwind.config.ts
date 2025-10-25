@@ -159,8 +159,23 @@ export default {
 					// Override default Tailwind bounce globally to our soft bounce
 					'bounce': 'soft-bounce 2s ease-in-out infinite',
 					'soft-bounce': 'soft-bounce 2s ease-in-out infinite'
-				}
+				},
+			minHeight: {
+				'touch': '44px', // Apple's minimum recommendation
+			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [
+		require("tailwindcss-animate"),
+		function({ addUtilities }: any) {
+			addUtilities({
+				'.touch-target': {
+					'@apply min-h-[44px] min-w-[44px]': {},
+				},
+				'.touch-feedback': {
+					'@apply active:scale-[0.97] active:brightness-95 transition-all duration-150': {},
+				},
+			})
+		}
+	],
 } satisfies Config;
