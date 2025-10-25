@@ -283,82 +283,64 @@ const EmployerDashboard = memo(() => {
       </div>
 
       {/* Search and Sort */}
-      <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-        <CardContent className="p-3 md:p-4">
-          <div className="flex flex-col md:flex-row gap-2">
-            {/* Search field */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60" />
-              <Input
-                type="text"
-                placeholder="Sök efter titel, plats, anställningstyp..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/40 focus-visible:ring-white/40"
-              />
-            </div>
-            
-            {/* Sort dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  className="w-full md:w-auto md:min-w-[180px] bg-white/10 border-white/20 text-white hover:bg-white/20"
-                >
-                  <ArrowUpDown className="mr-2 h-4 w-4" />
-                  {sortBy === 'newest' && 'Nyast först'}
-                  {sortBy === 'oldest' && 'Äldst först'}
-                  {sortBy === 'title-asc' && 'Titel A-Ö'}
-                  {sortBy === 'title-desc' && 'Titel Ö-A'}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent 
-                align="end" 
-                className="bg-card/95 backdrop-blur-sm border-white/20 text-white z-50"
-                sideOffset={5}
-              >
-                <DropdownMenuItem 
-                  onClick={() => setSortBy('newest')}
-                  className="cursor-pointer hover:bg-white/10"
-                >
-                  Nyast först
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => setSortBy('oldest')}
-                  className="cursor-pointer hover:bg-white/10"
-                >
-                  Äldst först
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => setSortBy('title-asc')}
-                  className="cursor-pointer hover:bg-white/10"
-                >
-                  Titel A-Ö
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => setSortBy('title-desc')}
-                  className="cursor-pointer hover:bg-white/10"
-                >
-                  Titel Ö-A
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          
-          {/* Result indicator */}
-          {searchTerm.trim() && (
-            <div className="mt-2 text-xs text-white/60">
-              {filteredAndSortedJobs.length === 0 ? (
-                <span className="text-white/80">Inga annonser matchar din sökning</span>
-              ) : (
-                <span>
-                  Visar {filteredAndSortedJobs.length} av {jobs.length} annonser
-                </span>
-              )}
-            </div>
+      <div className="flex flex-col md:flex-row gap-2 mb-4">
+        {/* Search field */}
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60" />
+          <Input
+            placeholder="Sök efter titel, plats, anställningstyp..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="pl-10 bg-white/5 backdrop-blur-sm border-white/20 text-white placeholder:text-white/60"
+          />
+        </div>
+        
+        {/* Sort dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="outline" 
+              className="w-full md:w-auto md:min-w-[180px] bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10"
+            >
+              <ArrowUpDown className="mr-2 h-4 w-4" />
+              {sortBy === 'newest' && 'Nyast först'}
+              {sortBy === 'oldest' && 'Äldst först'}
+              {sortBy === 'title-asc' && 'Titel A-Ö'}
+              {sortBy === 'title-desc' && 'Titel Ö-A'}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent 
+            align="end"
+            className="w-[200px]"
+          >
+            <DropdownMenuItem onClick={() => setSortBy('newest')}>
+              Nyast först
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSortBy('oldest')}>
+              Äldst först
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSortBy('title-asc')}>
+              Titel A-Ö
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSortBy('title-desc')}>
+              Titel Ö-A
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* Result indicator */}
+      {searchTerm && (
+        <div className="text-sm text-white/60 mb-4">
+          {filteredAndSortedJobs.length === 0 ? (
+            <span className="text-white/80">Inga annonser matchar din sökning</span>
+          ) : (
+            <span>
+              Visar {filteredAndSortedJobs.length} av {jobs.length} annonser
+            </span>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      )}
 
       {/* Jobs Table */}
       <Card className="bg-white/5 backdrop-blur-sm border-white/20">
