@@ -198,10 +198,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
 
   const handleTemplateWizardBack = useCallback(() => {
     setShowTemplateWizard(false);
-    requestAnimationFrame(() => {
+    // Vänta 100ms på att wizarden ska stänga helt
+    setTimeout(() => {
       setOpen(true);
-      setTimeout(() => setTemplateMenuOpen(true), 60);
-    });
+      // Vänta ytterligare 180ms på att dialogen ska öppnas innan dropdown öppnas
+      setTimeout(() => setTemplateMenuOpen(true), 180);
+    }, 100);
   }, []);
 
   return (
