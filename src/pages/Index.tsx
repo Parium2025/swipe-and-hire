@@ -156,10 +156,8 @@ const Index = () => {
     const role = (profile as any)?.role;
     if (location.pathname === '/') {
       if (role === 'employer') {
-        console.log('✅ Index: Redirecting employer to /dashboard');
         navigate('/dashboard', { replace: true });
       } else {
-        console.log('✅ Index: Redirecting job seeker to /search-jobs');
         navigate('/search-jobs', { replace: true });
       }
       setIsInitializing(false);
@@ -226,20 +224,6 @@ const Index = () => {
   // Check if user needs to complete onboarding
   const needsOnboarding = !profile?.onboarding_completed;
   
-  // Debug logging
-  console.log('=== ONBOARDING DEBUG ===');
-  console.log('User email:', user?.email);
-  console.log('User ID:', user?.id);
-  console.log('User role:', userRole?.role);
-  console.log('Profile object:', profile);
-  console.log('Profile onboarding_completed (raw):', profile?.onboarding_completed);
-  console.log('Profile onboarding_completed (type):', typeof profile?.onboarding_completed);
-  console.log('!profile?.onboarding_completed:', !profile?.onboarding_completed);
-  console.log('Needs onboarding:', needsOnboarding);
-  console.log('Should show WelcomeTunnel:', needsOnboarding && (profile as any)?.role === 'job_seeker');
-  console.log('Developer view:', developerView);
-  console.log('========================');
-  
   // Developer overrides for admin user
   if (user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') {
     if (developerView === 'welcome_tunnel') {
@@ -300,7 +284,6 @@ const Index = () => {
   const needsProfileSetup = !profile.bio && !profile.location && !profile.profile_image_url;
   const isAdminEmail = user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com';
   if (needsProfileSetup && role === 'employer' && !isAdminEmail) {
-    console.log('Showing ProfileSetup for employer');
     return <ProfileSetup />;
   }
 

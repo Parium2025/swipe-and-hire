@@ -112,12 +112,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (event, session) => {
         if (!mounted) return;
 
-        console.log('Auth state change:', event, session?.user?.id);
-        
         // Förbättrad felhantering för olika auth events
-        if (event === 'TOKEN_REFRESHED') {
-          console.log('✅ Token refreshed successfully');
-        } else if (event === 'SIGNED_OUT' && !session) {
+        if (event === 'SIGNED_OUT' && !session) {
           // Visa meddelande bara vid oväntad utloggning (token refresh error)
           setTimeout(() => {
             toast({
@@ -161,7 +157,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!mounted || sessionInitialized) return;
       sessionInitialized = true;
 
-      console.log('Initial session check:', session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
 
@@ -181,28 +176,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const fetchUserData = async (userId: string) => {
-    console.time('⏱️ Total fetchUserData');
     try {
-      console.time('⏱️ Profile fetch');
       // Fetch profile
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
         .maybeSingle();
-      console.timeEnd('⏱️ Profile fetch');
 
       if (profileError) {
         console.error('Error fetching profile:', profileError);
         // Don't auto-logout on profile errors, just set profile to null
         setProfile(null);
-        console.timeEnd('⏱️ Total fetchUserData');
         return;
       } else if (!profileData) {
-        console.log('Profile not found for user, creating empty profile state...');
         // Don't auto-logout, just set profile to null and let app handle it
         setProfile(null);
-        console.timeEnd('⏱️ Total fetchUserData');
         return;
       } else {
         // Convert JSONB interests to string array
@@ -229,8 +218,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Parallelize role and organization fetches
-      console.time('⏱️ Parallel role + org fetch');
-      
       const rolePromise = supabase
         .from('user_roles')
         .select('*')
@@ -252,8 +239,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         rolePromise,
         orgPromise
       ]);
-
-      console.timeEnd('⏱️ Parallel role + org fetch');
 
       const { data: roleData, error: roleError } = roleResult;
       
@@ -292,7 +277,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
-    console.timeEnd('⏱️ Total fetchUserData');
   };
 
   const signUp = async (email: string, password: string, userData: { 
@@ -310,8 +294,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     employee_count?: string;
   }) => {
     try {
-      console.log('Starting custom signup with Resend for:', email);
-      
       // Använd din befintliga custom-signup Edge Function som använder Resend
       const { data, error } = await supabase.functions.invoke('custom-signup', {
         body: {
@@ -321,12 +303,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       });
 
-      if (error) {
-        console.error('Custom signup error:', error);
-        throw error;
-      }
-
-      console.log('Custom signup result:', data);
+      if (error) throw error;
 
       if (data?.error || data?.success === false) {
         // Hantera befintlig användare med specifik flagga
@@ -620,15 +597,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user) return { error: 'No user logged in' };
 
     try {
-      console.log('Updating profile for user:', user.id);
-      console.log('Profile updates:', updates);
-      
       const { error } = await supabase
         .from('profiles')
         .update(updates)
         .eq('user_id', user.id);
-
-      console.log('Profile update result - error:', error);
 
       if (error) {
         console.error('Supabase profile update error:', error);
@@ -640,7 +612,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error };
       }
 
-      console.log('Profile update successful, fetching updated data...');
       // Refresh profile
       await fetchUserData(user.id);
       
@@ -659,19 +630,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resendConfirmation = async (email: string, userRole?: string) => {
     try {
-      console.log('Resending confirmation email via edge function for:', email);
-
       // Use our token-generating edge function to ensure the link works for both roles
       const { data, error } = await supabase.functions.invoke('resend-confirmation', {
         body: { email }
       });
 
-      if (error) {
-        console.error('Edge function resend error:', error);
-        throw error;
-      }
-
-      console.log('Confirmation email resent successfully via edge function');
+      if (error) throw error;
 
       toast({
         title: "Ny bekräftelselänk skickad!",
@@ -703,14 +667,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resetPassword = async (email: string) => {
     try {
-      console.log(`🔄 USING EDGE FUNCTION (final fix) för: ${email}`);
-      
       // Tillbaka till vår edge function - den kommer att fungera nu
       const { data, error } = await supabase.functions.invoke('send-reset-password', {
         body: { email }
       });
-      
-      console.log('📩 EDGE FUNCTION FINAL RESPONSE:', { data, error });
 
       if (error) {
         console.error('Reset password error:', error);
@@ -906,8 +866,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Automatisk utloggning efter inaktivitet
       timeoutId = setTimeout(() => {
-        const timeout = rememberMe ? '16 timmar' : '1 timme';
-        console.log(`🔒 Automatisk utloggning efter ${timeout} inaktivitet`);
         toast({
           title: 'Session utgången',
           description: 'Du har loggats ut efter inaktivitet',

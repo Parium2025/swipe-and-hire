@@ -24,7 +24,6 @@ const EmployerLayout = ({ children, developerView, onViewChange }: EmployerLayou
   useEffect(() => {
     if (!user) return;
 
-    console.time('⏱️ Prefetch applications');
     queryClient.prefetchInfiniteQuery({
       queryKey: ['applications', user.id],
       initialPageParam: 0,
@@ -44,8 +43,6 @@ const EmployerLayout = ({ children, developerView, onViewChange }: EmployerLayou
           `)
           .order('applied_at', { ascending: false })
           .range(0, 24);
-
-        console.timeEnd('⏱️ Prefetch applications');
 
         if (error) throw error;
         if (!data) return { items: [], hasMore: false };

@@ -86,10 +86,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
     queryKey: ['applications', user?.id, searchQuery],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
-      console.time(`⏱️ Applications page ${pageParam}`);
-      
       if (!user) {
-        console.timeEnd(`⏱️ Applications page ${pageParam}`);
         return { items: [], hasMore: false };
       }
       
@@ -126,15 +123,12 @@ export const useApplicationsData = (searchQuery: string = '') => {
         .order('applied_at', { ascending: false })
         .range(from, to);
 
-      console.timeEnd(`⏱️ Applications page ${pageParam}`);
-
       if (baseError) {
         console.error('❌ Applications query error:', baseError);
         throw baseError;
       }
 
       if (!baseData) {
-        console.warn('⚠️ Applications query returned null');
         return { items: [], hasMore: false };
       }
 
@@ -166,7 +160,6 @@ export const useApplicationsData = (searchQuery: string = '') => {
       const snapshot = readSnapshot(user.id);
       if (snapshot.length === 0) return undefined;
       
-      console.log('📸 Loaded snapshot:', snapshot.length, 'items');
       return {
         pages: [{ items: snapshot, hasMore: true }],
         pageParams: [0],
@@ -186,14 +179,11 @@ export const useApplicationsData = (searchQuery: string = '') => {
     
     if (missingIds.length === 0) return;
 
-    console.time('⏱️ Enrichment: job metadata');
     supabase
       .from('job_postings')
       .select('id, title')
       .in('id', missingIds)
       .then(({ data: jobData }) => {
-        console.timeEnd('⏱️ Enrichment: job metadata');
-        
         if (jobData) {
           const titleMap = Object.fromEntries(
             jobData.map(job => [job.id, job.title])

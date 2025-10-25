@@ -26,15 +26,16 @@ export interface JobPosting {
 }
 
 export const useJobsData = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: jobs = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['jobs', user?.id],
+    queryKey: ['jobs', profile?.organization_id, user?.id],
     queryFn: async () => {
       if (!user) return [];
       
-      const { data, error } = await supabase
+      // Build query with employer profile join
+      const query = supabase
         .from('job_postings')
         .select(`
           *,
@@ -43,15 +44,23 @@ export const useJobsData = () => {
             last_name
           )
         `)
-        .eq('employer_id', user.id)
         .order('created_at', { ascending: false });
 
+      // Prioritize organization_id, fallback to employer_id for legacy data
+      if (profile?.organization_id) {
+        query.eq('organization_id', profile.organization_id);
+      } else {
+        // Legacy fallback: show only own jobs if organization is missing
+        query.eq('employer_id', user.id);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     },
     enabled: !!user,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes (renamed from cacheTime)
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 
   const stats = {
@@ -62,7 +71,7 @@ export const useJobsData = () => {
   };
 
   const invalidateJobs = () => {
-    queryClient.invalidateQueries({ queryKey: ['jobs', user?.id] });
+    queryClient.invalidateQueries({ queryKey: ['jobs', profile?.organization_id] });
   };
 
   return {
