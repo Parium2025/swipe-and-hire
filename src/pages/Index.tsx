@@ -33,7 +33,6 @@ import { ArrowRightLeft, Search } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { useApplicationsData } from '@/hooks/useApplicationsData';
 import { CandidatesTable } from '@/components/CandidatesTable';
-import { CandidatesFilters } from '@/components/CandidatesFilters';
 import { Input } from '@/components/ui/input';
 
 const CandidatesContent = () => {
@@ -88,30 +87,21 @@ const CandidatesContent = () => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Filters Sidebar */}
-        <div className="lg:col-span-1">
-          <div className="sticky top-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6">
-            <CandidatesFilters
-              stats={stats}
-              selectedFilter={selectedFilter}
-              onFilterChange={setSelectedFilter}
-            />
-          </div>
+      {/* Candidates Table */}
+      {isLoading && applications.length === 0 ? (
+        <div className="flex items-center justify-center py-16">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
         </div>
-
-        {/* Candidates Table */}
-        <div className="lg:col-span-3">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-16">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-            </div>
-          ) : (
-            <CandidatesTable applications={filteredApplications} onUpdate={refetch} />
-          )}
+      ) : filteredApplications.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 bg-white/5 border border-white/10 rounded-lg">
+          <p className="text-white/60 text-center">
+            Inga kandidater än.<br />
+            När någon söker till dina jobb så kommer deras ansökning att visas här.
+          </p>
         </div>
-      </div>
+      ) : (
+        <CandidatesTable applications={filteredApplications} onUpdate={refetch} />
+      )}
     </div>
   );
 };
