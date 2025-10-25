@@ -66,10 +66,10 @@ const CandidatesContent = () => {
     <>
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-white mb-2">
+        <h1 className="text-xl md:text-2xl font-semibold text-white mb-2">
           Alla kandidater ({stats.total})
         </h1>
-        <p className="text-white/70">
+        <p className="text-white/60">
           Hantera och granska kandidater som sökt till dina jobbannonser
         </p>
       </div>
@@ -83,7 +83,7 @@ const CandidatesContent = () => {
             placeholder="Sök på namn, email eller tjänst..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/50"
+            className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/60"
           />
         </div>
       </div>
