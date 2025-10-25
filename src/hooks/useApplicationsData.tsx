@@ -28,6 +28,9 @@ export const useApplicationsData = () => {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
 
+  // Check if profile is still loading
+  const profileLoading = user && !profile;
+
   const { data: applications = [], isLoading, error, refetch } = useQuery({
     queryKey: ['applications', profile?.organization_id],
     queryFn: async () => {
@@ -77,7 +80,7 @@ export const useApplicationsData = () => {
   return {
     applications,
     stats,
-    isLoading,
+    isLoading: isLoading || profileLoading,
     error,
     refetch,
     invalidateApplications,
