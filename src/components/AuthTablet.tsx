@@ -671,8 +671,8 @@ const AuthTablet = ({
                           }}
                           className="sr-only peer"
                         />
-                        <span className="relative h-4 w-4 rounded border-2 border-white/60 bg-transparent grid place-items-center transition-all peer-checked:bg-white/10 peer-checked:border-white group-hover:border-white/80 peer-checked:[&>svg]:opacity-100 peer-checked:[&>svg]:scale-100">
-                          <Check className="h-4 w-4 text-white opacity-0 scale-75 transition-all duration-200 pointer-events-none" strokeWidth={4} stroke="white" />
+                        <span className="relative h-4 w-4 rounded border-2 border-white/60 bg-transparent flex items-center justify-center transition-all peer-checked:bg-white/10 peer-checked:border-white group-hover:border-white/80 peer-checked:[&>svg]:opacity-100 peer-checked:[&>svg]:scale-100">
+                          <Check className="absolute h-3 w-3 text-white opacity-0 scale-90 transition-all duration-200 pointer-events-none" strokeWidth={4} stroke="white" />
                         </span>
                         <span className="text-sm text-white">Håll mig inloggad</span>
                       </label>
