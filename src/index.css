@@ -840,3 +840,17 @@ All colors MUST be HSL.
   }
 }
 
+/* Reduce focus visibility on touch devices to prevent "frame locking" */
+@media (hover: none) and (pointer: coarse) {
+  *:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* Keep accessibility for keyboard users on desktop */
+  *:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline-offset: 2px;
+  }
+}
+

@@ -207,8 +207,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     // Snabbare timing för mer responsiv känsla
     setTimeout(() => {
       setOpen(true);
-      // Lägg till bounce-effekt på dropdown
-      setTimeout(() => setTemplateMenuOpen(true), 150);
+      // Ta bort auto-open av dropdown för att låta titel fyllas i korrekt
     }, 80);
   }, []);
 
@@ -238,6 +237,13 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
             if (document.activeElement instanceof HTMLElement) {
               document.activeElement.blur();
             }
+            // Force focus to body to prevent any lingering focus
+            setTimeout(() => {
+              if (document.body) {
+                document.body.focus();
+                document.body.blur();
+              }
+            }, 0);
           }}
         >
           <DialogHeader className="sr-only">
@@ -335,6 +341,13 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             if (document.activeElement instanceof HTMLElement) {
                               document.activeElement.blur();
                             }
+                            // Force focus to body to prevent any lingering focus
+                            setTimeout(() => {
+                              if (document.body) {
+                                document.body.focus();
+                                document.body.blur();
+                              }
+                            }, 0);
                           }}
                         >
                           <div className="p-3 border-b border-slate-600/30 sticky top-0 bg-slate-800/95 backdrop-blur-md z-10">

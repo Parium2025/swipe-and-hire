@@ -46,7 +46,18 @@ export const JobSearchBar = ({
       </div>
       
       {/* Sort menu */}
-      <DropdownMenu>
+      <DropdownMenu 
+        onOpenChange={(open) => {
+          if (!open) {
+            // När dropdown stängs, ta bort fokus
+            setTimeout(() => {
+              if (document.activeElement instanceof HTMLElement) {
+                document.activeElement.blur();
+              }
+            }, 0);
+          }
+        }}
+      >
         <DropdownMenuTrigger asChild>
           <Button 
             variant="outline" 
