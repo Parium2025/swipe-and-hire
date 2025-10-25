@@ -243,7 +243,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     target.style.height = target.scrollHeight + 'px';
                   }}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 text-sm resize-none min-h-[44px] leading-[28px] py-2 overflow-hidden"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 text-sm resize-none h-[44px] leading-[28px] py-2 overflow-hidden"
                   autoComplete="off"
                   title={jobTitle}
                   rows={1}
