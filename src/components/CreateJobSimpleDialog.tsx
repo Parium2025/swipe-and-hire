@@ -103,6 +103,13 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     }
   }, [user, open]);
 
+  // Återställ hasUnsavedChanges när formuläret är tomt/neutralt
+  useEffect(() => {
+    if (!jobTitle.trim() && !selectedTemplate) {
+      setHasUnsavedChanges(false);
+    }
+  }, [jobTitle, selectedTemplate]);
+
   const handleTemplateSelect = useCallback((templateId: string, templateName: string) => {
     if (templateId === 'none') {
       setSelectedTemplate(null);
@@ -423,9 +430,11 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => {
-                          setSelectedTemplate(null);
-                        }}
+                      onClick={() => {
+                        setSelectedTemplate(null);
+                        setJobTitle('');
+                        setHasUnsavedChanges(false);
+                      }}
                         className="mt-1 min-h-[44px] w-11 flex-shrink-0 text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150"
                         title="Ta bort vald mall"
                       >
