@@ -63,13 +63,13 @@ const CandidatesContent = () => {
   }, [applications, selectedFilter, searchQuery]);
 
   return (
-    <>
+    <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12">
       {/* Header */}
-      <div className="mb-6">
+      <div className="text-center">
         <h1 className="text-xl md:text-2xl font-semibold text-white mb-2">
           Alla kandidater ({stats.total})
         </h1>
-        <p className="text-white/60">
+        <p className="text-white">
           Hantera och granska kandidater som sökt till dina jobbannonser
         </p>
       </div>
@@ -77,7 +77,7 @@ const CandidatesContent = () => {
       {/* Search Bar */}
       <div className="mb-6">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
           <Input
             type="text"
             placeholder="Sök på namn, email eller tjänst..."
@@ -112,7 +112,7 @@ const CandidatesContent = () => {
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
