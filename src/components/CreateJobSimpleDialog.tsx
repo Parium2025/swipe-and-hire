@@ -57,8 +57,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const { user } = useAuth();
   const { toast } = useToast();
   const isNavigatingBack = useRef(false);
-  const isNavigatingToTemplateWizard = useRef(false);
-  const lastTemplateTitleRef = useRef<string>('');
 
 
   const fetchTemplates = useCallback(async () => {
@@ -88,7 +86,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       if (defaultTemplate && !jobTitle) {
         setSelectedTemplate(defaultTemplate as any);
         setJobTitle(defaultTemplate.title);
-        lastTemplateTitleRef.current = defaultTemplate.title;
       }
     } catch (error) {
       toast({
@@ -118,7 +115,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     if (templateId === 'none') {
       setSelectedTemplate(null);
       setTemplateMenuOpen(false);
-      lastTemplateTitleRef.current = '';
       return;
     }
     
@@ -126,7 +122,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     if (template) {
       setSelectedTemplate(template as any);
       setJobTitle(template.title);
-      lastTemplateTitleRef.current = template.title;
     }
     setTemplateMenuOpen(false);
   }, [templates]);
@@ -203,40 +198,22 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
 
   const handleTemplateWizardBack = useCallback(() => {
     setShowTemplateWizard(false);
-    
-    // Blur any focused element to prevent mobile scroll lock
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
-
-    const restoreTitle = lastTemplateTitleRef.current || selectedTemplate?.title || '';
-    
     // Snabbare timing för mer responsiv känsla
     setTimeout(() => {
       setOpen(true);
-      if (restoreTitle) {
-        // Sätt direkt och även i nästa frame som extra säkerhet
-        setJobTitle(restoreTitle);
-        requestAnimationFrame(() => setJobTitle(restoreTitle));
-      }
-      // Ta bort auto-open av dropdown för att låta titel fyllas i korrekt
+      // Lägg till bounce-effekt på dropdown
+      setTimeout(() => setTemplateMenuOpen(true), 150);
     }, 80);
-  }, [selectedTemplate]);
+  }, []);
 
   return (
     <>
       <Dialog open={open} onOpenChange={(isOpen) => {
         setOpen(isOpen);
         if (!isOpen) {
-          if (isNavigatingToTemplateWizard.current) {
-            // Do not reset when navigating to template wizard
-            isNavigatingToTemplateWizard.current = false;
-          } else {
-            setJobTitle('');
-            setSelectedTemplate(null);
-            setSearchTerm('');
-            lastTemplateTitleRef.current = '';
-          }
+          setJobTitle('');
+          setSelectedTemplate(null);
+          setSearchTerm('');
         }
       }}>
         <DialogTrigger asChild>
@@ -249,20 +226,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
           hideClose
           className="max-w-md bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[95vh] sm:max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl transition-all duration-200 ease-out animate-scale-in"
           onEscapeKeyDown={(e) => e.preventDefault()}
-          onCloseAutoFocus={(e) => {
-            e.preventDefault();
-            // Blur active element to prevent scroll lock on mobile
-            if (document.activeElement instanceof HTMLElement) {
-              document.activeElement.blur();
-            }
-            // Force focus to body to prevent any lingering focus
-            setTimeout(() => {
-              if (document.body) {
-                document.body.focus();
-                document.body.blur();
-              }
-            }, 0);
-          }}
         >
           <DialogHeader className="sr-only">
             <DialogTitle className="sr-only">Skapa jobb</DialogTitle>
@@ -353,20 +316,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           onWheel={(e) => e.stopPropagation()}
                           onTouchStart={(e) => e.stopPropagation()}
                           onTouchMove={(e) => e.stopPropagation()}
-                          onCloseAutoFocus={(e) => {
-                            e.preventDefault();
-                            // Blur active element to prevent scroll lock on mobile
-                            if (document.activeElement instanceof HTMLElement) {
-                              document.activeElement.blur();
-                            }
-                            // Force focus to body to prevent any lingering focus
-                            setTimeout(() => {
-                              if (document.body) {
-                                document.body.focus();
-                                document.body.blur();
-                              }
-                            }, 0);
-                          }}
+                          onCloseAutoFocus={(e) => e.preventDefault()}
                         >
                           <div className="p-3 border-b border-slate-600/30 sticky top-0 bg-slate-800/95 backdrop-blur-md z-10">
                             <div className="relative">
@@ -413,12 +363,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           <div className="bg-slate-800/95 flex-1 pb-2">
                             <DropdownMenuItem
                               onClick={() => {
-                                isNavigatingToTemplateWizard.current = true;
-                                if (jobTitle) {
-                                  lastTemplateTitleRef.current = jobTitle;
-                                } else if (selectedTemplate?.title) {
-                                  lastTemplateTitleRef.current = selectedTemplate.title;
-                                }
                                 setTemplateMenuOpen(false);
                                 setOpen(false);
                                 setShowTemplateWizard(true);
@@ -467,12 +411,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         setTemplateToEdit(template);
-                                        isNavigatingToTemplateWizard.current = true;
-                                        if (jobTitle) {
-                                          lastTemplateTitleRef.current = jobTitle;
-                                        } else if (template.title) {
-                                          lastTemplateTitleRef.current = template.title;
-                                        }
                                         setTemplateMenuOpen(false);
                                         setOpen(false);
                                         setShowTemplateWizard(true);
