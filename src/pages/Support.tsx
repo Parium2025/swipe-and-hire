@@ -161,7 +161,6 @@ const Support = () => {
     <div className="space-y-8 max-w-4xl mx-auto">
       <div className="text-center mb-6">
         <h1 className="text-xl md:text-2xl font-semibold text-white mb-1">Kundtjänst</h1>
-        <p className="text-sm text-white">Vi hjälper dig gärna med dina frågor och problem</p>
       </div>
 
       {/* Support Form */}

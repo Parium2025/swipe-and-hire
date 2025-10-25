@@ -51,7 +51,6 @@ const EmployerSettings = () => {
     <div className="space-y-8 max-w-4xl mx-auto">
       <div className="text-center mb-6">
         <h1 className="text-xl md:text-2xl font-semibold text-white mb-1">Inställningar</h1>
-        <p className="text-sm text-white">Hantera dina kontoinställningar och preferenser</p>
       </div>
 
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
