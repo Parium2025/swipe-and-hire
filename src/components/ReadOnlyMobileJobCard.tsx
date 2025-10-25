@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Eye, MessageCircle, MapPin, Calendar } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import type { JobPosting } from '@/hooks/useJobsData';
-import { TruncatedText } from '@/components/TruncatedText';
 
 interface ReadOnlyMobileJobCardProps {
   job: JobPosting;
@@ -27,10 +26,9 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
         {/* Titel */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <TruncatedText 
-              text={job.title}
-              className="text-sm font-semibold text-white line-clamp-2 leading-tight block"
-            />
+            <h3 className="text-sm font-semibold text-white line-clamp-2 leading-tight">
+              {job.title}
+            </h3>
             {job.employment_type && (
               <Badge 
                 variant="secondary" 
@@ -64,20 +62,25 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
           </div>
           <div className="flex items-center gap-1 flex-1 min-w-0">
             <MapPin className="h-4 w-4 flex-shrink-0" />
-            <TruncatedText 
-              text={job.location}
-              className="truncate"
-            />
+            <span className="truncate">{job.location}</span>
           </div>
         </div>
 
         {/* Rekryterare + Datum */}
-        <div className="flex items-center gap-1 text-xs text-white min-w-0">
-          <Calendar className="h-3 w-3 flex-shrink-0" />
-          <TruncatedText 
-            text={`${job.employer_profile?.first_name && job.employer_profile?.last_name ? `${job.employer_profile.first_name} ${job.employer_profile.last_name} • ` : ''}Skapad: ${new Date(job.created_at).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short', year: 'numeric' })}`}
-            className="truncate"
-          />
+        <div className="flex items-center gap-1 text-xs text-white">
+          <Calendar className="h-3 w-3" />
+          <span>
+            {job.employer_profile?.first_name && job.employer_profile?.last_name && (
+              <>
+                {job.employer_profile.first_name} {job.employer_profile.last_name} • {' '}
+              </>
+            )}
+            Skapad: {new Date(job.created_at).toLocaleDateString('sv-SE', { 
+              day: 'numeric', 
+              month: 'short',
+              year: 'numeric'
+            })}
+          </span>
         </div>
       </div>
     </Card>

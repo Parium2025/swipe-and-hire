@@ -14,13 +14,6 @@ interface TruncatedTextProps {
 export function TruncatedText({ text, className, children }: TruncatedTextProps) {
   const textRef = useRef<HTMLSpanElement>(null);
   const [isTruncated, setIsTruncated] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
-
-  // Detect touch device
-  useEffect(() => {
-    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
-  }, []);
 
   useEffect(() => {
     const checkTruncation = () => {
@@ -58,14 +51,6 @@ export function TruncatedText({ text, className, children }: TruncatedTextProps)
     };
   }, [text]);
 
-  // Handle tap on touch devices
-  const handleTouchTap = (e: React.MouseEvent) => {
-    if (isTouchDevice && isTruncated) {
-      e.preventDefault();
-      setIsOpen(!isOpen);
-    }
-  };
-
   if (!isTruncated) {
     // No truncation, just render the text normally
     return (
@@ -78,18 +63,9 @@ export function TruncatedText({ text, className, children }: TruncatedTextProps)
   // Text is truncated, wrap in tooltip
   return (
     <TooltipProvider delayDuration={200}>
-      <Tooltip 
-        open={isOpen} 
-        onOpenChange={setIsOpen}
-        disableHoverableContent={isTouchDevice}
-      >
+      <Tooltip>
         <TooltipTrigger asChild>
-          <span 
-            ref={textRef} 
-            className={className}
-            onClick={handleTouchTap}
-            style={{ cursor: isTruncated && isTouchDevice ? 'pointer' : undefined }}
-          >
+          <span ref={textRef} className={className}>
             {children || text}
           </span>
         </TooltipTrigger>

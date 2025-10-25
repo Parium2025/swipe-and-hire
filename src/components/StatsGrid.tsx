@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LucideIcon } from 'lucide-react';
-import { TruncatedText } from '@/components/TruncatedText';
 
 interface StatCard {
   icon: LucideIcon;
@@ -20,11 +19,8 @@ export const StatsGrid = ({ stats }: StatsGridProps) => {
         <Card key={index} className="bg-white/5 backdrop-blur-sm border-white/20">
           <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4 min-w-0 min-h-[36px] md:min-h-[40px]">
             <stat.icon className="h-3 w-3 md:h-4 md:w-4 text-white" />
-            <CardTitle className="flex-1 min-w-0 text-xs md:text-sm font-medium text-white">
-              <TruncatedText 
-                text={stat.title}
-                className="block w-full whitespace-nowrap truncate"
-              />
+            <CardTitle className="text-xs md:text-sm font-medium text-white whitespace-nowrap truncate">
+              {stat.title}
             </CardTitle>
           </CardHeader>
           <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
