@@ -57,6 +57,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const { user } = useAuth();
   const { toast } = useToast();
   const isNavigatingBack = useRef(false);
+  const isNavigatingToTemplateWizard = useRef(false);
+  const lastTemplateTitleRef = useRef<string>('');
 
 
   const fetchTemplates = useCallback(async () => {
