@@ -25,7 +25,7 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete }: Mo
 
   return (
     <Card 
-      className="bg-transparent touch-border-white shadow-none min-h-[120px] cursor-pointer transition-all duration-150 hover:bg-white/5 active:scale-[0.98] active:bg-white/10"
+      className="bg-transparent touch-border-white shadow-none min-h-[120px] cursor-pointer transition-all duration-150"
       onClick={handleCardClick}
     >
       <div className="p-3 space-y-2">
@@ -100,7 +100,7 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete }: Mo
               e.stopPropagation();
               onEdit(job);
             }}
-            className="flex-1 h-11 bg-white/10 border-white/20 text-white hover:bg-white/20 text-sm"
+            className="flex-1 h-11 bg-white/10 border-white/20 text-white text-sm"
           >
             <Edit className="h-4 w-4 mr-2" />
             Redigera
@@ -112,7 +112,7 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete }: Mo
               e.stopPropagation();
               onDelete(job);
             }}
-            className="flex-1 h-11 bg-white/10 border-white/20 text-white hover:bg-red-500/20 hover:border-red-500/40 text-sm"
+            className="flex-1 h-11 bg-white/10 border-white/20 text-white text-sm"
           >
             <Trash2 className="h-4 w-4 mr-2" />
             Ta bort

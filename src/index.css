@@ -842,6 +842,9 @@ All colors MUST be HSL.
 
 /* Reduce focus visibility on touch devices to prevent "frame locking" */
 @media (hover: none) and (pointer: coarse) {
+  /* Remove default iOS highlight */
+  * { -webkit-tap-highlight-color: transparent; }
+
   *:focus {
     outline: none !important;
     box-shadow: none !important;
@@ -852,5 +855,23 @@ All colors MUST be HSL.
     outline: 2px solid rgba(59, 130, 246, 0.5);
     outline-offset: 2px;
   }
+
+  /* Neutralize hover/active background flashes on touch */
+  .hover\:bg-white\/5:hover,
+  .hover\:bg-white\/10:hover,
+  .hover\:bg-red-500\/20:hover,
+  .active\:bg-white\/10:active {
+    background-color: transparent !important;
+  }
+
+  /* Buttons shouldn't flash when scrolling */
+  button:hover,
+  button:active,
+  [role="button"]:hover,
+  [role="button"]:active {
+    background-image: none !important;
+    box-shadow: none !important;
+  }
 }
+
 

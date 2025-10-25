@@ -203,13 +203,20 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
+
+    // Capture currently selected template title (if any)
+    const restoreTitle = selectedTemplate?.title;
     
     // Snabbare timing för mer responsiv känsla
     setTimeout(() => {
       setOpen(true);
+      // Säkerställ att titeln återställs efter att dialogen öppnats
+      if (restoreTitle) {
+        requestAnimationFrame(() => setJobTitle(restoreTitle));
+      }
       // Ta bort auto-open av dropdown för att låta titel fyllas i korrekt
     }, 80);
-  }, []);
+  }, [selectedTemplate?.title]);
 
   return (
     <>
