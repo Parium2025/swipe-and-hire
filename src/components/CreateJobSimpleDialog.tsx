@@ -198,6 +198,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
 
   const handleTemplateWizardBack = useCallback(() => {
     setShowTemplateWizard(false);
+    
+    // Blur any focused element to prevent mobile scroll lock
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    
     // Snabbare timing för mer responsiv känsla
     setTimeout(() => {
       setOpen(true);
@@ -226,6 +232,13 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
           hideClose
           className="max-w-md bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[95vh] sm:max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl transition-all duration-200 ease-out animate-scale-in"
           onEscapeKeyDown={(e) => e.preventDefault()}
+          onCloseAutoFocus={(e) => {
+            e.preventDefault();
+            // Blur active element to prevent scroll lock on mobile
+            if (document.activeElement instanceof HTMLElement) {
+              document.activeElement.blur();
+            }
+          }}
         >
           <DialogHeader className="sr-only">
             <DialogTitle className="sr-only">Skapa jobb</DialogTitle>
@@ -316,7 +329,13 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           onWheel={(e) => e.stopPropagation()}
                           onTouchStart={(e) => e.stopPropagation()}
                           onTouchMove={(e) => e.stopPropagation()}
-                          onCloseAutoFocus={(e) => e.preventDefault()}
+                          onCloseAutoFocus={(e) => {
+                            e.preventDefault();
+                            // Blur active element to prevent scroll lock on mobile
+                            if (document.activeElement instanceof HTMLElement) {
+                              document.activeElement.blur();
+                            }
+                          }}
                         >
                           <div className="p-3 border-b border-slate-600/30 sticky top-0 bg-slate-800/95 backdrop-blur-md z-10">
                             <div className="relative">
