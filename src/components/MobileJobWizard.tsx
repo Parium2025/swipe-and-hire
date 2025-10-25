@@ -576,10 +576,40 @@ const MobileJobWizard = ({
   // Set initial form data for unsaved changes tracking
   useEffect(() => {
     if (open && !initialFormData) {
-      setInitialFormData({ ...formData });
-      setHasUnsavedChanges(false);
+      // Om vi öppnar med en template, sätt ett tomt initialFormData
+      // så att template-data räknas som en ändring
+      if (selectedTemplate) {
+        setInitialFormData({
+          title: '',
+          description: '',
+          requirements: '',
+          location: '',
+          occupation: '',
+          salary_min: '',
+          salary_max: '',
+          employment_type: '',
+          salary_type: '',
+          positions_count: '',
+          work_schedule: '',
+          work_location_type: '',
+          remote_work_possible: '',
+          workplace_name: '',
+          workplace_address: '',
+          workplace_postal_code: '',
+          workplace_city: '',
+          contact_email: '',
+          application_instructions: '',
+          pitch: '',
+          job_image_url: ''
+        });
+        setHasUnsavedChanges(true); // Markera som ändrad från start
+      } else {
+        // Ingen template vald, använd aktuell formData som start
+        setInitialFormData({ ...formData });
+        setHasUnsavedChanges(false);
+      }
     }
-  }, [open, formData, initialFormData]);
+  }, [open, selectedTemplate, formData, initialFormData]);
   
   // Track form changes
   useEffect(() => {
