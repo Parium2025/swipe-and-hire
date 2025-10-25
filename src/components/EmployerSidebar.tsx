@@ -2,6 +2,8 @@ import React, { useEffect, useState, memo } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Sidebar,
   SidebarContent,
@@ -115,6 +117,7 @@ export function EmployerSidebar() {
   const { profile, signOut, user } = useAuth();
   const navigate = useNavigate();
   const { checkBeforeNavigation } = useUnsavedChanges();
+  const queryClient = useQueryClient();
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(() => {
     const fromProfile = (profile as any)?.company_logo_url as string | undefined;
     const cached = typeof window !== 'undefined' ? sessionStorage.getItem(LOGO_CACHE_KEY) : null;
@@ -206,6 +209,51 @@ export function EmployerSidebar() {
            (url === "/" && window.location.pathname === "/");
   };
 
+  // Prefetch applications data on hover/focus for instant navigation
+  const prefetchApplications = () => {
+    const cachedOrgId = typeof window !== 'undefined' 
+      ? localStorage.getItem('org_id') 
+      : null;
+    const orgId = profile?.organization_id ?? cachedOrgId;
+    
+    if (!orgId || !user) return;
+
+    queryClient.prefetchQuery({
+      queryKey: ['applications', orgId],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from('job_applications')
+          .select(`
+            id,
+            first_name,
+            last_name,
+            email,
+            status,
+            applied_at,
+            updated_at,
+            job_postings!inner(
+              title,
+              organization_id
+            ),
+            profiles(
+              profile_image_url
+            )
+          `)
+          .eq('job_postings.organization_id', orgId)
+          .order('applied_at', { ascending: false });
+
+        if (error) throw error;
+
+        return (data || []).map((app: any) => ({
+          ...app,
+          job_title: app.job_postings?.title,
+          profile_image_url: app.profiles?.profile_image_url,
+        }));
+      },
+      staleTime: 2 * 60 * 1000,
+    });
+  };
+
   return (
     <Sidebar 
       className={`border-r-0 bg-transparent ${collapsed ? 'w-16' : 'w-64'}`}
@@ -254,6 +302,8 @@ export function EmployerSidebar() {
                   >
                     <button
                       onClick={() => handleNavigation(item.url)}
+                      onMouseEnter={item.url === '/candidates' ? prefetchApplications : undefined}
+                      onFocus={item.url === '/candidates' ? prefetchApplications : undefined}
                       className="flex items-center gap-3 w-full"
                     >
                       <item.icon className="h-4 w-4" />

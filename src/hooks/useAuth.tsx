@@ -181,23 +181,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const fetchUserData = async (userId: string) => {
+    console.time('⏱️ Total fetchUserData');
     try {
+      console.time('⏱️ Profile fetch');
       // Fetch profile
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
         .maybeSingle();
+      console.timeEnd('⏱️ Profile fetch');
 
       if (profileError) {
         console.error('Error fetching profile:', profileError);
         // Don't auto-logout on profile errors, just set profile to null
         setProfile(null);
+        console.timeEnd('⏱️ Total fetchUserData');
         return;
       } else if (!profileData) {
         console.log('Profile not found for user, creating empty profile state...');
         // Don't auto-logout, just set profile to null and let app handle it
         setProfile(null);
+        console.timeEnd('⏱️ Total fetchUserData');
         return;
       } else {
         // Convert JSONB interests to string array
@@ -212,10 +217,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             : []
         };
         setProfile(processedProfile);
+
+        // Cache organization_id early for faster queries
+        if (profileData.organization_id) {
+          try {
+            localStorage.setItem('org_id', profileData.organization_id);
+          } catch (e) {
+            console.warn('Failed to cache org_id:', e);
+          }
+        }
       }
 
-      // Fetch user role
-      const { data: roleData, error: roleError } = await supabase
+      // Parallelize role and organization fetches
+      console.time('⏱️ Parallel role + org fetch');
+      
+      const rolePromise = supabase
         .from('user_roles')
         .select('*')
         .eq('user_id', userId)
@@ -223,13 +239,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .order('created_at', { ascending: false })
         .maybeSingle();
 
+      const orgPromise = profileData?.organization_id
+        ? supabase
+            .from('organizations')
+            .select('*')
+            .eq('id', profileData.organization_id)
+            .maybeSingle()
+        : Promise.resolve({ data: null, error: null });
+
+      // Execute in parallel
+      const [roleResult, orgResult] = await Promise.all([
+        rolePromise,
+        orgPromise
+      ]);
+
+      console.timeEnd('⏱️ Parallel role + org fetch');
+
+      const { data: roleData, error: roleError } = roleResult;
+      
       if (roleError) {
         console.error('Error fetching user role:', roleError);
       } else {
         setUserRole(roleData);
 
-        // Fetch organization if user has one
-        if (roleData?.organization_id) {
+        // If profile didn't have org_id but role does, fetch organization
+        if (!profileData?.organization_id && roleData?.organization_id) {
+          try {
+            localStorage.setItem('org_id', roleData.organization_id);
+          } catch (e) {
+            console.warn('Failed to cache org_id from role:', e);
+          }
+
           const { data: orgData, error: orgError } = await supabase
             .from('organizations')
             .select('*')
@@ -238,14 +278,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           if (orgError) {
             console.error('Error fetching organization:', orgError);
-          } else {
+          } else if (orgData) {
             setOrganization(orgData);
+          }
+        } else if (orgResult.data) {
+          if (orgResult.error) {
+            console.error('Error fetching organization:', orgResult.error);
+          } else {
+            setOrganization(orgResult.data);
           }
         }
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
+    console.timeEnd('⏱️ Total fetchUserData');
   };
 
   const signUp = async (email: string, password: string, userData: { 

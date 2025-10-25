@@ -28,18 +28,35 @@ export const useApplicationsData = () => {
   const { user, profile } = useAuth();
   const queryClient = useQueryClient();
 
-  // Check if profile is still loading
-  const profileLoading = user && !profile;
+  // Use cached orgId as fallback for faster initial query
+  const cachedOrgId = typeof window !== 'undefined' 
+    ? localStorage.getItem('org_id') 
+    : null;
+  
+  const effectiveOrgId = profile?.organization_id ?? cachedOrgId ?? null;
+  const profileLoading = user && !effectiveOrgId;
 
   const { data: applications = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['applications', profile?.organization_id],
+    queryKey: ['applications', effectiveOrgId],
     queryFn: async () => {
-      if (!user || !profile?.organization_id) return [];
+      console.time('⏱️ Applications query');
       
+      if (!user || !effectiveOrgId) {
+        console.timeEnd('⏱️ Applications query');
+        return [];
+      }
+      
+      // Lighter payload - only fetch fields needed for list view
       const { data, error } = await supabase
         .from('job_applications')
         .select(`
-          *,
+          id,
+          first_name,
+          last_name,
+          email,
+          status,
+          applied_at,
+          updated_at,
           job_postings!inner(
             title,
             organization_id
@@ -48,8 +65,10 @@ export const useApplicationsData = () => {
             profile_image_url
           )
         `)
-        .eq('job_postings.organization_id', profile.organization_id)
+        .eq('job_postings.organization_id', effectiveOrgId)
         .order('applied_at', { ascending: false });
+
+      console.timeEnd('⏱️ Applications query');
 
       if (error) throw error;
 
@@ -60,7 +79,7 @@ export const useApplicationsData = () => {
         profile_image_url: app.profiles?.profile_image_url,
       })) as ApplicationData[];
     },
-    enabled: !!user && !!profile?.organization_id,
+    enabled: !!user && !!effectiveOrgId,
     staleTime: 2 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
   });
