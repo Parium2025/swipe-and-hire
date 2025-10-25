@@ -243,7 +243,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     target.style.height = target.scrollHeight + 'px';
                   }}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 text-sm resize-none min-h-[36px] leading-tight py-2 overflow-hidden"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 text-sm resize-none min-h-[44px] leading-tight py-2 overflow-hidden"
                   autoComplete="off"
                   title={jobTitle}
                   rows={1}
@@ -278,7 +278,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-all duration-150 justify-between mt-1 text-left h-auto min-h-9 py-2 whitespace-normal"
+                            className="flex-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-all duration-150 justify-between mt-1 text-left h-auto min-h-[44px] py-2 whitespace-normal"
                             title={selectedTemplate?.name || 'Ingen mall är vald'}
                           >
                             <span className="text-left flex-1 px-1 text-sm whitespace-normal break-words pr-6">
@@ -435,7 +435,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                         onClick={() => {
                           setSelectedTemplate(null);
                         }}
-                        className="mt-1 h-9 w-9 flex-shrink-0 text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150"
+                        className="mt-1 min-h-[44px] w-11 flex-shrink-0 text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150"
                         title="Ta bort vald mall"
                       >
                         <X className="h-4 w-4" />
@@ -449,7 +449,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 <Button 
                   onClick={handleCreateJob}
                   disabled={loading || !jobTitle.trim()}
-                  className={`flex-1 transition-all duration-150 active:scale-95 ${
+                  className={`flex-1 min-h-[44px] transition-all duration-150 active:scale-95 ${
                     !loading && jobTitle.trim() ? 'border border-white/30' : ''
                   }`}
                 >
@@ -459,7 +459,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 <Button 
                   variant="outline" 
                   onClick={handleClose}
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20 transition-all duration-150 active:scale-95"
+                  className="min-h-[44px] bg-white/10 border-white/20 text-white hover:bg-white/20 transition-all duration-150 active:scale-95"
                 >
                   Avbryt
                 </Button>
