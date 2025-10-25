@@ -280,7 +280,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           sideOffset={8}
                           avoidCollisions={true}
                           collisionPadding={16}
-                          onInteractOutside={(e) => e.preventDefault()}
                           onWheel={(e) => e.stopPropagation()}
                           onCloseAutoFocus={(e) => e.preventDefault()}
                         >
