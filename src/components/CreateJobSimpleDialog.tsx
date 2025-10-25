@@ -86,6 +86,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       if (defaultTemplate && !jobTitle) {
         setSelectedTemplate(defaultTemplate as any);
         setJobTitle(defaultTemplate.title);
+        lastTemplateTitleRef.current = defaultTemplate.title;
       }
     } catch (error) {
       toast({
@@ -115,6 +116,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     if (templateId === 'none') {
       setSelectedTemplate(null);
       setTemplateMenuOpen(false);
+      lastTemplateTitleRef.current = '';
       return;
     }
     
@@ -122,6 +124,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     if (template) {
       setSelectedTemplate(template as any);
       setJobTitle(template.title);
+      lastTemplateTitleRef.current = template.title;
     }
     setTemplateMenuOpen(false);
   }, [templates]);
@@ -204,28 +207,34 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       document.activeElement.blur();
     }
 
-    // Capture currently selected template title (if any)
-    const restoreTitle = selectedTemplate?.title;
+    const restoreTitle = lastTemplateTitleRef.current || selectedTemplate?.title || '';
     
     // Snabbare timing för mer responsiv känsla
     setTimeout(() => {
       setOpen(true);
-      // Säkerställ att titeln återställs efter att dialogen öppnats
       if (restoreTitle) {
+        // Sätt direkt och även i nästa frame som extra säkerhet
+        setJobTitle(restoreTitle);
         requestAnimationFrame(() => setJobTitle(restoreTitle));
       }
       // Ta bort auto-open av dropdown för att låta titel fyllas i korrekt
     }, 80);
-  }, [selectedTemplate?.title]);
+  }, [selectedTemplate]);
 
   return (
     <>
       <Dialog open={open} onOpenChange={(isOpen) => {
         setOpen(isOpen);
         if (!isOpen) {
-          setJobTitle('');
-          setSelectedTemplate(null);
-          setSearchTerm('');
+          if (isNavigatingToTemplateWizard.current) {
+            // Do not reset when navigating to template wizard
+            isNavigatingToTemplateWizard.current = false;
+          } else {
+            setJobTitle('');
+            setSelectedTemplate(null);
+            setSearchTerm('');
+            lastTemplateTitleRef.current = '';
+          }
         }
       }}>
         <DialogTrigger asChild>
@@ -402,6 +411,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           <div className="bg-slate-800/95 flex-1 pb-2">
                             <DropdownMenuItem
                               onClick={() => {
+                                isNavigatingToTemplateWizard.current = true;
+                                if (jobTitle) {
+                                  lastTemplateTitleRef.current = jobTitle;
+                                } else if (selectedTemplate?.title) {
+                                  lastTemplateTitleRef.current = selectedTemplate.title;
+                                }
                                 setTemplateMenuOpen(false);
                                 setOpen(false);
                                 setShowTemplateWizard(true);
@@ -450,6 +465,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         setTemplateToEdit(template);
+                                        isNavigatingToTemplateWizard.current = true;
+                                        if (jobTitle) {
+                                          lastTemplateTitleRef.current = jobTitle;
+                                        } else if (template.title) {
+                                          lastTemplateTitleRef.current = template.title;
+                                        }
                                         setTemplateMenuOpen(false);
                                         setOpen(false);
                                         setShowTemplateWizard(true);

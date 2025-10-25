@@ -500,34 +500,32 @@ All colors MUST be HSL.
   }
 }
 
-/* Touch device button borders - automatic white borders on devices without hover capability */
+/* Touch device button borders - disable default on touch, enable subtle on desktop hover */
 .touch-border-white {
-  @apply border border-white/20;
+  @apply border;
+  border-color: transparent;
 }
 
 .touch-border-white-thick {
-  @apply border-2 border-white/20;
+  @apply border-2;
+  border-color: transparent;
 }
 
 @media (hover: none) {
-  .touch-border-white {
-    border-color: hsla(0, 0%, 100%, 0.4) !important;
-  }
-  
+  .touch-border-white,
   .touch-border-white-thick {
-    @apply border-2;
-    border-color: hsla(0, 0%, 100%, 0.4) !important;
+    border-color: transparent !important;
   }
 }
 
-/* Keep hover behavior on desktop */
+/* Keep subtle hover behavior on desktop only */
 @media (hover: hover) {
   .touch-border-white:hover {
-    border-color: hsla(0, 0%, 100%, 0.4);
+    border-color: hsla(0, 0%, 100%, 0.2);
   }
   
   .touch-border-white-thick:hover {
-    border-color: hsla(0, 0%, 100%, 0.4);
+    border-color: hsla(0, 0%, 100%, 0.25);
   }
 }
 
