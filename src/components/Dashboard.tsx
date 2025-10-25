@@ -94,9 +94,9 @@ const Dashboard = memo(() => {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 md:gap-2">
         <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4">
+          <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4 min-w-0 min-h-[36px] md:min-h-[40px]">
             <Briefcase className="h-3 w-3 md:h-4 md:w-4 text-white" />
-            <CardTitle className="text-xs md:text-sm font-medium text-white">Totalt annonser</CardTitle>
+            <CardTitle className="text-xs md:text-sm font-medium text-white whitespace-nowrap truncate">Totalt annonser</CardTitle>
           </CardHeader>
           <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
             <div className="text-lg md:text-xl font-bold text-white transition-all duration-300">
@@ -106,9 +106,9 @@ const Dashboard = memo(() => {
         </Card>
 
         <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4">
+          <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4 min-w-0 min-h-[36px] md:min-h-[40px]">
             <TrendingUp className="h-3 w-3 md:h-4 md:w-4 text-white" />
-            <CardTitle className="text-xs md:text-sm font-medium text-white">Aktiva</CardTitle>
+            <CardTitle className="text-xs md:text-sm font-medium text-white whitespace-nowrap truncate">Aktiva annonser</CardTitle>
           </CardHeader>
           <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
             <div className="text-lg md:text-xl font-bold text-white transition-all duration-300">
@@ -118,9 +118,9 @@ const Dashboard = memo(() => {
         </Card>
 
         <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4">
+          <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4 min-w-0 min-h-[36px] md:min-h-[40px]">
             <Eye className="h-3 w-3 md:h-4 md:w-4 text-white" />
-            <CardTitle className="text-xs md:text-sm font-medium text-white">Totala visningar</CardTitle>
+            <CardTitle className="text-xs md:text-sm font-medium text-white whitespace-nowrap truncate">Totala visningar</CardTitle>
           </CardHeader>
           <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
             <div className="text-lg md:text-xl font-bold text-white transition-all duration-300">
@@ -130,9 +130,9 @@ const Dashboard = memo(() => {
         </Card>
 
         <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4">
+          <CardHeader className="flex flex-row items-center gap-1 md:gap-2 space-y-0 p-2 md:p-4 min-w-0 min-h-[36px] md:min-h-[40px]">
             <Users className="h-3 w-3 md:h-4 md:w-4 text-white" />
-            <CardTitle className="text-xs md:text-sm font-medium text-white">Ansökningar</CardTitle>
+            <CardTitle className="text-xs md:text-sm font-medium text-white whitespace-nowrap truncate">Ansökningar</CardTitle>
           </CardHeader>
           <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
             <div className="text-lg md:text-xl font-bold text-white transition-all duration-300">
