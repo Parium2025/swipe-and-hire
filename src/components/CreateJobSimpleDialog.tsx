@@ -179,7 +179,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
 
   return (
     <>
-      <Dialog modal={false} open={open} onOpenChange={(isOpen) => {
+      <Dialog open={open} onOpenChange={(isOpen) => {
         setOpen(isOpen);
         if (!isOpen) {
           setJobTitle('');
@@ -272,7 +272,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
-                          className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[60vh] overflow-y-auto flex flex-col touch-pan-y pt-0 pb-0 animate-scale-in"
+                          className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto flex flex-col touch-pan-y pt-0 pb-0 animate-scale-in"
                           style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorY: 'contain', touchAction: 'pan-y' }}
                           side="bottom"
                           align="center"
@@ -280,6 +280,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           sideOffset={8}
                           avoidCollisions={true}
                           collisionPadding={16}
+                          onInteractOutside={(e) => e.preventDefault()}
                           onWheel={(e) => e.stopPropagation()}
                           onCloseAutoFocus={(e) => e.preventDefault()}
                         >
@@ -338,7 +339,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                   e.preventDefault();
                                 }
                               }}
-                              className="px-4 py-3 text-white hover:bg-slate-700/80 focus:bg-slate-700/80 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20"
+                              className="px-4 py-2 text-white hover:bg-slate-700/80 focus:bg-slate-700/80 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20"
                             >
                               <div className="flex flex-col">
                                 <span className="font-medium text-white">+ Skapa en ny mall</span>
@@ -356,7 +357,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                     e.preventDefault();
                                   }
                                 }}
-                                className="px-4 py-3 text-white hover:bg-slate-700/80 focus:bg-slate-700/80 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20 last:border-b-0"
+                                className="px-4 py-2 text-white hover:bg-slate-700/80 focus:bg-slate-700/80 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20 last:border-b-0"
                               >
                                 <div className="flex items-center justify-between w-full gap-3">
                                   <button
