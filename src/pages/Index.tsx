@@ -33,13 +33,11 @@ import { ArrowRightLeft, Search } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { useApplicationsData } from '@/hooks/useApplicationsData';
 import { CandidatesTable } from '@/components/CandidatesTable';
-import { CandidatesFilters } from '@/components/CandidatesFilters';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const CandidatesContent = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('all');
 
   const { 
     applications, 
@@ -50,26 +48,15 @@ const CandidatesContent = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage 
-  } = useApplicationsData(searchQuery, selectedFilter);
+  } = useApplicationsData(searchQuery);
 
   // Safety check to prevent null crash
   const safeApplications = applications || [];
 
   return (
-    <div className="flex gap-6 max-w-7xl mx-auto px-3 md:px-12">
-      {/* Filters Sidebar */}
-      <aside className="hidden lg:block w-72 flex-shrink-0">
-        <div className="sticky top-6">
-          <CandidatesFilters
-            stats={stats}
-            selectedFilter={selectedFilter}
-            onFilterChange={setSelectedFilter}
-          />
-        </div>
-      </aside>
-
+    <div className="max-w-7xl mx-auto px-3 md:px-12">
       {/* Main Content */}
-      <div className="flex-1 space-y-4">
+      <div className="space-y-4">
         {/* Header */}
         <div className="text-center lg:text-left">
           <h1 className="text-xl md:text-2xl font-semibold text-white mb-2">

@@ -69,7 +69,7 @@ const writeSnapshot = (userId: string, items: ApplicationData[]) => {
   }
 };
 
-export const useApplicationsData = (searchQuery: string = '', statusFilter: string = 'all') => {
+export const useApplicationsData = (searchQuery: string = '') => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [jobTitles, setJobTitles] = useState<Record<string, string>>({});
@@ -83,7 +83,7 @@ export const useApplicationsData = (searchQuery: string = '', statusFilter: stri
     isFetchingNextPage,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ['applications', user?.id, searchQuery, statusFilter],
+    queryKey: ['applications', user?.id, searchQuery],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       console.time(`⏱️ Applications page ${pageParam}`);
@@ -114,11 +114,6 @@ export const useApplicationsData = (searchQuery: string = '', statusFilter: stri
           updated_at,
           job_postings!inner(title)
         `);
-
-      // Apply status filter
-      if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter);
-      }
 
       // Apply powerful global search across all relevant fields including job title
       if (searchQuery && searchQuery.trim()) {
