@@ -33,10 +33,21 @@ import { ArrowRightLeft, Search } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { useApplicationsData } from '@/hooks/useApplicationsData';
 import { CandidatesTable } from '@/components/CandidatesTable';
+import { CandidatesAdvancedFilters } from '@/components/CandidatesAdvancedFilters';
+import { CandidateFilters, DEFAULT_FILTERS } from '@/types/candidateFilters';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const CandidatesContent = () => {
+  const [filters, setFilters] = useState<CandidateFilters>(DEFAULT_FILTERS);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Merge search query into filters
+  const activeFilters = useMemo(() => ({
+    ...filters,
+    search: searchQuery,
+  }), [filters, searchQuery]);
+
   const { 
     applications, 
     stats, 
@@ -46,94 +57,85 @@ const CandidatesContent = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage 
-  } = useApplicationsData();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('all');
+  } = useApplicationsData(activeFilters);
 
   // Safety check to prevent null crash
   const safeApplications = applications || [];
 
-  const filteredApplications = useMemo(() => {
-    let filtered = [...safeApplications];
-
-    if (selectedFilter !== 'all') {
-      filtered = filtered.filter(app => app.status === selectedFilter);
-    }
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(app => {
-        const fullName = `${app.first_name || ''} ${app.last_name || ''}`.toLowerCase();
-        const email = (app.email || '').toLowerCase();
-        const jobTitle = (app.job_title || '').toLowerCase();
-        
-        return fullName.includes(query) || email.includes(query) || jobTitle.includes(query);
-      });
-    }
-
-    return filtered;
-  }, [safeApplications, selectedFilter, searchQuery]);
-
   return (
-    <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12">
-      {/* Header */}
-      <div className="text-center">
-        <h1 className="text-xl md:text-2xl font-semibold text-white mb-2">
-          Alla kandidater ({isLoading ? '...' : stats.total})
-        </h1>
-        <p className="text-white">
-          Hantera och granska kandidater som sökt till dina jobbannonser
-        </p>
-      </div>
-
-      {/* Search Bar - hide during initial loading */}
-      {!isLoading && (
-        <div className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
-            <Input
-              type="text"
-              placeholder="Sök på namn, email eller tjänst..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/60"
-            />
-          </div>
+    <div className="flex gap-6 max-w-7xl mx-auto px-3 md:px-12">
+      {/* Filters Sidebar */}
+      <aside className="hidden lg:block w-72 flex-shrink-0">
+        <div className="sticky top-6">
+          <CandidatesAdvancedFilters
+            filters={filters}
+            onFiltersChange={setFilters}
+            stats={stats}
+          />
         </div>
-      )}
+      </aside>
 
-      {/* Candidates Table */}
-      {error ? (
-        <div className="text-center py-12 text-destructive">
-          Något gick fel vid hämtning av kandidater
+      {/* Main Content */}
+      <div className="flex-1 space-y-4">
+        {/* Header */}
+        <div className="text-center lg:text-left">
+          <h1 className="text-xl md:text-2xl font-semibold text-white mb-2">
+            Alla kandidater ({isLoading ? '...' : stats.total})
+          </h1>
+          <p className="text-white">
+            Hantera och granska kandidater som sökt till dina jobbannonser
+          </p>
         </div>
-      ) : safeApplications.length === 0 && isLoading ? (
-        <Card className="bg-white/5 border-white/10">
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              <Skeleton className="h-8 w-full bg-white/10" />
-              <Skeleton className="h-8 w-full bg-white/10" />
-              <Skeleton className="h-8 w-full bg-white/10" />
-              <Skeleton className="h-8 w-3/4 bg-white/10" />
+
+        {/* Search Bar - hide during initial loading */}
+        {!isLoading && (
+          <div className="mb-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
+              <Input
+                type="text"
+                placeholder="Sök på namn, email eller tjänst..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/60"
+              />
             </div>
-          </CardContent>
-        </Card>
-      ) : filteredApplications.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 bg-white/5 border border-white/10 rounded-lg">
+          </div>
+        )}
+
+        {/* Candidates Table */}
+        {error ? (
+          <div className="text-center py-12 text-destructive">
+            Något gick fel vid hämtning av kandidater
+          </div>
+        ) : safeApplications.length === 0 && isLoading ? (
+          <Card className="bg-white/5 border-white/10">
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <Skeleton className="h-8 w-full bg-white/10" />
+                <Skeleton className="h-8 w-full bg-white/10" />
+                <Skeleton className="h-8 w-full bg-white/10" />
+                <Skeleton className="h-8 w-3/4 bg-white/10" />
+              </div>
+            </CardContent>
+          </Card>
+        ) : safeApplications.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 bg-white/5 border border-white/10 rounded-lg">
             <p className="text-white text-center">
               Inga kandidater än.<br />
               När någon söker till dina jobb så kommer deras ansökning att visas här.
             </p>
-        </div>
-      ) : (
-        <CandidatesTable 
-          applications={filteredApplications} 
-          onUpdate={refetch}
-          onLoadMore={fetchNextPage}
-          hasMore={hasNextPage}
-          isLoadingMore={isFetchingNextPage}
-        />
-      )}
+          </div>
+        ) : (
+          <CandidatesTable 
+            applications={safeApplications} 
+            onUpdate={refetch}
+            onLoadMore={fetchNextPage}
+            hasMore={hasNextPage}
+            isLoadingMore={isFetchingNextPage}
+          />
+        )}
+      </div>
     </div>
   );
 };
