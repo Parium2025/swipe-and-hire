@@ -672,7 +672,7 @@ export type Database = {
           action: string
           created_at: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           record_id: string | null
           table_name: string | null
           user_agent: string | null
@@ -682,7 +682,7 @@ export type Database = {
           action: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           record_id?: string | null
           table_name?: string | null
           user_agent?: string | null
@@ -692,7 +692,7 @@ export type Database = {
           action?: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           record_id?: string | null
           table_name?: string | null
           user_agent?: string | null
@@ -853,34 +853,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      calculate_age: {
-        Args: { birth_date: string }
-        Returns: number
-      }
-      can_cleanup_confirmations: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      calculate_age: { Args: { birth_date: string }; Returns: number }
+      can_cleanup_confirmations: { Args: never; Returns: boolean }
       can_view_job_seeker_profile: {
         Args: { employer_uuid: string; seeker_uuid: string }
         Returns: boolean
       }
-      check_password_strength: {
-        Args: { password: string }
-        Returns: boolean
-      }
-      cleanup_expired_confirmations: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      cleanup_expired_profile_permissions: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      create_secure_confirmation_token: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      check_password_strength: { Args: { password: string }; Returns: boolean }
+      cleanup_expired_confirmations: { Args: never; Returns: undefined }
+      cleanup_expired_profile_permissions: { Args: never; Returns: undefined }
+      create_secure_confirmation_token: { Args: never; Returns: string }
       get_confirmation_status: {
         Args: { user_uuid: string }
         Returns: {
@@ -935,16 +917,13 @@ export type Database = {
         }[]
       }
       get_user_confirmation_status: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           has_pending: boolean
           is_expired: boolean
         }[]
       }
-      get_user_organization: {
-        Args: { user_uuid: string }
-        Returns: string
-      }
+      get_user_organization: { Args: { user_uuid: string }; Returns: string }
       get_user_role: {
         Args: { org_uuid?: string; user_uuid: string }
         Returns: string
@@ -957,14 +936,8 @@ export type Database = {
         Args: { confirmation_user_id: string }
         Returns: boolean
       }
-      is_super_admin: {
-        Args: { user_uuid: string }
-        Returns: boolean
-      }
-      is_support_admin: {
-        Args: { user_uuid: string }
-        Returns: boolean
-      }
+      is_super_admin: { Args: { user_uuid: string }; Returns: boolean }
+      is_support_admin: { Args: { user_uuid: string }; Returns: boolean }
       log_password_security_event: {
         Args: { details?: Json; event_type: string; user_id: string }
         Returns: undefined
@@ -981,18 +954,9 @@ export type Database = {
         Args: { job_seeker_id?: string; target_employer_id: string }
         Returns: boolean
       }
-      sanitize_filename: {
-        Args: { filename: string }
-        Returns: string
-      }
-      test_reset_flow: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      user_has_given_consent: {
-        Args: { user_uuid: string }
-        Returns: boolean
-      }
+      sanitize_filename: { Args: { filename: string }; Returns: string }
+      test_reset_flow: { Args: never; Returns: string }
+      user_has_given_consent: { Args: { user_uuid: string }; Returns: boolean }
       validate_confirmation_token: {
         Args: { input_token: string }
         Returns: {

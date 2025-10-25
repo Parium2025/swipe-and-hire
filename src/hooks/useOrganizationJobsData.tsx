@@ -8,11 +8,12 @@ export const useOrganizationJobsData = () => {
   const queryClient = useQueryClient();
 
   const { data: jobs = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['organization-jobs', profile?.organization_id],
+    queryKey: ['organization-jobs', profile?.organization_id, user?.id],
     queryFn: async () => {
-      if (!user || !profile?.organization_id) return [];
+      if (!user) return [];
       
-      const { data, error } = await supabase
+      // Prioritera organization_id, fallback till employer_id för legacy data
+      const query = supabase
         .from('job_postings')
         .select(`
           *,
@@ -21,13 +22,20 @@ export const useOrganizationJobsData = () => {
             last_name
           )
         `)
-        .eq('organization_id', profile.organization_id)
         .order('created_at', { ascending: false });
 
+      if (profile?.organization_id) {
+        query.eq('organization_id', profile.organization_id);
+      } else {
+        // Legacy fallback: visa endast egna jobb om organization saknas
+        query.eq('employer_id', user.id);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     },
-    enabled: !!user && !!profile?.organization_id,
+    enabled: !!user,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });
