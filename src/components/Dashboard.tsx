@@ -1,7 +1,7 @@
 import { memo, useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Briefcase, Users, Eye, TrendingUp, MapPin, Calendar, Search, ArrowUpDown } from 'lucide-react';
-import { useJobsData } from '@/hooks/useJobsData';
+import { useOrganizationJobsData } from '@/hooks/useOrganizationJobsData';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
@@ -23,7 +23,7 @@ import {
 import { expandSearchTerms } from '@/lib/smartSearch';
 
 const Dashboard = memo(() => {
-  const { jobs, stats, isLoading, invalidateJobs } = useJobsData();
+  const { jobs, stats, isLoading, invalidateJobs } = useOrganizationJobsData();
   const { profile } = useAuth();
   const navigate = useNavigate();
 
