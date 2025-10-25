@@ -1,6 +1,6 @@
-import { memo } from 'react';
+import { memo, useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Briefcase, Users, Eye, TrendingUp, MapPin, Calendar } from 'lucide-react';
+import { Briefcase, Users, Eye, TrendingUp, MapPin, Calendar, Search, ArrowUpDown } from 'lucide-react';
 import { useJobsData } from '@/hooks/useJobsData';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -12,11 +12,78 @@ import { TruncatedText } from '@/components/TruncatedText';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { formatDateShortSv } from '@/lib/date';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { expandSearchTerms } from '@/lib/smartSearch';
 
 const Dashboard = memo(() => {
   const { jobs, stats, isLoading, invalidateJobs } = useJobsData();
   const { profile } = useAuth();
   const navigate = useNavigate();
+
+  const [searchInput, setSearchInput] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'title-asc' | 'title-desc'>('newest');
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchTerm(searchInput);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  // Filter and sort jobs
+  const filteredAndSortedJobs = useMemo(() => {
+    let result = [...jobs];
+    
+    // Filter based on search term
+    if (searchTerm.trim()) {
+      const expandedTerms = expandSearchTerms(searchTerm);
+      result = result.filter(job => {
+        const searchableText = [
+          job.title,
+          job.location,
+          job.employment_type,
+          job.description,
+          job.workplace_city,
+          job.employer_profile?.first_name,
+          job.employer_profile?.last_name
+        ].filter(Boolean).join(' ').toLowerCase();
+        
+        return expandedTerms.some(term => 
+          searchableText.includes(term.toLowerCase())
+        );
+      });
+    }
+    
+    // Sort
+    switch (sortBy) {
+      case 'oldest':
+        return result.sort((a, b) => 
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+      case 'title-asc':
+        return result.sort((a, b) => 
+          a.title.localeCompare(b.title, 'sv')
+        );
+      case 'title-desc':
+        return result.sort((a, b) => 
+          b.title.localeCompare(a.title, 'sv')
+        );
+      case 'newest':
+      default:
+        return result.sort((a, b) => 
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+    }
+  }, [jobs, searchTerm, sortBy]);
 
   return (
     <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12">
@@ -75,6 +142,59 @@ const Dashboard = memo(() => {
         </Card>
       </div>
 
+      {/* Search & Sort */}
+      <div className="flex flex-col md:flex-row gap-2">
+        {/* Search field */}
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+          <Input
+            placeholder="Sök efter titel, plats, anställningstyp, rekryterare..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="pl-10 bg-white/5 backdrop-blur-sm border-white/20 text-white placeholder:text-white/60"
+          />
+        </div>
+        
+        {/* Sort menu */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="outline" 
+              className="w-full md:w-auto md:min-w-[180px] bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10"
+            >
+              <ArrowUpDown className="mr-2 h-4 w-4" />
+              {sortBy === 'newest' && 'Nyast först'}
+              {sortBy === 'oldest' && 'Äldst först'}
+              {sortBy === 'title-asc' && 'Titel A-Ö'}
+              {sortBy === 'title-desc' && 'Titel Ö-A'}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent 
+            align="end"
+            className="w-[200px]"
+          >
+            <DropdownMenuItem onClick={() => setSortBy('newest')}>
+              Nyast först
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSortBy('oldest')}>
+              Äldst först
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSortBy('title-asc')}>
+              Titel A-Ö
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSortBy('title-desc')}>
+              Titel Ö-A
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* Result indicator */}
+      {searchTerm && (
+        <div className="text-sm text-white/60">
+          Visar {filteredAndSortedJobs.length} av {jobs.length} annonser
+        </div>
+      )}
 
       {/* Jobs Table */}
       <Card className="bg-white/5 backdrop-blur-sm border-white/20">
@@ -106,14 +226,14 @@ const Dashboard = memo(() => {
                       Laddar...
                     </TableCell>
                   </TableRow>
-                ) : jobs.length === 0 ? (
+                ) : filteredAndSortedJobs.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center !text-white py-8 font-medium text-sm">
-                      Inga jobbannonser än. Skapa din första annons!
+                      {searchTerm ? 'Inga annonser matchar din sökning' : 'Inga jobbannonser än. Skapa din första annons!'}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  jobs.map((job) => (
+                  filteredAndSortedJobs.map((job) => (
                     <TableRow 
                       key={job.id}
                       className="border-white/10 hover:bg-white/5 cursor-pointer transition-colors"
@@ -173,15 +293,15 @@ const Dashboard = memo(() => {
               <div className="text-center text-white/60 py-8 text-sm">
                 Laddar...
               </div>
-            ) : jobs.length === 0 ? (
+            ) : filteredAndSortedJobs.length === 0 ? (
               <div className="text-center text-white py-8 font-medium text-sm">
-                Inga jobbannonser än. Skapa din första annons!
+                {searchTerm ? 'Inga annonser matchar din sökning' : 'Inga jobbannonser än. Skapa din första annons!'}
               </div>
             ) : (
               <div className="rounded-none bg-transparent ring-0 shadow-none">
                 <ScrollArea className="h-[calc(100vh-280px)] min-h-[320px]">
                   <div className="space-y-2 px-2 py-2 pb-24">
-                    {jobs.map((job) => (
+                    {filteredAndSortedJobs.map((job) => (
                       <ReadOnlyMobileJobCard
                         key={job.id}
                         job={job}
