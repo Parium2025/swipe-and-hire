@@ -220,13 +220,15 @@ export function EmployerSidebar() {
           .from('job_applications')
           .select(`
             id,
+            job_id,
+            applicant_id,
             first_name,
             last_name,
             email,
             status,
             applied_at,
             updated_at,
-            job_postings(
+            job_postings!inner(
               title
             ),
             profiles(
@@ -236,6 +238,7 @@ export function EmployerSidebar() {
           .order('applied_at', { ascending: false });
 
         if (error) throw error;
+        if (!data) return [];
 
         return (data || []).map((app: any) => ({
           ...app,

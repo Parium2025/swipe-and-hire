@@ -45,13 +45,15 @@ export const useApplicationsData = () => {
         .from('job_applications')
         .select(`
           id,
+          job_id,
+          applicant_id,
           first_name,
           last_name,
           email,
           status,
           applied_at,
           updated_at,
-          job_postings(
+          job_postings!inner(
             title
           ),
           profiles(
@@ -62,7 +64,15 @@ export const useApplicationsData = () => {
 
       console.timeEnd('⏱️ DB optimized Applications query');
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Applications query error:', error);
+        throw error;
+      }
+
+      if (!data) {
+        console.warn('⚠️ Applications query returned null');
+        return [];
+      }
 
       // Transform data to flatten the structure
       const mapped = (data || []).map((app: any) => ({

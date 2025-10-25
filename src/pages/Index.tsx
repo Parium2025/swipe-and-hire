@@ -41,8 +41,11 @@ const CandidatesContent = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
 
+  // Safety check to prevent null crash
+  const safeApplications = applications || [];
+
   const filteredApplications = useMemo(() => {
-    let filtered = [...applications];
+    let filtered = [...safeApplications];
 
     if (selectedFilter !== 'all') {
       filtered = filtered.filter(app => app.status === selectedFilter);
@@ -60,7 +63,7 @@ const CandidatesContent = () => {
     }
 
     return filtered;
-  }, [applications, selectedFilter, searchQuery]);
+  }, [safeApplications, selectedFilter, searchQuery]);
 
   return (
     <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12">
