@@ -1479,7 +1479,11 @@ const MobileJobWizard = ({
     setHasUnsavedChanges(false);
     setShowUnsavedDialog(false);
     setPendingClose(false);
-    onOpenChange(false);
+    if (onBack) {
+      onBack();
+    } else {
+      onOpenChange(false);
+    }
   };
 
   const handleCancelClose = () => {

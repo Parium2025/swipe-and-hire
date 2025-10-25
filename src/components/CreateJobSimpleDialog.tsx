@@ -191,6 +191,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     // Öppna mallvalssteget igen efter en kort delay
     requestAnimationFrame(() => {
       setOpen(true);
+      setTimeout(() => setTemplateMenuOpen(true), 60);
       isNavigatingBack.current = false;
     });
   }, []);
