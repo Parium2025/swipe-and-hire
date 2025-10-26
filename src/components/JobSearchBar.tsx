@@ -96,7 +96,7 @@ export const JobSearchBar = ({
               <Button 
                 variant="ghost" 
                 size="icon"
-                className="h-8 w-8 text-white hover:bg-white/10 focus:outline-none focus-visible:outline-none md:focus-visible:ring-2"
+                className="h-8 w-8 text-white md:hover:bg-white/10 active:bg-white/12 focus:outline-none focus-visible:outline-none focus:ring-0"
               >
                 <Search className="h-4 w-4" />
               </Button>
@@ -131,7 +131,7 @@ export const JobSearchBar = ({
               <Button 
                 variant="ghost" 
                 size="icon"
-                className="h-8 w-8 text-white hover:bg-white/10 focus:outline-none focus-visible:outline-none md:focus-visible:ring-2"
+                className="h-8 w-8 text-white md:hover:bg-white/10 active:bg-white/12 focus:outline-none focus-visible:outline-none focus:ring-0"
               >
                 <ArrowUpDown className="h-4 w-4" />
               </Button>
@@ -144,7 +144,7 @@ export const JobSearchBar = ({
                 <DropdownMenuItem 
                   key={key} 
                   onClick={() => onSortChange(key as SortOption)}
-                  className="text-white hover:bg-white/10 focus:bg-white/10"
+                  className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
                 >
                   {label}
                 </DropdownMenuItem>
