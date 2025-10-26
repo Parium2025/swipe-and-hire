@@ -177,6 +177,7 @@ const EmployerDashboard = memo(() => {
         onSearchChange={setSearchInput}
         sortBy={sortBy}
         onSortChange={setSortBy}
+        companyName={profile?.company_name || 'företaget'}
       />
 
       {/* Result indicator */}
