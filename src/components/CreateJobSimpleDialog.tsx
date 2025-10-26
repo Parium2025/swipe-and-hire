@@ -57,6 +57,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const { user } = useAuth();
   const { toast } = useToast();
   const isNavigatingBack = useRef(false);
+  const lastTemplateTitleRef = useRef<string>('');
 
 
   const fetchTemplates = useCallback(async () => {
@@ -86,6 +87,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       if (defaultTemplate && !jobTitle) {
         setSelectedTemplate(defaultTemplate as any);
         setJobTitle(defaultTemplate.title);
+        lastTemplateTitleRef.current = defaultTemplate.title;
       }
     } catch (error) {
       toast({
@@ -122,6 +124,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     if (template) {
       setSelectedTemplate(template as any);
       setJobTitle(template.title);
+      lastTemplateTitleRef.current = template.title;
     }
     setTemplateMenuOpen(false);
   }, [templates]);
@@ -198,10 +201,15 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
 
   const handleTemplateWizardBack = useCallback(() => {
     setShowTemplateWizard(false);
-    // Snabbare timing för mer responsiv känsla
+    // Restore the title from ref when coming back from template wizard
     setTimeout(() => {
       setOpen(true);
-      // Lägg till bounce-effekt på dropdown
+      if (lastTemplateTitleRef.current) {
+        setJobTitle(lastTemplateTitleRef.current);
+        requestAnimationFrame(() => {
+          setJobTitle(lastTemplateTitleRef.current);
+        });
+      }
       setTimeout(() => setTemplateMenuOpen(true), 150);
     }, 80);
   }, []);
@@ -284,6 +292,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                         setTemplateMenuOpen(isOpen);
                         if (isOpen) {
                           setSearchTerm('');
+                        } else {
+                          (document.activeElement as HTMLElement)?.blur();
                         }
                       }}
                     >
@@ -363,6 +373,10 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           <div className="bg-slate-800/95 flex-1 pb-2">
                             <DropdownMenuItem
                               onClick={() => {
+                                // Save current title before opening template wizard
+                                if (jobTitle.trim()) {
+                                  lastTemplateTitleRef.current = jobTitle;
+                                }
                                 setTemplateMenuOpen(false);
                                 setOpen(false);
                                 setShowTemplateWizard(true);
@@ -410,6 +424,10 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                     <Button
                                       onClick={(e) => {
                                         e.stopPropagation();
+                                        // Save current title before opening template wizard
+                                        if (jobTitle.trim()) {
+                                          lastTemplateTitleRef.current = jobTitle;
+                                        }
                                         setTemplateToEdit(template);
                                         setTemplateMenuOpen(false);
                                         setOpen(false);

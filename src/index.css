@@ -813,6 +813,47 @@ All colors MUST be HSL.
   }
 }
 
+/* Global iOS tap highlight removal */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mobile Touch Device Neutralization - Remove unwanted highlights */
+@media (hover: none) and (pointer: coarse) {
+  /* Remove all visual feedback on touch devices */
+  button, a, [role="button"], [role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"] {
+    outline: 0 !important;
+    box-shadow: none !important;
+    background-image: none !important;
+  }
+  
+  /* Neutralize hover/focus/active pseudo-states visually */
+  button:hover, button:focus, button:active,
+  a:hover, a:focus, a:active,
+  [role="button"]:hover, [role="button"]:focus, [role="button"]:active,
+  [role="menuitem"]:hover, [role="menuitem"]:focus, [role="menuitem"]:active,
+  [role="menuitemradio"]:hover, [role="menuitemradio"]:focus, [role="menuitemradio"]:active,
+  [role="menuitemcheckbox"]:hover, [role="menuitemcheckbox"]:focus, [role="menuitemcheckbox"]:active {
+    background-color: transparent !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+  }
+  
+  /* Remove active button press effects */
+  button:active, [role="button"]:active {
+    transform: none !important;
+    filter: none !important;
+    scale: 1 !important;
+  }
+  
+  /* Neutralize Tailwind focus-visible rings */
+  .focus-visible\:ring-2:focus, .focus-visible\:ring-2:focus-visible,
+  *:focus, *:focus-visible {
+    box-shadow: none !important;
+    outline: 0 !important;
+  }
+}
+
 /* Mobile Scroll Optimization - Premium Touch Experience */
 @media (max-width: 768px) {
   /* Apply to all elements for consistent mobile scrolling */
@@ -835,7 +876,6 @@ All colors MUST be HSL.
   
   /* Improve touch interaction on all interactive elements */
   button, a, [role="button"], [onclick] {
-    -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
 }

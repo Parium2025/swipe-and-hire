@@ -46,11 +46,15 @@ export const JobSearchBar = ({
       </div>
       
       {/* Sort menu */}
-      <DropdownMenu>
+      <DropdownMenu onOpenChange={(open) => {
+        if (!open) {
+          (document.activeElement as HTMLElement)?.blur();
+        }
+      }}>
         <DropdownMenuTrigger asChild>
           <Button 
             variant="outline" 
-            className="w-full md:w-auto md:min-w-[180px] bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10"
+            className="w-full md:w-auto md:min-w-[180px] bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10"
           >
             <ArrowUpDown className="mr-2 h-4 w-4" />
             {sortLabels[sortBy]}
