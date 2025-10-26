@@ -14,6 +14,11 @@ html {
   background: var(--gradient-parium);
   background-color: hsl(215 100% 12%);
   min-height: 100dvh;
+  /* Remove tap highlight on iOS and Android */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  touch-action: manipulation;
 }
 
 
@@ -28,6 +33,30 @@ body {
   background: rgba(255, 255, 255, 0.05);
   background-color: hsl(215 100% 15%);
   min-height: 100dvh;
+}
+
+/* Remove ALL focus rings and outlines globally */
+*, *::before, *::after {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+*:focus, *:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  --tw-ring-shadow: 0 0 transparent !important;
+}
+
+/* Extra ensure for buttons and interactive elements */
+button:focus, button:focus-visible,
+a:focus, a:focus-visible,
+input:focus, input:focus-visible,
+textarea:focus, textarea:focus-visible,
+select:focus, select:focus-visible,
+[role="button"]:focus, [role="button"]:focus-visible,
+[tabindex]:focus, [tabindex]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  --tw-ring-shadow: 0 0 transparent !important;
 }
 
 @media (min-width: 768px) {
