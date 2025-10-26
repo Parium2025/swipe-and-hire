@@ -825,6 +825,8 @@ All colors MUST be HSL.
     outline: 0 !important;
     box-shadow: none !important;
     background-image: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
   }
   
   /* Neutralize hover/focus/active pseudo-states visually */
@@ -844,6 +846,12 @@ All colors MUST be HSL.
     transform: none !important;
     filter: none !important;
     scale: 1 !important;
+  }
+  
+  /* Neutralize Tailwind ring/shadow utilities */
+  *, *::before, *::after {
+    --tw-ring-shadow: 0 0 #0000 !important;
+    --tw-shadow: 0 0 #0000 !important;
   }
   
   /* Neutralize Tailwind focus-visible rings */
