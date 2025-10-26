@@ -331,7 +331,7 @@ const EmployerDashboard = memo(() => {
               <>
                 <div ref={listTopRef} />
                 <div className="rounded-none bg-transparent ring-0 shadow-none">
-                  <ScrollArea className="h-[calc(100dvh-260px)] md:h-[calc(100vh-280px)] min-h-[320px] allow-scroll-chain">
+                  <ScrollArea className="h-[calc(100vh-280px)] min-h-[320px]">
                     <div className="space-y-2 px-2 py-2 pb-24">
                       {pageJobs.map((job) => (
                         <MobileJobCard

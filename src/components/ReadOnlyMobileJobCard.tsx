@@ -19,7 +19,7 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
 
   return (
     <Card 
-      className="bg-transparent touch-border-white shadow-none min-h-[120px] cursor-pointer md:hover:bg-white/5"
+      className="bg-transparent touch-border-white shadow-none min-h-[120px] cursor-pointer transition-colors hover:bg-white/5"
       onClick={handleCardClick}
     >
       <div className="p-3 space-y-2">

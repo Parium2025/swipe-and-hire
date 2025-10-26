@@ -21,8 +21,8 @@ body {
   /* Förbättrad touch-hantering */
   touch-action: pan-y pinch-zoom;
   /* Förhindra iOS rubber-band från att visa vit bakgrund */
-  overscroll-behavior: auto;
-  overscroll-behavior-y: auto;
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
   -webkit-overflow-scrolling: touch;
   /* Mobilversion - ljusare bakgrund som matchar korten */
   background: rgba(255, 255, 255, 0.05);
@@ -181,9 +181,9 @@ All colors MUST be HSL.
     margin: 0 !important;
     width: 100% !important;
     overflow-x: hidden !important;
-    overscroll-behavior: auto;
-    overscroll-behavior-x: auto;
-    overscroll-behavior-y: auto;
+    overscroll-behavior: none;
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: none;
     /* Optimerad touch-hantering för mobil */
     touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
@@ -220,8 +220,8 @@ All colors MUST be HSL.
       height: 100%;
       width: 100%;
       -webkit-overflow-scrolling: touch;
-      overscroll-behavior: auto;
-      overscroll-behavior-y: auto;
+      overscroll-behavior: none;
+      overscroll-behavior-y: none;
       min-height: calc(100dvh + env(safe-area-inset-bottom, 0));
       background: transparent;
     }
@@ -769,18 +769,6 @@ All colors MUST be HSL.
     overscroll-behavior: contain;
   }
   
-  /* Scroll chain utilities */
-  .allow-scroll-chain {
-    overscroll-behavior-y: auto;
-  }
-  /* Ensure Radix ScrollArea viewport inherits scroll-chain */
-  .allow-scroll-chain > div:first-child {
-    overscroll-behavior-y: auto;
-  }
-  .no-scroll-chain {
-    overscroll-behavior-y: contain;
-  }
-  
   /* Dölj scrollbar men behåll funktionalitet */
   .scrollbar-hide {
     -ms-overflow-style: none;
@@ -825,61 +813,12 @@ All colors MUST be HSL.
   }
 }
 
-/* Global iOS tap highlight removal */
-* {
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Mobile Touch Device Neutralization - Remove unwanted highlights */
-@media (hover: none) and (pointer: coarse) {
-  /* Remove all visual feedback on touch devices */
-  button, a, [role="button"], [role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"] {
-    outline: 0 !important;
-    box-shadow: none !important;
-    background-image: none !important;
-    user-select: none !important;
-    -webkit-user-select: none !important;
-  }
-  
-  /* Neutralize hover/focus/active pseudo-states visually */
-  button:hover, button:focus, button:active,
-  a:hover, a:focus, a:active,
-  [role="button"]:hover, [role="button"]:focus, [role="button"]:active,
-  [role="menuitem"]:hover, [role="menuitem"]:focus, [role="menuitem"]:active,
-  [role="menuitemradio"]:hover, [role="menuitemradio"]:focus, [role="menuitemradio"]:active,
-  [role="menuitemcheckbox"]:hover, [role="menuitemcheckbox"]:focus, [role="menuitemcheckbox"]:active {
-    background-color: transparent !important;
-    outline: 0 !important;
-    box-shadow: none !important;
-  }
-  
-  /* Remove active button press effects */
-  button:active, [role="button"]:active {
-    transform: none !important;
-    filter: none !important;
-    scale: 1 !important;
-  }
-  
-  /* Neutralize Tailwind ring/shadow utilities */
-  *, *::before, *::after {
-    --tw-ring-shadow: 0 0 #0000 !important;
-    --tw-shadow: 0 0 #0000 !important;
-  }
-  
-  /* Neutralize Tailwind focus-visible rings */
-  .focus-visible\:ring-2:focus, .focus-visible\:ring-2:focus-visible,
-  *:focus, *:focus-visible {
-    box-shadow: none !important;
-    outline: 0 !important;
-  }
-}
-
 /* Mobile Scroll Optimization - Premium Touch Experience */
 @media (max-width: 768px) {
   /* Apply to all elements for consistent mobile scrolling */
   * {
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: auto;
+    overscroll-behavior-y: contain;
   }
   
   /* Scroll containers with native momentum */
@@ -891,11 +830,12 @@ All colors MUST be HSL.
   
   /* Prevent body scroll bounce */
   body {
-    overscroll-behavior-y: auto;
+    overscroll-behavior-y: none;
   }
   
   /* Improve touch interaction on all interactive elements */
   button, a, [role="button"], [onclick] {
+    -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
 }
