@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Clock, X, ChevronDown, Check, Search } from 'lucide-react';
+import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { createSmartSearchConditions, expandSearchTerms } from '@/lib/smartSearch';
@@ -72,171 +73,6 @@ const SearchJobs = () => {
   const listTopRef = useRef<HTMLDivElement>(null);
   const didMountRef = useRef(false);
 
-  const jobCategories = [
-    { 
-      value: 'administration', 
-      label: 'Administration, Ekonomi, Juridik',
-      icon: '',
-      keywords: ['administration', 'ekonomi', 'redovisning', 'controller', 'assistent', 'sekreterare', 'koordinator', 'projektledare', 'juridik', 'advokat', 'receptionist', 'administratör'],
-      subcategories: [
-        'Advokat', 'Affärs- och företagsjurist', 'Arkivvård- och biblioteksassistent', 'Backofficespecialist', 'Chefssekreterare och VD-assistent', 'Controller', 'Domare', 'Domstols- och juristsekreterare', 'Ekonomiassistent', 'Finansanalytiker och investeringsrådgivare', 'Försäkringssäljare och försäkringsrådgivare', 'Förvaltnings- och organisationsjurist', 'Gruppledare för kontorspersonal', 'Informatör, kommunikatör och PR-specialist', 'Inkasserare och pantlånare', 'Kontorsreceptionist', 'Lednings- och organisationsutvecklare', 'Medicinsk sekreterare, vårdadministratör', 'Mäklare inom finans', 'Nationalekonom och makroanalytiker', 'Personal- och HR-specialist', 'Planerare och utredare', 'Redovisningsekonom', 'Revisor', 'Skadereglerare och värderare', 'Skatthandläggare', 'Socialförsäkringshandläggare', 'Statistiker', 'Telefonist', 'Trader och fondförvaltare', 'Åklagare', 'Övrig ekonom', 'Övrig handläggare', 'Övrig jurist', 'Övrig kontorsassistent och sekreterare'
-      ]
-    },
-    { 
-      value: 'construction', 
-      label: 'Bygg och Anläggning', 
-      icon: '',
-      keywords: ['bygg', 'snickare', 'elektriker', 'anläggning', 'murare', 'målare', 'byggledare', 'platschef', 'vvs'],
-      subcategories: [
-        'Anläggningsarbetare', 'Anläggningsdykare', 'Anläggningsmaskinförare', 'Arbetsledare inom bygg, anläggning och gruva', 'Betongarbetare', 'Brunnsborrare', 'Bygnads- och ventilationsplåtslagare', 'Civilingenjörsyrken inom bygg och anläggning', 'Golvläggare', 'Grovarbetare inom bygg och anläggning', 'Gruv- och stenbrottsarbetare', 'Ingenjör och tekniker inom bygg och anläggning', 'Isoleringsmontör', 'Kranförare', 'Kyl- och värmepumpstekniker', 'Murare', 'Målare', 'Stallningsbyggare', 'Takmontör', 'Träarbetare, snickare', 'VVS-montör', 'Övrig byggnads- och anläggningsarbetare'
-      ]
-    },
-    { 
-      value: 'management', 
-      label: 'Chefer och Verksamhetsledare', 
-      icon: '',
-      keywords: ['chef', 'ledare', 'verksamhet', 'director', 'manager', 'vd', 'platschef', 'avdelningschef'],
-      subcategories: [
-        'Chef inom arkitekt- och ingenjörsverksamhet', 'Chef inom bank, finans och försäkring', 'Chef inom friskvård, sport och fritid', 'Chef inom förskolverksamhet', 'Chef inom grund- och gymnasieskola samt vuxenutbildning', 'Chef inom handel', 'Chef inom hälso- och sjukvård', 'Chef inom socialt och kurativt arbete', 'Chef inom äldreomsorg', 'Chef och ledare inom trossamfund', 'Chefstjänsteman i intresseorganisation', 'Driftchef inom bygg, anläggning och gruva', 'Ekonomi- och finanschef', 'Fastighets- och förvaltningschef', 'Forsknings- och utvecklingschef', 'Försäljnings- och marknadschef', 'Förvaltare inom skogsbruk och lantbruk', 'General-, landstings- och kommundirektör', 'Hotell- och konferenschef', 'IT-chef', 'Informations-, kommunikations- och PR-chef', 'Inköps-, logistik- och transportchef', 'Personal- och HR-chef', 'Politiker', 'Produktionschef inom tillverkning', 'Restaurang- och kökschef', 'Verkställande direktör', 'Övrig administrations- och servicechef', 'Övrig chef inom samhällsservice', 'Övrig chef inom utbildning', 'Övrig chef inom övrig servicenäring'
-      ]
-    },
-    { 
-      value: 'it', 
-      label: 'Data/IT', 
-      icon: '',
-      keywords: ['utvecklare', 'programmerare', 'IT', 'data', 'systemadministratör', 'webb', 'mjukvara', 'frontend', 'backend', 'fullstack', 'devops', 'cybersäkerhet'],
-      subcategories: [
-        'Drifttekniker, IT', 'IT-säkerhetsspecialist', 'Mjukvaru- och systemutvecklare', 'Nätverks- och systemtekniker', 'Supporttekniker, IT', 'Systemadministratör', 'Systemanalytiker och IT-arkitekt', 'Systemförvaltare', 'Systemtestare och testledare', 'Utvecklare inom spel och digitala media', 'Webbmaster och webbadministratör', 'Övrig IT-specialist'
-      ]
-    },
-    { 
-      value: 'sales', 
-      label: 'Försäljning, Inköp, Marknadsföring', 
-      icon: '',
-      keywords: ['försäljning', 'sales', 'säljare', 'account', 'marketing', 'marknadsföring', 'reklam', 'kommunikation', 'pr', 'inköp'],
-      subcategories: [
-        'Apotekstekniker', 'Banktjänsteman', 'Bensinstationspersonal', 'Butikssäljare, dagligvaror', 'Butikssäljare, fackhandel', 'Evenemangs- och reseproducent', 'Eventsäljare och butiksdemonistratör', 'Fastighetsmäklare', 'Företagssäljare', 'Guide och resetedare', 'Inköpare och upphandlare', 'Inköps- och orderassistent', 'Kassapersonal', 'Kundtjänstpersonal', 'Marknads- och försäljningsassistent', 'Marknadsanalytiker och marknadsförare', 'Marknadsundersökare och intervjuare', 'Optikerassistent', 'Ordersamordnare', 'Resesäljare och trafikassistent', 'Speditör och transportmäklare', 'Säljande butikschef och avdelningschef i butik', 'Telefonförsäljare', 'Torg- och marknadsförsäljare', 'Uthyrare', 'Övrig förmedlare'
-      ]
-    },
-    { 
-      value: 'crafts', 
-      label: 'Hantverkyrken', 
-      icon: '',
-      keywords: ['hantverk', 'smed', 'keramiker', 'snickare', 'träarbete', 'metallarbete', 'bagare', 'konditor'],
-      subcategories: [
-        'Bagare och konditor', 'Fin-, inrednings- och möbelsnickare', 'Finmekaniker', 'Glastekniker', 'Guld- och silversmed', 'Läderhantverkare och skomakare', 'Manuell ytbehandlare, trä', 'Musikinstrumentmakare och övrig konsthantverkare', 'Skräddare och ateljésömmerska', 'Smed', 'Sömmare', 'Tapetserare'
-      ]
-    },
-    { 
-      value: 'restaurant', 
-      label: 'Hotell, Restaurang, Storhushåll', 
-      icon: '',
-      keywords: ['kock', 'servitör', 'hotell', 'restaurang', 'storhushåll', 'bagare', 'konditor', 'hovmästare'],
-      subcategories: [
-        'Bartender', 'Croupier och oddssättare', 'Hotellreceptionist', 'Hovmästare och servitör', 'Kafé- och konditorbiträde', 'Kock och kallskänka', 'Köksmästare och souschef', 'Pizzabagare', 'Restaurang- och köksbiträde', 'Storhushållsföreståndare'
-      ]
-    },
-    { 
-      value: 'healthcare', 
-      label: 'Hälso- och Sjukvård', 
-      icon: '',
-      keywords: ['sjuksköterska', 'läkare', 'vård', 'omsorg', 'tandläkare', 'fysioterapeut', 'undersköterska', 'vårdbiträde'],
-      subcategories: [
-        'AT-läkare', 'Ambulanssjuksköterska', 'Ambulanssjukvårdare', 'Anestesisjuksköterska', 'Apotekare', 'Arbetsterapeut', 'Audionom och logoped', 'Barnmorska', 'Barnsjuksköterska', 'Barnsköterska', 'Biomedicinsk analytiker', 'Dietist', 'Distriktssköterska', 'Djursjuksköterska', 'Fysioterapeut och sjukgymnast', 'Företagssköterska', 'Geriatriksjuksköterska', 'Grundutbildad sjuksköterska', 'Intensivvårdssjuksköterska', 'Kiropraktor och naprapat', 'Operationssjuksköterska', 'Optiker', 'Psykiatrisjuksköterska', 'Psykolog', 'Psykoterapeut', 'Receptarie', 'Röntgensjuksköterska', 'ST-läkare', 'Skolsköterska', 'Skötare', 'Specialistläkare', 'Tandhygienist', 'Tandläkare', 'Tandsköterska', 'Terapeut inom alternativmedicin', 'Undersköterska, hemsjukvård, äldreboende och habilitering', 'Undersköterska, vård- och specialavdelning och mottagning', 'Veterinär', 'Vårdbiträde', 'Övrig vård- och omsorgspersonal', 'Övrig läkare', 'Övrig specialist inom hälso- och sjukvård', 'Övrig specialistsjuksköterska'
-      ]
-    },
-    { 
-      value: 'industry', 
-      label: 'Industriell Tillverkning', 
-      icon: '',
-      keywords: ['industri', 'tillverkning', 'produktion', 'maskinoperatör', 'kvalitet', 'process', 'tekniker'],
-      subcategories: [
-        'Arbetsledare inom tillverkning', 'Bergsprängare', 'Bobindare', 'Fordonsmontör', 'Gjutare', 'Handpaketerare och andra fabriksarbetare', 'Lackerare och industrimålare', 'Maskinoperatör inom ytbehandling, trä', 'Maskinoperatör, blekning, färgning och tvättning', 'Maskinoperatör, cement-, sten- och betongvaror', 'Maskinoperatör, farmaceutiska produkter', 'Maskinoperatör, gummiindustri', 'Maskinoperatör, kemisk-tekniska och fotografiska produkter', 'Maskinoperatör, kvarn-, bageri- och konfektyrindustri', 'Maskinoperatör, kött- och fiskberedningsindustri', 'Maskinoperatör, mejeri', 'Maskinoperatör, plastindustri', 'Maskinoperatör, pappersvaruindustri', 'Maskinoperatör, pappersindustri', 'Maskinoperatör, påfyllning, packning och märkning', 'Maskinställare och maskinoperatör, metallarbete', 'Maskinsnickare och maskinoperatör, träindustri', 'Montör, elektrisk och elektronisk utrustning', 'Montör, metall-, gummi- och plastprodukter', 'Montör, träprodukter', 'Operatör inom sågverk, hyvleri och plywood', 'Prepress tekniker', 'Processoperatör, papper', 'Processoperatör, pappersmassa', 'Processoperatör, stenkross- och malmförädling', 'Provsmakare och kvalitetsbedömare', 'Slaktare och styckare', 'Slipare', 'Stenhuggare', 'Stålkonstruktionsmontör och grovplåtslagare', 'Svetsare och gasskärare', 'Tryckare', 'Tunnplåtslagare', 'Valsverksoperatör', 'Verktygsmakare', 'Övrig maskin- och processoperatör vid stål- och metallverk', 'Övrig maskinoperatör, livsmedelsindustri', 'Övrig maskinoperatör, textil-, skinn- och läderindustri', 'Övrig montör', 'Övrig process- och maskinoperatör'
-      ]
-    },
-    { 
-      value: 'installation', 
-      label: 'Installation, Drift, Underhåll', 
-      icon: '',
-      keywords: ['installation', 'drift', 'underhåll', 'reparatör', 'tekniker', 'service', 'elektriker', 'fastighet'],
-      subcategories: [
-        'Distributionselektriker', 'Drifttekniker vid värme- och vattenverk', 'Elektronikreaparatör och kommunikationselektriker', 'Fastighetsskötare', 'Flygmekaniker', 'Industrielektriker', 'Installations- och serviceelektriker', 'Motorfordonsmekaniker och fordonsreparatör', 'Processövervakare, kemisk industri', 'Processövervakare, metallproduktion', 'Underhållsmekaniker och maskinreparatör', 'Vaktmästare', 'Övrig drifttekniker och processövervakare', 'Övrig servicearbetare'
-      ]
-    },
-    { 
-      value: 'logistics', 
-      label: 'Transport', 
-      icon: '',
-      keywords: ['lager', 'logistik', 'transport', 'distribution', 'chaufför', 'lastbil', 'gaffeltruck', 'leverans'],
-      subcategories: [
-        'Arbetsledare inom lager och terminal', 'Bangårdspersonal', 'Brevbärare och postterminalarbetare', 'Buss- och spårvagnsförare', 'Distributionschaufför', 'Fartygsbefäl', 'Flygledare', 'Hamnarbetare', 'Kabinpersonal', 'Lager- och terminalpersonal', 'Lastbilsförare', 'Lokförare', 'Maskinbefäl', 'Matros och jungman', 'Pilot', 'Ramppersonal, flyttkarl och varupåfyllare', 'Reklamutdelare och tidningsdistributör', 'Taxiförare', 'Transportledare och transportsamordnare', 'Truckförare', 'Tågvärd och ombordansvarig'
-      ]
-    },
-    { 
-      value: 'beauty', 
-      label: 'Kropps- och Skönhetsvård', 
-      icon: '',
-      keywords: ['frisör', 'skönhet', 'massage', 'naglar', 'kosmetolog', 'fotvård', 'hudterapeut'],
-      subcategories: [
-        'Fotterapeut', 'Frisör', 'Hudterapeut', 'Massör och massageterapeut', 'Övrig skönhets- och kroppsterapeut'
-      ]
-    },
-    { 
-      value: 'creative', 
-      label: 'Kultur, Media, Design', 
-      icon: '',
-      keywords: ['design', 'grafisk', 'kreativ', 'media', 'journalist', 'fotograf', 'video', 'kultur', 'konstnär', 'bibliotek'],
-      subcategories: [
-        'Bibliotekarie och arkivarie', 'Bild- och sändningstekniker', 'Bildkonstnär', 'Designer inom spel och digitala medier', 'Fotograf', 'Författare', 'Grafisk formgivare', 'Industridesigner', 'Inredare, dekoratör och scenograf', 'Inspicient och scriptör', 'Journalist', 'Koreograf och dansare', 'Ljus-, ljud- och scentekniker', 'Museiintendent', 'Programledare och underhållare', 'Reklamtekniker', 'Scenograf och kostymör', 'Skådespelare', 'Översättare och tolkar', 'Övrig konstnär'
-      ]
-    },
-    { 
-      value: 'agriculture', 
-      label: 'Naturbruk', 
-      icon: '',
-      keywords: ['jordbruk', 'skogsbruk', 'lantbruk', 'djur', 'odling', 'natur', 'fiske', 'veterinär'],
-      subcategories: [
-        'Djuruppfödare', 'Fiskare och fiskodlare', 'Jord- och trädgårdsarbetare', 'Skogsarbetare', 'Specialistyrken inom jordbruk'
-      ]
-    },
-    { 
-      value: 'education', 
-      label: 'Pedagogiskt Arbete', 
-      icon: '',
-      keywords: ['lärare', 'pedagog', 'utbildning', 'skola', 'förskola', 'universitet', 'undervisning'],
-      subcategories: [
-        'Barnskötare', 'Fritidsledare', 'Förskollärare', 'Grundskollärare', 'Gymnasielärare', 'Handledarutbildare', 'Legitimerad läkare inom utbildning', 'Professor', 'Speciallärare', 'Specialpedagog', 'Universitetslektor', 'Yrkeslärare'
-      ]
-    },
-    { 
-      value: 'security', 
-      label: 'Säkerhet', 
-      icon: '',
-      keywords: ['säkerhet', 'ordningsvakt', 'brandman', 'räddningstjänst', 'militär', 'polis'],
-      subcategories: [
-        'Brandman', 'Fångvårdare och häktespersonal', 'Ordningsvakt', 'Polis', 'Räddningspersonal', 'Säkerhetskontrollant', 'Militär personal', 'Tull- och gränspolis'
-      ]
-    },
-    { 
-      value: 'social', 
-      label: 'Socialt Arbete', 
-      icon: '',
-      keywords: ['socialarbetare', 'kurator', 'behandling', 'omsorg', 'stöd', 'rådgivning'],
-      subcategories: [
-        'Behandlingsassistent', 'Familjerådgivare och terapeut', 'Fritidsledare', 'Kurator', 'Socialsekreterare', 'Socionom', 'Behandlare inom kriminalvård'
-      ]
-    },
-    { 
-      value: 'science', 
-      label: 'Naturvetenskap', 
-      icon: '',
-      keywords: ['forskning', 'vetenskap', 'labb', 'kemi', 'biologi', 'fysik', 'miljö'],
-      subcategories: [
-        'Analytiker', 'Biolog', 'Forskare', 'Kemist', 'Laboratorieassistent', 'Miljöspecialist', 'Kvalitetskontrollant'
-      ]
-    }
-  ];
-
   const locations = [
     'Stockholm', 'Göteborg', 'Malmö', 'Uppsala', 'Västerås', 'Örebro', 'Linköping', 'Helsingborg', 'Jönköping', 
     'Norrköping', 'Lund', 'Umeå', 'Gävle', 'Borås', 'Eskilstuna', 'Södertälje', 'Karlstad', 'Växjö', 
@@ -276,7 +112,7 @@ const SearchJobs = () => {
           }
         });
       } else if (selectedCategory && selectedCategory !== 'all-categories') {
-        const category = jobCategories.find(cat => cat.value === selectedCategory);
+        const category = OCCUPATION_CATEGORIES.find(cat => cat.value === selectedCategory);
         if (category) {
           if (category.keywords.length === 1) {
             const cleanKeyword = category.keywords[0].replace(/[%_]/g, '\\$&');
@@ -610,22 +446,72 @@ const SearchJobs = () => {
                   </DropdownMenu>
                 </div>
 
-                {/* Clear all filters button */}
-                <div className="flex items-end">
-                  <Button 
-                    variant="outline" 
-                    className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10"
-                    onClick={() => {
-                      setSelectedLocations([]);
-                      setSelectedEmploymentTypes([]);
-                      setSelectedCategory('all-categories');
-                      setSelectedSubcategories([]);
-                      setSearchInput('');
-                    }}
-                  >
-                    Rensa filter
-                  </Button>
+                {/* Yrkesområde Filter */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-white flex items-center gap-2">
+                    <Briefcase className="h-3 w-3" />
+                    Yrkesområde
+                  </Label>
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between text-sm"
+                      >
+                        <span className="truncate">
+                          {selectedCategory === 'all-categories'
+                            ? 'Alla yrkesområden'
+                            : OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.label || 'Välj område'
+                          }
+                        </span>
+                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white max-h-80 overflow-y-auto z-50">
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setSelectedCategory('all-categories');
+                          setSelectedSubcategories([]);
+                        }}
+                        className="cursor-pointer hover:bg-slate-700/70 text-white font-medium border-b border-slate-600/30"
+                      >
+                        Alla yrkesområden
+                      </DropdownMenuItem>
+                      {OCCUPATION_CATEGORIES.map((category) => (
+                        <DropdownMenuItem
+                          key={category.value}
+                          onClick={() => {
+                            setSelectedCategory(category.value);
+                            setSelectedSubcategories([]);
+                          }}
+                          className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
+                        >
+                          <span>{category.label}</span>
+                          {selectedCategory === category.value && (
+                            <Check className="h-4 w-4 text-white" />
+                          )}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
+              </div>
+
+              {/* Clear all filters button - moved outside grid */}
+              <div className="pt-2">
+                <Button 
+                  variant="outline" 
+                  className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10"
+                  onClick={() => {
+                    setSelectedLocations([]);
+                    setSelectedEmploymentTypes([]);
+                    setSelectedCategory('all-categories');
+                    setSelectedSubcategories([]);
+                    setSearchInput('');
+                  }}
+                >
+                  Rensa alla filter
+                </Button>
               </div>
             </CardContent>
           </Card>
