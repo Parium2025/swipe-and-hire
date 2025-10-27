@@ -477,7 +477,7 @@ const EmployerDashboard = memo(() => {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteJob}
-              variant="destructive"
+              variant="destructiveSoft"
               className="w-full sm:w-auto text-sm"
             >
               <Trash2 className="h-4 w-4 mr-1.5" />
