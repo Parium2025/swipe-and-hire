@@ -100,7 +100,7 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete }: Mo
               e.stopPropagation();
               onEdit(job);
             }}
-            className="flex-1 h-11 bg-white/10 border-white/20 text-white !hover:bg-blue-500/20 !hover:border-blue-500/40 text-sm"
+            className="flex-1 h-11 bg-transparent border-white/20 text-white !hover:bg-blue-500/20 !hover:border-blue-500/40 hover:!text-white text-sm"
           >
             <Edit className="h-4 w-4 mr-2" />
             Redigera
@@ -112,7 +112,7 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete }: Mo
               e.stopPropagation();
               onDelete(job);
             }}
-            className="flex-1 h-11 bg-white/10 border-white/20 text-white !hover:bg-red-500/20 !hover:border-red-500/40 text-sm"
+            className="flex-1 h-11 bg-transparent border-white/20 text-white !hover:bg-red-500/20 !hover:border-red-500/40 hover:!text-white text-sm"
           >
             <Trash2 className="h-4 w-4 mr-2" />
             Ta bort
