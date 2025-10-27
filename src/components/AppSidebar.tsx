@@ -23,6 +23,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarSeparator,
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
@@ -129,15 +130,15 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className={`bg-slate-900/40 backdrop-blur-md border-r border-white/20 ${collapsed ? 'w-14' : 'w-64'} transition-all duration-200 ease-in-out`}
+      className={`border-r-0 bg-transparent ${collapsed ? 'w-16' : 'w-64'}`}
       collapsible="icon"
     >
-      <SidebarContent className="p-4">
+      <SidebarContent className="gap-0">
         {/* User Profile Section */}
         {!collapsed && (
-          <div className="mb-6 animate-fade-in">
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-sidebar-accent transition-colors duration-150">
-                <Avatar className="h-10 w-10">
+          <div className="p-4">
+            <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10 border-2 border-white/30">
                   <AvatarImage 
                     src={avatarUrl} 
                     alt="Profilbild" 
@@ -150,10 +151,10 @@ export function AppSidebar() {
                   </AvatarFallback>
                 </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">
+                <p className="text-sm font-medium text-white truncate">
                   {profile?.first_name} {profile?.last_name}
                 </p>
-                <p className="text-sm text-sidebar-foreground/70 truncate">
+                <p className="text-sm text-white/70 truncate">
                   {userRole?.role === 'employer' ? 'Arbetsgivare' : 'Jobbsökare'}
                 </p>
               </div>
@@ -162,92 +163,113 @@ export function AppSidebar() {
         )}
 
         {/* Navigation Groups */}
-        <div className="space-y-4">
-          {/* Profile Section */}
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-sm font-semibold uppercase tracking-wider text-white">
-              {collapsed ? <User className="h-4 w-4" /> : 'Profil'}
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                 {profileItems.map((item) => (
-                   <SidebarMenuItem key={item.title}>
-                     <SidebarMenuButton 
-                       data-onboarding={item.title === 'Min Profil' ? 'min-profil' : undefined}
-                       onClick={(e) => handleNavigation(item.url, e)}
-                       className={`transition-colors duration-150 ${isActiveUrl(item.url) ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent'}`}
-                       title={collapsed ? item.title : undefined}
-                     >
-                       <item.icon className="h-4 w-4" />
-                       {!collapsed && <span>{item.title}</span>}
-                     </SidebarMenuButton>
-                   </SidebarMenuItem>
-                 ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+        {/* Profile Section */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-white text-sm uppercase tracking-wide px-4">
+            {collapsed ? <User className="h-4 w-4" /> : 'Profil'}
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+               {profileItems.map((item) => (
+                 <SidebarMenuItem key={item.title}>
+                   <SidebarMenuButton 
+                     data-onboarding={item.title === 'Min Profil' ? 'min-profil' : undefined}
+                     onClick={(e) => handleNavigation(item.url, e)}
+                     className={`
+                       mx-2 rounded-lg transition-all duration-200
+                       ${isActiveUrl(item.url) 
+                         ? 'bg-white/20 text-white shadow-lg' 
+                         : 'text-white hover:bg-white/10 hover:text-white'
+                       }
+                     `}
+                     title={collapsed ? item.title : undefined}
+                   >
+                     <item.icon className="h-4 w-4" />
+                     {!collapsed && <span>{item.title}</span>}
+                   </SidebarMenuButton>
+                 </SidebarMenuItem>
+               ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
-          <Separator />
+        <SidebarSeparator className="bg-white/20 mx-4" />
 
-          {/* Business Section */}
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-sm font-semibold uppercase tracking-wider text-white">
-              {collapsed ? <Building className="h-4 w-4" /> : 'Ekonomi'}
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                 {businessItems.map((item) => (
-                   <SidebarMenuItem key={item.title}>
-                     <SidebarMenuButton 
-                       onClick={(e) => handleNavigation(item.url, e)}
-                       className={`transition-colors duration-150 ${isActiveUrl(item.url) ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent'}`}
-                       title={collapsed ? item.title : undefined}
-                     >
-                       <item.icon className="h-4 w-4" />
-                       {!collapsed && <span>{item.title}</span>}
-                     </SidebarMenuButton>
-                   </SidebarMenuItem>
-                 ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+        {/* Business Section */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-white text-sm uppercase tracking-wide px-4">
+            {collapsed ? <Building className="h-4 w-4" /> : 'Ekonomi'}
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+               {businessItems.map((item) => (
+                 <SidebarMenuItem key={item.title}>
+                   <SidebarMenuButton 
+                     onClick={(e) => handleNavigation(item.url, e)}
+                     className={`
+                       mx-2 rounded-lg transition-all duration-200
+                       ${isActiveUrl(item.url) 
+                         ? 'bg-white/20 text-white shadow-lg' 
+                         : 'text-white hover:bg-white/10 hover:text-white'
+                       }
+                     `}
+                     title={collapsed ? item.title : undefined}
+                   >
+                     <item.icon className="h-4 w-4" />
+                     {!collapsed && <span>{item.title}</span>}
+                   </SidebarMenuButton>
+                 </SidebarMenuItem>
+               ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
-          <Separator />
+        <SidebarSeparator className="bg-white/20 mx-4" />
 
-          {/* Support Section */}
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-sm font-semibold uppercase tracking-wider text-white">
-              {collapsed ? <MessageCircle className="h-4 w-4" /> : 'Support'}
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                 {supportItems.map((item) => (
-                   <SidebarMenuItem key={item.title}>
-                     <SidebarMenuButton 
-                       onClick={(e) => handleNavigation(item.url, e)}
-                       className={`transition-colors duration-150 ${isActiveUrl(item.url) ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent'}`}
-                       title={collapsed ? item.title : undefined}
-                     >
-                       <item.icon className="h-4 w-4" />
-                       {!collapsed && <span>{item.title}</span>}
-                     </SidebarMenuButton>
-                   </SidebarMenuItem>
-                 ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </div>
+        {/* Support Section */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-white text-sm uppercase tracking-wide px-4">
+            {collapsed ? <MessageCircle className="h-4 w-4" /> : 'Support'}
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+               {supportItems.map((item) => (
+                 <SidebarMenuItem key={item.title}>
+                   <SidebarMenuButton 
+                     onClick={(e) => handleNavigation(item.url, e)}
+                     className={`
+                       mx-2 rounded-lg transition-all duration-200
+                       ${isActiveUrl(item.url) 
+                         ? 'bg-white/20 text-white shadow-lg' 
+                         : 'text-white hover:bg-white/10 hover:text-white'
+                       }
+                     `}
+                     title={collapsed ? item.title : undefined}
+                   >
+                     <item.icon className="h-4 w-4" />
+                     {!collapsed && <span>{item.title}</span>}
+                   </SidebarMenuButton>
+                 </SidebarMenuItem>
+               ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator className="bg-white/20 mx-4" />
 
         {/* Sign Out Button */}
-        <div className="mt-auto pt-4">
+        <div className="mt-auto p-4">
           <Button 
             onClick={signOut}
-            variant="ghost" 
-            className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors duration-150"
+            variant="outline" 
+            className={`
+              w-full justify-start border border-white/30 bg-transparent text-white hover:bg-white/10
+              ${collapsed ? 'px-2' : 'px-4'}
+            `}
             title={collapsed ? 'Logga ut' : undefined}
           >
             <LogOut className="h-4 w-4" />
-            {!collapsed && <span className="ml-2">Logga ut</span>}
+            {!collapsed && <span className="ml-3">Logga ut</span>}
           </Button>
         </div>
       </SidebarContent>
