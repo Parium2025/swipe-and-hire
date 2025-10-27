@@ -287,7 +287,7 @@ const EmployerDashboard = memo(() => {
                               className="scale-75"
                             />
                             <Button 
-                              variant="outline" 
+                              variant="outlineNeutral" 
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -298,7 +298,7 @@ const EmployerDashboard = memo(() => {
                               <Edit size={12} />
                             </Button>
                             <Button 
-                              variant="outline" 
+                              variant="outlineNeutral" 
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();

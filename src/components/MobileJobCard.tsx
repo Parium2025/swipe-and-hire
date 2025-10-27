@@ -94,7 +94,7 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete }: Mo
         {/* Action Buttons */}
         <div className="flex gap-2 pt-1">
           <Button 
-            variant="outline" 
+            variant="outlineNeutral" 
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
@@ -106,7 +106,7 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete }: Mo
             Redigera
           </Button>
           <Button 
-            variant="outline" 
+            variant="outlineNeutral" 
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
