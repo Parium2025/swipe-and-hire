@@ -300,6 +300,9 @@ export function EmployerSidebar() {
                       onClick={() => handleNavigation(item.url)}
                       onMouseEnter={item.url === '/candidates' ? prefetchApplications : undefined}
                       onFocus={item.url === '/candidates' ? prefetchApplications : undefined}
+                      onPointerDown={(e) => { const pt = (e as any).pointerType; if (pt === 'mouse' || pt === 'touch' || pt === 'pen') e.preventDefault(); }}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onTouchStart={(e) => e.preventDefault()}
                       className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
@@ -335,6 +338,9 @@ export function EmployerSidebar() {
                   >
                     <button
                       onClick={() => handleNavigation(item.url)}
+                      onPointerDown={(e) => { const pt = (e as any).pointerType; if (pt === 'mouse' || pt === 'touch' || pt === 'pen') e.preventDefault(); }}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onTouchStart={(e) => e.preventDefault()}
                       className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
@@ -370,6 +376,9 @@ export function EmployerSidebar() {
                   >
                     <button
                       onClick={() => handleNavigation(item.url)}
+                      onPointerDown={(e) => { const pt = (e as any).pointerType; if (pt === 'mouse' || pt === 'touch' || pt === 'pen') e.preventDefault(); }}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onTouchStart={(e) => e.preventDefault()}
                       className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
@@ -403,6 +412,9 @@ export function EmployerSidebar() {
                     >
                       <button
                         onClick={() => handleNavigation('/admin')}
+                        onPointerDown={(e) => { const pt = (e as any).pointerType; if (pt === 'mouse' || pt === 'touch' || pt === 'pen') e.preventDefault(); }}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onTouchStart={(e) => e.preventDefault()}
                         className="flex items-center gap-3 w-full outline-none focus:outline-none"
                       >
                         <Settings className="h-4 w-4" />

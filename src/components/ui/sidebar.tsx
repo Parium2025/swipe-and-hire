@@ -561,6 +561,12 @@ const SidebarMenuButton = React.forwardRef<
         data-size={size}
         data-active={isActive}
         className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+        onPointerDown={(e: any) => {
+          const pt = e.pointerType;
+          if (pt === 'mouse' || pt === 'touch' || pt === 'pen') e.preventDefault();
+        }}
+        onMouseDown={(e: React.MouseEvent) => e.preventDefault()}
+        onTouchStart={(e: React.TouchEvent) => e.preventDefault()}
         {...props}
       />
     )
@@ -727,6 +733,12 @@ const SidebarMenuSubButton = React.forwardRef<
         "group-data-[collapsible=icon]:hidden",
         className
       )}
+      onPointerDown={(e: any) => {
+        const pt = e.pointerType;
+        if (pt === 'mouse' || pt === 'touch' || pt === 'pen') e.preventDefault();
+      }}
+      onMouseDown={(e: React.MouseEvent) => e.preventDefault()}
+      onTouchStart={(e: React.TouchEvent) => e.preventDefault()}
       {...props}
     />
   )

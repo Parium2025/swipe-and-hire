@@ -175,6 +175,9 @@ export function AppSidebar() {
                     <SidebarMenuButton 
                       data-onboarding={item.title === 'Min Profil' ? 'min-profil' : undefined}
                       onClick={(e) => handleNavigation(item.url, e)}
+                      onPointerDown={(e) => { const pt = (e as any).pointerType; if (pt === 'mouse' || pt === 'touch' || pt === 'pen') e.preventDefault(); }}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onTouchStart={(e) => e.preventDefault()}
                       className={`
                         mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none active:!bg-transparent
                         ${isActiveUrl(item.url) 
@@ -206,6 +209,9 @@ export function AppSidebar() {
                  <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
                       onClick={(e) => handleNavigation(item.url, e)}
+                      onPointerDown={(e) => { const pt = (e as any).pointerType; if (pt === 'mouse' || pt === 'touch' || pt === 'pen') e.preventDefault(); }}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onTouchStart={(e) => e.preventDefault()}
                       className={`
                         mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none active:!bg-transparent
                         ${isActiveUrl(item.url) 
@@ -237,6 +243,9 @@ export function AppSidebar() {
                  <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
                       onClick={(e) => handleNavigation(item.url, e)}
+                      onPointerDown={(e) => { const pt = (e as any).pointerType; if (pt === 'mouse' || pt === 'touch' || pt === 'pen') e.preventDefault(); }}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onTouchStart={(e) => e.preventDefault()}
                       className={`
                         mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none active:!bg-transparent
                         ${isActiveUrl(item.url) 
