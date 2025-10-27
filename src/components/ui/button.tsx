@@ -11,7 +11,7 @@ const buttonVariants = cva(
       variant: {
         default: "bg-primary text-primary-foreground md:hover:bg-primary/90",
         destructive:
-          "bg-red-700 text-destructive-foreground md:hover:bg-destructive md:hover:shadow-lg transition-all",
+          "bg-destructive text-destructive-foreground md:hover:bg-destructive md:hover:shadow-lg md:hover:scale-[1.02] transition-all",
         outline:
           "border border-input bg-background md:hover:bg-accent md:hover:text-accent-foreground",
         // Neutral outline without accent hover for precise per-button control
