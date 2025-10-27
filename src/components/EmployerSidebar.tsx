@@ -292,7 +292,7 @@ export function EmployerSidebar() {
                       mx-2 rounded-lg transition-all duration-200
                       ${isActiveUrl(item.url) 
                         ? 'bg-white/20 text-white shadow-lg' 
-                        : 'text-white hover:bg-white/10 hover:text-white'
+                        : 'text-white md:hover:bg-white/10 md:hover:text-white'
                       }
                     `}
                   >
@@ -329,7 +329,7 @@ export function EmployerSidebar() {
                       mx-2 rounded-lg transition-all duration-200
                       ${isActiveUrl(item.url) 
                         ? 'bg-white/20 text-white shadow-lg' 
-                        : 'text-white hover:bg-white/10 hover:text-white'
+                        : 'text-white md:hover:bg-white/10 md:hover:text-white'
                       }
                     `}
                   >
@@ -364,7 +364,7 @@ export function EmployerSidebar() {
                       mx-2 rounded-lg transition-all duration-200
                       ${isActiveUrl(item.url) 
                         ? 'bg-white/20 text-white shadow-lg' 
-                        : 'text-white hover:bg-white/10 hover:text-white'
+                        : 'text-white md:hover:bg-white/10 md:hover:text-white'
                       }
                     `}
                   >
@@ -397,7 +397,7 @@ export function EmployerSidebar() {
                         mx-2 rounded-lg transition-all duration-200
                         ${isActiveUrl('/admin') 
                           ? 'bg-white/20 text-white shadow-lg' 
-                          : 'text-white hover:bg-white/10 hover:text-white'
+                          : 'text-white md:hover:bg-white/10 md:hover:text-white'
                         }
                       `}
                     >

@@ -626,7 +626,7 @@ const AuthDesktop = ({
                           inputMode="email"
                           spellCheck={false}
                           autoCapitalize="none"
-                          className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                          className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10 placeholder:text-white/60"
                         />
                         {/* email suggestions removed for simpler UX */}
                       </div>
@@ -644,7 +644,7 @@ const AuthDesktop = ({
                             required
                             name={`password-${role}`}
                             autoComplete={`${role}-current-password`}
-                            className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                            className="bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10 placeholder:text-white/60"
                           />
                           <button
                             type="button"
@@ -677,7 +677,7 @@ const AuthDesktop = ({
                         <span className="text-sm text-white">Håll mig inloggad</span>
                       </label>
                       
-                       <Button type="submit" className="w-full bg-parium-navy hover:bg-parium-navy/90 text-white" disabled={loading}>
+                       <Button type="submit" className="w-full bg-parium-navy md:hover:bg-parium-navy/90 text-white" disabled={loading}>
                          {loading ? "Loggar in..." : "Logga in"}
                        </Button>
                        
@@ -692,9 +692,9 @@ const AuthDesktop = ({
                         </div>
                        
                         {showResetPassword && !resetPasswordSent && (
-                         <div className="mt-4 p-3 rounded-lg text-center">
+                        <div className="mt-4 p-3 rounded-lg text-center">
                             <Button
-                              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                              className="bg-primary md:hover:bg-primary/90 text-primary-foreground"
                               size="sm"
                               onClick={handleResetPasswordEmail}
                               disabled={resetLoading}
@@ -715,7 +715,7 @@ const AuthDesktop = ({
                                size="sm"
                                onClick={handleResetPasswordEmail}
                                disabled={resetLoading}
-                               className="bg-parium-navy hover:bg-parium-navy/90 text-white text-sm"
+                               className="bg-parium-navy md:hover:bg-parium-navy/90 text-white text-sm"
                              >
                                {resetLoading ? "Skickar..." : "Skicka igen"}
                              </Button>

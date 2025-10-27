@@ -176,11 +176,11 @@ export function AppSidebar() {
                  {profileItems.map((item) => (
                    <SidebarMenuItem key={item.title}>
                      <SidebarMenuButton 
-                       data-onboarding={item.title === 'Min Profil' ? 'min-profil' : undefined}
-                       onClick={(e) => handleNavigation(item.url, e)}
-                       className={`transition-colors duration-150 ${isActiveUrl(item.url) ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent'}`}
-                       title={collapsed ? item.title : undefined}
-                     >
+                        data-onboarding={item.title === 'Min Profil' ? 'min-profil' : undefined}
+                        onClick={(e) => handleNavigation(item.url, e)}
+                        className={`transition-colors duration-150 ${isActiveUrl(item.url) ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'md:hover:bg-sidebar-accent'}`}
+                        title={collapsed ? item.title : undefined}
+                      >
                        <item.icon className="h-4 w-4" />
                        {!collapsed && <span>{item.title}</span>}
                      </SidebarMenuButton>
@@ -202,10 +202,10 @@ export function AppSidebar() {
                  {businessItems.map((item) => (
                    <SidebarMenuItem key={item.title}>
                      <SidebarMenuButton 
-                       onClick={(e) => handleNavigation(item.url, e)}
-                       className={`transition-colors duration-150 ${isActiveUrl(item.url) ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent'}`}
-                       title={collapsed ? item.title : undefined}
-                     >
+                        onClick={(e) => handleNavigation(item.url, e)}
+                        className={`transition-colors duration-150 ${isActiveUrl(item.url) ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'md:hover:bg-sidebar-accent'}`}
+                        title={collapsed ? item.title : undefined}
+                      >
                        <item.icon className="h-4 w-4" />
                        {!collapsed && <span>{item.title}</span>}
                      </SidebarMenuButton>
@@ -227,10 +227,10 @@ export function AppSidebar() {
                  {supportItems.map((item) => (
                    <SidebarMenuItem key={item.title}>
                      <SidebarMenuButton 
-                       onClick={(e) => handleNavigation(item.url, e)}
-                       className={`transition-colors duration-150 ${isActiveUrl(item.url) ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'hover:bg-sidebar-accent'}`}
-                       title={collapsed ? item.title : undefined}
-                     >
+                        onClick={(e) => handleNavigation(item.url, e)}
+                        className={`transition-colors duration-150 ${isActiveUrl(item.url) ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'md:hover:bg-sidebar-accent'}`}
+                        title={collapsed ? item.title : undefined}
+                      >
                        <item.icon className="h-4 w-4" />
                        {!collapsed && <span>{item.title}</span>}
                      </SidebarMenuButton>
@@ -246,7 +246,7 @@ export function AppSidebar() {
           <Button 
             onClick={signOut}
             variant="ghost" 
-            className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors duration-150"
+            className="w-full justify-start text-sidebar-foreground md:hover:bg-sidebar-accent md:hover:text-sidebar-accent-foreground transition-colors duration-150"
             title={collapsed ? 'Logga ut' : undefined}
           >
             <LogOut className="h-4 w-4" />

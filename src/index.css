@@ -59,6 +59,18 @@ select:focus, select:focus-visible,
   --tw-ring-shadow: 0 0 transparent !important;
 }
 
+/* Ultra-safe touch device styles */
+@media (hover: none) and (pointer: coarse) {
+  * {
+    -webkit-tap-highlight-color: transparent !important;
+  }
+  
+  button:active, a:active, [role="button"]:active {
+    background-color: inherit !important;
+    opacity: 0.85;
+  }
+}
+
 @media (min-width: 768px) {
   body {
     /* Desktop - återgå till original mörk bakgrund */
