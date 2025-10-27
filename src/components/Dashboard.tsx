@@ -58,7 +58,7 @@ const Dashboard = memo(() => {
         </div>
       )}
 
-      <Card className="bg-white/5 backdrop-blur-sm border-white/20">
+      <Card className="bg-white/5 backdrop-blur-sm border-0">
         <CardHeader className="p-6 md:p-4">
           <CardTitle className="text-sm text-white text-center md:text-left">
             Utlagda jobb av {profile?.company_name || 'ditt företag'}
