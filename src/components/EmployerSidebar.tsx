@@ -300,7 +300,7 @@ export function EmployerSidebar() {
                       onClick={() => handleNavigation(item.url)}
                       onMouseEnter={item.url === '/candidates' ? prefetchApplications : undefined}
                       onFocus={item.url === '/candidates' ? prefetchApplications : undefined}
-                      className="flex items-center gap-3 w-full"
+                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span className="font-medium">{item.title}</span>}
@@ -335,7 +335,7 @@ export function EmployerSidebar() {
                   >
                     <button
                       onClick={() => handleNavigation(item.url)}
-                      className="flex items-center gap-3 w-full"
+                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span className="font-medium">{item.title}</span>}
@@ -370,7 +370,7 @@ export function EmployerSidebar() {
                   >
                     <button
                       onClick={() => handleNavigation(item.url)}
-                      className="flex items-center gap-3 w-full"
+                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span className="font-medium">{item.title}</span>}
@@ -403,7 +403,7 @@ export function EmployerSidebar() {
                     >
                       <button
                         onClick={() => handleNavigation('/admin')}
-                        className="flex items-center gap-3 w-full"
+                        className="flex items-center gap-3 w-full outline-none focus:outline-none"
                       >
                         <Settings className="h-4 w-4" />
                         {!collapsed && <span className="font-medium">Admin Panel</span>}

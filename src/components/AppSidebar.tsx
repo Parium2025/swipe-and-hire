@@ -174,14 +174,14 @@ export function AppSidebar() {
                  <SidebarMenuItem key={item.title}>
                    <SidebarMenuButton 
                      data-onboarding={item.title === 'Min Profil' ? 'min-profil' : undefined}
-                     onClick={(e) => handleNavigation(item.url, e)}
-                     className={`
-                       mx-2 rounded-lg transition-all duration-200
-                       ${isActiveUrl(item.url) 
-                         ? 'bg-white/20 text-white shadow-lg' 
-                         : 'text-white hover:bg-white/10 hover:text-white'
-                       }
-                     `}
+                      onClick={(e) => handleNavigation(item.url, e)}
+                      className={`
+                        mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none
+                        ${isActiveUrl(item.url) 
+                          ? 'bg-white/20 text-white shadow-lg' 
+                          : 'text-white hover:bg-white/10 hover:text-white'
+                        }
+                      `}
                      title={collapsed ? item.title : undefined}
                    >
                      <item.icon className="h-4 w-4" />
@@ -205,14 +205,14 @@ export function AppSidebar() {
                {businessItems.map((item) => (
                  <SidebarMenuItem key={item.title}>
                    <SidebarMenuButton 
-                     onClick={(e) => handleNavigation(item.url, e)}
-                     className={`
-                       mx-2 rounded-lg transition-all duration-200
-                       ${isActiveUrl(item.url) 
-                         ? 'bg-white/20 text-white shadow-lg' 
-                         : 'text-white hover:bg-white/10 hover:text-white'
-                       }
-                     `}
+                      onClick={(e) => handleNavigation(item.url, e)}
+                      className={`
+                        mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none
+                        ${isActiveUrl(item.url) 
+                          ? 'bg-white/20 text-white shadow-lg' 
+                          : 'text-white hover:bg-white/10 hover:text-white'
+                        }
+                      `}
                      title={collapsed ? item.title : undefined}
                    >
                      <item.icon className="h-4 w-4" />
@@ -236,14 +236,14 @@ export function AppSidebar() {
                {supportItems.map((item) => (
                  <SidebarMenuItem key={item.title}>
                    <SidebarMenuButton 
-                     onClick={(e) => handleNavigation(item.url, e)}
-                     className={`
-                       mx-2 rounded-lg transition-all duration-200
-                       ${isActiveUrl(item.url) 
-                         ? 'bg-white/20 text-white shadow-lg' 
-                         : 'text-white hover:bg-white/10 hover:text-white'
-                       }
-                     `}
+                      onClick={(e) => handleNavigation(item.url, e)}
+                      className={`
+                        mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none
+                        ${isActiveUrl(item.url) 
+                          ? 'bg-white/20 text-white shadow-lg' 
+                          : 'text-white hover:bg-white/10 hover:text-white'
+                        }
+                      `}
                      title={collapsed ? item.title : undefined}
                    >
                      <item.icon className="h-4 w-4" />
