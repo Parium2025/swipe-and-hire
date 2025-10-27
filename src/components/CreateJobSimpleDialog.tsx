@@ -571,7 +571,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 
                 setTemplateToDelete(null);
               }}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              variant="destructive"
             >
               Ta bort
             </AlertDialogAction>

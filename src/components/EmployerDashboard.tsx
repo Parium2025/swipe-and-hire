@@ -477,7 +477,8 @@ const EmployerDashboard = memo(() => {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteJob}
-              className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white border-0 text-sm"
+              variant="destructive"
+              className="w-full sm:w-auto text-sm"
             >
               <Trash2 className="h-4 w-4 mr-1.5" />
               Ta bort
