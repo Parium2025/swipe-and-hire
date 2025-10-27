@@ -1,21 +1,35 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Search, MapPin, Clock, Building, Filter, Heart, ExternalLink, X, ChevronDown, Check, Briefcase } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useAuth } from '@/hooks/useAuth';
-
-import { createSmartSearchConditions, expandSearchTerms } from '@/lib/smartSearch';
+import { useToast } from '@/hooks/use-toast';
+import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Clock, X, ChevronDown, Check, Search } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
-import { swedishCities } from '@/lib/swedishCities';
+import { createSmartSearchConditions, expandSearchTerms } from '@/lib/smartSearch';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { JobTitleCell } from '@/components/JobTitleCell';
+import { TruncatedText } from '@/components/TruncatedText';
+import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
+import { formatDateShortSv } from '@/lib/date';
+import { StatsGrid } from '@/components/StatsGrid';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
 interface Job {
   id: string;
   title: string;
@@ -26,28 +40,38 @@ interface Job {
   salary_max?: number;
   description: string;
   created_at: string;
+  is_active: boolean;
+  views_count: number;
+  applications_count: number;
+  employer_profile?: {
+    first_name: string;
+    last_name: string;
+  };
   profiles?: {
     company_name: string | null;
   };
 }
 
 const SearchJobs = () => {
-  const { user, profile } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState('all-locations');
+  const [searchInput, setSearchInput] = useState('');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most-views'>('newest');
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [locationSearchTerm, setLocationSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all-categories');
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
   const [selectedEmploymentTypes, setSelectedEmploymentTypes] = useState<string[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const isMobile = useIsMobile();
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   
-  const dropdownAlignOffset = 0;
-  // Job categories with subcategories - using existing working data structure
+  // Pagination
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const listTopRef = useRef<HTMLDivElement>(null);
+  const didMountRef = useRef(false);
+
   const jobCategories = [
     { 
       value: 'administration', 
@@ -224,7 +248,6 @@ const SearchJobs = () => {
     'Värnamo', 'Flen', 'Tibro', 'Markaryd', 'Kungälv', 'Kungsbacka', 'Solna'
   ];
 
-  // Employment types for filtering - using centralized configuration
   const employmentTypes = SEARCH_EMPLOYMENT_TYPES;
 
   const fetchJobs = async () => {
@@ -239,39 +262,26 @@ const SearchJobs = () => {
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
-      // Apply search filters with smart synonyms
-      if (searchTerm) {
-        const smartSearchConditions = createSmartSearchConditions(searchTerm);
+      // Apply smart search
+      if (searchInput) {
+        const smartSearchConditions = createSmartSearchConditions(searchInput);
         query = query.or(smartSearchConditions);
       }
 
-      // Apply search filtering - prioritize company selection
-      if (selectedCompany) {
-        // If a specific company is selected, filter only by that company
-        query = query.ilike('company_name', selectedCompany);
-      } else if (searchTerm) {
-        // General search across both company and job title
-        query = query.or(`company_name.ilike.%${searchTerm}%,title.ilike.%${searchTerm}%`);
-      }
-
-      // Apply subcategory filter (more specific than category)
+      // Apply subcategory filter
       if (selectedSubcategories.length > 0) {
-        // Fix SQL parsing issues by using proper escaping
         selectedSubcategories.forEach((subcategory, index) => {
           if (index === 0) {
             query = query.ilike('title', `%${subcategory}%`);
           }
         });
       } else if (selectedCategory && selectedCategory !== 'all-categories') {
-        // Apply category filter only if no subcategory is selected
         const category = jobCategories.find(cat => cat.value === selectedCategory);
         if (category) {
-          // Use individual filter operations for keywords as well
           if (category.keywords.length === 1) {
             const cleanKeyword = category.keywords[0].replace(/[%_]/g, '\\$&');
             query = query.or(`title.ilike.%${cleanKeyword}%,description.ilike.%${cleanKeyword}%`);
           } else {
-            // For multiple keywords, apply them one by one
             let hasFilter = false;
             category.keywords.forEach((keyword) => {
               const cleanKeyword = keyword.replace(/[%_]/g, '\\$&');
@@ -284,39 +294,42 @@ const SearchJobs = () => {
         }
       }
 
+      // Apply location filter
       if (selectedLocations.length > 0) {
-        // Create OR conditions for all selected locations
         const locationConditions = selectedLocations.map(location => 
           `location.ilike.%${location}%`
         ).join(',');
         query = query.or(locationConditions);
-      } else if (selectedLocation && selectedLocation !== 'all-locations') {
-        // Apply single location filter from dropdown
-        query = query.ilike('location', `%${selectedLocation}%`);
       }
 
+      // Apply employment type filter
       if (selectedEmploymentTypes.length > 0) {
-        // Convert search labels to database codes if needed
         const employmentCodes = selectedEmploymentTypes.map(type => {
           const foundType = SEARCH_EMPLOYMENT_TYPES.find(t => t.value === type);
-          return foundType?.code || type; // Use code if available, fallback to original value
+          return foundType?.code || type;
         });
         query = query.in('employment_type', employmentCodes);
       }
 
-      const { data, error } = await query.limit(20);
+      const { data, error } = await query.limit(100);
       
       if (error) throw error;
       
-      // Transform the data to match our Job interface
       const transformedJobs = (data || []).map(job => ({
         ...job,
-        company_name: job.profiles?.company_name || 'Okänt företag'
+        company_name: job.profiles?.company_name || 'Okänt företag',
+        views_count: job.views_count || 0,
+        applications_count: job.applications_count || 0,
       }));
       
       setJobs(transformedJobs);
     } catch (error) {
       console.error('Error fetching jobs:', error);
+      toast({
+        title: "Fel vid hämtning",
+        description: "Kunde inte hämta jobb. Försök igen.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
@@ -324,7 +337,54 @@ const SearchJobs = () => {
 
   useEffect(() => {
     fetchJobs();
-  }, [searchTerm, selectedLocations, selectedCategory, selectedSubcategories, selectedEmploymentTypes, selectedCompany]);
+  }, [selectedLocations, selectedCategory, selectedSubcategories, selectedEmploymentTypes]);
+
+  // Filter and sort jobs
+  const filteredAndSortedJobs = useMemo(() => {
+    let filtered = [...jobs];
+
+    // Search filter
+    if (searchInput) {
+      const searchLower = searchInput.toLowerCase();
+      filtered = filtered.filter(job =>
+        job.title.toLowerCase().includes(searchLower) ||
+        job.company_name.toLowerCase().includes(searchLower) ||
+        job.description.toLowerCase().includes(searchLower) ||
+        job.location.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Sort
+    switch (sortBy) {
+      case 'newest':
+        filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+      case 'oldest':
+        filtered.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        break;
+      case 'most-views':
+        filtered.sort((a, b) => b.views_count - a.views_count);
+        break;
+    }
+
+    return filtered;
+  }, [jobs, searchInput, sortBy]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredAndSortedJobs.length / pageSize));
+  const pageJobs = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredAndSortedJobs.slice(start, start + pageSize);
+  }, [filteredAndSortedJobs, page]);
+
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    if (listTopRef.current) {
+      listTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [page]);
 
   const formatSalary = (min?: number, max?: number) => {
     if (min && max) {
@@ -337,807 +397,424 @@ const SearchJobs = () => {
     return 'Enligt överenskommelse';
   };
 
-  const handleQuickCategory = (category: string) => {
-    setSelectedCategory(category);
-    setSelectedSubcategories([]); // Clear subcategories when selecting main category
-    setSearchTerm('');
+  const statsCards = useMemo(() => [
+    { icon: Briefcase, title: 'Jobb hittade', value: jobs.length, loading },
+    { icon: TrendingUp, title: 'Aktiva annonser', value: jobs.filter(j => j.is_active).length, loading },
+    { icon: Building, title: 'Unika företag', value: new Set(jobs.map(j => j.company_name)).size, loading },
+    { icon: Users, title: 'Nya denna vecka', value: jobs.filter(j => {
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      return new Date(j.created_at) > weekAgo;
+    }).length, loading },
+  ], [jobs, loading]);
+
+  const sortLabels = {
+    newest: 'Nyaste först',
+    oldest: 'Äldsta först',
+    'most-views': 'Mest visade',
   };
-
-  const handleSelectAllInCategory = (categoryValue: string) => {
-    const category = jobCategories.find(cat => cat.value === categoryValue);
-    if (category) {
-      setSelectedCategory(categoryValue);
-      
-      // Check if all subcategories are already selected
-      const allSelected = category.subcategories.every(sub => selectedSubcategories.includes(sub));
-      
-      if (allSelected) {
-        // If all are selected, deselect all
-        setSelectedSubcategories([]);
-        setSelectedCategory('all-categories');
-      } else {
-        // If not all are selected, select all
-        setSelectedSubcategories(category.subcategories);
-      }
-      
-      setSearchTerm('');
-    }
-  };
-
-  const toggleSubcategory = (category: string, subcategory: string) => {
-    setSelectedCategory(category);
-    
-    const isCurrentlySelected = selectedSubcategories.includes(subcategory);
-    if (isCurrentlySelected) {
-      // Remove from selection
-      setSelectedSubcategories(prev => prev.filter(s => s !== subcategory));
-    } else {
-      // Add to selection
-      setSelectedSubcategories(prev => [...prev, subcategory]);
-    }
-    setSearchTerm('');
-  };
-
-
-  // Get suggestions for job title autocomplete with smart synonyms
-  const getJobTitleSuggestions = (searchTerm: string) => {
-    if (!searchTerm.trim() || searchTerm.length < 2) return [];
-    
-    const searchLower = searchTerm.toLowerCase().trim();
-    const expandedTerms = expandSearchTerms(searchTerm);
-    const suggestions: Array<{title: string, category: any}> = [];
-    
-    // Collect all subcategories that match the search term or its synonyms
-    jobCategories.forEach(category => {
-      category.subcategories.forEach(subcategory => {
-        const subcategoryLower = subcategory.toLowerCase();
-        
-        // Check if the subcategory matches the original search term or any synonym
-        const matches = expandedTerms.some(term => 
-          subcategoryLower.includes(term) || term.includes(subcategoryLower)
-        );
-        
-        if (matches || subcategoryLower.includes(searchLower)) {
-          suggestions.push({
-            title: subcategory,
-            category: category
-          });
-        }
-      });
-      
-      // Also check category keywords for matches
-      if (category.keywords) {
-        const keywordMatches = expandedTerms.some(term => 
-          category.keywords.some(keyword => keyword.toLowerCase().includes(term))
-        );
-        
-        if (keywordMatches) {
-          // Add a few representative subcategories from this category
-          category.subcategories.slice(0, 3).forEach(subcategory => {
-            if (!suggestions.some(s => s.title === subcategory)) {
-              suggestions.push({
-                title: subcategory,
-                category: category
-              });
-            }
-          });
-        }
-      }
-    });
-    
-    // Sort by relevance (exact start match first, then contains)
-    return suggestions.sort((a, b) => {
-      const aStarts = a.title.toLowerCase().startsWith(searchLower);
-      const bStarts = b.title.toLowerCase().startsWith(searchLower);
-      if (aStarts && !bStarts) return -1;
-      if (!aStarts && bStarts) return 1;
-      return a.title.localeCompare(b.title);
-    }).slice(0, 8); // Limit to 8 suggestions
-  };
-
-  // Get company suggestions from existing jobs
-  const getCompanySuggestions = (searchTerm: string) => {
-    if (!searchTerm.trim() || searchTerm.length < 2) return [];
-    
-    const searchLower = searchTerm.toLowerCase().trim();
-    const companyNames = new Set<string>();
-    
-    // Extract unique company names from jobs that match search
-    jobs.forEach(job => {
-      if (job.company_name && job.company_name.toLowerCase().includes(searchLower)) {
-        companyNames.add(job.company_name);
-      }
-    });
-    
-    return Array.from(companyNames)
-      .sort((a, b) => {
-        const aStarts = a.toLowerCase().startsWith(searchLower);
-        const bStarts = b.toLowerCase().startsWith(searchLower);
-        if (aStarts && !bStarts) return -1;
-        if (!aStarts && bStarts) return 1;
-        return a.localeCompare(b);
-      })
-      .slice(0, 5) // Limit to 5 company suggestions
-      .map(company => ({ name: company, jobCount: jobs.filter(j => j.company_name === company).length }));
-  };
-
-  const jobTitleSuggestions = getJobTitleSuggestions(searchTerm);
-  const companySuggestions = getCompanySuggestions(searchTerm);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-4 relative smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
-      
-      {/* Main content */}
-      {/* Hero Section */}
-      <div className="text-center space-y-2 py-3">
-        <h1 className="text-2xl font-bold text-white">
-          Ditt nästa steg
-        </h1>
-        <p className="text-sm text-white/90 max-w-2xl mx-auto">
-          Enkel, smart och snabb jobbsökning. Välj yrkesområde eller sök fritt - vi hjälper dig hitta rätt
-        </p>
+    <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12">
+      <div className="flex justify-center items-center mb-4">
+        <h1 className="text-xl md:text-2xl font-semibold text-white">Sök Jobb</h1>
       </div>
 
-      {/* Advanced Search - Modern & Integrated */}
-      <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-        <CardHeader className="pb-3">
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Search Fields Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            
-            {/* Combined Job and Company Search */}
-            <div className="space-y-2 relative z-[10000]">
-              <Label htmlFor="search" className="text-sm font-medium text-white flex items-center gap-2">
-                <Search className="h-3 w-3" />
-                Sök
-              </Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
-                <Input
-                  id="search"
-                  placeholder="Sök yrke eller företag..."
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setShowSuggestions(true);
-                  }}
-                  onFocus={() => setShowSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                  className="pl-10 h-10 text-sm bg-white/5 border-white/10 text-white placeholder:text-white/40"
-                />
-                {searchTerm && (
-                  <button 
-                    onClick={() => setSearchTerm('')}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-                
-                {/* Enhanced Autocomplete with Companies */}
-                {showSuggestions && (jobTitleSuggestions.length > 0 || companySuggestions.length > 0) && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-slate-700/95 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-[999999] overflow-hidden">
-                    
-                    {/* Company Suggestions */}
-                    {companySuggestions.length > 0 && (
-                      <div>
-                        <div className="p-2 border-b border-white/10 text-sm text-white/70 font-medium flex items-center gap-2">
-                          <Building className="h-4 w-4" />
-                          Företag
-                        </div>
-                        {companySuggestions.map((company, index) => (
-                          <div
-                            key={`company-${index}`}
-                            className="flex items-center justify-between p-3 hover:bg-white/10 cursor-pointer border-b border-white/5 transition-colors"
-                            onClick={() => {
-                              setSearchTerm(company.name);
-                              setSelectedCompany(company.name);
-                              setShowSuggestions(false);
-                            }}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="w-5 h-5 shrink-0 flex items-center justify-center">
-                                <Building className="h-4 w-4 text-white/50" />
-                              </div>
-                              <div>
-                                <div className="font-medium text-sm text-white">{company.name}</div>
-                                <div className="text-sm text-white/60">
-                                  {company.jobCount} {company.jobCount === 1 ? 'jobb' : 'jobb'}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-sm text-white/50">Välj →</div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    
-                    {/* Job Title Suggestions */}
-                    {jobTitleSuggestions.length > 0 && (
-                      <div>
-                        <div className="p-2 border-b border-white/10 text-sm text-white/70 font-medium flex items-center gap-2">
-                          <Briefcase className="h-4 w-4" />
-                          Yrken
-                        </div>
-                        {jobTitleSuggestions.map((suggestion, index) => (
-                          <div
-                            key={`job-${index}`}
-                            className="flex items-center justify-between p-3 hover:bg-white/10 cursor-pointer border-b border-white/5 last:border-b-0 transition-colors"
-                            onClick={() => {
-                              setSearchTerm(suggestion.title);
-                              setSelectedCompany(null);
-                              setShowSuggestions(false);
-                            }}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="w-5 h-5 shrink-0 flex items-center justify-center">
-                                <Briefcase className="h-4 w-4 text-white/50" />
-                              </div>
-                              <div>
-                                <div className="font-medium text-sm text-white">{suggestion.title}</div>
-                                <div className="text-sm text-white/60">
-                                  {suggestion.category.label}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-sm text-white/50">Välj →</div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
+      <StatsGrid stats={statsCards} />
 
-              </div>
-              
-            </div>
+      {/* Search Bar - Desktop */}
+      <div className="hidden md:flex items-center gap-4">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
+          <Input
+            placeholder="Sök efter jobbtitel, företag, plats..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/40"
+          />
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="bg-white/5 border-white/10 text-white hover:bg-white/10">
+              Sortera: {sortLabels[sortBy]}
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white">
+            <DropdownMenuItem onClick={() => setSortBy('newest')} className="hover:bg-slate-700/70">
+              Nyaste först
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSortBy('oldest')} className="hover:bg-slate-700/70">
+              Äldsta först
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSortBy('most-views')} className="hover:bg-slate-700/70">
+              Mest visade
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
-            {/* Yrke Filter - Direct dropdown */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-white flex items-center gap-2">
-                <Briefcase className="h-3 w-3" />
-                Yrkesområde
-              </Label>
-              <DropdownMenu modal={false}>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full h-10 bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between text-sm"
-                  >
-                    <span className="truncate">
-                      {selectedSubcategories.length > 0 
-                        ? `${selectedSubcategories.length} valda`
-                        : 'Välj yrkeso...'
-                      }
-                    </span>
-                    <div className="flex items-center gap-2">
-                      {selectedSubcategories.length > 0 && (
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
-                      )}
-                      <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                    </div>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent 
-                  className={`w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white ${isMobile ? 'max-h-[60vh]' : 'max-h-96'} overflow-y-auto overscroll-contain`}
-                  side="bottom"
-                  align="center"
-                  alignOffset={0}
-                  sideOffset={6}
-                  avoidCollisions={false}
-                  onCloseAutoFocus={(e) => e.preventDefault()}
-                >
-                  {/* Clear selection option */}
-                  {(selectedCategory !== 'all-categories' || selectedSubcategories.length > 0) && (
-                    <>
-                      <DropdownMenuItem
-                        onSelect={(e) => e.preventDefault()}
-                        onClick={() => {
-                          setSelectedCategory('all-categories');
-                          setSelectedSubcategories([]);
-                        }}
-                        className="font-medium cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 text-red-300 border-b border-slate-600/30"
+      {/* Search Bar - Mobile */}
+      <div className="md:hidden space-y-2">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
+          <Input
+            placeholder="Sök jobb..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/40"
+          />
+        </div>
+        <Button 
+          variant="outline" 
+          className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between"
+          onClick={() => {}}
+        >
+          Sortera: {sortLabels[sortBy]}
+          <ChevronDown className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {/* Advanced Filters - Collapsible */}
+      <Collapsible open={showAdvancedFilters} onOpenChange={setShowAdvancedFilters}>
+        <CollapsibleTrigger asChild>
+          <Button variant="outline" className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10">
+            Avancerade filter
+            <ChevronDown className={`ml-2 h-4 w-4 transition-transform ${showAdvancedFilters ? 'rotate-180' : ''}`} />
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <Card className="bg-white/5 backdrop-blur-sm border-white/20 mt-2">
+            <CardContent className="p-4 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Location Filter */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-white flex items-center gap-2">
+                    <MapPin className="h-3 w-3" />
+                    Plats
+                  </Label>
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between text-sm"
                       >
-                        <X className="h-4 w-4 mr-2" />
-                        Rensa val
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                  
-                  {/* Job categories with subcategory dropdowns */}
-                  <div className="max-h-80 overflow-y-auto">
-                    {jobCategories.map((category) => (
-                      <div key={category.value}>
+                        <span className="truncate">
+                          {selectedLocations.length === 0 
+                            ? 'Välj ort...'
+                            : selectedLocations.length === 1 
+                            ? selectedLocations[0]
+                            : `${selectedLocations.length} valda`
+                          }
+                        </span>
+                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white max-h-80 overflow-y-auto">
+                      <div className="p-2 border-b border-slate-600/30">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
+                          <Input
+                            placeholder="Sök stad..."
+                            value={locationSearchTerm}
+                            onChange={(e) => setLocationSearchTerm(e.target.value)}
+                            onClick={(e) => e.stopPropagation()}
+                            className="pl-10 bg-slate-600/50 border-slate-500/50 text-white placeholder:text-white/50"
+                          />
+                        </div>
+                      </div>
+                      {selectedLocations.length > 0 && (
                         <DropdownMenuItem
-                          onSelect={(e) => e.preventDefault()}
-                          onClick={() => {
-                            if (selectedCategory === category.value) {
-                              setSelectedCategory('all-categories');
-                              setSelectedSubcategories([]);
-                            } else {
-                              setSelectedCategory(category.value);
-                              setSelectedSubcategories([]);
-                            }
-                          }}
-                          className="font-medium cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white flex items-center justify-between border-b border-slate-600/30"
+                          onClick={() => setSelectedLocations([])}
+                          className="font-medium cursor-pointer hover:bg-slate-700/70 text-red-300 border-b border-slate-600/30"
                         >
-                          <div className="flex items-center gap-2">
-                            <span className="text-lg">{category.icon}</span>
-                            <span>{category.label}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {selectedCategory === category.value && (
-                              <Check className="h-4 w-4 text-white" />
-                            )}
-                            {category.subcategories.some(sub => selectedSubcategories.includes(sub)) && (
-                              <div className="w-2 h-2 bg-white rounded-full"></div>
-                            )}
-                          </div>
+                          <X className="h-4 w-4 mr-2" />
+                          Rensa alla ({selectedLocations.length})
                         </DropdownMenuItem>
-                        
-                        {/* Show subcategories if category is selected or has selected subcategories */}
-                        {(selectedCategory === category.value || category.subcategories.some(sub => selectedSubcategories.includes(sub))) && (
-                          <div className="bg-slate-800/50 border-l-2 border-slate-600/50 ml-4">
+                      )}
+                      <div className="max-h-60 overflow-y-auto">
+                        {locations
+                          .filter(location => location.toLowerCase().includes(locationSearchTerm.toLowerCase()))
+                          .map((location) => (
                             <DropdownMenuItem
-                              onSelect={(e) => e.preventDefault()}
+                              key={location}
                               onClick={() => {
-                                if (selectedSubcategories.length === category.subcategories.length && 
-                                    category.subcategories.every(sub => selectedSubcategories.includes(sub))) {
-                                  // All selected, deselect all from this category
-                                  setSelectedSubcategories(prev => prev.filter(sub => !category.subcategories.includes(sub)));
+                                const isSelected = selectedLocations.includes(location);
+                                if (isSelected) {
+                                  setSelectedLocations(prev => prev.filter(l => l !== location));
                                 } else {
-                                  // Select all from this category
-                                  setSelectedSubcategories(prev => {
-                                    const filtered = prev.filter(sub => !category.subcategories.includes(sub));
-                                    return [...filtered, ...category.subcategories];
-                                  });
+                                  setSelectedLocations(prev => [...prev, location]);
                                 }
                               }}
-                              className="text-sm cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white/90 italic"
+                              className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
                             >
-                              <span className="ml-4">
-                                {category.subcategories.every(sub => selectedSubcategories.includes(sub))
-                                  ? 'Avmarkera alla'
-                                  : 'Välj alla'
-                                }
-                              </span>
+                              <span>{location}</span>
+                              {selectedLocations.includes(location) && (
+                                <Check className="h-4 w-4 text-white" />
+                              )}
                             </DropdownMenuItem>
-                            {category.subcategories.map((subcategory) => (
-                              <DropdownMenuItem
-                                key={subcategory}
-                                onSelect={(e) => e.preventDefault()}
-                                onClick={() => {
-                                  const isSelected = selectedSubcategories.includes(subcategory);
-                                  if (isSelected) {
-                                    setSelectedSubcategories(prev => prev.filter(s => s !== subcategory));
-                                  } else {
-                                    setSelectedSubcategories(prev => [...prev, subcategory]);
-                                    setSelectedCategory(category.value);
-                                  }
-                                }}
-                                className="text-sm cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white flex items-center justify-between"
-                              >
-                                <span className="ml-6">{subcategory}</span>
-                                {selectedSubcategories.includes(subcategory) && (
-                                  <Check className="h-4 w-4 text-white" />
-                                )}
-                              </DropdownMenuItem>
-                            ))}
-                          </div>
-                        )}
+                          ))}
                       </div>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                {/* Employment Type Filter */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-white flex items-center gap-2">
+                    <Clock className="h-3 w-3" />
+                    Anställning
+                  </Label>
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between text-sm"
+                      >
+                        <span className="truncate">
+                          {selectedEmploymentTypes.length === 0 
+                            ? 'Alla typer' 
+                            : `${selectedEmploymentTypes.length} valda`
+                          }
+                        </span>
+                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-72 bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white max-h-80 overflow-y-auto">
+                      <DropdownMenuItem
+                        onClick={() => setSelectedEmploymentTypes([])}
+                        className="cursor-pointer hover:bg-slate-700/70 text-white"
+                      >
+                        Alla typer
+                      </DropdownMenuItem>
+                      {employmentTypes.map((type) => (
+                        <DropdownMenuItem
+                          key={type.value}
+                          onClick={() => {
+                            const isSelected = selectedEmploymentTypes.includes(type.value);
+                            if (isSelected) {
+                              setSelectedEmploymentTypes(prev => prev.filter(t => t !== type.value));
+                            } else {
+                              setSelectedEmploymentTypes(prev => [...prev, type.value]);
+                            }
+                          }}
+                          className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
+                        >
+                          <span>{type.label}</span>
+                          {selectedEmploymentTypes.includes(type.value) && (
+                            <Check className="h-4 w-4 text-white" />
+                          )}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                {/* Clear all filters button */}
+                <div className="flex items-end">
+                  <Button 
+                    variant="outline" 
+                    className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10"
+                    onClick={() => {
+                      setSelectedLocations([]);
+                      setSelectedEmploymentTypes([]);
+                      setSelectedCategory('all-categories');
+                      setSelectedSubcategories([]);
+                      setSearchInput('');
+                    }}
+                  >
+                    Rensa filter
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* Result indicator */}
+      {searchInput && (
+        <div className="text-sm text-white mb-4">
+          {filteredAndSortedJobs.length === 0 ? (
+            <span>Inga jobb matchar din sökning</span>
+          ) : (
+            <span>
+              Visar {filteredAndSortedJobs.length} av {jobs.length} jobb
+            </span>
+          )}
+        </div>
+      )}
+
+      <div ref={listTopRef} />
+
+      {/* Jobs Table/Cards */}
+      <Card className="bg-white/5 backdrop-blur-sm border-white/20">
+        <CardHeader className="hidden md:block md:p-4">
+          <CardTitle className="text-sm text-white">Jobbsökresultat</CardTitle>
+        </CardHeader>
+        <CardContent className="px-6 pb-6 md:px-4 md:pb-4">
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="inline-flex items-center gap-2">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                <p className="text-sm text-white/70">Söker jobb...</p>
+              </div>
+            </div>
+          ) : filteredAndSortedJobs.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-white/70">Inga jobb hittades</p>
+            </div>
+          ) : (
+            <>
+              {/* Desktop: Table view */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-white/10">
+                      <TableHead className="text-white">Titel</TableHead>
+                      <TableHead className="text-white">Företag</TableHead>
+                      <TableHead className="text-white">Plats</TableHead>
+                      <TableHead className="text-white">Lön</TableHead>
+                      <TableHead className="text-white">Publicerad</TableHead>
+                      <TableHead className="text-white">Åtgärder</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pageJobs.map((job) => (
+                      <TableRow 
+                        key={job.id} 
+                        className="border-white/10 cursor-pointer hover:bg-white/5"
+                        onClick={() => navigate(`/job-details/${job.id}`)}
+                      >
+                        <TableCell>
+                          <JobTitleCell title={job.title} employmentType={job.employment_type} />
+                        </TableCell>
+                        <TableCell>
+                          <TruncatedText 
+                            text={job.company_name} 
+                            className="text-sm text-white truncate max-w-[120px] block"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3 text-white/60" />
+                            <TruncatedText 
+                              text={job.location} 
+                              className="text-sm text-white truncate max-w-[100px] block"
+                            />
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs">
+                            {formatSalary(job.salary_min, job.salary_max)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1 text-sm text-white">
+                            <Calendar className="h-3 w-3" />
+                            {formatDateShortSv(job.created_at)}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button 
+                              size="sm" 
+                              className="h-8 px-3 text-xs"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/job-details/${job.id}`);
+                              }}
+                            >
+                              Ansök
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="h-8 w-8 p-0 bg-white/5 border-white/20 hover:bg-white/10"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toast({ title: "Sparad!", description: "Jobbet har sparats till dina favoriter" });
+                              }}
+                            >
+                              <Heart className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile: Card view */}
+              <div className="md:hidden">
+                <ScrollArea className="h-[calc(100vh-420px)]">
+                  <div className="space-y-2 px-2 py-2">
+                    {pageJobs.map((job) => (
+                      <ReadOnlyMobileJobCard
+                        key={job.id}
+                        job={job as any}
+                      />
                     ))}
                   </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            {/* Multi-Select Location */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-white flex items-center gap-2">
-                <MapPin className="h-3 w-3" />
-                Plats
-              </Label>
-              <div className="relative">
-                <DropdownMenu modal={false}>
-                  <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      className="w-full h-10 bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between text-sm"
-                    >
-                       <span className="truncate">
-                         {selectedLocations.length === 0 
-                           ? 'Välj ort eller...'
-                           : selectedLocations.length === 1 
-                           ? selectedLocations[0]
-                           : `${selectedLocations.length} valda`
-                         }
-                       </span>
-                      <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                   <DropdownMenuContent 
-                     className={`w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-[60] rounded-lg text-white ${isMobile ? 'max-h-[50vh]' : 'max-h-80'} overflow-y-auto overscroll-contain`}
-                     side="bottom"
-                     align="center"
-                     alignOffset={0}
-                     sideOffset={6}
-                     avoidCollisions={false}
-                     onCloseAutoFocus={(e) => e.preventDefault()}
-                   >
-                    {/* Search input */}
-                    <div className="p-2 border-b border-slate-600/30">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
-                        <Input
-                          placeholder="Sök stad..."
-                          value={locationSearchTerm}
-                          onChange={(e) => setLocationSearchTerm(e.target.value)}
-                          onClick={(e) => e.stopPropagation()}
-                          onMouseDown={(e) => e.stopPropagation()}
-                          onKeyDown={(e) => e.stopPropagation()}
-                          className="pl-10 bg-slate-600/50 border-slate-500/50 text-white placeholder:text-white/50"
-                        />
-                      </div>
-                    </div>
-                    
-                    {/* Clear all button */}
-                    {selectedLocations.length > 0 && (
-                      <DropdownMenuItem
-                        onClick={() => setSelectedLocations([])}
-                        className="font-medium cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 text-red-300 border-b border-slate-600/30"
-                      >
-                        <X className="h-4 w-4 mr-2" />
-                        Rensa alla ({selectedLocations.length})
-                      </DropdownMenuItem>
-                    )}
-                    
-                    {/* Location list */}
-                    <div className="max-h-60 overflow-y-auto">
-                      {locations
-                        .filter(location => 
-                          location.toLowerCase().includes(locationSearchTerm.toLowerCase())
-                        )
-                        .map((location) => (
-                          <DropdownMenuItem
-                            key={location}
-                            onClick={() => {
-                              const isSelected = selectedLocations.includes(location);
-                              if (isSelected) {
-                                setSelectedLocations(prev => prev.filter(l => l !== location));
-                              } else {
-                                setSelectedLocations(prev => [...prev, location]);
-                              }
-                            }}
-                            className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white flex items-center justify-between"
-                          >
-                            <span>{location}</span>
-                            {selectedLocations.includes(location) && (
-                              <Check className="h-4 w-4 text-white" />
-                            )}
-                          </DropdownMenuItem>
-                        ))}
-                      
-                      {locations.filter(location => 
-                        location.toLowerCase().includes(locationSearchTerm.toLowerCase())
-                      ).length === 0 && (
-                        <div className="p-4 text-center text-white/50">
-                          Ingen stad hittades för "{locationSearchTerm}"
-                        </div>
-                      )}
-                    </div>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                </ScrollArea>
               </div>
-              
-              {/* Selected locations preview */}
-              {selectedLocations.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {selectedLocations.slice(0, 3).map((location) => (
-                    <Badge key={location} variant="secondary" className="text-sm bg-white/10 text-white border-white/20">
-                      {location}
-                    </Badge>
-                  ))}
-                  {selectedLocations.length > 3 && (
-                    <Badge variant="secondary" className="text-sm bg-white/10 text-white border-white/20">
-                      +{selectedLocations.length - 3} till
-                    </Badge>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Employment Type */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-white flex items-center gap-2">
-                <Clock className="h-3 w-3" />
-                Anställning
-              </Label>
-              <DropdownMenu modal={false}>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full h-10 bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between text-sm"
-                  >
-                    <span className="truncate">
-                      {selectedEmploymentTypes.length === 0 
-                        ? 'Alla typer' 
-                        : selectedEmploymentTypes.length === 1 
-                          ? employmentTypes.find(type => type.value === selectedEmploymentTypes[0])?.label 
-                          : `${selectedEmploymentTypes.length} valda`
-                      }
-                    </span>
-                    <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent 
-                  className={`w-72 bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white ${isMobile ? 'max-h-[45vh]' : 'max-h-80'} overflow-y-auto overscroll-contain`}
-                  style={{ 
-                    WebkitOverflowScrolling: 'touch',
-                    scrollbarWidth: 'thin',
-                    scrollbarColor: '#64748b #334155'
-                  }}
-                  side="top"
-                  align="center"
-                  alignOffset={0}
-                  sideOffset={6}
-                  avoidCollisions={false}
-                  onCloseAutoFocus={(e) => e.preventDefault()}
-                >
-                  <DropdownMenuItem
-                    onClick={() => setSelectedEmploymentTypes([])}
-                    className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white flex items-center justify-between"
-                  >
-                    <span>Alla typer</span>
-                    {selectedEmploymentTypes.length === 0 && (
-                      <Check className="h-4 w-4 text-white" />
-                    )}
-                  </DropdownMenuItem>
-                  {employmentTypes.map((type) => {
-                    const isSelected = selectedEmploymentTypes.includes(type.value);
-                    return (
-                      <DropdownMenuItem
-                        key={type.value}
-                        onClick={() => {
-                          if (isSelected) {
-                            setSelectedEmploymentTypes(prev => prev.filter(t => t !== type.value));
-                          } else {
-                            setSelectedEmploymentTypes(prev => [...prev, type.value]);
-                          }
-                        }}
-                        className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white flex items-center justify-between"
-                      >
-                        <span>{type.label}</span>
-                        {isSelected && (
-                          <Check className="h-4 w-4 text-white" />
-                        )}
-                      </DropdownMenuItem>
-                    );
-                  })}
-                </DropdownMenuContent>
-              </DropdownMenu>
-              
-              {/* Selected employment types preview */}
-              {selectedEmploymentTypes.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {selectedEmploymentTypes.slice(0, 3).map((typeValue) => {
-                    const typeLabel = employmentTypes.find(t => t.value === typeValue)?.label || typeValue;
-                    return (
-                      <Badge 
-                        key={typeValue} 
-                        variant="secondary" 
-                        className="text-sm bg-white/10 text-white border-white/20 gap-2 hover:bg-white/20 cursor-pointer" 
-                        onClick={() => {
-                          setSelectedEmploymentTypes(prev => prev.filter(t => t !== typeValue));
-                        }}
-                      >
-                        <span>{typeLabel}</span>
-                        <X className="h-3 w-3" />
-                      </Badge>
-                    );
-                  })}
-                  {selectedEmploymentTypes.length > 3 && (
-                    <Badge variant="secondary" className="text-sm bg-white/10 text-white border-white/20">
-                      +{selectedEmploymentTypes.length - 3} till
-                    </Badge>
-                  )}
-                </div>
-              )}
-               
-              {/* Moved clear all filters button to after categories */}
-            </div>
-          </div>
-
-          {/* Selected Job Categories - Fixed position section */}
-          {selectedSubcategories.length > 0 && (
-            <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-              <div className="flex flex-wrap gap-2">
-                {selectedSubcategories.map((subcategory) => (
-                  <Badge key={subcategory} variant="secondary" className="gap-2 bg-white/10 hover:bg-white/20 text-white border-white/20">
-                    <span className="text-sm">{subcategory}</span>
-                    <button 
-                      onClick={() => {
-                        const newSubcategories = selectedSubcategories.filter(s => s !== subcategory);
-                        setSelectedSubcategories(newSubcategories);
-                        // Reset category if no subcategories left
-                        if (newSubcategories.length === 0) {
-                          setSelectedCategory('all-categories');
-                        }
-                      }}
-                      className="ml-1 hover:bg-white/20 rounded p-0.5"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Clear all filters button - moved here to come after all selections */}
-          {(searchTerm || selectedLocation !== 'all-locations' || selectedLocations.length > 0 || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentTypes.length > 0 || selectedCompany) && (
-            <div className="flex justify-center">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                    setSearchTerm('');
-                    setSelectedLocation('all-locations');
-                    setSelectedCompany(null);
-                    setSelectedLocations([]);
-                    setSelectedCategory('all-categories');
-                    setSelectedSubcategories([]);
-                    setSelectedEmploymentTypes([]);
-                  }}
-                className="text-white/70 hover:text-white hover:bg-white/10 border border-white/20"
-              >
-                <X className="h-4 w-4 mr-1" />
-                Rensa alla
-              </Button>
-            </div>
-          )}
-
-          {/* Results Summary */}
-          <div className={`flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-white/10 ${jobs.length === 0 ? 'justify-center' : 'justify-between'}`}>
-            <div className={`flex items-center gap-2 flex-wrap ${jobs.length === 0 ? 'justify-center text-center mx-auto' : ''}`}>
-              <span className="text-xl font-bold text-white">{jobs.length}</span>
-              <span className="text-sm text-white">jobb hittades</span>
-              {(searchTerm || selectedLocations.length > 0 || selectedCategory !== 'all-categories' || selectedSubcategories.length > 0 || selectedEmploymentTypes.length > 0) && (
-                <>
-                  <span className="text-white/70">•</span>
-                  <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                    Filtrerade resultat
-                  </Badge>
-                </>
-              )}
-            </div>
-            
-            {jobs.length > 0 && (
-              <Button
-                variant="outline"
-                className="bg-white/10 border-white/30 text-white hover:bg-white/20"
-                onClick={() => {
-                  // Scroll to results or trigger some action
-                  const resultsSection = document.querySelector('[data-results]');
-                  if (resultsSection) {
-                    resultsSection.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
-              >
-                Se alla jobb →
-              </Button>
-            )}
-          </div>
-          
-          {/* No jobs found helper text and actions */}
-          {jobs.length === 0 && (
-            <div className="text-center -mt-4 sm:-mt-2">
-              <p className="text-white max-w-md mx-auto text-sm">
-                Inga jobb matchade dina sökkriterier Prova att ändra dina filter eller sökord
-              </p>
-              <div className="pt-3">
-                <Button 
-                  variant="outline"
-                  className="bg-white/10 border-white/30 text-white hover:bg-white/20"
-                  onClick={() => {
-                    setSearchTerm('');
-                    setSelectedLocations([]);
-                    setSelectedCategory('all-categories');
-                    setSelectedSubcategories([]);
-                    setSelectedEmploymentTypes([]);
-                    setSelectedCompany(null);
-                  }}
-                >
-                  Visa alla jobb
-                </Button>
-              </div>
-            </div>
+            </>
           )}
         </CardContent>
       </Card>
 
-      {/* Removed collapsible job categories section - now handled in dropdown above */}
-
-      {/* Results Section */}
-      <div className="space-y-4 max-w-4xl mx-auto" data-results>
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-flex items-center gap-2">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-              <p className="text-sm text-white/70">Söker bland tusentals jobb...</p>
-            </div>
-          </div>
-        ) : (
-          <>
-            {/* Job Cards */}
-            <div className="grid gap-4">
-              {jobs.map((job) => (
-                <Card key={job.id} className="group bg-white/5 backdrop-blur-sm border-white/20 hover:bg-white/10 transition-all duration-200">
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="flex-1 space-y-3">
-                        {/* Job Header */}
-                        <div className="space-y-1">
-                          <h3 className="text-lg font-semibold text-white group-hover:text-white/90 transition-colors">
-                            {job.title}
-                          </h3>
-                          <div className="flex flex-wrap items-center gap-3 text-white text-sm">
-                            <div className="flex items-center gap-1">
-                              <Building className="h-3 w-3" />
-                              {job.profiles?.company_name || 'Okänt företag'}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {job.location}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {getEmploymentTypeLabel(job.employment_type)}
-                            </div>
-                          </div>
-                        </div>
-                        
-                        {/* Job Description */}
-                        <p className="text-white text-sm leading-relaxed">
-                          {job.description.length > 150 
-                            ? `${job.description.substring(0, 150)}...` 
-                            : job.description
-                          }
-                        </p>
-                        
-                        {/* Job Footer */}
-                        <div className="flex items-center gap-3 pt-2 border-t border-white/10">
-                          <Badge variant="outline" className="bg-green-500/20 text-green-300 border-green-500/30 text-sm">
-                            {formatSalary(job.salary_min, job.salary_max)}
-                          </Badge>
-                          <span className="text-sm text-white">
-                            {new Date(job.created_at).toLocaleDateString('sv-SE', {
-                              day: 'numeric',
-                              month: 'short'
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      {/* Action Buttons */}
-                      <div className="flex flex-col gap-2">
-                        <Button size="sm" className="h-8 px-3 text-sm">
-                          <ExternalLink className="h-3 w-3 mr-1" />
-                          Ansök nu
-                        </Button>
-                        <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-white/5 border-white/20 hover:bg-white/10">
-                          <Heart className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+              />
+            </PaginationItem>
+            
+            {[...Array(Math.min(5, totalPages))].map((_, i) => {
+              let pageNum;
+              if (totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (page <= 3) {
+                pageNum = i + 1;
+              } else if (page >= totalPages - 2) {
+                pageNum = totalPages - 4 + i;
+              } else {
+                pageNum = page - 2 + i;
+              }
+              
+              return (
+                <PaginationItem key={pageNum}>
+                  <PaginationLink
+                    onClick={() => setPage(pageNum)}
+                    isActive={page === pageNum}
+                    className="cursor-pointer"
+                  >
+                    {pageNum}
+                  </PaginationLink>
+                </PaginationItem>
+              );
+            })}
+            
+            {totalPages > 5 && page < totalPages - 2 && (
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+            )}
+            
+            <PaginationItem>
+              <PaginationNext 
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                className={page === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   );
 };
