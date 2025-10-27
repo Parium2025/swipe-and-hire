@@ -300,9 +300,6 @@ export function EmployerSidebar() {
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
                       onMouseEnter={item.url === '/candidates' ? prefetchApplications : undefined}
                       onFocus={item.url === '/candidates' ? prefetchApplications : undefined}
-                      onPointerDown={(e) => { const pt = (e as any).pointerType; if (pt === 'mouse' || pt === 'touch' || pt === 'pen') e.preventDefault(); }}
-                      onMouseDown={(e) => e.preventDefault()}
-                      onTouchStart={(e) => e.preventDefault()}
                       className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
@@ -338,9 +335,6 @@ export function EmployerSidebar() {
                   >
                     <button
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
-                      onPointerDown={(e) => { const pt = (e as any).pointerType; if (pt === 'mouse' || pt === 'touch' || pt === 'pen') e.preventDefault(); }}
-                      onMouseDown={(e) => e.preventDefault()}
-                      onTouchStart={(e) => e.preventDefault()}
                       className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
@@ -376,9 +370,6 @@ export function EmployerSidebar() {
                   >
                     <button
                       onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
-                      onPointerDown={(e) => { const pt = (e as any).pointerType; if (pt === 'mouse' || pt === 'touch' || pt === 'pen') e.preventDefault(); }}
-                      onMouseDown={(e) => e.preventDefault()}
-                      onTouchStart={(e) => e.preventDefault()}
                       className="flex items-center gap-3 w-full outline-none focus:outline-none"
                     >
                       <item.icon className="h-4 w-4" />
@@ -412,9 +403,6 @@ export function EmployerSidebar() {
                     >
                       <button
                         onClick={(e) => { handleNavigation('/admin'); (e.currentTarget as HTMLButtonElement).blur(); }}
-                        onPointerDown={(e) => { const pt = (e as any).pointerType; if (pt === 'mouse' || pt === 'touch' || pt === 'pen') e.preventDefault(); }}
-                        onMouseDown={(e) => e.preventDefault()}
-                        onTouchStart={(e) => e.preventDefault()}
                         className="flex items-center gap-3 w-full outline-none focus:outline-none"
                       >
                         <Settings className="h-4 w-4" />
