@@ -172,9 +172,9 @@ export function AppSidebar() {
             <SidebarMenu>
                {profileItems.map((item) => (
                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
+                  <SidebarMenuButton 
                       data-onboarding={item.title === 'Min Profil' ? 'min-profil' : undefined}
-                      onClick={(e) => handleNavigation(item.url, e)}
+                      onClick={(e) => { handleNavigation(item.url, e); (e.currentTarget as HTMLElement).blur(); }}
                       onPointerDown={(e) => { const pt = (e as any).pointerType; if (pt === 'mouse' || pt === 'touch' || pt === 'pen') e.preventDefault(); }}
                       onMouseDown={(e) => e.preventDefault()}
                       onTouchStart={(e) => e.preventDefault()}
@@ -208,7 +208,7 @@ export function AppSidebar() {
                {businessItems.map((item) => (
                  <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
-                      onClick={(e) => handleNavigation(item.url, e)}
+                      onClick={(e) => { handleNavigation(item.url, e); (e.currentTarget as HTMLElement).blur(); }}
                       onPointerDown={(e) => { const pt = (e as any).pointerType; if (pt === 'mouse' || pt === 'touch' || pt === 'pen') e.preventDefault(); }}
                       onMouseDown={(e) => e.preventDefault()}
                       onTouchStart={(e) => e.preventDefault()}
@@ -242,7 +242,7 @@ export function AppSidebar() {
                {supportItems.map((item) => (
                  <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
-                      onClick={(e) => handleNavigation(item.url, e)}
+                      onClick={(e) => { handleNavigation(item.url, e); (e.currentTarget as HTMLElement).blur(); }}
                       onPointerDown={(e) => { const pt = (e as any).pointerType; if (pt === 'mouse' || pt === 'touch' || pt === 'pen') e.preventDefault(); }}
                       onMouseDown={(e) => e.preventDefault()}
                       onTouchStart={(e) => e.preventDefault()}

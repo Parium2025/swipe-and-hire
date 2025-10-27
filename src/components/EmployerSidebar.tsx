@@ -297,7 +297,7 @@ export function EmployerSidebar() {
                     `}
                   >
                     <button
-                      onClick={() => handleNavigation(item.url)}
+                      onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
                       onMouseEnter={item.url === '/candidates' ? prefetchApplications : undefined}
                       onFocus={item.url === '/candidates' ? prefetchApplications : undefined}
                       onPointerDown={(e) => { const pt = (e as any).pointerType; if (pt === 'mouse' || pt === 'touch' || pt === 'pen') e.preventDefault(); }}
@@ -337,7 +337,7 @@ export function EmployerSidebar() {
                     `}
                   >
                     <button
-                      onClick={() => handleNavigation(item.url)}
+                      onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
                       onPointerDown={(e) => { const pt = (e as any).pointerType; if (pt === 'mouse' || pt === 'touch' || pt === 'pen') e.preventDefault(); }}
                       onMouseDown={(e) => e.preventDefault()}
                       onTouchStart={(e) => e.preventDefault()}
@@ -375,7 +375,7 @@ export function EmployerSidebar() {
                     `}
                   >
                     <button
-                      onClick={() => handleNavigation(item.url)}
+                      onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
                       onPointerDown={(e) => { const pt = (e as any).pointerType; if (pt === 'mouse' || pt === 'touch' || pt === 'pen') e.preventDefault(); }}
                       onMouseDown={(e) => e.preventDefault()}
                       onTouchStart={(e) => e.preventDefault()}
@@ -411,7 +411,7 @@ export function EmployerSidebar() {
                       `}
                     >
                       <button
-                        onClick={() => handleNavigation('/admin')}
+                        onClick={(e) => { handleNavigation('/admin'); (e.currentTarget as HTMLButtonElement).blur(); }}
                         onPointerDown={(e) => { const pt = (e as any).pointerType; if (pt === 'mouse' || pt === 'touch' || pt === 'pen') e.preventDefault(); }}
                         onMouseDown={(e) => e.preventDefault()}
                         onTouchStart={(e) => e.preventDefault()}

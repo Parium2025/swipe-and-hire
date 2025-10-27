@@ -35,19 +35,26 @@ body {
   min-height: 100dvh;
 }
 
-/* Sidebar-specific focus removal - prevents white frame on click */
-[data-sidebar="menu-button"],
-[data-sidebar="menu-sub-button"] {
-  -webkit-tap-highlight-color: transparent;
+/* Sidebar-specific: disable tap highlight and focus outlines to prevent white flash */
+[data-sidebar="sidebar"],
+[data-sidebar="sidebar"] * {
+  -webkit-tap-highlight-color: transparent !important;
 }
 
-[data-sidebar="menu-button"]:focus,
-[data-sidebar="menu-button"]:active,
-[data-sidebar="menu-sub-button"]:focus,
-[data-sidebar="menu-sub-button"]:active {
+/* Reset focus/active visuals for pointer interactions inside the sidebar */
+[data-sidebar="sidebar"] :is(a, button, [role="button"]) {
+  -webkit-appearance: none;
+  appearance: none;
   outline: none !important;
+  outline-offset: 0 !important;
   box-shadow: none !important;
+  border-color: transparent !important;
+  background-clip: padding-box;
 }
+
+/* Remove legacy inner focus rings */
+[data-sidebar="sidebar"] :is(button, a)::-moz-focus-inner { border: 0 !important; }
+[data-sidebar="sidebar"] :is(button, a)::-webkit-focus-inner { border: 0 !important; padding: 0 !important; }
 
 @media (min-width: 768px) {
   body {
