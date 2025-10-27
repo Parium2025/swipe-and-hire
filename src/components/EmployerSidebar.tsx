@@ -289,9 +289,9 @@ export function EmployerSidebar() {
                   <SidebarMenuButton 
                     asChild 
                     className={`
-                      mx-2 rounded-lg transition-all duration-200
+                      mx-2 rounded-lg transition-all duration-200 active:!bg-transparent
                       ${isActiveUrl(item.url) 
-                        ? 'bg-white/20 text-white shadow-lg' 
+                        ? 'bg-white/20 text-white' 
                         : 'text-white hover:bg-white/10 hover:text-white'
                       }
                     `}
@@ -326,9 +326,9 @@ export function EmployerSidebar() {
                   <SidebarMenuButton 
                     asChild 
                     className={`
-                      mx-2 rounded-lg transition-all duration-200
+                      mx-2 rounded-lg transition-all duration-200 active:!bg-transparent
                       ${isActiveUrl(item.url) 
-                        ? 'bg-white/20 text-white shadow-lg' 
+                        ? 'bg-white/20 text-white' 
                         : 'text-white hover:bg-white/10 hover:text-white'
                       }
                     `}
@@ -361,9 +361,9 @@ export function EmployerSidebar() {
                   <SidebarMenuButton 
                     asChild 
                     className={`
-                      mx-2 rounded-lg transition-all duration-200
+                      mx-2 rounded-lg transition-all duration-200 active:!bg-transparent
                       ${isActiveUrl(item.url) 
-                        ? 'bg-white/20 text-white shadow-lg' 
+                        ? 'bg-white/20 text-white' 
                         : 'text-white hover:bg-white/10 hover:text-white'
                       }
                     `}
@@ -394,9 +394,9 @@ export function EmployerSidebar() {
                     <SidebarMenuButton 
                       asChild 
                       className={`
-                        mx-2 rounded-lg transition-all duration-200
+                        mx-2 rounded-lg transition-all duration-200 active:!bg-transparent
                         ${isActiveUrl('/admin') 
-                          ? 'bg-white/20 text-white shadow-lg' 
+                          ? 'bg-white/20 text-white' 
                           : 'text-white hover:bg-white/10 hover:text-white'
                         }
                       `}

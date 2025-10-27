@@ -35,28 +35,18 @@ body {
   min-height: 100dvh;
 }
 
-/* Remove ALL focus rings and outlines globally */
-*, *::before, *::after {
-  -webkit-tap-highlight-color: transparent !important;
+/* Sidebar-specific focus removal - prevents white frame on click */
+[data-sidebar="menu-button"],
+[data-sidebar="menu-sub-button"] {
+  -webkit-tap-highlight-color: transparent;
 }
 
-*:focus, *:focus-visible {
+[data-sidebar="menu-button"]:focus,
+[data-sidebar="menu-button"]:active,
+[data-sidebar="menu-sub-button"]:focus,
+[data-sidebar="menu-sub-button"]:active {
   outline: none !important;
   box-shadow: none !important;
-  --tw-ring-shadow: 0 0 transparent !important;
-}
-
-/* Extra ensure for buttons and interactive elements */
-button:focus, button:focus-visible,
-a:focus, a:focus-visible,
-input:focus, input:focus-visible,
-textarea:focus, textarea:focus-visible,
-select:focus, select:focus-visible,
-[role="button"]:focus, [role="button"]:focus-visible,
-[tabindex]:focus, [tabindex]:focus-visible {
-  outline: none !important;
-  box-shadow: none !important;
-  --tw-ring-shadow: 0 0 transparent !important;
 }
 
 @media (min-width: 768px) {

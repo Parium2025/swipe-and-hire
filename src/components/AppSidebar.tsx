@@ -172,13 +172,13 @@ export function AppSidebar() {
             <SidebarMenu>
                {profileItems.map((item) => (
                  <SidebarMenuItem key={item.title}>
-                   <SidebarMenuButton 
-                     data-onboarding={item.title === 'Min Profil' ? 'min-profil' : undefined}
+                    <SidebarMenuButton 
+                      data-onboarding={item.title === 'Min Profil' ? 'min-profil' : undefined}
                       onClick={(e) => handleNavigation(item.url, e)}
                       className={`
-                        mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none
+                        mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none active:!bg-transparent
                         ${isActiveUrl(item.url) 
-                          ? 'bg-white/20 text-white shadow-lg' 
+                          ? 'bg-white/20 text-white' 
                           : 'text-white hover:bg-white/10 hover:text-white'
                         }
                       `}
@@ -204,12 +204,12 @@ export function AppSidebar() {
             <SidebarMenu>
                {businessItems.map((item) => (
                  <SidebarMenuItem key={item.title}>
-                   <SidebarMenuButton 
+                    <SidebarMenuButton 
                       onClick={(e) => handleNavigation(item.url, e)}
                       className={`
-                        mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none
+                        mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none active:!bg-transparent
                         ${isActiveUrl(item.url) 
-                          ? 'bg-white/20 text-white shadow-lg' 
+                          ? 'bg-white/20 text-white' 
                           : 'text-white hover:bg-white/10 hover:text-white'
                         }
                       `}
@@ -235,12 +235,12 @@ export function AppSidebar() {
             <SidebarMenu>
                {supportItems.map((item) => (
                  <SidebarMenuItem key={item.title}>
-                   <SidebarMenuButton 
+                    <SidebarMenuButton 
                       onClick={(e) => handleNavigation(item.url, e)}
                       className={`
-                        mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none
+                        mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none active:!bg-transparent
                         ${isActiveUrl(item.url) 
-                          ? 'bg-white/20 text-white shadow-lg' 
+                          ? 'bg-white/20 text-white' 
                           : 'text-white hover:bg-white/10 hover:text-white'
                         }
                       `}
