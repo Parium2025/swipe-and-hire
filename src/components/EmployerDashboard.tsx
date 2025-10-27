@@ -293,7 +293,7 @@ const EmployerDashboard = memo(() => {
                                 e.stopPropagation();
                                 handleEditJob(job as any);
                               }}
-                              className="h-6 px-1.5 bg-white/10 border-white/20 text-white hover:bg-white/20 text-[10px]"
+                              className="h-6 px-1.5 bg-white/10 border-white/20 text-white hover:bg-blue-500/20 hover:border-blue-500/40 text-[10px]"
                             >
                               <Edit size={12} />
                             </Button>
