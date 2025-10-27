@@ -448,22 +448,19 @@ const EmployerDashboard = memo(() => {
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0">
-          <AlertDialogHeader className="space-y-3">
-            <div className="flex items-center justify-center sm:justify-start gap-2.5">
+          <AlertDialogHeader className="space-y-0">
+            <div className="flex items-center justify-center gap-2.5">
               <div className="bg-red-500/20 p-2 rounded-full flex-shrink-0">
                 <AlertTriangle className="h-4 w-4 text-red-400" />
               </div>
-              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold text-center sm:text-left">
-                Ta bort jobbannons
-              </AlertDialogTitle>
+              <AlertDialogDescription className="text-white text-sm leading-relaxed break-words text-center">
+                {jobToDelete && (
+                  <>
+                    Är du säker på att du vill ta bort <span className="font-semibold text-white break-words">"{jobToDelete.title}"</span>? Denna åtgärd går inte att ångra.
+                  </>
+                )}
+              </AlertDialogDescription>
             </div>
-            <AlertDialogDescription className="text-white/90 text-sm leading-relaxed break-words text-center">
-              {jobToDelete && (
-                <>
-                  Är du säker på att du vill ta bort <span className="font-semibold text-white break-words">"{jobToDelete.title}"</span>? Denna åtgärd går inte att ångra.
-                </>
-              )}
-            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2 mt-4">
             <AlertDialogCancel 
