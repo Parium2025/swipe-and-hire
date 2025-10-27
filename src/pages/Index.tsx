@@ -54,7 +54,7 @@ const CandidatesContent = () => {
   const safeApplications = applications || [];
 
   return (
-    <div className="max-w-7xl mx-auto px-3 md:px-12">
+    <div className="max-w-6xl mx-auto px-3 md:px-12">
       {/* Main Content */}
       <div className="space-y-4">
         {/* Header */}
