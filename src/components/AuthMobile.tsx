@@ -536,7 +536,7 @@ const AuthMobile = ({
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
+                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                 />
               </div>
               <div>
@@ -547,7 +547,7 @@ const AuthMobile = ({
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                          className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
+                          className="bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                 />
               </div>
               <Button type="submit" className="w-full min-h-[44px]" disabled={loading}>
@@ -699,7 +699,7 @@ const AuthMobile = ({
                           inputMode="email"
                           spellCheck={false}
                           autoCapitalize="none"
-                          className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
+                          className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                         />
                         {/* email suggestions removed for simpler UX */}
                       </div>
@@ -717,11 +717,11 @@ const AuthMobile = ({
                             required
                             name={`password-${role}`}
                             autoComplete={`${role}-current-password`}
-                            className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
+                            className="bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                           />
                           <button
                             type="button"
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white/70 hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white/70 md:hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
                             onClick={() => setShowPassword(!showPassword)}
                             onTouchStart={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                             onTouchEnd={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -852,7 +852,7 @@ const AuthMobile = ({
                                   }
                                 }}
                                 required
-                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
+                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                               />
                             </div>
                              <div>
@@ -868,7 +868,7 @@ const AuthMobile = ({
                                   }
                                 }}
                                 required
-                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
+                                className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                               />
                             </div>
                          </div>
@@ -889,7 +889,7 @@ const AuthMobile = ({
                              inputMode="email"
                              spellCheck={false}
                              autoCapitalize="none"
-                             className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
+                             className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                            />
                            {/* email suggestions removed for simpler UX */}
                          </div>
@@ -905,7 +905,7 @@ const AuthMobile = ({
                                     type="tel"
                                     value={jobSeekerData.phone}
                                     onChange={(e) => handlePhoneChange(e.target.value)}
-                                    className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
+                                    className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                                     placeholder="070-123 45 67"
                                     required
                                   />
@@ -932,7 +932,7 @@ const AuthMobile = ({
                                    value={employerData.companyName}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, companyName: e.target.value }))}
                                    placeholder="Mitt företag"
-                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
+                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                                    required
                                  />
                               </div>
@@ -944,7 +944,7 @@ const AuthMobile = ({
                                     <Button
                                       ref={triggerRef}
                                       variant="outline"
-                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left min-h-[44px]"
+                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10 transition-colors justify-between mt-1 text-left min-h-[44px]"
                                     >
                                        <span className="truncate text-left flex-1 px-1">
                                          {employerData.industry || 'Välj bransch'}
@@ -1042,7 +1042,7 @@ const AuthMobile = ({
                                     <Button
                                       ref={employeeCountTriggerRef}
                                       variant="outline"
-                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left min-h-[44px]"
+                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10 transition-colors justify-between mt-1 text-left min-h-[44px]"
                                     >
                                        <span className="truncate text-left flex-1 px-1">
                                          {employerData.employeeCount || 'Antal'}
@@ -1092,7 +1092,7 @@ const AuthMobile = ({
                                    value={employerData.address}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, address: e.target.value }))}
                                    placeholder="Ange din adress"
-                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
+                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                                    required
                                  />
                               </div>
@@ -1107,7 +1107,7 @@ const AuthMobile = ({
                                    value={employerData.website}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, website: e.target.value }))}
                                    placeholder="https://exempel.se"
-                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
+                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                                    required
                                  />
                               </div>
@@ -1119,7 +1119,7 @@ const AuthMobile = ({
                                    value={employerData.companyDescription}
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, companyDescription: e.target.value }))}
                                    placeholder="Beskriv vad ert företag gör..."
-                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 resize-none text-base"
+                                   className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white md:hover:bg-white/10 placeholder:text-white/60 resize-none text-base"
                                    style={{ fontSize: '16px' }}
                                    rows={2}
                                  />
@@ -1145,7 +1145,7 @@ const AuthMobile = ({
                           />
                            <button
                             type="button"
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white/70 hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white/70 md:hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
                             onClick={() => setShowPassword(!showPassword)}
                             onTouchStart={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                             onTouchEnd={(e) => e.currentTarget.style.backgroundColor = 'transparent'}

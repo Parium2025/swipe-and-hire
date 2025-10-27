@@ -36,7 +36,7 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
                 <a
                   key={item.label}
                   href={item.href}
-                  className="text-white/80 hover:text-white transition-colors text-sm font-medium"
+                  className="text-white/80 md:hover:text-white transition-colors text-sm font-medium"
                 >
                   {item.label}
                 </a>
@@ -48,7 +48,7 @@ const LandingNav = ({ onLoginClick }: LandingNavProps) => {
               <Button
                 onClick={onLoginClick}
                 variant="ghost"
-                className="text-white hover:bg-white/10 border border-white/20"
+                className="text-white md:hover:bg-white/10 border border-white/20"
               >
                 Logga in
               </Button>

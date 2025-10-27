@@ -10,7 +10,7 @@ export const Header = () => {
         <Button
           onClick={() => navigate('/')}
           variant="ghost"
-          className="flex items-center gap-3 p-2 hover:bg-accent/50 rounded-lg transition-colors"
+          className="flex items-center gap-3 p-2 md:hover:bg-accent/50 rounded-lg transition-colors"
         >
           <img 
             src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 

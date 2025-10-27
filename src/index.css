@@ -59,15 +59,39 @@ select:focus, select:focus-visible,
   --tw-ring-shadow: 0 0 transparent !important;
 }
 
-/* Ultra-safe touch device styles */
+/* Ultra-safe touch device styles - MAXIMAL OPTIMERING */
 @media (hover: none) and (pointer: coarse) {
-  * {
-    -webkit-tap-highlight-color: transparent !important;
+  /* Kill ALL hover states globally to prevent stickiness */
+  *:hover {
+    background-color: inherit !important;
   }
   
+  /* Ultra-safe tap highlight removal - multiple layers */
+  * {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  /* Allow text selection where needed */
+  input, textarea, [contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  
+  /* Ensure focus rings are completely hidden */
+  *:focus, *:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    --tw-ring-shadow: 0 0 transparent !important;
+  }
+  
+  /* Subtle active feedback only - native-like feel */
   button:active, a:active, [role="button"]:active {
-    background-color: inherit !important;
-    opacity: 0.85;
+    opacity: 0.85 !important;
+    transform: scale(0.98);
+    transition: transform 0.05s ease-out, opacity 0.05s ease-out;
   }
 }
 
