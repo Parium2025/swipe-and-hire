@@ -97,7 +97,7 @@ const Dashboard = memo(() => {
                   filteredAndSortedJobs.map((job) => (
                     <TableRow 
                       key={job.id}
-                      className="border-white/10 md:hover:bg-white/5 cursor-pointer transition-colors"
+                      className="border-white/10 hover:bg-white/5 cursor-pointer transition-colors"
                       onClick={() => navigate(`/job-details/${job.id}`)}
                     >
                       <TableCell className="font-medium text-white px-2 py-2">

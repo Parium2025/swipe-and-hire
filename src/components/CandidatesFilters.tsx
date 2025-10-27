@@ -36,7 +36,7 @@ export const CandidatesFilters = ({ stats, selectedFilter, onFilterChange }: Can
             className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all ${
               isSelected
                 ? 'bg-primary/20 text-primary border border-primary/30'
-                : 'text-muted-foreground md:hover:bg-white/5 md:hover:text-foreground border border-transparent'
+                : 'text-muted-foreground hover:bg-white/5 hover:text-foreground border border-transparent'
             }`}
           >
             <div className="flex items-center gap-3">
