@@ -129,10 +129,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className={`${collapsed ? 'w-14' : 'w-64'} transition-all duration-200 ease-in-out`}
-      style={{
-        background: 'linear-gradient(180deg, hsl(215 80% 18%) 0%, hsl(215 70% 22%) 100%)'
-      }}
+      className={`bg-slate-900/40 backdrop-blur-md border-r border-white/20 ${collapsed ? 'w-14' : 'w-64'} transition-all duration-200 ease-in-out`}
       collapsible="icon"
     >
       <SidebarContent className="p-4">
