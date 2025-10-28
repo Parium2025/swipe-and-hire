@@ -290,7 +290,7 @@ const CompanyProfile = () => {
   };
 
   const confirmRemoveSocialLink = async () => {
-    if (!linkToDelete) return;
+    if (!linkToDelete || !profile?.user_id) return;
 
     const updatedLinks = formData.company_social_media_links.filter((_, i) => i !== linkToDelete.index);
     
@@ -300,8 +300,13 @@ const CompanyProfile = () => {
     };
 
     try {
-      setLoading(true);
-      await updateProfile(updatedFormData as any);
+      // Direct Supabase update to avoid triggering the general "Profil uppdaterad" toast
+      const { error } = await supabase
+        .from('profiles')
+        .update({ company_social_media_links: updatedLinks })
+        .eq('user_id', profile.user_id);
+
+      if (error) throw error;
 
       // Update both formData and originalValues to sync them
       const savedValues = {
@@ -324,7 +329,6 @@ const CompanyProfile = () => {
         variant: "destructive"
       });
     } finally {
-      setLoading(false);
       setDeleteDialogOpen(false);
       setLinkToDelete(null);
     }
