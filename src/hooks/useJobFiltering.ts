@@ -8,6 +8,20 @@ export interface FilterableJob {
   employment_type?: string;
   description?: string;
   workplace_city?: string;
+  workplace_address?: string;
+  workplace_name?: string;
+  workplace_postal_code?: string;
+  work_schedule?: string;
+  occupation?: string;
+  category?: string;
+  requirements?: string;
+  pitch?: string;
+  work_location_type?: string;
+  remote_work_possible?: string;
+  salary_type?: string;
+  salary_min?: number;
+  salary_max?: number;
+  positions_count?: number;
   created_at: string;
   is_active: boolean;
   views_count: number;
@@ -42,14 +56,29 @@ export const useJobFiltering = (jobs: FilterableJob[]) => {
     if (searchTerm.trim()) {
       const expandedTerms = expandSearchTerms(searchTerm);
       result = result.filter(job => {
+        // Comprehensive searchable text including ALL relevant fields
         const searchableText = [
           job.title,
           job.location,
-          job.employment_type,
-          job.description,
           job.workplace_city,
+          job.workplace_address,
+          job.workplace_name,
+          job.workplace_postal_code,
+          job.employment_type,
+          job.work_schedule,
+          job.occupation,
+          job.category,
+          job.description,
+          job.requirements,
+          job.pitch,
+          job.work_location_type,
+          job.remote_work_possible,
+          job.salary_type,
           job.employer_profile?.first_name,
-          job.employer_profile?.last_name
+          job.employer_profile?.last_name,
+          // Add formatted salary for search
+          job.salary_min && job.salary_max ? `${job.salary_min}-${job.salary_max}` : '',
+          job.positions_count ? `${job.positions_count} platser` : '',
         ].filter(Boolean).join(' ').toLowerCase();
         
         return expandedTerms.some(term => 
