@@ -72,7 +72,7 @@ const EmployerLayout = ({ children, developerView, onViewChange }: EmployerLayou
       <div className="min-h-screen flex w-full overflow-x-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
         <AnimatedBackground showBubbles={false} />
         <EmployerSidebar />
-        <div className="flex-1 flex flex-col overflow-x-hidden relative z-10">
+        <div className="flex-1 min-h-0 flex flex-col overflow-x-hidden relative z-10">
           <header className="sticky top-0 z-40 h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="text-white hover:bg-white/20 h-8 w-8" />
