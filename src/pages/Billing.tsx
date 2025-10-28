@@ -163,7 +163,7 @@ const Billing = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                className="bg-white/5 border border-white/10 text-white hover:bg-white/10 w-full sm:w-auto h-8 text-sm"
+                className="bg-white/5 border border-white/10 text-white w-full sm:w-auto h-8 text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50"
               >
                 Lägg till kort
                 <Plus className="h-3 w-3 ml-2" />
@@ -241,7 +241,7 @@ const Billing = () => {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-7 w-7 p-0 text-white/70 hover:text-white hover:bg-white/10"
+                                  className="h-7 w-7 p-0 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
                                   title="Visa faktura"
                                 >
                                   <Eye className="h-3 w-3" />
@@ -249,7 +249,7 @@ const Billing = () => {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-7 w-7 p-0 text-white/70 hover:text-white hover:bg-white/10"
+                                  className="h-7 w-7 p-0 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
                                   title="Ladda ner faktura"
                                 >
                                   <Download className="h-3 w-3" />

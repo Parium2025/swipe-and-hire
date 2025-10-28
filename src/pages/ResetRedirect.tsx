@@ -158,7 +158,7 @@ const ResetRedirect = () => {
                   </div>
                 </div>
 
-                <Button onClick={copyUrlToClipboard} className="w-full" variant="outline">
+                <Button onClick={copyUrlToClipboard} className="w-full transition-all duration-300 md:hover:bg-primary/90" variant="outline">
                   {copySuccess ? (
                     <>
                       <CheckCircle className="h-4 w-4 mr-2" />

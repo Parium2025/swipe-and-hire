@@ -271,7 +271,7 @@ const SearchJobs = () => {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="bg-white/5 border-white/10 text-white hover:bg-white/10">
+            <Button variant="outline" className="bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50">
               Sortera: {sortLabels[sortBy]}
               <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
@@ -314,7 +314,7 @@ const SearchJobs = () => {
       {/* Advanced Filters - Collapsible */}
       <Collapsible open={showAdvancedFilters} onOpenChange={setShowAdvancedFilters}>
         <CollapsibleTrigger asChild>
-          <Button variant="outline" className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10">
+          <Button variant="outline" className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50">
             Avancerade filter
             <ChevronDown className={`ml-2 h-4 w-4 transition-transform ${showAdvancedFilters ? 'rotate-180' : ''}`} />
           </Button>

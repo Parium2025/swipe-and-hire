@@ -1001,7 +1001,7 @@ const Profile = () => {
                   size="sm"
                   onClick={() => document.getElementById('cover-image')?.click()}
                   disabled={isUploadingCover}
-                  className="bg-white/20 border-white/30 text-white hover:bg-white/30 disabled:opacity-50 transition-all duration-200"
+                  className="bg-white/20 border-white/30 text-white disabled:opacity-50 transition-all duration-300 md:hover:bg-white/30 md:hover:border-white/50"
                 >
                   {(profile?.profile_image_url || coverImageUrl) ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
                 </Button>
@@ -1213,7 +1213,7 @@ const Profile = () => {
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="outline"
-                              className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 transition-colors justify-between"
+                              className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 justify-between"
                             >
                               <span className="truncate">
                                 {employmentStatus ? (
@@ -1277,7 +1277,7 @@ const Profile = () => {
                             <DropdownMenuTrigger asChild>
                               <Button
                                 variant="outline"
-                                className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 transition-colors justify-between"
+                                className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 justify-between"
                               >
                                 <span className="truncate">
                                   {workingHours ? (
@@ -1322,7 +1322,7 @@ const Profile = () => {
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="outline"
-                              className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 transition-colors justify-between"
+                              className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 justify-between"
                             >
                               <span className="truncate">
                                 {availability ? (
@@ -1435,7 +1435,7 @@ const Profile = () => {
               <div className="flex justify-center">
                 <Button 
                   type="submit" 
-                  className="border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm" 
+                  className="border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50" 
                   disabled={loading}
                 >
                   {loading ? 'Sparar...' : 'Spara ändringar'}

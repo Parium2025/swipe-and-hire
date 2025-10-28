@@ -177,7 +177,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
           <div className="bg-white/10 border border-white/20 rounded-lg p-6 text-center">
             <FileText className="h-12 w-12 text-white/60 mx-auto mb-3" />
             <p className="text-white/80 mb-4">Ladda upp en fil</p>
-            <Button variant="outline" className="border-white/40 text-white hover:bg-white/10">
+            <Button variant="outline" className="border-white/40 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50">
               Välj fil
             </Button>
           </div>
@@ -188,7 +188,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
           <div className="bg-white/10 border border-white/20 rounded-lg p-6 text-center">
             <Video className="h-12 w-12 text-white/60 mx-auto mb-3" />
             <p className="text-white/80 mb-4">Spela in en kort video</p>
-            <Button variant="outline" className="border-white/40 text-white hover:bg-white/10">
+            <Button variant="outline" className="border-white/40 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50">
               Starta inspelning
             </Button>
           </div>

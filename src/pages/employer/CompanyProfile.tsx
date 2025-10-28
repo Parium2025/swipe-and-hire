@@ -406,7 +406,7 @@ const CompanyProfile = () => {
             size="sm"
             onClick={() => document.getElementById('logo-upload')?.click()}
             disabled={isUploadingLogo}
-            className="bg-white/5 border-white/10 text-white/90 hover:bg-white/10"
+            className="bg-white/5 border-white/10 text-white/90 transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50"
           >
             {isUploadingLogo ? (
               <>
@@ -427,7 +427,7 @@ const CompanyProfile = () => {
               size="sm"
               onClick={handleLogoDelete}
               disabled={isUploadingLogo}
-              className="bg-white/5 border-white/10 text-white/90 hover:bg-red-500/20"
+              className="bg-white/5 border-white/10 text-white/90 transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40"
             >
               <Trash2 className="h-3 w-3" />
             </Button>
@@ -498,7 +498,7 @@ const CompanyProfile = () => {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
-                      className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between h-9 font-normal"
+                      className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 justify-between h-9 font-normal"
                     >
                       <span className="truncate text-left flex-1 px-1 text-white/90">
                         {formData.industry || 'Välj bransch'}
@@ -679,7 +679,7 @@ const CompanyProfile = () => {
                             e.stopPropagation();
                             removeSocialLink(index);
                           }}
-                          className="bg-red-500/20 border-red-400/40 text-red-300 hover:bg-red-500/30 flex-shrink-0"
+                          className="bg-red-500/20 border-red-400/40 text-red-300 transition-all duration-300 md:hover:bg-red-500/30 md:hover:border-red-500/50 flex-shrink-0"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -696,7 +696,7 @@ const CompanyProfile = () => {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 h-9 text-sm justify-between font-normal"
+                        className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 h-9 text-sm justify-between font-normal"
                       >
                         <span className="truncate text-left flex-1 px-1">
                           {newSocialLink.platform ? SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label : 'Välj plattform'}
@@ -751,8 +751,8 @@ const CompanyProfile = () => {
                     onClick={addSocialLink}
                     disabled={!newSocialLink.platform || !newSocialLink.url.trim()}
                     className={cn(
-                      "w-full bg-primary/80 hover:bg-primary text-white h-9 text-sm",
-                      newSocialLink.platform && newSocialLink.url.trim() && "border border-white/30"
+                      "w-full bg-primary/80 text-white h-9 text-sm transition-all duration-300 md:hover:bg-primary/90",
+                      newSocialLink.platform && newSocialLink.url.trim() && "border border-white/30 md:hover:border-white/50"
                     )}
                   >
                     Lägg till
@@ -766,7 +766,7 @@ const CompanyProfile = () => {
               <Button 
                 type="submit" 
                 disabled={loading || !hasUnsavedChanges}
-                className="disabled:opacity-50 disabled:cursor-not-allowed disabled:border-0 border border-white/30 font-medium h-9 px-6"
+                className="disabled:opacity-50 disabled:cursor-not-allowed disabled:border-0 border border-white/30 font-medium h-9 px-6 transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50"
               >
                 {loading ? 'Sparar...' : 'Spara ändringar'}
               </Button>

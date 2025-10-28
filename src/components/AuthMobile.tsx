@@ -550,7 +550,7 @@ const AuthMobile = ({
                           className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
                 />
               </div>
-              <Button type="submit" className="w-full min-h-[44px]" disabled={loading}>
+              <Button type="submit" className="w-full min-h-[44px] transition-all duration-300 md:hover:bg-primary/90" disabled={loading}>
                 {loading ? "Sparar..." : "Spara nytt lösenord"}
               </Button>
               <div className="text-center">
@@ -750,7 +750,7 @@ const AuthMobile = ({
                         <span className="text-sm text-white">Håll mig inloggad</span>
                       </label>
                       
-                       <Button type="submit" className="w-full bg-parium-navy hover:bg-parium-navy/90 text-white min-h-[44px]" disabled={loading}>
+                       <Button type="submit" className="w-full bg-parium-navy text-white min-h-[44px] transition-all duration-300 md:hover:bg-parium-navy/80" disabled={loading}>
                          {loading ? "Loggar in..." : "Logga in"}
                        </Button>
                        

@@ -538,15 +538,15 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
                         placeholder={`Alternativ ${optionIndex + 1}`}
                         className="h-9 text-sm"
                       />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          const options = (questionDraft.options || []).filter((_, i) => i !== optionIndex);
-                          setQuestionDraft({ ...questionDraft, options });
-                        }}
-                        className="text-red-600"
-                      >
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const options = (questionDraft.options || []).filter((_, i) => i !== optionIndex);
+                            setQuestionDraft({ ...questionDraft, options });
+                          }}
+                          className="text-red-600 transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40"
+                        >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -557,12 +557,13 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
 
             {/* Action buttons */}
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={editingQuestionIndex !== null ? cancelEditQuestion : cancelAddQuestion}>
+              <Button variant="outline" onClick={editingQuestionIndex !== null ? cancelEditQuestion : cancelAddQuestion} className="transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50">
                 Avbryt
               </Button>
               <Button 
                 onClick={editingQuestionIndex !== null ? confirmEditQuestion : confirmAddQuestion}
                 disabled={!questionDraft.question_text.trim()}
+                className="transition-all duration-300 md:hover:bg-primary/90"
               >
                 Spara
               </Button>

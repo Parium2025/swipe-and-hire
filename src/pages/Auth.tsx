@@ -1004,14 +1004,14 @@ const Auth = () => {
                 disabled={resending}
                 className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
               />
-              <Button type="submit" className="w-full" disabled={resending}>
+              <Button type="submit" className="w-full transition-all duration-300 md:hover:bg-primary/90" disabled={resending}>
                 {resending ? 'Skickar...' : 'Skicka ny länk'}
               </Button>
             </form>
             {resendMessage && (
               <p className="text-sm text-primary-foreground/80 whitespace-pre-line">{resendMessage}</p>
             )}
-            <Button onClick={handleBackToLogin} className="w-full">
+            <Button onClick={handleBackToLogin} className="w-full transition-all duration-300 md:hover:bg-primary/90">
               Tillbaka till inloggning
             </Button>
           </CardContent>
@@ -1162,14 +1162,14 @@ const Auth = () => {
                         required
                         disabled={resending}
                       />
-                      <Button type="submit" className="w-full" disabled={resending}>
+                      <Button type="submit" className="w-full transition-all duration-300 md:hover:bg-primary/90" disabled={resending}>
                         {resending ? 'Skickar...' : 'Skicka ny länk'}
                       </Button>
                     </form>
                     {resendMessage && (
                       <p className="text-sm text-primary-foreground/80">{resendMessage}</p>
                     )}
-                    <Button variant="outline" onClick={handleBackToLogin} className="w-full">
+                    <Button variant="outline" onClick={handleBackToLogin} className="w-full transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50">
                       Tillbaka till inloggning
                     </Button>
                   </CardContent>
