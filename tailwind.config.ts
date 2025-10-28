@@ -20,21 +20,7 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				'sans': [
-					'Inter',
-					{
-						fontFeatureSettings: '"kern", "liga", "calt"',
-						fontOpticalSizing: 'auto',
-					},
-					'system-ui',
-					'-apple-system',
-					'BlinkMacSystemFont',
-					'Segoe UI',
-					'Roboto',
-					'Helvetica Neue',
-					'Arial',
-					'sans-serif'
-				],
+				'sans': ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
 			},
 			fontSize: {
 				'xs': ['0.75rem', { lineHeight: '1rem' }],      // 12px

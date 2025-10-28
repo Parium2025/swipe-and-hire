@@ -418,7 +418,7 @@ export function EmployerSidebar() {
         )}
 
         {/* Logout Button */}
-        <div className="mt-auto px-4 pt-4 pb-0">
+        <div className="mt-auto p-4">
           <Button
             onClick={signOut}
             className={`

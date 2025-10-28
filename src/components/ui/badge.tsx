@@ -29,14 +29,7 @@ export interface BadgeProps
 
 function Badge({ className, variant, ...props }: BadgeProps) {
   return (
-    <div 
-      className={cn(
-        badgeVariants({ variant }), 
-        "will-change-transform transform-gpu",
-        className
-      )} 
-      {...props} 
-    />
+    <div className={cn(badgeVariants({ variant }), className)} {...props} />
   )
 }
 

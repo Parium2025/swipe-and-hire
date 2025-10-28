@@ -182,36 +182,6 @@ All colors MUST be HSL.
     @apply border-border;
     box-sizing: border-box;
     max-width: 100%;
-    
-    /* MAXIMALA TEXT SHARPNESS OPTIMIZATIONS */
-    text-rendering: optimizeLegibility;
-    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    font-smooth: always;
-    -webkit-font-feature-settings: "kern" 1, "liga" 1;
-    font-kerning: normal;
-    
-    /* GPU acceleration för crisp rendering */
-    will-change: transform;
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    
-    /* Subpixel precision */
-    -webkit-backface-visibility: hidden;
-    perspective: 1000px;
-  }
-
-  /* SVG/Icon sharpness optimizations */
-  svg, img {
-    shape-rendering: geometricPrecision;
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-    
-    /* Extra icon sharpness */
-    vector-effect: non-scaling-stroke;
-    stroke-linecap: round;
-    stroke-linejoin: round;
   }
   
   /* Prevent page horizontal scroll without clipping children */
@@ -494,78 +464,6 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
-  /* MAXIMUM Badge crispness */
-  .badge, [class*="badge"] {
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    backface-visibility: hidden;
-    transform: translateZ(0);
-    will-change: transform;
-    
-    /* Extra text sharpness för små text (12px) */
-    font-feature-settings: "kern" 1, "liga" 1, "zero" 1;
-    letter-spacing: 0.01em;
-    
-    /* Slight contrast boost för extra crisp */
-    filter: contrast(1.05);
-  }
-
-  /* Enhanced button/icon crispness */
-  .button, button, [role="button"], [class*="Button"] {
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    backface-visibility: hidden;
-    transform: translateZ(0);
-    will-change: transform;
-  }
-  
-  /* Icon sharpness inside buttons */
-  button svg, [role="button"] svg, [class*="Button"] svg {
-    shape-rendering: geometricPrecision;
-    vector-effect: non-scaling-stroke;
-  }
-
-  /* Table text crispness */
-  table, th, td {
-    text-rendering: optimizeLegibility;
-    font-feature-settings: "kern" 1, "liga" 1;
-  }
-  
-  /* Extra sharpness för high-DPI screens (Retina, 4K) */
-  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    * {
-      -webkit-font-smoothing: subpixel-antialiased;
-      text-rendering: optimizeLegibility;
-    }
-    
-    svg, img {
-      image-rendering: -webkit-optimize-contrast;
-    }
-    
-    .badge, button, [class*="badge"], [class*="Button"] {
-      filter: contrast(1.08);
-    }
-  }
-
-  /* Sidebar scrollbar styling */
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
-  }
-
   .bg-parium-gradient { background: var(--gradient-parium); }
   .bg-gradient-parium { background: var(--gradient-parium); }
   .bg-primary-gradient { background: var(--gradient-primary); }
