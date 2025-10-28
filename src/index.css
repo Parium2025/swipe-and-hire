@@ -182,6 +182,21 @@ All colors MUST be HSL.
     @apply border-border;
     box-sizing: border-box;
     max-width: 100%;
+    /* TEXT SHARPNESS OPTIMIZATIONS */
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "kern" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-smooth: always;
+    -webkit-font-feature-settings: "kern" 1;
+    font-kerning: normal;
+  }
+
+  /* SVG/Icon sharpness optimizations */
+  svg, img {
+    shape-rendering: geometricPrecision;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
   }
   
   /* Prevent page horizontal scroll without clipping children */
@@ -464,6 +479,20 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
+  /* Enhanced text crispness for UI elements */
+  .badge, .button, button, [role="button"] {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+  }
+
+  /* Table text crispness */
+  table, th, td {
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+
   .bg-parium-gradient { background: var(--gradient-parium); }
   .bg-gradient-parium { background: var(--gradient-parium); }
   .bg-primary-gradient { background: var(--gradient-primary); }
