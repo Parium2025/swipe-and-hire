@@ -207,8 +207,8 @@ const EmployerProfile = () => {
     setDeleteDialogOpen(true);
   };
 
-  const confirmRemoveSocialLink = async () => {
-    if (!linkToDelete || !profile?.user_id) return;
+  const confirmRemoveSocialLink = () => {
+    if (!linkToDelete) return;
 
     const updatedLinks = formData.social_media_links.filter((_, i) => i !== linkToDelete.index);
     
@@ -217,39 +217,17 @@ const EmployerProfile = () => {
       social_media_links: [...updatedLinks]
     };
 
-    try {
-      // Direct Supabase update to avoid triggering the general "Profil uppdaterad" toast
-      const { error } = await supabase
-        .from('profiles')
-        .update({ social_media_links: updatedLinks })
-        .eq('user_id', profile.user_id);
+    // Update local state only - user must save manually
+    setFormData(updatedFormData);
+    setHasUnsavedChanges(true);
 
-      if (error) throw error;
+    toast({
+      title: "Länk borttagen",
+      description: `${getPlatformLabel(linkToDelete.link.platform)}-länken har tagits bort. Klicka på Spara ändringar för att bekräfta.`,
+    });
 
-      // Update both formData and originalValues to sync them
-      const savedValues = {
-        ...updatedFormData,
-        social_media_links: JSON.parse(JSON.stringify(updatedLinks)),
-      };
-
-      setFormData(savedValues);
-      setOriginalValues(savedValues);
-      setHasUnsavedChanges(false);
-
-      toast({
-        title: "Länk borttagen",
-        description: `${getPlatformLabel(linkToDelete.link.platform)}-länken har tagits bort.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Fel",
-        description: "Kunde inte ta bort länken.",
-        variant: "destructive"
-      });
-    } finally {
-      setDeleteDialogOpen(false);
-      setLinkToDelete(null);
-    }
+    setDeleteDialogOpen(false);
+    setLinkToDelete(null);
   };
 
   const handleSave = async () => {
