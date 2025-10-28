@@ -217,7 +217,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         }
       }}>
         <DialogTrigger asChild>
-          <Button className="flex items-center gap-2 border border-white/30 transition-all duration-300 md:hover:opacity-90 md:hover:scale-[1.02]">
+          <Button className="flex items-center gap-2 border border-white/30 transition-all duration-300 md:hover:opacity-90">
             Skapa ny annons
             <Plus size={16} />
           </Button>
