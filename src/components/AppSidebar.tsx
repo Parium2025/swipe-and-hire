@@ -179,7 +179,7 @@ export function AppSidebar() {
                         mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none active:!bg-transparent
                         ${isActiveUrl(item.url) 
                           ? 'bg-white/20 text-white' 
-                          : 'text-white hover:bg-white/10 hover:text-white'
+                          : 'text-white md:hover:bg-white/10 hover:text-white'
                         }
                       `}
                      title={collapsed ? item.title : undefined}
@@ -210,7 +210,7 @@ export function AppSidebar() {
                         mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none active:!bg-transparent
                         ${isActiveUrl(item.url) 
                           ? 'bg-white/20 text-white' 
-                          : 'text-white hover:bg-white/10 hover:text-white'
+                          : 'text-white md:hover:bg-white/10 hover:text-white'
                         }
                       `}
                      title={collapsed ? item.title : undefined}
@@ -241,7 +241,7 @@ export function AppSidebar() {
                         mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none active:!bg-transparent
                         ${isActiveUrl(item.url) 
                           ? 'bg-white/20 text-white' 
-                          : 'text-white hover:bg-white/10 hover:text-white'
+                          : 'text-white md:hover:bg-white/10 hover:text-white'
                         }
                       `}
                      title={collapsed ? item.title : undefined}
@@ -264,7 +264,7 @@ export function AppSidebar() {
             data-allow-border="true"
             className={`
               flex items-center gap-2 bg-transparent text-white border border-white/30
-              w-full justify-start
+              w-full justify-start transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50
               ${collapsed ? 'px-2' : 'px-4'}
             `}
             title={collapsed ? 'Logga ut' : undefined}
