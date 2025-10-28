@@ -235,7 +235,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
               variant="ghost"
               size="icon"
               onClick={() => onOpenChange(false)}
-              className="absolute top-4 right-4 z-10 text-white hover:bg-white/10"
+              className="absolute top-4 right-4 z-10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white"
             >
               <X className="h-6 w-6" />
             </Button>
@@ -301,7 +301,7 @@ const JobPreview = ({ open, onOpenChange, jobData, onCompanyClick }: JobPreviewP
               <Button 
                 variant="outline" 
                 size="lg" 
-                className="flex-1 border-white/40 text-white hover:bg-white/10 h-14 text-lg"
+                className="flex-1 border-white/40 text-white h-14 text-lg transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white"
               >
                 <X className="h-6 w-6 mr-2" />
                 Inte intresserad

@@ -177,7 +177,7 @@ const Support = () => {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full h-9 bg-white/5 border-white/10 text-white hover:bg-white/10 transition-colors justify-between text-sm"
+                    className="w-full h-9 bg-white/5 border-white/10 text-white transition-colors justify-between text-sm md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white"
                   >
                     <span className="truncate text-left flex-1 px-1">
                       {categoryOptions.find(o => o.value === category)?.label || 'Välj kategori'}

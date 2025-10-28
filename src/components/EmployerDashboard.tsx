@@ -471,7 +471,7 @@ const EmployerDashboard = memo(() => {
                 setDeleteDialogOpen(false);
                 setJobToDelete(null);
               }}
-              className="flex-[0.6] bg-white/10 border-white/20 text-white hover:bg-white/20 text-sm"
+              className="flex-[0.6] bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
             >
               Avbryt
             </AlertDialogCancel>

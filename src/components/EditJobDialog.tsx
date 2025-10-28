@@ -159,7 +159,7 @@ const SortableQuestionItem = ({ question, onEdit, onDelete }: SortableQuestionIt
             onClick={() => onEdit(question)}
             variant="ghost"
             size="sm"
-            className="text-white/70 hover:text-white hover:bg-white/10 h-6 w-6 p-0"
+            className="text-white/70 h-6 w-6 p-0 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
           >
             <Pencil className="h-3 w-3 text-[hsl(var(--pure-white))]" />
           </Button>
@@ -1173,7 +1173,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                   variant="ghost"
                   size="icon"
                   onClick={handleClose}
-                  className="absolute right-4 top-4 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+                  className="absolute right-4 top-4 h-8 w-8 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -1522,7 +1522,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               }}
                               variant="ghost"
                               size="sm"
-                              className="text-white/70 hover:text-white hover:bg-white/10"
+                              className="text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
                             >
                               <X className="h-4 w-4 text-[hsl(var(--pure-white))]" />
                             </Button>
@@ -1669,7 +1669,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               }}
                               variant="ghost"
                               size="sm"
-                              className="text-white/70 hover:text-white hover:bg-white/10"
+                              className="text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
                             >
                               <X className="h-4 w-4" />
                             </Button>
@@ -1871,7 +1871,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   <div className={showApplicationForm ? 'flex flex-col h-full' : 'hidden'}>
                                     <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 border-b border-white/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem]">
                                     <div className="text-xs font-bold text-white">Ansökningsformulär</div>
-                                    <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white/80 hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
+                                    <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white/80 transition-colors md:hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
                                     </div>
 
                                      <div 

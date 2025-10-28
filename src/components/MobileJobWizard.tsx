@@ -1634,7 +1634,7 @@ const MobileJobWizard = ({
                 variant="ghost"
                 size="icon"
                 onClick={handleClose}
-                className="absolute right-4 top-4 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+                className="absolute right-4 top-4 h-8 w-8 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -1990,7 +1990,7 @@ const MobileJobWizard = ({
                         }}
                         variant="ghost"
                         size="sm"
-                        className="text-white/70 hover:text-white hover:bg-white/10"
+                        className="text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
                       >
                         <X className="h-4 w-4 text-[hsl(var(--pure-white))]" />
                       </Button>
@@ -2140,7 +2140,7 @@ const MobileJobWizard = ({
                         }}
                         variant="ghost"
                         size="sm"
-                        className="text-white/70 hover:text-white hover:bg-white/10"
+                        className="text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -2849,7 +2849,7 @@ const MobileJobWizard = ({
                               setOriginalImageUrl(null);
                               setManualFocus(null);
                             }}
-                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 transition-colors md:hover:bg-red-600"
                           >
                             <X className="w-4 h-4" />
                           </button>

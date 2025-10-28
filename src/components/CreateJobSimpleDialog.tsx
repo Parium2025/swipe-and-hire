@@ -241,7 +241,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                   variant="ghost"
                   size="icon"
                   onClick={handleClose}
-                  className="absolute right-2 top-2 h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+                  className="absolute right-2 top-2 h-8 w-8 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -344,7 +344,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                     e.stopPropagation();
                                     setSearchTerm('');
                                   }}
-                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white transition-colors"
+                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 transition-colors md:hover:text-white"
                                   type="button"
                                 >
                                   <X className="h-4 w-4" />
@@ -452,12 +452,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       <Button
                         variant="ghost"
                         size="icon"
-                      onClick={() => {
-                        setSelectedTemplate(null);
-                        setJobTitle('');
-                        setHasUnsavedChanges(false);
-                      }}
-                        className="mt-1 min-h-[44px] w-11 flex-shrink-0 text-white/70 hover:text-white hover:bg-white/10 transition-all duration-150"
+                        onClick={() => {
+                          setSelectedTemplate(null);
+                          setJobTitle('');
+                          setHasUnsavedChanges(false);
+                        }}
+                        className="mt-1 min-h-[44px] w-11 flex-shrink-0 text-white/70 transition-all duration-150 md:hover:text-white md:hover:bg-white/10"
                         title="Ta bort vald mall"
                       >
                         <X className="h-4 w-4" />
@@ -481,7 +481,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 <Button 
                   variant="outline" 
                   onClick={handleClose}
-                  className="min-h-[44px] bg-white/10 border-white/20 text-white hover:bg-white/20 transition-all duration-150 active:scale-95"
+                  className="min-h-[44px] bg-white/10 border-white/20 text-white transition-all duration-150 active:scale-95 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
                 >
                   Avbryt
                 </Button>
@@ -536,7 +536,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-white/20 border-white/30 text-white hover:bg-white/30">
+            <AlertDialogCancel className="bg-white/20 border-white/30 text-white transition-all duration-300 md:hover:bg-white/30 md:hover:text-white md:hover:border-white/50">
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction

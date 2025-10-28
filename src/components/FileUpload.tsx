@@ -172,7 +172,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
             variant="ghost"
             size="sm"
             onClick={handleRemoveFile}
-            className="h-6 w-6 p-0"
+            className="h-6 w-6 p-0 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
           >
             <X className="h-3 w-3" />
           </Button>

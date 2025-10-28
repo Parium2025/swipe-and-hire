@@ -635,7 +635,7 @@ const JobTemplatesOverview = () => {
                   resetForm();
                 }}
                 disabled={isSubmitting}
-                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                className="bg-white/10 border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
               >
                 Avbryt
               </Button>
