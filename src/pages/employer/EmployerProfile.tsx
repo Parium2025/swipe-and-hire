@@ -417,7 +417,7 @@ const EmployerProfile = () => {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className="w-full bg-white/5 border-white/10 text-white text-sm h-9 transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 justify-between text-left"
+                        className="w-full bg-white/5 border-white/10 text-white text-sm h-9 transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-left"
                       >
                         <span className="truncate text-left flex-1 px-1 text-sm">
                           {newSocialLink.platform ? SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label : 'Välj plattform'}

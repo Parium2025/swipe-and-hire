@@ -217,7 +217,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         }
       }}>
         <DialogTrigger asChild>
-          <Button className="flex items-center gap-2 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50">
+          <Button className="flex items-center gap-2 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white">
             Skapa ny annons
             <Plus size={16} />
           </Button>
@@ -291,7 +291,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex-1 bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 justify-between mt-1 text-left h-auto min-h-[44px] py-2 whitespace-normal"
+                        className="flex-1 bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-auto min-h-[44px] py-2 whitespace-normal"
                         title={selectedTemplate?.name || 'Ingen mall är vald'}
                       >
                             <span className="text-left flex-1 px-1 text-sm whitespace-normal break-words pr-6">

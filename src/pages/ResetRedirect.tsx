@@ -158,7 +158,7 @@ const ResetRedirect = () => {
                   </div>
                 </div>
 
-                <Button onClick={copyUrlToClipboard} className="w-full text-white transition-all duration-300 md:hover:bg-primary/90" variant="outline">
+                <Button onClick={copyUrlToClipboard} className="w-full text-white transition-all duration-300 md:hover:bg-primary/90 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white" variant="outline">
                   {copySuccess ? (
                     <>
                       <CheckCircle className="h-4 w-4 mr-2" />
@@ -174,13 +174,13 @@ const ResetRedirect = () => {
 
                 <div className="text-sm text-primary-foreground/60 text-center">eller</div>
 
-                <Button onClick={openInSafari} className="w-full text-white">
+                <Button onClick={openInSafari} className="w-full text-white md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white">
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Försök öppna i Safari
                 </Button>
               </>
             ) : (
-              <Button onClick={openInSafari} className="w-full">
+              <Button onClick={openInSafari} className="w-full md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white">
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Öppna i ny flik
               </Button>

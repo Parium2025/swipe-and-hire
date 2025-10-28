@@ -484,7 +484,7 @@ const AuthTablet = ({
                   className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                 />
               </div>
-              <Button type="submit" className="w-full text-white transition-all duration-300 md:hover:bg-primary/90" disabled={loading}>
+              <Button type="submit" className="w-full text-white transition-all duration-300 md:hover:bg-primary/90 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white" disabled={loading}>
                 {loading ? "Sparar..." : "Spara nytt lösenord"}
               </Button>
               <div className="text-center">
@@ -871,7 +871,7 @@ const AuthTablet = ({
                                     <Button
                                       ref={triggerRef}
                                       variant="outline"
-                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 justify-between mt-1 text-left"
+                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left"
                                     >
                                        <span className="truncate text-left flex-1 px-1">
                                          {employerData.industry || 'Välj bransch'}
@@ -969,7 +969,7 @@ const AuthTablet = ({
                                     <Button
                                       ref={employeeCountTriggerRef}
                                       variant="outline"
-                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 justify-between mt-1 text-left"
+                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left"
                                     >
                                        <span className="truncate text-left flex-1 px-1">
                                          {employerData.employeeCount || 'Antal'}

@@ -178,8 +178,8 @@ export function AppSidebar() {
                       className={`
                         mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none active:!bg-transparent
                         ${isActiveUrl(item.url) 
-                          ? 'bg-white/20 text-white' 
-                          : 'text-white md:hover:bg-white/10 hover:text-white'
+                          ? 'bg-white/20 text-white [&_svg]:text-white' 
+                          : 'text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white'
                         }
                       `}
                      title={collapsed ? item.title : undefined}
@@ -209,8 +209,8 @@ export function AppSidebar() {
                       className={`
                         mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none active:!bg-transparent
                         ${isActiveUrl(item.url) 
-                          ? 'bg-white/20 text-white' 
-                          : 'text-white md:hover:bg-white/10 hover:text-white'
+                          ? 'bg-white/20 text-white [&_svg]:text-white' 
+                          : 'text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white'
                         }
                       `}
                      title={collapsed ? item.title : undefined}
@@ -240,8 +240,8 @@ export function AppSidebar() {
                       className={`
                         mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none active:!bg-transparent
                         ${isActiveUrl(item.url) 
-                          ? 'bg-white/20 text-white' 
-                          : 'text-white md:hover:bg-white/10 hover:text-white'
+                          ? 'bg-white/20 text-white [&_svg]:text-white' 
+                          : 'text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white'
                         }
                       `}
                      title={collapsed ? item.title : undefined}
@@ -265,6 +265,7 @@ export function AppSidebar() {
             className={`
               flex items-center gap-2 bg-transparent text-white border border-white/30
               w-full justify-start transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50
+              md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white
               ${collapsed ? 'px-2' : 'px-4'}
             `}
             title={collapsed ? 'Logga ut' : undefined}

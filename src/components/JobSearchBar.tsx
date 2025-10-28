@@ -64,7 +64,7 @@ export const JobSearchBar = ({
           <DropdownMenuTrigger asChild>
             <Button 
               variant="outline" 
-              className="w-auto min-w-[180px] bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10"
+              className="w-auto min-w-[180px] bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white"
             >
               <ArrowUpDown className="mr-2 h-4 w-4" />
               {sortLabels[sortBy]}
@@ -96,7 +96,7 @@ export const JobSearchBar = ({
               <Button 
                 variant="ghost" 
                 size="icon"
-                className="h-8 w-8 text-white md:hover:bg-white/10 active:bg-white/12 focus:outline-none focus-visible:outline-none focus:ring-0"
+                className="h-8 w-8 text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white active:bg-white/12 focus:outline-none focus-visible:outline-none focus:ring-0"
               >
                 <Search className="h-4 w-4" />
               </Button>
@@ -131,7 +131,7 @@ export const JobSearchBar = ({
               <Button 
                 variant="ghost" 
                 size="icon"
-                className="h-8 w-8 text-white md:hover:bg-white/10 active:bg-white/12 focus:outline-none focus-visible:outline-none focus:ring-0"
+                className="h-8 w-8 text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white active:bg-white/12 focus:outline-none focus-visible:outline-none focus:ring-0"
               >
                 <ArrowUpDown className="h-4 w-4" />
               </Button>

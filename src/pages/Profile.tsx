@@ -1213,7 +1213,7 @@ const Profile = () => {
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="outline"
-                              className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 justify-between"
+                              className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
                             >
                               <span className="truncate">
                                 {employmentStatus ? (
@@ -1277,7 +1277,7 @@ const Profile = () => {
                             <DropdownMenuTrigger asChild>
                               <Button
                                 variant="outline"
-                                className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 justify-between"
+                                className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
                               >
                                 <span className="truncate">
                                   {workingHours ? (
@@ -1322,7 +1322,7 @@ const Profile = () => {
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="outline"
-                              className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 justify-between"
+                              className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
                             >
                               <span className="truncate">
                                 {availability ? (
@@ -1435,7 +1435,7 @@ const Profile = () => {
               <div className="flex justify-center">
                 <Button 
                   type="submit" 
-                  className="border border-white/30 text-white disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50" 
+                  className="border border-white/30 text-white disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white" 
                   disabled={loading}
                 >
                   {loading ? 'Sparar...' : 'Spara ändringar'}
