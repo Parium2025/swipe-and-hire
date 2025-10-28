@@ -406,7 +406,7 @@ const CompanyProfile = () => {
             size="sm"
             onClick={() => document.getElementById('logo-upload')?.click()}
             disabled={isUploadingLogo}
-            className="bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50"
+            className="bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white"
           >
             {isUploadingLogo ? (
               <>
@@ -751,7 +751,7 @@ const CompanyProfile = () => {
                     onClick={addSocialLink}
                     disabled={!newSocialLink.platform || !newSocialLink.url.trim()}
                     className={cn(
-                      "w-full bg-primary/80 text-white h-9 text-sm transition-all duration-300 md:hover:bg-primary/90",
+                      "w-full bg-primary/80 text-white h-9 text-sm transition-all duration-300 md:hover:bg-primary/90 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white",
                       newSocialLink.platform && newSocialLink.url.trim() && "border border-white/30 md:hover:border-white/50"
                     )}
                   >

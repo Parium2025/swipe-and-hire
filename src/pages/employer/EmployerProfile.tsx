@@ -476,8 +476,8 @@ const EmployerProfile = () => {
                     onClick={addSocialLink}
                     disabled={!newSocialLink.platform || !newSocialLink.url.trim()}
                     className={cn(
-                      "bg-primary/80 hover:bg-primary text-white h-9 text-sm",
-                      newSocialLink.platform && newSocialLink.url.trim() && "border border-white/30"
+                      "bg-primary/80 text-white h-9 text-sm transition-all duration-300 md:hover:bg-primary md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white",
+                      newSocialLink.platform && newSocialLink.url.trim() && "border border-white/30 md:hover:border-white/50"
                     )}
                   >
                     Lägg till
