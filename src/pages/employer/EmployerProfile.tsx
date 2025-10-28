@@ -386,7 +386,7 @@ const EmployerProfile = () => {
                             e.stopPropagation();
                             removeSocialLink(index);
                           }}
-                          className="bg-red-500/20 border-red-400/40 text-red-300 hover:bg-red-500/30 flex-shrink-0"
+                          className="bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40 flex-shrink-0"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
