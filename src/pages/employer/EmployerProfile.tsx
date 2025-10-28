@@ -192,12 +192,18 @@ const EmployerProfile = () => {
     const linkToRemove = formData.social_media_links[index];
     const updatedLinks = formData.social_media_links.filter((_, i) => i !== index);
     
-    // Update local state and mark as unsaved
-    setFormData({ 
+    // Update local state with new array to ensure change detection
+    const newFormData = { 
       ...formData, 
-      social_media_links: updatedLinks 
-    });
-    setHasUnsavedChanges(true);
+      social_media_links: [...updatedLinks]
+    };
+    
+    setFormData(newFormData);
+    
+    // Force unsaved changes state
+    setTimeout(() => {
+      setHasUnsavedChanges(true);
+    }, 0);
     
     toast({
       title: "Länk borttagen",
