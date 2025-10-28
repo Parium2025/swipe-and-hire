@@ -412,6 +412,7 @@ const CompanyProfile = () => {
 
         <div className="flex gap-2">
           <Button 
+            type="button"
             variant="outline" 
             size="sm"
             onClick={() => document.getElementById('logo-upload')?.click()}
@@ -433,6 +434,7 @@ const CompanyProfile = () => {
 
           {formData.company_logo_url && (
             <Button 
+              type="button"
               variant="outline" 
               size="sm"
               onClick={handleLogoDelete}

@@ -405,6 +405,7 @@ const EmployerProfile = () => {
                           </div>
                         </div>
                         <Button
+                          type="button"
                           variant="outline"
                           size="sm"
                           onClick={(e) => {
@@ -427,6 +428,7 @@ const EmployerProfile = () => {
                   <DropdownMenu modal={false} open={platformMenuOpen} onOpenChange={setPlatformMenuOpen}>
                     <DropdownMenuTrigger asChild>
                       <Button
+                        type="button"
                         variant="outline"
                         className="w-full bg-white/5 border-white/10 text-white text-sm h-9 transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-left"
                       >
