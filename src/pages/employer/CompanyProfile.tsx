@@ -312,17 +312,18 @@ const CompanyProfile = () => {
     try {
       setLoading(true);
       await updateProfile(formData as any);
-      
+
       // Deep clone to ensure proper comparison
       const updatedValues = {
         ...formData,
-        social_media_links: JSON.parse(JSON.stringify(formData.social_media_links))
+        social_media_links: JSON.parse(JSON.stringify(formData.social_media_links)),
       };
-      
-      // Update original values after successful save
+
+      // Sync form with saved values to avoid second click
+      setFormData(updatedValues);
       setOriginalValues(updatedValues);
       setHasUnsavedChanges(false);
-      
+
       toast({
         title: "Företagsprofil uppdaterad",
         description: "Din företagsprofil har uppdaterats"
