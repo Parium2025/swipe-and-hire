@@ -484,7 +484,7 @@ const AuthDesktop = ({
                   className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                 />
               </div>
-              <Button type="submit" className="w-full transition-all duration-300 md:hover:bg-primary/90" disabled={loading}>
+              <Button type="submit" className="w-full text-white transition-all duration-300 md:hover:bg-primary/90" disabled={loading}>
                 {loading ? "Sparar..." : "Spara nytt lösenord"}
               </Button>
               <div className="text-center">
@@ -867,11 +867,11 @@ const AuthDesktop = ({
                               <div>
                                 <Label htmlFor="industry" className="text-white">Bransch *</Label>
                                 <DropdownMenu modal={false} open={industryMenuOpen} onOpenChange={setIndustryMenuOpen}>
-                                  <DropdownMenuTrigger asChild>
+                                   <DropdownMenuTrigger asChild>
                                     <Button
                                       ref={triggerRef}
                                       variant="outline"
-                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
+                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 justify-between mt-1 text-left"
                                     >
                                        <span className="truncate text-left flex-1 px-1">
                                          {employerData.industry || 'Välj bransch'}
@@ -965,11 +965,11 @@ const AuthDesktop = ({
                               <div>
                                 <Label htmlFor="employeeCount" className="text-white">Anställda *</Label>
                                 <DropdownMenu modal={false} open={employeeMenuOpen} onOpenChange={setEmployeeMenuOpen}>
-                                  <DropdownMenuTrigger asChild>
+                                   <DropdownMenuTrigger asChild>
                                     <Button
                                       ref={employeeCountTriggerRef}
                                       variant="outline"
-                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 transition-colors justify-between mt-1 text-left"
+                                      className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 justify-between mt-1 text-left"
                                     >
                                        <span className="truncate text-left flex-1 px-1">
                                          {employerData.employeeCount || 'Antal'}

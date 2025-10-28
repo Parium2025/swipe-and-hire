@@ -417,7 +417,7 @@ const Index = () => {
                 currentView={developerView}
               />
             )}
-            <Button onClick={signOut} variant="outline" className="border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/40">
+            <Button onClick={signOut} variant="outline" className="border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50">
               Logga ut
             </Button>
           </div>

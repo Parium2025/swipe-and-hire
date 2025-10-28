@@ -1435,7 +1435,7 @@ const Profile = () => {
               <div className="flex justify-center">
                 <Button 
                   type="submit" 
-                  className="border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50" 
+                  className="border border-white/30 text-white disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50" 
                   disabled={loading}
                 >
                   {loading ? 'Sparar...' : 'Spara ändringar'}

@@ -557,13 +557,13 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
 
             {/* Action buttons */}
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={editingQuestionIndex !== null ? cancelEditQuestion : cancelAddQuestion} className="transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50">
+              <Button variant="outline" onClick={editingQuestionIndex !== null ? cancelEditQuestion : cancelAddQuestion} className="text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50">
                 Avbryt
               </Button>
               <Button 
                 onClick={editingQuestionIndex !== null ? confirmEditQuestion : confirmAddQuestion}
                 disabled={!questionDraft.question_text.trim()}
-                className="transition-all duration-300 md:hover:bg-primary/90"
+                className="text-white transition-all duration-300 md:hover:bg-primary/90"
               >
                 Spara
               </Button>
@@ -608,7 +608,7 @@ const JobQuestionsManager = ({ jobId, onQuestionsChange }: JobQuestionsManagerPr
 
       {questions.length > 0 && (
         <div className="flex justify-end pt-4">
-          <Button onClick={saveQuestions} disabled={loading}>
+          <Button onClick={saveQuestions} disabled={loading} className="text-white">
             {loading ? 'Sparar...' : 'Spara frågor'}
           </Button>
         </div>

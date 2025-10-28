@@ -417,7 +417,7 @@ const EmployerProfile = () => {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className="w-full bg-white/5 border-white/10 text-white text-sm h-9 hover:bg-white/10 transition-colors justify-between text-left"
+                        className="w-full bg-white/5 border-white/10 text-white text-sm h-9 transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 justify-between text-left"
                       >
                         <span className="truncate text-left flex-1 px-1 text-sm">
                           {newSocialLink.platform ? SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label : 'Välj plattform'}
@@ -498,7 +498,7 @@ const EmployerProfile = () => {
                           key={index}
                           variant="outline"
                           onClick={() => window.open(link.url, '_blank')}
-                          className="bg-white/5 border-white/10 text-white text-sm h-8 hover:bg-white/10 transition-colors"
+                          className="bg-white/5 border-white/10 text-white text-sm h-8 transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50"
                         >
                           <Icon className="h-3 w-3 mr-1.5" />
                           {getPlatformLabel(link.platform)}
@@ -515,7 +515,7 @@ const EmployerProfile = () => {
               <Button 
                 type="submit"
                 disabled={loading || !hasUnsavedChanges}
-                className="disabled:opacity-50 disabled:cursor-not-allowed disabled:border-0 border border-white/30 font-medium h-9 px-6 text-sm"
+                className="disabled:opacity-50 disabled:cursor-not-allowed disabled:border-0 border border-white/30 text-white font-medium h-9 px-6 text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50"
               >
                 {loading ? (
                   <>

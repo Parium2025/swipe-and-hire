@@ -100,7 +100,7 @@ const EmployerSettings = () => {
             />
           </div>
           <div className="flex justify-center pt-1">
-            <Button onClick={handlePasswordUpdate} className="h-9 px-6 text-sm border border-white/30 font-medium transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50">
+            <Button onClick={handlePasswordUpdate} className="h-9 px-6 text-sm border border-white/30 text-white font-medium transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50">
               Uppdatera lösenord
             </Button>
           </div>

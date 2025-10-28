@@ -406,7 +406,7 @@ const CompanyProfile = () => {
             size="sm"
             onClick={() => document.getElementById('logo-upload')?.click()}
             disabled={isUploadingLogo}
-            className="bg-white/5 border-white/10 text-white/90 transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50"
+            className="bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50"
           >
             {isUploadingLogo ? (
               <>
@@ -427,7 +427,7 @@ const CompanyProfile = () => {
               size="sm"
               onClick={handleLogoDelete}
               disabled={isUploadingLogo}
-              className="bg-white/5 border-white/10 text-white/90 transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40"
+              className="bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40"
             >
               <Trash2 className="h-3 w-3" />
             </Button>
@@ -766,7 +766,7 @@ const CompanyProfile = () => {
               <Button 
                 type="submit" 
                 disabled={loading || !hasUnsavedChanges}
-                className="disabled:opacity-50 disabled:cursor-not-allowed disabled:border-0 border border-white/30 font-medium h-9 px-6 transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50"
+                className="disabled:opacity-50 disabled:cursor-not-allowed disabled:border-0 border border-white/30 text-white font-medium h-9 px-6 transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50"
               >
                 {loading ? 'Sparar...' : 'Spara ändringar'}
               </Button>
