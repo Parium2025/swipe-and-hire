@@ -469,30 +469,6 @@ const EmployerProfile = () => {
                   </Button>
                 </div>
               </div>
-
-              {/* Display social media links if any exist */}
-              {formData.social_media_links.length > 0 && (
-                <div className="border-t border-white/10 pt-4 md:pt-3">
-                  <Label className="text-sm text-white mb-2 block">Förhandsvisning</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.social_media_links.map((link, index) => {
-                      const Icon = getPlatformIcon(link.platform);
-                      return (
-                        <Button
-                          key={index}
-                          variant="outline"
-                          onClick={() => window.open(link.url, '_blank')}
-                          className="bg-white/5 border-white/10 text-white text-sm h-8 transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50"
-                        >
-                          <Icon className="h-3 w-3 mr-1.5" />
-                          {getPlatformLabel(link.platform)}
-                          <ExternalLink className="h-2.5 w-2.5 ml-1.5" />
-                        </Button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="flex justify-center pt-1">
