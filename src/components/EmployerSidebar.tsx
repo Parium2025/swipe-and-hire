@@ -252,7 +252,7 @@ export function EmployerSidebar() {
 
   return (
     <Sidebar 
-      className={`border-r-0 bg-transparent ${collapsed ? 'w-16' : 'w-64'}`}
+      className={`border-r-0 bg-transparent ${collapsed ? 'w-16' : 'w-64'} scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent`}
       collapsible="icon"
     >
       <SidebarContent className="gap-0">
