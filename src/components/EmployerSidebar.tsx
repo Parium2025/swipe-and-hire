@@ -421,9 +421,10 @@ export function EmployerSidebar() {
         <div className="mt-auto p-4">
           <Button
             onClick={signOut}
+            variant="outline"
             className={`
               w-full justify-start rounded-lg
-              border border-white/30 bg-white/5 hover:bg-white/10
+              ring-1 ring-inset ring-white/30 md:hover:bg-white/5
               ${collapsed ? 'px-2' : 'px-4'}
             `}
           >
