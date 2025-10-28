@@ -313,8 +313,14 @@ const CompanyProfile = () => {
       setLoading(true);
       await updateProfile(formData as any);
       
+      // Deep clone to ensure proper comparison
+      const updatedValues = {
+        ...formData,
+        social_media_links: JSON.parse(JSON.stringify(formData.social_media_links))
+      };
+      
       // Update original values after successful save
-      setOriginalValues({ ...formData });
+      setOriginalValues(updatedValues);
       setHasUnsavedChanges(false);
       
       toast({
