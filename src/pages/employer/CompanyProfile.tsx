@@ -289,31 +289,45 @@ const CompanyProfile = () => {
     setDeleteDialogOpen(true);
   };
 
-  const confirmRemoveSocialLink = () => {
+  const confirmRemoveSocialLink = async () => {
     if (!linkToDelete) return;
 
     const updatedLinks = formData.company_social_media_links.filter((_, i) => i !== linkToDelete.index);
     
-    // Update local state with new array to ensure change detection
-    const newFormData = { 
+    const updatedFormData = { 
       ...formData, 
       company_social_media_links: [...updatedLinks]
     };
-    
-    setFormData(newFormData);
-    
-    // Force unsaved changes state
-    setTimeout(() => {
-      setHasUnsavedChanges(true);
-    }, 0);
-    
-    toast({
-      title: "Länk borttagen",
-      description: `${getPlatformLabel(linkToDelete.link.platform)}-länken har tagits bort. Glöm inte att spara!`,
-    });
 
-    setDeleteDialogOpen(false);
-    setLinkToDelete(null);
+    try {
+      setLoading(true);
+      await updateProfile(updatedFormData as any);
+
+      // Update both formData and originalValues to sync them
+      const savedValues = {
+        ...updatedFormData,
+        company_social_media_links: JSON.parse(JSON.stringify(updatedLinks)),
+      };
+
+      setFormData(savedValues);
+      setOriginalValues(savedValues);
+      setHasUnsavedChanges(false);
+
+      toast({
+        title: "Länk borttagen",
+        description: `${getPlatformLabel(linkToDelete.link.platform)}-länken har tagits bort.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Fel",
+        description: "Kunde inte ta bort länken.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+      setDeleteDialogOpen(false);
+      setLinkToDelete(null);
+    }
   };
 
   const handleSave = async () => {
