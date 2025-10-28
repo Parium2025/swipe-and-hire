@@ -261,15 +261,15 @@ export function AppSidebar() {
         <div className="mt-auto p-4">
           <Button 
             onClick={signOut}
-            variant="outline" 
             className={`
-              w-full justify-start border border-white/30 bg-transparent text-white hover:bg-white/10
+              flex items-center gap-2 border border-white/30
+              w-full justify-start
               ${collapsed ? 'px-2' : 'px-4'}
             `}
             title={collapsed ? 'Logga ut' : undefined}
           >
             <LogOut className="h-4 w-4" />
-            {!collapsed && <span className="ml-3">Logga ut</span>}
+            {!collapsed && <span>Logga ut</span>}
           </Button>
         </div>
       </SidebarContent>
