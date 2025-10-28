@@ -349,6 +349,41 @@ export function EmployerSidebar() {
 
         <SidebarSeparator className="bg-white/20 mx-4" />
 
+        {/* Support Section */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-white text-sm uppercase tracking-wide px-4">
+            Support
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {supportNavItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton 
+                    asChild 
+                    className={`
+                      mx-2 rounded-lg transition-all duration-200 active:!bg-transparent
+                      ${isActiveUrl(item.url) 
+                        ? 'bg-white/20 text-white [&_svg]:text-white' 
+                        : 'text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white'
+                      }
+                    `}
+                  >
+                    <button
+                      onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
+                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {!collapsed && <span className="font-medium">{item.title}</span>}
+                    </button>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator className="bg-white/20 mx-4" />
+
         {/* Admin Panel - Only for specific user */}
         {user?.email === 'fredrikandits@hotmail.com' && (
           <>
