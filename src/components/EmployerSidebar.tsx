@@ -424,7 +424,7 @@ export function EmployerSidebar() {
             data-allow-border="true"
             className={`
               flex items-center gap-2 bg-transparent text-white border border-white/30
-              w-full justify-start transition-all duration-300 md:hover:opacity-90
+              w-full justify-start transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50
               ${collapsed ? 'px-2' : 'px-4'}
             `}
           >
