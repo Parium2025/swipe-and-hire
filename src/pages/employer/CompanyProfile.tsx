@@ -52,7 +52,7 @@ const CompanyProfile = () => {
     company_description: profile?.company_description || '',
     employee_count: profile?.employee_count || '',
     company_logo_url: (profile as any)?.company_logo_url || '',
-    social_media_links: (profile as any)?.social_media_links || [] as SocialMediaLink[],
+    company_social_media_links: (profile as any)?.company_social_media_links || [] as SocialMediaLink[],
   });
 
   const [newSocialLink, setNewSocialLink] = useState({
@@ -77,7 +77,7 @@ const CompanyProfile = () => {
         company_description: profile.company_description || '',
         employee_count: profile.employee_count || '',
         company_logo_url: (profile as any)?.company_logo_url || '',
-        social_media_links: (profile as any)?.social_media_links || [],
+        company_social_media_links: (profile as any)?.company_social_media_links || [],
       };
       
       setFormData(values);
@@ -90,7 +90,7 @@ const CompanyProfile = () => {
     if (!originalValues.company_name) return false; // Not loaded yet
     
     const hasChanges = Object.keys(formData).some(key => {
-      if (key === 'social_media_links') {
+      if (key === 'company_social_media_links') {
         return JSON.stringify(formData[key]) !== JSON.stringify(originalValues[key]);
       }
       return formData[key] !== originalValues[key];
@@ -241,23 +241,25 @@ const CompanyProfile = () => {
       return;
     }
 
-    // Check if platform already exists
-    const existingPlatform = formData.social_media_links.find(link => link.platform === newSocialLink.platform);
-    if (existingPlatform) {
-      toast({
-        title: "Plattform finns redan",
-        description: "Du har redan lagt till denna plattform. Ta bort den först om du vill ändra länken.",
-        variant: "destructive"
-      });
-      return;
+    // Check if platform already exists (except for "annat" which can have multiple entries)
+    if (newSocialLink.platform !== 'annat') {
+      const existingPlatform = formData.company_social_media_links.find(link => link.platform === newSocialLink.platform);
+      if (existingPlatform) {
+        toast({
+          title: "Plattform finns redan",
+          description: "Du har redan lagt till denna plattform. Ta bort den först om du vill ändra länken.",
+          variant: "destructive"
+        });
+        return;
+      }
     }
 
-    const updatedLinks = [...formData.social_media_links, newSocialLink as SocialMediaLink];
+    const updatedLinks = [...formData.company_social_media_links, newSocialLink as SocialMediaLink];
     
     // Update local state and mark as unsaved
     setFormData({
       ...formData,
-      social_media_links: updatedLinks
+      company_social_media_links: updatedLinks
     });
     setHasUnsavedChanges(true);
     
@@ -270,13 +272,13 @@ const CompanyProfile = () => {
   };
 
   const removeSocialLink = (index: number) => {
-    const linkToRemove = formData.social_media_links[index];
-    const updatedLinks = formData.social_media_links.filter((_, i) => i !== index);
+    const linkToRemove = formData.company_social_media_links[index];
+    const updatedLinks = formData.company_social_media_links.filter((_, i) => i !== index);
     
     // Update local state and mark as unsaved
     setFormData({ 
       ...formData, 
-      social_media_links: updatedLinks 
+      company_social_media_links: updatedLinks 
     });
     setHasUnsavedChanges(true);
     
@@ -298,7 +300,7 @@ const CompanyProfile = () => {
     }
 
     // Validate all social media URLs
-    for (const link of formData.social_media_links) {
+    for (const link of formData.company_social_media_links) {
       if (!validateUrl(link.url, link.platform)) {
         toast({
           title: "Ogiltig URL",
@@ -316,7 +318,7 @@ const CompanyProfile = () => {
       // Deep clone to ensure proper comparison
       const updatedValues = {
         ...formData,
-        social_media_links: JSON.parse(JSON.stringify(formData.social_media_links)),
+        company_social_media_links: JSON.parse(JSON.stringify(formData.company_social_media_links)),
       };
 
       // Sync form with saved values to avoid second click
@@ -631,10 +633,10 @@ const CompanyProfile = () => {
               </div>
 
               {/* Existing social media links */}
-              {formData.social_media_links.length > 0 && (
+              {formData.company_social_media_links.length > 0 && (
                 <div className="space-y-2">
                   <Label className="text-sm text-white">Företagets sociala medier</Label>
-                  {formData.social_media_links.map((link, index) => {
+                  {formData.company_social_media_links.map((link, index) => {
                     const Icon = getPlatformIcon(link.platform);
                     return (
                       <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-2 gap-2">

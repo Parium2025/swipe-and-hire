@@ -158,15 +158,17 @@ const EmployerProfile = () => {
       return;
     }
 
-    // Check if platform already exists
-    const existingPlatform = formData.social_media_links.find(link => link.platform === newSocialLink.platform);
-    if (existingPlatform) {
-      toast({
-        title: "Plattform finns redan",
-        description: "Du har redan lagt till denna plattform. Ta bort den först om du vill ändra länken.",
-        variant: "destructive"
-      });
-      return;
+    // Check if platform already exists (except for "annat" which can have multiple entries)
+    if (newSocialLink.platform !== 'annat') {
+      const existingPlatform = formData.social_media_links.find(link => link.platform === newSocialLink.platform);
+      if (existingPlatform) {
+        toast({
+          title: "Plattform finns redan",
+          description: "Du har redan lagt till denna plattform. Ta bort den först om du vill ändra länken.",
+          variant: "destructive"
+        });
+        return;
+      }
     }
 
     const updatedLinks = [...formData.social_media_links, newSocialLink as SocialMediaLink];
@@ -421,7 +423,8 @@ const EmployerProfile = () => {
                       {/* Platform options */}
                       <div className="p-2">
                         {SOCIAL_PLATFORMS.map((platform) => {
-                          const isDisabled = formData.social_media_links.some(link => link.platform === platform.value);
+                          // Allow multiple "annat" platforms, but only one of each other platform
+                          const isDisabled = platform.value !== 'annat' && formData.social_media_links.some(link => link.platform === platform.value);
                           return (
                             <DropdownMenuItem
                               key={platform.value}

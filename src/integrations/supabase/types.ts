@@ -560,6 +560,7 @@ export type Database = {
           company_description: string | null
           company_logo_url: string | null
           company_name: string | null
+          company_social_media_links: Json | null
           cover_image_url: string | null
           created_at: string
           cv_filename: string | null
@@ -595,6 +596,7 @@ export type Database = {
           company_description?: string | null
           company_logo_url?: string | null
           company_name?: string | null
+          company_social_media_links?: Json | null
           cover_image_url?: string | null
           created_at?: string
           cv_filename?: string | null
@@ -630,6 +632,7 @@ export type Database = {
           company_description?: string | null
           company_logo_url?: string | null
           company_name?: string | null
+          company_social_media_links?: Json | null
           cover_image_url?: string | null
           created_at?: string
           cv_filename?: string | null
