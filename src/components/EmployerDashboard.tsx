@@ -293,7 +293,7 @@ const EmployerDashboard = memo(() => {
                                 e.stopPropagation();
                                 handleEditJob(job as any);
                               }}
-                              className="h-6 px-1.5 bg-transparent border-white/20 text-white transition-all duration-300 !hover:bg-blue-500/20 md:hover:!bg-blue-500/20 !hover:border-blue-500/40 md:hover:!border-blue-500/40 hover:!text-white md:hover:!text-white text-[10px]"
+                              className="h-6 px-1.5 bg-transparent border-white/20 text-white !hover:bg-blue-500/20 md:hover:!bg-blue-500/20 !hover:border-blue-500/40 md:hover:!border-blue-500/40 hover:!text-white md:hover:!text-white text-[10px]"
                             >
                               <Edit size={12} />
                             </Button>
@@ -304,7 +304,7 @@ const EmployerDashboard = memo(() => {
                                 e.stopPropagation();
                                 handleDeleteClick(job as any);
                               }}
-                              className="h-6 px-1.5 bg-transparent border-white/20 text-white transition-all duration-300 !hover:bg-red-500/20 md:hover:!bg-red-500/20 !hover:border-red-500/40 md:hover:!border-red-500/40 hover:!text-white md:hover:!text-white text-[10px]"
+                              className="h-6 px-1.5 bg-transparent border-white/20 text-white !hover:bg-red-500/20 md:hover:!bg-red-500/20 !hover:border-red-500/40 md:hover:!border-red-500/40 hover:!text-white md:hover:!text-white text-[10px]"
                             >
                               <Trash2 size={12} />
                             </Button>
