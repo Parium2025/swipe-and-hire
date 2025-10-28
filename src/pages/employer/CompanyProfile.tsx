@@ -413,7 +413,7 @@ const CompanyProfile = () => {
               size="sm"
               onClick={handleLogoDelete}
               disabled={isUploadingLogo}
-              className="bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40"
+              className="bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40 md:hover:text-red-300"
             >
               <Trash2 className="h-3 w-3" />
             </Button>
