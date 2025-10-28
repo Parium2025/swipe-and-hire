@@ -422,12 +422,13 @@ export function EmployerSidebar() {
           <Button
             onClick={signOut}
             className={`
-              w-full justify-start border border-white/30
+              flex items-center gap-2 bg-transparent border border-white/30
+              w-full justify-start
               ${collapsed ? 'px-2' : 'px-4'}
             `}
           >
             <LogOut className="h-4 w-4" />
-            {!collapsed && <span className="ml-3">Logga ut</span>}
+            {!collapsed && <span>Logga ut</span>}
           </Button>
         </div>
       </SidebarContent>
