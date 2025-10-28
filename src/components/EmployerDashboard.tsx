@@ -465,20 +465,20 @@ const EmployerDashboard = memo(() => {
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col gap-2 mt-4 sm:justify-center">
+          <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
             <AlertDialogCancel 
               onClick={() => {
                 setDeleteDialogOpen(false);
                 setJobToDelete(null);
               }}
-              className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20 text-sm"
+              className="flex-[0.6] bg-white/10 border-white/20 text-white hover:bg-white/20 text-sm"
             >
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteJob}
               variant="destructiveSoft"
-              className="w-full sm:w-auto text-sm"
+              className="flex-[0.4] text-sm"
             >
               <Trash2 className="h-4 w-4 mr-1.5" />
               Ta bort
