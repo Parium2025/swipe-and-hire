@@ -284,7 +284,6 @@ export function EmployerSidebar() {
           <SidebarGroupLabel className="text-white text-sm uppercase tracking-wide px-4">
             Huvudmeny
           </SidebarGroupLabel>
-          <SidebarSeparator className="bg-white/20 mx-4 mt-2" />
           <SidebarGroupContent>
             <SidebarMenu>
               {employerNavItems.map((item) => (
