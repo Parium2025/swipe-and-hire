@@ -182,6 +182,13 @@ All colors MUST be HSL.
     @apply border-border;
     box-sizing: border-box;
     max-width: 100%;
+    /* Crisp text rendering */
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevent subpixel blur */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
   
   /* Prevent page horizontal scroll without clipping children */
