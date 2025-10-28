@@ -422,7 +422,7 @@ export function EmployerSidebar() {
           <Button
             onClick={signOut}
             className={`
-              flex items-center gap-2 border border-white/30
+              flex items-center gap-2 bg-transparent text-white border border-white/30
               w-full justify-start
               ${collapsed ? 'px-2' : 'px-4'}
             `}
