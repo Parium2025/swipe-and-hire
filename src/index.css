@@ -42,7 +42,7 @@ body {
 }
 
 /* Reset focus/active visuals for pointer interactions inside the sidebar */
-[data-sidebar="sidebar"] :is(a, button, [role="button"]) {
+[data-sidebar="sidebar"] :is(a, button, [role="button"]):not([data-allow-border="true"]) {
   -webkit-appearance: none;
   appearance: none;
   outline: none !important;
