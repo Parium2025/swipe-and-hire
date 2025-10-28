@@ -273,7 +273,7 @@ const EmployerDashboard = memo(() => {
                           />
                         </TableCell>
                         <TableCell className="text-white px-2 py-2">
-                          <div className="flex items-center gap-1 text-sm whitespace-nowrap">
+                          <div className="flex items-center gap-1 text-sm whitespace-nowrap min-w-[110px]">
                             <Calendar size={12} />
                             {formatDateShortSv(job.created_at)}
                           </div>
