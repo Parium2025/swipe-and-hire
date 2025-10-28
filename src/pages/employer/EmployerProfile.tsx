@@ -139,7 +139,7 @@ const EmployerProfile = () => {
     }
   };
 
-  const addSocialLink = async () => {
+  const addSocialLink = () => {
     if (!newSocialLink.platform || !newSocialLink.url.trim()) {
       toast({
         title: "Ofullständig information",
@@ -170,60 +170,37 @@ const EmployerProfile = () => {
     }
 
     const updatedLinks = [...formData.social_media_links, newSocialLink as SocialMediaLink];
-    const updatedFormData = {
+    
+    // Update local state and mark as unsaved
+    setFormData({
       ...formData,
       social_media_links: updatedLinks
-    };
-
-    try {
-      // Save immediately to database
-      await updateProfile(updatedFormData as any);
-      
-      // Update local state
-      setFormData(updatedFormData);
-      setOriginalValues(updatedFormData);
-      setHasUnsavedChanges(false);
-      
-      setNewSocialLink({ platform: '', url: '' });
-      
-      toast({
-        title: "Länk tillagd",
-        description: `${SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label}-länken har lagts till`,
-      });
-    } catch (error) {
-      toast({
-        title: "Fel",
-        description: "Kunde inte spara länken. Försök igen.",
-        variant: "destructive"
-      });
-    }
+    });
+    setHasUnsavedChanges(true);
+    
+    setNewSocialLink({ platform: '', url: '' });
+    
+    toast({
+      title: "Länk tillagd",
+      description: `${SOCIAL_PLATFORMS.find(p => p.value === newSocialLink.platform)?.label}-länken har lagts till. Glöm inte att spara!`,
+    });
   };
 
-  const removeSocialLink = async (index: number) => {
+  const removeSocialLink = (index: number) => {
     const linkToRemove = formData.social_media_links[index];
     const updatedLinks = formData.social_media_links.filter((_, i) => i !== index);
-    const updatedFormData = { ...formData, social_media_links: updatedLinks };
-
-    try {
-      // Save immediately to database
-      await updateProfile(updatedFormData as any);
-      
-      // Update local state
-      setFormData(updatedFormData);
-      setOriginalValues(updatedFormData);
-      setHasUnsavedChanges(false);
-      
-      toast({
-        title: "Länk borttagen",
-        description: `${getPlatformLabel(linkToRemove.platform)}-länken har tagits bort`,
-      });
-    } catch (error) {
-      toast({
-        title: "Fel",
-        description: "Kunde inte ta bort länken. Försök igen.",
-        variant: "destructive"
-      });
-    }
+    
+    // Update local state and mark as unsaved
+    setFormData({ 
+      ...formData, 
+      social_media_links: updatedLinks 
+    });
+    setHasUnsavedChanges(true);
+    
+    toast({
+      title: "Länk borttagen",
+      description: `${getPlatformLabel(linkToRemove.platform)}-länken har tagits bort. Glöm inte att spara!`,
+    });
   };
 
   const handleSave = async () => {
@@ -475,10 +452,7 @@ const EmployerProfile = () => {
                     type="button"
                     onClick={addSocialLink}
                     disabled={!newSocialLink.platform || !newSocialLink.url.trim()}
-                    className={cn(
-                      "bg-primary/80 text-white h-9 text-sm transition-all duration-300 md:hover:bg-primary md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white",
-                      newSocialLink.platform && newSocialLink.url.trim() && "border border-white/30 md:hover:border-white/50"
-                    )}
+                    className="bg-white/5 border border-white/10 text-white h-9 text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Lägg till
                     <Plus className="h-3 w-3 ml-1.5" />
