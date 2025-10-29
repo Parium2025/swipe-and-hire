@@ -114,6 +114,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const handleTemplateSelect = useCallback((templateId: string, templateName: string) => {
     if (templateId === 'none') {
       setSelectedTemplate(null);
+      setJobTitle('');
+      setHasUnsavedChanges(false);
       setTemplateMenuOpen(false);
       return;
     }
@@ -122,6 +124,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     if (template) {
       setSelectedTemplate(template as any);
       setJobTitle(template.title);
+      setHasUnsavedChanges(true);
     }
     setTemplateMenuOpen(false);
   }, [templates]);
@@ -301,7 +304,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
-                          className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 duration-200 z-50"
+                          className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50"
                           style={{ 
                             WebkitOverflowScrolling: 'touch', 
                             overscrollBehaviorY: 'contain', 
@@ -311,7 +314,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           align="center"
                           alignOffset={0}
                           sideOffset={8}
-                          avoidCollisions={true}
+                          avoidCollisions={false}
                           collisionPadding={16}
                           onWheel={(e) => e.stopPropagation()}
                           onTouchStart={(e) => e.stopPropagation()}
@@ -361,6 +364,23 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           )}
 
                           <div className="bg-slate-800/95 flex-1 pb-2">
+                            {/* "Ingen mall är vald" option */}
+                            <DropdownMenuItem
+                              onClick={() => handleTemplateSelect('none', 'Ingen mall är vald')}
+                              onFocus={(e) => {
+                                const searchInput = e.currentTarget.closest('[role="menu"]')?.querySelector('input');
+                                if (searchInput && document.activeElement === searchInput) {
+                                  e.preventDefault();
+                                }
+                              }}
+                              className="px-4 py-2 text-white hover:bg-slate-700/80 focus:bg-slate-700/80 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20"
+                            >
+                              <div className="flex flex-col">
+                                <span className="font-medium text-white/80">Ingen mall är vald</span>
+                                <span className="text-sm text-white/60">Skapa jobb utan mall</span>
+                              </div>
+                            </DropdownMenuItem>
+
                             <DropdownMenuItem
                               onClick={() => {
                                 setTemplateMenuOpen(false);
