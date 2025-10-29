@@ -64,7 +64,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const [menuInstanceKey, setMenuInstanceKey] = useState(0);
   // Dropdown positioning helpers
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const rowRef = useRef<HTMLDivElement | null>(null);
   const [dropdownWidth, setDropdownWidth] = useState<number | null>(null);
+  const [alignOffset, setAlignOffset] = useState<number>(0);
 
   const fetchTemplates = useCallback(async () => {
     if (!user) return;
@@ -118,15 +120,20 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     }
   }, [jobTitle, selectedTemplate]);
 
-  // Mät trigger-bredden varje gång menyn öppnas (även programmatisk öppning)
+  // Mät och lås menybredd + centrering varje gång menyn öppnas
   useEffect(() => {
-    if (templateMenuOpen) {
-      requestAnimationFrame(() => {
-        if (triggerRef.current) {
-          setDropdownWidth(triggerRef.current.offsetWidth);
-        }
-      });
-    }
+    if (!templateMenuOpen) return;
+    const measure = () => {
+      const trigW = triggerRef.current?.offsetWidth || 0;
+      const containerW = rowRef.current?.offsetWidth || trigW;
+      setDropdownWidth(containerW);
+      setAlignOffset(Math.max(0, Math.round((containerW - trigW) / 2)));
+    };
+    requestAnimationFrame(measure);
+    const ro = new ResizeObserver(() => measure());
+    if (rowRef.current) ro.observe(rowRef.current);
+    if (triggerRef.current) ro.observe(triggerRef.current);
+    return () => ro.disconnect();
   }, [templateMenuOpen, open]);
 
   const handleTemplateSelect = useCallback((templateId: string, templateName: string) => {
@@ -322,7 +329,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     Laddar mallar...
                   </div>
                 ) : (
-                  <div className="flex gap-2 items-start">
+                  <div className="flex gap-2 items-start" ref={rowRef}>
                     <div className="flex-1">
                       <DropdownMenu 
                         key={menuInstanceKey}
@@ -333,12 +340,14 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                            if (isOpen) {
                              setSearchTerm('');
                              requestAnimationFrame(() => {
-                               if (triggerRef.current) {
-                                 setDropdownWidth(triggerRef.current.offsetWidth);
-                               }
+                               const trigW = triggerRef.current?.offsetWidth || 0;
+                               const containerW = rowRef.current?.offsetWidth || trigW;
+                               setDropdownWidth(containerW);
+                               setAlignOffset(Math.max(0, Math.round((containerW - trigW) / 2)));
                              });
                            } else {
                              setDropdownWidth(null);
+                             setAlignOffset(0);
                            }
                          }}
                       >
@@ -368,7 +377,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             }}
                             side="top"
                             align="center"
-                            alignOffset={0}
+                            alignOffset={alignOffset}
                             sideOffset={8}
                             avoidCollisions={false}
                             onWheel={(e) => e.stopPropagation()}
