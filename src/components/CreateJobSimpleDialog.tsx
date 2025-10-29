@@ -308,7 +308,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     Laddar mallar...
                   </div>
                 ) : (
-                  <div className="flex items-start gap-2">
+                  <div className="relative w-full">
                     <DropdownMenu 
                       key={menuInstanceKey}
                       modal={false} 
@@ -324,14 +324,14 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex-1 bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-auto min-h-[44px] py-2 whitespace-normal"
+                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-auto min-h-[44px] py-2 whitespace-normal pr-10"
                         title={selectedTemplate?.name || 'Ingen mall är vald'}
                       >
-                            <span className="text-left flex-1 px-1 text-sm whitespace-normal break-words pr-6">
-                              {selectedTemplate?.name || 'Ingen mall är vald'}
-                            </span>
-                            <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2 transition-transform duration-150" />
-                          </Button>
+                        <span className="text-left flex-1 px-1 text-sm whitespace-normal break-words pr-6">
+                          {selectedTemplate?.name || 'Ingen mall är vald'}
+                        </span>
+                        <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2 transition-transform duration-150" />
+                      </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
                           key={menuInstanceKey}
@@ -345,8 +345,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           align="center"
                           alignOffset={0}
                           sideOffset={8}
-                          avoidCollisions={false}
-                          sticky="always"
+                          avoidCollisions={true}
+                          collisionPadding={24}
                           onWheel={(e) => e.stopPropagation()}
                           onTouchStart={(e) => e.stopPropagation()}
                           onTouchMove={(e) => e.stopPropagation()}
