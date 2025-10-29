@@ -178,6 +178,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       setJobTitle('');
       setSelectedTemplate(null);
       setHasUnsavedChanges(false);
+      setTemplateMenuOpen(false);
+      setTitleInputKey((k) => k + 1);
     }
   }, [hasUnsavedChanges]);
 
@@ -187,6 +189,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     setJobTitle('');
     setSelectedTemplate(null);
     setHasUnsavedChanges(false);
+    setTemplateMenuOpen(false);
+    setTitleInputKey((k) => k + 1);
   }, []);
 
   const handleCancelClose = useCallback(() => {
@@ -229,6 +233,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
           setJobTitle('');
           setSelectedTemplate(null);
           setSearchTerm('');
+          setTemplateMenuOpen(false);
+          setTitleInputKey((k) => k + 1);
         }
       }}>
         <DialogTrigger asChild>
