@@ -412,7 +412,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                       e.stopPropagation();
                                       setSearchTerm('');
                                     }}
-                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 transition-colors md:hover:text-white"
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white transition-colors md:hover:text-white"
                                     aria-label="Rensa sökning"
                                   >
                                     <X className="h-4 w-4" />
@@ -608,7 +608,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-white/20 border-white/30 text-white transition-all duration-300 md:hover:bg-white/30 md:hover:text-white md:hover:border-white/50">
+            <AlertDialogCancel className="h-11 bg-white/20 border-white/30 text-white transition-all duration-300 md:hover:bg-white/30 md:hover:text-white md:hover:border-white/50">
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
@@ -644,6 +644,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 setTemplateToDelete(null);
               }}
               variant="destructive"
+              className="h-11"
             >
               Ta bort
             </AlertDialogAction>
