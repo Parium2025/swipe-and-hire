@@ -60,7 +60,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const isNavigatingBack = useRef(false);
   const isMobile = useIsMobile();
   const titleRef = useRef<HTMLTextAreaElement>(null);
-
+  const [titleInputKey, setTitleInputKey] = useState(0);
 
   const fetchTemplates = useCallback(async () => {
     if (!user) return;
@@ -120,6 +120,16 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       setJobTitle('');
       setHasUnsavedChanges(false);
       setTemplateMenuOpen(false);
+      setTitleInputKey((k) => k + 1);
+      // Force iOS refresh
+      setTimeout(() => {
+        if (titleRef.current) {
+          titleRef.current.value = '';
+          titleRef.current.blur();
+          titleRef.current.focus();
+          titleRef.current.blur();
+        }
+      }, 0);
       return;
     }
     
@@ -260,6 +270,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 <Label htmlFor="job-title" className="text-white">Titel</Label>
                 <Textarea
                   id="job-title"
+                  key={titleInputKey}
                   ref={titleRef}
                   value={jobTitle}
                   onChange={(e) => {
@@ -465,10 +476,15 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           setSelectedTemplate(null);
                           setJobTitle('');
                           setHasUnsavedChanges(false);
-                          if (titleRef.current) {
-                            titleRef.current.value = '';
-                            titleRef.current.blur();
-                          }
+                          setTitleInputKey((k) => k + 1);
+                          setTimeout(() => {
+                            if (titleRef.current) {
+                              titleRef.current.value = '';
+                              titleRef.current.blur();
+                              titleRef.current.focus();
+                              titleRef.current.blur();
+                            }
+                          }, 0);
                         }}
                         className="mt-1 min-h-[44px] w-11 flex-shrink-0 text-white/70 transition-all duration-150 md:hover:text-white md:hover:bg-white/10"
                         title="Ta bort vald mall"
