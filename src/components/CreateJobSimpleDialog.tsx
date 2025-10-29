@@ -234,11 +234,16 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   // Händelsebaserad öppning av dropdown efter dialog-animation
   useEffect(() => {
     if (dialogReady && openMenuAfterDialog) {
-      setTemplateMenuOpen(true);
-      setOpenMenuAfterDialog(false);
-      isNavigatingBack.current = false;
-      // Tvinga Popper att omberäkna position i Safari/iOS
-      queueMicrotask(() => window.dispatchEvent(new Event('resize')));
+      // Vänta tills scroll-lock och animationer är helt klara
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          setTemplateMenuOpen(true);
+          setOpenMenuAfterDialog(false);
+          isNavigatingBack.current = false;
+          // Tvinga Popper att omberäkna position
+          queueMicrotask(() => window.dispatchEvent(new Event('resize')));
+        }, 80);
+      });
     }
   }, [dialogReady, openMenuAfterDialog]);
 
