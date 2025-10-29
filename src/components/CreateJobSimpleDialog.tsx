@@ -59,6 +59,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const { toast } = useToast();
   const isNavigatingBack = useRef(false);
   const isMobile = useIsMobile();
+  const titleRef = useRef<HTMLTextAreaElement>(null);
 
 
   const fetchTemplates = useCallback(async () => {
@@ -259,14 +260,19 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 <Label htmlFor="job-title" className="text-white">Titel</Label>
                 <Textarea
                   id="job-title"
+                  ref={titleRef}
                   value={jobTitle}
                   onChange={(e) => {
                     setJobTitle(e.target.value);
                     setHasUnsavedChanges(true);
                   }}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 text-sm resize-none h-[44px] !min-h-[44px] md:!min-h-[44px] leading-[28px] py-2 overflow-y-auto [&:not(:placeholder-shown)]:text-white"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 text-sm resize-none h-[44px] !min-h-[44px] md:!min-h-[44px] leading-[28px] py-2 overflow-y-auto"
                   autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  inputMode="text"
                   title={jobTitle || "Namnge jobbet"}
                   rows={1}
                 />
@@ -459,6 +465,10 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           setSelectedTemplate(null);
                           setJobTitle('');
                           setHasUnsavedChanges(false);
+                          if (titleRef.current) {
+                            titleRef.current.value = '';
+                            titleRef.current.blur();
+                          }
                         }}
                         className="mt-1 min-h-[44px] w-11 flex-shrink-0 text-white/70 transition-all duration-150 md:hover:text-white md:hover:bg-white/10"
                         title="Ta bort vald mall"
