@@ -60,8 +60,11 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const isNavigatingBack = useRef(false);
   const isMobile = useIsMobile();
   const titleRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const [titleInputKey, setTitleInputKey] = useState(0);
   const [menuInstanceKey, setMenuInstanceKey] = useState(0);
+  const [dialogReady, setDialogReady] = useState(false);
+  const [openMenuAfterDialog, setOpenMenuAfterDialog] = useState(false);
 
   const fetchTemplates = useCallback(async () => {
     if (!user) return;
@@ -176,6 +179,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       setShowUnsavedDialog(true);
       // Stäng dropdown om den är öppen för att undvika felaktig position nästa gång
       setTemplateMenuOpen(false);
+      setMenuInstanceKey((k) => k + 1);
     } else {
       setOpen(false);
       setJobTitle('');
@@ -212,15 +216,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const handleWizardBack = useCallback(() => {
     isNavigatingBack.current = true;
     setShowDetailDialog(false);
-    // Öppna mallvalssteget igen efter att dialogens animation är klar
-    // 1) Tvinga ny instans av dropdown för stabil positionering
     setMenuInstanceKey((k) => k + 1);
-    // 2) Vänta lite längre så att layouten hinner sätta sig innan Popper mäter
-    requestAnimationFrame(() => {
-      setOpen(true);
-      setTimeout(() => setTemplateMenuOpen(true), 260);
-      isNavigatingBack.current = false;
-    });
+    setOpen(true);
+    setOpenMenuAfterDialog(true);
   }, []);
 
   const handleTemplateWizardBack = useCallback(() => {
@@ -233,6 +231,17 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     }, 80);
   }, []);
 
+  // Händelsebaserad öppning av dropdown efter dialog-animation
+  useEffect(() => {
+    if (dialogReady && openMenuAfterDialog) {
+      setTemplateMenuOpen(true);
+      setOpenMenuAfterDialog(false);
+      isNavigatingBack.current = false;
+      // Tvinga Popper att omberäkna position i Safari/iOS
+      queueMicrotask(() => window.dispatchEvent(new Event('resize')));
+    }
+  }, [dialogReady, openMenuAfterDialog]);
+
   return (
     <>
       <Dialog open={open} onOpenChange={(isOpen) => {
@@ -243,6 +252,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
           setSearchTerm('');
           setTemplateMenuOpen(false);
           setTitleInputKey((k) => k + 1);
+          setDialogReady(false);
+        } else {
+          setDialogReady(false);
         }
       }}>
         <DialogTrigger asChild>
@@ -252,9 +264,11 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
           </Button>
         </DialogTrigger>
         <DialogContent 
+          ref={dialogRef}
           hideClose
           className="max-w-md bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[95vh] sm:max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl transition-all duration-200 ease-out animate-scale-in"
           onEscapeKeyDown={(e) => e.preventDefault()}
+          onAnimationEnd={() => setDialogReady(true)}
         >
           <DialogHeader className="sr-only">
             <DialogTitle className="sr-only">Skapa jobb</DialogTitle>
@@ -339,7 +353,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           </DropdownMenuTrigger>
                           <DropdownMenuContent 
                             key={menuInstanceKey}
-                            className="w-[calc(100vw-2rem)] sm:w-[400px] max-w-sm mx-auto bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50"
+                            container={dialogRef.current}
+                            className="w-[calc(100vw-2rem)] sm:w-[400px] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50"
                             style={{ 
                               WebkitOverflowScrolling: 'touch', 
                               overscrollBehaviorY: 'contain', 
@@ -350,6 +365,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             alignOffset={0}
                             sideOffset={8}
                             avoidCollisions={false}
+                            collisionPadding={0}
                             updatePositionStrategy="always"
                             onWheel={(e) => e.stopPropagation()}
                             onTouchStart={(e) => e.stopPropagation()}
