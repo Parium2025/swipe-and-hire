@@ -1481,7 +1481,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     <Button
                       onClick={addCustomQuestion}
                       size="sm"
-                      className="bg-primary hover:bg-primary/90 text-white touch-border-white-thick"
+                      className="bg-primary hover:bg-primary/90 text-white touch-border-white"
                     >
                       Lägg till fråga
                       <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
@@ -1548,7 +1548,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                       <Button
                         onClick={createNewQuestion}
                         size="sm"
-                        className="bg-primary hover:bg-primary/90 text-white touch-border-white-thick"
+                        className="bg-primary hover:bg-primary/90 text-white touch-border-white"
                       >
                         Skapa ny fråga
                         <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
