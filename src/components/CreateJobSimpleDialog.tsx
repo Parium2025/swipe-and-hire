@@ -61,10 +61,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const isMobile = useIsMobile();
   const titleRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const [titleInputKey, setTitleInputKey] = useState(0);
   const [menuInstanceKey, setMenuInstanceKey] = useState(0);
   const [dialogReady, setDialogReady] = useState(false);
   const [openMenuAfterDialog, setOpenMenuAfterDialog] = useState(false);
+  const [dropdownWidth, setDropdownWidth] = useState<number | null>(null);
 
   const fetchTemplates = useCallback(async () => {
     if (!user) return;
@@ -237,6 +239,11 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       // Vänta tills scroll-lock och animationer är helt klara
       requestAnimationFrame(() => {
         setTimeout(() => {
+          // Mät triggerns bredd innan vi öppnar menyn
+          if (triggerRef.current) {
+            const width = triggerRef.current.offsetWidth;
+            setDropdownWidth(width);
+          }
           setTemplateMenuOpen(true);
           setOpenMenuAfterDialog(false);
           isNavigatingBack.current = false;
@@ -345,6 +352,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       >
                           <DropdownMenuTrigger asChild>
                         <Button
+                          ref={triggerRef}
                           variant="outline"
                           size="sm"
                           className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-auto min-h-[44px] py-2 whitespace-normal pr-10"
@@ -358,11 +366,13 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           </DropdownMenuTrigger>
                           <DropdownMenuContent 
                             key={menuInstanceKey}
-                            className="w-[calc(100vw-2rem)] sm:w-[400px] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50"
+                            className="bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50"
                             style={{ 
                               WebkitOverflowScrolling: 'touch', 
                               overscrollBehaviorY: 'contain', 
-                              touchAction: 'pan-y'
+                              touchAction: 'pan-y',
+                              width: dropdownWidth ? `${dropdownWidth}px` : 'calc(100vw - 2rem)',
+                              maxWidth: dropdownWidth ? `${dropdownWidth}px` : '400px'
                             }}
                             side="top"
                             align="center"
