@@ -336,7 +336,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           </DropdownMenuTrigger>
                           <DropdownMenuContent 
                             key={menuInstanceKey}
-                            className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50"
+                            className="w-[calc(100vw-2rem)] sm:w-[400px] max-w-sm mx-auto bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50"
                             style={{ 
                               WebkitOverflowScrolling: 'touch', 
                               overscrollBehaviorY: 'contain', 
