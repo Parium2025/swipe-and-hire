@@ -212,10 +212,13 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const handleWizardBack = useCallback(() => {
     isNavigatingBack.current = true;
     setShowDetailDialog(false);
-    // Öppna mallvalssteget igen efter en kort delay
+    // Öppna mallvalssteget igen efter att dialogens animation är klar
+    // 1) Tvinga ny instans av dropdown för stabil positionering
+    setMenuInstanceKey((k) => k + 1);
+    // 2) Vänta lite längre så att layouten hinner sätta sig innan Popper mäter
     requestAnimationFrame(() => {
       setOpen(true);
-      setTimeout(() => setTemplateMenuOpen(true), 60);
+      setTimeout(() => setTemplateMenuOpen(true), 260);
       isNavigatingBack.current = false;
     });
   }, []);
@@ -347,6 +350,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             alignOffset={0}
                             sideOffset={8}
                             avoidCollisions={false}
+                            updatePositionStrategy="always"
                             onWheel={(e) => e.stopPropagation()}
                             onTouchStart={(e) => e.stopPropagation()}
                             onTouchMove={(e) => e.stopPropagation()}
