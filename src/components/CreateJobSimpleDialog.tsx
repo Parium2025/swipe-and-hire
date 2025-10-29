@@ -61,6 +61,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const isMobile = useIsMobile();
   const titleRef = useRef<HTMLInputElement>(null);
   const [titleInputKey, setTitleInputKey] = useState(0);
+  const [menuInstanceKey, setMenuInstanceKey] = useState(0);
 
   const fetchTemplates = useCallback(async () => {
     if (!user) return;
@@ -173,6 +174,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const handleClose = useCallback(() => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
+      // Stäng dropdown om den är öppen för att undvika felaktig position nästa gång
+      setTemplateMenuOpen(false);
     } else {
       setOpen(false);
       setJobTitle('');
@@ -180,6 +183,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       setHasUnsavedChanges(false);
       setTemplateMenuOpen(false);
       setTitleInputKey((k) => k + 1);
+      setMenuInstanceKey((k) => k + 1);
     }
   }, [hasUnsavedChanges]);
 
@@ -191,6 +195,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     setHasUnsavedChanges(false);
     setTemplateMenuOpen(false);
     setTitleInputKey((k) => k + 1);
+    setMenuInstanceKey((k) => k + 1);
   }, []);
 
   const handleCancelClose = useCallback(() => {
@@ -305,6 +310,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 ) : (
                   <div className="flex items-start gap-2">
                     <DropdownMenu 
+                      key={menuInstanceKey}
                       modal={false} 
                       open={templateMenuOpen} 
                       onOpenChange={(isOpen) => {
@@ -328,6 +334,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
+                          key={menuInstanceKey}
                           className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50"
                           style={{ 
                             WebkitOverflowScrolling: 'touch', 
@@ -339,6 +346,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           alignOffset={0}
                           sideOffset={8}
                           avoidCollisions={false}
+                          sticky="always"
                           onWheel={(e) => e.stopPropagation()}
                           onTouchStart={(e) => e.stopPropagation()}
                           onTouchMove={(e) => e.stopPropagation()}
