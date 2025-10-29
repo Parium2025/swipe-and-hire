@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useMemo } from 'react';
 
 export interface JobPosting {
   id: string;
@@ -19,10 +20,17 @@ export interface JobPosting {
   applications_count: number;
   created_at: string;
   updated_at: string;
+  employer_id: string;
   employer_profile?: {
     first_name: string;
     last_name: string;
   };
+}
+
+export interface Recruiter {
+  id: string;
+  first_name: string;
+  last_name: string;
 }
 
 export const useJobsData = () => {
@@ -74,9 +82,29 @@ export const useJobsData = () => {
     queryClient.invalidateQueries({ queryKey: ['jobs', profile?.organization_id] });
   };
 
+  // Get unique recruiters from jobs
+  const recruiters: Recruiter[] = useMemo(() => {
+    const recruiterMap = new Map<string, Recruiter>();
+    
+    jobs.forEach(job => {
+      if (job.employer_id && job.employer_profile?.first_name && job.employer_profile?.last_name) {
+        if (!recruiterMap.has(job.employer_id)) {
+          recruiterMap.set(job.employer_id, {
+            id: job.employer_id,
+            first_name: job.employer_profile.first_name,
+            last_name: job.employer_profile.last_name,
+          });
+        }
+      }
+    });
+    
+    return Array.from(recruiterMap.values());
+  }, [jobs]);
+
   return {
     jobs,
     stats,
+    recruiters,
     isLoading,
     error,
     refetch,

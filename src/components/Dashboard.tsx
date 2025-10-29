@@ -16,7 +16,7 @@ import { JobSearchBar } from '@/components/JobSearchBar';
 import { useJobFiltering } from '@/hooks/useJobFiltering';
 
 const Dashboard = memo(() => {
-  const { jobs, stats, isLoading } = useJobsData();
+  const { jobs, stats, recruiters, isLoading } = useJobsData();
   const { profile } = useAuth();
   const navigate = useNavigate();
 
@@ -26,6 +26,8 @@ const Dashboard = memo(() => {
     searchTerm,
     sortBy,
     setSortBy,
+    selectedRecruiterId,
+    setSelectedRecruiterId,
     filteredAndSortedJobs,
   } = useJobFiltering(jobs);
 
@@ -49,7 +51,11 @@ const Dashboard = memo(() => {
         onSearchChange={setSearchInput}
         sortBy={sortBy}
         onSortChange={setSortBy}
+        recruiters={recruiters}
+        selectedRecruiterId={selectedRecruiterId}
+        onRecruiterChange={setSelectedRecruiterId}
         placeholder="Sök efter titel, plats, anställningstyp, rekryterare..."
+        companyName={profile?.company_name}
       />
 
       {searchTerm && (

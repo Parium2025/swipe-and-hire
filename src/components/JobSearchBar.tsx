@@ -1,6 +1,6 @@
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, ArrowUpDown } from 'lucide-react';
+import { Search, ArrowUpDown, UserCheck } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +11,12 @@ import { useState, useRef, useEffect } from 'react';
 
 type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc';
 
+export interface Recruiter {
+  id: string;
+  first_name: string;
+  last_name: string;
+}
+
 interface JobSearchBarProps {
   searchInput: string;
   onSearchChange: (value: string) => void;
@@ -18,6 +24,9 @@ interface JobSearchBarProps {
   onSortChange: (value: SortOption) => void;
   placeholder?: string;
   companyName?: string;
+  recruiters?: Recruiter[];
+  selectedRecruiterId?: string | null;
+  onRecruiterChange?: (recruiterId: string | null) => void;
 }
 
 export const JobSearchBar = ({
@@ -27,9 +36,14 @@ export const JobSearchBar = ({
   onSortChange,
   placeholder = "Sök efter titel, plats, anställningstyp...",
   companyName,
+  recruiters = [],
+  selectedRecruiterId,
+  onRecruiterChange,
 }: JobSearchBarProps) => {
   const [searchExpanded, setSearchExpanded] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const showRecruiterFilter = recruiters.length > 1;
 
   useEffect(() => {
     if (searchExpanded && searchInputRef.current) {
@@ -59,6 +73,39 @@ export const JobSearchBar = ({
           />
         </div>
         
+        {/* Recruiter filter - only show if multiple recruiters */}
+        {showRecruiterFilter && onRecruiterChange && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="outline" 
+                className="w-auto min-w-[180px] bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white"
+              >
+                <UserCheck className="mr-2 h-4 w-4" />
+                {selectedRecruiterId 
+                  ? recruiters.find(r => r.id === selectedRecruiterId)
+                    ? `${recruiters.find(r => r.id === selectedRecruiterId)!.first_name} ${recruiters.find(r => r.id === selectedRecruiterId)!.last_name}`
+                    : 'Rekryterare'
+                  : 'Alla rekryterare'
+                }
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[200px]">
+              <DropdownMenuItem onClick={() => onRecruiterChange(null)}>
+                Alla rekryterare
+              </DropdownMenuItem>
+              {recruiters.map((recruiter) => (
+                <DropdownMenuItem 
+                  key={recruiter.id} 
+                  onClick={() => onRecruiterChange(recruiter.id)}
+                >
+                  {recruiter.first_name} {recruiter.last_name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+
         {/* Sort menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -102,6 +149,41 @@ export const JobSearchBar = ({
               >
                 <Search className="h-4 w-4" />
               </Button>
+
+              {/* Recruiter filter - only show if multiple recruiters */}
+              {showRecruiterFilter && onRecruiterChange && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="h-8 w-8 text-white active:bg-white/12 focus:outline-none focus-visible:outline-none focus:ring-0"
+                    >
+                      <UserCheck className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent 
+                    align="end" 
+                    className="w-[200px] z-[10000] bg-neutral-900/95 supports-[backdrop-filter]:bg-neutral-900/85 text-white border-white/20 shadow-lg"
+                  >
+                    <DropdownMenuItem 
+                      onClick={() => onRecruiterChange(null)}
+                      className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                    >
+                      Alla rekryterare
+                    </DropdownMenuItem>
+                    {recruiters.map((recruiter) => (
+                      <DropdownMenuItem 
+                        key={recruiter.id} 
+                        onClick={() => onRecruiterChange(recruiter.id)}
+                        className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                      >
+                        {recruiter.first_name} {recruiter.last_name}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
 
               {/* Sort icon button */}
               <DropdownMenu>
@@ -163,6 +245,41 @@ export const JobSearchBar = ({
                 </Button>
               )}
             </div>
+
+            {/* Recruiter filter - only show if multiple recruiters */}
+            {showRecruiterFilter && onRecruiterChange && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="h-8 w-8 flex-shrink-0 text-white active:bg-white/12 focus:outline-none focus-visible:outline-none focus:ring-0"
+                  >
+                    <UserCheck className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent 
+                  align="end" 
+                  className="w-[200px] z-[10000] bg-neutral-900/95 supports-[backdrop-filter]:bg-neutral-900/85 text-white border-white/20 shadow-lg"
+                >
+                  <DropdownMenuItem 
+                    onClick={() => onRecruiterChange(null)}
+                    className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                  >
+                    Alla rekryterare
+                  </DropdownMenuItem>
+                  {recruiters.map((recruiter) => (
+                    <DropdownMenuItem 
+                      key={recruiter.id} 
+                      onClick={() => onRecruiterChange(recruiter.id)}
+                      className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                    >
+                      {recruiter.first_name} {recruiter.last_name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
 
             {/* Sort icon button */}
             <DropdownMenu>

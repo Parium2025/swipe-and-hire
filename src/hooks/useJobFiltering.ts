@@ -27,6 +27,7 @@ export interface FilterableJob {
   views_count: number;
   applications_count: number;
   updated_at: string;
+  employer_id?: string;
   employer_profile?: {
     first_name?: string;
     last_name?: string;
@@ -39,6 +40,7 @@ export const useJobFiltering = (jobs: FilterableJob[]) => {
   const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
+  const [selectedRecruiterId, setSelectedRecruiterId] = useState<string | null>(null);
 
   // Debounce search input
   useEffect(() => {
@@ -51,6 +53,11 @@ export const useJobFiltering = (jobs: FilterableJob[]) => {
   // Filter and sort jobs
   const filteredAndSortedJobs = useMemo(() => {
     let result = [...jobs];
+    
+    // Filter by recruiter if selected
+    if (selectedRecruiterId) {
+      result = result.filter(job => job.employer_id === selectedRecruiterId);
+    }
     
     // Filter based on search term
     if (searchTerm.trim()) {
@@ -107,7 +114,7 @@ export const useJobFiltering = (jobs: FilterableJob[]) => {
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
     }
-  }, [jobs, searchTerm, sortBy]);
+  }, [jobs, searchTerm, sortBy, selectedRecruiterId]);
 
   return {
     searchInput,
@@ -115,6 +122,8 @@ export const useJobFiltering = (jobs: FilterableJob[]) => {
     searchTerm,
     sortBy,
     setSortBy,
+    selectedRecruiterId,
+    setSelectedRecruiterId,
     filteredAndSortedJobs,
   };
 };
