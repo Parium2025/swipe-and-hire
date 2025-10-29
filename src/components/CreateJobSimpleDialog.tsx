@@ -261,9 +261,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     setHasUnsavedChanges(true);
                   }}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 text-sm resize-none h-[44px] !min-h-[44px] md:!min-h-[44px] leading-[28px] py-2 overflow-y-auto"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 text-sm resize-none h-[44px] !min-h-[44px] md:!min-h-[44px] leading-[28px] py-2 overflow-y-auto [&:not(:placeholder-shown)]:text-white"
                   autoComplete="off"
-                  title={jobTitle}
+                  title={jobTitle || "Namnge jobbet"}
                   rows={1}
                 />
               </div>
@@ -301,7 +301,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
-                          className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 duration-200 z-50"
+                          className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50"
                           style={{ 
                             WebkitOverflowScrolling: 'touch', 
                             overscrollBehaviorY: 'contain', 
@@ -311,8 +311,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           align="center"
                           alignOffset={0}
                           sideOffset={8}
-                          avoidCollisions={true}
-                          collisionPadding={16}
+                          avoidCollisions={false}
                           onWheel={(e) => e.stopPropagation()}
                           onTouchStart={(e) => e.stopPropagation()}
                           onTouchMove={(e) => e.stopPropagation()}
