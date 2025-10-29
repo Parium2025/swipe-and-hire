@@ -403,24 +403,11 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                 className="cursor-pointer focus:bg-white/10 focus:text-white transition-colors rounded-md mx-2 my-1 py-3"
                               >
                                 <div className="flex items-center gap-3 w-full">
-                                  <Plus className="h-5 w-5 text-blue-400" />
+                                  <Plus className="h-5 w-5 text-white" />
                                   <div className="flex flex-col">
                                     <span className="font-medium text-white">Skapa en ny mall</span>
-                                    <span className="text-sm text-white/60">Skapa en återanvändbar jobbmall</span>
+                                    <span className="text-sm text-white">Skapa en återanvändbar jobbmall</span>
                                   </div>
-                                </div>
-                              </DropdownMenuItem>
-
-                              <DropdownMenuItem
-                                onSelect={(e) => {
-                                  e.preventDefault();
-                                  handleTemplateSelect(null, '');
-                                }}
-                                className="cursor-pointer focus:bg-white/10 focus:text-white transition-colors rounded-md mx-2 my-1 py-3"
-                              >
-                                <div className="flex items-center gap-3 w-full">
-                                  <FileText className="h-5 w-5 text-white/70" />
-                                  <span className="font-medium text-white">Skapa en återanvändbar jobbmall</span>
                                 </div>
                               </DropdownMenuItem>
 
