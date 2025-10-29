@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Loader2, ChevronDown, Search, X, Trash2, Pencil, FileText } from 'lucide-react';
@@ -411,54 +411,58 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                 </div>
                               </DropdownMenuItem>
 
-                              {filteredTemplates.map((template) => (
-                                <DropdownMenuItem 
-                                  key={template.id}
-                                  onSelect={(e) => e.preventDefault()}
-                                  className="cursor-pointer focus:bg-white/10 focus:text-white transition-colors rounded-md mx-2 my-1 py-2"
-                                >
-                                  <div className="flex items-start gap-2 w-full">
-                                    <button
-                                      onClick={() => handleTemplateSelect(template.id, template.name)}
-                                      className="flex flex-col flex-1 text-left hover:opacity-80 transition-opacity"
-                                    >
-                                      <div className="flex items-center justify-between">
-                                        <span className="font-medium text-white">{template.name}</span>
-                                        {template.is_default && (
-                                          <span className="text-sm text-blue-400 ml-2">Standard</span>
-                                        )}
+                              <DropdownMenuSeparator className="bg-white/10 mx-2 my-2" />
+
+                              {filteredTemplates.map((template, index) => (
+                                <div key={template.id}>
+                                  {index > 0 && <DropdownMenuSeparator className="bg-white/10 mx-2 my-2" />}
+                                  <DropdownMenuItem 
+                                    onSelect={(e) => e.preventDefault()}
+                                    className="cursor-pointer focus:bg-white/10 focus:text-white transition-colors rounded-md mx-2 my-1 py-2"
+                                  >
+                                    <div className="flex items-start gap-2 w-full">
+                                      <button
+                                        onClick={() => handleTemplateSelect(template.id, template.name)}
+                                        className="flex flex-col flex-1 text-left hover:opacity-80 transition-opacity"
+                                      >
+                                        <div className="flex items-center justify-between">
+                                          <span className="font-medium text-white">{template.name}</span>
+                                          {template.is_default && (
+                                            <span className="text-sm text-blue-400 ml-2">Standard</span>
+                                          )}
+                                        </div>
+                                        <span className="text-sm text-white mt-1 break-words line-clamp-2 sm:line-clamp-none">{template.title}</span>
+                                      </button>
+                                      <div className="flex gap-1 flex-shrink-0">
+                                        <Button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setTemplateToEdit(template);
+                                            setTemplateMenuOpen(false);
+                                            setOpen(false);
+                                            setShowTemplateWizard(true);
+                                          }}
+                                          variant="ghost"
+                                          size="sm"
+                                          className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8 p-0 flex-shrink-0"
+                                        >
+                                          <Pencil className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setTemplateToDelete(template);
+                                          }}
+                                          variant="ghost"
+                                          size="sm"
+                                          className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0 flex-shrink-0"
+                                        >
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
                                       </div>
-                                      <span className="text-sm text-white mt-1 break-words line-clamp-2 sm:line-clamp-none">{template.title}</span>
-                                    </button>
-                                    <div className="flex gap-1 flex-shrink-0">
-                                      <Button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setTemplateToEdit(template);
-                                          setTemplateMenuOpen(false);
-                                          setOpen(false);
-                                          setShowTemplateWizard(true);
-                                        }}
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8 p-0 flex-shrink-0"
-                                      >
-                                        <Pencil className="h-4 w-4" />
-                                      </Button>
-                                      <Button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setTemplateToDelete(template);
-                                        }}
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0 flex-shrink-0"
-                                      >
-                                        <Trash2 className="h-4 w-4" />
-                                      </Button>
                                     </div>
-                                  </div>
-                                </DropdownMenuItem>
+                                  </DropdownMenuItem>
+                                </div>
                               ))}
                               
                               {filteredTemplates.length === 0 && searchTerm && (
