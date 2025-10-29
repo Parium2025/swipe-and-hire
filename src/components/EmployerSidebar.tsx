@@ -29,7 +29,8 @@ import {
   CreditCard,
   HelpCircle,
   FileText,
-  Star
+  Star,
+  UserCircle
 } from "lucide-react";
 
 
@@ -92,7 +93,7 @@ const supportNavItems = [
   {
     title: "Min Profil",
     url: "/profile", 
-    icon: Settings,
+    icon: UserCircle,
     group: "support"
   },
   {
