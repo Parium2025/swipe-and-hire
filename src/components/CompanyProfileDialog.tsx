@@ -323,7 +323,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                 <div>
                   <DialogTitle className="text-2xl text-white">{company.company_name}</DialogTitle>
                   <div className="flex items-center gap-2 mt-1">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <Star className="h-4 w-4 fill-transparent text-white stroke-white stroke-[1.5]" />
                     <span className="text-sm text-white">
                       {averageRating} ({reviews.length} {reviews.length === 1 ? 'recension' : 'recensioner'})
                     </span>

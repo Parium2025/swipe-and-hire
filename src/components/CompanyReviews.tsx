@@ -186,7 +186,7 @@ const CompanyReviews = () => {
             <div>
               <h2 className="text-xl font-semibold text-white">{company.company_name}</h2>
               <div className="flex items-center gap-2 mt-0.5">
-                <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                <Star className="h-3.5 w-3.5 fill-transparent text-white stroke-white stroke-[1.5]" />
                 <span className="text-sm text-white">
                   {averageRating} ({reviews.length} {reviews.length === 1 ? 'recension' : 'recensioner'})
                 </span>
