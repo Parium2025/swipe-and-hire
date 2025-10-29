@@ -16,6 +16,7 @@ import MobileJobWizard from '@/components/MobileJobWizard';
 import CreateTemplateWizard from '@/components/CreateTemplateWizard';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import type { JobPosting } from '@/hooks/useJobsData';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface JobTemplate {
   id: string;
@@ -57,6 +58,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const { user } = useAuth();
   const { toast } = useToast();
   const isNavigatingBack = useRef(false);
+  const isMobile = useIsMobile();
 
 
   const fetchTemplates = useCallback(async () => {
@@ -114,6 +116,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const handleTemplateSelect = useCallback((templateId: string, templateName: string) => {
     if (templateId === 'none') {
       setSelectedTemplate(null);
+      setJobTitle('');
+      setHasUnsavedChanges(false);
       setTemplateMenuOpen(false);
       return;
     }
@@ -307,7 +311,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             overscrollBehaviorY: 'contain', 
                             touchAction: 'pan-y'
                           }}
-                          side="bottom"
+                          side={isMobile ? "top" : "bottom"}
                           align="center"
                           alignOffset={0}
                           sideOffset={8}
