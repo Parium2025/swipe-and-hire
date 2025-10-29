@@ -90,7 +90,7 @@ export const JobSearchBar = ({
                 }
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px]">
+            <DropdownMenuContent align="end" className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20">
               <DropdownMenuItem onClick={() => onRecruiterChange(null)}>
                 Alla rekryterare
               </DropdownMenuItem>
@@ -117,7 +117,7 @@ export const JobSearchBar = ({
               {sortLabels[sortBy]}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[200px]">
+          <DropdownMenuContent align="end" className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20">
             {Object.entries(sortLabels).map(([key, label]) => (
               <DropdownMenuItem 
                 key={key} 
@@ -164,7 +164,7 @@ export const JobSearchBar = ({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent 
                     align="end" 
-                    className="w-[200px] z-[10000] bg-neutral-900/95 supports-[backdrop-filter]:bg-neutral-900/85 text-white border-white/20 shadow-lg"
+                    className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20"
                   >
                     <DropdownMenuItem 
                       onClick={() => onRecruiterChange(null)}
@@ -198,7 +198,7 @@ export const JobSearchBar = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
                   align="end" 
-                  className="w-[200px] z-[10000] bg-neutral-900/95 supports-[backdrop-filter]:bg-neutral-900/85 text-white border-white/20 shadow-lg"
+                  className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20"
                 >
                   {Object.entries(sortLabels).map(([key, label]) => (
                     <DropdownMenuItem 
@@ -260,7 +260,7 @@ export const JobSearchBar = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
                   align="end" 
-                  className="w-[200px] z-[10000] bg-neutral-900/95 supports-[backdrop-filter]:bg-neutral-900/85 text-white border-white/20 shadow-lg"
+                  className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20"
                 >
                   <DropdownMenuItem 
                     onClick={() => onRecruiterChange(null)}
@@ -294,7 +294,7 @@ export const JobSearchBar = ({
               </DropdownMenuTrigger>
               <DropdownMenuContent 
                 align="end" 
-                className="w-[200px] z-[10000] bg-neutral-900/95 supports-[backdrop-filter]:bg-neutral-900/85 text-white border-white/20 shadow-lg"
+                className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20"
               >
                 {Object.entries(sortLabels).map(([key, label]) => (
                   <DropdownMenuItem 
