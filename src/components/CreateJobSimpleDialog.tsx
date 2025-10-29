@@ -60,13 +60,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const isNavigatingBack = useRef(false);
   const isMobile = useIsMobile();
   const titleRef = useRef<HTMLInputElement>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
   const [titleInputKey, setTitleInputKey] = useState(0);
   const [menuInstanceKey, setMenuInstanceKey] = useState(0);
-  const [dialogReady, setDialogReady] = useState(false);
-  const [openMenuAfterDialog, setOpenMenuAfterDialog] = useState(false);
-  const [dropdownWidth, setDropdownWidth] = useState<number | null>(null);
 
   const fetchTemplates = useCallback(async () => {
     if (!user) return;
@@ -181,7 +176,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       setShowUnsavedDialog(true);
       // Stäng dropdown om den är öppen för att undvika felaktig position nästa gång
       setTemplateMenuOpen(false);
-      setMenuInstanceKey((k) => k + 1);
     } else {
       setOpen(false);
       setJobTitle('');
@@ -218,9 +212,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const handleWizardBack = useCallback(() => {
     isNavigatingBack.current = true;
     setShowDetailDialog(false);
-    setMenuInstanceKey((k) => k + 1);
-    setOpen(true);
-    setOpenMenuAfterDialog(true);
+    // Öppna mallvalssteget igen efter en kort delay
+    requestAnimationFrame(() => {
+      setOpen(true);
+      setTimeout(() => setTemplateMenuOpen(true), 60);
+      isNavigatingBack.current = false;
+    });
   }, []);
 
   const handleTemplateWizardBack = useCallback(() => {
@@ -233,27 +230,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     }, 80);
   }, []);
 
-  // Händelsebaserad öppning av dropdown efter dialog-animation
-  useEffect(() => {
-    if (dialogReady && openMenuAfterDialog) {
-      // Vänta tills scroll-lock och animationer är helt klara
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          // Mät triggerns bredd innan vi öppnar menyn
-          if (triggerRef.current) {
-            const width = triggerRef.current.offsetWidth;
-            setDropdownWidth(width);
-          }
-          setTemplateMenuOpen(true);
-          setOpenMenuAfterDialog(false);
-          isNavigatingBack.current = false;
-          // Tvinga Popper att omberäkna position
-          queueMicrotask(() => window.dispatchEvent(new Event('resize')));
-        }, 80);
-      });
-    }
-  }, [dialogReady, openMenuAfterDialog]);
-
   return (
     <>
       <Dialog open={open} onOpenChange={(isOpen) => {
@@ -264,9 +240,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
           setSearchTerm('');
           setTemplateMenuOpen(false);
           setTitleInputKey((k) => k + 1);
-          setDialogReady(false);
-        } else {
-          setDialogReady(false);
         }
       }}>
         <DialogTrigger asChild>
@@ -276,11 +249,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
           </Button>
         </DialogTrigger>
         <DialogContent 
-          ref={dialogRef}
           hideClose
           className="max-w-md bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[95vh] sm:max-h-[90vh] shadow-lg rounded-[24px] sm:rounded-xl transition-all duration-200 ease-out animate-scale-in"
           onEscapeKeyDown={(e) => e.preventDefault()}
-          onAnimationEnd={() => setDialogReady(true)}
         >
           <DialogHeader className="sr-only">
             <DialogTitle className="sr-only">Skapa jobb</DialogTitle>
@@ -352,7 +323,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       >
                           <DropdownMenuTrigger asChild>
                         <Button
-                          ref={triggerRef}
                           variant="outline"
                           size="sm"
                           className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-auto min-h-[44px] py-2 whitespace-normal pr-10"
@@ -366,21 +336,17 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           </DropdownMenuTrigger>
                           <DropdownMenuContent 
                             key={menuInstanceKey}
-                            className="bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50"
+                            className="w-[calc(100vw-2rem)] sm:w-[400px] max-w-sm mx-auto bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50"
                             style={{ 
                               WebkitOverflowScrolling: 'touch', 
                               overscrollBehaviorY: 'contain', 
-                              touchAction: 'pan-y',
-                              width: dropdownWidth ? `${dropdownWidth}px` : 'calc(100vw - 2rem)',
-                              maxWidth: dropdownWidth ? `${dropdownWidth}px` : '400px'
+                              touchAction: 'pan-y'
                             }}
                             side="top"
                             align="center"
                             alignOffset={0}
                             sideOffset={8}
                             avoidCollisions={false}
-                            collisionPadding={0}
-                            updatePositionStrategy="always"
                             onWheel={(e) => e.stopPropagation()}
                             onTouchStart={(e) => e.stopPropagation()}
                             onTouchMove={(e) => e.stopPropagation()}
@@ -412,7 +378,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                       e.stopPropagation();
                                       setSearchTerm('');
                                     }}
-                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white transition-colors md:hover:text-white"
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 transition-colors md:hover:text-white"
                                     aria-label="Rensa sökning"
                                   >
                                     <X className="h-4 w-4" />
@@ -608,7 +574,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="h-11 bg-white/20 border-white/30 text-white transition-all duration-300 md:hover:bg-white/30 md:hover:text-white md:hover:border-white/50">
+            <AlertDialogCancel className="bg-white/20 border-white/30 text-white transition-all duration-300 md:hover:bg-white/30 md:hover:text-white md:hover:border-white/50">
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
@@ -644,7 +610,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 setTemplateToDelete(null);
               }}
               variant="destructive"
-              className="h-11"
             >
               Ta bort
             </AlertDialogAction>

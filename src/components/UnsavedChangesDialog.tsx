@@ -32,10 +32,10 @@ export function UnsavedChangesDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onCancel} className="h-11 bg-white/20 border-white/30 text-white transition-all duration-300 md:hover:bg-white/30 md:hover:text-white md:hover:border-white/50">
+          <AlertDialogCancel onClick={onCancel} className="bg-white/20 border-white/30 text-white transition-all duration-300 md:hover:bg-white/30 md:hover:text-white md:hover:border-white/50">
             Avbryt
           </AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} variant="destructive" className="h-11">
+          <AlertDialogAction onClick={onConfirm} variant="destructive">
             Lämna utan att spara
           </AlertDialogAction>
         </AlertDialogFooter>

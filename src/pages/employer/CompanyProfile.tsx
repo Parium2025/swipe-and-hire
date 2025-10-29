@@ -823,14 +823,14 @@ const CompanyProfile = () => {
                 setDeleteDialogOpen(false);
                 setLinkToDelete(null);
               }}
-              className="h-11 flex-[0.6] bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
+              className="flex-[0.6] bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
             >
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmRemoveSocialLink}
               variant="destructiveSoft"
-              className="h-11 flex-[0.4] text-sm"
+              className="flex-[0.4] text-sm"
             >
               <Trash2 className="h-4 w-4 mr-1.5" />
               Ta bort
