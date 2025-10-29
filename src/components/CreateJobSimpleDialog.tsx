@@ -59,7 +59,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const { toast } = useToast();
   const isNavigatingBack = useRef(false);
   const isMobile = useIsMobile();
-  const titleRef = useRef<HTMLTextAreaElement>(null);
+  const titleRef = useRef<HTMLInputElement>(null);
   const [titleInputKey, setTitleInputKey] = useState(0);
 
   const fetchTemplates = useCallback(async () => {
@@ -268,24 +268,24 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
             <CardContent className="space-y-4 px-4 pb-4">
               <div className="space-y-2">
                 <Label htmlFor="job-title" className="text-white">Titel</Label>
-                <Textarea
+                <Input
                   id="job-title"
                   key={titleInputKey}
-                  ref={titleRef}
+                  ref={titleRef as any}
                   value={jobTitle}
                   onChange={(e) => {
                     setJobTitle(e.target.value);
                     setHasUnsavedChanges(true);
                   }}
                   placeholder="Namnge jobbet"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 text-sm resize-none h-[44px] !min-h-[44px] md:!min-h-[44px] leading-[28px] py-2 overflow-y-auto"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 transition-all duration-150 text-sm h-[44px]"
                   autoComplete="off"
                   autoCorrect="off"
                   autoCapitalize="none"
                   spellCheck={false}
                   inputMode="text"
                   title={jobTitle || "Namnge jobbet"}
-                  rows={1}
+                  type="text"
                 />
               </div>
 
