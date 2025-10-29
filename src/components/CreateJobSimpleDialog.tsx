@@ -62,6 +62,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const titleRef = useRef<HTMLInputElement>(null);
   const [titleInputKey, setTitleInputKey] = useState(0);
   const [menuInstanceKey, setMenuInstanceKey] = useState(0);
+  // Dropdown positioning helpers
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [dropdownWidth, setDropdownWidth] = useState<number | null>(null);
 
   const fetchTemplates = useCallback(async () => {
     if (!user) return;
@@ -114,6 +117,17 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       setHasUnsavedChanges(false);
     }
   }, [jobTitle, selectedTemplate]);
+
+  // Mät trigger-bredden varje gång menyn öppnas (även programmatisk öppning)
+  useEffect(() => {
+    if (templateMenuOpen) {
+      requestAnimationFrame(() => {
+        if (triggerRef.current) {
+          setDropdownWidth(triggerRef.current.offsetWidth);
+        }
+      });
+    }
+  }, [templateMenuOpen, open]);
 
   const handleTemplateSelect = useCallback((templateId: string, templateName: string) => {
     if (templateId === 'none') {
@@ -314,15 +328,23 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                         key={menuInstanceKey}
                         modal={false} 
                         open={templateMenuOpen} 
-                        onOpenChange={(isOpen) => {
-                          setTemplateMenuOpen(isOpen);
-                          if (isOpen) {
-                            setSearchTerm('');
-                          }
-                        }}
+                         onOpenChange={(isOpen) => {
+                           setTemplateMenuOpen(isOpen);
+                           if (isOpen) {
+                             setSearchTerm('');
+                             requestAnimationFrame(() => {
+                               if (triggerRef.current) {
+                                 setDropdownWidth(triggerRef.current.offsetWidth);
+                               }
+                             });
+                           } else {
+                             setDropdownWidth(null);
+                           }
+                         }}
                       >
                           <DropdownMenuTrigger asChild>
                         <Button
+                          ref={triggerRef}
                           variant="outline"
                           size="sm"
                           className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-auto min-h-[44px] py-2 whitespace-normal pr-10"
@@ -338,6 +360,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             key={menuInstanceKey}
                             className="w-[calc(100vw-2rem)] sm:w-[400px] max-w-sm mx-auto bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50"
                             style={{ 
+                              width: dropdownWidth ? `${dropdownWidth}px` : undefined,
+                              maxWidth: dropdownWidth ? `${dropdownWidth}px` : undefined,
                               WebkitOverflowScrolling: 'touch', 
                               overscrollBehaviorY: 'contain', 
                               touchAction: 'pan-y'
