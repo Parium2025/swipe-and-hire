@@ -345,8 +345,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           align="center"
                           alignOffset={0}
                           sideOffset={8}
-                          avoidCollisions={true}
-                          collisionPadding={24}
+                          avoidCollisions={false}
                           onWheel={(e) => e.stopPropagation()}
                           onTouchStart={(e) => e.stopPropagation()}
                           onTouchMove={(e) => e.stopPropagation()}
