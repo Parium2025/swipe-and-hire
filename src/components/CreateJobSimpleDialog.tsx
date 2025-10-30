@@ -124,12 +124,21 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   useEffect(() => {
     if (!templateMenuOpen) return;
     const measure = () => {
-      const trigW = triggerRef.current?.offsetWidth || 0;
-      setDropdownWidth(trigW);
-      setAlignOffset(0);
+      const rowEl = rowRef.current;
+      const trigEl = triggerRef.current;
+      if (!rowEl || !trigEl) return;
+      const rowRect = rowEl.getBoundingClientRect();
+      const trigRect = trigEl.getBoundingClientRect();
+      const rowCenter = rowRect.left + rowRect.width / 2;
+      const trigCenter = trigRect.left + trigRect.width / 2;
+      setDropdownWidth(Math.round(rowRect.width));
+      const offset = Math.round(rowCenter - trigCenter);
+      setAlignOffset(offset);
+      console.debug('TemplateMenu measure', { rowW: rowRect.width, trigW: trigRect.width, offset });
     };
     requestAnimationFrame(measure);
     const ro = new ResizeObserver(() => measure());
+    if (rowRef.current) ro.observe(rowRef.current);
     if (triggerRef.current) ro.observe(triggerRef.current);
     return () => ro.disconnect();
   }, [templateMenuOpen, open]);
@@ -337,11 +346,19 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                            setTemplateMenuOpen(isOpen);
                            if (isOpen) {
                              setSearchTerm('');
-                             requestAnimationFrame(() => {
-                               const trigW = triggerRef.current?.offsetWidth || 0;
-                               setDropdownWidth(trigW);
-                               setAlignOffset(0);
-                             });
+                              requestAnimationFrame(() => {
+                                const rowEl = rowRef.current;
+                                const trigEl = triggerRef.current;
+                                if (!rowEl || !trigEl) return;
+                                const rowRect = rowEl.getBoundingClientRect();
+                                const trigRect = trigEl.getBoundingClientRect();
+                                const rowCenter = rowRect.left + rowRect.width / 2;
+                                const trigCenter = trigRect.left + trigRect.width / 2;
+                                setDropdownWidth(Math.round(rowRect.width));
+                                const offset = Math.round(rowCenter - trigCenter);
+                                setAlignOffset(offset);
+                                console.debug('TemplateMenu open', { rowW: rowRect.width, trigW: trigRect.width, offset });
+                              });
                            } else {
                              setDropdownWidth(null);
                              setAlignOffset(0);
