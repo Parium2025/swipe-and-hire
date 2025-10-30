@@ -341,7 +341,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             overscrollBehaviorY: 'contain', 
                             touchAction: 'pan-y'
                           }}
-                          side={isMobile ? "top" : "bottom"}
+                          side="top"
                           align="center"
                           alignOffset={0}
                           sideOffset={8}
