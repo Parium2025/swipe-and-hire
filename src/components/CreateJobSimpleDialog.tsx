@@ -327,30 +327,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                         className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-auto min-h-[44px] py-2 whitespace-normal pr-10"
                         title={selectedTemplate?.name || 'Ingen mall är vald'}
                       >
-                        <span className="text-left flex-1 px-1 text-sm whitespace-normal break-words pr-6">
+                        <span className="text-left flex-1 px-1 text-sm whitespace-normal break-words">
                           {selectedTemplate?.name || 'Ingen mall är vald'}
                         </span>
-                        {selectedTemplate && (
-                          <X 
-                            className="h-4 w-4 flex-shrink-0 opacity-70 ml-2 transition-opacity duration-150 md:hover:opacity-100" 
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setSelectedTemplate(null);
-                              setJobTitle('');
-                              setHasUnsavedChanges(false);
-                              setTitleInputKey((k) => k + 1);
-                              setTimeout(() => {
-                                if (titleRef.current) {
-                                  titleRef.current.value = '';
-                                  titleRef.current.blur();
-                                  titleRef.current.focus();
-                                  titleRef.current.blur();
-                                }
-                              }, 0);
-                            }}
-                          />
-                        )}
                         <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2 transition-transform duration-150" />
                       </Button>
                         </DropdownMenuTrigger>
@@ -501,6 +480,33 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           </div>
                         </DropdownMenuContent>
                       </DropdownMenu>
+                      {selectedTemplate && (
+                        <div className="flex justify-center mt-3">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setSelectedTemplate(null);
+                              setJobTitle('');
+                              setHasUnsavedChanges(false);
+                              setTitleInputKey((k) => k + 1);
+                              setTimeout(() => {
+                                if (titleRef.current) {
+                                  titleRef.current.value = '';
+                                  titleRef.current.blur();
+                                  titleRef.current.focus();
+                                  titleRef.current.blur();
+                                }
+                              }, 0);
+                            }}
+                            className="h-8 w-8 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
                   </div>
                 )}
               </div>
