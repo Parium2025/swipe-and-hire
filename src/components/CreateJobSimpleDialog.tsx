@@ -125,13 +125,11 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     if (!templateMenuOpen) return;
     const measure = () => {
       const trigW = triggerRef.current?.offsetWidth || 0;
-      const containerW = rowRef.current?.offsetWidth || trigW;
-      setDropdownWidth(containerW);
-      setAlignOffset(Math.round((trigW - containerW) / 2));
+      setDropdownWidth(trigW);
+      setAlignOffset(0);
     };
     requestAnimationFrame(measure);
     const ro = new ResizeObserver(() => measure());
-    if (rowRef.current) ro.observe(rowRef.current);
     if (triggerRef.current) ro.observe(triggerRef.current);
     return () => ro.disconnect();
   }, [templateMenuOpen, open]);
@@ -339,12 +337,11 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                            setTemplateMenuOpen(isOpen);
                            if (isOpen) {
                              setSearchTerm('');
-                              requestAnimationFrame(() => {
-                                const trigW = triggerRef.current?.offsetWidth || 0;
-                                const containerW = rowRef.current?.offsetWidth || trigW;
-                                setDropdownWidth(containerW);
-                                setAlignOffset(Math.round((trigW - containerW) / 2));
-                              });
+                             requestAnimationFrame(() => {
+                               const trigW = triggerRef.current?.offsetWidth || 0;
+                               setDropdownWidth(trigW);
+                               setAlignOffset(0);
+                             });
                            } else {
                              setDropdownWidth(null);
                              setAlignOffset(0);
