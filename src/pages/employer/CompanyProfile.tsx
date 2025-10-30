@@ -858,7 +858,7 @@ const CompanyProfile = () => {
               </AlertDialogTitle>
             </div>
             <AlertDialogDescription className="text-white text-sm leading-relaxed break-words">
-              Är du säker på att du vill ta bort företagsloggan? Denna åtgärd går inte att ångra.
+              Är du säker på att du vill ta bort företagsloggan? (Glöm inte att spara åtgärden.)
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
