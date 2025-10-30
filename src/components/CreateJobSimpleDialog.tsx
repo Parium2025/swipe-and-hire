@@ -336,6 +336,14 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             role="button"
                             aria-label="Rensa vald mall"
                             className="h-4 w-4 flex-shrink-0 opacity-70 ml-2 transition-opacity duration-150 md:hover:opacity-100 cursor-pointer" 
+                            onPointerDownCapture={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            onPointerDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
                             onMouseDown={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
