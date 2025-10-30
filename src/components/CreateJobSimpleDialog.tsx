@@ -65,11 +65,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   // Dropdown positioning helpers
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const rowRef = useRef<HTMLDivElement | null>(null); // raden (dropdown + kryss)
-  const slotRef = useRef<HTMLDivElement | null>(null); // endast ytan för dropdownen
+  const slotRef = useRef<HTMLDivElement | null>(null); // endast ytan för dropdownen (behålls för layout)
   const [dropdownWidth, setDropdownWidth] = useState<number | null>(null);
   const [alignOffset, setAlignOffset] = useState<number>(0);
-  const [baseSlotWidth, setBaseSlotWidth] = useState<number | null>(null); // bredden när "Ingen mall är vald"
-  const [baseSlotCenter, setBaseSlotCenter] = useState<number | null>(null); // centrum när "Ingen mall är vald"
 
   const fetchTemplates = useCallback(async () => {
     if (!user) return;
@@ -123,47 +121,32 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     }
   }, [jobTitle, selectedTemplate]);
 
-  // Mät basbredd för dropdown-ytan när ingen mall är vald
-  useEffect(() => {
-    if (!open) return;
-    if (selectedTemplate) return; // mäter endast neutral-läget
-    const measureBase = () => {
-      const el = slotRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      setBaseSlotWidth(Math.round(rect.width));
-      setBaseSlotCenter(Math.round(rect.left + rect.width / 2));
-    };
-    measureBase();
-    const ro = new ResizeObserver(() => measureBase());
-    if (slotRef.current) ro.observe(slotRef.current);
-    window.addEventListener('resize', measureBase);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', measureBase);
-    };
-  }, [open, selectedTemplate]);
+  // Borttagen basmätning: vi låser alltid bredden till hela raden (rowRef)
+  // för att undvika att menyn krymper till knappens bredd på iOS.
 
-  // Mät och lås menybredd + centrering varje gång menyn öppnas
+  // Lås menybredden till hela raden och centrera mot raden när menyn öppnas
   useEffect(() => {
     if (!templateMenuOpen) return;
-    const measure = () => {
+    const compute = () => {
+      const rowEl = rowRef.current;
       const trigEl = triggerRef.current;
-      if (!trigEl) return;
+      if (!rowEl || !trigEl) return;
+      const rowRect = rowEl.getBoundingClientRect();
       const trigRect = trigEl.getBoundingClientRect();
-      const baseW = baseSlotWidth ?? trigRect.width;
-      const baseC = baseSlotCenter ?? (trigRect.left + trigRect.width / 2);
-      setDropdownWidth(Math.round(baseW));
+      const rowCenter = rowRect.left + rowRect.width / 2;
       const trigCenter = trigRect.left + trigRect.width / 2;
-      const offset = Math.round(baseC - trigCenter);
-      setAlignOffset(offset);
-      console.debug('TemplateMenu measure', { baseW, trigW: trigRect.width, offset });
+      setDropdownWidth(Math.round(rowRect.width));
+      setAlignOffset(Math.round(rowCenter - trigCenter));
     };
-    requestAnimationFrame(measure);
-    const ro = new ResizeObserver(() => measure());
-    if (triggerRef.current) ro.observe(triggerRef.current);
-    return () => ro.disconnect();
-  }, [templateMenuOpen, open, baseSlotWidth, baseSlotCenter]);
+    requestAnimationFrame(compute);
+    const ro = new ResizeObserver(compute);
+    if (rowRef.current) ro.observe(rowRef.current);
+    window.addEventListener('resize', compute);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', compute);
+    };
+  }, [templateMenuOpen, open]);
 
   const handleTemplateSelect = useCallback((templateId: string, templateName: string) => {
     if (templateId === 'none') {
@@ -379,7 +362,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                 setDropdownWidth(Math.round(rowRect.width));
                                 const offset = Math.round(rowCenter - trigCenter);
                                 setAlignOffset(offset);
-                                console.debug('TemplateMenu open', { rowW: rowRect.width, trigW: trigRect.width, offset });
                               });
                            } else {
                              setDropdownWidth(null);
