@@ -64,9 +64,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const [menuInstanceKey, setMenuInstanceKey] = useState(0);
   // Dropdown positioning helpers
   const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const rowRef = useRef<HTMLDivElement | null>(null);
+  const rowRef = useRef<HTMLDivElement | null>(null); // raden (dropdown + kryss)
+  const slotRef = useRef<HTMLDivElement | null>(null); // endast ytan för dropdownen
   const [dropdownWidth, setDropdownWidth] = useState<number | null>(null);
   const [alignOffset, setAlignOffset] = useState<number>(0);
+  const [baseSlotWidth, setBaseSlotWidth] = useState<number | null>(null); // bredden när "Ingen mall är vald"
+  const [baseSlotCenter, setBaseSlotCenter] = useState<number | null>(null); // centrum när "Ingen mall är vald"
 
   const fetchTemplates = useCallback(async () => {
     if (!user) return;
@@ -120,28 +123,47 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     }
   }, [jobTitle, selectedTemplate]);
 
+  // Mät basbredd för dropdown-ytan när ingen mall är vald
+  useEffect(() => {
+    if (!open) return;
+    if (selectedTemplate) return; // mäter endast neutral-läget
+    const measureBase = () => {
+      const el = slotRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      setBaseSlotWidth(Math.round(rect.width));
+      setBaseSlotCenter(Math.round(rect.left + rect.width / 2));
+    };
+    measureBase();
+    const ro = new ResizeObserver(() => measureBase());
+    if (slotRef.current) ro.observe(slotRef.current);
+    window.addEventListener('resize', measureBase);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measureBase);
+    };
+  }, [open, selectedTemplate]);
+
   // Mät och lås menybredd + centrering varje gång menyn öppnas
   useEffect(() => {
     if (!templateMenuOpen) return;
     const measure = () => {
-      const rowEl = rowRef.current;
       const trigEl = triggerRef.current;
-      if (!rowEl || !trigEl) return;
-      const rowRect = rowEl.getBoundingClientRect();
+      if (!trigEl) return;
       const trigRect = trigEl.getBoundingClientRect();
-      const rowCenter = rowRect.left + rowRect.width / 2;
+      const baseW = baseSlotWidth ?? trigRect.width;
+      const baseC = baseSlotCenter ?? (trigRect.left + trigRect.width / 2);
+      setDropdownWidth(Math.round(baseW));
       const trigCenter = trigRect.left + trigRect.width / 2;
-      setDropdownWidth(Math.round(rowRect.width));
-      const offset = Math.round(rowCenter - trigCenter);
+      const offset = Math.round(baseC - trigCenter);
       setAlignOffset(offset);
-      console.debug('TemplateMenu measure', { rowW: rowRect.width, trigW: trigRect.width, offset });
+      console.debug('TemplateMenu measure', { baseW, trigW: trigRect.width, offset });
     };
     requestAnimationFrame(measure);
     const ro = new ResizeObserver(() => measure());
-    if (rowRef.current) ro.observe(rowRef.current);
     if (triggerRef.current) ro.observe(triggerRef.current);
     return () => ro.disconnect();
-  }, [templateMenuOpen, open]);
+  }, [templateMenuOpen, open, baseSlotWidth, baseSlotCenter]);
 
   const handleTemplateSelect = useCallback((templateId: string, templateName: string) => {
     if (templateId === 'none') {
@@ -337,7 +359,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                   </div>
                 ) : (
                   <div className="flex gap-2 items-start" ref={rowRef}>
-                    <div className="flex-1">
+                    <div className="flex-1" ref={slotRef}>
                       <DropdownMenu 
                         key={menuInstanceKey}
                         modal={false} 
@@ -524,30 +546,34 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                         </DropdownMenu>
                       </div>
                       
-                      {selectedTemplate && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setSelectedTemplate(null);
-                            setJobTitle('');
-                            setHasUnsavedChanges(false);
-                            setTitleInputKey((k) => k + 1);
-                            setTimeout(() => {
-                              if (titleRef.current) {
-                                titleRef.current.value = '';
-                                titleRef.current.blur();
-                                titleRef.current.focus();
-                                titleRef.current.blur();
-                              }
-                            }, 0);
-                          }}
-                          className="mt-1 min-h-[44px] w-11 flex-shrink-0 text-white/70 transition-all duration-150 md:hover:text-white md:hover:bg-white/10"
-                          title="Ta bort vald mall"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      )}
+                      <div className="mt-1 w-11 min-h-[44px] flex-shrink-0 flex items-stretch justify-center">
+                        {selectedTemplate ? (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setSelectedTemplate(null);
+                              setJobTitle('');
+                              setHasUnsavedChanges(false);
+                              setTitleInputKey((k) => k + 1);
+                              setTimeout(() => {
+                                if (titleRef.current) {
+                                  titleRef.current.value = '';
+                                  titleRef.current.blur();
+                                  titleRef.current.focus();
+                                  titleRef.current.blur();
+                                }
+                              }, 0);
+                            }}
+                            className="w-11 min-h-[44px] flex-shrink-0 text-white/70 transition-all duration-150 md:hover:text-white md:hover:bg-white/10"
+                            title="Ta bort vald mall"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <div className="w-11 min-h-[44px]" aria-hidden="true" />
+                        )}
+                      </div>
                     </div>
                 )}
               </div>
