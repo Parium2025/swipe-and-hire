@@ -330,6 +330,27 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                         <span className="text-left flex-1 px-1 text-sm whitespace-normal break-words pr-6">
                           {selectedTemplate?.name || 'Ingen mall är vald'}
                         </span>
+                        {selectedTemplate && (
+                          <X 
+                            className="h-4 w-4 flex-shrink-0 opacity-70 ml-2 transition-opacity duration-150 md:hover:opacity-100" 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setSelectedTemplate(null);
+                              setJobTitle('');
+                              setHasUnsavedChanges(false);
+                              setTitleInputKey((k) => k + 1);
+                              setTimeout(() => {
+                                if (titleRef.current) {
+                                  titleRef.current.value = '';
+                                  titleRef.current.blur();
+                                  titleRef.current.focus();
+                                  titleRef.current.blur();
+                                }
+                              }, 0);
+                            }}
+                          />
+                        )}
                         <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2 transition-transform duration-150" />
                       </Button>
                         </DropdownMenuTrigger>
@@ -480,31 +501,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           </div>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    
-                    {selectedTemplate && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setSelectedTemplate(null);
-                          setJobTitle('');
-                          setHasUnsavedChanges(false);
-                          setTitleInputKey((k) => k + 1);
-                          setTimeout(() => {
-                            if (titleRef.current) {
-                              titleRef.current.value = '';
-                              titleRef.current.blur();
-                              titleRef.current.focus();
-                              titleRef.current.blur();
-                            }
-                          }, 0);
-                        }}
-                        className="mt-1 min-h-[44px] w-11 flex-shrink-0 text-white/70 transition-all duration-150 md:hover:text-white md:hover:bg-white/10"
-                        title="Ta bort vald mall"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
                   </div>
                 )}
               </div>
