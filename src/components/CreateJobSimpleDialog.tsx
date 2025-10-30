@@ -365,16 +365,16 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2 transition-transform duration-150" />
                         </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent 
-                            key={menuInstanceKey}
-                            className="w-[calc(100vw-2rem)] sm:w-[400px] max-w-sm mx-auto bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50"
-                            style={{ 
-                              width: dropdownWidth ? `${dropdownWidth}px` : undefined,
-                              maxWidth: dropdownWidth ? `${dropdownWidth}px` : undefined,
-                              WebkitOverflowScrolling: 'touch', 
-                              overscrollBehaviorY: 'contain', 
-                              touchAction: 'pan-y'
-                            }}
+                           <DropdownMenuContent 
+                             key={menuInstanceKey}
+                             className="bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50"
+                             style={{ 
+                               width: dropdownWidth ? `${dropdownWidth}px` : undefined,
+                               maxWidth: dropdownWidth ? `${dropdownWidth}px` : undefined,
+                               WebkitOverflowScrolling: 'touch', 
+                               overscrollBehaviorY: 'contain', 
+                               touchAction: 'pan-y'
+                             }}
                             side="top"
                             align="center"
                             alignOffset={alignOffset}
