@@ -147,7 +147,7 @@ export const JobSearchBar = ({
                 onClick={() => setSearchExpanded(true)}
                 className="h-8 w-8 text-white active:bg-white/12 focus:outline-none focus-visible:outline-none focus:ring-0"
               >
-                <Search className="h-4 w-4" />
+                <Search className="h-4 w-4 text-white" />
               </Button>
 
               {/* Recruiter filter - only show if multiple recruiters */}
@@ -218,7 +218,7 @@ export const JobSearchBar = ({
           <div className="flex items-center gap-2 px-4 py-3 animate-fade-in">
             {/* Search field */}
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
               <Input
                 ref={searchInputRef}
                 placeholder={placeholder}

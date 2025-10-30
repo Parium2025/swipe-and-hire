@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Eye, MessageCircle, MapPin, Calendar, Edit, Trash2 } from 'lucide-react';
+import { Eye, Users, MapPin, Calendar, Edit, Trash2 } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import type { JobPosting } from '@/hooks/useJobsData';
 import { formatDateShortSv } from '@/lib/date';
@@ -69,7 +69,7 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete }: Mo
             <span>{job.views_count || 0}</span>
           </div>
           <div className="flex items-center gap-1">
-            <MessageCircle className="h-4 w-4" />
+            <Users className="h-4 w-4" />
             <span>{job.applications_count || 0}</span>
           </div>
           <div className="flex items-center gap-1 flex-1 min-w-0">
@@ -80,13 +80,15 @@ export const MobileJobCard = memo(({ job, onToggleStatus, onEdit, onDelete }: Mo
 
         {/* Rekryterare + Datum */}
         <div className="flex items-center gap-1 text-xs text-white">
-          <Calendar className="h-3 w-3" />
           <span>
             {job.employer_profile?.first_name && job.employer_profile?.last_name && (
               <>
                 {job.employer_profile.first_name} {job.employer_profile.last_name} • {' '}
               </>
             )}
+          </span>
+          <Calendar className="h-3 w-3" />
+          <span>
             Skapad: {formatDateShortSv(job.created_at)}
           </span>
         </div>
