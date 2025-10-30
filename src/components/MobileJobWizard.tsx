@@ -2884,7 +2884,7 @@ const MobileJobWizard = ({
                 variant="outline"
                 onClick={prevStep}
                 disabled={currentStep === 0}
-                className="bg-white/5 backdrop-blur-sm border-white/20 text-white px-6 transition-all duration-300 md:hover:bg-white/10 md:hover:text-white disabled:opacity-30 touch-border-white [&_svg]:text-white md:hover:[&_svg]:text-white"
+                className="bg-white/5 backdrop-blur-sm border-white/20 text-white px-6 transition-all duration-300 hover:bg-white/10 md:hover:bg-white/10 hover:text-white md:hover:text-white disabled:opacity-30 touch-border-white [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Tillbaka
@@ -2894,7 +2894,7 @@ const MobileJobWizard = ({
                 <Button
                   onClick={handleSubmit}
                   disabled={loading || !validateCurrentStep()}
-                  className="bg-green-600/80 hover:bg-green-600 text-white px-6"
+                  className="bg-green-600/80 hover:bg-green-600 md:hover:bg-green-600 text-white px-6 transition-all duration-300"
                 >
                   {loading ? (
                     <>
@@ -2912,7 +2912,7 @@ const MobileJobWizard = ({
                 <Button
                   onClick={nextStep}
                   disabled={!validateCurrentStep()}
-                  className="bg-primary hover:bg-primary/90 text-white px-6 touch-border-white focus:ring-2 focus:ring-white/40"
+                  className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-6 touch-border-white focus:ring-2 focus:ring-white/40 transition-all duration-300"
                 >
                   Nästa
                   <ArrowRight className="h-4 w-4 ml-2" />
