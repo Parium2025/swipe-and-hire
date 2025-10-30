@@ -1475,7 +1475,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                               <Button
                                 onClick={addCustomQuestion}
                                 size="sm"
-                                className="bg-primary hover:bg-primary/90 text-white"
+                                className="bg-primary hover:bg-primary/90 text-white touch-border-white"
                               >
                                 Lägg till fråga
                                 <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />

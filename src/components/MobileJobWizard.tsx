@@ -1942,7 +1942,7 @@ const MobileJobWizard = ({
                         <Button
                           onClick={addCustomQuestion}
                           size="sm"
-                          className="bg-primary hover:bg-primary/90 text-white border border-white/30 px-6 font-medium"
+                          className="bg-primary hover:bg-primary/90 text-white touch-border-white px-6 font-medium"
                         >
                           Lägg till fråga
                           <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
