@@ -330,28 +330,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                         <span className="text-left flex-1 px-1 text-sm whitespace-normal break-words pr-6">
                           {selectedTemplate?.name || 'Ingen mall är vald'}
                         </span>
-                        <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2 transition-transform duration-150" />
                         {selectedTemplate && (
                           <X 
-                            role="button"
-                            aria-label="Rensa vald mall"
-                            className="h-4 w-4 flex-shrink-0 opacity-70 ml-2 transition-opacity duration-150 md:hover:opacity-100 cursor-pointer" 
-                            onPointerDownCapture={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                            onPointerDown={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                            onTouchStart={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
+                            className="h-4 w-4 flex-shrink-0 opacity-70 ml-2 transition-opacity duration-150 md:hover:opacity-100" 
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -370,6 +351,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             }}
                           />
                         )}
+                        <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2 transition-transform duration-150" />
                       </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
