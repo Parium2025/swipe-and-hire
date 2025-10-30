@@ -2881,10 +2881,9 @@ const MobileJobWizard = ({
           {!showQuestionTemplates && !showQuestionForm && (
             <div className="flex items-center justify-between p-4 border-t border-white/20 flex-shrink-0">
               <Button
-                variant="ghost"
                 onClick={prevStep}
                 disabled={currentStep === 0}
-                className="text-white hover:text-white hover:bg-white/10 disabled:opacity-30 touch-border-white"
+                className="bg-white/10 hover:bg-white/20 text-white px-6 touch-border-white disabled:opacity-30"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Tillbaka
