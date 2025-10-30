@@ -1,6 +1,6 @@
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, ArrowUpDown, UserCheck } from 'lucide-react';
+import { Search, ArrowUpDown, UserCheck, X } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -241,7 +241,7 @@ export const JobSearchBar = ({
                   }}
                   className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 text-white/60 hover:text-white focus:outline-none focus-visible:outline-none focus:ring-0"
                 >
-                  <Search className="h-3 w-3 rotate-45" />
+                  <X className="h-4 w-4" />
                 </Button>
               )}
             </div>
