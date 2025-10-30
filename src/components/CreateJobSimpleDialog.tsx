@@ -333,7 +333,17 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                         <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2 transition-transform duration-150" />
                         {selectedTemplate && (
                           <X 
-                            className="h-4 w-4 flex-shrink-0 opacity-70 ml-2 transition-opacity duration-150 md:hover:opacity-100" 
+                            role="button"
+                            aria-label="Rensa vald mall"
+                            className="h-4 w-4 flex-shrink-0 opacity-70 ml-2 transition-opacity duration-150 md:hover:opacity-100 cursor-pointer" 
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            onTouchStart={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
