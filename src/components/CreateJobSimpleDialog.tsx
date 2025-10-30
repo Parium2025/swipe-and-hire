@@ -127,7 +127,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       const trigW = triggerRef.current?.offsetWidth || 0;
       const containerW = rowRef.current?.offsetWidth || trigW;
       setDropdownWidth(containerW);
-      setAlignOffset(Math.round((containerW - trigW) / 2));
+      setAlignOffset(Math.round((trigW - containerW) / 2));
     };
     requestAnimationFrame(measure);
     const ro = new ResizeObserver(() => measure());
@@ -339,12 +339,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                            setTemplateMenuOpen(isOpen);
                            if (isOpen) {
                              setSearchTerm('');
-                             requestAnimationFrame(() => {
-                               const trigW = triggerRef.current?.offsetWidth || 0;
-                               const containerW = rowRef.current?.offsetWidth || trigW;
-                               setDropdownWidth(containerW);
-                               setAlignOffset(Math.round((containerW - trigW) / 2));
-                             });
+                              requestAnimationFrame(() => {
+                                const trigW = triggerRef.current?.offsetWidth || 0;
+                                const containerW = rowRef.current?.offsetWidth || trigW;
+                                setDropdownWidth(containerW);
+                                setAlignOffset(Math.round((trigW - containerW) / 2));
+                              });
                            } else {
                              setDropdownWidth(null);
                              setAlignOffset(0);
