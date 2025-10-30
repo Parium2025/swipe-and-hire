@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Loader2, ChevronDown, Search, X, Trash2, Pencil, FileText } from 'lucide-react';
@@ -62,12 +62,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const titleRef = useRef<HTMLInputElement>(null);
   const [titleInputKey, setTitleInputKey] = useState(0);
   const [menuInstanceKey, setMenuInstanceKey] = useState(0);
-  // Dropdown positioning helpers
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const rowRef = useRef<HTMLDivElement | null>(null); // raden (dropdown + kryss)
-  const slotRef = useRef<HTMLDivElement | null>(null); // endast ytan för dropdownen (behålls för layout)
-  const [dropdownWidth, setDropdownWidth] = useState<number | null>(null);
-  const [alignOffset, setAlignOffset] = useState<number>(0);
 
   const fetchTemplates = useCallback(async () => {
     if (!user) return;
@@ -120,33 +114,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       setHasUnsavedChanges(false);
     }
   }, [jobTitle, selectedTemplate]);
-
-  // Borttagen basmätning: vi låser alltid bredden till hela raden (rowRef)
-  // för att undvika att menyn krymper till knappens bredd på iOS.
-
-  // Lås menybredden till hela raden och centrera mot raden när menyn öppnas
-  useEffect(() => {
-    if (!templateMenuOpen) return;
-    const compute = () => {
-      const rowEl = rowRef.current;
-      const trigEl = triggerRef.current;
-      if (!rowEl || !trigEl) return;
-      const rowRect = rowEl.getBoundingClientRect();
-      const trigRect = trigEl.getBoundingClientRect();
-      const rowCenter = rowRect.left + rowRect.width / 2;
-      const trigCenter = trigRect.left + trigRect.width / 2;
-      setDropdownWidth(Math.round(rowRect.width));
-      setAlignOffset(Math.round(rowCenter - trigCenter));
-    };
-    requestAnimationFrame(compute);
-    const ro = new ResizeObserver(compute);
-    if (rowRef.current) ro.observe(rowRef.current);
-    window.addEventListener('resize', compute);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', compute);
-    };
-  }, [templateMenuOpen, open]);
 
   const handleTemplateSelect = useCallback((templateId: string, templateName: string) => {
     if (templateId === 'none') {
@@ -341,37 +308,21 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     Laddar mallar...
                   </div>
                 ) : (
-                  <div className="flex gap-2 items-start" ref={rowRef}>
-                    <div className="flex-1" ref={slotRef}>
+                  <div className="flex gap-2 items-start">
+                    <div className="flex-1">
                       <DropdownMenu 
                         key={menuInstanceKey}
                         modal={false} 
                         open={templateMenuOpen} 
-                         onOpenChange={(isOpen) => {
-                           setTemplateMenuOpen(isOpen);
-                           if (isOpen) {
-                             setSearchTerm('');
-                              requestAnimationFrame(() => {
-                                const rowEl = rowRef.current;
-                                const trigEl = triggerRef.current;
-                                if (!rowEl || !trigEl) return;
-                                const rowRect = rowEl.getBoundingClientRect();
-                                const trigRect = trigEl.getBoundingClientRect();
-                                const rowCenter = rowRect.left + rowRect.width / 2;
-                                const trigCenter = trigRect.left + trigRect.width / 2;
-                                setDropdownWidth(Math.round(rowRect.width));
-                                const offset = Math.round(rowCenter - trigCenter);
-                                setAlignOffset(offset);
-                              });
-                           } else {
-                             setDropdownWidth(null);
-                             setAlignOffset(0);
-                           }
-                         }}
+                        onOpenChange={(isOpen) => {
+                          setTemplateMenuOpen(isOpen);
+                          if (isOpen) {
+                            setSearchTerm('');
+                          }
+                        }}
                       >
                           <DropdownMenuTrigger asChild>
                         <Button
-                          ref={triggerRef}
                           variant="outline"
                           size="sm"
                           className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-auto min-h-[44px] py-2 whitespace-normal pr-10"
@@ -383,19 +334,17 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           <ChevronDown className="h-4 w-4 flex-shrink-0 opacity-50 ml-2 transition-transform duration-150" />
                         </Button>
                           </DropdownMenuTrigger>
-                           <DropdownMenuContent 
-                             key={menuInstanceKey}
-                             className="bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50"
-                             style={{ 
-                               width: dropdownWidth ? `${dropdownWidth}px` : undefined,
-                               maxWidth: dropdownWidth ? `${dropdownWidth}px` : undefined,
-                               WebkitOverflowScrolling: 'touch', 
-                               overscrollBehaviorY: 'contain', 
-                               touchAction: 'pan-y'
-                             }}
-                            side="top"
+                          <DropdownMenuContent 
+                            key={menuInstanceKey}
+                            className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50"
+                            style={{ 
+                              WebkitOverflowScrolling: 'touch', 
+                              overscrollBehaviorY: 'contain', 
+                              touchAction: 'pan-y'
+                            }}
+                            side={isMobile ? "top" : "bottom"}
                             align="center"
-                            alignOffset={alignOffset}
+                            alignOffset={0}
                             sideOffset={8}
                             avoidCollisions={false}
                             onWheel={(e) => e.stopPropagation()}
@@ -454,66 +403,75 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                 className="cursor-pointer focus:bg-white/10 focus:text-white transition-colors rounded-md mx-2 my-1 py-3"
                               >
                                 <div className="flex items-center gap-3 w-full">
-                                  <Plus className="h-5 w-5 text-white" />
+                                  <Plus className="h-5 w-5 text-blue-400" />
                                   <div className="flex flex-col">
                                     <span className="font-medium text-white">Skapa en ny mall</span>
-                                    <span className="text-sm text-white">Skapa en återanvändbar jobbmall</span>
+                                    <span className="text-sm text-white/60">Skapa en återanvändbar jobbmall</span>
                                   </div>
                                 </div>
                               </DropdownMenuItem>
 
-                              <DropdownMenuSeparator className="bg-white/10 mx-2 my-2" />
-
-                              {filteredTemplates.map((template, index) => (
-                                <div key={template.id}>
-                                  {index > 0 && <DropdownMenuSeparator className="bg-white/10 mx-2 my-2" />}
-                                  <DropdownMenuItem 
-                                    onSelect={(e) => e.preventDefault()}
-                                    className="cursor-pointer focus:bg-white/10 focus:text-white transition-colors rounded-md mx-2 my-1 py-2"
-                                  >
-                                    <div className="flex items-start gap-2 w-full">
-                                      <button
-                                        onClick={() => handleTemplateSelect(template.id, template.name)}
-                                        className="flex flex-col flex-1 text-left hover:opacity-80 transition-opacity"
-                                      >
-                                        <div className="flex items-center justify-between">
-                                          <span className="font-medium text-white">{template.name}</span>
-                                          {template.is_default && (
-                                            <span className="text-sm text-blue-400 ml-2">Standard</span>
-                                          )}
-                                        </div>
-                                        <span className="text-sm text-white mt-1 break-words line-clamp-2 sm:line-clamp-none">{template.title}</span>
-                                      </button>
-                                      <div className="flex gap-1 flex-shrink-0">
-                                        <Button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setTemplateToEdit(template);
-                                            setTemplateMenuOpen(false);
-                                            setOpen(false);
-                                            setShowTemplateWizard(true);
-                                          }}
-                                          variant="ghost"
-                                          size="sm"
-                                          className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8 p-0 flex-shrink-0"
-                                        >
-                                          <Pencil className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setTemplateToDelete(template);
-                                          }}
-                                          variant="ghost"
-                                          size="sm"
-                                          className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0 flex-shrink-0"
-                                        >
-                                          <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onSelect={(e) => {
+                                  e.preventDefault();
+                                  handleTemplateSelect(null, '');
+                                }}
+                                className="cursor-pointer focus:bg-white/10 focus:text-white transition-colors rounded-md mx-2 my-1 py-3"
+                              >
+                                <div className="flex items-center gap-3 w-full">
+                                  <FileText className="h-5 w-5 text-white/70" />
+                                  <span className="font-medium text-white">Skapa en återanvändbar jobbmall</span>
                                 </div>
+                              </DropdownMenuItem>
+
+                              {filteredTemplates.map((template) => (
+                                <DropdownMenuItem 
+                                  key={template.id}
+                                  onSelect={(e) => e.preventDefault()}
+                                  className="cursor-pointer focus:bg-white/10 focus:text-white transition-colors rounded-md mx-2 my-1 py-2"
+                                >
+                                  <div className="flex items-start gap-2 w-full">
+                                    <button
+                                      onClick={() => handleTemplateSelect(template.id, template.name)}
+                                      className="flex flex-col flex-1 text-left hover:opacity-80 transition-opacity"
+                                    >
+                                      <div className="flex items-center justify-between">
+                                        <span className="font-medium text-white">{template.name}</span>
+                                        {template.is_default && (
+                                          <span className="text-sm text-blue-400 ml-2">Standard</span>
+                                        )}
+                                      </div>
+                                      <span className="text-sm text-white mt-1 break-words line-clamp-2 sm:line-clamp-none">{template.title}</span>
+                                    </button>
+                                    <div className="flex gap-1 flex-shrink-0">
+                                      <Button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setTemplateToEdit(template);
+                                          setTemplateMenuOpen(false);
+                                          setOpen(false);
+                                          setShowTemplateWizard(true);
+                                        }}
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8 p-0 flex-shrink-0"
+                                      >
+                                        <Pencil className="h-4 w-4" />
+                                      </Button>
+                                      <Button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setTemplateToDelete(template);
+                                        }}
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0 flex-shrink-0"
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </DropdownMenuItem>
                               ))}
                               
                               {filteredTemplates.length === 0 && searchTerm && (
@@ -528,34 +486,30 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                         </DropdownMenu>
                       </div>
                       
-                      <div className="mt-1 w-11 min-h-[44px] flex-shrink-0 flex items-stretch justify-center">
-                        {selectedTemplate ? (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              setSelectedTemplate(null);
-                              setJobTitle('');
-                              setHasUnsavedChanges(false);
-                              setTitleInputKey((k) => k + 1);
-                              setTimeout(() => {
-                                if (titleRef.current) {
-                                  titleRef.current.value = '';
-                                  titleRef.current.blur();
-                                  titleRef.current.focus();
-                                  titleRef.current.blur();
-                                }
-                              }, 0);
-                            }}
-                            className="w-11 min-h-[44px] flex-shrink-0 text-white/70 transition-all duration-150 md:hover:text-white md:hover:bg-white/10"
-                            title="Ta bort vald mall"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        ) : (
-                          <div className="w-11 min-h-[44px]" aria-hidden="true" />
-                        )}
-                      </div>
+                      {selectedTemplate && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setSelectedTemplate(null);
+                            setJobTitle('');
+                            setHasUnsavedChanges(false);
+                            setTitleInputKey((k) => k + 1);
+                            setTimeout(() => {
+                              if (titleRef.current) {
+                                titleRef.current.value = '';
+                                titleRef.current.blur();
+                                titleRef.current.focus();
+                                titleRef.current.blur();
+                              }
+                            }, 0);
+                          }}
+                          className="mt-1 min-h-[44px] w-11 flex-shrink-0 text-white/70 transition-all duration-150 md:hover:text-white md:hover:bg-white/10"
+                          title="Ta bort vald mall"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                 )}
               </div>

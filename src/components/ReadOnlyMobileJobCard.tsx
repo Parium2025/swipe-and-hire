@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Users, MapPin, Calendar } from 'lucide-react';
+import { Eye, MessageCircle, MapPin, Calendar } from 'lucide-react';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import type { JobPosting } from '@/hooks/useJobsData';
 
@@ -57,7 +57,7 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
             <span>{job.views_count || 0}</span>
           </div>
           <div className="flex items-center gap-1">
-            <Users className="h-4 w-4" />
+            <MessageCircle className="h-4 w-4" />
             <span>{job.applications_count || 0}</span>
           </div>
           <div className="flex items-center gap-1 flex-1 min-w-0">
@@ -67,20 +67,20 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
         </div>
 
         {/* Rekryterare + Datum */}
-        <div className="flex flex-wrap items-center gap-2 text-xs text-white">
-          {job.employer_profile?.first_name && job.employer_profile?.last_name && (
-            <span>
-              {job.employer_profile.first_name} {job.employer_profile.last_name}
-            </span>
-          )}
-          <div className="flex items-center gap-1">
-            <Calendar className="h-3 w-3" />
-            <span>Skapad: {new Date(job.created_at).toLocaleDateString('sv-SE', { 
+        <div className="flex items-center gap-1 text-xs text-white">
+          <Calendar className="h-3 w-3" />
+          <span>
+            {job.employer_profile?.first_name && job.employer_profile?.last_name && (
+              <>
+                {job.employer_profile.first_name} {job.employer_profile.last_name} • {' '}
+              </>
+            )}
+            Skapad: {new Date(job.created_at).toLocaleDateString('sv-SE', { 
               day: 'numeric', 
               month: 'short',
               year: 'numeric'
-            })}</span>
-          </div>
+            })}
+          </span>
         </div>
       </div>
     </Card>
