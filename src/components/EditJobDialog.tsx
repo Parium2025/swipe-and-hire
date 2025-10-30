@@ -1217,7 +1217,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             onChange={(e) => handleOccupationSearch(e.target.value)}
                             onFocus={() => setShowOccupationDropdown(occupationSearchTerm.length > 0)}
                             placeholder="t.ex. Mjukvaru- och systemutvecklare"
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 focus:border-white/40"
                           />
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
                           
@@ -1262,7 +1262,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           onChange={(e) => handleInputChange('description', e.target.value)}
                           placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
                           rows={3}
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 p-2 text-sm resize-none leading-tight focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 p-2 text-sm resize-none leading-tight focus:border-white/40"
                         />
                       </div>
 
@@ -1276,7 +1276,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             onChange={(e) => handleEmploymentTypeSearch(e.target.value)}
                             onClick={handleEmploymentTypeClick}
                             placeholder="Välj anställningsform"
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
                             readOnly
                           />
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
@@ -1306,7 +1306,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             onChange={(e) => handleSalaryTypeSearch(e.target.value)}
                             onClick={handleSalaryTypeClick}
                             placeholder="Välj lönetyp"
-                             className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                             className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
                             readOnly
                           />
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
@@ -1336,7 +1336,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           value={formData.positions_count}
                           onChange={(e) => handleInputChange('positions_count', e.target.value)}
                           placeholder="1"
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                         />
                       </div>
                     </div>
@@ -1353,7 +1353,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             onChange={(e) => handleWorkLocationSearch(e.target.value)}
                             onClick={handleWorkLocationClick}
                             placeholder="Välj arbetsplats"
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
                             readOnly
                           />
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
@@ -1383,7 +1383,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             onChange={(e) => handleRemoteWorkSearch(e.target.value)}
                             onClick={handleRemoteWorkClick}
                             placeholder="Välj alternativ"
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
                             readOnly
                           />
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
@@ -1411,7 +1411,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           value={formData.workplace_name}
                           onChange={(e) => handleInputChange('workplace_name', e.target.value)}
                           placeholder={profile?.company_name ? `t.ex. ${profile.company_name}` : "t.ex. IKEA Kungens Kurva"}
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                         />
                       </div>
 
@@ -1422,7 +1422,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           value={formData.contact_email}
                           onChange={(e) => handleInputChange('contact_email', e.target.value)}
                           placeholder={user?.email || "kontakt@företag.se"}
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                         />
                       </div>
 
@@ -1432,7 +1432,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           value={formData.workplace_address}
                           onChange={(e) => handleInputChange('workplace_address', e.target.value)}
                           placeholder="t.ex. Modulvägen 1"
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                         />
                       </div>
 
@@ -1684,7 +1684,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   onChange={(e) => handleQuestionTypeSearch(e.target.value)}
                                   onClick={handleQuestionTypeClick}
                                   placeholder="Välj frågetyp"
-                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
                                   readOnly
                                 />
                                 <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
