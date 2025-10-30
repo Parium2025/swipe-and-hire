@@ -44,6 +44,7 @@ const CompanyProfile = () => {
   const [originalValues, setOriginalValues] = useState<any>({});
   const [linkToDelete, setLinkToDelete] = useState<{ link: SocialMediaLink; index: number } | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [logoDeleteDialogOpen, setLogoDeleteDialogOpen] = useState(false);
   
   // Image editor states
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
@@ -198,8 +199,13 @@ const CompanyProfile = () => {
   };
 
   const handleLogoDelete = () => {
+    setLogoDeleteDialogOpen(true);
+  };
+
+  const confirmLogoDelete = () => {
     setFormData(prev => ({ ...prev, company_logo_url: '' }));
     setHasUnsavedChanges(true);
+    setLogoDeleteDialogOpen(false);
     
     toast({
       title: "Logga borttagen",
@@ -797,7 +803,7 @@ const CompanyProfile = () => {
         isCircular={false}
       />
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Social Link Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0">
           <AlertDialogHeader className="space-y-4 text-center">
@@ -829,6 +835,41 @@ const CompanyProfile = () => {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmRemoveSocialLink}
+              variant="destructiveSoft"
+              className="flex-[0.4] text-sm"
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              Ta bort
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Logo Confirmation Dialog */}
+      <AlertDialog open={logoDeleteDialogOpen} onOpenChange={setLogoDeleteDialogOpen}>
+        <AlertDialogContent className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0">
+          <AlertDialogHeader className="space-y-4 text-center">
+            <div className="flex items-center justify-center gap-2.5">
+              <div className="bg-red-500/20 p-2 rounded-full">
+                <AlertTriangle className="h-4 w-4 text-red-400" />
+              </div>
+              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+                Ta bort företagslogga
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-white text-sm leading-relaxed break-words">
+              Är du säker på att du vill ta bort företagsloggan? Denna åtgärd går inte att ångra.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
+            <AlertDialogCancel 
+              onClick={() => setLogoDeleteDialogOpen(false)}
+              className="flex-[0.6] bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
+            >
+              Avbryt
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmLogoDelete}
               variant="destructiveSoft"
               className="flex-[0.4] text-sm"
             >
