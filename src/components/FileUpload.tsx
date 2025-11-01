@@ -193,7 +193,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       
       <div
         {...getRootProps()}
-        className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+        className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center cursor-pointer transition-colors ${
           isDragActive
             ? 'border-primary bg-primary/5'
             : 'border-border hover:border-muted-foreground bg-muted/30'
@@ -203,18 +203,18 @@ const FileUpload: React.FC<FileUploadProps> = ({
           open(); // Explicitly open file dialog
         }}
       >
-        <div className="space-y-2">
-          <Upload className="h-8 w-8 mx-auto text-white" />
+        <div className="space-y-1.5 sm:space-y-2">
+          <Upload className="h-6 w-6 sm:h-8 sm:w-8 mx-auto text-white" />
           {uploading ? (
-            <p className="text-sm text-white">Laddar upp...</p>
+            <p className="text-xs sm:text-sm text-white">Laddar upp...</p>
           ) : (
             <>
-              <p className="text-sm font-medium text-white">
+              <p className="text-xs sm:text-sm font-medium text-white">
                 {isDragActive
                   ? 'Släpp filen här...'
                   : 'Klicka för att välja fil'}
               </p>
-              <p className="text-sm text-white">
+              <p className="text-xs sm:text-sm text-white">
                 {getAcceptedTypesText()} (max {Math.round(maxFileSize / 1024 / 1024)}MB)
               </p>
             </>
