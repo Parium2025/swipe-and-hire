@@ -608,10 +608,9 @@ const MobileJobWizard = ({
         setInitialCustomQuestions([]);
         setHasUnsavedChanges(true); // Markera som ändrad från start
       } else {
-        // Ingen template vald, använd aktuell formData som start
-        setInitialFormData({ ...formData });
+        // Ingen template vald, använd aktuell formData som start men räkna titel som förändring
+        setInitialFormData({ ...formData, title: '' });
         setInitialCustomQuestions([]);
-        // Sätt hasUnsavedChanges till true eftersom användaren har påbörjat ett jobb
         setHasUnsavedChanges(true);
       }
     }
