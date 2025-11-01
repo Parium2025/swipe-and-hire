@@ -567,18 +567,6 @@ All colors MUST be HSL.
       transition: will-change 1s ease 1s;
     }
 
-    /* Make FIRST open faster to compensate for any remaining GPU warm-up */
-    [data-state="open"]:not([data-state="closed"]) {
-      /* 120ms instead of 200ms for first open (40% faster) */
-      animation-duration: 120ms !important;
-      transition-duration: 120ms !important;
-    }
-    
-    /* After first open, use full duration */
-    [data-state="open"][data-state="closed"] {
-      animation-duration: 200ms !important;
-      transition-duration: 200ms !important;
-    }
   }
 
   /* Desktop: Pre-warm GPU on hover (before click) */
