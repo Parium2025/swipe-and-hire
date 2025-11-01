@@ -671,6 +671,21 @@ const MobileJobWizard = ({
     return () => { cancelled = true; };
   }, [jobImageDisplayUrl, manualFocus]);
 
+  // Show company tooltip when reaching preview step (step 3)
+  useEffect(() => {
+    if (currentStep === 3 && open) {
+      // Small delay to let the preview render first
+      const timer = setTimeout(() => {
+        setShowCompanyTooltip(true);
+        setShowApplicationForm(false);
+        setIsScrolledTop(true);
+      }, 300);
+      return () => clearTimeout(timer);
+    } else {
+      setShowCompanyTooltip(false);
+    }
+  }, [currentStep, open]);
+
   const handleImageEdit = async (editedImageBlob: Blob) => {
     try {
       const user = await supabase.auth.getUser();

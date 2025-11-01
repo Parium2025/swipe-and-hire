@@ -581,6 +581,21 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     }
   }, [jobImageDisplayUrl, currentStep, open]);
 
+  // Show company tooltip when reaching preview step (step 3)
+  useEffect(() => {
+    if (currentStep === 3 && open) {
+      // Small delay to let the preview render first
+      const timer = setTimeout(() => {
+        setShowCompanyTooltip(true);
+        setShowApplicationForm(false);
+        setIsScrolledTop(true);
+      }, 300);
+      return () => clearTimeout(timer);
+    } else {
+      setShowCompanyTooltip(false);
+    }
+  }, [currentStep, open]);
+
   // Preload postal code information early to make location fields faster
   useEffect(() => {
     const preloadPostalCodeInfo = async () => {
