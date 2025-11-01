@@ -361,7 +361,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
                           key={menuInstanceKey}
-                          className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 duration-150"
+                          className="w-[calc(100vw-2rem)] max-w-sm bg-slate-800/95 md:backdrop-blur-md border-slate-600/30 shadow-xl pointer-events-auto rounded-lg text-white max-h-[40vh] overflow-y-auto scrollbar-hide flex flex-col pt-0 pb-0 z-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 duration-150"
                           style={{ 
                             WebkitOverflowScrolling: 'touch', 
                             overscrollBehaviorY: 'contain', 
@@ -454,8 +454,18 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                               >
                                 <div className="flex items-center justify-between w-full gap-3">
                                   <button
-                                    onClick={() => handleTemplateSelect(template.id, template.name)}
-                                    className="flex flex-col flex-1 text-left hover:opacity-80 transition-opacity"
+                                    onTouchEnd={(e) => {
+                                      e.preventDefault(); // Prevent 300ms click delay
+                                      e.stopPropagation();
+                                      handleTemplateSelect(template.id, template.name);
+                                    }}
+                                    onClick={(e) => {
+                                      // Fallback for desktop/non-touch
+                                      e.stopPropagation();
+                                      handleTemplateSelect(template.id, template.name);
+                                    }}
+                                    style={{ touchAction: 'manipulation' }}
+                                    className="flex flex-col flex-1 text-left select-none"
                                   >
                                     <div className="flex items-center justify-between">
                                       <span className="font-medium text-white">{template.name}</span>

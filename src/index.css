@@ -614,6 +614,19 @@ All colors MUST be HSL.
     }
   }
 
+  /* Pre-warm touch-interactive dropdown items */
+  @media (hover: none) and (pointer: coarse) {
+    [role="menuitem"] button {
+      will-change: transform;
+      transform: translateZ(0);
+    }
+    
+    /* Release GPU after interaction */
+    [role="menuitem"]:active button {
+      will-change: auto;
+    }
+  }
+
   /* Native-like smooth scroll - iOS momentum scrolling */
   * {
     -webkit-overflow-scrolling: touch;
