@@ -560,11 +560,19 @@ All colors MUST be HSL.
       will-change: opacity;
     }
 
-    /* Eliminate "settling" time - keep GPU warm for 1 second after close */
+    /* Keep GPU warm briefly after close, then release smoothly */
     [data-state="closed"] {
-      /* Don't immediately release GPU - keep warm for potential re-open */
-      will-change: transform, opacity;
-      transition: will-change 1s ease 1s;
+      transition: transform 200ms ease-out, opacity 200ms ease-out;
+    }
+
+    /* Release will-change after animation completes */
+    [data-state="closed"] {
+      animation: release-gpu 1s ease 0.2s;
+    }
+
+    @keyframes release-gpu {
+      from { will-change: transform, opacity; }
+      to { will-change: auto; }
     }
 
   }
@@ -572,16 +580,16 @@ All colors MUST be HSL.
   /* Desktop: Pre-warm GPU on hover (before click) */
   @media (hover: hover) and (pointer: fine) {
     /* When user hovers button, pre-warm GPU for upcoming dialog */
-    button:hover,
-    [role="button"]:hover {
+    button:hover:not(:disabled),
+    [role="button"]:hover:not([aria-disabled="true"]) {
       /* Silently activate GPU in background */
       will-change: transform, opacity;
     }
     
-    /* Release GPU after hover ends */
+    /* Release GPU after hover ends - but keep brief for fast re-hover */
     button:not(:hover),
     [role="button"]:not(:hover) {
-      transition: will-change 500ms ease 500ms;
+      transition: will-change 300ms ease 200ms;
     }
   }
 

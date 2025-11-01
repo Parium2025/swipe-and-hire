@@ -250,7 +250,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         </DialogTrigger>
         <DialogContent 
           hideClose
-          className="w-[min(90vw,400px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[80vh] shadow-lg rounded-[24px] sm:rounded-xl transition-all duration-200 ease-[cubic-bezier(0.32,0.72,0,1)] will-change-transform will-change-opacity overflow-hidden"
+          className="w-[min(90vw,400px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[80vh] shadow-lg rounded-[24px] sm:rounded-xl transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-transform will-change-opacity overflow-hidden"
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
           <DialogHeader className="sr-only">
