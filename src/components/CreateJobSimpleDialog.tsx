@@ -143,78 +143,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     };
   }, [templateMenuOpen]);
 
-  // Compute menu position for mobile portal (opens upward and fits viewport)
-  const computeMenuPosition = useCallback(() => {
-    if (!isMobile || !templateButtonRef.current) return {};
-
-    const rect = templateButtonRef.current.getBoundingClientRect();
-    const vv = (window as any).visualViewport;
-    const viewportHeight: number = vv?.height ?? window.innerHeight;
-    const viewportWidth: number = vv?.width ?? window.innerWidth;
-
-    // Horizontal clamp so menu stays on screen
-    const desiredLeft = rect.left;
-    const maxLeft = viewportWidth - rect.width - 8; // 8px padding
-    const left = Math.max(8, Math.min(desiredLeft, Math.max(8, maxLeft)));
-
-    // Space available above the input
-    const availableAbove = rect.top - 16; // keep 16px from top
-
-    // Target height: up to 50vh but not more than availableAbove
-    let targetHeight = Math.min(Math.max(availableAbove, 120), viewportHeight * 0.5);
-
-    // Compute top so menu sits above the input with 8px gap
-    let top = rect.top - targetHeight - 8;
-
-    // If top goes off-screen, clamp and shrink height accordingly
-    if (top < 8) {
-      const delta = 8 - top;
-      targetHeight = Math.max(100, targetHeight - delta);
-      top = 8;
-    }
-
-    return {
-      position: 'fixed' as const,
-      left: `${left}px`,
-      width: `${rect.width}px`,
-      top: `${top}px`,
-      height: `${targetHeight}px`,
-      maxHeight: `${targetHeight}px`,
-      zIndex: 999999,
-    };
-  }, [isMobile]);
-
-  // Update portal position when menu opens or viewport changes (keyboard)
-  useLayoutEffect(() => {
-    if (!isMobile || !templateMenuOpen) return;
-
-    const updatePosition = () => {
-      const style = computeMenuPosition();
-      setMenuPortalStyle(style);
-    };
-
-    // Initial position
-    updatePosition();
-
-    // Listen to viewport changes (keyboard show/hide)
-    const viewport = window.visualViewport;
-    if (viewport) {
-      viewport.addEventListener('resize', updatePosition);
-      viewport.addEventListener('scroll', updatePosition);
-    }
-
-    window.addEventListener('scroll', updatePosition, true);
-    window.addEventListener('resize', updatePosition);
-
-    return () => {
-      if (viewport) {
-        viewport.removeEventListener('resize', updatePosition);
-        viewport.removeEventListener('scroll', updatePosition);
-      }
-      window.removeEventListener('scroll', updatePosition, true);
-      window.removeEventListener('resize', updatePosition);
-    };
-  }, [isMobile, templateMenuOpen, computeMenuPosition]);
 
   // Pre-compute template lookup for instant access (0ms instead of 5-10ms)
   const templateMap = useMemo(
@@ -452,6 +380,11 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                               value={searchTerm}
                               onChange={(e) => setSearchTerm(e.target.value)}
                               className="pl-10 pr-10 h-10 bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40"
+                              autoComplete="off"
+                              autoCorrect="off"
+                              autoCapitalize="none"
+                              spellCheck={false}
+                              inputMode="search"
                             />
                             {searchTerm && (
                               <button
@@ -472,17 +405,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           </div>
                         )}
 
-                        {/* No Template Option */}
-                        <button
-                          type="button"
-                          onClick={() => handleTemplateSelect('none', 'Ingen mall')}
-                          className="w-full px-4 py-3 text-left hover:bg-gray-700 text-white transition-colors border-b border-gray-700"
-                        >
-                          <div className="flex flex-col">
-                            <span className="font-medium">Ingen mall</span>
-                            <span className="text-sm text-white/80">Skapa från början</span>
-                          </div>
-                        </button>
 
                         {/* Create New Template */}
                         <button
@@ -562,132 +484,88 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       </div>
                     )}
 
-                    {/* Mobile Portal Dropdown */}
-                    {templateMenuOpen && isMobile && createPortal(
-                      <div
-                        ref={menuPortalRef}
-                        className="bg-gray-800 border border-gray-600 rounded-md shadow-xl flex flex-col"
-                        style={{
-                          ...menuPortalStyle,
-                          overflow: 'hidden'
-                        }}
+                    {/* Mobile Dropdown - opens upward */}
+                    {templateMenuOpen && isMobile && (
+                      <div 
+                        className="absolute bottom-full left-0 right-0 z-[10000] bg-gray-800 border border-gray-600 rounded-md mb-2 shadow-xl max-h-[50vh] overflow-y-auto"
+                        style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorY: 'contain', touchAction: 'pan-y' }}
                       >
                         {/* Search Bar */}
-                        <div className="p-3 border-b border-gray-600/50 bg-gray-800 flex-shrink-0">
+                        <div className="p-3 border-b border-gray-600/50 sticky top-0 bg-gray-800 z-10">
                           <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/80 pointer-events-none" />
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/80" />
                             <Input
                               placeholder="Sök mall..."
                               value={searchTerm}
                               onChange={(e) => setSearchTerm(e.target.value)}
                               className="pl-10 pr-10 h-10 bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40"
+                              autoComplete="off"
+                              autoCorrect="off"
+                              autoCapitalize="none"
+                              spellCheck={false}
+                              inputMode="search"
                             />
                             {searchTerm && (
-                              <button
-                                onClick={() => setSearchTerm('')}
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 active:text-white transition-colors touch-manipulation"
-                                type="button"
-                              >
+                              <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white transition-colors" type="button">
                                 <X className="h-4 w-4" />
                               </button>
                             )}
                           </div>
                         </div>
 
-                        {/* Scrollable Content */}
-                        <div 
-                          className="flex-1 overflow-y-auto"
-                          style={{
-                            WebkitOverflowScrolling: 'touch',
-                            overscrollBehavior: 'contain'
+                        {/* Result Indicator */}
+                        {searchTerm && (
+                          <div className="px-4 py-2 text-sm text-white/90 bg-gray-800/50 border-b border-gray-600/30">
+                            Visar <span className="text-white font-medium">{filteredTemplates.length}</span> av <span className="text-white font-medium">{templates.length}</span> mallar
+                          </div>
+                        )}
+
+                        {/* Create New Template */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setTemplateMenuOpen(false);
+                            setOpen(false);
+                            setShowTemplateWizard(true);
                           }}
+                          className="w-full px-4 py-3 text-left hover:bg-gray-700 text-white transition-colors border-b border-gray-700"
                         >
+                          <div className="flex flex-col">
+                            <span className="font-medium">+ Skapa en ny mall</span>
+                            <span className="text-sm text-white/80">Skapa en återanvändbar jobbmall</span>
+                          </div>
+                        </button>
 
-                          {/* Result Indicator */}
-                          {searchTerm && (
-                            <div className="px-4 py-2 text-sm text-white/90 bg-gray-800/50 border-b border-gray-600/30">
-                              Visar <span className="text-white font-medium">{filteredTemplates.length}</span> av <span className="text-white font-medium">{templates.length}</span> mallar
-                            </div>
-                          )}
-
-                          {/* Create New Template */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setTemplateMenuOpen(false);
-                              setOpen(false);
-                              setShowTemplateWizard(true);
-                            }}
-                            className="w-full px-4 py-3 text-left active:bg-gray-700 text-white transition-colors border-b border-gray-700 touch-manipulation"
-                          >
-                            <div className="flex flex-col pointer-events-none">
-                              <span className="font-medium">+ Skapa en ny mall</span>
-                              <span className="text-sm text-white/80">Skapa en återanvändbar jobbmall</span>
-                            </div>
-                          </button>
-
-                          {/* Template List */}
-                          {filteredTemplates.map((template) => (
-                            <div
-                              key={template.id}
-                              className="px-4 py-3 text-white border-b border-gray-700 last:border-b-0"
-                            >
-                              <div className="flex items-center justify-between w-full gap-3">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTemplateSelect(template.id, template.name)}
-                                  className="flex flex-col flex-1 text-left active:opacity-70 transition-opacity touch-manipulation"
-                                >
-                                  <div className="flex items-center justify-between pointer-events-none">
-                                    <span className="font-medium">{template.name}</span>
-                                    {template.is_default && (
-                                      <span className="text-sm text-blue-400 ml-2">Standard</span>
-                                    )}
-                                  </div>
-                                  <span className="text-sm text-white/80 mt-1 break-words pointer-events-none">{template.title}</span>
-                                </button>
-                                <div className="flex gap-1 flex-shrink-0">
-                                  <Button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setTemplateToEdit(template);
-                                      setTemplateMenuOpen(false);
-                                      setOpen(false);
-                                      setShowTemplateWizard(true);
-                                    }}
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-white/70 active:text-white active:bg-white/10 h-8 w-8 p-0 touch-manipulation"
-                                  >
-                                    <Pencil className="h-4 w-4 pointer-events-none" />
-                                  </Button>
-                                  <Button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setTemplateToDelete(template);
-                                    }}
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-destructive active:text-destructive/90 active:bg-destructive/15 h-8 w-8 p-0 touch-manipulation"
-                                  >
-                                    <Trash2 className="h-4 w-4 pointer-events-none" />
-                                  </Button>
+                        {/* Template List */}
+                        {filteredTemplates.map((template) => (
+                          <div key={template.id} className="px-4 py-3 hover:bg-gray-700 text-white transition-colors border-b border-gray-700 last:border-b-0">
+                            <div className="flex items-center justify-between w-full gap-3">
+                              <button type="button" onClick={() => handleTemplateSelect(template.id, template.name)} className="flex flex-col flex-1 text-left active:opacity-70 transition-opacity touch-manipulation">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-medium">{template.name}</span>
+                                  {template.is_default && (<span className="text-sm text-blue-400 ml-2">Standard</span>)}
                                 </div>
+                                <span className="text-sm text-white/80 mt-1 break-words">{template.title}</span>
+                              </button>
+                              <div className="flex gap-1 flex-shrink-0">
+                                <Button onClick={(e) => { e.stopPropagation(); setTemplateToEdit(template); setTemplateMenuOpen(false); setOpen(false); setShowTemplateWizard(true); }} variant="ghost" size="sm" className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8 p-0">
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button onClick={(e) => { e.stopPropagation(); setTemplateToDelete(template); }} variant="ghost" size="sm" className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
                               </div>
                             </div>
-                          ))}
+                          </div>
+                        ))}
 
-                          {/* No Results */}
-                          {filteredTemplates.length === 0 && searchTerm && (
-                            <div className="px-4 py-8 text-center">
-                              <p className="text-white font-medium">
-                                Ingen mall hittades för ({searchTerm})
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </div>,
-                      document.body
+                        {/* No Results */}
+                        {filteredTemplates.length === 0 && searchTerm && (
+                          <div className="px-4 py-8 text-center">
+                            <p className="text-white font-medium">Ingen mall hittades för ({searchTerm})</p>
+                          </div>
+                        )}
+                      </div>
                     )}
 
                     {selectedTemplate && (
