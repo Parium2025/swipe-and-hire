@@ -484,10 +484,10 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       </div>
                     )}
 
-                    {/* Mobile Dropdown - opens downward */}
+                    {/* Mobile Dropdown - opens upward */}
                     {templateMenuOpen && isMobile && (
                       <div 
-                        className="absolute top-full left-0 right-0 z-[10000] bg-gray-800 border border-gray-600 rounded-md mt-2 shadow-xl flex flex-col max-h-[50vh] overflow-hidden"
+                        className="absolute bottom-full left-0 right-0 z-[10000] bg-gray-800 border border-gray-600 rounded-md mb-2 shadow-xl flex flex-col max-h-[50vh] overflow-hidden"
                       >
                         {/* Search Bar - Fixed at top */}
                         <div className="p-3 border-b border-gray-600/50 bg-gray-800 flex-shrink-0">
