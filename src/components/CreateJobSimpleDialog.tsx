@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 // Removed DropdownMenu - using custom dropdown pattern from MobileJobWizard
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Loader2, ChevronDown, ChevronUp, Search, X, Trash2, Pencil } from 'lucide-react';
+import { Plus, Loader2, ChevronDown, Search, X, Trash2, Pencil } from 'lucide-react';
 import MobileJobWizard from '@/components/MobileJobWizard';
 import CreateTemplateWizard from '@/components/CreateTemplateWizard';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
@@ -359,12 +359,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-11 text-sm pr-10 cursor-pointer focus:border-white/40 touch-manipulation"
                       readOnly
                     />
-                    <ChevronUp className={`absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none transition-transform duration-200 ${templateMenuOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none transition-transform duration-200 ${templateMenuOpen ? 'rotate-180' : ''}`} />
                     
                     {/* Custom Dropdown - Premium Touch Pattern */}
                     {templateMenuOpen && (
                       <div 
-                        className="absolute bottom-full left-0 right-0 z-[10000] bg-gray-800 border border-gray-600 rounded-md mb-1 shadow-xl max-h-[40vh] overflow-y-auto"
+                        className="absolute top-full left-0 right-0 z-[10000] bg-gray-800 border border-gray-600 rounded-md mt-1 shadow-xl max-h-[40vh] overflow-y-auto"
                         style={{ 
                           WebkitOverflowScrolling: 'touch',
                           overscrollBehaviorY: 'contain'
