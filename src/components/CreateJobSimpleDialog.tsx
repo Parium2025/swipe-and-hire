@@ -151,26 +151,44 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     };
   }, [templateMenuOpen]);
 
-  // Compute menu position for mobile portal
+  // Compute menu position for mobile portal (opens upward and fits viewport)
   const computeMenuPosition = useCallback(() => {
     if (!isMobile || !templateButtonRef.current) return {};
 
     const rect = templateButtonRef.current.getBoundingClientRect();
-    const viewport = window.visualViewport || { height: window.innerHeight, pageTop: 0 };
-    const viewportHeight = viewport.height;
-    
-    // Calculate available space above the input
-    const spaceAbove = rect.top - 8; // 8px padding from top
-    const menuHeight = Math.min(spaceAbove - 16, viewportHeight * 0.4); // Max 40vh or available space
-    
+    const vv = (window as any).visualViewport;
+    const viewportHeight: number = vv?.height ?? window.innerHeight;
+    const viewportWidth: number = vv?.width ?? window.innerWidth;
+
+    // Horizontal clamp so menu stays on screen
+    const desiredLeft = rect.left;
+    const maxLeft = viewportWidth - rect.width - 8; // 8px padding
+    const left = Math.max(8, Math.min(desiredLeft, Math.max(8, maxLeft)));
+
+    // Space available above the input
+    const availableAbove = rect.top - 16; // keep 16px from top
+
+    // Target height: up to 50vh but not more than availableAbove
+    let targetHeight = Math.min(Math.max(availableAbove, 120), viewportHeight * 0.5);
+
+    // Compute top so menu sits above the input with 8px gap
+    let top = rect.top - targetHeight - 8;
+
+    // If top goes off-screen, clamp and shrink height accordingly
+    if (top < 8) {
+      const delta = 8 - top;
+      targetHeight = Math.max(100, targetHeight - delta);
+      top = 8;
+    }
+
     return {
       position: 'fixed' as const,
-      left: `${rect.left}px`,
+      left: `${left}px`,
       width: `${rect.width}px`,
-      bottom: `${viewportHeight - rect.top + 8}px`, // 8px above input
-      height: `${menuHeight}px`,
-      maxHeight: `${menuHeight}px`,
-      zIndex: 10000,
+      top: `${top}px`,
+      height: `${targetHeight}px`,
+      maxHeight: `${targetHeight}px`,
+      zIndex: 999999,
     };
   }, [isMobile]);
 
