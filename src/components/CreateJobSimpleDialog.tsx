@@ -243,7 +243,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         }
       }}>
         <DialogTrigger asChild>
-          <Button className="flex items-center gap-2 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white">
+          <Button className="flex items-center gap-2 border border-white/30 text-white transition-transform duration-100 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white">
             Skapa ny annons
             <Plus size={16} />
           </Button>

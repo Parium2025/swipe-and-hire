@@ -162,6 +162,9 @@ export default {
 				},
 			minHeight: {
 				'touch': '44px', // Apple's minimum recommendation
+			},
+			minWidth: {
+				'touch': '44px', // Apple's minimum recommendation
 			}
 		}
 	},
