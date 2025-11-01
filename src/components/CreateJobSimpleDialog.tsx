@@ -65,17 +65,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const [menuInstanceKey, setMenuInstanceKey] = useState(0);
   const hasPrefetched = useRef(false);
 
-  // Warmup: open & close the real dialog, but hide globally via injected CSS
+  // Warmup: open & close the real dialog to prepare GPU, while it's hidden
   useEffect(() => {
     if (!isMobile) {
       setIsWarmedUp(true);
       return;
     }
-
-    const style = document.createElement('style');
-    style.id = 'parium-warmup-hide';
-    style.textContent = '[data-parium="dialog-overlay"],[data-parium="dialog-content"]{display:none!important}';
-    document.head.appendChild(style);
 
     const timer = setTimeout(() => {
       setOpen(true);
@@ -83,15 +78,11 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         requestAnimationFrame(() => {
           setOpen(false);
           setIsWarmedUp(true);
-          style.remove();
         });
       });
     }, 80);
 
-    return () => {
-      clearTimeout(timer);
-      if (document.head.contains(style)) style.remove();
-    };
+    return () => clearTimeout(timer);
   }, [isMobile]);
 
   const fetchTemplates = useCallback(async () => {
@@ -290,10 +281,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         <DialogContent 
           hideClose
           forceMount
-          overlayHidden={!open || !isWarmedUp}
-          contentHidden={!open || !isWarmedUp}
           className={"w-[min(90vw,400px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[80vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden transform-gpu will-change-transform will-change-opacity transition-all duration-200 ease-out"}
-          aria-hidden={!open || !isWarmedUp}
           style={{ display: (!open || !isWarmedUp) ? 'none' : undefined }}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
