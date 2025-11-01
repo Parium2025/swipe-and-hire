@@ -1639,7 +1639,7 @@ const MobileJobWizard = ({
         <AnimatedBackground showBubbles={false} />
         <div className="flex flex-col h-full max-h-[75vh] sm:max-h-[80vh] relative z-10">
           {/* Header */}
-          <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 rounded-t-[24px] bg-background/10">
+          <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">
             <DialogHeader className="text-center sm:text-center">
               <DialogTitle className="text-white text-lg">
                 {steps[currentStep].title}
