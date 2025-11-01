@@ -2359,8 +2359,8 @@ const MobileJobWizard = ({
                           <svg width="24" height="16" viewBox="0 0 48 24" className="text-white">
                             <path d="M2 12 Q 24 4, 46 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerEnd="url(#arrowheadRight)" />
                             <defs>
-                              <marker id="arrowheadRight" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-                                <polygon points="0 0, 6 3, 0 6" fill="currentColor" />
+                              <marker id="arrowheadRight" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+                                <polygon points="0 0, 10 5, 0 10" fill="currentColor" />
                               </marker>
                             </defs>
                           </svg>
@@ -2370,8 +2370,8 @@ const MobileJobWizard = ({
                           <svg width="24" height="16" viewBox="0 0 48 24" className="text-white">
                             <path d="M46 12 Q 24 4, 2 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerEnd="url(#arrowheadLeft_ext_2)" />
                             <defs>
-                              <marker id="arrowheadLeft_ext_2" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-                                <polygon points="6 0, 0 3, 6 6" fill="currentColor" />
+                              <marker id="arrowheadLeft_ext_2" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+                                <polygon points="10 0, 0 5, 10 10" fill="currentColor" />
                               </marker>
                             </defs>
                           </svg>
