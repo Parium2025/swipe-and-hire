@@ -1868,26 +1868,26 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             {showCompanyTooltip && showApplicationForm && isScrolledTop && (
                               <>
                                 {/* Left tooltip (company name) */}
-                                <div className="pointer-events-none absolute z-[999] top-8 -left-36 flex items-center gap-0">
+                                <div className="pointer-events-none absolute z-[999] top-8 -left-32 flex items-center gap-0">
                                   <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
                                     Obs, tryck här!
                                   </div>
-                                  <svg width="32" height="24" viewBox="0 0 64 32" className="text-white -ml-1">
-                                    <path d="M2 16 Q 32 2, 62 16" stroke="currentColor" strokeWidth="2" fill="none" markerEnd="url(#arrowheadRight)" />
+                                  <svg width="40" height="28" viewBox="0 0 80 40" className="text-white overflow-visible">
+                                    <path d="M4 20 Q 40 4, 76 20" stroke="currentColor" strokeWidth="2.5" fill="none" markerEnd="url(#arrowheadRight)" />
                                     <defs>
-                                      <marker id="arrowheadRight" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
-                                        <polygon points="0 0, 8 4, 0 8" fill="currentColor" />
+                                      <marker id="arrowheadRight" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+                                        <polygon points="0 0, 10 5, 0 10" fill="currentColor" />
                                       </marker>
                                     </defs>
                                   </svg>
                                 </div>
                                 {/* Right tooltip (X button) - outside the phone */}
-                                <div className="pointer-events-none absolute z-[999] top-4 -right-36 flex items-center gap-0">
-                                  <svg width="32" height="24" viewBox="0 0 64 32" className="text-white -mr-1">
-                                    <path d="M62 16 Q 32 2, 2 16" stroke="currentColor" strokeWidth="2" fill="none" markerEnd="url(#arrowheadLeft_ext)" />
+                                <div className="pointer-events-none absolute z-[999] top-4 -right-32 flex items-center gap-0">
+                                  <svg width="40" height="28" viewBox="0 0 80 40" className="text-white overflow-visible">
+                                    <path d="M76 20 Q 40 4, 4 20" stroke="currentColor" strokeWidth="2.5" fill="none" markerEnd="url(#arrowheadLeft_ext)" />
                                     <defs>
-                                      <marker id="arrowheadLeft_ext" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
-                                        <polygon points="8 0, 0 4, 8 8" fill="currentColor" />
+                                      <marker id="arrowheadLeft_ext" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+                                        <polygon points="10 0, 0 5, 10 10" fill="currentColor" />
                                       </marker>
                                     </defs>
                                   </svg>
