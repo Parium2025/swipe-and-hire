@@ -1903,10 +1903,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 <div className="absolute top-1 left-1/2 -translate-x-1/2 z-20 h-1 w-8 rounded-full bg-black border border-gray-800"></div>
 
                                 <div className="absolute inset-0 rounded-[1.6rem] overflow-hidden" style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}>
-                                  <div className="h-1 bg-black relative z-10"></div>
                                   
                                   <div className={showApplicationForm ? 'flex flex-col h-full' : 'hidden'}>
-                                    <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 border-b border-white/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem]">
+                                    <div className="flex items-center justify-between px-2 py-1.5 pt-2 bg-black/20 border-b border-white/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem]">
                                       <div className="text-xs font-bold text-white">Ansökningsformulär</div>
                                       <div className="relative">
                                         {showCompanyTooltip && isScrolledTop && (

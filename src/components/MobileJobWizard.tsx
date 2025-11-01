@@ -2390,12 +2390,10 @@ const MobileJobWizard = ({
 
                         {/* Mobilansökningsformulär med korrekt Parium bakgrund */}
                         <div className="absolute inset-0 rounded-[1.6rem] overflow-hidden" style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}>
-                          {/* Status bar */}
-                          <div className="h-1 bg-black relative z-10"></div>
                           
                            {/* Form container (toggle) */}
                            <div className={showApplicationForm ? 'flex flex-col h-full' : 'hidden'}>
-                             <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 border-b border-white/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem]">
+                             <div className="flex items-center justify-between px-2 py-1.5 pt-2 bg-black/20 border-b border-white/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem]">
                                <div className="text-xs font-bold text-white">Ansökningsformulär</div>
                                <div className="relative">
                                  {showCompanyTooltip && isScrolledTop && (
