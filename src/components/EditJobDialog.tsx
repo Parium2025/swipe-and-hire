@@ -1168,16 +1168,14 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                   Steg {currentStep + 1} av {steps.length}
                 </div>
               </DialogHeader>
-              {!showQuestionTemplates && !showQuestionForm && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleClose}
-                  className="absolute right-4 top-4 h-8 w-8 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleClose}
+                className="absolute right-4 top-4 h-8 w-8 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
 
             {/* Progress Bar */}
@@ -1537,14 +1535,16 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             />
                           </div>
 
-                          <Button
-                            onClick={createNewQuestion}
-                            size="sm"
-                            className="w-full bg-primary hover:bg-primary/90 text-white"
-                          >
-                            Skapa ny fråga
-                            <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
-                          </Button>
+                          <div className="flex justify-center">
+                            <Button
+                              onClick={createNewQuestion}
+                              size="sm"
+                              className="bg-primary hover:bg-primary/90 text-white touch-border-white"
+                            >
+                              Skapa ny fråga
+                              <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
+                            </Button>
+                          </div>
 
                           <div className="space-y-3 max-h-[400px] overflow-y-auto">
                             {(() => {
