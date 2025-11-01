@@ -360,7 +360,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-11 text-sm pr-10 cursor-pointer focus:border-white/40 touch-manipulation"
                       readOnly
                     />
-                    <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none transition-transform duration-200 ${templateMenuOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none transition-transform duration-200 z-10 ${templateMenuOpen ? 'rotate-180' : ''}`} />
                     
                     {/* Custom Dropdown */}
                     {templateMenuOpen && !isMobile && (
@@ -484,10 +484,10 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       </div>
                     )}
 
-                    {/* Mobile Dropdown - opens upward */}
+                    {/* Mobile Dropdown - opens downward */}
                     {templateMenuOpen && isMobile && (
                       <div 
-                        className="absolute bottom-full left-0 right-0 z-[10000] bg-gray-800 border border-gray-600 rounded-md mb-2 shadow-xl flex flex-col max-h-[50vh]"
+                        className="absolute top-full left-0 right-0 z-[10000] bg-gray-800 border border-gray-600 rounded-md mt-2 shadow-xl flex flex-col max-h-[50vh] overflow-hidden"
                       >
                         {/* Search Bar - Fixed at top */}
                         <div className="p-3 border-b border-gray-600/50 bg-gray-800 flex-shrink-0">
