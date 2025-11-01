@@ -1889,25 +1889,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                   <div className="h-1 bg-black relative z-10"></div>
                                   
                                   <div className={showApplicationForm ? 'flex flex-col h-full' : 'hidden'}>
-                                    {/* Tooltip för att stänga formuläret - utanför mobilen på höger sida */}
-                                    {showCompanyTooltip && showApplicationForm && (
-                                      <div className="pointer-events-none absolute z-[999] top-8 -right-28 flex items-center gap-1">
-                                        <svg width="20" height="12" viewBox="0 0 48 28" className="text-white">
-                                          <path d="M2 14 Q 24 0, 46 14" stroke="currentColor" strokeWidth="2" fill="none" markerEnd="url(#arrowheadCloseRight)" />
-                                          <defs>
-                                            <marker id="arrowheadCloseRight" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-                                              <polygon points="0 0, 6 3, 0 6" fill="currentColor" />
-                                            </marker>
-                                          </defs>
-                                        </svg>
-                                        <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
-                                          Obs, tryck här!
-                                        </div>
-                                      </div>
-                                    )}
                                     <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 border-b border-white/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem]">
-                                      <div className="text-xs font-bold text-white">Ansökningsformulär</div>
-                                      <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white/80 transition-colors md:hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
+                                    <div className="text-xs font-bold text-white">Ansökningsformulär</div>
+                                    <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white/80 transition-colors md:hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
                                     </div>
 
                                      <div 
