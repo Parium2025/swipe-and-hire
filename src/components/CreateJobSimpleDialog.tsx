@@ -365,10 +365,10 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     {/* Custom Dropdown */}
                     {templateMenuOpen && !isMobile && (
                       <div 
-                        className="absolute bottom-full left-0 right-0 z-[10000] bg-gray-800 border border-gray-600 rounded-md mb-1 shadow-xl flex flex-col max-h-[40vh] overflow-hidden"
+                        className="absolute bottom-full left-0 right-0 z-[10000] bg-gray-800 border border-gray-600 rounded-md mb-1 shadow-xl flex flex-col-reverse max-h-[40vh] overflow-hidden"
                       >
                         {/* Search Bar - Fixed near trigger (bottom) */}
-                        <div className="p-3 border-b border-gray-600/50 bg-gray-800 flex-shrink-0">
+                          <div className="p-3 border-t border-gray-600/50 bg-gray-800 flex-shrink-0">
                           <div className="relative">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/80" />
                             <Input
@@ -394,6 +394,22 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           </div>
                         </div>
 
+                        {/* Create New Template (fixed under search) */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setTemplateMenuOpen(false);
+                            setOpen(false);
+                            setShowTemplateWizard(true);
+                          }}
+                          className="w-full px-4 py-3 text-left hover:bg-gray-700 text-white transition-colors border-t border-gray-700"
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-medium">+ Skapa en ny mall</span>
+                            <span className="text-sm text-white/80">Skapa en återanvändbar jobbmall</span>
+                          </div>
+                        </button>
+
                         {/* Scrollable Content */}
                         <div 
                           className="overflow-y-auto flex-1"
@@ -406,21 +422,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             </div>
                           )}
 
-                          {/* Create New Template */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setTemplateMenuOpen(false);
-                              setOpen(false);
-                              setShowTemplateWizard(true);
-                            }}
-                            className="w-full px-4 py-3 text-left hover:bg-gray-700 text-white transition-colors border-b border-gray-700"
-                          >
-                            <div className="flex flex-col">
-                              <span className="font-medium">+ Skapa en ny mall</span>
-                              <span className="text-sm text-white/80">Skapa en återanvändbar jobbmall</span>
-                            </div>
-                          </button>
 
                           {/* Template List */}
                           {filteredTemplates.map((template) => (
@@ -488,10 +489,10 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     {/* Mobile Dropdown - opens upward */}
                     {templateMenuOpen && isMobile && (
                       <div 
-                        className="absolute bottom-full left-0 right-0 z-[10000] bg-gray-800 border border-gray-600 rounded-md mb-2 shadow-xl flex flex-col max-h-[50vh] overflow-hidden"
+                        className="absolute bottom-full left-0 right-0 z-[10000] bg-gray-800 border border-gray-600 rounded-md mb-2 shadow-xl flex flex-col-reverse max-h-[50vh] overflow-hidden"
                       >
                         {/* Search Bar - Fixed at top */}
-                        <div className="p-3 border-b border-gray-600/50 bg-gray-800 flex-shrink-0">
+                        <div className="p-3 border-t border-gray-600/50 bg-gray-800 flex-shrink-0">
                           <div className="relative">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/80" />
                             <Input
@@ -513,6 +514,22 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           </div>
                         </div>
 
+                        {/* Create New Template (fixed under search) */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setTemplateMenuOpen(false);
+                            setOpen(false);
+                            setShowTemplateWizard(true);
+                          }}
+                          className="w-full px-4 py-3 text-left hover:bg-gray-700 active:bg-gray-700 text-white transition-colors border-t border-gray-700"
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-medium">+ Skapa en ny mall</span>
+                            <span className="text-sm text-white/80">Skapa en återanvändbar jobbmall</span>
+                          </div>
+                        </button>
+
                         {/* Scrollable Content */}
                         <div 
                           className="overflow-y-auto flex-1"
@@ -525,21 +542,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             </div>
                           )}
 
-                          {/* Create New Template */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setTemplateMenuOpen(false);
-                              setOpen(false);
-                              setShowTemplateWizard(true);
-                            }}
-                            className="w-full px-4 py-3 text-left hover:bg-gray-700 active:bg-gray-700 text-white transition-colors border-b border-gray-700"
-                          >
-                            <div className="flex flex-col">
-                              <span className="font-medium">+ Skapa en ny mall</span>
-                              <span className="text-sm text-white/80">Skapa en återanvändbar jobbmall</span>
-                            </div>
-                          </button>
 
                           {/* Template List */}
                           {filteredTemplates.map((template) => (
