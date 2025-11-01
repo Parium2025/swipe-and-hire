@@ -557,11 +557,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     {templateMenuOpen && isMobile && createPortal(
                       <div
                         ref={menuPortalRef}
-                        className="bg-gray-800 border border-gray-600 rounded-md shadow-xl overflow-y-auto"
+                        className="bg-gray-800 border border-gray-600 rounded-md shadow-xl overflow-y-scroll"
                         style={{
                           ...menuPortalStyle,
                           WebkitOverflowScrolling: 'touch',
-                          overscrollBehaviorY: 'contain'
+                          overscrollBehaviorY: 'auto',
+                          touchAction: 'pan-y'
                         }}
                       >
                         {/* Search Bar */}
@@ -593,18 +594,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                             Visar <span className="text-white font-medium">{filteredTemplates.length}</span> av <span className="text-white font-medium">{templates.length}</span> mallar
                           </div>
                         )}
-
-                        {/* No Template Option */}
-                        <button
-                          type="button"
-                          onClick={() => handleTemplateSelect('none', 'Ingen mall')}
-                          className="w-full px-4 py-3 text-left hover:bg-gray-700 text-white transition-colors border-b border-gray-700"
-                        >
-                          <div className="flex flex-col">
-                            <span className="font-medium">Ingen mall</span>
-                            <span className="text-sm text-white/80">Skapa från början</span>
-                          </div>
-                        </button>
 
                         {/* Create New Template */}
                         <button
