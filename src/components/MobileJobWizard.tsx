@@ -2963,7 +2963,7 @@ const MobileJobWizard = ({
                 <Button
                   onClick={nextStep}
                   disabled={!validateCurrentStep()}
-                  className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-6 touch-border-white focus:ring-2 focus:ring-white/40 transition-all duration-300"
+                  className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-6 touch-border-white transition-all duration-300 focus:outline-none"
                 >
                   Nästa
                   <ArrowRight className="h-4 w-4 ml-2" />
