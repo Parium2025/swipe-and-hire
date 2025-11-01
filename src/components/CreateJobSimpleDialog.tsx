@@ -63,8 +63,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const titleRef = useRef<HTMLInputElement>(null);
   const [titleInputKey, setTitleInputKey] = useState(0);
   const [menuInstanceKey, setMenuInstanceKey] = useState(0);
+  const hasPrefetched = useRef(false);
 
-  // Warmup effect - use real dialog but make it completely invisible during warmup
+  // Silent warmup effect - just set flag after short delay on mobile
   useEffect(() => {
     if (!isMobile) {
       setIsWarmedUp(true);
@@ -72,17 +73,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     }
 
     const warmupTimer = setTimeout(() => {
-      setOpen(true);
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setOpen(false);
-          setIsWarmedUp(true);
-        });
-      });
-    }, 150);
+      setIsWarmedUp(true);
+    }, 400);
 
     return () => clearTimeout(warmupTimer);
   }, [isMobile]);
+
   const fetchTemplates = useCallback(async () => {
     if (!user) return;
 
@@ -127,6 +123,14 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       fetchTemplates();
     }
   }, [user, open]);
+
+  // Prefetch templates once on mobile to avoid first-open lag
+  useEffect(() => {
+    if (isMobile && user && !hasPrefetched.current) {
+      hasPrefetched.current = true;
+      fetchTemplates();
+    }
+  }, [isMobile, user, fetchTemplates]);
 
   // Återställ hasUnsavedChanges när formuläret är tomt/neutralt
   useEffect(() => {
