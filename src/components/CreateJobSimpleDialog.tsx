@@ -589,7 +589,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         jobTitle={jobTitle}
         selectedTemplate={selectedTemplate}
         onJobCreated={handleJobCreated}
-        onBack={handleWizardBack}
       />
 
       <CreateTemplateWizard
