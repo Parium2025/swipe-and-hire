@@ -2380,7 +2380,24 @@ const MobileJobWizard = ({
                            <div className={showApplicationForm ? 'flex flex-col h-full' : 'hidden'}>
                              <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 border-b border-white/20 relative z-10 flex-shrink-0 rounded-t-[1.6rem]">
                                <div className="text-xs font-bold text-white">Ansökningsformulär</div>
-                               <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white/80 hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
+                               <div className="relative">
+                                 {showCompanyTooltip && isScrolledTop && (
+                                   <div className="pointer-events-none absolute z-[999] top-0 -right-28 flex items-center gap-1">
+                                     <svg width="20" height="12" viewBox="0 0 48 28" className="text-white">
+                                       <path d="M46 14 Q 24 0, 2 14" stroke="currentColor" strokeWidth="2" fill="none" markerEnd="url(#arrowheadLeft2)" />
+                                       <defs>
+                                         <marker id="arrowheadLeft2" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                                           <polygon points="6 0, 0 3, 6 6" fill="currentColor" />
+                                         </marker>
+                                       </defs>
+                                     </svg>
+                                     <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
+                                       Obs, tryck här!
+                                     </div>
+                                   </div>
+                                 )}
+                                 <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white/80 hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
+                               </div>
                              </div>
 
                              {/* Scrollable content */}
