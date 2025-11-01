@@ -211,10 +211,10 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     // Stäng första dialogen med fade
     setOpen(false);
     
-    // Vänta lite längre för mjukare övergång
+    // Vänta längre för helt smooth övergång
     setTimeout(() => {
       setShowDetailDialog(true);
-    }, 100);
+    }, 200);
   }, [jobTitle, selectedTemplate, toast]);
 
   const handleClose = useCallback(() => {
