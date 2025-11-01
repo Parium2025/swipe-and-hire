@@ -533,6 +533,70 @@ All colors MUST be HSL.
     transition-duration: 100ms;
   }
 
+  /* === GPU PRE-WARMING FOR TOUCH DEVICES === */
+  /* Pre-activate GPU acceleration BEFORE user interaction to eliminate cold start lag */
+  
+  @media (hover: none) and (pointer: coarse) {
+    /* Pre-warm GPU for ALL potential dialog/sheet elements on page load */
+    [role="dialog"],
+    [role="alertdialog"],
+    [data-state],
+    .parium-panel,
+    [class*="Dialog"],
+    [class*="Sheet"],
+    [class*="drawer"] {
+      /* Force GPU layer creation IMMEDIATELY on mount */
+      transform: translateZ(0);
+      backface-visibility: hidden;
+      perspective: 1000px;
+      /* Pre-declare what will change (GPU creates layers proactively) */
+      will-change: transform, opacity;
+    }
+
+    /* Pre-warm overlay elements (black backdrop) */
+    [data-radix-dialog-overlay],
+    [data-radix-drawer-overlay] {
+      transform: translateZ(0);
+      will-change: opacity;
+    }
+
+    /* Eliminate "settling" time - keep GPU warm for 1 second after close */
+    [data-state="closed"] {
+      /* Don't immediately release GPU - keep warm for potential re-open */
+      will-change: transform, opacity;
+      transition: will-change 1s ease 1s;
+    }
+
+    /* Make FIRST open faster to compensate for any remaining GPU warm-up */
+    [data-state="open"]:not([data-state="closed"]) {
+      /* 120ms instead of 200ms for first open (40% faster) */
+      animation-duration: 120ms !important;
+      transition-duration: 120ms !important;
+    }
+    
+    /* After first open, use full duration */
+    [data-state="open"][data-state="closed"] {
+      animation-duration: 200ms !important;
+      transition-duration: 200ms !important;
+    }
+  }
+
+  /* Desktop: Pre-warm GPU on hover (before click) */
+  @media (hover: hover) and (pointer: fine) {
+    /* When user hovers button, pre-warm GPU for upcoming dialog */
+    button:hover,
+    [role="button"]:hover {
+      /* Silently activate GPU in background */
+      will-change: transform, opacity;
+    }
+    
+    /* Release GPU after hover ends */
+    button:not(:hover),
+    [role="button"]:not(:hover) {
+      transition: will-change 500ms ease 500ms;
+    }
+  }
+
   /* === ULTRA-PREMIUM DELUXE FAS 3 - Spring-Back & Ultimate Touch === */
   
   /* Spring-back animation on button release - Native iOS feel */
