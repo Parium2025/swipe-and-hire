@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef, startTransition, useLayoutEffect } from 'react';
-import { createPortal } from 'react-dom';
+import { useState, useEffect, useCallback, useMemo, useRef, startTransition } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -63,9 +62,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const titleRef = useRef<HTMLInputElement>(null);
   const [titleInputKey, setTitleInputKey] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const menuPortalRef = useRef<HTMLDivElement>(null);
-  const templateButtonRef = useRef<HTMLInputElement>(null);
-  const [menuPortalStyle, setMenuPortalStyle] = useState<React.CSSProperties>({});
 
   // Read from React Query cache (pre-fetched in EmployerLayout)
   const { data: templates = [], isLoading: loadingTemplates } = useQuery({
@@ -131,11 +127,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current && 
-        !dropdownRef.current.contains(event.target as Node) &&
-        (!menuPortalRef.current || !menuPortalRef.current.contains(event.target as Node))
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setTemplateMenuOpen(false);
       }
     };
@@ -434,7 +426,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 ) : (
                   <div className="relative w-full" ref={dropdownRef}>
                     <Input
-                      ref={templateButtonRef as any}
                       value={selectedTemplate?.name || ''}
                       onClick={() => setTemplateMenuOpen(!templateMenuOpen)}
                       placeholder="Ingen mall är vald"
@@ -461,7 +452,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                               value={searchTerm}
                               onChange={(e) => setSearchTerm(e.target.value)}
                               className="pl-10 pr-10 h-10 bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40"
-                              autoFocus
                             />
                             {searchTerm && (
                               <button
