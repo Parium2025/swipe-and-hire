@@ -1849,13 +1849,13 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         <h3 className="text-white font-medium">Så kommer ansökningsformuläret att se ut på mobil. (Testa att trycka på mobilens skärm)</h3>
                         
                         <div className="relative flex items-center justify-center gap-4">
-                          <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[280px]">
+                          <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px]">
                             {showCompanyTooltip && showApplicationForm && isScrolledTop && (
-                              <div className="pointer-events-none absolute z-[999] top-7 -left-32 flex items-center gap-1">
+                              <div className="pointer-events-none absolute z-[999] top-8 -left-28 flex items-center gap-1">
                                 <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
                                   Obs, tryck här!
                                 </div>
-                                <svg width="18" height="11" viewBox="0 0 48 28" className="text-white">
+                                <svg width="20" height="12" viewBox="0 0 48 28" className="text-white">
                                   <path d="M2 14 Q 24 0, 46 14" stroke="currentColor" strokeWidth="2" fill="none" markerEnd="url(#arrowheadRight)" />
                                   <defs>
                                     <marker id="arrowheadRight" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
