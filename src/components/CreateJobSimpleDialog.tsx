@@ -151,6 +151,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   useEffect(() => {
     if (!jobTitle.trim() && !selectedTemplate) {
       setHasUnsavedChanges(false);
+    } else if (jobTitle.trim()) {
+      // Om det finns en titel, markera som ändrad
+      setHasUnsavedChanges(true);
     }
   }, [jobTitle, selectedTemplate]);
 
