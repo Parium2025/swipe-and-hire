@@ -2399,7 +2399,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
               <Button
                 onClick={handleBack}
                 disabled={currentStep === 0}
-                className="bg-transparent border border-white/40 text-white hover:bg-white/10 md:hover:bg-white/10 disabled:opacity-50 disabled:border-white/20 transition-all duration-300 [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white"
+                className="bg-transparent border border-white/40 text-white px-4 py-2 hover:bg-white/10 md:hover:bg-white/10 disabled:opacity-50 disabled:border-white/20 transition-all duration-300 [&_svg]:text-white hover:[&_svg]:text-white md:hover:[&_svg]:text-white"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Tillbaka
@@ -2409,7 +2409,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                 <Button
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="bg-green-600 hover:bg-green-700 md:hover:bg-green-700 text-white transition-all duration-300"
+                  className="bg-green-600 hover:bg-green-700 md:hover:bg-green-700 text-white px-8 py-2 transition-all duration-300"
                 >
                   {loading ? (
                     <>
@@ -2424,7 +2424,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                 <Button
                   onClick={handleNext}
                   disabled={!canProceed()}
-                  className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white disabled:opacity-50 touch-border-white transition-all duration-300"
+                  className="bg-primary hover:bg-primary/90 md:hover:bg-primary/90 text-white px-8 py-2 disabled:opacity-50 touch-border-white transition-all duration-300"
                 >
                   Nästa
                   <ArrowRight className="h-4 w-4 ml-2" />
