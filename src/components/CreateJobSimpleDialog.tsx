@@ -251,13 +251,22 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const handleWizardBack = useCallback(() => {
     isNavigatingBack.current = true;
     setShowDetailDialog(false);
-    // Öppna mallvalssteget igen efter en kort delay
-    requestAnimationFrame(() => {
-      setOpen(true);
-      setTimeout(() => setTemplateMenuOpen(true), 60);
+    
+    // Om en mall är vald, öppna dropdown igen
+    // Annars stäng helt och gå till dashboard
+    if (selectedTemplate) {
+      requestAnimationFrame(() => {
+        setOpen(true);
+        setTimeout(() => setTemplateMenuOpen(true), 60);
+        isNavigatingBack.current = false;
+      });
+    } else {
+      // Ingen mall vald - stäng helt
+      setJobTitle('');
+      setSelectedTemplate(null);
       isNavigatingBack.current = false;
-    });
-  }, []);
+    }
+  }, [selectedTemplate]);
 
   const handleTemplateWizardBack = useCallback(() => {
     setShowTemplateWizard(false);
@@ -589,6 +598,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         jobTitle={jobTitle}
         selectedTemplate={selectedTemplate}
         onJobCreated={handleJobCreated}
+        onBack={handleWizardBack}
       />
 
       <CreateTemplateWizard
