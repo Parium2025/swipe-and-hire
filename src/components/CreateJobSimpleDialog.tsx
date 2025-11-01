@@ -65,18 +65,33 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const [menuInstanceKey, setMenuInstanceKey] = useState(0);
   const hasPrefetched = useRef(false);
 
-  // Silent warmup effect - just set flag after short delay on mobile
+  // Warmup: open & close the real dialog, but hide globally via injected CSS
   useEffect(() => {
     if (!isMobile) {
       setIsWarmedUp(true);
       return;
     }
 
-    const warmupTimer = setTimeout(() => {
-      setIsWarmedUp(true);
-    }, 400);
+    const style = document.createElement('style');
+    style.id = 'parium-warmup-hide';
+    style.textContent = '[data-parium="dialog-overlay"],[data-parium="dialog-content"]{display:none!important}';
+    document.head.appendChild(style);
 
-    return () => clearTimeout(warmupTimer);
+    const timer = setTimeout(() => {
+      setOpen(true);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setOpen(false);
+          setIsWarmedUp(true);
+          style.remove();
+        });
+      });
+    }, 80);
+
+    return () => {
+      clearTimeout(timer);
+      if (document.head.contains(style)) style.remove();
+    };
   }, [isMobile]);
 
   const fetchTemplates = useCallback(async () => {
