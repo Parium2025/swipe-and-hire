@@ -29,8 +29,4 @@ export default defineConfig(({ mode }) => ({
     // Avoid prebundling React multiple times which can cause Invalid Hook Call
     exclude: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
   },
-  build: {
-    modulePreload: { polyfill: false },
-    cssCodeSplit: false, // Load all CSS together for instant UI
-  },
 }));

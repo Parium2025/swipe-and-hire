@@ -9,29 +9,18 @@ type CompanyAvatarProps = {
 
 function CompanyAvatarBase({ companyLogoUrl, companyName, initials }: CompanyAvatarProps) {
   const [error, setError] = React.useState(false);
-  const [retryCount, setRetryCount] = React.useState(0);
-
-  const handleError = React.useCallback(() => {
-    if (retryCount < 2) {
-      // Retry loading image up to 2 times
-      setRetryCount(prev => prev + 1);
-      setError(false);
-    } else {
-      setError(true);
-    }
-  }, [retryCount]);
 
   return (
     <Avatar className="h-10 w-10 ring-2 ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
       {companyLogoUrl && !error ? (
         <AvatarImage
-          src={`${companyLogoUrl}${retryCount > 0 ? `?retry=${retryCount}` : ''}`}
+          src={companyLogoUrl}
           alt={`${companyName || "Företag"} logotyp`}
-          decoding="async"
+          decoding="sync"
           loading="eager"
           fetchPriority="high"
           draggable={false}
-          onError={handleError}
+          onError={() => setError(true)}
         />
       ) : (
         <AvatarFallback className="bg-white/10 text-white font-semibold">

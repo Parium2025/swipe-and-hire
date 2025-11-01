@@ -1,4 +1,3 @@
-import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LucideIcon } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
@@ -14,7 +13,7 @@ interface StatsGridProps {
   stats: StatCard[];
 }
 
-const StatsGridBase = ({ stats }: StatsGridProps) => {
+export const StatsGrid = ({ stats }: StatsGridProps) => {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 md:gap-2">
       {stats.map((stat, index) => (
@@ -39,5 +38,3 @@ const StatsGridBase = ({ stats }: StatsGridProps) => {
     </div>
   );
 };
-
-export const StatsGrid = memo(StatsGridBase);

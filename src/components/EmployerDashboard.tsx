@@ -1,4 +1,4 @@
-import { useState, memo, useMemo, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
+import { useState, memo, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,8 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
-
-const EditJobDialog = lazy(() => import('@/components/EditJobDialog'));
+import EditJobDialog from '@/components/EditJobDialog';
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -82,14 +81,11 @@ const EmployerDashboard = memo(() => {
     }
   }, [page]);
 
-  const toggleJobStatus = useCallback(async (jobId: string, currentStatus: boolean) => {
-    // Optimistic update: update UI immediately
-    const newStatus = !currentStatus;
-    
+  const toggleJobStatus = async (jobId: string, currentStatus: boolean) => {
     try {
       const { error } = await supabase
         .from('job_postings')
-        .update({ is_active: newStatus })
+        .update({ is_active: !currentStatus })
         .eq('id', jobId);
 
       if (error) {
@@ -98,16 +94,14 @@ const EmployerDashboard = memo(() => {
           description: error.message,
           variant: "destructive"
         });
-        invalidateJobs(); // Rollback on error
         return;
       }
 
       toast({
         title: "Status uppdaterad",
-        description: `Annonsen är nu ${newStatus ? 'aktiv' : 'inaktiv'}.`
+        description: `Annonsen är nu ${!currentStatus ? 'aktiv' : 'inaktiv'}.`
       });
 
-      // Only invalidate on success to ensure cache sync
       invalidateJobs();
     } catch (error) {
       toast({
@@ -115,16 +109,15 @@ const EmployerDashboard = memo(() => {
         description: "Kunde inte uppdatera annonsens status.",
         variant: "destructive"
       });
-      invalidateJobs(); // Rollback on error
     }
-  }, [toast, invalidateJobs]);
+  };
 
-  const handleDeleteClick = useCallback((job: JobPosting) => {
+  const handleDeleteClick = (job: JobPosting) => {
     setJobToDelete(job);
     setDeleteDialogOpen(true);
-  }, []);
+  };
 
-  const confirmDeleteJob = useCallback(async () => {
+  const confirmDeleteJob = async () => {
     if (!jobToDelete) return;
 
     try {
@@ -157,12 +150,12 @@ const EmployerDashboard = memo(() => {
         variant: "destructive"
       });
     }
-  }, [jobToDelete, toast, invalidateJobs]);
+  };
 
-  const handleEditJob = useCallback((job: JobPosting) => {
+  const handleEditJob = (job: JobPosting) => {
     setEditingJob(job);
     setEditDialogOpen(true);
-  }, []);
+  };
 
   const statsCards = useMemo(() => [
     { icon: Briefcase, title: 'Totalt annonser', value: jobs.length, loading },
@@ -300,7 +293,7 @@ const EmployerDashboard = memo(() => {
                                 e.stopPropagation();
                                 handleEditJob(job as any);
                               }}
-                              className="h-6 px-1.5 bg-transparent border-white/20 text-white transition-transform duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] active:scale-95 will-change-transform md:hover:bg-white/10 md:hover:text-white md:hover:border-white/40 [&_svg]:text-white md:hover:[&_svg]:text-white text-[10px]"
+                              className="h-6 px-1.5 bg-transparent border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/40 [&_svg]:text-white md:hover:[&_svg]:text-white text-[10px]"
                             >
                               <Edit size={12} />
                             </Button>
@@ -311,7 +304,7 @@ const EmployerDashboard = memo(() => {
                                 e.stopPropagation();
                                 handleDeleteClick(job as any);
                               }}
-                              className="h-6 px-1.5 bg-transparent border-white/20 text-white transition-transform duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] active:scale-95 will-change-transform !hover:bg-red-500/20 md:hover:!bg-red-500/20 !hover:border-red-500/40 md:hover:!border-red-500/40 hover:!text-white md:hover:!text-white text-[10px]"
+                              className="h-6 px-1.5 bg-transparent border-white/20 text-white !hover:bg-red-500/20 md:hover:!bg-red-500/20 !hover:border-red-500/40 md:hover:!border-red-500/40 hover:!text-white md:hover:!text-white text-[10px]"
                             >
                               <Trash2 size={12} />
                             </Button>
@@ -494,15 +487,12 @@ const EmployerDashboard = memo(() => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Edit Job Dialog - Lazy loaded for performance */}
-      <Suspense fallback={null}>
-        <EditJobDialog
-          job={editingJob}
-          open={editDialogOpen}
-          onOpenChange={setEditDialogOpen}
-          onJobUpdated={invalidateJobs}
-        />
-      </Suspense>
+      <EditJobDialog
+        job={editingJob}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onJobUpdated={invalidateJobs}
+      />
     </div>
   );
 });

@@ -16,9 +16,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
-const ImageEditor = lazy(() => import('@/components/ImageEditor'));
+import ImageEditor from '@/components/ImageEditor';
 import { Upload, Building2, Camera, ChevronDown, Search, Check, Trash2, Linkedin, Twitter, Instagram, Globe, ExternalLink, Plus, AlertTriangle } from 'lucide-react';
 import { SWEDISH_INDUSTRIES } from '@/lib/industries';
 import { supabase } from '@/integrations/supabase/client';
@@ -111,12 +111,9 @@ const CompanyProfile = () => {
     return hasChanges;
   }, [originalValues, formData, setHasUnsavedChanges]);
 
-  // Debounced check for changes (300ms delay for performance)
+  // Check for changes whenever form values change
   useEffect(() => {
-    const timer = setTimeout(() => {
-      checkForChanges();
-    }, 300);
-    return () => clearTimeout(timer);
+    checkForChanges();
   }, [checkForChanges]);
 
   // Prevent leaving page with unsaved changes (browser/tab close)
@@ -171,12 +168,14 @@ const CompanyProfile = () => {
 
       if (uploadError) throw uploadError;
 
-      // Use public URL for company logos (no expiration, no cache-busting for stability)
+      // Use public URL for company logos (no expiration)
       const { data: { publicUrl } } = supabase.storage
         .from('company-logos')
         .getPublicUrl(fileName);
+
+      const logoUrl = `${publicUrl}?t=${Date.now()}`;
       
-      setFormData(prev => ({ ...prev, company_logo_url: publicUrl }));
+      setFormData(prev => ({ ...prev, company_logo_url: logoUrl }));
       setImageEditorOpen(false);
       setPendingImageSrc('');
       
@@ -791,20 +790,18 @@ const CompanyProfile = () => {
         </div>
       </div>
 
-      {/* Image Editor - Lazy loaded for performance */}
-      <Suspense fallback={null}>
-        <ImageEditor
-          isOpen={imageEditorOpen}
-          onClose={() => {
-            setImageEditorOpen(false);
-            setPendingImageSrc('');
-          }}
-          imageSrc={pendingImageSrc}
-          onSave={handleLogoSave}
-          aspectRatio={1}
-          isCircular={false}
-        />
-      </Suspense>
+      {/* Image Editor */}
+      <ImageEditor
+        isOpen={imageEditorOpen}
+        onClose={() => {
+          setImageEditorOpen(false);
+          setPendingImageSrc('');
+        }}
+        imageSrc={pendingImageSrc}
+        onSave={handleLogoSave}
+        aspectRatio={1}
+        isCircular={false}
+      />
 
       {/* Delete Social Link Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

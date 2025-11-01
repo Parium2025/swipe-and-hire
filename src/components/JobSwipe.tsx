@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
@@ -78,7 +78,7 @@ const JobSwipe = () => {
     }
   };
 
-  const handleSwipe = useCallback(async (jobId: string, liked: boolean) => {
+  const handleSwipe = async (jobId: string, liked: boolean) => {
     if (swiping) return;
     setSwiping(true);
 
@@ -118,9 +118,9 @@ const JobSwipe = () => {
         variant: "destructive"
       });
     }
-  }, [swiping]);
+  };
 
-  const handleApplicationSubmit = useCallback(async (answers: Record<string, any>) => {
+  const handleApplicationSubmit = async (answers: Record<string, any>) => {
     try {
       // Here you would save the application to database
       // For now, just show success message
@@ -141,10 +141,9 @@ const JobSwipe = () => {
         variant: "destructive"
       });
     }
-  }, []);
+  };
 
-  const handleCardClick = useCallback(async () => {
-    if (!currentJob) return;
+  const handleCardClick = async () => {
     try {
       const { data: questions, error } = await supabase
         .from('job_questions')
@@ -161,17 +160,15 @@ const JobSwipe = () => {
       setCurrentJobQuestions([]);
       setShowApplicationDialog(true);
     }
-  }, [jobs, currentJobIndex]);
+  };
 
-  const formatSalary = useCallback((min?: number, max?: number) => {
+  const formatSalary = (min?: number, max?: number) => {
     if (!min && !max) return 'Lön enligt överenskommelse';
     if (min && max) return `${min.toLocaleString()} - ${max.toLocaleString()} kr/mån`;
     if (min) return `Från ${min.toLocaleString()} kr/mån`;
     if (max) return `Upp till ${max.toLocaleString()} kr/mån`;
     return '';
-  }, []);
-  
-  const currentJob = useMemo(() => jobs[currentJobIndex], [jobs, currentJobIndex]);
+  };
 
   if (loading) {
     return (
@@ -216,8 +213,10 @@ const JobSwipe = () => {
     );
   }
 
+  const currentJob = jobs[currentJobIndex];
+
   return (
-    <div className="max-w-md mx-auto p-3 sm:p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorY: 'contain' }}>
+    <div className="max-w-md mx-auto p-3 sm:p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
       <div className="mb-4 text-center">
         <h2 className="text-lg sm:text-xl font-bold">Upptäck jobb</h2>
         <p className="text-sm text-muted-foreground">
@@ -227,9 +226,8 @@ const JobSwipe = () => {
 
       <div className="relative">
         <Card
-          className={`overflow-hidden border-2 transition-transform duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] ${swiping ? 'scale-95 opacity-50' : ''} cursor-pointer will-change-transform`}
+          className={`overflow-hidden border-2 transition-all duration-300 ${swiping ? 'scale-95 opacity-50' : ''} cursor-pointer`}
           onClick={handleCardClick}
-          style={{ touchAction: 'manipulation' }}
         >
           <CardContent className="p-3 md:p-6 space-y-3 md:space-y-4">
             {/* Company info */}
@@ -325,7 +323,7 @@ const JobSwipe = () => {
           <Button
             variant="outline"
             size="lg"
-            className="rounded-full w-14 h-14 sm:w-16 sm:h-16 border-2 border-red-200 hover:border-red-300 hover:bg-red-50 min-h-[56px] min-w-[56px] will-change-transform transition-transform duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] active:scale-90"
+            className="rounded-full w-14 h-14 sm:w-16 sm:h-16 border-2 border-red-200 hover:border-red-300 hover:bg-red-50 min-h-[56px] min-w-[56px]"
             onClick={(e) => { e.stopPropagation(); handleSwipe(currentJob.id, false); }}
             disabled={swiping}
           >
@@ -334,7 +332,7 @@ const JobSwipe = () => {
           
           <Button
             size="lg"
-            className="rounded-full w-14 h-14 sm:w-16 sm:h-16 bg-green-500 hover:bg-green-600 border-0 min-h-[56px] min-w-[56px] will-change-transform transition-transform duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] active:scale-90"
+            className="rounded-full w-14 h-14 sm:w-16 sm:h-16 bg-green-500 hover:bg-green-600 border-0 min-h-[56px] min-w-[56px]"
             onClick={(e) => { e.stopPropagation(); handleSwipe(currentJob.id, true); }}
             disabled={swiping}
           >

@@ -19,8 +19,6 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   touch-action: manipulation;
-  /* Prevent overscroll bounce */
-  overscroll-behavior-y: contain;
 }
 
 
@@ -28,15 +26,13 @@ body {
   /* Förbättrad touch-hantering */
   touch-action: pan-y pinch-zoom;
   /* Förhindra iOS rubber-band från att visa vit bakgrund */
-  overscroll-behavior: contain;
-  overscroll-behavior-y: contain;
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
   -webkit-overflow-scrolling: touch;
   /* Mobilversion - ljusare bakgrund som matchar korten */
   background: rgba(255, 255, 255, 0.05);
   background-color: hsl(215 100% 15%);
   min-height: 100dvh;
-  /* Optimize scroll performance */
-  will-change: scroll-position;
 }
 
 /* Sidebar-specific: disable tap highlight and focus outlines to prevent white flash */
@@ -471,203 +467,6 @@ All colors MUST be HSL.
     box-shadow: 0 0 0px 1000px hsla(0 0% 100% / 0.05) inset !important;
     border-color: hsla(0 0% 100% / 0.2) !important;
     border-width: 1px !important;
-  }
-
-  /* Premium Deluxe Touch - GPU-acceleration & Native-like feedback */
-  button, 
-  a[href], 
-  [role="button"],
-  input[type="submit"],
-  input[type="button"] {
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    perspective: 1000px;
-    will-change: transform;
-  }
-
-  /* Native-like pressed state feedback */
-  button:active, 
-  a[href]:active, 
-  [role="button"]:active {
-    transform: translateZ(0) scale(0.95);
-    transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* Touch-specific: prevent text selection during rapid tapping */
-  @media (hover: none) and (pointer: coarse) {
-    button, 
-    a[href], 
-    [role="button"] {
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
-    }
-  }
-
-  /* Touch-specific: instant feedback on touchstart (iOS Safari) */
-  @supports (-webkit-touch-callout: none) {
-    button:active,
-    a[href]:active,
-    [role="button"]:active {
-      transition-duration: 0ms;
-    }
-  }
-
-  /* Ultra-fast input focus for native-like feel */
-  input[type="text"],
-  input[type="email"],
-  input[type="number"],
-  input[type="password"],
-  textarea,
-  select {
-    transition: border-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
-                background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
-                box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: border-color, background-color;
-  }
-
-  /* Instant focus feedback */
-  input:focus,
-  textarea:focus,
-  select:focus {
-    transition-duration: 100ms;
-  }
-
-  /* === GPU PRE-WARMING FOR TOUCH DEVICES === */
-  /* Pre-activate GPU acceleration BEFORE user interaction to eliminate cold start lag */
-  
-  @media (hover: none) and (pointer: coarse) {
-    /* Pre-warm GPU for ALL potential dialog/sheet elements on page load */
-    [role="dialog"],
-    [role="alertdialog"],
-    [data-state],
-    .parium-panel,
-    [class*="Dialog"],
-    [class*="Sheet"],
-    [class*="drawer"] {
-      /* Force GPU layer creation IMMEDIATELY on mount */
-      transform: translateZ(0);
-      backface-visibility: hidden;
-      perspective: 1000px;
-      /* Pre-declare what will change (GPU creates layers proactively) */
-      will-change: transform, opacity;
-    }
-
-    /* Pre-warm overlay elements (black backdrop) */
-    [data-radix-dialog-overlay],
-    [data-radix-drawer-overlay] {
-      transform: translateZ(0);
-      will-change: opacity;
-    }
-
-    /* Keep GPU warm briefly after close, then release smoothly */
-    [data-state="closed"] {
-      transition: transform 200ms ease-out, opacity 200ms ease-out;
-    }
-
-    /* Release will-change after animation completes */
-    [data-state="closed"] {
-      animation: release-gpu 1s ease 0.2s;
-    }
-
-    @keyframes release-gpu {
-      from { will-change: transform, opacity; }
-      to { will-change: auto; }
-    }
-
-  }
-
-  /* Desktop: Pre-warm GPU on hover (before click) */
-  @media (hover: hover) and (pointer: fine) {
-    /* When user hovers button, pre-warm GPU for upcoming dialog */
-    button:hover:not(:disabled),
-    [role="button"]:hover:not([aria-disabled="true"]) {
-      /* Silently activate GPU in background */
-      will-change: transform, opacity;
-    }
-    
-    /* Release GPU after hover ends - but keep brief for fast re-hover */
-    button:not(:hover),
-    [role="button"]:not(:hover) {
-      transition: will-change 300ms ease 200ms;
-    }
-  }
-
-  /* === ULTRA-PREMIUM DELUXE FAS 3 - Spring-Back & Ultimate Touch === */
-  
-  /* Spring-back animation on button release - Native iOS feel */
-  @media (hover: none) and (pointer: coarse) {
-    button:not(:active),
-    a[href]:not(:active),
-    [role="button"]:not(:active) {
-      transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-    }
-  }
-
-  /* Prevent iOS double-tap zoom on buttons - Ultra-responsive feel */
-  @supports (-webkit-touch-callout: none) {
-    button,
-    a[href],
-    [role="button"] {
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-    }
-  }
-
-  /* Touch-optimized dropdown items - CSS only, no JS interference */
-  @media (hover: none) and (pointer: coarse) {
-    [role="menuitem"] button {
-      /* GPU pre-warming (safe) */
-      will-change: transform;
-      transform: translateZ(0);
-      
-      /* Fast tap response (safe) */
-      -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
-      
-      /* Prevent double-tap zoom (safe) */
-      touch-action: manipulation;
-    }
-    
-    /* Release GPU after interaction */
-    [role="menuitem"]:active button {
-      will-change: auto;
-    }
-  }
-}
-
-@layer utilities {
-  .touch-manipulation {
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
-    user-select: none;
-    -webkit-user-select: none;
-  }
-
-  /* Native-like smooth scroll - iOS momentum scrolling */
-  * {
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-  }
-
-  /* Ultimate touch optimization - Eliminate ALL delays */
-  @media (hover: none) and (pointer: coarse) {
-    * {
-      /* Prevent callout to copy image, etc when tap to hold */
-      -webkit-touch-callout: none;
-      /* Prevent blue selection background on tap */
-      -webkit-tap-highlight-color: transparent;
-      /* Fast tap response */
-      touch-action: manipulation;
-    }
-    
-    /* But allow text selection in inputs/textareas */
-    input,
-    textarea,
-    [contenteditable] {
-      -webkit-touch-callout: default;
-      -webkit-user-select: text;
-      user-select: text;
-    }
   }
 }
 

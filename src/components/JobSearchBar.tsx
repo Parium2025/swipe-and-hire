@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useState, useRef, useEffect, memo } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc';
 
@@ -29,7 +29,7 @@ interface JobSearchBarProps {
   onRecruiterChange?: (recruiterId: string | null) => void;
 }
 
-const JobSearchBarBase = ({
+export const JobSearchBar = ({
   searchInput,
   onSearchChange,
   sortBy,
@@ -313,5 +313,3 @@ const JobSearchBarBase = ({
     </>
   );
 };
-
-export const JobSearchBar = memo(JobSearchBarBase);
