@@ -229,7 +229,7 @@ const Support = () => {
             <div className="flex justify-center">
               <Button 
                 type="submit" 
-                className="h-9 px-6 text-sm border border-white/30 font-medium transition-all duration-300 md:hover:text-white md:hover:border-white/50" 
+                className="h-9 px-6 text-sm border border-white/30 text-white font-medium transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white" 
                 disabled={loading}
               >
                 {loading ? 'Skickar...' : 'Skicka meddelande'}
