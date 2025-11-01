@@ -207,10 +207,14 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       jobTitle,
       selectedTemplateId: selectedTemplate?.id,
     });
+    
+    // Stäng första dialogen med fade
     setOpen(false);
-    requestAnimationFrame(() => {
+    
+    // Vänta lite längre för mjukare övergång
+    setTimeout(() => {
       setShowDetailDialog(true);
-    });
+    }, 100);
   }, [jobTitle, selectedTemplate, toast]);
 
   const handleClose = useCallback(() => {
