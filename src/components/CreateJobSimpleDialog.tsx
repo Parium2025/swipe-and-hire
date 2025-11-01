@@ -362,7 +362,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                         <span className="text-left flex-1 px-1 text-sm whitespace-normal break-words">
                           {selectedTemplate?.name || 'Ingen mall är vald'}
                         </span>
-                        <ChevronDown className={`h-4 w-4 flex-shrink-0 opacity-50 ml-2 transition-transform duration-300 ${templateMenuOpen ? 'rotate-180' : 'rotate-0'}`} />
+                        <ChevronDown className={`h-4 w-4 flex-shrink-0 text-white ml-2 transition-transform duration-300 ${templateMenuOpen ? 'rotate-180' : 'rotate-0'}`} />
                       </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
