@@ -611,7 +611,8 @@ const MobileJobWizard = ({
         // Ingen template vald, använd aktuell formData som start
         setInitialFormData({ ...formData });
         setInitialCustomQuestions([]);
-        setHasUnsavedChanges(false);
+        // Sätt hasUnsavedChanges till true eftersom användaren har påbörjat ett jobb
+        setHasUnsavedChanges(true);
       }
     }
   }, [open, selectedTemplate, formData, initialFormData]);
