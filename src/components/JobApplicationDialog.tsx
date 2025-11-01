@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import FileUpload from './FileUpload';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -58,10 +58,10 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
   ];
 
   // Combine standard questions with custom questions
-  const allQuestions = [
+  const allQuestions = useMemo(() => [
     ...standardQuestions,
     ...questions.map(q => ({ ...q, id: `custom_${q.id}` }))
-  ];
+  ], [questions]);
 
   useEffect(() => {
     if (user && open) {
@@ -95,14 +95,14 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
     }
   };
 
-  const handleAnswerChange = (questionId: string, value: any) => {
+  const handleAnswerChange = useCallback((questionId: string, value: any) => {
     setAnswers(prev => ({
       ...prev,
       [questionId]: value
     }));
-  };
+  }, []);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     // Validate required questions
     const requiredQuestions = questions.filter(q => q.is_required);
     const missingAnswers = requiredQuestions.filter(q => {
@@ -136,9 +136,9 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [answers, questions, onSubmit, onOpenChange, toast]);
 
-  const renderQuestionRow = (question: any, index: number) => {
+  const renderQuestionRow = useCallback((question: any, index: number) => {
     const isStandardQuestion = standardQuestions.some(sq => sq.id === question.id);
     const isRequired = 'required' in question ? question.required : question.is_required;
     
@@ -278,7 +278,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
         </div>
       </div>
     );
-  };
+  }, [answers, handleAnswerChange, standardQuestions]);
 
   const getQuestionTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
@@ -367,4 +367,4 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
   );
 };
 
-export default JobApplicationDialog;
+export default memo(JobApplicationDialog);

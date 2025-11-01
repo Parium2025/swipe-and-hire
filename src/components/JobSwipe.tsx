@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
@@ -78,7 +78,7 @@ const JobSwipe = () => {
     }
   };
 
-  const handleSwipe = async (jobId: string, liked: boolean) => {
+  const handleSwipe = useCallback(async (jobId: string, liked: boolean) => {
     if (swiping) return;
     setSwiping(true);
 
@@ -118,9 +118,9 @@ const JobSwipe = () => {
         variant: "destructive"
       });
     }
-  };
+  }, [swiping]);
 
-  const handleApplicationSubmit = async (answers: Record<string, any>) => {
+  const handleApplicationSubmit = useCallback(async (answers: Record<string, any>) => {
     try {
       // Here you would save the application to database
       // For now, just show success message
@@ -141,9 +141,10 @@ const JobSwipe = () => {
         variant: "destructive"
       });
     }
-  };
+  }, []);
 
-  const handleCardClick = async () => {
+  const handleCardClick = useCallback(async () => {
+    if (!currentJob) return;
     try {
       const { data: questions, error } = await supabase
         .from('job_questions')
@@ -160,15 +161,17 @@ const JobSwipe = () => {
       setCurrentJobQuestions([]);
       setShowApplicationDialog(true);
     }
-  };
+  }, [jobs, currentJobIndex]);
 
-  const formatSalary = (min?: number, max?: number) => {
+  const formatSalary = useCallback((min?: number, max?: number) => {
     if (!min && !max) return 'Lön enligt överenskommelse';
     if (min && max) return `${min.toLocaleString()} - ${max.toLocaleString()} kr/mån`;
     if (min) return `Från ${min.toLocaleString()} kr/mån`;
     if (max) return `Upp till ${max.toLocaleString()} kr/mån`;
     return '';
-  };
+  }, []);
+  
+  const currentJob = useMemo(() => jobs[currentJobIndex], [jobs, currentJobIndex]);
 
   if (loading) {
     return (
@@ -213,10 +216,8 @@ const JobSwipe = () => {
     );
   }
 
-  const currentJob = jobs[currentJobIndex];
-
   return (
-    <div className="max-w-md mx-auto p-3 sm:p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
+    <div className="max-w-md mx-auto p-3 sm:p-4 smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorY: 'contain' }}>
       <div className="mb-4 text-center">
         <h2 className="text-lg sm:text-xl font-bold">Upptäck jobb</h2>
         <p className="text-sm text-muted-foreground">
@@ -226,8 +227,9 @@ const JobSwipe = () => {
 
       <div className="relative">
         <Card
-          className={`overflow-hidden border-2 transition-all duration-300 ${swiping ? 'scale-95 opacity-50' : ''} cursor-pointer`}
+          className={`overflow-hidden border-2 transition-transform duration-300 ${swiping ? 'scale-95 opacity-50' : ''} cursor-pointer will-change-transform`}
           onClick={handleCardClick}
+          style={{ touchAction: 'manipulation' }}
         >
           <CardContent className="p-3 md:p-6 space-y-3 md:space-y-4">
             {/* Company info */}

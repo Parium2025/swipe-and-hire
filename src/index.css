@@ -19,6 +19,8 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   touch-action: manipulation;
+  /* Prevent overscroll bounce */
+  overscroll-behavior-y: contain;
 }
 
 
@@ -26,13 +28,15 @@ body {
   /* Förbättrad touch-hantering */
   touch-action: pan-y pinch-zoom;
   /* Förhindra iOS rubber-band från att visa vit bakgrund */
-  overscroll-behavior: none;
-  overscroll-behavior-y: none;
+  overscroll-behavior: contain;
+  overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
   /* Mobilversion - ljusare bakgrund som matchar korten */
   background: rgba(255, 255, 255, 0.05);
   background-color: hsl(215 100% 15%);
   min-height: 100dvh;
+  /* Optimize scroll performance */
+  will-change: scroll-position;
 }
 
 /* Sidebar-specific: disable tap highlight and focus outlines to prevent white flash */
