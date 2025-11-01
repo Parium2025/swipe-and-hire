@@ -236,6 +236,7 @@ const MobileJobWizard = ({
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingClose, setPendingClose] = useState(false);
   const [initialFormData, setInitialFormData] = useState<JobFormData | null>(null);
+  const [initialCustomQuestions, setInitialCustomQuestions] = useState<JobQuestion[]>([]);
   
   // Company profile dialog
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
@@ -604,10 +605,12 @@ const MobileJobWizard = ({
           pitch: '',
           job_image_url: ''
         });
+        setInitialCustomQuestions([]);
         setHasUnsavedChanges(true); // Markera som ändrad från start
       } else {
         // Ingen template vald, använd aktuell formData som start
         setInitialFormData({ ...formData });
+        setInitialCustomQuestions([]);
         setHasUnsavedChanges(false);
       }
     }
@@ -617,12 +620,13 @@ const MobileJobWizard = ({
   useEffect(() => {
     if (!initialFormData || !open) return;
     
-    const hasChanges = Object.keys(formData).some(key => {
+    const formChanged = Object.keys(formData).some(key => {
       return formData[key as keyof JobFormData] !== initialFormData[key as keyof JobFormData];
-    }) || customQuestions.length > 0;
+    });
+    const questionsChanged = JSON.stringify(customQuestions) !== JSON.stringify(initialCustomQuestions);
     
-    setHasUnsavedChanges(hasChanges);
-  }, [formData, customQuestions, initialFormData, open]);
+    setHasUnsavedChanges(formChanged || questionsChanged);
+  }, [formData, customQuestions, initialFormData, initialCustomQuestions, open]);
 
   // Show company tooltip only on step 4 (visible and persistent while on this step)
   useEffect(() => {

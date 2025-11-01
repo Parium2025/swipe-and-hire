@@ -175,6 +175,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
   const [questionSearchQuery, setQuestionSearchQuery] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [initialFormData, setInitialFormData] = useState<TemplateFormData | null>(null);
+  const [initialCustomQuestions, setInitialCustomQuestions] = useState<JobQuestion[]>([]);
   
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
@@ -282,7 +284,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
   // Load template data when editing
   useEffect(() => {
     if (templateToEdit && open) {
-      setFormData({
+      const loadedFormData = {
         name: templateToEdit.name || '',
         title: templateToEdit.title || '',
         occupation: templateToEdit.occupation || '',
@@ -304,7 +306,9 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         contact_email: templateToEdit.contact_email || '',
         application_instructions: templateToEdit.application_instructions || '',
         location: ''
-      });
+      };
+      setFormData(loadedFormData);
+      setInitialFormData(loadedFormData);
       
       if (templateToEdit.questions && Array.isArray(templateToEdit.questions)) {
         // Ensure each question has a unique ID
@@ -314,7 +318,41 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
           order_index: index
         }));
         setCustomQuestions(questionsWithIds);
+        setInitialCustomQuestions(questionsWithIds);
+      } else {
+        setCustomQuestions([]);
+        setInitialCustomQuestions([]);
       }
+      
+      setHasUnsavedChanges(false);
+    } else if (open && !templateToEdit) {
+      // New template - set empty initial state
+      const emptyFormData = {
+        name: '',
+        title: '',
+        description: '',
+        requirements: '',
+        location: '',
+        occupation: '',
+        salary_min: '',
+        salary_max: '',
+        employment_type: '',
+        salary_type: '',
+        positions_count: '1',
+        work_location_type: 'på-plats',
+        remote_work_possible: 'nej',
+        workplace_name: '',
+        workplace_address: '',
+        workplace_postal_code: '',
+        workplace_city: '',
+        work_schedule: '',
+        contact_email: '',
+        application_instructions: '',
+        pitch: ''
+      };
+      setInitialFormData(emptyFormData);
+      setInitialCustomQuestions([]);
+      setHasUnsavedChanges(false);
     } else if (!open) {
       // Reset when dialog closes
       setFormData({
@@ -360,6 +398,16 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       setShowQuestionTypeDropdown(false);
     }
   }, [templateToEdit, open]);
+
+  // Track unsaved changes
+  useEffect(() => {
+    if (!initialFormData || !open) return;
+    
+    const formChanged = JSON.stringify(formData) !== JSON.stringify(initialFormData);
+    const questionsChanged = JSON.stringify(customQuestions) !== JSON.stringify(initialCustomQuestions);
+    
+    setHasUnsavedChanges(formChanged || questionsChanged);
+  }, [formData, customQuestions, initialFormData, initialCustomQuestions, open]);
 
   const steps = [
     {
@@ -416,7 +464,6 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       ...prev,
       [field]: value
     }));
-    setHasUnsavedChanges(true);
   };
 
   const handleOccupationSearch = (value: string) => {
