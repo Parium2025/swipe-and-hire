@@ -365,14 +365,10 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     {/* Custom Dropdown */}
                     {templateMenuOpen && !isMobile && (
                       <div 
-                        className="absolute top-full left-0 right-0 z-[10000] bg-gray-800 border border-gray-600 rounded-md mt-1 shadow-xl max-h-[40vh] overflow-y-auto"
-                        style={{ 
-                          WebkitOverflowScrolling: 'touch',
-                          overscrollBehaviorY: 'contain'
-                        }}
+                        className="absolute bottom-full left-0 right-0 z-[10000] bg-gray-800 border border-gray-600 rounded-md mb-1 shadow-xl flex flex-col-reverse max-h-[40vh] overflow-hidden"
                       >
-                        {/* Search Bar */}
-                        <div className="p-3 border-b border-gray-600/50 sticky top-0 bg-gray-800 z-10">
+                        {/* Search Bar - Fixed near trigger (bottom) */}
+                        <div className="p-3 border-t border-gray-600/50 bg-gray-800 flex-shrink-0">
                           <div className="relative">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/80" />
                             <Input
@@ -398,96 +394,101 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           </div>
                         </div>
 
-                        {/* Result Indicator */}
-                        {searchTerm && (
-                          <div className="px-4 py-2 text-sm text-white/90 bg-gray-800/50 border-b border-gray-600/30">
-                            Visar <span className="text-white font-medium">{filteredTemplates.length}</span> av <span className="text-white font-medium">{templates.length}</span> mallar
-                          </div>
-                        )}
-
-
-                        {/* Create New Template */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setTemplateMenuOpen(false);
-                            setOpen(false);
-                            setShowTemplateWizard(true);
-                          }}
-                          className="w-full px-4 py-3 text-left hover:bg-gray-700 text-white transition-colors border-b border-gray-700"
+                        {/* Scrollable Content */}
+                        <div 
+                          className="overflow-y-auto flex-1"
+                          style={{ WebkitOverflowScrolling: 'touch', overscrollBehaviorY: 'contain' }}
                         >
-                          <div className="flex flex-col">
-                            <span className="font-medium">+ Skapa en ny mall</span>
-                            <span className="text-sm text-white/80">Skapa en återanvändbar jobbmall</span>
-                          </div>
-                        </button>
+                          {/* Result Indicator */}
+                          {searchTerm && (
+                            <div className="px-4 py-2 text-sm text-white/90 bg-gray-800/50 border-b border-gray-600/30">
+                              Visar <span className="text-white font-medium">{filteredTemplates.length}</span> av <span className="text-white font-medium">{templates.length}</span> mallar
+                            </div>
+                          )}
 
-                        {/* Template List */}
-                        {filteredTemplates.map((template) => (
-                          <div
-                            key={template.id}
-                            className="px-4 py-3 hover:bg-gray-700 text-white transition-colors border-b border-gray-700 last:border-b-0"
+                          {/* Create New Template */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setTemplateMenuOpen(false);
+                              setOpen(false);
+                              setShowTemplateWizard(true);
+                            }}
+                            className="w-full px-4 py-3 text-left hover:bg-gray-700 text-white transition-colors border-b border-gray-700"
                           >
-                            <div className="flex items-center justify-between w-full gap-3">
-                              <button
-                                type="button"
-                                onClick={() => handleTemplateSelect(template.id, template.name)}
-                                className="flex flex-col flex-1 text-left active:opacity-70 transition-opacity touch-manipulation"
-                              >
-                                <div className="flex items-center justify-between">
-                                  <span className="font-medium">{template.name}</span>
-                                  {template.is_default && (
-                                    <span className="text-sm text-blue-400 ml-2">Standard</span>
-                                  )}
+                            <div className="flex flex-col">
+                              <span className="font-medium">+ Skapa en ny mall</span>
+                              <span className="text-sm text-white/80">Skapa en återanvändbar jobbmall</span>
+                            </div>
+                          </button>
+
+                          {/* Template List */}
+                          {filteredTemplates.map((template) => (
+                            <div
+                              key={template.id}
+                              className="px-4 py-3 hover:bg-gray-700 text-white transition-colors border-b border-gray-700 last:border-b-0"
+                            >
+                              <div className="flex items-center justify-between w-full gap-3">
+                                <button
+                                  type="button"
+                                  onClick={() => handleTemplateSelect(template.id, template.name)}
+                                  className="flex flex-col flex-1 text-left active:opacity-70 transition-opacity touch-manipulation"
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <span className="font-medium">{template.name}</span>
+                                    {template.is_default && (
+                                      <span className="text-sm text-blue-400 ml-2">Standard</span>
+                                    )}
+                                  </div>
+                                  <span className="text-sm text-white/80 mt-1 break-words">{template.title}</span>
+                                </button>
+                                <div className="flex gap-1 flex-shrink-0">
+                                  <Button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setTemplateToEdit(template);
+                                      setTemplateMenuOpen(false);
+                                      setOpen(false);
+                                      setShowTemplateWizard(true);
+                                    }}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setTemplateToDelete(template);
+                                    }}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
                                 </div>
-                                <span className="text-sm text-white/80 mt-1 break-words">{template.title}</span>
-                              </button>
-                              <div className="flex gap-1 flex-shrink-0">
-                                <Button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setTemplateToEdit(template);
-                                    setTemplateMenuOpen(false);
-                                    setOpen(false);
-                                    setShowTemplateWizard(true);
-                                  }}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setTemplateToDelete(template);
-                                  }}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
 
-                        {/* No Results */}
-                        {filteredTemplates.length === 0 && searchTerm && (
-                          <div className="px-4 py-8 text-center">
-                            <p className="text-white font-medium">
-                              Ingen mall hittades för ({searchTerm})
-                            </p>
-                          </div>
-                        )}
+                          {/* No Results */}
+                          {filteredTemplates.length === 0 && searchTerm && (
+                            <div className="px-4 py-8 text-center">
+                              <p className="text-white font-medium">
+                                Ingen mall hittades för ({searchTerm})
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    )}
+                    )
 
                     {/* Mobile Dropdown - opens upward */}
                     {templateMenuOpen && isMobile && (
                       <div 
-                        className="absolute bottom-full left-0 right-0 z-[10000] bg-gray-800 border border-gray-600 rounded-md mb-2 shadow-xl flex flex-col max-h-[50vh] overflow-hidden"
+                        className="absolute bottom-full left-0 right-0 z-[10000] bg-gray-800 border border-gray-600 rounded-md mb-2 shadow-xl flex flex-col-reverse max-h-[50vh] overflow-hidden"
                       >
                         {/* Search Bar - Fixed at top */}
                         <div className="p-3 border-b border-gray-600/50 bg-gray-800 flex-shrink-0">
