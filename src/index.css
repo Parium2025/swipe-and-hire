@@ -513,6 +513,26 @@ All colors MUST be HSL.
     }
   }
 
+  /* Ultra-fast input focus for native-like feel */
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="password"],
+  textarea,
+  select {
+    transition: border-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+                background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: border-color, background-color;
+  }
+
+  /* Instant focus feedback */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    transition-duration: 100ms;
+  }
+
   /* === ULTRA-PREMIUM DELUXE FAS 3 - Spring-Back & Ultimate Touch === */
   
   /* Spring-back animation on button release - Native iOS feel */
