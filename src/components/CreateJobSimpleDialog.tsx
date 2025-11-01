@@ -64,10 +64,21 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const [titleInputKey, setTitleInputKey] = useState(0);
   const [menuInstanceKey, setMenuInstanceKey] = useState(0);
 
-  // Warmup effect - pre-render dialog for smooth first open on touch devices
+  // Warmup effect - smooth first open on touch devices without visual flash
   useEffect(() => {
-    const warmupTimer = setTimeout(() => {
-      // Briefly open and close while fully hidden to warm up measurements/animation
+    if (!isMobile) {
+      setIsWarmedUp(true);
+      return;
+    }
+
+    const schedule = (cb: () => void) => {
+      const anyWin = window as any;
+      if (anyWin.requestIdleCallback) return anyWin.requestIdleCallback(cb, { timeout: 700 });
+      return setTimeout(cb, 300) as unknown as number;
+    };
+
+    const warmupId = schedule(() => {
+      // mark as warming; open and close while content & overlay are fully hidden
       setOpen(true);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -75,11 +86,14 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
           setIsWarmedUp(true);
         });
       });
-    }, 120);
+    });
 
-    return () => clearTimeout(warmupTimer);
-  }, []);
-
+    return () => {
+      const anyWin = window as any;
+      if (anyWin.cancelIdleCallback) anyWin.cancelIdleCallback(warmupId);
+      else clearTimeout(warmupId as unknown as number);
+    };
+  }, [isMobile]);
   const fetchTemplates = useCallback(async () => {
     if (!user) return;
 
@@ -269,8 +283,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
           hideClose
           forceMount
           overlayHidden={!isWarmedUp}
-          className={`w-[min(90vw,400px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[80vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden transform-gpu will-change-transform will-change-opacity ${isWarmedUp ? 'transition-all duration-200 ease-out animate-scale-in' : 'opacity-0 pointer-events-none'}`}
-          style={!isWarmedUp ? { position: 'fixed', left: '-9999px', top: '-9999px' } : undefined}
+          contentHidden={!isWarmedUp}
+          className={"w-[min(90vw,400px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[80vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden transform-gpu will-change-transform will-change-opacity transition-all duration-200 ease-out"}
+          aria-hidden={!isWarmedUp}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
           <DialogHeader className="sr-only">
