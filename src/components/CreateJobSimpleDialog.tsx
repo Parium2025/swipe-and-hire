@@ -64,50 +64,24 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const [titleInputKey, setTitleInputKey] = useState(0);
   const [menuInstanceKey, setMenuInstanceKey] = useState(0);
 
-  // Warmup effect - separate hidden warmup to avoid any visual flash
+  // Warmup effect - use real dialog but make it completely invisible during warmup
   useEffect(() => {
     if (!isMobile) {
       setIsWarmedUp(true);
       return;
     }
 
-    const warmupContainer = document.createElement('div');
-    warmupContainer.style.cssText = 'position: absolute; top: -10000px; left: -10000px; visibility: hidden; pointer-events: none; opacity: 0;';
-    document.body.appendChild(warmupContainer);
-
-    const schedule = (cb: () => void) => {
-      const anyWin = window as any;
-      if (anyWin.requestIdleCallback) return anyWin.requestIdleCallback(cb, { timeout: 700 });
-      return setTimeout(cb, 300) as unknown as number;
-    };
-
-    const warmupId = schedule(() => {
-      // Create warmup dialog completely separate from main dialog
-      warmupContainer.innerHTML = `
-        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(90vw, 400px); height: 80vh; background: rgba(0,0,0,0.1); border-radius: 24px; visibility: hidden; opacity: 0; pointer-events: none;">
-          <div style="padding: 24px;">
-            <input type="text" style="width: 100%; height: 44px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;">
-            <button style="width: 100%; height: 44px; margin-top: 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;"></button>
-          </div>
-        </div>
-      `;
-      
+    const warmupTimer = setTimeout(() => {
+      setOpen(true);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          document.body.removeChild(warmupContainer);
+          setOpen(false);
           setIsWarmedUp(true);
         });
       });
-    });
+    }, 150);
 
-    return () => {
-      const anyWin = window as any;
-      if (anyWin.cancelIdleCallback) anyWin.cancelIdleCallback(warmupId);
-      else clearTimeout(warmupId as unknown as number);
-      if (document.body.contains(warmupContainer)) {
-        document.body.removeChild(warmupContainer);
-      }
-    };
+    return () => clearTimeout(warmupTimer);
   }, [isMobile]);
   const fetchTemplates = useCallback(async () => {
     if (!user) return;
