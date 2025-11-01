@@ -614,17 +614,33 @@ All colors MUST be HSL.
     }
   }
 
-  /* Pre-warm touch-interactive dropdown items */
+  /* Touch-optimized dropdown items - CSS only, no JS interference */
   @media (hover: none) and (pointer: coarse) {
     [role="menuitem"] button {
+      /* GPU pre-warming (safe) */
       will-change: transform;
       transform: translateZ(0);
+      
+      /* Fast tap response (safe) */
+      -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
+      
+      /* Prevent double-tap zoom (safe) */
+      touch-action: manipulation;
     }
     
     /* Release GPU after interaction */
     [role="menuitem"]:active button {
       will-change: auto;
     }
+  }
+}
+
+@layer utilities {
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   /* Native-like smooth scroll - iOS momentum scrolling */

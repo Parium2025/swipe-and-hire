@@ -454,18 +454,11 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                               >
                                 <div className="flex items-center justify-between w-full gap-3">
                                   <button
-                                    onTouchEnd={(e) => {
-                                      e.preventDefault(); // Prevent 300ms click delay
-                                      e.stopPropagation();
-                                      handleTemplateSelect(template.id, template.name);
-                                    }}
                                     onClick={(e) => {
-                                      // Fallback for desktop/non-touch
                                       e.stopPropagation();
                                       handleTemplateSelect(template.id, template.name);
                                     }}
-                                    style={{ touchAction: 'manipulation' }}
-                                    className="flex flex-col flex-1 text-left select-none"
+                                    className="flex flex-col flex-1 text-left active:opacity-70 transition-opacity touch-manipulation"
                                   >
                                     <div className="flex items-center justify-between">
                                       <span className="font-medium text-white">{template.name}</span>
