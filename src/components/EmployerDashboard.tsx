@@ -1,4 +1,4 @@
-import { useState, memo, useMemo, useRef, useEffect } from 'react';
+import { useState, memo, useMemo, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, MapPin, Calendar, Edit, Trash2, AlertTriangle, Briefcase, TrendingUp, Users } from 'lucide-react';
-import EditJobDialog from '@/components/EditJobDialog';
+
+const EditJobDialog = lazy(() => import('@/components/EditJobDialog'));
 import { useJobsData, type JobPosting } from '@/hooks/useJobsData';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -81,11 +82,14 @@ const EmployerDashboard = memo(() => {
     }
   }, [page]);
 
-  const toggleJobStatus = async (jobId: string, currentStatus: boolean) => {
+  const toggleJobStatus = useCallback(async (jobId: string, currentStatus: boolean) => {
+    // Optimistic update: update UI immediately
+    const newStatus = !currentStatus;
+    
     try {
       const { error } = await supabase
         .from('job_postings')
-        .update({ is_active: !currentStatus })
+        .update({ is_active: newStatus })
         .eq('id', jobId);
 
       if (error) {
@@ -94,14 +98,16 @@ const EmployerDashboard = memo(() => {
           description: error.message,
           variant: "destructive"
         });
+        invalidateJobs(); // Rollback on error
         return;
       }
 
       toast({
         title: "Status uppdaterad",
-        description: `Annonsen är nu ${!currentStatus ? 'aktiv' : 'inaktiv'}.`
+        description: `Annonsen är nu ${newStatus ? 'aktiv' : 'inaktiv'}.`
       });
 
+      // Only invalidate on success to ensure cache sync
       invalidateJobs();
     } catch (error) {
       toast({
@@ -109,15 +115,16 @@ const EmployerDashboard = memo(() => {
         description: "Kunde inte uppdatera annonsens status.",
         variant: "destructive"
       });
+      invalidateJobs(); // Rollback on error
     }
-  };
+  }, [toast, invalidateJobs]);
 
-  const handleDeleteClick = (job: JobPosting) => {
+  const handleDeleteClick = useCallback((job: JobPosting) => {
     setJobToDelete(job);
     setDeleteDialogOpen(true);
-  };
+  }, []);
 
-  const confirmDeleteJob = async () => {
+  const confirmDeleteJob = useCallback(async () => {
     if (!jobToDelete) return;
 
     try {
@@ -150,12 +157,12 @@ const EmployerDashboard = memo(() => {
         variant: "destructive"
       });
     }
-  };
+  }, [jobToDelete, toast, invalidateJobs]);
 
-  const handleEditJob = (job: JobPosting) => {
+  const handleEditJob = useCallback((job: JobPosting) => {
     setEditingJob(job);
     setEditDialogOpen(true);
-  };
+  }, []);
 
   const statsCards = useMemo(() => [
     { icon: Briefcase, title: 'Totalt annonser', value: jobs.length, loading },
@@ -487,12 +494,15 @@ const EmployerDashboard = memo(() => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <EditJobDialog
-        job={editingJob}
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-        onJobUpdated={invalidateJobs}
-      />
+      {/* Edit Job Dialog - Lazy loaded for performance */}
+      <Suspense fallback={null}>
+        <EditJobDialog
+          job={editingJob}
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          onJobUpdated={invalidateJobs}
+        />
+      </Suspense>
     </div>
   );
 });
