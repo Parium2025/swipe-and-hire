@@ -300,7 +300,7 @@ const EmployerDashboard = memo(() => {
                                 e.stopPropagation();
                                 handleEditJob(job as any);
                               }}
-                              className="h-6 px-1.5 bg-transparent border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/40 [&_svg]:text-white md:hover:[&_svg]:text-white text-[10px]"
+                              className="h-6 px-1.5 bg-transparent border-white/20 text-white transition-transform duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] active:scale-95 will-change-transform md:hover:bg-white/10 md:hover:text-white md:hover:border-white/40 [&_svg]:text-white md:hover:[&_svg]:text-white text-[10px]"
                             >
                               <Edit size={12} />
                             </Button>
@@ -311,7 +311,7 @@ const EmployerDashboard = memo(() => {
                                 e.stopPropagation();
                                 handleDeleteClick(job as any);
                               }}
-                              className="h-6 px-1.5 bg-transparent border-white/20 text-white !hover:bg-red-500/20 md:hover:!bg-red-500/20 !hover:border-red-500/40 md:hover:!border-red-500/40 hover:!text-white md:hover:!text-white text-[10px]"
+                              className="h-6 px-1.5 bg-transparent border-white/20 text-white transition-transform duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] active:scale-95 will-change-transform !hover:bg-red-500/20 md:hover:!bg-red-500/20 !hover:border-red-500/40 md:hover:!border-red-500/40 hover:!text-white md:hover:!text-white text-[10px]"
                             >
                               <Trash2 size={12} />
                             </Button>
