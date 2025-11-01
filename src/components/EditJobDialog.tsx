@@ -1848,7 +1848,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                       <div className="flex flex-col items-center space-y-4">
                         <h3 className="text-white font-medium">Så kommer ansökningsformuläret att se ut på mobil. (Testa att trycka på mobilens skärm)</h3>
                         
-                        <div className="relative flex items-center justify-center gap-4">
+                        <div className="relative flex items-center justify-center gap-4 scale-90 sm:scale-100">
                           <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px]">
                             {showCompanyTooltip && showApplicationForm && isScrolledTop && (
                               <div className="pointer-events-none absolute z-[999] top-8 -left-28 flex items-center gap-1">

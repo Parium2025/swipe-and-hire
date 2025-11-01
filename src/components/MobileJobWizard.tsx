@@ -2330,7 +2330,7 @@ const MobileJobWizard = ({
                   <h3 className="text-white font-medium">Så kommer ansökningsformuläret att se ut på mobil. (Testa att trycka på mobilens skärm)</h3>
                   
                    {/* Phone mockup med ansökningsformulär + tooltip */}
-                  <div className="relative flex items-center justify-center gap-4">
+                  <div className="relative flex items-center justify-center gap-4 scale-90 sm:scale-100">
                     
                     <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px]">
                     {/* Tooltip framför mobilen som pekar på företagsnamnet */}
