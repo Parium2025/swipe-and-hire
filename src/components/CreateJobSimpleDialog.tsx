@@ -42,7 +42,6 @@ interface CreateJobSimpleDialogProps {
 
 const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => {
   const [open, setOpen] = useState(false);
-  const [isWarmedUp, setIsWarmedUp] = useState(false);
   const [templates, setTemplates] = useState<JobTemplate[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingTemplates, setLoadingTemplates] = useState(true);
@@ -63,22 +62,6 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const titleRef = useRef<HTMLInputElement>(null);
   const [titleInputKey, setTitleInputKey] = useState(0);
   const [menuInstanceKey, setMenuInstanceKey] = useState(0);
-
-  // Warmup effect - pre-render dialog for smooth first open on touch devices
-  useEffect(() => {
-    // Warmup: Open and close dialog invisibly to prepare GPU
-    const warmupTimer = setTimeout(() => {
-      setOpen(true);
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setOpen(false);
-          setIsWarmedUp(true);
-        });
-      });
-    }, 100);
-    
-    return () => clearTimeout(warmupTimer);
-  }, []);
 
   const fetchTemplates = useCallback(async () => {
     if (!user) return;
@@ -267,8 +250,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         </DialogTrigger>
         <DialogContent 
           hideClose
-          forceMount
-          className={`w-[min(90vw,400px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[80vh] shadow-lg rounded-[24px] sm:rounded-xl overflow-hidden transform-gpu will-change-transform will-change-opacity ${isWarmedUp ? 'transition-all duration-200 ease-out animate-scale-in' : 'opacity-0 pointer-events-none'}`}
+          className="w-[min(90vw,400px)] bg-card-parium text-white backdrop-blur-md border-white/20 max-h-[80vh] shadow-lg rounded-[24px] sm:rounded-xl transition-all duration-200 ease-out animate-scale-in overflow-hidden transform-gpu will-change-transform will-change-opacity"
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
           <DialogHeader className="sr-only">
