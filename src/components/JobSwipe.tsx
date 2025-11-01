@@ -227,7 +227,7 @@ const JobSwipe = () => {
 
       <div className="relative">
         <Card
-          className={`overflow-hidden border-2 transition-transform duration-300 ${swiping ? 'scale-95 opacity-50' : ''} cursor-pointer will-change-transform`}
+          className={`overflow-hidden border-2 transition-transform duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] ${swiping ? 'scale-95 opacity-50' : ''} cursor-pointer will-change-transform`}
           onClick={handleCardClick}
           style={{ touchAction: 'manipulation' }}
         >
@@ -325,7 +325,7 @@ const JobSwipe = () => {
           <Button
             variant="outline"
             size="lg"
-            className="rounded-full w-14 h-14 sm:w-16 sm:h-16 border-2 border-red-200 hover:border-red-300 hover:bg-red-50 min-h-[56px] min-w-[56px]"
+            className="rounded-full w-14 h-14 sm:w-16 sm:h-16 border-2 border-red-200 hover:border-red-300 hover:bg-red-50 min-h-[56px] min-w-[56px] will-change-transform transition-transform duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] active:scale-90"
             onClick={(e) => { e.stopPropagation(); handleSwipe(currentJob.id, false); }}
             disabled={swiping}
           >
@@ -334,7 +334,7 @@ const JobSwipe = () => {
           
           <Button
             size="lg"
-            className="rounded-full w-14 h-14 sm:w-16 sm:h-16 bg-green-500 hover:bg-green-600 border-0 min-h-[56px] min-w-[56px]"
+            className="rounded-full w-14 h-14 sm:w-16 sm:h-16 bg-green-500 hover:bg-green-600 border-0 min-h-[56px] min-w-[56px] will-change-transform transition-transform duration-150 ease-[cubic-bezier(0.4,0,0.2,1)] active:scale-90"
             onClick={(e) => { e.stopPropagation(); handleSwipe(currentJob.id, true); }}
             disabled={swiping}
           >

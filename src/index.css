@@ -512,6 +512,54 @@ All colors MUST be HSL.
       transition-duration: 0ms;
     }
   }
+
+  /* === ULTRA-PREMIUM DELUXE FAS 3 - Spring-Back & Ultimate Touch === */
+  
+  /* Spring-back animation on button release - Native iOS feel */
+  @media (hover: none) and (pointer: coarse) {
+    button:not(:active),
+    a[href]:not(:active),
+    [role="button"]:not(:active) {
+      transition: transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    }
+  }
+
+  /* Prevent iOS double-tap zoom on buttons - Ultra-responsive feel */
+  @supports (-webkit-touch-callout: none) {
+    button,
+    a[href],
+    [role="button"] {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+  }
+
+  /* Native-like smooth scroll - iOS momentum scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Ultimate touch optimization - Eliminate ALL delays */
+  @media (hover: none) and (pointer: coarse) {
+    * {
+      /* Prevent callout to copy image, etc when tap to hold */
+      -webkit-touch-callout: none;
+      /* Prevent blue selection background on tap */
+      -webkit-tap-highlight-color: transparent;
+      /* Fast tap response */
+      touch-action: manipulation;
+    }
+    
+    /* But allow text selection in inputs/textareas */
+    input,
+    textarea,
+    [contenteditable] {
+      -webkit-touch-callout: default;
+      -webkit-user-select: text;
+      user-select: text;
+    }
+  }
 }
 
 @layer utilities {
