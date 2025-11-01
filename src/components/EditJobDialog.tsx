@@ -1868,28 +1868,28 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             {showCompanyTooltip && showApplicationForm && isScrolledTop && (
                               <>
                                 {/* Left tooltip (company name) */}
-                                <div className="pointer-events-none absolute z-[999] top-8 -left-[110px] flex items-center gap-1">
+                                <div className="pointer-events-none absolute z-[999] top-8 -left-[130px] flex items-center gap-1">
                                   <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
                                     Obs, tryck här!
                                   </div>
-                                  <svg width="24" height="16" viewBox="0 0 48 24" className="text-white" style={{ overflow: 'visible' }}>
+                                  <svg width="32" height="16" viewBox="0 0 64 24" className="text-white" style={{ overflow: 'visible' }}>
                                     <defs>
                                       <marker id="arrowheadRight" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
                                         <polygon points="0 0, 12 6, 0 12" fill="currentColor" />
                                       </marker>
                                     </defs>
-                                    <path d="M2 12 Q 24 4, 46 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerEnd="url(#arrowheadRight)" />
+                                    <path d="M2 12 L 62 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerEnd="url(#arrowheadRight)" />
                                   </svg>
                                 </div>
                                 {/* Right tooltip (X button) - outside the phone */}
-                                <div className="pointer-events-none absolute z-[999] top-4 -right-[110px] flex items-center gap-1">
-                                  <svg width="24" height="16" viewBox="0 0 48 24" className="text-white" style={{ overflow: 'visible' }}>
+                                <div className="pointer-events-none absolute z-[999] top-4 -right-[130px] flex items-center gap-1">
+                                  <svg width="32" height="16" viewBox="0 0 64 24" className="text-white" style={{ overflow: 'visible' }}>
                                     <defs>
-                                      <marker id="arrowheadLeft_ext" markerWidth="12" markerHeight="12" refX="3" refY="6" orient="auto">
-                                        <polygon points="12 0, 0 6, 12 12" fill="currentColor" />
+                                      <marker id="arrowheadLeft_ext" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
+                                        <polygon points="0 0, 12 6, 0 12" fill="currentColor" />
                                       </marker>
                                     </defs>
-                                    <path d="M46 12 Q 24 4, 2 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerEnd="url(#arrowheadLeft_ext)" />
+                                    <path d="M62 12 L 2 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerEnd="url(#arrowheadLeft_ext)" />
                                   </svg>
                                   <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
                                     Obs, tryck här!
