@@ -2280,9 +2280,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         </div>
                       </div>
 
-                      <div className="bg-white/5 rounded-lg p-4 border border-white/20">
-                        <div className="text-white font-medium mb-3">Jobbild (valfritt)</div>
-                        <p className="text-white text-sm mb-4">
+                      <div className="bg-white/5 rounded-lg p-3 sm:p-4 border border-white/20">
+                        <div className="text-white font-medium text-sm sm:text-base mb-2">Jobbild (valfritt)</div>
+                        <p className="text-white text-xs sm:text-sm mb-3">
                           Ladda upp en bild som representerar jobbet eller arbetsplatsen
                         </p>
                         
