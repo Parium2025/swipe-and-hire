@@ -1866,19 +1866,36 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         <div className="relative flex items-center justify-center gap-4 scale-90 sm:scale-100">
                           <section aria-label="Mobilansökningsformulär förhandsvisning" className="relative w-[160px] h-[320px]">
                             {showCompanyTooltip && showApplicationForm && isScrolledTop && (
-                              <div className="pointer-events-none absolute z-[999] top-8 -left-28 flex items-center gap-1">
-                                <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
-                                  Obs, tryck här!
+                              <>
+                                {/* Left tooltip (company name) */}
+                                <div className="pointer-events-none absolute z-[999] top-8 -left-28 flex items-center gap-1">
+                                  <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
+                                    Obs, tryck här!
+                                  </div>
+                                  <svg width="20" height="12" viewBox="0 0 48 28" className="text-white">
+                                    <path d="M2 14 Q 24 0, 46 14" stroke="currentColor" strokeWidth="2" fill="none" markerEnd="url(#arrowheadRight)" />
+                                    <defs>
+                                      <marker id="arrowheadRight" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                                        <polygon points="0 0, 6 3, 0 6" fill="currentColor" />
+                                      </marker>
+                                    </defs>
+                                  </svg>
                                 </div>
-                                <svg width="20" height="12" viewBox="0 0 48 28" className="text-white">
-                                  <path d="M2 14 Q 24 0, 46 14" stroke="currentColor" strokeWidth="2" fill="none" markerEnd="url(#arrowheadRight)" />
-                                  <defs>
-                                    <marker id="arrowheadRight" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-                                      <polygon points="0 0, 6 3, 0 6" fill="currentColor" />
-                                    </marker>
-                                  </defs>
-                                </svg>
-                              </div>
+                                {/* Right tooltip (X button) - outside the phone */}
+                                <div className="pointer-events-none absolute z-[999] top-4 -right-28 flex items-center gap-1">
+                                  <svg width="20" height="12" viewBox="0 0 48 28" className="text-white">
+                                    <path d="M46 14 Q 24 0, 2 14" stroke="currentColor" strokeWidth="2" fill="none" markerEnd="url(#arrowheadLeft_ext)" />
+                                    <defs>
+                                      <marker id="arrowheadLeft_ext" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                                        <polygon points="6 0, 0 3, 6 6" fill="currentColor" />
+                                      </marker>
+                                    </defs>
+                                  </svg>
+                                  <div className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
+                                    Obs, tryck här!
+                                  </div>
+                                </div>
+                              </>
                             )}
                             
                             <div className="relative w-full h-full rounded-[2rem] bg-black p-1 shadow-xl">
