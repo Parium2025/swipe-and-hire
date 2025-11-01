@@ -483,7 +483,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           )}
                         </div>
                       </div>
-                    )
+                    )}
 
                     {/* Mobile Dropdown - opens upward */}
                     {templateMenuOpen && isMobile && (
