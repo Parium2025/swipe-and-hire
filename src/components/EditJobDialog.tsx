@@ -1924,7 +1924,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                             </div>
                                           </div>
                                         )}
-                                        <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white/80 transition-colors md:hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
+                                        <button onClick={() => setShowApplicationForm(false)} className="text-xs text-white transition-colors md:hover:text-white" aria-label="Stäng ansökningsformulär">✕</button>
                                       </div>
                                     </div>
 
