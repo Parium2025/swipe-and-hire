@@ -64,12 +64,16 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const [titleInputKey, setTitleInputKey] = useState(0);
   const [menuInstanceKey, setMenuInstanceKey] = useState(0);
 
-  // Warmup effect - smooth first open on touch devices without visual flash
+  // Warmup effect - separate hidden warmup to avoid any visual flash
   useEffect(() => {
     if (!isMobile) {
       setIsWarmedUp(true);
       return;
     }
+
+    const warmupContainer = document.createElement('div');
+    warmupContainer.style.cssText = 'position: absolute; top: -10000px; left: -10000px; visibility: hidden; pointer-events: none; opacity: 0;';
+    document.body.appendChild(warmupContainer);
 
     const schedule = (cb: () => void) => {
       const anyWin = window as any;
@@ -78,11 +82,19 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     };
 
     const warmupId = schedule(() => {
-      // mark as warming; open and close while content & overlay are fully hidden
-      setOpen(true);
+      // Create warmup dialog completely separate from main dialog
+      warmupContainer.innerHTML = `
+        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(90vw, 400px); height: 80vh; background: rgba(0,0,0,0.1); border-radius: 24px; visibility: hidden; opacity: 0; pointer-events: none;">
+          <div style="padding: 24px;">
+            <input type="text" style="width: 100%; height: 44px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;">
+            <button style="width: 100%; height: 44px; margin-top: 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;"></button>
+          </div>
+        </div>
+      `;
+      
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          setOpen(false);
+          document.body.removeChild(warmupContainer);
           setIsWarmedUp(true);
         });
       });
@@ -92,6 +104,9 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       const anyWin = window as any;
       if (anyWin.cancelIdleCallback) anyWin.cancelIdleCallback(warmupId);
       else clearTimeout(warmupId as unknown as number);
+      if (document.body.contains(warmupContainer)) {
+        document.body.removeChild(warmupContainer);
+      }
     };
   }, [isMobile]);
   const fetchTemplates = useCallback(async () => {
