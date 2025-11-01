@@ -64,6 +64,37 @@ const EmployerLayout = ({ children, developerView, onViewChange }: EmployerLayou
     });
   }, [user, queryClient]);
 
+  // Prefetch job templates on mount for instant dialog open
+  useEffect(() => {
+    if (!user) return;
+
+    queryClient.prefetchQuery({
+      queryKey: ['job_templates', user.id],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from('job_templates')
+          .select('*')
+          .eq('employer_id', user.id)
+          .order('is_default', { ascending: false })
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        
+        // Write to localStorage snapshot for instant cold start
+        try {
+          const snapshot = {
+            templates: data || [],
+            timestamp: Date.now(),
+          };
+          localStorage.setItem(`templates_snapshot_${user.id}`, JSON.stringify(snapshot));
+        } catch {}
+
+        return data || [];
+      },
+      staleTime: 5 * 60 * 1000, // 5 minutes - keep fresh
+    });
+  }, [user, queryClient]);
+
   return (
     <SidebarProvider defaultOpen={true}>
       {/* Fixed gradient background - covers viewport */}

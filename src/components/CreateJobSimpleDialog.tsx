@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -42,9 +43,7 @@ interface CreateJobSimpleDialogProps {
 
 const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => {
   const [open, setOpen] = useState(false);
-  const [templates, setTemplates] = useState<JobTemplate[]>([]);
   const [loading, setLoading] = useState(false);
-  const [loadingTemplates, setLoadingTemplates] = useState(true);
   const [selectedTemplate, setSelectedTemplate] = useState<JobTemplate | null>(null);
   const [jobTitle, setJobTitle] = useState('');
   const [showDetailDialog, setShowDetailDialog] = useState(false);
@@ -57,16 +56,31 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const isNavigatingBack = useRef(false);
   const isMobile = useIsMobile();
   const titleRef = useRef<HTMLInputElement>(null);
   const [titleInputKey, setTitleInputKey] = useState(0);
   const [menuInstanceKey, setMenuInstanceKey] = useState(0);
 
-  const fetchTemplates = useCallback(async () => {
-    if (!user) return;
+  // Read from React Query cache (pre-fetched in EmployerLayout)
+  const { data: templates = [], isLoading: loadingTemplates } = useQuery({
+    queryKey: ['job_templates', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      
+      // Try snapshot first for instant render
+      try {
+        const snapshot = localStorage.getItem(`templates_snapshot_${user.id}`);
+        if (snapshot) {
+          const { templates, timestamp } = JSON.parse(snapshot);
+          // Use snapshot if less than 5 minutes old
+          if (Date.now() - timestamp < 5 * 60 * 1000) {
+            return templates;
+          }
+        }
+      } catch {}
 
-    try {
       const { data, error } = await supabase
         .from('job_templates')
         .select('*')
@@ -74,39 +88,34 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         .order('is_default', { ascending: false })
         .order('created_at', { ascending: false });
 
-      if (error) {
-        toast({
-          title: "Fel vid hämtning av mallar",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
-      }
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+    placeholderData: () => {
+      // Show snapshot immediately while fetching
+      try {
+        const snapshot = localStorage.getItem(`templates_snapshot_${user?.id}`);
+        if (snapshot) {
+          const { templates } = JSON.parse(snapshot);
+          return templates;
+        }
+      } catch {}
+      return [];
+    },
+  });
 
-      setTemplates((data as any) || []);
-      
-      // Set default template if available and no title is set
-      const defaultTemplate = data?.find(t => t.is_default);
-      if (defaultTemplate && !jobTitle) {
+  // Auto-select default template when templates load
+  useEffect(() => {
+    if (!loadingTemplates && templates.length > 0 && !selectedTemplate && !jobTitle) {
+      const defaultTemplate = templates.find(t => t.is_default);
+      if (defaultTemplate) {
         setSelectedTemplate(defaultTemplate as any);
         setJobTitle(defaultTemplate.title);
       }
-    } catch (error) {
-      toast({
-        title: "Ett fel uppstod",
-        description: "Kunde inte hämta jobbmallar.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoadingTemplates(false);
     }
-  }, [user, jobTitle, toast]);
-
-  useEffect(() => {
-    if (open) {
-      fetchTemplates();
-    }
-  }, [user, open]);
+  }, [templates, loadingTemplates, selectedTemplate, jobTitle]);
 
   // Återställ hasUnsavedChanges när formuläret är tomt/neutralt
   useEffect(() => {
@@ -560,7 +569,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         }}
         templateToEdit={templateToEdit}
         onTemplateCreated={() => {
-          fetchTemplates();
+          // Invalidate cache to refresh templates
+          queryClient.invalidateQueries({ queryKey: ['job_templates', user?.id] });
           setTemplateToEdit(null);
           toast({
             title: templateToEdit ? "Mall uppdaterad!" : "Mall skapad!",
@@ -595,7 +605,8 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                   
                   if (error) throw error;
                   
-                  setTemplates(prev => prev.filter(t => t.id !== templateToDelete.id));
+                  // Invalidate cache to refresh templates
+                  queryClient.invalidateQueries({ queryKey: ['job_templates', user?.id] });
                   
                   if (selectedTemplate?.id === templateToDelete.id) {
                     setSelectedTemplate(null);
