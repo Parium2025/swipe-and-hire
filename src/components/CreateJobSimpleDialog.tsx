@@ -65,12 +65,17 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const [menuInstanceKey, setMenuInstanceKey] = useState(0);
   const hasPrefetched = useRef(false);
 
-  // Warmup: open & close the real dialog to prepare GPU, while it's hidden
+  // Warmup with hard hide via CSS to prevent any flash on iOS
   useEffect(() => {
     if (!isMobile) {
       setIsWarmedUp(true);
       return;
     }
+
+    const style = document.createElement('style');
+    style.id = 'parium-warmup-hide';
+    style.textContent = '[data-parium="dialog-overlay"],[data-parium="dialog-content"]{display:none !important;}';
+    document.head.appendChild(style);
 
     const timer = setTimeout(() => {
       setOpen(true);
@@ -78,11 +83,15 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         requestAnimationFrame(() => {
           setOpen(false);
           setIsWarmedUp(true);
+          if (document.head.contains(style)) style.remove();
         });
       });
     }, 80);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (document.head.contains(style)) style.remove();
+    };
   }, [isMobile]);
 
   const fetchTemplates = useCallback(async () => {
