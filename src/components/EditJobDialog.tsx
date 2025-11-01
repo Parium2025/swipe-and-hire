@@ -203,6 +203,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingClose, setPendingClose] = useState(false);
   const [initialFormData, setInitialFormData] = useState<JobFormData | null>(null);
+  const [initialCustomQuestions, setInitialCustomQuestions] = useState<JobQuestion[]>([]);
   
   const [occupationSearchTerm, setOccupationSearchTerm] = useState('');
   const [showOccupationDropdown, setShowOccupationDropdown] = useState(false);
@@ -517,7 +518,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
       .order('order_index');
     
     if (!error && data) {
-      setCustomQuestions(data.map(q => ({
+      const questions = data.map(q => ({
         id: q.id,
         question_text: q.question_text,
         question_type: q.question_type as any,
@@ -527,7 +528,9 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         min_value: q.min_value || undefined,
         max_value: q.max_value || undefined,
         placeholder_text: q.placeholder_text || undefined
-      })));
+      }));
+      setCustomQuestions(questions);
+      setInitialCustomQuestions(questions);
     }
   };
 
@@ -645,9 +648,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
   useEffect(() => {
     if (!initialFormData || !open) return;
     
-    const changed = JSON.stringify(formData) !== JSON.stringify(initialFormData);
-    setHasUnsavedChanges(changed);
-  }, [formData, initialFormData, open]);
+    const formChanged = JSON.stringify(formData) !== JSON.stringify(initialFormData);
+    const questionsChanged = JSON.stringify(customQuestions) !== JSON.stringify(initialCustomQuestions);
+    
+    setHasUnsavedChanges(formChanged || questionsChanged);
+  }, [formData, initialFormData, customQuestions, initialCustomQuestions, open]);
 
   const handleClose = () => {
     if (hasUnsavedChanges) {
