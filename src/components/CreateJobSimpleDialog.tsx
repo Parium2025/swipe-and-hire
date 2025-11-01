@@ -364,7 +364,14 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                     {/* Custom Dropdown - Premium Touch Pattern */}
                     {templateMenuOpen && (
                       <div 
-                        className="absolute top-full left-0 right-0 z-[10000] bg-gray-800 border border-gray-600 rounded-md mt-1 shadow-xl max-h-[40vh] overflow-y-auto"
+                        className={`
+                          ${isMobile ? 'fixed bottom-[50vh] left-4 right-4' : 'absolute top-full left-0 right-0'}
+                          z-[10000] bg-gray-800 border border-gray-600 rounded-md 
+                          ${isMobile ? 'mb-2' : 'mt-1'}
+                          shadow-xl
+                          ${isMobile ? 'max-h-[30vh]' : 'max-h-[40vh]'}
+                          overflow-y-auto
+                        `}
                         style={{ 
                           WebkitOverflowScrolling: 'touch',
                           overscrollBehaviorY: 'contain'
