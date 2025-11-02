@@ -1,20 +1,8 @@
-import { useState, useEffect, memo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-import {
-  User,
-  CreditCard,
-  MessageCircle,
-  LogOut,
-  ChevronRight,
-  Building,
-  Crown,
-  Settings,
-  Eye
-} from 'lucide-react';
-
-import {
+import React, { useEffect, useState, memo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import { 
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -24,13 +12,21 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
-  SidebarTrigger,
-  useSidebar,
-} from '@/components/ui/sidebar';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+  useSidebar
+} from "@/components/ui/sidebar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { 
+  User,
+  CreditCard,
+  MessageCircle,
+  LogOut,
+  Building,
+  Crown,
+  Settings,
+  Eye
+} from "lucide-react";
 
-const AVATAR_CACHE_KEY = 'parium_profile_avatar_base';
 
 const mainItems = [
   { title: 'Sök Jobb', url: '/search-jobs', icon: Building },
@@ -47,20 +43,23 @@ const businessItems = [
   { title: 'Betalningar', url: '/billing', icon: CreditCard },
 ];
 
-export const AppSidebar = memo(function AppSidebar() {
+const AVATAR_CACHE_KEY = 'parium_profile_avatar_base';
+
+export function AppSidebar() {
   const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
   const collapsed = state === 'collapsed';
   const { profile, userRole, signOut, user } = useAuth();
   const navigate = useNavigate();
   const { checkBeforeNavigation } = useUnsavedChanges();
-  const [avatarUrl, setAvatarUrl] = useState<string>(() => {
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(() => {
     const fromProfile = profile?.cover_image_url || profile?.profile_image_url || '';
     const cached = typeof window !== 'undefined' ? sessionStorage.getItem(AVATAR_CACHE_KEY) : null;
     const raw = (typeof fromProfile === 'string' && fromProfile.trim() !== '') ? fromProfile : cached;
     return raw ? raw.split('?')[0] : null;
   });
+  const [avatarLoaded, setAvatarLoaded] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
 
-  const isEmployer = userRole?.role === 'employer';
   const isAdmin = user?.email === 'fredrikandits@hotmail.com';
 
   // Support items - add admin for Fredrik
@@ -96,6 +95,8 @@ export const AppSidebar = memo(function AppSidebar() {
         const base = raw.split('?')[0];
         setAvatarUrl((prev) => {
           if (prev === base) return prev; // no change → avoid flicker
+          setAvatarLoaded(false);
+          setAvatarError(false);
           try { sessionStorage.setItem(AVATAR_CACHE_KEY, base); } catch {}
           return base;
         });
@@ -103,7 +104,9 @@ export const AppSidebar = memo(function AppSidebar() {
         console.error('Failed to parse profile avatar:', error);
       }
     } else if (raw === '' || raw === null) {
-      setAvatarUrl('');
+      setAvatarUrl(null);
+      setAvatarLoaded(false);
+      setAvatarError(false);
       try { sessionStorage.removeItem(AVATAR_CACHE_KEY); } catch {}
     }
     // if undefined, keep previous URL while profile is re-fetching
@@ -124,13 +127,20 @@ export const AppSidebar = memo(function AppSidebar() {
     }
   };
 
+  const isActive = (path: string) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
+
   const isActiveUrl = (url: string) => {
     return window.location.pathname === url || 
            (url === "/" && window.location.pathname === "/");
   };
 
   return (
-    <Sidebar
+    <Sidebar 
       className={`border-r-0 bg-transparent ${collapsed ? 'w-16' : 'w-64'}`}
       collapsible="icon"
     >
@@ -139,20 +149,24 @@ export const AppSidebar = memo(function AppSidebar() {
         {!collapsed && (
           <div className="p-4">
             <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10 ring-2 ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
-                  <AvatarImage 
-                    src={avatarUrl} 
-                    alt="Profilbild" 
-                    onError={() => setAvatarUrl('')}
-                    loading="eager"
-                    decoding="sync"
-                    fetchPriority="high"
-                    draggable={false}
-                  />
-                  <AvatarFallback className="bg-white/20 text-white">
-                    {profile?.first_name?.[0]}{profile?.last_name?.[0]}
-                  </AvatarFallback>
-                </Avatar>
+              <Avatar className="h-10 w-10 ring-2 ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
+                <AvatarImage 
+                  src={avatarUrl || undefined} 
+                  alt="Profilbild" 
+                  onError={() => {
+                    setAvatarError(true);
+                    setAvatarUrl(null);
+                  }}
+                  onLoad={() => setAvatarLoaded(true)}
+                  loading="eager"
+                  decoding="sync"
+                  fetchPriority="high"
+                  draggable={false}
+                />
+                <AvatarFallback className="bg-white/20 text-white">
+                  {profile?.first_name?.[0]}{profile?.last_name?.[0]}
+                </AvatarFallback>
+              </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white truncate">
                   {profile?.first_name} {profile?.last_name}
@@ -306,9 +320,9 @@ export const AppSidebar = memo(function AppSidebar() {
 
         <SidebarSeparator className="bg-white/20 mx-4" />
 
-        {/* Sign Out Button */}
+        {/* Logout Button */}
         <div className="mt-auto p-4">
-          <Button 
+          <Button
             onClick={signOut}
             data-allow-border="true"
             className={`
@@ -325,4 +339,6 @@ export const AppSidebar = memo(function AppSidebar() {
       </SidebarContent>
     </Sidebar>
   );
-});
+}
+
+export default memo(AppSidebar);
