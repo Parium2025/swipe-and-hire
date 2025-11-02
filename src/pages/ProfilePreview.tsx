@@ -104,7 +104,7 @@ export default function ProfilePreview() {
     loadPreviewData();
   }, [user?.id, profile]);
 
-  // Ladda avatar URL
+  // Ladda avatar URL med caching
   useEffect(() => {
     const loadAvatar = async () => {
       const candidate = profile?.cover_image_url || profile?.profile_image_url || '';
@@ -113,9 +113,25 @@ export default function ProfilePreview() {
         return;
       }
 
+      // Check if URL is already fresh (has timestamp within last 5 minutes)
+      try {
+        const urlObj = new URL(candidate, window.location.origin);
+        const timestamp = urlObj.searchParams.get('t');
+        if (timestamp) {
+          const age = Date.now() - parseInt(timestamp);
+          if (age < 5 * 60 * 1000) { // Less than 5 minutes old
+            setAvatarUrl(candidate);
+            return;
+          }
+        }
+      } catch {
+        // Invalid URL, proceed with refresh
+      }
+
       try {
         const refreshed = await convertToSignedUrl(candidate, 'job-applications', 86400);
-        setAvatarUrl(refreshed || candidate);
+        const finalUrl = (refreshed || candidate) + (candidate.includes('?') ? `&t=${Date.now()}` : `?t=${Date.now()}`);
+        setAvatarUrl(finalUrl);
       } catch {
         setAvatarUrl(candidate);
       }
@@ -508,7 +524,7 @@ export default function ProfilePreview() {
           />
         </div>
 
-        <div className="p-6 max-w-4xl mx-auto space-y-6">
+        <div className="p-6 max-w-4xl mx-auto space-y-6 animate-in fade-in duration-200">
           {/* Header */}
           <div className="text-center space-y-4 mb-6">
             <div className="flex items-center justify-center gap-2 text-white">

@@ -79,7 +79,7 @@ export function AppSidebar() {
     return () => window.removeEventListener('unsaved-cancel', closeOnCancel as EventListener);
 }, [isMobile, setOpenMobile]);
 
-  // Ensure avatar uses a fresh signed URL (handles expired links) with debouncing
+  // Ensure avatar uses a fresh signed URL (handles expired links) with better caching
   useEffect(() => {
     let isCancelled = false;
     
@@ -90,11 +90,18 @@ export function AppSidebar() {
         return; 
       }
       
+      // Check if URL is already fresh (has timestamp within last 5 minutes)
+      const urlObj = new URL(candidate, window.location.origin);
+      const timestamp = urlObj.searchParams.get('t');
+      if (timestamp) {
+        const age = Date.now() - parseInt(timestamp);
+        if (age < 5 * 60 * 1000) { // Less than 5 minutes old
+          if (!isCancelled) setAvatarUrl(candidate);
+          return;
+        }
+      }
+      
       try {
-        // Add small delay to prevent rapid updates during login
-        await new Promise(resolve => setTimeout(resolve, 50));
-        if (isCancelled) return;
-        
         const refreshed = await convertToSignedUrl(candidate, 'job-applications', 86400);
         const finalUrl = (refreshed || candidate) + (candidate.includes('?') ? `&t=${Date.now()}` : `?t=${Date.now()}`);
         
@@ -146,10 +153,10 @@ export function AppSidebar() {
                     src={avatarUrl} 
                     alt="Profilbild" 
                     onError={() => setAvatarUrl('')}
-                    className="transition-opacity duration-200"
-                    style={{ opacity: avatarUrl ? 1 : 0 }}
+                    loading="eager"
+                    decoding="async"
                   />
-                  <AvatarFallback className="bg-white/20 text-white transition-opacity duration-200">
+                  <AvatarFallback className="bg-white/20 text-white">
                     {profile?.first_name?.[0]}{profile?.last_name?.[0]}
                   </AvatarFallback>
                 </Avatar>

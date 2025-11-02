@@ -76,7 +76,9 @@ const JobSeekerLayout = ({ children, developerView, onViewChange }: JobSeekerLay
           </div>
           
           <main className="flex-1 overflow-hidden p-3">
-            {children}
+            <div className="animate-in fade-in duration-200">
+              {children}
+            </div>
           </main>
         </div>
       </div>
