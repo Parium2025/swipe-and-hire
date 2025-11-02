@@ -24,7 +24,6 @@ export const StatsGrid = ({ stats }: StatsGridProps) => {
               <TruncatedText 
                 text={stat.title} 
                 className="w-full block whitespace-nowrap truncate cursor-pointer"
-                alwaysShowTooltip="desktop-only"
               />
             </CardTitle>
           </CardHeader>
