@@ -49,11 +49,9 @@ const redirected = redirectAuthTokensIfNeeded();
 if (!redirected) {
   const root = createRoot(document.getElementById("root")!);
   root.render(
-    <StrictMode>
-      <GlobalErrorBoundary>
-        <App />
-      </GlobalErrorBoundary>
-    </StrictMode>
+    <GlobalErrorBoundary>
+      <App />
+    </GlobalErrorBoundary>
   );
 }
 
