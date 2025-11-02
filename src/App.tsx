@@ -25,40 +25,36 @@ import { useDevice } from "@/hooks/use-device";
 
 const queryClient = new QueryClient();
 
-// Smooth route transitions via CSS
+// Routes without animations for instant navigation
 const AnimatedRoutes = () => {
-  const location = useLocation();
-  
   return (
-    <div key={location.pathname} className="animate-in fade-in duration-150">
-      <Routes location={location}>
-        <Route path="/" element={<Landing />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/home" element={<Index />} />
-        <Route path="/consent" element={<Index />} />
-        <Route path="/verify" element={<EmailVerification />} />
-        <Route path="/email-redirect" element={<EmailRedirect />} />
-        <Route path="/confirm" element={<EmailConfirm />} />
-        <Route path="/profile" element={<Index />} />
-        <Route path="/profile-preview" element={<ProfilePreview />} />
-        <Route path="/search-jobs" element={<Index />} />
-        <Route path="/subscription" element={<Index />} />
-        <Route path="/support" element={<Index />} />
-        <Route path="/admin" element={<Index />} />
-        <Route path="/settings" element={<Index />} />
-        <Route path="/billing" element={<Index />} />
-        <Route path="/payment" element={<Index />} />
-        <Route path="/dashboard" element={<Index />} />
-        <Route path="/my-jobs" element={<Index />} />
-        <Route path="/candidates" element={<Index />} />
-        <Route path="/job-details/:jobId" element={<Index />} />
-        <Route path="/company-profile" element={<Index />} />
-        <Route path="/reviews" element={<Index />} />
-        <Route path="/job-application/:jobId" element={<JobApplication />} />
-        <Route path="/reset-redirect" element={<ResetRedirect />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </div>
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/home" element={<Index />} />
+      <Route path="/consent" element={<Index />} />
+      <Route path="/verify" element={<EmailVerification />} />
+      <Route path="/email-redirect" element={<EmailRedirect />} />
+      <Route path="/confirm" element={<EmailConfirm />} />
+      <Route path="/profile" element={<Index />} />
+      <Route path="/profile-preview" element={<ProfilePreview />} />
+      <Route path="/search-jobs" element={<Index />} />
+      <Route path="/subscription" element={<Index />} />
+      <Route path="/support" element={<Index />} />
+      <Route path="/admin" element={<Index />} />
+      <Route path="/settings" element={<Index />} />
+      <Route path="/billing" element={<Index />} />
+      <Route path="/payment" element={<Index />} />
+      <Route path="/dashboard" element={<Index />} />
+      <Route path="/my-jobs" element={<Index />} />
+      <Route path="/candidates" element={<Index />} />
+      <Route path="/job-details/:jobId" element={<Index />} />
+      <Route path="/company-profile" element={<Index />} />
+      <Route path="/reviews" element={<Index />} />
+      <Route path="/job-application/:jobId" element={<JobApplication />} />
+      <Route path="/reset-redirect" element={<ResetRedirect />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 };
 
