@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect, memo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import EmployerSidebar from '@/components/EmployerSidebar';
@@ -15,7 +15,7 @@ interface EmployerLayoutProps {
   onViewChange: (view: string) => void;
 }
 
-const EmployerLayout = ({ children, developerView, onViewChange }: EmployerLayoutProps) => {
+const EmployerLayout = memo(({ children, developerView, onViewChange }: EmployerLayoutProps) => {
   const { user, profile } = useAuth();
   const { invalidateJobs } = useJobsData();
   const queryClient = useQueryClient();
@@ -137,6 +137,8 @@ const EmployerLayout = ({ children, developerView, onViewChange }: EmployerLayou
       </div>
     </SidebarProvider>
   );
-};
+});
+
+EmployerLayout.displayName = 'EmployerLayout';
 
 export default EmployerLayout;

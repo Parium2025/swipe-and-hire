@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, memo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from '@/components/AppSidebar';
@@ -11,7 +11,7 @@ interface JobSeekerLayoutProps {
   onViewChange?: (view: string) => void;
 }
 
-const JobSeekerLayout = ({ children, developerView, onViewChange }: JobSeekerLayoutProps) => {
+const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeekerLayoutProps) => {
   const { user, profile } = useAuth();
 
   return (
@@ -82,6 +82,8 @@ const JobSeekerLayout = ({ children, developerView, onViewChange }: JobSeekerLay
       </div>
     </SidebarProvider>
   );
-};
+});
+
+JobSeekerLayout.displayName = 'JobSeekerLayout';
 
 export default JobSeekerLayout;
