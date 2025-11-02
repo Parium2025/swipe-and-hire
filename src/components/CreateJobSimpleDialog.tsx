@@ -649,7 +649,11 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
             <AlertDialogCancel 
-              onClick={() => setTemplateToDelete(null)}
+              onClick={() => {
+                setTemplateToDelete(null);
+                // Öppna dropdown-menyn igen efter att avbryt tryckts
+                setTimeout(() => setTemplateMenuOpen(true), 100);
+              }}
               style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
               className="flex-[0.6] mt-0 flex items-center justify-center bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
             >
