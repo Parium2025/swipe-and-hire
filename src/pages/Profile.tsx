@@ -341,17 +341,8 @@ const Profile = () => {
     if (isVideo) setIsUploadingVideo(true);
     
     try {
-      // Delete old profile media file if exists
-      if (profileFileName) {
-        try {
-          await supabase.storage
-            .from('job-applications')
-            .remove([profileFileName]);
-          console.log('Deleted old profile media:', profileFileName);
-        } catch (error) {
-          console.error('Error deleting old profile media:', error);
-        }
-      }
+      // DO NOT delete old files automatically - only when user clicks delete button
+      // Old files remain in storage for permanent access
       
       const fileExt = file.name.split('.').pop();
       const fileName = `${user?.id}/${Date.now()}-profile-media.${fileExt}`;
@@ -407,17 +398,8 @@ const Profile = () => {
     setIsUploadingCover(true);
     
     try {
-      // Delete old cover image file if exists
-      if (coverFileName) {
-        try {
-          await supabase.storage
-            .from('job-applications')
-            .remove([coverFileName]);
-          console.log('Deleted old cover image:', coverFileName);
-        } catch (error) {
-          console.error('Error deleting old cover image:', error);
-        }
-      }
+      // DO NOT delete old files automatically - only when user clicks delete button
+      // Old files remain in storage for permanent access
       
       const fileExt = file.name.split('.').pop();
       const fileName = `${user?.id}/${Date.now()}-cover-image.${fileExt}`;
@@ -572,17 +554,8 @@ const Profile = () => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('User not authenticated');
 
-      // Delete old profile media file if exists
-      if (profileFileName) {
-        try {
-          await supabase.storage
-            .from('job-applications')
-            .remove([profileFileName]);
-          console.log('Deleted old profile media:', profileFileName);
-        } catch (error) {
-          console.error('Error deleting old profile media:', error);
-        }
-      }
+      // DO NOT delete old files automatically - only when user clicks delete button
+      // Old files remain in storage for permanent access
 
       const fileName = `${user.data.user.id}/${Date.now()}-profile-image.jpg`;
       
@@ -635,17 +608,8 @@ const Profile = () => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('User not authenticated');
 
-      // Delete old cover image file if exists
-      if (coverFileName) {
-        try {
-          await supabase.storage
-            .from('job-applications')
-            .remove([coverFileName]);
-          console.log('Deleted old cover image:', coverFileName);
-        } catch (error) {
-          console.error('Error deleting old cover image:', error);
-        }
-      }
+      // DO NOT delete old files automatically - only when user clicks delete button
+      // Old files remain in storage for permanent access
 
       const fileName = `${user.data.user.id}/${Date.now()}-cover-image.jpg`;
       
