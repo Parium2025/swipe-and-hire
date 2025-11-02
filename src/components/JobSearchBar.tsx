@@ -6,6 +6,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { useState, useRef, useEffect } from 'react';
 
@@ -118,14 +119,21 @@ export const JobSearchBar = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20">
-            {Object.entries(sortLabels).map(([key, label]) => (
-              <DropdownMenuItem 
-                key={key} 
-                onClick={() => onSortChange(key as SortOption)}
-              >
-                {label}
-              </DropdownMenuItem>
-            ))}
+            <DropdownMenuItem onClick={() => onSortChange('newest')}>
+              {sortLabels.newest}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-white/20" />
+            <DropdownMenuItem onClick={() => onSortChange('oldest')}>
+              {sortLabels.oldest}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-white/20" />
+            <DropdownMenuItem onClick={() => onSortChange('title-asc')}>
+              {sortLabels['title-asc']}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-white/20" />
+            <DropdownMenuItem onClick={() => onSortChange('title-desc')}>
+              {sortLabels['title-desc']}
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

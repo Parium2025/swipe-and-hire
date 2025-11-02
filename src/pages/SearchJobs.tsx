@@ -19,7 +19,7 @@ import { TruncatedText } from '@/components/TruncatedText';
 import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { formatDateShortSv } from '@/lib/date';
 import { StatsGrid } from '@/components/StatsGrid';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import {
   Pagination,
   PaginationContent,
@@ -269,9 +269,11 @@ const SearchJobs = () => {
             <DropdownMenuItem onClick={() => setSortBy('newest')} className="hover:bg-slate-700/70">
               Nyaste först
             </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-white/20" />
             <DropdownMenuItem onClick={() => setSortBy('oldest')} className="hover:bg-slate-700/70">
               Äldsta först
             </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-white/20" />
             <DropdownMenuItem onClick={() => setSortBy('most-views')} className="hover:bg-slate-700/70">
               Mest visade
             </DropdownMenuItem>
