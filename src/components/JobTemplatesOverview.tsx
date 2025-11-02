@@ -442,7 +442,7 @@ const JobTemplatesOverview = () => {
           resetForm();
         }
       }}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-parium-gradient border-white/20 text-white" overlayHidden>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-parium-gradient border-white/20 text-white">
           <DialogHeader>
             <DialogTitle>
               {editingTemplate ? 'Redigera mall' : 'Skapa ny jobbmall'}
