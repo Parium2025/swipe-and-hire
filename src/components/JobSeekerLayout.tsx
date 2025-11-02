@@ -1,9 +1,11 @@
-import { ReactNode, memo } from 'react';
+import { ReactNode, memo, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from '@/components/AppSidebar';
 import DeveloperControls from '@/components/DeveloperControls';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface JobSeekerLayoutProps {
   children: ReactNode;
@@ -13,6 +15,36 @@ interface JobSeekerLayoutProps {
 
 const JobSeekerLayout = memo(({ children, developerView, onViewChange }: JobSeekerLayoutProps) => {
   const { user, profile } = useAuth();
+  const queryClient = useQueryClient();
+
+  // Prefetch public jobs in background so they're ready instantly when navigating to /search-jobs
+  useEffect(() => {
+    // Prefetch with empty filters (default view)
+    queryClient.prefetchQuery({
+      queryKey: ['public-jobs', [], 'all-categories', [], []],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from('job_postings')
+          .select(`
+            *,
+            profiles!job_postings_employer_id_fkey(company_name)
+          `)
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(100);
+        
+        if (error) throw error;
+        
+        return (data || []).map(job => ({
+          ...job,
+          company_name: job.profiles?.company_name || 'Okänt företag',
+          views_count: job.views_count || 0,
+          applications_count: job.applications_count || 0,
+        }));
+      },
+      staleTime: 2 * 60 * 1000, // Cache for 2 minutes
+    });
+  }, [queryClient]);
 
   return (
     <SidebarProvider defaultOpen={true}>

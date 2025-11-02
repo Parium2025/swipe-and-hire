@@ -30,6 +30,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useQuery } from '@tanstack/react-query';
 
 interface Job {
   id: string;
@@ -56,8 +57,6 @@ interface Job {
 const SearchJobs = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most-views'>('newest');
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
@@ -72,7 +71,6 @@ const SearchJobs = () => {
   const pageSize = 10;
   const listTopRef = useRef<HTMLDivElement>(null);
   const didMountRef = useRef(false);
-  const isInitialLoadRef = useRef(true);
 
   const locations = [
     'Stockholm', 'Göteborg', 'Malmö', 'Uppsala', 'Västerås', 'Örebro', 'Linköping', 'Helsingborg', 'Jönköping', 
@@ -87,9 +85,10 @@ const SearchJobs = () => {
 
   const employmentTypes = SEARCH_EMPLOYMENT_TYPES;
 
-  const fetchJobs = async () => {
-    // Don't show loading state for stats - they should always display values smoothly
-    try {
+  // Use React Query for background caching and instant data
+  const { data: jobs = [], isLoading } = useQuery({
+    queryKey: ['public-jobs', selectedLocations, selectedCategory, selectedSubcategories, selectedEmploymentTypes],
+    queryFn: async () => {
       let query = supabase
         .from('job_postings')
         .select(`
@@ -152,31 +151,18 @@ const SearchJobs = () => {
       
       if (error) throw error;
       
-      const transformedJobs = (data || []).map(job => ({
+      return (data || []).map(job => ({
         ...job,
         company_name: job.profiles?.company_name || 'Okänt företag',
         views_count: job.views_count || 0,
         applications_count: job.applications_count || 0,
       }));
-      
-      setJobs(transformedJobs);
-    } catch (error) {
-      console.error('Error fetching jobs:', error);
-      toast({
-        title: "Fel vid hämtning",
-        description: "Kunde inte hämta jobb. Försök igen.",
-        variant: "destructive"
-      });
-    } finally {
-      if (isInitialLoadRef.current) {
-        isInitialLoadRef.current = false;
-      }
-    }
-  };
-
-  useEffect(() => {
-    fetchJobs();
-  }, [selectedLocations, selectedCategory, selectedSubcategories, selectedEmploymentTypes]);
+    },
+    staleTime: 2 * 60 * 1000, // Cache for 2 minutes - fresh data
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    refetchOnWindowFocus: true, // Refresh when user comes back to tab
+    refetchOnMount: 'always', // Always check for fresh data
+  });
 
   // Filter and sort jobs
   const filteredAndSortedJobs = useMemo(() => {
@@ -618,7 +604,7 @@ const SearchJobs = () => {
           <CardTitle className="text-sm text-white">Jobbsökresultat</CardTitle>
         </CardHeader>
         <CardContent className="px-6 pb-6 md:px-4 md:pb-4">
-          {loading ? (
+          {isLoading ? (
             <div className="text-center py-12">
               <div className="inline-flex items-center gap-2">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
