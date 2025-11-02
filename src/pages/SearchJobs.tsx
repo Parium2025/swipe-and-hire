@@ -88,10 +88,7 @@ const SearchJobs = () => {
   const employmentTypes = SEARCH_EMPLOYMENT_TYPES;
 
   const fetchJobs = async () => {
-    // Only show loading state on initial load, not when filtering
-    if (isInitialLoadRef.current) {
-      setLoading(true);
-    }
+    // Don't show loading state for stats - they should always display values smoothly
     try {
       let query = supabase
         .from('job_postings')
@@ -172,7 +169,6 @@ const SearchJobs = () => {
       });
     } finally {
       if (isInitialLoadRef.current) {
-        setLoading(false);
         isInitialLoadRef.current = false;
       }
     }
@@ -241,15 +237,15 @@ const SearchJobs = () => {
   };
 
   const statsCards = useMemo(() => [
-    { icon: Briefcase, title: 'Jobb hittade', value: jobs.length, loading },
-    { icon: TrendingUp, title: 'Aktiva annonser', value: jobs.filter(j => j.is_active).length, loading },
-    { icon: Building, title: 'Unika företag', value: new Set(jobs.map(j => j.company_name)).size, loading },
+    { icon: Briefcase, title: 'Jobb hittade', value: jobs.length, loading: false },
+    { icon: TrendingUp, title: 'Aktiva annonser', value: jobs.filter(j => j.is_active).length, loading: false },
+    { icon: Building, title: 'Unika företag', value: new Set(jobs.map(j => j.company_name)).size, loading: false },
     { icon: Users, title: 'Nya denna vecka', value: jobs.filter(j => {
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
       return new Date(j.created_at) > weekAgo;
-    }).length, loading },
-  ], [jobs, loading]);
+    }).length, loading: false },
+  ], [jobs]);
 
   const sortLabels = {
     newest: 'Nyaste först',

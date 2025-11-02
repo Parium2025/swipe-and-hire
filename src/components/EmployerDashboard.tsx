@@ -158,11 +158,11 @@ const EmployerDashboard = memo(() => {
   };
 
   const statsCards = useMemo(() => [
-    { icon: Briefcase, title: 'Totalt annonser', value: jobs.length, loading },
-    { icon: TrendingUp, title: 'Aktiva annonser', value: jobs.filter(j => j.is_active).length, loading },
-    { icon: Eye, title: 'Totala visningar', value: jobs.reduce((s, j) => s + j.views_count, 0), loading },
-    { icon: Users, title: 'Ansökningar', value: jobs.reduce((s, j) => s + j.applications_count, 0), loading },
-  ], [jobs, loading]);
+    { icon: Briefcase, title: 'Totalt annonser', value: jobs.length, loading: false },
+    { icon: TrendingUp, title: 'Aktiva annonser', value: jobs.filter(j => j.is_active).length, loading: false },
+    { icon: Eye, title: 'Totala visningar', value: jobs.reduce((s, j) => s + j.views_count, 0), loading: false },
+    { icon: Users, title: 'Ansökningar', value: jobs.reduce((s, j) => s + j.applications_count, 0), loading: false },
+  ], [jobs]);
 
   return (
     <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12">

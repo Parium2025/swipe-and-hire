@@ -28,8 +28,11 @@ export const StatsGrid = ({ stats }: StatsGridProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent className="px-2 pb-2 md:px-4 md:pb-4">
-            <div className="text-lg md:text-xl font-bold text-white transition-all duration-300">
-              {stat.loading ? '...' : stat.value}
+            <div 
+              className="text-lg md:text-xl font-bold text-white transition-opacity duration-500"
+              style={{ opacity: stat.loading ? 0.5 : 1 }}
+            >
+              {stat.value}
             </div>
           </CardContent>
         </Card>

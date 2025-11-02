@@ -32,11 +32,11 @@ const Dashboard = memo(() => {
   } = useJobFiltering(jobs);
 
   const statsCards = useMemo(() => [
-    { icon: Briefcase, title: 'Totalt annonser', value: stats.totalJobs, loading: isLoading },
-    { icon: TrendingUp, title: 'Aktiva annonser', value: stats.activeJobs, loading: isLoading },
-    { icon: Eye, title: 'Totala visningar', value: stats.totalViews, loading: isLoading },
-    { icon: Users, title: 'Ansökningar', value: stats.totalApplications, loading: isLoading },
-  ], [stats, isLoading]);
+    { icon: Briefcase, title: 'Totalt annonser', value: stats.totalJobs, loading: false },
+    { icon: TrendingUp, title: 'Aktiva annonser', value: stats.activeJobs, loading: false },
+    { icon: Eye, title: 'Totala visningar', value: stats.totalViews, loading: false },
+    { icon: Users, title: 'Ansökningar', value: stats.totalApplications, loading: false },
+  ], [stats]);
 
   return (
     <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12">
