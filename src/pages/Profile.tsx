@@ -572,6 +572,18 @@ const Profile = () => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('User not authenticated');
 
+      // Delete old profile media file if exists
+      if (profileFileName) {
+        try {
+          await supabase.storage
+            .from('job-applications')
+            .remove([profileFileName]);
+          console.log('Deleted old profile media:', profileFileName);
+        } catch (error) {
+          console.error('Error deleting old profile media:', error);
+        }
+      }
+
       const fileName = `${user.data.user.id}/${Date.now()}-profile-image.jpg`;
       
       const { error: uploadError } = await supabase.storage
@@ -591,6 +603,7 @@ const Profile = () => {
       // Update local state instead of saving immediately
       setProfileImageUrl(imageUrl);
       setIsProfileVideo(false); // Mark as image, not video
+      setProfileFileName(fileName); // Track the new filename for deletion
       // Keep cover image when uploading profile image
       
       setImageEditorOpen(false);
@@ -622,6 +635,18 @@ const Profile = () => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('User not authenticated');
 
+      // Delete old cover image file if exists
+      if (coverFileName) {
+        try {
+          await supabase.storage
+            .from('job-applications')
+            .remove([coverFileName]);
+          console.log('Deleted old cover image:', coverFileName);
+        } catch (error) {
+          console.error('Error deleting old cover image:', error);
+        }
+      }
+
       const fileName = `${user.data.user.id}/${Date.now()}-cover-image.jpg`;
       
       const { error: uploadError } = await supabase.storage
@@ -640,6 +665,7 @@ const Profile = () => {
       
       // Update local state instead of saving immediately
       setCoverImageUrl(coverUrl);
+      setCoverFileName(fileName); // Track the new filename for deletion
       
       setCoverEditorOpen(false);
       setPendingCoverSrc('');
