@@ -1,5 +1,5 @@
 import React, { useEffect, useState, memo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { 
@@ -50,6 +50,7 @@ export function AppSidebar() {
   const collapsed = state === 'collapsed';
   const { profile, userRole, signOut, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(() => {
     const fromProfile = profile?.cover_image_url || profile?.profile_image_url || '';
@@ -135,8 +136,8 @@ export function AppSidebar() {
   };
 
   const isActiveUrl = (url: string) => {
-    return window.location.pathname === url || 
-           (url === "/" && window.location.pathname === "/");
+    return location.pathname === url || 
+           (url === "/" && location.pathname === "/");
   };
 
   return (
