@@ -32,11 +32,14 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { convertToSignedUrl } from '@/utils/storageUtils';
 
+const mainItems = [
+  { title: 'Sök Jobb', url: '/search-jobs', icon: Building },
+];
+
 const profileItems = [
   { title: 'Min Profil', url: '/profile', icon: User },
   { title: 'Förhandsgranska Profil', url: '/profile-preview', icon: Eye },
   { title: 'Mitt samtycke', url: '/consent', icon: Settings },
-  { title: 'Sök Jobb', url: '/search-jobs', icon: Building },
 ];
 
 const businessItems = [
@@ -163,6 +166,34 @@ export function AppSidebar() {
         )}
 
         {/* Navigation Groups */}
+        {/* Main Section */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+               {mainItems.map((item) => (
+                 <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton 
+                      onClick={(e) => { handleNavigation(item.url, e); (e.currentTarget as HTMLElement).blur(); }}
+                      className={`
+                        mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none active:!bg-transparent
+                        ${isActiveUrl(item.url) 
+                          ? 'bg-white/20 text-white [&_svg]:text-white' 
+                          : 'text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white'
+                        }
+                      `}
+                     title={collapsed ? item.title : undefined}
+                   >
+                     <item.icon className="h-4 w-4" />
+                     {!collapsed && <span>{item.title}</span>}
+                   </SidebarMenuButton>
+                 </SidebarMenuItem>
+               ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator className="bg-white/20 mx-4" />
+
         {/* Profile Section */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-white text-sm uppercase tracking-wide px-4">
