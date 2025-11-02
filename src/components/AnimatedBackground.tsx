@@ -6,11 +6,21 @@ import { memo } from 'react';
  */
 interface AnimatedBackgroundProps {
   showBubbles?: boolean;
+  variant?: 'full' | 'card'; // 'full' = fixed to viewport, 'card' = clipped to parent
 }
 
-export const AnimatedBackground = memo(({ showBubbles = true }: AnimatedBackgroundProps) => {
+export const AnimatedBackground = memo(({ showBubbles = true, variant = 'full' }: AnimatedBackgroundProps) => {
+  const containerClass = variant === 'card'
+    ? 'absolute inset-0 pointer-events-none z-0'
+    : 'fixed inset-0 pointer-events-none z-0';
+
   return (
-    <div className="fixed inset-0 pointer-events-none z-0">
+    <div className={containerClass} style={variant === 'card' ? { borderRadius: 'inherit' } : undefined}>
+      {/* Base gradient fill for card variant to ensure full-bleed color to rounded edges */}
+      {variant === 'card' && (
+        <div className="absolute inset-0 bg-parium-gradient" aria-hidden />
+      )}
+
       {showBubbles && (
         <>
           {/* Left-side bubbles (top corner) */}
@@ -43,7 +53,7 @@ export const AnimatedBackground = memo(({ showBubbles = true }: AnimatedBackgrou
       )}
       
       {/* Decorative glow effect in bottom right corner - always shown */}
-      <div className="absolute -right-32 w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 opacity-10 sm:opacity-15 md:opacity-40 lg:opacity-60 pointer-events-none pwa-bottom-glow">
+      <div className={variant === 'card' ? 'absolute right-0 w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 opacity-10 sm:opacity-15 md:opacity-40 lg:opacity-60 pointer-events-none pwa-bottom-glow' : 'absolute -right-32 w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 opacity-10 sm:opacity-15 md:opacity-40 lg:opacity-60 pointer-events-none pwa-bottom-glow'}>
         <div className="absolute inset-0 bg-primary-glow/40 rounded-full blur-[120px]"></div>
         <div className="absolute inset-4 bg-primary-glow/30 rounded-full blur-[100px]"></div>
         <div className="absolute inset-8 bg-primary-glow/25 rounded-full blur-[80px]"></div>
