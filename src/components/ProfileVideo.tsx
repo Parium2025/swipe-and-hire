@@ -40,19 +40,18 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     convertUrls();
   }, [videoUrl, coverImageUrl]);
 
-  const handleMouseEnter = () => {
-    if (!isMobile && !isPlaying) {
+  // Remove hover-based autoplay to avoid flicker; play only on explicit tap/click
+  // (Keeping function names removed to simplify behavior)
+
+  const handleTap = () => {
+    if (!isPlaying) {
       setShowVideo(true);
       setIsPlaying(true);
       if (videoRef.current) {
         videoRef.current.currentTime = 0;
         videoRef.current.play();
       }
-    }
-  };
-
-  const handleMouseLeave = () => {
-    if (!isMobile) {
+    } else {
       setShowVideo(false);
       setIsPlaying(false);
       if (videoRef.current) {
@@ -61,27 +60,6 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
       }
     }
   };
-
-  const handleTap = () => {
-    if (isMobile) {
-      if (!isPlaying) {
-        setShowVideo(true);
-        setIsPlaying(true);
-        if (videoRef.current) {
-          videoRef.current.currentTime = 0;
-          videoRef.current.play();
-        }
-      } else {
-        setShowVideo(false);
-        setIsPlaying(false);
-        if (videoRef.current) {
-          videoRef.current.pause();
-          videoRef.current.currentTime = 0;
-        }
-      }
-    }
-  };
-
   const handleVideoEnd = () => {
     setIsPlaying(false);
     if (videoRef.current) {
@@ -92,54 +70,40 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     }
   };
 
-  // Show loading state while converting URLs
-  if (!signedVideoUrl && videoUrl) {
-    return (
-      <div className={`${className} bg-muted/20 flex items-center justify-center rounded-lg animate-pulse`}>
-        <span className="text-white/60 text-sm">Laddar video...</span>
-      </div>
-    );
-  }
+  // Visa alltid omslagsbild/initialer medan URL:er signeras för att undvika blink
+
 
   return (
     <div 
       className={`relative overflow-hidden ${className}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
       onClick={handleTap}
     >
-      {/* Cover image or poster frame */}
-      {(!showVideo || !isPlaying) && (
-        <>
-          {signedCoverUrl ? (
-            <img 
-              src={signedCoverUrl} 
-              alt={alt}
-              className="w-full h-full object-cover transition-opacity duration-300"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center text-white font-semibold text-2xl">
-              {userInitials}
-            </div>
-          )}
-        </>
+      {/* Cover image or poster frame - always mounted, fade only */}
+      {signedCoverUrl ? (
+        <img 
+          src={signedCoverUrl} 
+          alt={alt}
+          className={`w-full h-full object-cover transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
+        />
+      ) : (
+        <div className={`w-full h-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center text-white font-semibold text-2xl transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}>
+          {userInitials}
+        </div>
       )}
       
-      {/* Video element */}
       {signedVideoUrl && (
         <video 
           ref={videoRef}
           src={signedVideoUrl}
-          className={`w-full h-full object-cover transition-opacity duration-300 ${
-            showVideo && isPlaying ? 'opacity-100' : 'opacity-0 absolute inset-0'
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
+            isPlaying ? 'opacity-100' : 'opacity-0'
           }`}
           loop={false}
           muted={false}
           playsInline
+          preload="metadata"
+          poster={signedCoverUrl || undefined}
           onEnded={handleVideoEnd}
-          style={{ 
-            display: showVideo ? 'block' : 'none' 
-          }}
         />
       )}
       
