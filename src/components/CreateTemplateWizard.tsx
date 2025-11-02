@@ -1031,7 +1031,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         <AnimatedBackground showBubbles={false} variant="card" />
         <div className="flex flex-col max-h-[90vh] relative z-10 overflow-hidden">
           {/* Header */}
-          <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-transparent">
+          <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">
             <DialogHeader className="text-center sm:text-center">
               <DialogTitle className="text-white text-lg">
                 {showQuestionForm ? 'Lägg till fråga' : (templateToEdit ? 'Redigera mall' : steps[currentStep].title)}
@@ -1771,7 +1771,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
           {/* Footer Navigation */}
           {!showQuestionForm && (
-            <div className="flex-shrink-0 p-4 border-t border-white/20 bg-transparent">
+            <div className="flex-shrink-0 p-4 border-t border-white/20 bg-background/10">
               <div className="flex items-center justify-between gap-2">
                 {currentStep > 0 && (
                   <Button
