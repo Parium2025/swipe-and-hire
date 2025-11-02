@@ -193,7 +193,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       
       <div
         {...getRootProps()}
-        className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center cursor-pointer transition-colors ${
+        className={`border-2 border-dashed rounded-lg p-3 sm:p-4 text-center cursor-pointer transition-colors ${
           isDragActive
             ? 'border-primary bg-primary/5'
             : 'border-border hover:border-muted-foreground bg-muted/30'
