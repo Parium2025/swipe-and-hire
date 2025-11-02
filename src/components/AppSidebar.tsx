@@ -138,7 +138,7 @@ export function AppSidebar() {
         {!collapsed && (
           <div className="p-4">
             <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10 border-2 border-white/30">
+                <Avatar className="h-10 w-10 ring-2 ring-white/20">
                   <AvatarImage 
                     src={avatarUrl} 
                     alt="Profilbild" 
@@ -154,7 +154,7 @@ export function AppSidebar() {
                 <p className="text-sm font-medium text-white truncate">
                   {profile?.first_name} {profile?.last_name}
                 </p>
-                <p className="text-sm text-white/70 truncate">
+                <p className="text-sm text-white truncate">
                   {userRole?.role === 'employer' ? 'Arbetsgivare' : 'Jobbsökare'}
                 </p>
               </div>
