@@ -16,6 +16,7 @@ import JobSwipe from '@/components/JobSwipe';
 import ProfileSetup from '@/components/ProfileSetup';
 import ProfileSelector from '@/components/ProfileSelector';
 import WelcomeTunnel from '@/components/WelcomeTunnel';
+import ProfilePreview from '@/pages/ProfilePreview';
 import EmployerWelcomeTunnel from '@/components/EmployerWelcomeTunnel';
 import AppOnboardingTour from '@/components/AppOnboardingTour';
 import Profile from '@/pages/Profile';
@@ -290,7 +291,7 @@ const Index = () => {
   }
 
   // Render sidebar layout for profile pages and employer routes
-  const sidebarRoutes = ['/profile', '/search-jobs', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/consent', '/templates'];
+  const sidebarRoutes = ['/profile', '/profile-preview', '/search-jobs', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/consent', '/templates'];
   const isSidebarRoute = sidebarRoutes.some(route => location.pathname.startsWith(route));
 
   if (isSidebarRoute && role !== 'employer') {
@@ -303,6 +304,8 @@ const Index = () => {
       switch (path) {
         case '/profile':
           return <Profile />;
+        case '/profile-preview':
+          return <ProfilePreview />;
         case '/consent':
           return <Consent />;
         case '/search-jobs':

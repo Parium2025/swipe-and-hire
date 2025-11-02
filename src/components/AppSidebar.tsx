@@ -32,6 +32,8 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { convertToSignedUrl } from '@/utils/storageUtils';
 
+const AVATAR_CACHE_KEY = 'parium_profile_avatar_base';
+
 const mainItems = [
   { title: 'Sök Jobb', url: '/search-jobs', icon: Building },
 ];
@@ -79,47 +81,37 @@ export const AppSidebar = memo(function AppSidebar() {
     return () => window.removeEventListener('unsaved-cancel', closeOnCancel as EventListener);
 }, [isMobile, setOpenMobile]);
 
-  // Ensure avatar uses a fresh signed URL (handles expired links) with better caching
+  // Ensure avatar uses a stable signed URL using base path caching to avoid flicker
   useEffect(() => {
     let isCancelled = false;
-    
+
     const loadAvatar = async () => {
       const candidate = profile?.cover_image_url || profile?.profile_image_url || '';
-      if (!candidate) { 
-        if (!isCancelled) setAvatarUrl(''); 
-        return; 
+      if (!candidate) {
+        return; // keep previous avatar to avoid flicker
       }
-      
-      // Check if URL is already fresh (has timestamp within last 5 minutes)
-      const urlObj = new URL(candidate, window.location.origin);
-      const timestamp = urlObj.searchParams.get('t');
-      if (timestamp) {
-        const age = Date.now() - parseInt(timestamp);
-        if (age < 5 * 60 * 1000) { // Less than 5 minutes old
-          if (!isCancelled) setAvatarUrl(candidate);
-          return;
-        }
-      }
-      
+
+      const base = candidate.split('?')[0];
+      let prevBase: string | null = null;
+      try { prevBase = sessionStorage.getItem(AVATAR_CACHE_KEY); } catch {}
+
+      // If base hasn't changed, keep current src (no re-sign)
+      if (prevBase === base) return;
+
       try {
-        const refreshed = await convertToSignedUrl(candidate, 'job-applications', 86400);
-        const finalUrl = (refreshed || candidate);
-        
-        if (!isCancelled) {
-          setAvatarUrl(finalUrl);
+        const refreshed = await convertToSignedUrl(candidate, 'job-applications', 604800);
+        if (!isCancelled && refreshed) {
+          setAvatarUrl((prev) => prev || refreshed); // keep previous until we have new
+          setAvatarUrl(refreshed);
+          try { sessionStorage.setItem(AVATAR_CACHE_KEY, base); } catch {}
         }
       } catch {
-        if (!isCancelled) {
-          setAvatarUrl(candidate);
-        }
+        // ignore errors, keep previous src
       }
     };
-    
+
     loadAvatar();
-    
-    return () => {
-      isCancelled = true;
-    };
+    return () => { isCancelled = true; };
   }, [profile?.cover_image_url, profile?.profile_image_url]);
 
   // Memoized navigation handler to prevent re-renders
@@ -136,7 +128,9 @@ export const AppSidebar = memo(function AppSidebar() {
   }, [checkBeforeNavigation, navigate, isMobile, setOpenMobile]);
 
   // Memoized active state checker
-  const isActiveUrl = useCallback((path: string) => currentPath === path, [currentPath]);
+  const isActiveUrl = useCallback((url: string) => {
+    return window.location.pathname === url || (url === "/" && window.location.pathname === "/") || window.location.pathname.startsWith(url);
+  }, []);
 
   return (
     <Sidebar
@@ -148,13 +142,15 @@ export const AppSidebar = memo(function AppSidebar() {
         {!collapsed && (
           <div className="p-4">
             <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10 ring-2 ring-white/20">
+                <Avatar className="h-10 w-10 ring-2 ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
                   <AvatarImage 
                     src={avatarUrl} 
                     alt="Profilbild" 
                     onError={() => setAvatarUrl('')}
                     loading="eager"
-                    decoding="async"
+                    decoding="sync"
+                    fetchPriority="high"
+                    draggable={false}
                   />
                   <AvatarFallback className="bg-white/20 text-white">
                     {profile?.first_name?.[0]}{profile?.last_name?.[0]}
