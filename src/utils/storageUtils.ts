@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 const signedUrlCache = new Map<string, { url: string; fetchedAt: number; maxAgeMs: number }>();
 
 // Default max age we keep a signed URL before refreshing (cap to avoid using near-expiry tokens)
-const DEFAULT_CACHE_MAX_AGE_MS = 10 * 60 * 1000; // 10 minutes
+const DEFAULT_CACHE_MAX_AGE_MS = 6 * 24 * 60 * 60 * 1000; // 6 dagar
 
 
 /**
@@ -80,7 +80,7 @@ export const getStoragePathFromUrl = (url: string): string | null => {
 export const convertToSignedUrl = async (
   url: string,
   bucket: string = 'job-applications',
-  expiresIn: number = 86400, // 24 hours default
+  expiresIn: number = 604800, // 7 dagar
   downloadName?: string
 ): Promise<string | null> => {
   if (!url) return null;

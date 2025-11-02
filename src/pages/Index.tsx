@@ -32,6 +32,7 @@ import DeveloperControls from '@/components/DeveloperControls';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRightLeft, Search } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import KeepAlive from '@/components/KeepAlive';
 import { useApplicationsData } from '@/hooks/useApplicationsData';
 import { CandidatesTable } from '@/components/CandidatesTable';
 import { Input } from '@/components/ui/input';
@@ -298,8 +299,8 @@ const Index = () => {
       return <Navigate to="/search-jobs" replace />;
     }
 
-    const renderSidebarContent = () => {
-      switch (location.pathname) {
+    const renderSidebarContent = (path: string) => {
+      switch (path) {
         case '/profile':
           return <Profile />;
         case '/consent':
@@ -327,7 +328,7 @@ const Index = () => {
 
     return (
       <JobSeekerLayout developerView={developerView} onViewChange={setDeveloperView}>
-        {renderSidebarContent()}
+        <KeepAlive activeKey={location.pathname} render={(key) => renderSidebarContent(key)} />
         {showTourOverlay && (
           <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
         )}
@@ -342,13 +343,13 @@ const Index = () => {
       return <Navigate to="/dashboard" replace />;
     }
 
-    const renderEmployerContent = () => {
+    const renderEmployerContent = (path: string) => {
       // Handle job details route with dynamic ID
-      if (location.pathname.startsWith('/job-details/')) {
+      if (path.startsWith('/job-details/')) {
         return <JobDetails />;
       }
       
-      switch (location.pathname) {
+      switch (path) {
         case '/dashboard':
           return <Dashboard />;
         case '/my-jobs':
@@ -383,7 +384,7 @@ const Index = () => {
 
     return (
       <EmployerLayout developerView={developerView} onViewChange={setDeveloperView}>
-        {renderEmployerContent()}
+        <KeepAlive activeKey={location.pathname} render={(key) => renderEmployerContent(key)} />
         {showTourOverlay && (
           <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
         )}
