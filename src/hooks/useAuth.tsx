@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -102,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<UserRoleData | null>(null);
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
+  const isManualSignOutRef = useRef(false);
 
   useEffect(() => {
     let mounted = true;
@@ -112,9 +113,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (event, session) => {
         if (!mounted) return;
 
-        // Förbättrad felhantering för olika auth events
-        if (event === 'SIGNED_OUT' && !session) {
-          // Visa meddelande bara vid oväntad utloggning (token refresh error)
+        // Visa bara toast vid oväntad utloggning (inte vid manuell signOut)
+        if (event === 'SIGNED_OUT' && !session && !isManualSignOutRef.current) {
           setTimeout(() => {
             toast({
               title: 'Session utgången',
@@ -123,6 +123,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               duration: 4000
             });
           }, 100);
+        }
+        
+        // Token refresh-händelser loggas för felsökning
+        if (event === 'TOKEN_REFRESHED') {
+          console.log('✅ Session token uppdaterades automatiskt');
         }
         
         // Update session and user state for all events
@@ -549,41 +554,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
-      // 1) Ask Supabase to revoke/clear session (global scope)
-      await supabase.auth.signOut({ scope: 'global' });
+      // Markera att detta är en manuell utloggning
+      isManualSignOutRef.current = true;
 
-      // 2) Proactively purge any lingering Supabase tokens from storage
-      // Supabase stores the auth token under: sb-<projectRef>-auth-token
-      const SUPABASE_REF = 'rvtsfnaqlnggfkoqygbm';
-      const tokenKey = `sb-${SUPABASE_REF}-auth-token`;
-      try {
-        // Remove the exact key if present
-        localStorage.removeItem(tokenKey);
-        // Fallback: remove any sb- keys to avoid stale sessions
-        for (let i = localStorage.length - 1; i >= 0; i--) {
-          const key = localStorage.key(i) || '';
-          if (key.startsWith('sb-') || key.includes('supabase')) {
-            localStorage.removeItem(key);
-          }
-        }
-      } catch (e) {
-        console.warn('Could not purge localStorage tokens:', e);
-      }
-
-      // 3) Clear app state and sessionStorage
+      // 1) Rensa applikationsstate först
       setUser(null);
       setSession(null);
       setProfile(null);
       setUserRole(null);
       setOrganization(null);
-      try { sessionStorage.clear(); } catch {}
+      
+      // 2) Rensa bara sessionStorage, inte localStorage
+      // Låt Supabase hantera sina egna tokens i localStorage
+      try { 
+        sessionStorage.clear(); 
+      } catch (e) {
+        console.warn('Could not clear sessionStorage:', e);
+      }
 
-      // 4) Notify and hard-redirect to auth (prevents going back to a cached session)
+      // 3) Signera ut från Supabase (global scope)
+      // Detta rensar Supabase's tokens på rätt sätt
+      await supabase.auth.signOut({ scope: 'global' });
+
+      // 4) Notify och redirect
       toast({ title: 'Utloggad', description: 'Du har loggats ut', duration: 2000 });
       window.location.replace('/auth');
     } catch (error) {
       console.error('Error signing out:', error);
-      // Ensure we still clear and redirect even if API errors (e.g., 403 session_not_found)
+      // Säkerställ att vi ändå rensar och redirectar även vid API-fel
       setUser(null);
       setSession(null);
       setProfile(null);
@@ -849,13 +847,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Auto-logout efter inaktivitet: 1 timme (standard) eller 16 timmar (om "Håll mig inloggad")
+  // Auto-logout efter inaktivitet: 8 timmar (standard) eller 30 dagar (om "Håll mig inloggad")
   useEffect(() => {
     if (!user) return; // Bara aktiv när användaren är inloggad
 
     // Kolla om användaren valt "Håll mig inloggad"
     const rememberMe = localStorage.getItem('parium-remember-me') === 'true';
-    const INACTIVITY_TIMEOUT = rememberMe ? 16 * 60 * 60 * 1000 : 1 * 60 * 60 * 1000; // 16 timmar ELLER 1 timme
+    const INACTIVITY_TIMEOUT = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 8 * 60 * 60 * 1000; // 30 dagar ELLER 8 timmar
     
     let timeoutId: NodeJS.Timeout;
 
