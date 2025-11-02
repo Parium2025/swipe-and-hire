@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Loader2, ChevronDown, Search, X, Trash2, Edit } from 'lucide-react';
+import { Plus, Loader2, ChevronDown, Search, X, Trash2, Edit, AlertTriangle } from 'lucide-react';
 import MobileJobWizard from '@/components/MobileJobWizard';
 import CreateTemplateWizard from '@/components/CreateTemplateWizard';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
@@ -629,16 +629,30 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       />
 
       <AlertDialog open={!!templateToDelete} onOpenChange={(open) => !open && setTemplateToDelete(null)}>
-        <AlertDialogContent className="max-w-md bg-white/10 backdrop-blur-sm border-white/20 text-white shadow-lg">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-white text-xl">Ta bort mall</AlertDialogTitle>
-            <AlertDialogDescription className="text-white text-base">
-              Är du säker på att du vill ta bort mallen <span className="font-semibold text-white">"{templateToDelete?.name}"</span>? 
-              Denna åtgärd kan inte ångras.
+        <AlertDialogContent className="border-white/20 text-white w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-md sm:w-[28rem] p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-xl shadow-lg mx-0">
+          <AlertDialogHeader className="space-y-4 text-center">
+            <div className="flex items-center justify-center gap-2.5">
+              <div className="bg-red-500/20 p-2 rounded-full">
+                <AlertTriangle className="h-4 w-4 text-red-400" />
+              </div>
+              <AlertDialogTitle className="text-white text-base md:text-lg font-semibold">
+                Ta bort mall
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-white text-sm leading-relaxed break-words">
+              {templateToDelete && (
+                <>
+                  Är du säker på att du vill ta bort <span className="font-semibold text-white break-words">"{templateToDelete.name}"</span>? Denna åtgärd går inte att ångra.
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-white/20 border-white/30 text-white transition-all duration-300 md:hover:bg-white/30 md:hover:text-white md:hover:border-white/50">
+          <AlertDialogFooter className="flex-row gap-2 mt-4 sm:justify-center">
+            <AlertDialogCancel 
+              onClick={() => setTemplateToDelete(null)}
+              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+              className="flex-[0.6] mt-0 flex items-center justify-center bg-white/10 border-white/20 text-white text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50"
+            >
               Avbryt
             </AlertDialogCancel>
             <AlertDialogAction
@@ -673,8 +687,11 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                 
                 setTemplateToDelete(null);
               }}
-              variant="destructive"
+              variant="destructiveSoft"
+              style={{ height: '44px', minHeight: '44px', padding: '0 1rem' }}
+              className="flex-[0.4] text-sm flex items-center justify-center"
             >
+              <Trash2 className="h-4 w-4 mr-1.5" />
               Ta bort
             </AlertDialogAction>
           </AlertDialogFooter>
