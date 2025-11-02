@@ -1172,11 +1172,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent 
-          className="parium-panel relative max-w-md h-auto max-h-[90vh] md:max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
+          className="parium-panel max-w-md h-auto max-h-[90vh] md:max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
-          <AnimatedBackground showBubbles={false} variant="card" />
+          <AnimatedBackground showBubbles={false} />
           <div className="flex flex-col max-h-[90vh] relative z-10 overflow-hidden">
             {/* Header */}
             <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">
