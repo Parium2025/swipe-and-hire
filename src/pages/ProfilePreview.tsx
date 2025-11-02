@@ -130,7 +130,7 @@ export default function ProfilePreview() {
 
       try {
         const refreshed = await convertToSignedUrl(candidate, 'job-applications', 86400);
-        const finalUrl = (refreshed || candidate) + (candidate.includes('?') ? `&t=${Date.now()}` : `?t=${Date.now()}`);
+        const finalUrl = refreshed || candidate;
         setAvatarUrl(finalUrl);
       } catch {
         setAvatarUrl(candidate);

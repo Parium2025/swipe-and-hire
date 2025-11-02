@@ -82,7 +82,7 @@ export const convertToSignedUrl = async (
     const existingPath = getStoragePathFromUrl(url);
     if (existingPath) {
       const refreshed = await createSignedUrl(bucket, existingPath, expiresIn, downloadName);
-      return refreshed ? `${refreshed}&t=${Date.now()}` : null;
+      return refreshed;
     }
     // Fallback: return original if we couldn't parse
     return url;

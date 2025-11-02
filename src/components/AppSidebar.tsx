@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
@@ -47,7 +47,7 @@ const businessItems = [
   { title: 'Betalningar', url: '/billing', icon: CreditCard },
 ];
 
-export function AppSidebar() {
+export const AppSidebar = memo(function AppSidebar() {
   const { state, setOpenMobile, isMobile } = useSidebar();
   const collapsed = state === 'collapsed';
   const { profile, userRole, signOut, user } = useAuth();
@@ -103,7 +103,7 @@ export function AppSidebar() {
       
       try {
         const refreshed = await convertToSignedUrl(candidate, 'job-applications', 86400);
-        const finalUrl = (refreshed || candidate) + (candidate.includes('?') ? `&t=${Date.now()}` : `?t=${Date.now()}`);
+        const finalUrl = (refreshed || candidate);
         
         if (!isCancelled) {
           setAvatarUrl(finalUrl);
@@ -315,4 +315,4 @@ export function AppSidebar() {
       </SidebarContent>
     </Sidebar>
   );
-}
+});
