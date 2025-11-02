@@ -508,7 +508,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                       }}
                                       variant="ghost"
                                       size="sm"
-                                      className="text-white/70 hover:text-white hover:bg-white/10 h-8 w-8 p-0 flex-shrink-0"
+                                      className="bg-white/10 border border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/20 h-8 w-8 p-0 flex-shrink-0"
                                     >
                                       <Pencil className="h-4 w-4" />
                                     </Button>
@@ -519,7 +519,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                       }}
                                       variant="ghost"
                                       size="sm"
-                                      className="text-destructive hover:text-destructive/90 hover:bg-destructive/15 h-8 w-8 p-0 flex-shrink-0"
+                                      className="bg-white/10 border border-white/20 text-white transition-all duration-300 md:hover:bg-red-500/20 md:hover:border-red-500/40 hover:text-white md:hover:text-white h-8 w-8 p-0 flex-shrink-0"
                                     >
                                       <Trash2 className="h-4 w-4" />
                                     </Button>
