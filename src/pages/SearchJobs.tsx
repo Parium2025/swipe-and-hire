@@ -467,7 +467,7 @@ const SearchJobs = () => {
                         <ChevronDown className="h-4 w-4 flex-shrink-0" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white max-h-80 overflow-y-auto z-50">
+                    <DropdownMenuContent className="w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white max-h-80 overflow-y-auto">
                       <DropdownMenuItem
                         onClick={() => {
                           setSelectedCategory('all-categories');
@@ -504,7 +504,7 @@ const SearchJobs = () => {
                     <Users className="h-3 w-3" />
                     Specifik roll inom {OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.label}
                   </Label>
-                  <DropdownMenu modal={false}>
+                  <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
@@ -521,7 +521,7 @@ const SearchJobs = () => {
                         <ChevronDown className="h-4 w-4 flex-shrink-0" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white max-h-80 overflow-y-auto z-[9999]">
+                    <DropdownMenuContent className="w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white max-h-80 overflow-y-auto">
                       <DropdownMenuItem
                         onClick={() => setSelectedSubcategories([])}
                         className="cursor-pointer hover:bg-slate-700/70 text-white font-medium border-b border-slate-600/30"
