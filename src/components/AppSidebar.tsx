@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, memo } from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect, memo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import {
@@ -29,8 +29,6 @@ import {
 } from '@/components/ui/sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { convertToSignedUrl } from '@/utils/storageUtils';
 
 const AVATAR_CACHE_KEY = 'parium_profile_avatar_base';
 
@@ -50,18 +48,17 @@ const businessItems = [
 ];
 
 export const AppSidebar = memo(function AppSidebar() {
-  const { state, setOpenMobile, isMobile } = useSidebar();
+  const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
   const collapsed = state === 'collapsed';
   const { profile, userRole, signOut, user } = useAuth();
-  const location = useLocation();
   const navigate = useNavigate();
   const { checkBeforeNavigation } = useUnsavedChanges();
-  const currentPath = location.pathname;
-  const [avatarUrl, setAvatarUrl] = useState<string>('');
-
-  const isActive = (path: string) => currentPath === path;
-  const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? 'bg-muted text-primary font-medium' : 'hover:bg-muted/50';
+  const [avatarUrl, setAvatarUrl] = useState<string>(() => {
+    const fromProfile = profile?.cover_image_url || profile?.profile_image_url || '';
+    const cached = typeof window !== 'undefined' ? sessionStorage.getItem(AVATAR_CACHE_KEY) : null;
+    const raw = (typeof fromProfile === 'string' && fromProfile.trim() !== '') ? fromProfile : cached;
+    return raw ? raw.split('?')[0] : null;
+  });
 
   const isEmployer = userRole?.role === 'employer';
   const isAdmin = user?.email === 'fredrikandits@hotmail.com';
@@ -72,65 +69,65 @@ export const AppSidebar = memo(function AppSidebar() {
     ...(isAdmin ? [{ title: 'Admin Panel', url: '/admin', icon: Settings }] : [])
   ];
 
-  // Close mobile sidebar when user cancels unsaved dialog
+  // Listen for unsaved changes cancel event to close sidebar
   useEffect(() => {
-    const closeOnCancel = () => {
-      if (isMobile) setOpenMobile(false);
-    };
-    window.addEventListener('unsaved-cancel', closeOnCancel as EventListener);
-    return () => window.removeEventListener('unsaved-cancel', closeOnCancel as EventListener);
-}, [isMobile, setOpenMobile]);
-
-  // Ensure avatar uses a stable signed URL using base path caching to avoid flicker
-  useEffect(() => {
-    let isCancelled = false;
-
-    const loadAvatar = async () => {
-      const candidate = profile?.cover_image_url || profile?.profile_image_url || '';
-      if (!candidate) {
-        return; // keep previous avatar to avoid flicker
-      }
-
-      const base = candidate.split('?')[0];
-      let prevBase: string | null = null;
-      try { prevBase = sessionStorage.getItem(AVATAR_CACHE_KEY); } catch {}
-
-      // If base hasn't changed, keep current src (no re-sign)
-      if (prevBase === base) return;
-
-      try {
-        const refreshed = await convertToSignedUrl(candidate, 'job-applications', 604800);
-        if (!isCancelled && refreshed) {
-          setAvatarUrl((prev) => prev || refreshed); // keep previous until we have new
-          setAvatarUrl(refreshed);
-          try { sessionStorage.setItem(AVATAR_CACHE_KEY, base); } catch {}
+    const handleUnsavedCancel = () => {
+      console.log('Unsaved cancel event received - closing sidebar');
+      // Endast stäng sidebaren på mobil/tablet (skärmar under 768px)
+      if (isMobile || window.innerWidth < 768) {
+        if (isMobile) {
+          setOpenMobile(false);
+        } else {
+          setOpen(false);
         }
-      } catch {
-        // ignore errors, keep previous src
       }
+      // På desktop (768px+) låt sidebaren vara öppen
     };
 
-    loadAvatar();
-    return () => { isCancelled = true; };
+    window.addEventListener('unsaved-cancel', handleUnsavedCancel);
+    return () => window.removeEventListener('unsaved-cancel', handleUnsavedCancel);
+  }, [isMobile, setOpenMobile, setOpen]);
+
+  // Keep last known avatar; don't reset state unless value actually changes
+  useEffect(() => {
+    const raw = profile?.cover_image_url || profile?.profile_image_url || '';
+    if (typeof raw === 'string' && raw.trim() !== '') {
+      try {
+        const base = raw.split('?')[0];
+        setAvatarUrl((prev) => {
+          if (prev === base) return prev; // no change → avoid flicker
+          try { sessionStorage.setItem(AVATAR_CACHE_KEY, base); } catch {}
+          return base;
+        });
+      } catch (error) {
+        console.error('Failed to parse profile avatar:', error);
+      }
+    } else if (raw === '' || raw === null) {
+      setAvatarUrl('');
+      try { sessionStorage.removeItem(AVATAR_CACHE_KEY); } catch {}
+    }
+    // if undefined, keep previous URL while profile is re-fetching
   }, [profile?.cover_image_url, profile?.profile_image_url]);
 
-  // Memoized navigation handler to prevent re-renders
-  const handleNavigation = useCallback((url: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    
-    if (checkBeforeNavigation(url)) {
-      navigate(url);
-      // Close mobile sidebar immediately for better UX
+  const handleNavigation = (href: string) => {
+    if (checkBeforeNavigation(href)) {
+      navigate(href);
+      // Scrolla till toppen på mobil
+      if (isMobile || window.innerWidth < 768) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      // Stäng endast mobilsidebaren efter navigation
       if (isMobile) {
         setOpenMobile(false);
       }
+      // På desktop behåller vi sidebarens nuvarande tillstånd
     }
-  }, [checkBeforeNavigation, navigate, isMobile, setOpenMobile]);
+  };
 
-  // Memoized active state checker
-  const isActiveUrl = useCallback((url: string) => {
-    return window.location.pathname === url || (url === "/" && window.location.pathname === "/") || window.location.pathname.startsWith(url);
-  }, []);
+  const isActiveUrl = (url: string) => {
+    return window.location.pathname === url || 
+           (url === "/" && window.location.pathname === "/");
+  };
 
   return (
     <Sidebar
@@ -138,7 +135,7 @@ export const AppSidebar = memo(function AppSidebar() {
       collapsible="icon"
     >
       <SidebarContent className="gap-0">
-        {/* User Profile Section */}
+        {/* User Profile Section - only show when not collapsed */}
         {!collapsed && (
           <div className="p-4">
             <div className="flex items-center gap-3">
@@ -168,6 +165,8 @@ export const AppSidebar = memo(function AppSidebar() {
           </div>
         )}
 
+        <SidebarSeparator className="bg-white/20 mx-4" />
+
         {/* Navigation Groups */}
         {/* Main Section */}
         <SidebarGroup>
@@ -176,18 +175,22 @@ export const AppSidebar = memo(function AppSidebar() {
                {mainItems.map((item) => (
                  <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
-                      onClick={(e) => { handleNavigation(item.url, e); (e.currentTarget as HTMLElement).blur(); }}
+                      asChild
                       className={`
-                        mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none active:!bg-transparent
+                        mx-2 rounded-lg transition-all duration-200 active:!bg-transparent
                         ${isActiveUrl(item.url) 
                           ? 'bg-white/20 text-white [&_svg]:text-white' 
                           : 'text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white'
                         }
                       `}
-                     title={collapsed ? item.title : undefined}
                    >
-                     <item.icon className="h-4 w-4" />
-                     {!collapsed && <span>{item.title}</span>}
+                    <button
+                      onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
+                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {!collapsed && <span className="font-medium">{item.title}</span>}
+                    </button>
                    </SidebarMenuButton>
                  </SidebarMenuItem>
                ))}
@@ -200,26 +203,30 @@ export const AppSidebar = memo(function AppSidebar() {
         {/* Profile Section */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-white text-sm uppercase tracking-wide px-4">
-            {collapsed ? <User className="h-4 w-4" /> : 'Profil'}
+            Profil
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
                {profileItems.map((item) => (
                  <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
+                      asChild
                       data-onboarding={item.title === 'Min Profil' ? 'min-profil' : undefined}
-                      onClick={(e) => { handleNavigation(item.url, e); (e.currentTarget as HTMLElement).blur(); }}
                       className={`
-                        mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none active:!bg-transparent
+                        mx-2 rounded-lg transition-all duration-200 active:!bg-transparent
                         ${isActiveUrl(item.url) 
                           ? 'bg-white/20 text-white [&_svg]:text-white' 
                           : 'text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white'
                         }
                       `}
-                     title={collapsed ? item.title : undefined}
                    >
-                     <item.icon className="h-4 w-4" />
-                     {!collapsed && <span>{item.title}</span>}
+                    <button
+                      onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
+                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {!collapsed && <span className="font-medium">{item.title}</span>}
+                    </button>
                    </SidebarMenuButton>
                  </SidebarMenuItem>
                ))}
@@ -232,25 +239,29 @@ export const AppSidebar = memo(function AppSidebar() {
         {/* Business Section */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-white text-sm uppercase tracking-wide px-4">
-            {collapsed ? <Building className="h-4 w-4" /> : 'Ekonomi'}
+            Ekonomi
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
                {businessItems.map((item) => (
                  <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
-                      onClick={(e) => { handleNavigation(item.url, e); (e.currentTarget as HTMLElement).blur(); }}
+                      asChild
                       className={`
-                        mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none active:!bg-transparent
+                        mx-2 rounded-lg transition-all duration-200 active:!bg-transparent
                         ${isActiveUrl(item.url) 
                           ? 'bg-white/20 text-white [&_svg]:text-white' 
                           : 'text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white'
                         }
                       `}
-                     title={collapsed ? item.title : undefined}
                    >
-                     <item.icon className="h-4 w-4" />
-                     {!collapsed && <span>{item.title}</span>}
+                    <button
+                      onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
+                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {!collapsed && <span className="font-medium">{item.title}</span>}
+                    </button>
                    </SidebarMenuButton>
                  </SidebarMenuItem>
                ))}
@@ -263,25 +274,29 @@ export const AppSidebar = memo(function AppSidebar() {
         {/* Support Section */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-white text-sm uppercase tracking-wide px-4">
-            {collapsed ? <MessageCircle className="h-4 w-4" /> : 'Support'}
+            Support
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
                {supportItems.map((item) => (
                  <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
-                      onClick={(e) => { handleNavigation(item.url, e); (e.currentTarget as HTMLElement).blur(); }}
+                      asChild
                       className={`
-                        mx-2 rounded-lg transition-all duration-200 outline-none focus:outline-none active:!bg-transparent
+                        mx-2 rounded-lg transition-all duration-200 active:!bg-transparent
                         ${isActiveUrl(item.url) 
                           ? 'bg-white/20 text-white [&_svg]:text-white' 
                           : 'text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white'
                         }
                       `}
-                     title={collapsed ? item.title : undefined}
                    >
-                     <item.icon className="h-4 w-4" />
-                     {!collapsed && <span>{item.title}</span>}
+                    <button
+                      onClick={(e) => { handleNavigation(item.url); (e.currentTarget as HTMLButtonElement).blur(); }}
+                      className="flex items-center gap-3 w-full outline-none focus:outline-none"
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {!collapsed && <span className="font-medium">{item.title}</span>}
+                    </button>
                    </SidebarMenuButton>
                  </SidebarMenuItem>
                ))}
@@ -302,7 +317,6 @@ export const AppSidebar = memo(function AppSidebar() {
               md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white
               ${collapsed ? 'px-2' : 'px-4'}
             `}
-            title={collapsed ? 'Logga ut' : undefined}
           >
             <LogOut className="h-4 w-4" />
             {!collapsed && <span>Logga ut</span>}
