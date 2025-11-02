@@ -1176,7 +1176,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
-          <AnimatedBackground showBubbles={false} />
+          <AnimatedBackground showBubbles={false} variant="card" />
           <div className="flex flex-col max-h-[90vh] relative z-10 overflow-hidden">
             {/* Header */}
             <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">

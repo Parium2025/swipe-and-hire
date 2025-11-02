@@ -6,11 +6,13 @@ import { memo } from 'react';
  */
 interface AnimatedBackgroundProps {
   showBubbles?: boolean;
+  variant?: 'viewport' | 'card';
 }
 
-export const AnimatedBackground = memo(({ showBubbles = true }: AnimatedBackgroundProps) => {
+export const AnimatedBackground = memo(({ showBubbles = true, variant = 'viewport' }: AnimatedBackgroundProps) => {
+  const positionClass = variant === 'card' ? 'absolute' : 'fixed';
   return (
-    <div className="fixed inset-0 pointer-events-none z-0">
+    <div className={`${positionClass} inset-0 pointer-events-none z-0`}>
       {showBubbles && (
         <>
           {/* Left-side bubbles (top corner) */}
