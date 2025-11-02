@@ -118,7 +118,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Visa bara toast vid oväntad utloggning (inte vid manuell signOut)
         if (event === 'SIGNED_OUT' && !session && !isManualSignOutRef.current) {
           const onAuthPage = typeof window !== 'undefined' && window.location.pathname === '/auth';
-          if (!onAuthPage) {
+          const duringSignIn = isSigningInRef.current;
+          if (!onAuthPage && !duringSignIn) {
             setTimeout(() => {
               toast({
                 title: 'Session utgången',
@@ -440,13 +441,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
+      isSigningInRef.current = true;
+      console.log('🔍 SignIn started for:', email);
+
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (error) {
-        // Förenklad felhantering - inga användaruppräkningskontroller av säkerhetsskäl
         if (error.message === 'Invalid login credentials') {
           toast({
             title: "Inloggning misslyckades",
@@ -460,20 +463,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             variant: "default",
             duration: 8000
           });
-          
-          return { 
-            error: { 
-              ...error,
-              code: 'email_not_confirmed',
-              message: 'Email not confirmed'
-            }
-          };
+          return { error: { ...error, code: 'email_not_confirmed', message: 'Email not confirmed' } };
         } else {
-          toast({
-            title: "Inloggningsfel",
-            description: error.message,
-            variant: "destructive"
-          });
+          toast({ title: "Inloggningsfel", description: error.message, variant: "destructive" });
         }
         return { error };
       }
@@ -481,12 +473,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // No toast on success - immediate navigation for best UX
       return {};
     } catch (error: any) {
-      toast({
-        title: "Inloggningsfel",
-        description: "Ett oväntat fel inträffade. Försök igen.",
-        variant: "destructive"
-      });
+      toast({ title: "Inloggningsfel", description: "Ett oväntat fel inträffade. Försök igen.", variant: "destructive" });
       return { error };
+    } finally {
+      isSigningInRef.current = false;
     }
   };
 
