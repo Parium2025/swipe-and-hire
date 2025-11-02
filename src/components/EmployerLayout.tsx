@@ -25,7 +25,7 @@ const EmployerLayout = memo(({ children, developerView, onViewChange }: Employer
     if (!user) return;
 
     queryClient.prefetchInfiniteQuery({
-      queryKey: ['applications', user.id],
+      queryKey: ['applications', user.id, ''], // Include empty search query to match hook
       initialPageParam: 0,
       queryFn: async () => {
         const { data, error } = await supabase
@@ -37,9 +37,13 @@ const EmployerLayout = memo(({ children, developerView, onViewChange }: Employer
             first_name,
             last_name,
             email,
+            phone,
+            location,
+            bio,
             status,
             applied_at,
-            updated_at
+            updated_at,
+            job_postings!inner(title)
           `)
           .order('applied_at', { ascending: false })
           .range(0, 24);
@@ -47,7 +51,13 @@ const EmployerLayout = memo(({ children, developerView, onViewChange }: Employer
         if (error) throw error;
         if (!data) return { items: [], hasMore: false };
 
-        const items = data;
+        // Transform data to match useApplicationsData format
+        const items = data.map((item: any) => ({
+          ...item,
+          job_title: item.job_postings?.title || 'Okänt jobb',
+          job_postings: undefined,
+        }));
+        
         const hasMore = items.length === 25;
 
         // Write to snapshot
