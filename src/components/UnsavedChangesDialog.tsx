@@ -31,11 +31,11 @@ export function UnsavedChangesDialog({
             Du har osparade ändringar. Är du säker på att du vill lämna sidan utan att spara?
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={onCancel} className="bg-white/20 border-white/30 text-white transition-all duration-300 md:hover:bg-white/30 md:hover:text-white md:hover:border-white/50">
+        <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:justify-center">
+          <AlertDialogCancel onClick={onCancel} className="bg-white/10 border-white/30 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:text-white md:hover:border-white/50 m-0">
             Avbryt
           </AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} variant="destructive">
+          <AlertDialogAction onClick={onConfirm} className="bg-red-600/90 hover:bg-red-600 text-white border-0 transition-all duration-300 m-0">
             Lämna utan att spara
           </AlertDialogAction>
         </AlertDialogFooter>
