@@ -1025,6 +1025,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       }}>
       <DialogContent 
         className="parium-panel max-w-md h-auto max-h-[90vh] md:max-h-[800px] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
+        overlayHidden
         onInteractOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
