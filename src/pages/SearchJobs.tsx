@@ -72,6 +72,7 @@ const SearchJobs = () => {
   const pageSize = 10;
   const listTopRef = useRef<HTMLDivElement>(null);
   const didMountRef = useRef(false);
+  const isInitialLoadRef = useRef(true);
 
   const locations = [
     'Stockholm', 'Göteborg', 'Malmö', 'Uppsala', 'Västerås', 'Örebro', 'Linköping', 'Helsingborg', 'Jönköping', 
@@ -87,7 +88,10 @@ const SearchJobs = () => {
   const employmentTypes = SEARCH_EMPLOYMENT_TYPES;
 
   const fetchJobs = async () => {
-    setLoading(true);
+    // Only show loading state on initial load, not when filtering
+    if (isInitialLoadRef.current) {
+      setLoading(true);
+    }
     try {
       let query = supabase
         .from('job_postings')
@@ -167,7 +171,10 @@ const SearchJobs = () => {
         variant: "destructive"
       });
     } finally {
-      setLoading(false);
+      if (isInitialLoadRef.current) {
+        setLoading(false);
+        isInitialLoadRef.current = false;
+      }
     }
   };
 
