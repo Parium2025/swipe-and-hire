@@ -15,6 +15,7 @@ import {
   useSidebar
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import ProfileVideo from "@/components/ProfileVideo";
 import { Button } from "@/components/ui/button";
 import { 
   User,
@@ -53,13 +54,15 @@ export function AppSidebar() {
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(() => {
-    const fromProfile = profile?.cover_image_url || profile?.profile_image_url || '';
+    const fromProfile = profile?.profile_image_url || profile?.cover_image_url || '';
     const cached = typeof window !== 'undefined' ? sessionStorage.getItem(AVATAR_CACHE_KEY) : null;
     const raw = (typeof fromProfile === 'string' && fromProfile.trim() !== '') ? fromProfile : cached;
     return raw ? raw.split('?')[0] : null;
   });
   const [avatarLoaded, setAvatarLoaded] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
+  
+  const hasVideo = !!profile?.video_url;
 
   const isAdmin = user?.email === 'fredrikandits@hotmail.com';
 
@@ -90,7 +93,7 @@ export function AppSidebar() {
 
   // Keep last known avatar; don't reset state unless value actually changes
   useEffect(() => {
-    const raw = profile?.cover_image_url || profile?.profile_image_url || '';
+    const raw = profile?.profile_image_url || profile?.cover_image_url || '';
     if (typeof raw === 'string' && raw.trim() !== '') {
       try {
         const base = raw.split('?')[0];
@@ -111,7 +114,7 @@ export function AppSidebar() {
       try { sessionStorage.removeItem(AVATAR_CACHE_KEY); } catch {}
     }
     // if undefined, keep previous URL while profile is re-fetching
-  }, [profile?.cover_image_url, profile?.profile_image_url]);
+  }, [profile?.profile_image_url, profile?.cover_image_url, profile?.video_url]);
 
   const handleNavigation = (href: string) => {
     if (checkBeforeNavigation(href)) {
@@ -150,24 +153,34 @@ export function AppSidebar() {
         {!collapsed && (
           <div className="p-4">
             <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10 ring-2 ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
-                <AvatarImage 
-                  src={avatarUrl || undefined} 
-                  alt="Profilbild" 
-                  onError={() => {
-                    setAvatarError(true);
-                    setAvatarUrl(null);
-                  }}
-                  onLoad={() => setAvatarLoaded(true)}
-                  loading="eager"
-                  decoding="sync"
-                  fetchPriority="high"
-                  draggable={false}
+              {hasVideo && profile?.video_url ? (
+                <ProfileVideo
+                  videoUrl={profile.video_url}
+                  coverImageUrl={profile.cover_image_url || profile.profile_image_url}
+                  userInitials={`${profile?.first_name?.[0] || ''}${profile?.last_name?.[0] || ''}`}
+                  alt="Profilvideo"
+                  className="h-10 w-10 ring-2 ring-white/20 rounded-full"
                 />
-                <AvatarFallback className="bg-white/20 text-white">
-                  {profile?.first_name?.[0]}{profile?.last_name?.[0]}
-                </AvatarFallback>
-              </Avatar>
+              ) : (
+                <Avatar className="h-10 w-10 ring-2 ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
+                  <AvatarImage 
+                    src={avatarUrl || undefined} 
+                    alt="Profilbild" 
+                    onError={() => {
+                      setAvatarError(true);
+                      setAvatarUrl(null);
+                    }}
+                    onLoad={() => setAvatarLoaded(true)}
+                    loading="eager"
+                    decoding="sync"
+                    fetchPriority="high"
+                    draggable={false}
+                  />
+                  <AvatarFallback className="bg-white/20 text-white">
+                    {profile?.first_name?.[0]}{profile?.last_name?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+              )}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white truncate">
                   {profile?.first_name} {profile?.last_name}
