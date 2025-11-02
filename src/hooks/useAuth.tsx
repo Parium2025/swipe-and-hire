@@ -103,6 +103,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
   const isManualSignOutRef = useRef(false);
+  const isInitializingRef = useRef(true);
+  const isSigningInRef = useRef(false);
 
   useEffect(() => {
     let mounted = true;
@@ -115,14 +117,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Visa bara toast vid oväntad utloggning (inte vid manuell signOut)
         if (event === 'SIGNED_OUT' && !session && !isManualSignOutRef.current) {
-          setTimeout(() => {
-            toast({
-              title: 'Session utgången',
-              description: 'Din session har gått ut. Vänligen logga in igen.',
-              variant: 'destructive',
-              duration: 4000
-            });
-          }, 100);
+          const onAuthPage = typeof window !== 'undefined' && window.location.pathname === '/auth';
+          if (!onAuthPage) {
+            setTimeout(() => {
+              toast({
+                title: 'Session utgången',
+                description: 'Din session har gått ut. Vänligen logga in igen.',
+                variant: 'destructive',
+                duration: 4000
+              });
+            }, 100);
+          }
         }
         
         // Token refresh-händelser loggas för felsökning
