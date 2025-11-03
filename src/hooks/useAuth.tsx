@@ -827,65 +827,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Auto-logout efter inaktivitet: 8 timmar (standard) eller 30 dagar (om "Håll mig inloggad")
-  useEffect(() => {
-    if (!user) return; // Bara aktiv när användaren är inloggad
-
-    // Kolla om användaren valt "Håll mig inloggad"
-    const rememberMe = localStorage.getItem('parium-remember-me') === 'true';
-    const INACTIVITY_TIMEOUT = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 8 * 60 * 60 * 1000; // 30 dagar ELLER 8 timmar
-    
-    let timeoutId: NodeJS.Timeout;
-
-    const resetTimer = () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-
-      // Automatisk utloggning efter inaktivitet
-      timeoutId = setTimeout(() => {
-        toast({
-          title: 'Session utgången',
-          description: 'Du har loggats ut efter inaktivitet',
-          duration: 3000
-        });
-        signOut();
-      }, INACTIVITY_TIMEOUT);
-    };
-
-    // Lyssna på användaraktivitet - throttled för prestanda
-    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
-    let throttleTimeout: NodeJS.Timeout | undefined;
-    
-    const throttledResetTimer = () => {
-      if (!throttleTimeout) {
-        resetTimer();
-        throttleTimeout = setTimeout(() => {
-          throttleTimeout = undefined;
-        }, 1000); // Max en gång per sekund
-      }
-    };
-
-    events.forEach(event => {
-      window.addEventListener(event, throttledResetTimer);
-    });
-
-    // Starta initial timer
-    resetTimer();
-
-    // Cleanup
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      if (throttleTimeout) {
-        clearTimeout(throttleTimeout);
-      }
-      events.forEach(event => {
-        window.removeEventListener(event, throttledResetTimer);
-      });
-    };
-  }, [user, toast, signOut]); // Beroenden: user, toast, signOut
 
   const value = {
     user,
