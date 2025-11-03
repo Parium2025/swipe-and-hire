@@ -208,15 +208,33 @@ export const JobSearchBar = ({
                   align="end" 
                   className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20"
                 >
-                  {Object.entries(sortLabels).map(([key, label]) => (
-                    <DropdownMenuItem 
-                      key={key} 
-                      onClick={() => onSortChange(key as SortOption)}
-                      className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
-                    >
-                      {label}
-                    </DropdownMenuItem>
-                  ))}
+                  <DropdownMenuItem 
+                    onClick={() => onSortChange('newest')}
+                    className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                  >
+                    {sortLabels.newest}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-white/20" />
+                  <DropdownMenuItem 
+                    onClick={() => onSortChange('oldest')}
+                    className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                  >
+                    {sortLabels.oldest}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-white/20" />
+                  <DropdownMenuItem 
+                    onClick={() => onSortChange('title-asc')}
+                    className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                  >
+                    {sortLabels['title-asc']}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-white/20" />
+                  <DropdownMenuItem 
+                    onClick={() => onSortChange('title-desc')}
+                    className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                  >
+                    {sortLabels['title-desc']}
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -304,15 +322,33 @@ export const JobSearchBar = ({
                 align="end" 
                 className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20"
               >
-                {Object.entries(sortLabels).map(([key, label]) => (
-                  <DropdownMenuItem 
-                    key={key} 
-                    onClick={() => onSortChange(key as SortOption)}
-                    className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
-                  >
-                    {label}
-                  </DropdownMenuItem>
-                ))}
+                <DropdownMenuItem 
+                  onClick={() => onSortChange('newest')}
+                  className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                >
+                  {sortLabels.newest}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-white/20" />
+                <DropdownMenuItem 
+                  onClick={() => onSortChange('oldest')}
+                  className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                >
+                  {sortLabels.oldest}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-white/20" />
+                <DropdownMenuItem 
+                  onClick={() => onSortChange('title-asc')}
+                  className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                >
+                  {sortLabels['title-asc']}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-white/20" />
+                <DropdownMenuItem 
+                  onClick={() => onSortChange('title-desc')}
+                  className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+                >
+                  {sortLabels['title-desc']}
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
