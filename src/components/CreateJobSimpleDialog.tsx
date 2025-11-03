@@ -12,12 +12,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Loader2, ChevronDown, Search, X, Trash2, Edit, AlertTriangle } from 'lucide-react';
+import { Plus, Loader2, ChevronDown, Search, X, Trash2, Edit, AlertTriangle, Sparkles } from 'lucide-react';
 import MobileJobWizard from '@/components/MobileJobWizard';
 import CreateTemplateWizard from '@/components/CreateTemplateWizard';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import type { JobPosting } from '@/hooks/useJobsData';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface JobTemplate {
   id: string;
@@ -50,6 +51,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const [selectedTemplate, setSelectedTemplate] = useState<JobTemplate | null>(null);
   const [jobTitle, setJobTitle] = useState('');
   const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [showTransition, setShowTransition] = useState(false);
   const [templateMenuOpen, setTemplateMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showTemplateWizard, setShowTemplateWizard] = useState(false);
@@ -225,11 +227,15 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       selectedTemplateId: selectedTemplate?.id,
     });
     
-    // Kort delay för smidig övergång
+    // Visa övergångsanimation
     setOpen(false);
+    setShowTransition(true);
+    
+    // Vänta på att animationen ska spelas
     setTimeout(() => {
+      setShowTransition(false);
       setShowDetailDialog(true);
-    }, 150);
+    }, 600);
   }, [jobTitle, selectedTemplate, toast]);
 
   const handleClose = useCallback(() => {
@@ -723,6 +729,84 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
         onConfirm={handleConfirmClose}
         onCancel={handleCancelClose}
       />
+
+      {/* Övergångsanimation */}
+      <AnimatePresence>
+        {showTransition && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 1.2, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="relative"
+            >
+              {/* Glödande ring */}
+              <motion.div
+                className="absolute inset-0 rounded-full"
+                animate={{
+                  scale: [1, 1.5, 1],
+                  opacity: [0.6, 0.2, 0.6],
+                }}
+                transition={{
+                  duration: 0.6,
+                  repeat: 0,
+                  ease: "easeInOut"
+                }}
+                style={{
+                  background: 'radial-gradient(circle, hsl(var(--secondary)) 0%, transparent 70%)',
+                  filter: 'blur(20px)'
+                }}
+              />
+              
+              {/* Animerade prickar runt cirkeln */}
+              {[...Array(8)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-3 h-3 bg-secondary rounded-full"
+                  style={{
+                    left: '50%',
+                    top: '50%',
+                    marginLeft: '-6px',
+                    marginTop: '-6px',
+                  }}
+                  animate={{
+                    x: [0, Math.cos(i * Math.PI / 4) * 40],
+                    y: [0, Math.sin(i * Math.PI / 4) * 40],
+                    opacity: [0, 1, 0],
+                    scale: [0, 1, 0.5],
+                  }}
+                  transition={{
+                    duration: 0.6,
+                    delay: i * 0.05,
+                    ease: "easeOut"
+                  }}
+                />
+              ))}
+              
+              {/* Central ikon */}
+              <motion.div
+                className="relative z-10 w-16 h-16 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg"
+                animate={{
+                  rotate: [0, 180],
+                  scale: [1, 1.1, 1],
+                }}
+                transition={{
+                  duration: 0.6,
+                  ease: "easeInOut"
+                }}
+              >
+                <Sparkles className="w-8 h-8 text-white" />
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };
