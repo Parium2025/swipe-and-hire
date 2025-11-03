@@ -666,12 +666,12 @@ const SearchJobs = () => {
                 <Table>
                   <TableHeader>
                     <TableRow className="border-white/10">
-                      <TableHead className="text-white transition-all duration-300 md:hover:bg-white/10">Titel</TableHead>
-                      <TableHead className="text-white transition-all duration-300 md:hover:bg-white/10">Företag</TableHead>
-                      <TableHead className="text-white transition-all duration-300 md:hover:bg-white/10">Plats</TableHead>
-                      <TableHead className="text-white transition-all duration-300 md:hover:bg-white/10">Lön</TableHead>
-                      <TableHead className="text-white transition-all duration-300 md:hover:bg-white/10">Publicerad</TableHead>
-                      <TableHead className="text-white transition-all duration-300 md:hover:bg-white/10">Åtgärder</TableHead>
+                      <TableHead className="text-white">Titel</TableHead>
+                      <TableHead className="text-white">Företag</TableHead>
+                      <TableHead className="text-white">Plats</TableHead>
+                      <TableHead className="text-white">Lön</TableHead>
+                      <TableHead className="text-white">Publicerad</TableHead>
+                      <TableHead className="text-white">Åtgärder</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
