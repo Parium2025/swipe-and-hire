@@ -99,6 +99,50 @@ const EmployerLayout = memo(({ children, developerView, onViewChange }: Employer
     prefetchTemplates();
   }, [user, queryClient]);
 
+  // Prefetch company profile for instant /reviews load
+  useEffect(() => {
+    if (!user) return;
+
+    queryClient.prefetchQuery({
+      queryKey: ['company-profile', user.id],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (error) throw error;
+        return data;
+      },
+    });
+  }, [user, queryClient]);
+
+  // Prefetch company reviews for instant /reviews load
+  useEffect(() => {
+    if (!user) return;
+
+    queryClient.prefetchQuery({
+      queryKey: ['company-reviews', user.id],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from('company_reviews')
+          .select(`
+            *,
+            profiles:user_id (
+              first_name,
+              last_name
+            )
+          `)
+          .eq('company_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+      },
+    });
+  }, [user, queryClient]);
+
   return (
     <SidebarProvider defaultOpen={true}>
       {/* Fixed gradient background - covers viewport */}
