@@ -665,7 +665,7 @@ const SearchJobs = () => {
               <div className="hidden md:block">
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-white/10 bg-white/5">
+                    <TableRow className="border-white/10 transition-all duration-300 md:hover:bg-white/10">
                       <TableHead className="text-white">Titel</TableHead>
                       <TableHead className="text-white">Företag</TableHead>
                       <TableHead className="text-white">Plats</TableHead>
