@@ -106,6 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isInitializingRef = useRef(true);
   const isSigningInRef = useRef(false);
   const hadSessionOnceRef = useRef(false);
+  const recentlySignedInAtRef = useRef<number | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -116,6 +117,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (event, session) => {
         if (!mounted) return;
         console.log('[AuthStateChange]', event, { hasSession: !!session });
+        if (event === 'SIGNED_IN') {
+          recentlySignedInAtRef.current = Date.now();
+        }
 
         // Visa bara toast vid oväntad utloggning (inte vid manuell signOut)
         if (event === 'SIGNED_OUT' && !session && !isManualSignOutRef.current) {
@@ -553,6 +557,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
+      // Blockera oavsiktlig utloggning om den sker precis efter en lyckad inloggning
+      const secondsSinceSignIn = recentlySignedInAtRef.current != null ? (Date.now() - recentlySignedInAtRef.current) / 1000 : null;
+      const onAuthPage = typeof window !== 'undefined' && window.location.pathname === '/auth';
+      if (!isManualSignOutRef.current && secondsSinceSignIn !== null && secondsSinceSignIn < 5) {
+        console.warn('Prevented signOut within 5s of SIGNED_IN', { secondsSinceSignIn, onAuthPage });
+        return;
+      }
+
       // Markera att detta är en manuell utloggning
       isManualSignOutRef.current = true;
       // Återställ också hadSession-flaggan
