@@ -669,7 +669,6 @@ const SearchJobs = () => {
                       <TableHead className="text-white">Titel</TableHead>
                       <TableHead className="text-white">Företag</TableHead>
                       <TableHead className="text-white">Plats</TableHead>
-                      <TableHead className="text-white">Lön</TableHead>
                       <TableHead className="text-white">Publicerad</TableHead>
                       <TableHead className="text-white">Åtgärder</TableHead>
                     </TableRow>
@@ -698,11 +697,6 @@ const SearchJobs = () => {
                               className="text-sm text-white truncate max-w-[100px] block"
                             />
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs">
-                            {formatSalary(job.salary_min, job.salary_max)}
-                          </Badge>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1 text-sm text-white">
