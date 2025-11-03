@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -58,6 +59,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const isNavigatingBack = useRef(false);
   const isMobile = useIsMobile();
   const titleRef = useRef<HTMLInputElement>(null);
@@ -98,6 +100,21 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     if (!user) return;
 
     try {
+      // Try to get from cache first (prefetched in EmployerLayout)
+      const cached = queryClient.getQueryData(['job-templates', user.id]) as JobTemplate[] | undefined;
+      
+      if (cached) {
+        setTemplates(cached);
+        const defaultTemplate = cached.find(t => t.is_default);
+        if (defaultTemplate && !jobTitle) {
+          setSelectedTemplate(defaultTemplate);
+          setJobTitle(defaultTemplate.title);
+        }
+        setLoadingTemplates(false);
+        return;
+      }
+
+      // Fallback to fetching if not in cache
       const { data, error } = await supabase
         .from('job_templates')
         .select('*')
@@ -131,7 +148,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
     } finally {
       setLoadingTemplates(false);
     }
-  }, [user, jobTitle, toast]);
+  }, [user, jobTitle, toast, queryClient]);
 
   useEffect(() => {
     if (open) {

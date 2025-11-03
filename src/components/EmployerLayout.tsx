@@ -74,6 +74,31 @@ const EmployerLayout = memo(({ children, developerView, onViewChange }: Employer
     });
   }, [user, queryClient]);
 
+  // Prefetch job templates for instant "Skapa ny annons" dialog load
+  useEffect(() => {
+    if (!user) return;
+
+    const prefetchTemplates = async () => {
+      try {
+        const { data } = await supabase
+          .from('job_templates')
+          .select('*')
+          .eq('employer_id', user.id)
+          .order('is_default', { ascending: false })
+          .order('created_at', { ascending: false });
+        
+        // Cache in queryClient for instant access
+        if (data) {
+          queryClient.setQueryData(['job-templates', user.id], data);
+        }
+      } catch (error) {
+        console.error('Failed to prefetch templates:', error);
+      }
+    };
+
+    prefetchTemplates();
+  }, [user, queryClient]);
+
   return (
     <SidebarProvider defaultOpen={true}>
       {/* Fixed gradient background - covers viewport */}
