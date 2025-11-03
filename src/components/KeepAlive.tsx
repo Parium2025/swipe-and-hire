@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 
 interface KeepAliveProps {
   activeKey: string;
@@ -9,13 +9,12 @@ interface KeepAliveProps {
 export function KeepAlive({ activeKey, render }: KeepAliveProps) {
   const cacheRef = useRef(new Map<string, React.ReactNode>());
 
-  // Ensure the active view is cached
-  const active = useMemo(() => {
+  // Cache the active view if not already cached
+  useEffect(() => {
     const cache = cacheRef.current;
     if (!cache.has(activeKey)) {
       cache.set(activeKey, render(activeKey));
     }
-    return cache.get(activeKey)!;
   }, [activeKey, render]);
 
   // Render all cached nodes, show only the active one

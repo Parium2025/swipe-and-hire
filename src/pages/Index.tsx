@@ -346,48 +346,49 @@ const Index = () => {
       return <Navigate to="/dashboard" replace />;
     }
 
-    const renderEmployerContent = (path: string) => {
-      // Handle job details route with dynamic ID
-      if (path.startsWith('/job-details/')) {
-        return <JobDetails />;
-      }
-      
-      switch (path) {
-        case '/dashboard':
-          return <Dashboard />;
-        case '/my-jobs':
-          return <EmployerDashboard />;
-        case '/candidates':
-          return <CandidatesContent />;
-        case '/profile':
-          return <EmployerProfile />;
-        case '/company-profile':
-          return <CompanyProfile />;
-        case '/reviews':
-          return <CompanyReviews />;
-        case '/templates':
-          return <JobTemplatesOverview />;
-        case '/settings':
-          return <EmployerSettings />;
-        case '/billing':
-          return <Billing />;
-        case '/support':
-          return <Support />;
-        case '/admin':
-          if (user.email === 'fredrikandits@hotmail.com') {
-            return <SupportAdmin />;
-          } else {
-            navigate('/support');
-            return <Support />;
-          }
-        default:
-          return <Dashboard />;
-      }
-    };
-
     return (
       <EmployerLayout developerView={developerView} onViewChange={setDeveloperView}>
-        <KeepAlive activeKey={location.pathname} render={(key) => renderEmployerContent(key)} />
+        <KeepAlive 
+          activeKey={location.pathname} 
+          render={(path: string) => {
+            // Handle job details route with dynamic ID
+            if (path.startsWith('/job-details/')) {
+              return <JobDetails />;
+            }
+            
+            switch (path) {
+              case '/dashboard':
+                return <Dashboard />;
+              case '/my-jobs':
+                return <EmployerDashboard />;
+              case '/candidates':
+                return <CandidatesContent />;
+              case '/profile':
+                return <EmployerProfile />;
+              case '/company-profile':
+                return <CompanyProfile />;
+              case '/reviews':
+                return <CompanyReviews />;
+              case '/templates':
+                return <JobTemplatesOverview />;
+              case '/settings':
+                return <EmployerSettings />;
+              case '/billing':
+                return <Billing />;
+              case '/support':
+                return <Support />;
+              case '/admin':
+                if (user.email === 'fredrikandits@hotmail.com') {
+                  return <SupportAdmin />;
+                } else {
+                  navigate('/support');
+                  return <Support />;
+                }
+              default:
+                return <Dashboard />;
+            }
+          }}
+        />
         {showTourOverlay && (
           <AppOnboardingTour onComplete={() => setShowIntroTutorial(false)} />
         )}
