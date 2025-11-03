@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Clock, X, ChevronDown, Check, Search } from 'lucide-react';
+import { Eye, MapPin, TrendingUp, Users, Briefcase, Heart, Calendar, Building, Clock, X, ChevronDown, Check, Search, ArrowUpDown } from 'lucide-react';
 import { OCCUPATION_CATEGORIES } from '@/lib/occupations';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { SEARCH_EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
@@ -234,8 +234,8 @@ const SearchJobs = () => {
   ], [jobs]);
 
   const sortLabels = {
-    newest: 'Nyaste först',
-    oldest: 'Äldsta först',
+    newest: 'Nyast först',
+    oldest: 'Äldst först',
     'most-views': 'Mest visade',
   };
 
@@ -260,22 +260,34 @@ const SearchJobs = () => {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white">
-              Sortera: {sortLabels[sortBy]}
-              <ChevronDown className="ml-2 h-4 w-4" />
+            <Button 
+              variant="outline" 
+              className="w-auto min-w-[180px] bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white"
+            >
+              <ArrowUpDown className="mr-2 h-4 w-4" />
+              {sortLabels[sortBy]}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white">
-            <DropdownMenuItem onClick={() => setSortBy('newest')} className="hover:bg-slate-700/70">
-              Nyaste först
+          <DropdownMenuContent align="end" className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20">
+            <DropdownMenuItem 
+              onClick={() => setSortBy('newest')}
+              className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+            >
+              {sortLabels.newest}
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-white/20" />
-            <DropdownMenuItem onClick={() => setSortBy('oldest')} className="hover:bg-slate-700/70">
-              Äldsta först
+            <DropdownMenuItem 
+              onClick={() => setSortBy('oldest')}
+              className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+            >
+              {sortLabels.oldest}
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-white/20" />
-            <DropdownMenuItem onClick={() => setSortBy('most-views')} className="hover:bg-slate-700/70">
-              Mest visade
+            <DropdownMenuItem 
+              onClick={() => setSortBy('most-views')}
+              className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+            >
+              {sortLabels['most-views']}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -283,23 +295,53 @@ const SearchJobs = () => {
 
       {/* Search Bar - Mobile */}
       <div className="md:hidden space-y-2">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
-          <Input
-            placeholder="Sök jobb..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/40"
-          />
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
+            <Input
+              placeholder="Sök jobb..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/40"
+            />
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="h-10 w-10 flex-shrink-0 text-white active:bg-white/12 focus:outline-none focus-visible:outline-none focus:ring-0"
+              >
+                <ArrowUpDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent 
+              align="end" 
+              className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20"
+            >
+              <DropdownMenuItem 
+                onClick={() => setSortBy('newest')}
+                className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+              >
+                {sortLabels.newest}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-white/20" />
+              <DropdownMenuItem 
+                onClick={() => setSortBy('oldest')}
+                className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+              >
+                {sortLabels.oldest}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-white/20" />
+              <DropdownMenuItem 
+                onClick={() => setSortBy('most-views')}
+                className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
+              >
+                {sortLabels['most-views']}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        <Button 
-          variant="outline" 
-          className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between"
-          onClick={() => {}}
-        >
-          Sortera: {sortLabels[sortBy]}
-          <ChevronDown className="h-4 w-4" />
-        </Button>
       </div>
 
       {/* Advanced Filters - Collapsible */}
