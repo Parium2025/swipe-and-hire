@@ -707,8 +707,9 @@ const SearchJobs = () => {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Button 
+                              variant="outline"
                               size="sm" 
-                              className="h-8 px-3 text-xs transition-all duration-300 md:hover:bg-primary/90 md:hover:text-white"
+                              className="h-8 px-3 text-xs bg-white/5 border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 navigate(`/job-details/${job.id}`);
