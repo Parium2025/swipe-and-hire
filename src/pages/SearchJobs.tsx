@@ -366,7 +366,7 @@ const SearchJobs = () => {
                     <DropdownMenuTrigger asChild>
                       <Button 
                         variant="outline" 
-                        className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between text-sm"
+                        className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
                       >
                         <span className="truncate">
                           {selectedLocations.length === 0 
@@ -438,7 +438,7 @@ const SearchJobs = () => {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between text-sm"
+                        className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
                       >
                         <span className="truncate">
                           {selectedEmploymentTypes.length === 0 
@@ -489,7 +489,7 @@ const SearchJobs = () => {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between text-sm"
+                        className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
                       >
                         <span className="truncate">
                           {selectedCategory === 'all-categories'
@@ -541,7 +541,7 @@ const SearchJobs = () => {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10 justify-between text-sm"
+                        className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
                       >
                         <span className="truncate">
                           {selectedSubcategories.length === 0
@@ -589,7 +589,7 @@ const SearchJobs = () => {
                         <Badge 
                           key={subcat}
                           variant="secondary"
-                          className="bg-white/10 text-white flex items-center gap-1 cursor-pointer hover:bg-white/20"
+                          className="bg-white/10 text-white flex items-center gap-1 cursor-pointer transition-all duration-300 md:hover:bg-white/20 md:hover:text-white"
                         >
                           {subcat}
                           <X 
@@ -610,7 +610,7 @@ const SearchJobs = () => {
               <div className="pt-2">
                 <Button 
                   variant="outline" 
-                  className="w-full bg-white/5 border-white/10 text-white hover:bg-white/10"
+                  className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white"
                   onClick={() => {
                     setSelectedLocations([]);
                     setSelectedEmploymentTypes([]);
