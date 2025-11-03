@@ -105,8 +105,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isManualSignOutRef = useRef(false);
   const isInitializingRef = useRef(true);
   const isSigningInRef = useRef(false);
-  const hadSessionOnceRef = useRef(false);
-  const recentlySignedInAtRef = useRef<number | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -117,26 +115,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (event, session) => {
         if (!mounted) return;
         console.log('[AuthStateChange]', event, { hasSession: !!session });
-        if (event === 'SIGNED_IN') {
-          recentlySignedInAtRef.current = Date.now();
-        }
-
-        // Visa bara toast vid oväntad utloggning (inte vid manuell signOut)
-        if (event === 'SIGNED_OUT' && !session && !isManualSignOutRef.current) {
-          const onAuthPage = typeof window !== 'undefined' && window.location.pathname === '/auth';
-          const duringSignIn = isSigningInRef.current;
-          const hadSession = hadSessionOnceRef.current;
-          if (!onAuthPage && !duringSignIn && hadSession) {
-            setTimeout(() => {
-              toast({
-                title: 'Session utgången',
-                description: 'Din session har gått ut. Vänligen logga in igen.',
-                variant: 'destructive',
-                duration: 4000
-              });
-            }, 100);
-          }
-        }
         
         // Token refresh-händelser loggas för felsökning
         if (event === 'TOKEN_REFRESHED') {
@@ -146,7 +124,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Update session and user state for all events
         setSession(session);
         setUser(session?.user ?? null);
-        if (session?.user) hadSessionOnceRef.current = true;
 
         if (session?.user) {
           // Skip fetching user data again for INITIAL_SESSION to avoid duplication
@@ -557,18 +534,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
-      // Blockera oavsiktlig utloggning om den sker precis efter en lyckad inloggning
-      const secondsSinceSignIn = recentlySignedInAtRef.current != null ? (Date.now() - recentlySignedInAtRef.current) / 1000 : null;
-      const onAuthPage = typeof window !== 'undefined' && window.location.pathname === '/auth';
-      if (!isManualSignOutRef.current && secondsSinceSignIn !== null && secondsSinceSignIn < 5) {
-        console.warn('Prevented signOut within 5s of SIGNED_IN', { secondsSinceSignIn, onAuthPage });
-        return;
-      }
-
       // Markera att detta är en manuell utloggning
       isManualSignOutRef.current = true;
-      // Återställ också hadSession-flaggan
-      hadSessionOnceRef.current = false;
 
       // 1) Rensa applikationsstate först
       setUser(null);
