@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
         // ... keep existing imports
         import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
         import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+        import { motion, AnimatePresence } from 'framer-motion';
         import FileUpload from '@/components/FileUpload';
 import JobPreview from '@/components/JobPreview';
 import { useToast } from '@/hooks/use-toast';
@@ -1633,10 +1634,20 @@ const MobileJobWizard = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="parium-panel max-w-none w-[min(92vw,400px)] h-auto max-h-[75vh] sm:max-h-[80vh] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-200"
+        className="parium-panel max-w-none w-[min(92vw,400px)] h-auto max-h-[75vh] sm:max-h-[80vh] bg-parium-gradient text-white [&>button]:hidden p-0 flex flex-col border-none shadow-none rounded-[24px] sm:rounded-xl overflow-hidden"
         onInteractOutside={(e) => e.preventDefault()}
+        asChild
       >
-        <AnimatedBackground showBubbles={false} />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ 
+            duration: 0.2,
+            ease: [0.16, 1, 0.3, 1]
+          }}
+        >
+          <AnimatedBackground showBubbles={false} />
         <div className="flex flex-col h-full max-h-[75vh] sm:max-h-[80vh] relative z-10">
           {/* Header */}
           <div className="relative flex items-center justify-center p-4 border-b border-white/20 flex-shrink-0 bg-background/10">
@@ -3004,6 +3015,7 @@ const MobileJobWizard = ({
             companyId={user.id}
           />
         )}
+        </motion.div>
       </DialogContent>
     </Dialog>
   );

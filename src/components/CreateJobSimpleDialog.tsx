@@ -225,9 +225,11 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
       selectedTemplateId: selectedTemplate?.id,
     });
     
-    // Öppna direkt utan delay
+    // Kort delay för smidig övergång
     setOpen(false);
-    setShowDetailDialog(true);
+    setTimeout(() => {
+      setShowDetailDialog(true);
+    }, 150);
   }, [jobTitle, selectedTemplate, toast]);
 
   const handleClose = useCallback(() => {
