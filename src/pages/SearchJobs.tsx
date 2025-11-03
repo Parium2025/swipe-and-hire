@@ -676,9 +676,9 @@ const SearchJobs = () => {
                   </TableHeader>
                   <TableBody>
                     {pageJobs.map((job) => (
-                      <TableRow 
+                       <TableRow 
                         key={job.id} 
-                        className="border-white/10 cursor-pointer hover:bg-white/5"
+                        className="border-white/10 cursor-pointer transition-all duration-300 md:hover:bg-white/10"
                         onClick={() => navigate(`/job-details/${job.id}`)}
                       >
                         <TableCell>
@@ -714,7 +714,7 @@ const SearchJobs = () => {
                           <div className="flex items-center gap-2">
                             <Button 
                               size="sm" 
-                              className="h-8 px-3 text-xs"
+                              className="h-8 px-3 text-xs transition-all duration-300 md:hover:bg-primary/90 md:hover:text-white"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 navigate(`/job-details/${job.id}`);
@@ -725,7 +725,7 @@ const SearchJobs = () => {
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="h-8 w-8 p-0 bg-white/5 border-white/20 hover:bg-white/10"
+                              className="h-8 w-8 p-0 bg-white/5 border-white/20 transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 toast({ title: "Sparad!", description: "Jobbet har sparats till dina favoriter" });
@@ -766,7 +766,7 @@ const SearchJobs = () => {
             <PaginationItem>
               <PaginationPrevious 
                 onClick={() => setPage(p => Math.max(1, p - 1))}
-                className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer transition-all duration-300 md:hover:bg-white/10 md:hover:text-white'}
               />
             </PaginationItem>
             
@@ -787,7 +787,7 @@ const SearchJobs = () => {
                   <PaginationLink
                     onClick={() => setPage(pageNum)}
                     isActive={page === pageNum}
-                    className="cursor-pointer"
+                    className="cursor-pointer transition-all duration-300 md:hover:bg-white/10 md:hover:text-white"
                   >
                     {pageNum}
                   </PaginationLink>
@@ -804,7 +804,7 @@ const SearchJobs = () => {
             <PaginationItem>
               <PaginationNext 
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                className={page === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                className={page === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer transition-all duration-300 md:hover:bg-white/10 md:hover:text-white'}
               />
             </PaginationItem>
           </PaginationContent>
