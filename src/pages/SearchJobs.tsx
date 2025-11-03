@@ -20,6 +20,7 @@ import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { formatDateShortSv } from '@/lib/date';
 import { StatsGrid } from '@/components/StatsGrid';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { swedishCities } from '@/lib/swedishCities';
 import {
   Pagination,
   PaginationContent,
@@ -72,16 +73,12 @@ const SearchJobs = () => {
   const listTopRef = useRef<HTMLDivElement>(null);
   const didMountRef = useRef(false);
 
-  const locations = [
-    'Stockholm', 'Göteborg', 'Malmö', 'Uppsala', 'Västerås', 'Örebro', 'Linköping', 'Helsingborg', 'Jönköping', 
-    'Norrköping', 'Lund', 'Umeå', 'Gävle', 'Borås', 'Eskilstuna', 'Södertälje', 'Karlstad', 'Växjö', 
-    'Halmstad', 'Sundsvall', 'Luleå', 'Trollhättan', 'Östersund', 'Borlänge', 'Falun', 'Kristianstad', 
-    'Kalmar', 'Karlskrona', 'Skövde', 'Uddevalla', 'Motala', 'Landskrona', 'Nyköping', 
-    'Trelleborg', 'Örnsköldsvik', 'Karlskoga', 'Skellefteå', 'Mariestad', 'Sandviken', 'Ängelholm', 
-    'Falkenberg', 'Ystad', 'Köping', 'Katrineholm', 'Varberg', 'Lidköping', 'Piteå', 'Kumla', 
-    'Karlshamn', 'Arvika', 'Enköping', 'Tranås', 'Åmål', 'Bollnäs', 'Kiruna', 'Sala', 
-    'Värnamo', 'Flen', 'Tibro', 'Markaryd', 'Kungälv', 'Kungsbacka', 'Solna'
-  ];
+  // Hämta alla unika städer från swedishCities och sortera alfabetiskt
+  const locations = useMemo(() => {
+    return [...new Set(swedishCities.map(city => city.name))].sort((a, b) => 
+      a.localeCompare(b, 'sv')
+    );
+  }, []);
 
   const employmentTypes = SEARCH_EMPLOYMENT_TYPES;
 
