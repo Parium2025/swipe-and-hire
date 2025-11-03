@@ -20,7 +20,7 @@ import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { formatDateShortSv } from '@/lib/date';
 import { StatsGrid } from '@/components/StatsGrid';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { swedishCities } from '@/lib/swedishCities';
+import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import {
   Pagination,
   PaginationContent,
@@ -38,6 +38,8 @@ interface Job {
   title: string;
   company_name: string;
   location: string;
+  workplace_city?: string;
+  workplace_postal_code?: string;
   employment_type: string;
   salary_min?: number;
   salary_max?: number;
@@ -60,8 +62,9 @@ const SearchJobs = () => {
   const { toast } = useToast();
   const [searchInput, setSearchInput] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most-views'>('newest');
-  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
-  const [locationSearchTerm, setLocationSearchTerm] = useState('');
+  const [selectedPostalCode, setSelectedPostalCode] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+  const [isPostalCodeValid, setIsPostalCodeValid] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all-categories');
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
   const [selectedEmploymentTypes, setSelectedEmploymentTypes] = useState<string[]>([]);
@@ -73,18 +76,11 @@ const SearchJobs = () => {
   const listTopRef = useRef<HTMLDivElement>(null);
   const didMountRef = useRef(false);
 
-  // Hämta alla unika städer från swedishCities och sortera alfabetiskt
-  const locations = useMemo(() => {
-    return [...new Set(swedishCities.map(city => city.name))].sort((a, b) => 
-      a.localeCompare(b, 'sv')
-    );
-  }, []);
-
   const employmentTypes = SEARCH_EMPLOYMENT_TYPES;
 
   // Use React Query for background caching and instant data
   const { data: jobs = [], isLoading } = useQuery({
-    queryKey: ['public-jobs', selectedLocations, selectedCategory, selectedSubcategories, selectedEmploymentTypes],
+    queryKey: ['public-jobs', selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes],
     queryFn: async () => {
       let query = supabase
         .from('job_postings')
@@ -127,12 +123,9 @@ const SearchJobs = () => {
         }
       }
 
-      // Apply location filter
-      if (selectedLocations.length > 0) {
-        const locationConditions = selectedLocations.map(location => 
-          `location.ilike.%${location}%`
-        ).join(',');
-        query = query.or(locationConditions);
+      // Apply location filter (city or postal code)
+      if (selectedCity) {
+        query = query.or(`workplace_city.ilike.%${selectedCity}%,location.ilike.%${selectedCity}%`);
       }
 
       // Apply employment type filter
@@ -234,6 +227,13 @@ const SearchJobs = () => {
     newest: 'Nyast först',
     oldest: 'Äldst först',
     'most-views': 'Mest visade',
+  };
+
+  const handleLocationChange = (location: string, postalCode?: string) => {
+    setSelectedCity(location);
+    if (postalCode) {
+      setSelectedPostalCode(postalCode);
+    }
   };
 
   return (
@@ -352,75 +352,68 @@ const SearchJobs = () => {
         <CollapsibleContent>
           <Card className="bg-white/5 backdrop-blur-sm border-white/20 mt-2">
             <CardContent className="p-4 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Location Filter */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Postal Code & City Filter */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-white flex items-center gap-2">
                     <MapPin className="h-3 w-3" />
-                    Plats
+                    Plats (Postnummer)
+                  </Label>
+                  <WorkplacePostalCodeSelector
+                    postalCodeValue={selectedPostalCode}
+                    cityValue={selectedCity}
+                    onPostalCodeChange={setSelectedPostalCode}
+                    onLocationChange={handleLocationChange}
+                    onValidationChange={setIsPostalCodeValid}
+                  />
+                </div>
+
+                {/* Yrkesområde Filter */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-white flex items-center gap-2">
+                    <Briefcase className="h-3 w-3" />
+                    Yrkesområde
                   </Label>
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
                       >
                         <span className="truncate">
-                          {selectedLocations.length === 0 
-                            ? 'Välj ort...'
-                            : selectedLocations.length === 1 
-                            ? selectedLocations[0]
-                            : `${selectedLocations.length} valda`
+                          {selectedCategory === 'all-categories'
+                            ? 'Alla yrkesområden'
+                            : OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.label || 'Välj område'
                           }
                         </span>
                         <ChevronDown className="h-4 w-4 flex-shrink-0" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white max-h-80 overflow-y-auto">
-                      <div className="p-2 border-b border-slate-600/30">
-                        <div className="relative">
-                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
-                          <Input
-                            placeholder="Sök stad..."
-                            value={locationSearchTerm}
-                            onChange={(e) => setLocationSearchTerm(e.target.value)}
-                            onClick={(e) => e.stopPropagation()}
-                            className="pl-10 bg-slate-600/50 border-slate-500/50 text-white placeholder:text-white/50"
-                          />
-                        </div>
-                      </div>
-                      {selectedLocations.length > 0 && (
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setSelectedCategory('all-categories');
+                          setSelectedSubcategories([]);
+                        }}
+                        className="cursor-pointer hover:bg-slate-700/70 text-white font-medium border-b border-slate-600/30"
+                      >
+                        Alla yrkesområden
+                      </DropdownMenuItem>
+                      {OCCUPATION_CATEGORIES.map((category) => (
                         <DropdownMenuItem
-                          onClick={() => setSelectedLocations([])}
-                          className="font-medium cursor-pointer hover:bg-slate-700/70 text-red-300 border-b border-slate-600/30"
+                          key={category.value}
+                          onClick={() => {
+                            setSelectedCategory(category.value);
+                            setSelectedSubcategories([]);
+                          }}
+                          className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
                         >
-                          <X className="h-4 w-4 mr-2" />
-                          Rensa alla ({selectedLocations.length})
+                          <span>{category.label}</span>
+                          {selectedCategory === category.value && (
+                            <Check className="h-4 w-4 text-white" />
+                          )}
                         </DropdownMenuItem>
-                      )}
-                      <div className="max-h-60 overflow-y-auto">
-                        {locations
-                          .filter(location => location.toLowerCase().includes(locationSearchTerm.toLowerCase()))
-                          .map((location) => (
-                            <DropdownMenuItem
-                              key={location}
-                              onClick={() => {
-                                const isSelected = selectedLocations.includes(location);
-                                if (isSelected) {
-                                  setSelectedLocations(prev => prev.filter(l => l !== location));
-                                } else {
-                                  setSelectedLocations(prev => [...prev, location]);
-                                }
-                              }}
-                              className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
-                            >
-                              <span>{location}</span>
-                              {selectedLocations.includes(location) && (
-                                <Check className="h-4 w-4 text-white" />
-                              )}
-                            </DropdownMenuItem>
-                          ))}
-                      </div>
+                      ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -468,56 +461,6 @@ const SearchJobs = () => {
                         >
                           <span>{type.label}</span>
                           {selectedEmploymentTypes.includes(type.value) && (
-                            <Check className="h-4 w-4 text-white" />
-                          )}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-
-                {/* Yrkesområde Filter */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-white flex items-center gap-2">
-                    <Briefcase className="h-3 w-3" />
-                    Yrkesområde
-                  </Label>
-                  <DropdownMenu modal={false}>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
-                      >
-                        <span className="truncate">
-                          {selectedCategory === 'all-categories'
-                            ? 'Alla yrkesområden'
-                            : OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.label || 'Välj område'
-                          }
-                        </span>
-                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white max-h-80 overflow-y-auto">
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setSelectedCategory('all-categories');
-                          setSelectedSubcategories([]);
-                        }}
-                        className="cursor-pointer hover:bg-slate-700/70 text-white font-medium border-b border-slate-600/30"
-                      >
-                        Alla yrkesområden
-                      </DropdownMenuItem>
-                      {OCCUPATION_CATEGORIES.map((category) => (
-                        <DropdownMenuItem
-                          key={category.value}
-                          onClick={() => {
-                            setSelectedCategory(category.value);
-                            setSelectedSubcategories([]);
-                          }}
-                          className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
-                        >
-                          <span>{category.label}</span>
-                          {selectedCategory === category.value && (
                             <Check className="h-4 w-4 text-white" />
                           )}
                         </DropdownMenuItem>
@@ -609,7 +552,8 @@ const SearchJobs = () => {
                   variant="outline" 
                   className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white"
                   onClick={() => {
-                    setSelectedLocations([]);
+                    setSelectedPostalCode('');
+                    setSelectedCity('');
                     setSelectedEmploymentTypes([]);
                     setSelectedCategory('all-categories');
                     setSelectedSubcategories([]);
