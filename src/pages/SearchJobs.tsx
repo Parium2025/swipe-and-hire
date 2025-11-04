@@ -21,6 +21,7 @@ import { formatDateShortSv } from '@/lib/date';
 import { StatsGrid } from '@/components/StatsGrid';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
+import LocationSearchInput from '@/components/LocationSearchInput';
 import {
   Pagination,
   PaginationContent,
@@ -355,18 +356,16 @@ const SearchJobs = () => {
           <Card className="bg-white/5 backdrop-blur-sm border-white/20 mt-2">
             <CardContent className="p-4 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Postal Code & City Filter */}
+                {/* Location Filter - Postal Code OR City */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-white flex items-center gap-2">
                     <MapPin className="h-3 w-3" />
-                    Plats (Postnummer)
+                    Plats
                   </Label>
-                  <WorkplacePostalCodeSelector
-                    postalCodeValue={selectedPostalCode}
-                    cityValue={selectedCity}
-                    onPostalCodeChange={setSelectedPostalCode}
+                  <LocationSearchInput
+                    value={selectedPostalCode || selectedCity}
                     onLocationChange={handleLocationChange}
-                    onValidationChange={setIsPostalCodeValid}
+                    onPostalCodeChange={setSelectedPostalCode}
                   />
                 </div>
 

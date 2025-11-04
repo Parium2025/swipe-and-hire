@@ -510,3 +510,8 @@ export const formatPostalCode = (postalCode: string): string => {
   }
   return digits;
 };
+
+// Funktion för att hämta alla städer
+export const getAllCities = (): string[] => {
+  return swedishCities.map(city => city.name);
+};
