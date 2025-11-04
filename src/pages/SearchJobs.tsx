@@ -421,7 +421,7 @@ const SearchJobs = () => {
                 </div>
 
                 {/* Employment Type Filter */}
-              <div className="space-y-2">
+                <div className="space-y-2">
                 <Label className="text-sm font-medium text-white flex items-center gap-2">
                   <Clock className="h-3 w-3" />
                   Anställning
@@ -473,7 +473,7 @@ const SearchJobs = () => {
             </div>
 
             {/* Subcategories Dropdown - shown only when category is selected */}
-              {selectedCategory && selectedCategory !== 'all-categories' && (
+            {selectedCategory && selectedCategory !== 'all-categories' && (
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-white flex items-center gap-2">
                     <Users className="h-3 w-3" />
@@ -545,10 +545,10 @@ const SearchJobs = () => {
                       ))}
                     </div>
                   )}
-                </div>
-              )}
+              </div>
+            )}
 
-              {/* Clear all filters button - moved outside grid */}
+            {/* Clear all filters button - moved outside grid */}
             <div className="pt-2">
               <Button 
                 variant="outline" 
@@ -566,6 +566,7 @@ const SearchJobs = () => {
               </Button>
             </div>
           </CardContent>
+        </Card>
         </CollapsibleContent>
       </Collapsible>
 
