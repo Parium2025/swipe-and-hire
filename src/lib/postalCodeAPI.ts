@@ -117,6 +117,51 @@ async function loadSwedishPostalDatabase(): Promise<Record<string, string>> {
 // Initiera databasen direkt när modulen laddas
 initializePostalDatabase();
 
+// Hitta platsinfo via stadsnamn (fallback till hela postnummerdatabasen)
+export async function getLocationByCityName(cityInput: string): Promise<PostalCodeResponse | null> {
+  try {
+    const database = await databaseLoadingPromise;
+    if (!database) return null;
+
+    const normalize = (s: string) => s
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+
+    const target = normalize(cityInput);
+    if (!target) return null;
+
+    const entries = Object.entries(database);
+    let foundCode: string | null = null;
+
+    // 1) Exakt matchning
+    for (const [code, city] of entries) {
+      if (normalize(city) === target) {
+        foundCode = code;
+        break;
+      }
+    }
+
+    // 2) Prefix-matchning
+    if (!foundCode) {
+      for (const [code, city] of entries) {
+        if (normalize(city).startsWith(target)) {
+          foundCode = code;
+          break;
+        }
+      }
+    }
+
+    if (!foundCode) return null;
+
+    // Återanvänd logik för att bygga komplett svar (inkl. län)
+    return await tryMultipleApis(foundCode);
+  } catch {
+    return null;
+  }
+}
+
 async function tryMultipleApis(postalCode: string): Promise<PostalCodeResponse | null> {
   const cleanedCode = postalCode.replace(/\s+/g, '');
   

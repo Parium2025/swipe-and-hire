@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
-import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
+import { getCachedPostalCodeInfo, isValidSwedishPostalCode, getLocationByCityName } from '@/lib/postalCodeAPI';
 import { MapPin, Loader2, Check, X } from 'lucide-react';
 import { getAllCities } from '@/lib/swedishCities';
 
 interface LocationSearchInputProps {
-  value: string;
+  value?: string;
   onLocationChange: (location: string, postalCode?: string, municipality?: string, county?: string) => void;
   onPostalCodeChange?: (postalCode: string) => void;
   className?: string;
@@ -17,7 +17,7 @@ const LocationSearchInput = ({
   onPostalCodeChange,
   className = ""
 }: LocationSearchInputProps) => {
-  const [searchInput, setSearchInput] = useState(value);
+  const [searchInput, setSearchInput] = useState(value ?? '');
   const [isLoading, setIsLoading] = useState(false);
   const [foundLocation, setFoundLocation] = useState<{
     type: 'postal' | 'city';
@@ -27,9 +27,9 @@ const LocationSearchInput = ({
     county?: string;
   } | null>(null);
 
-  // Sync with external value changes
+  // Sync with external value changes (only when provided)
   useEffect(() => {
-    if (value !== searchInput) {
+    if (value !== undefined && value !== searchInput) {
       setSearchInput(value);
     }
   }, [value]);
@@ -118,9 +118,27 @@ const LocationSearchInput = ({
             onLocationChange(matchedCity);
           }
         } else {
-          // Still allow the search even if city not found
-          onLocationChange(trimmed);
-          setFoundLocation(null);
+          // Fallback: use full postal database to resolve city -> location info
+          try {
+            const info = await getLocationByCityName(trimmed);
+            if (info) {
+              setFoundLocation({
+                type: 'city',
+                city: info.city,
+                county: info.county,
+                municipality: info.municipality
+              });
+              onLocationChange(info.city, undefined, info.municipality, info.county || '');
+            } else {
+              // Still allow the search even if city not found
+              onLocationChange(trimmed);
+              setFoundLocation(null);
+            }
+          } catch (e) {
+            console.error('Error resolving city via postal DB:', e);
+            onLocationChange(trimmed);
+            setFoundLocation(null);
+          }
         }
       }
       

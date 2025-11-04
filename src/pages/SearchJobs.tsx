@@ -20,7 +20,6 @@ import { ReadOnlyMobileJobCard } from '@/components/ReadOnlyMobileJobCard';
 import { formatDateShortSv } from '@/lib/date';
 import { StatsGrid } from '@/components/StatsGrid';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import LocationSearchInput from '@/components/LocationSearchInput';
 import {
   Pagination,
@@ -363,7 +362,6 @@ const SearchJobs = () => {
                     Plats
                   </Label>
                   <LocationSearchInput
-                    value={selectedPostalCode || selectedCity}
                     onLocationChange={handleLocationChange}
                     onPostalCodeChange={setSelectedPostalCode}
                   />
