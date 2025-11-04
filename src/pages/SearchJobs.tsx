@@ -364,6 +364,7 @@ const SearchJobs = () => {
                   <LocationSearchInput
                     onLocationChange={handleLocationChange}
                     onPostalCodeChange={setSelectedPostalCode}
+                    jobs={jobs}
                   />
                 </div>
 
