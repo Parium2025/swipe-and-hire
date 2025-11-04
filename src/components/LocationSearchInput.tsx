@@ -182,20 +182,20 @@ const LocationSearchInput = ({
           </button>
         </PopoverTrigger>
         <PopoverContent 
-          className="z-50 w-[var(--radix-popover-trigger-width)] p-0 bg-[#0A1628] border-white/10 pointer-events-auto" 
+          className="z-50 w-[var(--radix-popover-trigger-width)] p-0 bg-slate-700/95 backdrop-blur-md border-slate-500/30 pointer-events-auto" 
           align="start"
           side="bottom"
           sideOffset={4}
           avoidCollisions={false}
         >
-          <Command className="bg-[#0A1628] border-none">
+          <Command className="bg-transparent border-none">
             <CommandInput 
               placeholder="Sök län eller stad..." 
               value={searchInput}
               onValueChange={setSearchInput}
-              className="border-none focus:ring-0 bg-[#0A1628] text-white placeholder:text-white/60"
+              className="border-none focus:ring-0 bg-transparent text-white placeholder:text-white/60"
             />
-            <CommandList className="max-h-[300px] overflow-y-auto bg-[#0A1628]">
+            <CommandList className="max-h-[300px] overflow-y-auto">
               <CommandEmpty className="text-white/60 py-6 text-center">Ingen plats hittades.</CommandEmpty>
               <CommandGroup heading="Län" className="text-white/70">
                 {swedishCounties.map((county) => (
@@ -203,7 +203,7 @@ const LocationSearchInput = ({
                     key={county}
                     value={county}
                     onSelect={() => handleCountySelect(county)}
-                    className="cursor-pointer text-white/90 hover:bg-white/10 aria-selected:bg-white/10"
+                    className="cursor-pointer text-white hover:bg-slate-700/70"
                   >
                     {county}
                   </CommandItem>
