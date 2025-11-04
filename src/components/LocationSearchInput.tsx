@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Input } from '@/components/ui/input';
 import { getCachedPostalCodeInfo, isValidSwedishPostalCode, getLocationByCityName } from '@/lib/postalCodeAPI';
 import { MapPin, Loader2, Check, X } from 'lucide-react';
@@ -30,6 +31,7 @@ const LocationSearchInput = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [foundLocation, setFoundLocation] = useState<{
@@ -134,6 +136,18 @@ const LocationSearchInput = ({
     }
   }, [value]);
 
+  // Update dropdown position when input moves or suggestions change
+  useEffect(() => {
+    if (showSuggestions && inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width
+      });
+    }
+  }, [showSuggestions, suggestions]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -143,9 +157,27 @@ const LocationSearchInput = ({
       }
     };
 
+    const handleScroll = () => {
+      if (showSuggestions && inputRef.current) {
+        const rect = inputRef.current.getBoundingClientRect();
+        setDropdownPosition({
+          top: rect.bottom + window.scrollY,
+          left: rect.left + window.scrollX,
+          width: rect.width
+        });
+      }
+    };
+
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    window.addEventListener('scroll', handleScroll, true);
+    window.addEventListener('resize', handleScroll);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [showSuggestions]);
 
   const handleClear = useCallback(() => {
     setSearchInput('');
@@ -259,11 +291,17 @@ const LocationSearchInput = ({
         )}
       </div>
 
-      {/* Dropdown with suggestions */}
-      {showSuggestions && suggestions.length > 0 && (
+      {/* Dropdown with suggestions - Using Portal */}
+      {showSuggestions && suggestions.length > 0 && createPortal(
         <div 
           ref={dropdownRef}
-          className="absolute top-full left-0 right-0 mt-1 bg-slate-800/95 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-[10000] max-h-80 overflow-hidden"
+          style={{
+            position: 'absolute',
+            top: `${dropdownPosition.top}px`,
+            left: `${dropdownPosition.left}px`,
+            width: `${dropdownPosition.width}px`,
+          }}
+          className="bg-slate-800/95 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-[10000] max-h-80 overflow-hidden mt-1"
         >
           <ScrollArea className="max-h-80">
             <div className="py-2">
@@ -299,7 +337,8 @@ const LocationSearchInput = ({
               ))}
             </div>
           </ScrollArea>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Success indicator */}
