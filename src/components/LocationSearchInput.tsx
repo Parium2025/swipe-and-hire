@@ -1,8 +1,35 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
-import { MapPin, Loader2, Check, X } from 'lucide-react';
+import { MapPin, Loader2, Check, X, ChevronDown } from 'lucide-react';
 import { getAllCities } from '@/lib/swedishCities';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { cn } from '@/lib/utils';
+
+const swedishCounties = [
+  "Blekinge län",
+  "Dalarnas län",
+  "Gotlands län",
+  "Gävleborgs län",
+  "Hallands län",
+  "Jämtlands län",
+  "Jönköpings län",
+  "Kalmar län",
+  "Kronobergs län",
+  "Norrbottens län",
+  "Skåne län",
+  "Stockholms län",
+  "Södermanlands län",
+  "Uppsala län",
+  "Värmlands län",
+  "Västerbottens län",
+  "Västernorrlands län",
+  "Västmanlands län",
+  "Västra Götalands län",
+  "Örebro län",
+  "Östergötlands län"
+];
 
 interface LocationSearchInputProps {
   value: string;
@@ -19,6 +46,7 @@ const LocationSearchInput = ({
 }: LocationSearchInputProps) => {
   const [searchInput, setSearchInput] = useState(value);
   const [isLoading, setIsLoading] = useState(false);
+  const [open, setOpen] = useState(false);
   const [foundLocation, setFoundLocation] = useState<{
     type: 'postal' | 'city';
     city: string;
@@ -110,33 +138,78 @@ const LocationSearchInput = ({
     onPostalCodeChange?.('');
   }, [onLocationChange, onPostalCodeChange]);
 
+  const handleCountySelect = useCallback((county: string) => {
+    setSearchInput(county);
+    setFoundLocation({
+      type: 'city',
+      city: county
+    });
+    onLocationChange(county);
+    setOpen(false);
+  }, [onLocationChange]);
+
   return (
     <div className={`space-y-2 ${className}`}>
-      <div className="relative">
-        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white z-10" />
-        <Input
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          placeholder="Postnummer eller ort..."
-          className="bg-white/5 border-white/10 text-white placeholder:text-white/60 text-sm pl-10 pr-10 transition-all duration-300 md:hover:bg-white/10"
-          autoComplete="off"
-          autoCorrect="off"
-          spellCheck="false"
-        />
-        {isLoading ? (
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-            <Loader2 className="h-4 w-4 animate-spin text-white/60" />
-          </div>
-        ) : searchInput && (
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
           <button
-            onClick={handleClear}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white transition-colors"
-            aria-label="Rensa"
+            className={cn(
+              "w-full flex items-center gap-3 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-left transition-all duration-300 md:hover:bg-white/10",
+              "focus:outline-none focus:ring-2 focus:ring-white/20"
+            )}
+            aria-label="Välj plats"
           >
-            <X className="h-4 w-4" />
+            <MapPin className="h-4 w-4 text-white flex-shrink-0" />
+            <span className="text-sm text-white/90 flex-1 truncate">
+              {searchInput || "Postnummer eller ort..."}
+            </span>
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin text-white/60 flex-shrink-0" />
+            ) : searchInput ? (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleClear();
+                }}
+                className="text-white/60 hover:text-white transition-colors"
+                aria-label="Rensa"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            ) : (
+              <ChevronDown className="h-4 w-4 text-white/60 flex-shrink-0" />
+            )}
           </button>
-        )}
-      </div>
+        </PopoverTrigger>
+        <PopoverContent 
+          className="w-[var(--radix-popover-trigger-width)] p-0 bg-background border-border pointer-events-auto" 
+          align="start"
+        >
+          <Command className="bg-background">
+            <CommandInput 
+              placeholder="Sök län eller stad..." 
+              value={searchInput}
+              onValueChange={setSearchInput}
+              className="border-none focus:ring-0"
+            />
+            <CommandList className="max-h-[300px] overflow-y-auto">
+              <CommandEmpty>Ingen plats hittades.</CommandEmpty>
+              <CommandGroup heading="Län">
+                {swedishCounties.map((county) => (
+                  <CommandItem
+                    key={county}
+                    value={county}
+                    onSelect={() => handleCountySelect(county)}
+                    className="cursor-pointer"
+                  >
+                    {county}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
 
       {/* Success indicator */}
       {foundLocation && !isLoading && (
