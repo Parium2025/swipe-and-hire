@@ -71,6 +71,100 @@ const SearchJobs = () => {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [isParsingSearch, setIsParsingSearch] = useState(false);
   const [parsedSearch, setParsedSearch] = useState<{jobTitle: string; location: string; employmentType: string} | null>(null);
+
+  // Populära sökningar baserat på vanliga jobb och städer
+  const popularSearches = useMemo(() => [
+    // Lager & Logistik
+    "Lagerarbetare Stockholm",
+    "Lagerarbetare Göteborg",
+    "Lagerarbetare Malmö",
+    "Truckförare Stockholm",
+    "Truckförare Göteborg",
+    "Lastbilschaufför Stockholm",
+    "Lastbilschaufför Göteborg",
+    "Logistik Helsingborg",
+    "Terminalarbetare Stockholm",
+    
+    // Försäljning & Service
+    "Försäljare Stockholm",
+    "Försäljare Göteborg",
+    "Butikssäljare Malmö",
+    "Butiksbiträde Stockholm",
+    "Kassör Göteborg",
+    "Kundtjänst Stockholm",
+    "Kundservice Göteborg",
+    "Säljare Malmö",
+    
+    // Restaurang & Hotell
+    "Servitör Stockholm",
+    "Kock Göteborg",
+    "Kock Stockholm",
+    "Restaurangbiträde Malmö",
+    "Bartender Stockholm",
+    "Hotellreceptionist Stockholm",
+    "Städare Göteborg",
+    
+    // Bygg & Hantverk
+    "Snickare Stockholm",
+    "Elektriker Göteborg",
+    "Byggnadsarbetare Stockholm",
+    "Målare Malmö",
+    "VVS Göteborg",
+    "Plåtslagare Stockholm",
+    
+    // Vård & Omsorg
+    "Undersköterska Stockholm",
+    "Vårdbiträde Göteborg",
+    "Sjuksköterska Malmö",
+    "Personlig assistent Stockholm",
+    "Hemtjänst Göteborg",
+    "Barnskötare Stockholm",
+    
+    // Kontorsarbete
+    "Administratör Stockholm",
+    "Ekonomiassistent Göteborg",
+    "Receptionist Stockholm",
+    "Kontorsassistent Malmö",
+    "Redovisningsekonom Göteborg",
+    
+    // IT & Tech
+    "Utvecklare Stockholm",
+    "Systemadministratör Göteborg",
+    "IT-tekniker Stockholm",
+    "Support Malmö",
+    
+    // Industri & Produktion
+    "Produktionsarbetare Stockholm",
+    "Maskinoperatör Göteborg",
+    "Processoperatör Malmö",
+    "Svetsar Stockholm",
+    "Industriarbetare Göteborg",
+    
+    // Transport
+    "Taxiförare Stockholm",
+    "Bussförare Göteborg",
+    "Distributör Malmö",
+    "Chaufför Stockholm",
+    
+    // Städer utan specifikt yrke
+    "Jobb Stockholm",
+    "Jobb Göteborg", 
+    "Jobb Malmö",
+    "Jobb Uppsala",
+    "Jobb Västerås",
+    "Jobb Örebro",
+    "Jobb Linköping",
+    "Jobb Helsingborg",
+    "Jobb Norrköping",
+    "Jobb Jönköping",
+    
+    // Anställningstyper
+    "Heltid Stockholm",
+    "Deltid Göteborg",
+    "Vikariat Malmö",
+    "Sommarjobb Stockholm",
+    "Extrajobb Göteborg",
+  ], []);
   
   // Pagination
   const [page, setPage] = useState(1);
@@ -307,7 +401,7 @@ const SearchJobs = () => {
       <StatsGrid stats={statsCards} />
 
       {/* Smart Search Bar - Desktop */}
-      <div className="hidden md:block">
+      <div className="hidden md:block space-y-4">
         <Card className="bg-white/5 backdrop-blur-sm border-white/20 p-6">
           <div className="flex items-center gap-4">
             <div className="flex-1 relative">
@@ -360,10 +454,31 @@ const SearchJobs = () => {
             </div>
           )}
         </Card>
+
+        {/* Populära sökningar - Desktop */}
+        <Card className="bg-white/5 backdrop-blur-sm border-white/20 p-4">
+          <h3 className="text-sm font-medium text-white/70 mb-3">Populära sökningar:</h3>
+          <div className="flex flex-wrap gap-2">
+            {popularSearches.map((search, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchInput(search);
+                  handleSmartSearch(search);
+                }}
+                className="bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/40 text-xs transition-all"
+              >
+                {search}
+              </Button>
+            ))}
+          </div>
+        </Card>
       </div>
 
       {/* Smart Search Bar - Mobile */}
-      <div className="md:hidden">
+      <div className="md:hidden space-y-3">
         <Card className="bg-white/5 backdrop-blur-sm border-white/20 p-4">
           <div className="space-y-3">
             <div className="relative">
@@ -433,6 +548,29 @@ const SearchJobs = () => {
               </div>
             )}
           </div>
+        </Card>
+
+        {/* Populära sökningar - Mobile */}
+        <Card className="bg-white/5 backdrop-blur-sm border-white/20 p-3">
+          <h3 className="text-xs font-medium text-white/70 mb-2">Populära sökningar:</h3>
+          <ScrollArea className="h-[120px]">
+            <div className="flex flex-wrap gap-1.5 pr-4">
+              {popularSearches.slice(0, 40).map((search, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSearchInput(search);
+                    handleSmartSearch(search);
+                  }}
+                  className="bg-white/5 border-white/20 text-white hover:bg-white/10 text-xs h-7 px-2"
+                >
+                  {search}
+                </Button>
+              ))}
+            </div>
+          </ScrollArea>
         </Card>
       </div>
 
