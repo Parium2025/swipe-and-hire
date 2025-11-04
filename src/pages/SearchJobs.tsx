@@ -419,85 +419,8 @@ const SearchJobs = () => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-              </div>
 
-              {/* Subcategories Dropdown - shown only when category is selected */}
-              {selectedCategory && selectedCategory !== 'all-categories' && (
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-white flex items-center gap-2">
-                    <Users className="h-3 w-3" />
-                    Specifik roll inom {OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.label}
-                  </Label>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
-                      >
-                        <span className="truncate">
-                          {selectedSubcategories.length === 0
-                            ? 'Alla roller'
-                            : selectedSubcategories.length === 1
-                            ? selectedSubcategories[0]
-                            : `${selectedSubcategories.length} roller valda`
-                          }
-                        </span>
-                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white max-h-80 overflow-y-auto">
-                      <DropdownMenuItem
-                        onClick={() => setSelectedSubcategories([])}
-                        className="cursor-pointer hover:bg-slate-700/70 text-white font-medium border-b border-slate-600/30"
-                      >
-                        Alla roller
-                      </DropdownMenuItem>
-                      {OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.subcategories.map((subcat) => (
-                        <DropdownMenuItem
-                          key={subcat}
-                          onClick={() => {
-                            setSelectedSubcategories(prev => 
-                              prev.includes(subcat) 
-                                ? prev.filter(s => s !== subcat)
-                                : [...prev, subcat]
-                            );
-                          }}
-                          className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
-                        >
-                          <span>{subcat}</span>
-                          {selectedSubcategories.includes(subcat) && (
-                            <Check className="h-4 w-4 text-white" />
-                          )}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-
-                  {/* Show selected roles as badges */}
-                  {selectedSubcategories.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {selectedSubcategories.map((subcat) => (
-                        <Badge 
-                          key={subcat}
-                          variant="secondary"
-                          className="bg-white/10 text-white flex items-center gap-1 cursor-pointer transition-all duration-300 md:hover:bg-white/20 md:hover:text-white"
-                        >
-                          {subcat}
-                          <X 
-                            className="h-3 w-3" 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedSubcategories(prev => prev.filter(s => s !== subcat));
-                            }}
-                          />
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Employment Type Filter */}
+                {/* Employment Type Filter */}
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-white flex items-center gap-2">
                   <Clock className="h-3 w-3" />
@@ -547,8 +470,9 @@ const SearchJobs = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
+            </div>
 
-              {/* Subcategories Dropdown - shown only when category is selected */}
+            {/* Subcategories Dropdown - shown only when category is selected */}
               {selectedCategory && selectedCategory !== 'all-categories' && (
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-white flex items-center gap-2">
@@ -623,9 +547,8 @@ const SearchJobs = () => {
                   )}
                 </div>
               )}
-            </div>
 
-            {/* Clear all filters button - moved outside grid */}
+              {/* Clear all filters button - moved outside grid */}
             <div className="pt-2">
               <Button 
                 variant="outline" 
