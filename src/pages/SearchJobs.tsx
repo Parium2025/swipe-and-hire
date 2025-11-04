@@ -69,6 +69,8 @@ const SearchJobs = () => {
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
   const [selectedEmploymentTypes, setSelectedEmploymentTypes] = useState<string[]>([]);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [isParsingSearch, setIsParsingSearch] = useState(false);
+  const [parsedSearch, setParsedSearch] = useState<{jobTitle: string; location: string; employmentType: string} | null>(null);
   
   // Pagination
   const [page, setPage] = useState(1);
@@ -236,6 +238,66 @@ const SearchJobs = () => {
     }
   };
 
+  // AI-powered smart search
+  const handleSmartSearch = async (query: string) => {
+    if (!query.trim()) {
+      setSearchInput('');
+      setParsedSearch(null);
+      setSelectedCity('');
+      setSelectedCategory('all-categories');
+      setSelectedEmploymentTypes([]);
+      return;
+    }
+
+    setIsParsingSearch(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('parse-job-search', {
+        body: { query }
+      });
+
+      if (error) {
+        console.error('Error parsing search:', error);
+        toast({
+          title: "Sökningen misslyckades",
+          description: "Försök igen eller använd avancerade filter.",
+          variant: "destructive"
+        });
+        setSearchInput(query);
+        return;
+      }
+
+      console.log('Parsed search result:', data);
+      setParsedSearch(data);
+
+      // Apply parsed filters
+      if (data.jobTitle) {
+        setSearchInput(data.jobTitle);
+      }
+      if (data.location) {
+        setSelectedCity(data.location);
+      }
+      if (data.employmentType) {
+        const matchedType = SEARCH_EMPLOYMENT_TYPES.find(t => 
+          t.label.toLowerCase().includes(data.employmentType.toLowerCase())
+        );
+        if (matchedType) {
+          setSelectedEmploymentTypes([matchedType.value]);
+        }
+      }
+
+      toast({
+        title: "Sökning tolkad!",
+        description: `Visar ${data.jobTitle || 'alla jobb'}${data.location ? ` i ${data.location}` : ''}`,
+      });
+
+    } catch (error) {
+      console.error('Smart search error:', error);
+      setSearchInput(query);
+    } finally {
+      setIsParsingSearch(false);
+    }
+  };
+
   return (
     <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12">
       <div className="flex justify-center items-center mb-4">
@@ -244,103 +306,134 @@ const SearchJobs = () => {
 
       <StatsGrid stats={statsCards} />
 
-      {/* Search Bar - Desktop */}
-      <div className="hidden md:flex items-center gap-4">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
-          <Input
-            placeholder="Sök efter jobbtitel, företag, plats..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/40"
-          />
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button 
-              variant="outline" 
-              className="w-auto min-w-[180px] bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white"
+      {/* Smart Search Bar - Desktop */}
+      <div className="hidden md:block">
+        <Card className="bg-white/5 backdrop-blur-sm border-white/20 p-6">
+          <div className="flex items-center gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/40" />
+              <Input
+                placeholder="Skriv vad du söker... T.ex: 'Lastbilschaufför i Stockholm' eller 'Lagerarbete Göteborg'"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSmartSearch(searchInput);
+                  }
+                }}
+                className="pl-12 pr-4 h-14 text-lg bg-white/5 border-white/10 text-white placeholder:text-white/50"
+                disabled={isParsingSearch}
+              />
+              {isParsingSearch && (
+                <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                </div>
+              )}
+            </div>
+            <Button
+              onClick={() => handleSmartSearch(searchInput)}
+              disabled={isParsingSearch}
+              size="lg"
+              className="h-14 px-8 bg-white text-primary hover:bg-white/90 font-semibold"
             >
-              <ArrowUpDown className="mr-2 h-4 w-4" />
-              {sortLabels[sortBy]}
+              {isParsingSearch ? 'Tolkar...' : 'Sök jobb'}
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" side="bottom" avoidCollisions={false} className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20">
-            <DropdownMenuItem 
-              onClick={() => setSortBy('newest')}
-              className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
-            >
-              {sortLabels.newest}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-white/20" />
-            <DropdownMenuItem 
-              onClick={() => setSortBy('oldest')}
-              className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
-            >
-              {sortLabels.oldest}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-white/20" />
-            <DropdownMenuItem 
-              onClick={() => setSortBy('most-views')}
-              className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
-            >
-              {sortLabels['most-views']}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          </div>
+          {parsedSearch && (
+            <div className="mt-4 flex items-center gap-2 text-sm text-white/70">
+              <span>Söker efter:</span>
+              {parsedSearch.jobTitle && (
+                <Badge variant="secondary" className="bg-white/10 text-white border-white/20">
+                  💼 {parsedSearch.jobTitle}
+                </Badge>
+              )}
+              {parsedSearch.location && (
+                <Badge variant="secondary" className="bg-white/10 text-white border-white/20">
+                  📍 {parsedSearch.location}
+                </Badge>
+              )}
+              {parsedSearch.employmentType && (
+                <Badge variant="secondary" className="bg-white/10 text-white border-white/20">
+                  ⏰ {parsedSearch.employmentType}
+                </Badge>
+              )}
+            </div>
+          )}
+        </Card>
       </div>
 
-      {/* Search Bar - Mobile */}
-      <div className="md:hidden space-y-2">
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
-            <Input
-              placeholder="Sök jobb..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/40"
-            />
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="h-10 w-10 flex-shrink-0 text-white active:bg-white/12 focus:outline-none focus-visible:outline-none focus:ring-0"
+      {/* Smart Search Bar - Mobile */}
+      <div className="md:hidden">
+        <Card className="bg-white/5 backdrop-blur-sm border-white/20 p-4">
+          <div className="space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
+              <Input
+                placeholder="Vad söker du? T.ex: 'Lager Stockholm'"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSmartSearch(searchInput);
+                  }
+                }}
+                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/50"
+                disabled={isParsingSearch}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => handleSmartSearch(searchInput)}
+                disabled={isParsingSearch}
+                className="flex-1 bg-white text-primary hover:bg-white/90 font-semibold"
               >
-                <ArrowUpDown className="h-4 w-4" />
+                {isParsingSearch ? 'Tolkar...' : 'Sök'}
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent 
-              align="end" 
-              side="bottom"
-              avoidCollisions={false}
-              className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20"
-            >
-              <DropdownMenuItem 
-                onClick={() => setSortBy('newest')}
-                className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
-              >
-                {sortLabels.newest}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-white/20" />
-              <DropdownMenuItem 
-                onClick={() => setSortBy('oldest')}
-                className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
-              >
-                {sortLabels.oldest}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-white/20" />
-              <DropdownMenuItem 
-                onClick={() => setSortBy('most-views')}
-                className="text-white md:hover:bg-white/10 md:focus:bg-white/10"
-              >
-                {sortLabels['most-views']}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="bg-white/5 border-white/10 text-white"
+                  >
+                    <ArrowUpDown className="h-4 w-4 mr-1" />
+                    {sortLabels[sortBy]}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-slate-800/95 backdrop-blur-md border-white/20">
+                  <DropdownMenuItem onClick={() => setSortBy('newest')} className="text-white hover:bg-white/10">
+                    {sortLabels.newest}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('oldest')} className="text-white hover:bg-white/10">
+                    {sortLabels.oldest}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('most-views')} className="text-white hover:bg-white/10">
+                    {sortLabels['most-views']}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            {parsedSearch && (
+              <div className="flex flex-wrap gap-2">
+                {parsedSearch.jobTitle && (
+                  <Badge variant="secondary" className="bg-white/10 text-white text-xs">
+                    💼 {parsedSearch.jobTitle}
+                  </Badge>
+                )}
+                {parsedSearch.location && (
+                  <Badge variant="secondary" className="bg-white/10 text-white text-xs">
+                    📍 {parsedSearch.location}
+                  </Badge>
+                )}
+                {parsedSearch.employmentType && (
+                  <Badge variant="secondary" className="bg-white/10 text-white text-xs">
+                    ⏰ {parsedSearch.employmentType}
+                  </Badge>
+                )}
+              </div>
+            )}
+          </div>
+        </Card>
       </div>
 
       {/* Advanced Filters - Collapsible */}

@@ -36,6 +36,9 @@ verify_jwt = false
 [functions.optimize-job-title]
 verify_jwt = false
 
+[functions.parse-job-search]
+verify_jwt = false
+
 [auth]
 enable_signup = false
 enable_confirmations = false
