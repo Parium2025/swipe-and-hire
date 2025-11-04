@@ -1,35 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
-import { MapPin, Loader2, Check, X, ChevronDown } from 'lucide-react';
+import { MapPin, Loader2, Check, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { getAllCities } from '@/lib/swedishCities';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
+import { swedishCountiesWithMunicipalities, CountyName } from '@/lib/swedishCountiesWithMunicipalities';
 
-const swedishCounties = [
-  "Blekinge län",
-  "Dalarnas län",
-  "Gotlands län",
-  "Gävleborgs län",
-  "Hallands län",
-  "Jämtlands län",
-  "Jönköpings län",
-  "Kalmar län",
-  "Kronobergs län",
-  "Norrbottens län",
-  "Skåne län",
-  "Stockholms län",
-  "Södermanlands län",
-  "Uppsala län",
-  "Värmlands län",
-  "Västerbottens län",
-  "Västernorrlands län",
-  "Västmanlands län",
-  "Västra Götalands län",
-  "Örebro län",
-  "Östergötlands län"
-];
+const swedishCounties = Object.keys(swedishCountiesWithMunicipalities) as CountyName[];
 
 interface LocationSearchInputProps {
   value: string;
@@ -47,6 +26,7 @@ const LocationSearchInput = ({
   const [searchInput, setSearchInput] = useState(value);
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [expandedCounty, setExpandedCounty] = useState<CountyName | null>(null);
   const [foundLocation, setFoundLocation] = useState<{
     type: 'postal' | 'city';
     city: string;
@@ -138,7 +118,7 @@ const LocationSearchInput = ({
     onPostalCodeChange?.('');
   }, [onLocationChange, onPostalCodeChange]);
 
-  const handleCountySelect = useCallback((county: string) => {
+  const handleCountySelect = useCallback((county: CountyName) => {
     setSearchInput(county);
     setFoundLocation({
       type: 'city',
@@ -147,6 +127,21 @@ const LocationSearchInput = ({
     onLocationChange(county);
     setOpen(false);
   }, [onLocationChange]);
+
+  const handleMunicipalitySelect = useCallback((municipality: string) => {
+    setSearchInput(municipality);
+    setFoundLocation({
+      type: 'city',
+      city: municipality
+    });
+    onLocationChange(municipality);
+    setOpen(false);
+  }, [onLocationChange]);
+
+  const toggleCounty = useCallback((county: CountyName, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedCounty(expandedCounty === county ? null : county);
+  }, [expandedCounty]);
 
   return (
     <div className={`space-y-2 ${className}`}>
@@ -199,14 +194,40 @@ const LocationSearchInput = ({
               <CommandEmpty className="text-white/60 py-6 text-center">Ingen plats hittades.</CommandEmpty>
               <CommandGroup heading="Län" className="text-white/70">
                 {swedishCounties.map((county) => (
-                  <CommandItem
-                    key={county}
-                    value={county}
-                    onSelect={() => handleCountySelect(county)}
-                    className="cursor-pointer text-white hover:bg-slate-700/70"
-                  >
-                    {county}
-                  </CommandItem>
+                  <div key={county}>
+                    <CommandItem
+                      value={county}
+                      onSelect={() => handleCountySelect(county)}
+                      className="cursor-pointer text-white hover:bg-slate-700/70 flex items-center justify-between"
+                    >
+                      <span>{county}</span>
+                      <button
+                        onClick={(e) => toggleCounty(county, e)}
+                        className="ml-auto hover:bg-white/10 p-1 rounded"
+                        aria-label={expandedCounty === county ? "Dölj kommuner" : "Visa kommuner"}
+                      >
+                        {expandedCounty === county ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
+                      </button>
+                    </CommandItem>
+                    {expandedCounty === county && (
+                      <div className="pl-6 border-l border-white/10 ml-2">
+                        {swedishCountiesWithMunicipalities[county].map((municipality) => (
+                          <CommandItem
+                            key={municipality}
+                            value={municipality}
+                            onSelect={() => handleMunicipalitySelect(municipality)}
+                            className="cursor-pointer text-white/80 hover:bg-slate-700/50 text-sm py-1.5"
+                          >
+                            {municipality}
+                          </CommandItem>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </CommandGroup>
             </CommandList>
