@@ -428,7 +428,7 @@ const SearchJobs = () => {
                     <Users className="h-3 w-3" />
                     Specifik roll inom {OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.label}
                   </Label>
-                  <DropdownMenu>
+                  <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
