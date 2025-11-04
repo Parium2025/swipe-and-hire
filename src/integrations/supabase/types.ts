@@ -184,6 +184,8 @@ export type Database = {
           work_schedule: string | null
           workplace_address: string | null
           workplace_city: string | null
+          workplace_county: string | null
+          workplace_municipality: string | null
           workplace_name: string | null
           workplace_postal_code: string | null
         }
@@ -216,6 +218,8 @@ export type Database = {
           work_schedule?: string | null
           workplace_address?: string | null
           workplace_city?: string | null
+          workplace_county?: string | null
+          workplace_municipality?: string | null
           workplace_name?: string | null
           workplace_postal_code?: string | null
         }
@@ -248,6 +252,8 @@ export type Database = {
           work_schedule?: string | null
           workplace_address?: string | null
           workplace_city?: string | null
+          workplace_county?: string | null
+          workplace_municipality?: string | null
           workplace_name?: string | null
           workplace_postal_code?: string | null
         }

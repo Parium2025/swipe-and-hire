@@ -124,9 +124,15 @@ const SearchJobs = () => {
         }
       }
 
-      // Apply location filter (city or postal code)
+      // Apply location filter (city, postal code, county, or municipality)
       if (selectedCity) {
-        query = query.or(`workplace_city.ilike.%${selectedCity}%,location.ilike.%${selectedCity}%`);
+        // Check if selectedCity is a county (ends with "län")
+        if (selectedCity.endsWith(' län')) {
+          query = query.eq('workplace_county', selectedCity);
+        } else {
+          // Search in city, municipality, county, and location fields
+          query = query.or(`workplace_city.ilike.%${selectedCity}%,workplace_municipality.ilike.%${selectedCity}%,workplace_county.ilike.%${selectedCity}%,location.ilike.%${selectedCity}%`);
+        }
       }
 
       // Apply employment type filter
