@@ -84,11 +84,39 @@ const LocationSearchInput = ({
         );
         
         if (matchedCity) {
-          setFoundLocation({
-            type: 'city',
-            city: matchedCity
-          });
-          onLocationChange(matchedCity);
+          // Try to get county info by looking up any postal code for this city
+          try {
+            const cityData = (await import('@/lib/swedishCities')).swedishCities.find(
+              c => c.name.toLowerCase() === matchedCity.toLowerCase()
+            );
+            
+            if (cityData && cityData.postalCodes.length > 0) {
+              // Use first postal code to get county info
+              const firstPostalCode = cityData.postalCodes[0].replace(/\s+/g, '');
+              const locationInfo = await getCachedPostalCodeInfo(firstPostalCode);
+              
+              setFoundLocation({
+                type: 'city',
+                city: matchedCity,
+                county: locationInfo?.county,
+                municipality: locationInfo?.municipality
+              });
+              onLocationChange(matchedCity, undefined, locationInfo?.municipality, locationInfo?.county || '');
+            } else {
+              setFoundLocation({
+                type: 'city',
+                city: matchedCity
+              });
+              onLocationChange(matchedCity);
+            }
+          } catch (error) {
+            console.error('Error fetching city county info:', error);
+            setFoundLocation({
+              type: 'city',
+              city: matchedCity
+            });
+            onLocationChange(matchedCity);
+          }
         } else {
           // Still allow the search even if city not found
           onLocationChange(trimmed);
@@ -151,7 +179,10 @@ const LocationSearchInput = ({
                 {foundLocation.county && <span className="text-white/70"> ({foundLocation.county})</span>}
               </>
             ) : (
-              <span className="font-medium">{foundLocation.city}</span>
+              <>
+                <span className="font-medium">{foundLocation.city}</span>
+                {foundLocation.county && <span className="text-white/70"> ({foundLocation.county})</span>}
+              </>
             )}
           </p>
         </div>
