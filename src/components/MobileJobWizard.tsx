@@ -1519,6 +1519,17 @@ const MobileJobWizard = ({
     try {
       const category = categorizeJob(formData.title, formData.description, formData.occupation);
       
+      // Hämta län och kommun från postnummer
+      let workplaceCounty = null;
+      let workplaceMunicipality = null;
+      if (formData.workplace_postal_code && isValidSwedishPostalCode(formData.workplace_postal_code)) {
+        const postalInfo = await getCachedPostalCodeInfo(formData.workplace_postal_code);
+        if (postalInfo) {
+          workplaceCounty = postalInfo.county || null;
+          workplaceMunicipality = postalInfo.municipality || null;
+        }
+      }
+      
       const jobData = {
         employer_id: user.id,
         title: formData.title,
@@ -1537,6 +1548,8 @@ const MobileJobWizard = ({
         workplace_address: formData.workplace_address || null,
         workplace_postal_code: formData.workplace_postal_code || null,
         workplace_city: formData.workplace_city || null,
+        workplace_county: workplaceCounty,
+        workplace_municipality: workplaceMunicipality,
         work_schedule: formData.work_schedule || null,
         contact_email: formData.contact_email || null,
         application_instructions: formData.application_instructions || null,

@@ -19,7 +19,7 @@ import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import FileUpload from '@/components/FileUpload';
 import ImageEditor from '@/components/ImageEditor';
 import { createSignedUrl } from '@/utils/storageUtils';
-import { getCachedPostalCodeInfo } from '@/lib/postalCodeAPI';
+import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import modernMobileBg from '@/assets/modern-mobile-bg.jpg';
 import {
   DndContext,
@@ -1094,6 +1094,17 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
     setLoading(true);
     try {
+      // Hämta län och kommun från postnummer
+      let workplaceCounty = null;
+      let workplaceMunicipality = null;
+      if (formData.workplace_postal_code && isValidSwedishPostalCode(formData.workplace_postal_code)) {
+        const postalInfo = await getCachedPostalCodeInfo(formData.workplace_postal_code);
+        if (postalInfo) {
+          workplaceCounty = postalInfo.county || null;
+          workplaceMunicipality = postalInfo.municipality || null;
+        }
+      }
+      
       const payload = {
         title: formData.title,
         description: formData.description,
@@ -1111,6 +1122,8 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         workplace_address: formData.workplace_address || null,
         workplace_postal_code: formData.workplace_postal_code || null,
         workplace_city: formData.workplace_city || null,
+        workplace_county: workplaceCounty,
+        workplace_municipality: workplaceMunicipality,
         work_schedule: formData.work_schedule || null,
         contact_email: formData.contact_email || null,
         application_instructions: formData.application_instructions || null,

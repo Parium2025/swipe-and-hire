@@ -14,6 +14,7 @@ import { Progress } from '@/components/ui/progress';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Switch } from '@/components/ui/switch';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
+import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import { UnsavedChangesDialog } from '@/components/UnsavedChangesDialog';
 import {
   DndContext,
@@ -701,6 +702,17 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
     setLoading(true);
 
     try {
+      // Hämta län och kommun från postnummer
+      let workplaceCounty = null;
+      let workplaceMunicipality = null;
+      if (formData.workplace_postal_code && isValidSwedishPostalCode(formData.workplace_postal_code)) {
+        const postalInfo = await getCachedPostalCodeInfo(formData.workplace_postal_code);
+        if (postalInfo) {
+          workplaceCounty = postalInfo.county || null;
+          workplaceMunicipality = postalInfo.municipality || null;
+        }
+      }
+      
       const templateData = {
         employer_id: user.id,
         name: formData.name,
@@ -720,6 +732,8 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         workplace_address: formData.workplace_address || null,
         workplace_postal_code: formData.workplace_postal_code || null,
         workplace_city: formData.workplace_city || null,
+        workplace_county: workplaceCounty,
+        workplace_municipality: workplaceMunicipality,
         positions_count: formData.positions_count || null,
         pitch: formData.pitch || null,
         contact_email: formData.contact_email || null,
