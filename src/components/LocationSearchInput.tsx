@@ -118,15 +118,10 @@ const LocationSearchInput = ({
     onPostalCodeChange?.('');
   }, [onLocationChange, onPostalCodeChange]);
 
-  const handleCountySelect = useCallback((county: CountyName) => {
-    setSearchInput(county);
-    setFoundLocation({
-      type: 'city',
-      city: county
-    });
-    onLocationChange(county);
-    setOpen(false);
-  }, [onLocationChange]);
+  const handleCountyClick = useCallback((county: CountyName) => {
+    // Toggle expansion instead of selecting
+    setExpandedCounty(expandedCounty === county ? null : county);
+  }, [expandedCounty]);
 
   const handleMunicipalitySelect = useCallback((municipality: string) => {
     setSearchInput(municipality);
@@ -137,11 +132,6 @@ const LocationSearchInput = ({
     onLocationChange(municipality);
     setOpen(false);
   }, [onLocationChange]);
-
-  const toggleCounty = useCallback((county: CountyName, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setExpandedCounty(expandedCounty === county ? null : county);
-  }, [expandedCounty]);
 
   return (
     <div className={`space-y-2 ${className}`}>
@@ -197,21 +187,15 @@ const LocationSearchInput = ({
                   <div key={county}>
                     <CommandItem
                       value={county}
-                      onSelect={() => handleCountySelect(county)}
+                      onSelect={() => handleCountyClick(county)}
                       className="cursor-pointer text-white hover:bg-slate-700/70 flex items-center justify-between"
                     >
                       <span>{county}</span>
-                      <button
-                        onClick={(e) => toggleCounty(county, e)}
-                        className="ml-auto hover:bg-white/10 p-1 rounded"
-                        aria-label={expandedCounty === county ? "Dölj kommuner" : "Visa kommuner"}
-                      >
-                        {expandedCounty === county ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4" />
-                        )}
-                      </button>
+                      {expandedCounty === county ? (
+                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 flex-shrink-0" />
+                      )}
                     </CommandItem>
                     {expandedCounty === county && (
                       <div className="pl-6 border-l border-white/10 ml-2">
