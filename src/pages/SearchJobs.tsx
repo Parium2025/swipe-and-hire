@@ -419,57 +419,6 @@ const SearchJobs = () => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-
-                {/* Employment Type Filter */}
-                <div className="space-y-2">
-                <Label className="text-sm font-medium text-white flex items-center gap-2">
-                  <Clock className="h-3 w-3" />
-                  Anställning
-                </Label>
-                <DropdownMenu modal={false}>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
-                    >
-                      <span className="truncate">
-                        {selectedEmploymentTypes.length === 0 
-                          ? 'Alla typer' 
-                          : `${selectedEmploymentTypes.length} valda`
-                        }
-                      </span>
-                      <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-72 bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white max-h-80 overflow-y-auto">
-                    <DropdownMenuItem
-                      onClick={() => setSelectedEmploymentTypes([])}
-                      className="cursor-pointer hover:bg-slate-700/70 text-white"
-                    >
-                      Alla typer
-                    </DropdownMenuItem>
-                    {employmentTypes.map((type) => (
-                      <DropdownMenuItem
-                        key={type.value}
-                        onClick={() => {
-                          const isSelected = selectedEmploymentTypes.includes(type.value);
-                          if (isSelected) {
-                            setSelectedEmploymentTypes(prev => prev.filter(t => t !== type.value));
-                          } else {
-                            setSelectedEmploymentTypes(prev => [...prev, type.value]);
-                          }
-                        }}
-                        className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
-                      >
-                        <span>{type.label}</span>
-                        {selectedEmploymentTypes.includes(type.value) && (
-                          <Check className="h-4 w-4 text-white" />
-                        )}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
             </div>
 
             {/* Subcategories Dropdown - shown only when category is selected */}
@@ -547,6 +496,57 @@ const SearchJobs = () => {
                   )}
               </div>
             )}
+
+            {/* Employment Type Filter */}
+            <div className="space-y-2 mt-4">
+              <Label className="text-sm font-medium text-white flex items-center gap-2">
+                <Clock className="h-3 w-3" />
+                Anställning
+              </Label>
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
+                  >
+                    <span className="truncate">
+                      {selectedEmploymentTypes.length === 0 
+                        ? 'Alla typer' 
+                        : `${selectedEmploymentTypes.length} valda`
+                      }
+                    </span>
+                    <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-72 bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white max-h-80 overflow-y-auto">
+                  <DropdownMenuItem
+                    onClick={() => setSelectedEmploymentTypes([])}
+                    className="cursor-pointer hover:bg-slate-700/70 text-white"
+                  >
+                    Alla typer
+                  </DropdownMenuItem>
+                  {employmentTypes.map((type) => (
+                    <DropdownMenuItem
+                      key={type.value}
+                      onClick={() => {
+                        const isSelected = selectedEmploymentTypes.includes(type.value);
+                        if (isSelected) {
+                          setSelectedEmploymentTypes(prev => prev.filter(t => t !== type.value));
+                        } else {
+                          setSelectedEmploymentTypes(prev => [...prev, type.value]);
+                        }
+                      }}
+                      className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
+                    >
+                      <span>{type.label}</span>
+                      {selectedEmploymentTypes.includes(type.value) && (
+                        <Check className="h-4 w-4 text-white" />
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
 
             {/* Clear all filters button - moved outside grid */}
             <div className="pt-2">
