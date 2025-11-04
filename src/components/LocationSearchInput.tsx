@@ -102,9 +102,7 @@ const LocationSearchInput = ({
           if (!seen.has(key)) {
             seen.add(key);
             const jobCount = getJobCountForLocation(city);
-            if (jobCount > 0) {
-              results.push({ city, jobCount });
-            }
+            results.push({ city, jobCount }); // Visa alla städer, även med 0 jobb
           }
         }
       });
@@ -329,7 +327,11 @@ const LocationSearchInput = ({
                         </div>
                       )}
                     </div>
-                    <div className="flex-shrink-0 px-2 py-1 bg-white/10 rounded text-xs text-white/90 font-medium">
+                    <div className={`flex-shrink-0 px-2 py-1 rounded text-xs font-medium ${
+                      suggestion.jobCount === 0 
+                        ? 'bg-white/5 text-white/50' 
+                        : 'bg-white/10 text-white/90'
+                    }`}>
                       {suggestion.jobCount} {suggestion.jobCount === 1 ? 'jobb' : 'jobb'}
                     </div>
                   </div>

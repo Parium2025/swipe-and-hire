@@ -597,8 +597,33 @@ const SearchJobs = () => {
               </div>
             </div>
           ) : filteredAndSortedJobs.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-white/70">Inga jobb hittades</p>
+            <div className="flex flex-col items-center justify-center py-16 px-4">
+              <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-4">
+                <Briefcase className="w-8 h-8 text-white/40" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">Inga jobb hittades</h3>
+              <p className="text-white/60 text-center max-w-md mb-6">
+                {searchInput || selectedCity || selectedCategory !== 'all-categories' || selectedEmploymentTypes.length > 0
+                  ? 'Prova att justera dina filter eller sök efter något annat.'
+                  : 'Det finns inga aktiva jobbannonser just nu. Kom tillbaka senare!'}
+              </p>
+              {(searchInput || selectedCity || selectedCategory !== 'all-categories' || selectedEmploymentTypes.length > 0) && (
+                <Button
+                  onClick={() => {
+                    setSearchInput('');
+                    setSelectedCity('');
+                    setSelectedPostalCode('');
+                    setSelectedCategory('all-categories');
+                    setSelectedSubcategories([]);
+                    setSelectedEmploymentTypes([]);
+                  }}
+                  variant="outline"
+                  className="bg-white/5 border-white/10 text-white hover:bg-white/10"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Rensa alla filter
+                </Button>
+              )}
             </div>
           ) : (
             <>
