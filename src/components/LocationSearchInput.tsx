@@ -198,13 +198,13 @@ const LocationSearchInput = ({
                       )}
                     </CommandItem>
                     {expandedCounty === county && (
-                      <div className="pl-6 border-l border-white/10 ml-2">
+                      <div className="bg-slate-800/30">
                         {swedishCountiesWithMunicipalities[county].map((municipality) => (
                           <CommandItem
                             key={municipality}
                             value={municipality}
                             onSelect={() => handleMunicipalitySelect(municipality)}
-                            className="cursor-pointer text-white/80 hover:bg-slate-700/50 text-sm py-1.5"
+                            className="cursor-pointer text-white/80 hover:bg-slate-700/50 text-sm"
                           >
                             {municipality}
                           </CommandItem>
