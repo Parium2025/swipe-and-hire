@@ -182,10 +182,11 @@ const LocationSearchInput = ({
           </button>
         </PopoverTrigger>
         <PopoverContent 
-          className="w-[var(--radix-popover-trigger-width)] p-0 bg-background border-border pointer-events-auto" 
+          className="z-50 w-[var(--radix-popover-trigger-width)] p-0 bg-background border-border pointer-events-auto" 
           align="start"
           side="bottom"
           sideOffset={4}
+          avoidCollisions={false}
         >
           <Command className="bg-background">
             <CommandInput 
