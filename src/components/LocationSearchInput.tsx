@@ -195,6 +195,33 @@ const LocationSearchInput = ({
             />
             <CommandList className="max-h-[300px] overflow-y-auto">
               <CommandEmpty className="text-white/60 py-6 text-center">Ingen plats hittades.</CommandEmpty>
+              
+              {/* Show matching municipalities directly if there's a search */}
+              {dropdownSearch && (
+                <CommandGroup heading="Kommuner" className="text-white/70">
+                  {Object.entries(swedishCountiesWithMunicipalities)
+                    .flatMap(([county, municipalities]) => 
+                      municipalities
+                        .filter(m => m.toLowerCase().includes(dropdownSearch.toLowerCase()))
+                        .map(m => ({ municipality: m, county }))
+                    )
+                    .slice(0, 10) // Limit to 10 direct results
+                    .map(({ municipality, county }) => (
+                      <CommandItem
+                        key={municipality}
+                        value={municipality}
+                        onSelect={() => handleMunicipalitySelect(municipality)}
+                        className="cursor-pointer text-white hover:bg-slate-700/70"
+                      >
+                        <span>{municipality}</span>
+                        <span className="text-white/50 text-xs ml-2">({county})</span>
+                      </CommandItem>
+                    ))
+                  }
+                </CommandGroup>
+              )}
+              
+              {/* Show counties */}
               <CommandGroup heading="Län" className="text-white/70">
                 {swedishCounties
                   .filter(county => 
