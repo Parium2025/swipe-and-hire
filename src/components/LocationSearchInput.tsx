@@ -229,10 +229,10 @@ const LocationSearchInput = ({
                   e.stopPropagation();
                   handleClear();
                 }}
-                className="text-white/60 hover:text-white transition-colors"
+                className="text-white transition-colors"
                 aria-label="Rensa"
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4 text-white" />
               </button>
             ) : (
               <ChevronDown className="h-4 w-4 text-white/60 flex-shrink-0" />

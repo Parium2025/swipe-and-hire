@@ -393,7 +393,24 @@ const SearchJobs = () => {
                             : OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.label || 'Välj område'
                           }
                         </span>
-                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                        {selectedCategory !== 'all-categories' ? (
+                          <span
+                            role="button"
+                            aria-label="Rensa yrkesområde"
+                            tabIndex={0}
+                            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedCategory('all-categories');
+                              setSelectedSubcategories([]);
+                            }}
+                            className="ml-2 inline-flex items-center justify-center rounded p-1 md:hover:bg-white/10"
+                          >
+                            <X className="h-4 w-4 text-white" />
+                          </span>
+                        ) : (
+                          <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                        )}
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white max-h-80 overflow-y-auto">
