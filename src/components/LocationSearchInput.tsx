@@ -231,7 +231,7 @@ const LocationSearchInput = ({
           avoidCollisions={false}
         >
           <Command 
-            className="bg-transparent border-none" 
+            className="bg-transparent border-none [&_[cmdk-item]]:text-white [&_[cmdk-item]]:transition-colors [&_[cmdk-item][data-selected=true]]:bg-white/10 [&_[cmdk-item][data-selected=true]]:text-white"
             shouldFilter={false}
             loop={false}
             value=""
