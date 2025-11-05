@@ -27,6 +27,7 @@ const LocationSearchInput = ({
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [expandedCounty, setExpandedCounty] = useState<CountyName | null>(null);
+  const [dropdownSearch, setDropdownSearch] = useState('');
   const [foundLocation, setFoundLocation] = useState<{
     type: 'postal' | 'city';
     city: string;
@@ -125,6 +126,7 @@ const LocationSearchInput = ({
 
   const handleMunicipalitySelect = useCallback((municipality: string) => {
     setSearchInput(municipality);
+    setDropdownSearch('');
     setFoundLocation({
       type: 'city',
       city: municipality
@@ -135,7 +137,13 @@ const LocationSearchInput = ({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (isOpen) {
+          setDropdownSearch('');
+          setExpandedCounty(null);
+        }
+      }}>
         <PopoverTrigger asChild>
           <button
             className={cn(
@@ -173,11 +181,16 @@ const LocationSearchInput = ({
           sideOffset={4}
           avoidCollisions={false}
         >
-          <Command className="bg-transparent border-none" shouldFilter={false}>
+          <Command 
+            className="bg-transparent border-none" 
+            shouldFilter={false}
+            loop={false}
+            value=""
+          >
             <CommandInput 
               placeholder="Sök län eller stad..." 
-              value={searchInput}
-              onValueChange={setSearchInput}
+              value={dropdownSearch}
+              onValueChange={setDropdownSearch}
               className="border-none focus:ring-0 bg-transparent text-white placeholder:text-white/60"
             />
             <CommandList className="max-h-[300px] overflow-y-auto">
@@ -185,10 +198,10 @@ const LocationSearchInput = ({
               <CommandGroup heading="Län" className="text-white/70">
                 {swedishCounties
                   .filter(county => 
-                    !searchInput || 
-                    county.toLowerCase().includes(searchInput.toLowerCase()) ||
+                    !dropdownSearch || 
+                    county.toLowerCase().includes(dropdownSearch.toLowerCase()) ||
                     swedishCountiesWithMunicipalities[county].some(m => 
-                      m.toLowerCase().includes(searchInput.toLowerCase())
+                      m.toLowerCase().includes(dropdownSearch.toLowerCase())
                     )
                   )
                   .map((county) => (
@@ -209,8 +222,8 @@ const LocationSearchInput = ({
                       <div className="bg-slate-800/30">
                         {swedishCountiesWithMunicipalities[county]
                           .filter(municipality => 
-                            !searchInput || 
-                            municipality.toLowerCase().includes(searchInput.toLowerCase())
+                            !dropdownSearch || 
+                            municipality.toLowerCase().includes(dropdownSearch.toLowerCase())
                           )
                           .map((municipality) => (
                             <CommandItem
