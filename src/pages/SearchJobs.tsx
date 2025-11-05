@@ -373,6 +373,22 @@ const SearchJobs = () => {
                     onLocationChange={handleLocationChange}
                     onPostalCodeChange={setSelectedPostalCode}
                   />
+                  
+                  {/* Show selected location as badge */}
+                  {selectedCity && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge 
+                        variant="secondary"
+                        className="bg-white/10 text-white flex items-center gap-2 pr-3"
+                      >
+                        <div className="w-4 h-4 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                          <Check className="w-2.5 h-2.5 text-green-400" />
+                        </div>
+                        <span>{selectedCity}</span>
+                        <Check className="h-4 w-4 text-white ml-auto" />
+                      </Badge>
+                    </div>
+                  )}
                 </div>
 
                 {/* Yrkesområde Filter */}
