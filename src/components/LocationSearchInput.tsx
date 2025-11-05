@@ -28,6 +28,12 @@ const LocationSearchInput = ({
   const [open, setOpen] = useState(false);
   const [expandedCounty, setExpandedCounty] = useState<CountyName | null>(null);
   const [dropdownSearch, setDropdownSearch] = useState('');
+  const [postalCodeCity, setPostalCodeCity] = useState<{
+    city: string;
+    postalCode: string;
+    municipality?: string;
+    county?: string;
+  } | null>(null);
   const [foundLocation, setFoundLocation] = useState<{
     type: 'postal' | 'city';
     city: string;
@@ -42,6 +48,44 @@ const LocationSearchInput = ({
       setSearchInput(value);
     }
   }, [value]);
+
+  // Check if dropdown search is a postal code and fetch city
+  useEffect(() => {
+    const checkPostalCode = async () => {
+      const trimmed = dropdownSearch.trim();
+      const isNumeric = /^\d+\s?\d*$/.test(trimmed);
+      
+      if (isNumeric) {
+        const cleanedCode = trimmed.replace(/\s+/g, '');
+        
+        if (cleanedCode.length === 5 && isValidSwedishPostalCode(cleanedCode)) {
+          try {
+            const location = await getCachedPostalCodeInfo(cleanedCode);
+            if (location) {
+              setPostalCodeCity({
+                city: location.city,
+                postalCode: cleanedCode,
+                municipality: location.municipality,
+                county: location.county
+              });
+            } else {
+              setPostalCodeCity(null);
+            }
+          } catch (error) {
+            console.error('Error fetching postal code:', error);
+            setPostalCodeCity(null);
+          }
+        } else {
+          setPostalCodeCity(null);
+        }
+      } else {
+        setPostalCodeCity(null);
+      }
+    };
+
+    const timeoutId = setTimeout(checkPostalCode, 300);
+    return () => clearTimeout(timeoutId);
+  }, [dropdownSearch]);
 
   useEffect(() => {
     const searchLocation = async () => {
@@ -124,16 +168,20 @@ const LocationSearchInput = ({
     setExpandedCounty(expandedCounty === county ? null : county);
   }, [expandedCounty]);
 
-  const handleMunicipalitySelect = useCallback((municipality: string) => {
+  const handleMunicipalitySelect = useCallback((municipality: string, postalCode?: string, county?: string) => {
     setSearchInput(municipality);
     setDropdownSearch('');
+    setPostalCodeCity(null);
     setFoundLocation({
       type: 'city',
       city: municipality
     });
-    onLocationChange(municipality);
+    onLocationChange(municipality, postalCode, municipality, county);
+    if (postalCode) {
+      onPostalCodeChange?.(postalCode);
+    }
     setOpen(false);
-  }, [onLocationChange]);
+  }, [onLocationChange, onPostalCodeChange]);
 
   return (
     <div className={`space-y-2 ${className}`}>
@@ -141,6 +189,7 @@ const LocationSearchInput = ({
         setOpen(isOpen);
         if (isOpen) {
           setDropdownSearch('');
+          setPostalCodeCity(null);
           setExpandedCounty(null);
         }
       }}>
@@ -196,8 +245,32 @@ const LocationSearchInput = ({
             <CommandList className="max-h-[300px] overflow-y-auto">
               <CommandEmpty className="text-white/60 py-6 text-center">Ingen plats hittades.</CommandEmpty>
               
+              {/* Show postal code result if found */}
+              {postalCodeCity && (
+                <CommandGroup heading="Postnummer" className="text-white/70">
+                  <CommandItem
+                    value={postalCodeCity.city}
+                    onSelect={() => handleMunicipalitySelect(
+                      postalCodeCity.city, 
+                      postalCodeCity.postalCode,
+                      postalCodeCity.county
+                    )}
+                    className="cursor-pointer text-white hover:bg-slate-700/70"
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-medium">{postalCodeCity.city}</span>
+                      <span className="text-white/50 text-xs">
+                        {postalCodeCity.postalCode}
+                        {postalCodeCity.municipality && ` · ${postalCodeCity.municipality}`}
+                        {postalCodeCity.county && ` · ${postalCodeCity.county}`}
+                      </span>
+                    </div>
+                  </CommandItem>
+                </CommandGroup>
+              )}
+              
               {/* Show matching municipalities directly if there's a search */}
-              {dropdownSearch && (
+              {dropdownSearch && !postalCodeCity && (
                 <CommandGroup heading="Kommuner" className="text-white/70">
                   {Object.entries(swedishCountiesWithMunicipalities)
                     .flatMap(([county, municipalities]) => 
@@ -256,7 +329,7 @@ const LocationSearchInput = ({
                             <CommandItem
                               key={municipality}
                               value={municipality}
-                              onSelect={() => handleMunicipalitySelect(municipality)}
+                              onSelect={() => handleMunicipalitySelect(municipality, undefined, county)}
                               className="cursor-pointer text-white/80 hover:bg-slate-700/50 text-sm"
                             >
                               {municipality}
