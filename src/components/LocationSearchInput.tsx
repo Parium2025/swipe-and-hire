@@ -261,8 +261,8 @@ const LocationSearchInput = ({
                     className="cursor-pointer text-white hover:bg-slate-700/70"
                   >
                     <div className="flex flex-col">
-                      <span className="font-medium">{postalCodeCity.city}</span>
-                      <span className="text-white/50 text-xs">
+                      <span className="font-medium text-white">{postalCodeCity.city}</span>
+                      <span className="text-white text-xs">
                         {postalCodeCity.postalCode}
                         {postalCodeCity.municipality && ` · ${postalCodeCity.municipality}`}
                         {postalCodeCity.county && ` · ${postalCodeCity.county}`}
