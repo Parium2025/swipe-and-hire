@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
-import { MapPin, Loader2, Check, X, ChevronDown, ChevronRight } from 'lucide-react';
+import { MapPin, Loader2, Check, X, ChevronDown, ChevronRight, Search } from 'lucide-react';
 import { getAllCities } from '@/lib/swedishCities';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -236,18 +236,21 @@ const LocationSearchInput = ({
             loop={false}
             value=""
           >
-            <CommandInput 
-              placeholder="Sök län eller stad..." 
-              value={dropdownSearch}
-              onValueChange={setDropdownSearch}
-              className="border-none focus:ring-0 bg-transparent text-white placeholder:text-white/60"
-            />
+            <div className="flex items-center border-b border-white/10 px-3" cmdk-input-wrapper="">
+              <Search className="mr-2 h-4 w-4 shrink-0 text-white" />
+              <input
+                value={dropdownSearch}
+                onChange={(e) => setDropdownSearch(e.target.value)}
+                placeholder="Sök län eller stad/postnummer"
+                className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none text-white placeholder:text-white/60"
+              />
+            </div>
             <CommandList className="max-h-[300px] overflow-y-auto">
               <CommandEmpty className="text-white/60 py-6 text-center">Ingen plats hittades.</CommandEmpty>
               
               {/* Show postal code result if found */}
               {postalCodeCity && (
-                <CommandGroup heading="Postnummer" className="text-white/70">
+                <CommandGroup heading="Postnummer" className="text-white [&_[cmdk-group-heading]]:text-white">
                   <CommandItem
                     value={postalCodeCity.city}
                     onSelect={() => handleMunicipalitySelect(
@@ -271,7 +274,7 @@ const LocationSearchInput = ({
               
               {/* Show matching municipalities directly if there's a search */}
               {dropdownSearch && !postalCodeCity && (
-                <CommandGroup heading="Kommuner" className="text-white/70">
+                <CommandGroup heading="Kommuner" className="text-white [&_[cmdk-group-heading]]:text-white">
                   {Object.entries(swedishCountiesWithMunicipalities)
                     .flatMap(([county, municipalities]) => 
                       municipalities
@@ -295,7 +298,7 @@ const LocationSearchInput = ({
               )}
               
               {/* Show counties */}
-              <CommandGroup heading="Län" className="text-white/70">
+              <CommandGroup heading="Län" className="text-white [&_[cmdk-group-heading]]:text-white">
                 {swedishCounties
                   .filter(county => 
                     !dropdownSearch || 
@@ -330,7 +333,7 @@ const LocationSearchInput = ({
                               key={municipality}
                               value={municipality}
                               onSelect={() => handleMunicipalitySelect(municipality, undefined, county)}
-                              className="cursor-pointer text-white/80 hover:bg-slate-700/50 text-sm"
+                              className="cursor-pointer text-white hover:bg-slate-700/50 text-sm pl-6"
                             >
                               {municipality}
                             </CommandItem>
