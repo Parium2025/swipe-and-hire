@@ -173,7 +173,7 @@ const LocationSearchInput = ({
           sideOffset={4}
           avoidCollisions={false}
         >
-          <Command className="bg-transparent border-none">
+          <Command className="bg-transparent border-none" shouldFilter={false}>
             <CommandInput 
               placeholder="Sök län eller stad..." 
               value={searchInput}
@@ -183,7 +183,15 @@ const LocationSearchInput = ({
             <CommandList className="max-h-[300px] overflow-y-auto">
               <CommandEmpty className="text-white/60 py-6 text-center">Ingen plats hittades.</CommandEmpty>
               <CommandGroup heading="Län" className="text-white/70">
-                {swedishCounties.map((county) => (
+                {swedishCounties
+                  .filter(county => 
+                    !searchInput || 
+                    county.toLowerCase().includes(searchInput.toLowerCase()) ||
+                    swedishCountiesWithMunicipalities[county].some(m => 
+                      m.toLowerCase().includes(searchInput.toLowerCase())
+                    )
+                  )
+                  .map((county) => (
                   <div key={county}>
                     <CommandItem
                       value={county}
@@ -199,16 +207,21 @@ const LocationSearchInput = ({
                     </CommandItem>
                     {expandedCounty === county && (
                       <div className="bg-slate-800/30">
-                        {swedishCountiesWithMunicipalities[county].map((municipality) => (
-                          <CommandItem
-                            key={municipality}
-                            value={municipality}
-                            onSelect={() => handleMunicipalitySelect(municipality)}
-                            className="cursor-pointer text-white/80 hover:bg-slate-700/50 text-sm"
-                          >
-                            {municipality}
-                          </CommandItem>
-                        ))}
+                        {swedishCountiesWithMunicipalities[county]
+                          .filter(municipality => 
+                            !searchInput || 
+                            municipality.toLowerCase().includes(searchInput.toLowerCase())
+                          )
+                          .map((municipality) => (
+                            <CommandItem
+                              key={municipality}
+                              value={municipality}
+                              onSelect={() => handleMunicipalitySelect(municipality)}
+                              className="cursor-pointer text-white/80 hover:bg-slate-700/50 text-sm"
+                            >
+                              {municipality}
+                            </CommandItem>
+                          ))}
                       </div>
                     )}
                   </div>
