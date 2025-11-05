@@ -274,7 +274,7 @@ const LocationSearchInput = ({
                       postalCodeCity.postalCode,
                       postalCodeCity.county
                     )}
-                    className="cursor-pointer text-white hover:bg-slate-700/70"
+                    className="cursor-pointer text-white hover:bg-slate-700/70 flex items-center justify-between"
                   >
                     <div className="flex flex-col">
                       <span className="font-medium text-white">{postalCodeCity.city}</span>
@@ -284,6 +284,9 @@ const LocationSearchInput = ({
                         {postalCodeCity.county && ` · ${postalCodeCity.county}`}
                       </span>
                     </div>
+                    {searchInput === postalCodeCity.city && (
+                      <Check className="h-4 w-4 text-white flex-shrink-0" />
+                    )}
                   </CommandItem>
                 </CommandGroup>
               )}
@@ -303,10 +306,15 @@ const LocationSearchInput = ({
                         key={municipality}
                         value={municipality}
                         onSelect={() => handleMunicipalitySelect(municipality)}
-                        className="cursor-pointer text-white hover:bg-slate-700/70"
+                        className="cursor-pointer text-white hover:bg-slate-700/70 flex items-center justify-between"
                       >
-                        <span>{municipality}</span>
-                        <span className="text-white/50 text-xs ml-2">({county})</span>
+                        <div className="flex items-center gap-2">
+                          <span>{municipality}</span>
+                          <span className="text-white/50 text-xs">({county})</span>
+                        </div>
+                        {searchInput === municipality && (
+                          <Check className="h-4 w-4 text-white flex-shrink-0" />
+                        )}
                       </CommandItem>
                     ))
                   }
@@ -349,9 +357,12 @@ const LocationSearchInput = ({
                               key={municipality}
                               value={municipality}
                               onSelect={() => handleMunicipalitySelect(municipality, undefined, county)}
-                              className="cursor-pointer text-white hover:bg-slate-700/50 text-sm pl-6"
+                              className="cursor-pointer text-white hover:bg-slate-700/50 text-sm pl-6 flex items-center justify-between"
                             >
-                              {municipality}
+                              <span>{municipality}</span>
+                              {searchInput === municipality && (
+                                <Check className="h-4 w-4 text-white flex-shrink-0" />
+                              )}
                             </CommandItem>
                           ))}
                       </div>
