@@ -188,9 +188,25 @@ const LocationSearchInput = ({
       <Popover open={open} onOpenChange={(isOpen) => {
         setOpen(isOpen);
         if (isOpen) {
+          // If there's a selected location, find its county and expand it
+          if (searchInput && foundLocation) {
+            if (foundLocation.county) {
+              setExpandedCounty(foundLocation.county as CountyName);
+            } else if (foundLocation.municipality || foundLocation.city) {
+              // Find county by searching through all counties
+              const cityToFind = foundLocation.municipality || foundLocation.city;
+              const foundCounty = Object.entries(swedishCountiesWithMunicipalities).find(([_, municipalities]) =>
+                municipalities.includes(cityToFind)
+              );
+              if (foundCounty) {
+                setExpandedCounty(foundCounty[0] as CountyName);
+              }
+            }
+          } else {
+            setExpandedCounty(null);
+          }
           setDropdownSearch('');
           setPostalCodeCity(null);
-          setExpandedCounty(null);
         }
       }}>
         <PopoverTrigger asChild>
