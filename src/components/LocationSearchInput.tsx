@@ -312,7 +312,7 @@ const LocationSearchInput = ({
                     <CommandItem
                       value={county}
                       onSelect={() => handleCountyClick(county)}
-                      className="cursor-pointer text-white hover:bg-slate-700/70 flex items-center justify-between transition-all duration-200 hover:translate-x-1 hover:shadow-lg"
+                      className="cursor-pointer text-white hover:bg-slate-700/70 flex items-center justify-between"
                     >
                       <span>{county}</span>
                       {expandedCounty === county ? (
@@ -333,7 +333,7 @@ const LocationSearchInput = ({
                               key={municipality}
                               value={municipality}
                               onSelect={() => handleMunicipalitySelect(municipality, undefined, county)}
-                              className="cursor-pointer text-white hover:bg-slate-700/50 text-sm pl-6"
+                              className="cursor-pointer text-white hover:bg-slate-700/70 text-sm pl-6"
                             >
                               {municipality}
                             </CommandItem>
