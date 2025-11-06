@@ -346,7 +346,7 @@ const JobView = () => {
         </Button>
       </div>
 
-      <div className="max-w-5xl mx-auto px-3 md:px-8 py-8">
+      <div className="max-w-3xl mx-auto px-3 md:px-6 py-8">
         {/* Company header - clickable */}
         <div className="flex items-center space-x-2 mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
           <div className="bg-white/20 rounded-full p-2">
