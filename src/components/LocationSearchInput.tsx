@@ -51,31 +51,33 @@ const LocationSearchInput = ({
 
   // Check if dropdown search is a postal code and fetch city
   useEffect(() => {
+    const trimmed = dropdownSearch.trim();
+    const isNumeric = /^\d+\s?\d*$/.test(trimmed);
+    const cleanedCode = trimmed.replace(/\s+/g, '');
+    
+    // Immediately clear if not 5 digits
+    if (!isNumeric || cleanedCode.length !== 5) {
+      setPostalCodeCity(null);
+      return;
+    }
+    
+    // Only fetch if exactly 5 digits
     const checkPostalCode = async () => {
-      const trimmed = dropdownSearch.trim();
-      const isNumeric = /^\d+\s?\d*$/.test(trimmed);
-      
-      if (isNumeric) {
-        const cleanedCode = trimmed.replace(/\s+/g, '');
-        
-        if (cleanedCode.length === 5 && isValidSwedishPostalCode(cleanedCode)) {
-          try {
-            const location = await getCachedPostalCodeInfo(cleanedCode);
-            if (location) {
-              setPostalCodeCity({
-                city: location.city,
-                postalCode: cleanedCode,
-                municipality: location.municipality,
-                county: location.county
-              });
-            } else {
-              setPostalCodeCity(null);
-            }
-          } catch (error) {
-            console.error('Error fetching postal code:', error);
+      if (isValidSwedishPostalCode(cleanedCode)) {
+        try {
+          const location = await getCachedPostalCodeInfo(cleanedCode);
+          if (location) {
+            setPostalCodeCity({
+              city: location.city,
+              postalCode: cleanedCode,
+              municipality: location.municipality,
+              county: location.county
+            });
+          } else {
             setPostalCodeCity(null);
           }
-        } else {
+        } catch (error) {
+          console.error('Error fetching postal code:', error);
           setPostalCodeCity(null);
         }
       } else {
@@ -83,7 +85,7 @@ const LocationSearchInput = ({
       }
     };
 
-    const timeoutId = setTimeout(checkPostalCode, 300);
+    const timeoutId = setTimeout(checkPostalCode, 150);
     return () => clearTimeout(timeoutId);
   }, [dropdownSearch]);
 
