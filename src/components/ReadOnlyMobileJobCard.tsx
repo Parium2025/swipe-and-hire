@@ -14,7 +14,7 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    navigate(`/job-details/${job.id}`);
+    navigate(`/job-view/${job.id}`);
   };
 
   return (

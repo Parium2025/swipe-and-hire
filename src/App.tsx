@@ -15,6 +15,7 @@ import EmailVerification from "./pages/EmailVerification";
 import ProfilePreview from "./pages/ProfilePreview";
 import JobApplication from "./pages/JobApplication";
 import JobDetails from "./pages/JobDetails";
+import JobView from "./pages/JobView";
 import NotFound from "./pages/NotFound";
 // import MyJobs from "./pages/MyJobs";
 import { AuthProvider } from "@/hooks/useAuth";
@@ -49,6 +50,7 @@ const AnimatedRoutes = () => {
       <Route path="/my-jobs" element={<Index />} />
       <Route path="/candidates" element={<Index />} />
       <Route path="/job-details/:jobId" element={<Index />} />
+      <Route path="/job-view/:jobId" element={<JobView />} />
       <Route path="/company-profile" element={<Index />} />
       <Route path="/reviews" element={<Index />} />
       <Route path="/job-application/:jobId" element={<JobApplication />} />
