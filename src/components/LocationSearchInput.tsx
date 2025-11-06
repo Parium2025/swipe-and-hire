@@ -266,7 +266,7 @@ const LocationSearchInput = ({
               
               {/* Show postal code validation hint */}
               {dropdownSearch && /^\d+$/.test(dropdownSearch.trim()) && dropdownSearch.trim().length < 5 && (
-                <div className="py-4 px-3 text-white/80 text-sm text-center">
+                <div className="py-2 px-3 text-white text-sm text-center border-t border-white/10">
                   Postnummer måste innehålla 5 siffror
                 </div>
               )}
@@ -300,7 +300,7 @@ const LocationSearchInput = ({
               
               {/* Show matching municipalities directly if there's a search */}
               {dropdownSearch && !postalCodeCity && (
-                <CommandGroup heading="Kommuner" className="text-white [&_[cmdk-group-heading]]:text-white">
+                <CommandGroup heading="Kommuner" className="[&_[cmdk-group-heading]]:text-white [&_[cmdk-group-heading]]:font-medium">
                   {Object.entries(swedishCountiesWithMunicipalities)
                     .flatMap(([county, municipalities]) => 
                       municipalities
@@ -329,7 +329,7 @@ const LocationSearchInput = ({
               )}
               
               {/* Show counties */}
-              <CommandGroup heading="Län" className="text-white [&_[cmdk-group-heading]]:text-white">
+              <CommandGroup heading="Län" className="[&_[cmdk-group-heading]]:text-white [&_[cmdk-group-heading]]:font-medium">
                 {swedishCounties
                   .filter(county => 
                     !dropdownSearch || 
