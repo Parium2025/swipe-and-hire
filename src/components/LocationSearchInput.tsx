@@ -262,7 +262,10 @@ const LocationSearchInput = ({
               />
             </div>
             <CommandList className="max-h-[300px] overflow-y-auto">
-              <CommandEmpty className="text-white py-6 text-center">Ingen plats hittades.</CommandEmpty>
+              {/* Only show "no results" for text searches, not for incomplete postal codes */}
+              {!(/^\d+$/.test(dropdownSearch.trim())) && (
+                <CommandEmpty className="text-white py-6 text-center">Ingen plats hittades.</CommandEmpty>
+              )}
               
               {/* Show postal code validation hint */}
               {dropdownSearch && /^\d+$/.test(dropdownSearch.trim()) && dropdownSearch.trim().length < 5 && (
