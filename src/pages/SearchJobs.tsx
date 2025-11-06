@@ -615,7 +615,7 @@ const SearchJobs = () => {
                        <TableRow 
                         key={job.id} 
                         className="border-white/10 cursor-pointer transition-all duration-300 md:hover:bg-white/10"
-                        onClick={() => navigate(`/job-details/${job.id}`)}
+                        onClick={() => navigate(`/job-view/${job.id}`)}
                       >
                         <TableCell>
                           <JobTitleCell title={job.title} employmentType={job.employment_type} />
