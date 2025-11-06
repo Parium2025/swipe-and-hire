@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { MapPin, Clock, Euro, Building2, ArrowLeft, Send, FileText, Video, CheckSquare, List, Users, Briefcase } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 
@@ -356,17 +357,19 @@ const JobView = () => {
           onClick={() => setShowCompanyProfile(true)}
           className="w-full flex items-center space-x-2 mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg hover:bg-white/15 transition-all cursor-pointer"
         >
-          {job.profiles?.company_logo_url ? (
-            <img 
-              src={job.profiles.company_logo_url} 
-              alt={job.profiles.company_name || 'Företagslogga'}
-              className="h-10 w-10 rounded-full object-cover bg-white/20"
+          <Avatar className="h-10 w-10">
+            <AvatarImage 
+              src={job.profiles?.company_logo_url} 
+              alt={job.profiles?.company_name || 'Företagslogga'}
             />
-          ) : (
-            <div className="bg-white/20 rounded-full p-2">
-              <Building2 className="h-4 w-4 text-white" />
-            </div>
-          )}
+            <AvatarFallback className="bg-white/20 text-white font-semibold text-sm">
+              {job.profiles?.company_name
+                ? job.profiles.company_name.substring(0, 2).toUpperCase()
+                : job.profiles?.first_name && job.profiles?.last_name
+                ? `${job.profiles.first_name[0]}${job.profiles.last_name[0]}`.toUpperCase()
+                : 'FÖ'}
+            </AvatarFallback>
+          </Avatar>
           <div className="text-left">
             <h3 className="text-white font-bold text-sm">
               {job.profiles?.company_name || 
