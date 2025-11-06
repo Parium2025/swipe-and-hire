@@ -117,11 +117,11 @@ const JobView = () => {
   };
 
   const formatSalary = (min?: number, max?: number) => {
-    if (!min && !max) return 'Lön enligt överenskommelse';
+    if (!min && !max) return null;
     if (min && max) return `${min.toLocaleString()} - ${max.toLocaleString()} kr/mån`;
     if (min) return `Från ${min.toLocaleString()} kr/mån`;
     if (max) return `Upp till ${max.toLocaleString()} kr/mån`;
-    return '';
+    return null;
   };
 
   const renderQuestionInput = (question: JobQuestion) => {
@@ -415,10 +415,12 @@ const JobView = () => {
                   </div>
                 )}
 
-                <div className="flex items-center text-green-300 text-sm font-semibold pt-0.5">
-                  <Euro className="h-4 w-4 mr-1.5" />
-                  <span>{formatSalary(job.salary_min, job.salary_max)}</span>
-                </div>
+                {formatSalary(job.salary_min, job.salary_max) && (
+                  <div className="flex items-center text-green-300 text-sm font-semibold pt-0.5">
+                    <Euro className="h-4 w-4 mr-1.5" />
+                    <span>{formatSalary(job.salary_min, job.salary_max)}</span>
+                  </div>
+                )}
               </div>
             </div>
 
