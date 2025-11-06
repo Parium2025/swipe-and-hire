@@ -219,7 +219,7 @@ const LocationSearchInput = ({
           >
             <MapPin className="h-4 w-4 text-white flex-shrink-0" />
             <span className="text-sm text-white/90 flex-1 truncate">
-              {searchInput || "Postnummer eller ort..."}
+              {searchInput || "Sök på län eller stad/postnummer"}
             </span>
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-white/60 flex-shrink-0" />
