@@ -149,49 +149,69 @@ export function AppSidebar() {
       collapsible="icon"
     >
       <SidebarContent className="gap-0">
-        {/* User Profile Section - only show when not collapsed */}
-        {!collapsed && (
-          <div className="p-4">
-            <div className="flex items-center gap-3">
-              {hasVideo && profile?.video_url ? (
-                <ProfileVideo
-                  videoUrl={profile.video_url}
-                  coverImageUrl={profile.cover_image_url || profile.profile_image_url}
-                  userInitials={`${profile?.first_name?.[0] || ''}${profile?.last_name?.[0] || ''}`}
-                  alt="Profilvideo"
-                  className="h-10 w-10 ring-2 ring-white/20 rounded-full"
+        {/* User Profile Section - always mounted to preload, but only visible when not collapsed */}
+        <div className={`p-4 ${collapsed ? 'hidden' : ''}`}>
+          <div className="flex items-center gap-3">
+            {hasVideo && profile?.video_url ? (
+              <ProfileVideo
+                videoUrl={profile.video_url}
+                coverImageUrl={profile.cover_image_url || profile.profile_image_url}
+                userInitials={`${profile?.first_name?.[0] || ''}${profile?.last_name?.[0] || ''}`}
+                alt="Profilvideo"
+                className="h-10 w-10 ring-2 ring-white/20 rounded-full"
+              />
+            ) : (
+              <Avatar className="h-10 w-10 ring-2 ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
+                <AvatarImage 
+                  src={avatarUrl || undefined} 
+                  alt="Profilbild" 
+                  onError={() => {
+                    setAvatarError(true);
+                    setAvatarUrl(null);
+                  }}
+                  onLoad={() => setAvatarLoaded(true)}
+                  loading="eager"
+                  decoding="sync"
+                  fetchPriority="high"
+                  draggable={false}
                 />
-              ) : (
-                <Avatar className="h-10 w-10 ring-2 ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
-                  <AvatarImage 
-                    src={avatarUrl || undefined} 
-                    alt="Profilbild" 
-                    onError={() => {
-                      setAvatarError(true);
-                      setAvatarUrl(null);
-                    }}
-                    onLoad={() => setAvatarLoaded(true)}
-                    loading="eager"
-                    decoding="sync"
-                    fetchPriority="high"
-                    draggable={false}
-                  />
-                  <AvatarFallback className="bg-white/20 text-white">
-                    {profile?.first_name?.[0]}{profile?.last_name?.[0]}
-                  </AvatarFallback>
-                </Avatar>
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">
-                  {profile?.first_name} {profile?.last_name}
-                </p>
-                <p className="text-sm text-white truncate">
-                  {userRole?.role === 'employer' ? 'Arbetsgivare' : 'Jobbsökare'}
-                </p>
-              </div>
+                <AvatarFallback className="bg-white/20 text-white">
+                  {profile?.first_name?.[0]}{profile?.last_name?.[0]}
+                </AvatarFallback>
+              </Avatar>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">
+                {profile?.first_name} {profile?.last_name}
+              </p>
+              <p className="text-sm text-white truncate">
+                {userRole?.role === 'employer' ? 'Arbetsgivare' : 'Jobbsökare'}
+              </p>
             </div>
           </div>
-        )}
+        </div>
+        
+        {/* Hidden preloader - always mounted to keep video/image cached */}
+        <div className="hidden">
+          {hasVideo && profile?.video_url && (
+            <ProfileVideo
+              videoUrl={profile.video_url}
+              coverImageUrl={profile.cover_image_url || profile.profile_image_url}
+              userInitials={`${profile?.first_name?.[0] || ''}${profile?.last_name?.[0] || ''}`}
+              alt="Profilvideo preload"
+              className="h-10 w-10"
+            />
+          )}
+          {avatarUrl && (
+            <img 
+              src={avatarUrl} 
+              alt="Preload" 
+              loading="eager"
+              decoding="sync"
+              fetchPriority="high"
+            />
+          )}
+        </div>
 
         <SidebarSeparator className="bg-white/20 mx-4" />
 
