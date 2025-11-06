@@ -407,10 +407,6 @@ const LocationSearchInput = ({
                     {expandedCounty === county && (
                       <div className="bg-slate-800/30">
                         {swedishCountiesWithMunicipalities[county]
-                          .filter(municipality => 
-                            !dropdownSearch || 
-                            municipality.toLowerCase().includes(dropdownSearch.toLowerCase())
-                          )
                           .map((municipality) => (
                             <CommandItem
                               key={municipality}
