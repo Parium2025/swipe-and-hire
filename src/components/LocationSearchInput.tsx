@@ -293,8 +293,8 @@ const LocationSearchInput = ({
               
               {/* Show postal code validation hint */}
               {dropdownSearch && /^\d+$/.test(dropdownSearch.trim()) && dropdownSearch.trim().length < 5 && (
-                <div className="py-2 px-3 text-white/70 text-xs text-center border-t border-white/10">
-                  {dropdownSearch.trim().length} av 5 siffror
+                <div className="py-2 px-3 text-white text-xs text-center border-t border-white/10">
+                  Postnummer måste innehålla 5 siffror
                 </div>
               )}
               
