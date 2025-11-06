@@ -438,7 +438,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       placeholder="Dela dina erfarenheter av detta företag..."
-                      className="min-h-[100px]"
+                      className="min-h-[100px] bg-white/10 border-white/20 text-white placeholder:text-white/50"
                     />
                   </div>
 
