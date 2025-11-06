@@ -262,7 +262,14 @@ const LocationSearchInput = ({
               />
             </div>
             <CommandList className="max-h-[300px] overflow-y-auto">
-              <CommandEmpty className="text-white/60 py-6 text-center">Ingen plats hittades.</CommandEmpty>
+              <CommandEmpty className="text-white py-6 text-center">Ingen plats hittades.</CommandEmpty>
+              
+              {/* Show postal code validation hint */}
+              {dropdownSearch && /^\d+$/.test(dropdownSearch.trim()) && dropdownSearch.trim().length < 5 && (
+                <div className="py-4 px-3 text-white/80 text-sm text-center">
+                  Postnummer måste innehålla 5 siffror
+                </div>
+              )}
               
               {/* Show postal code result if found */}
               {postalCodeCity && (
