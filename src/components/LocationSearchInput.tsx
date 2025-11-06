@@ -34,6 +34,13 @@ const LocationSearchInput = ({
     municipality?: string;
     county?: string;
   } | null>(null);
+  const [isFadingOut, setIsFadingOut] = useState(false);
+  const [displayedPostalCode, setDisplayedPostalCode] = useState<{
+    city: string;
+    postalCode: string;
+    municipality?: string;
+    county?: string;
+  } | null>(null);
   const [foundLocation, setFoundLocation] = useState<{
     type: 'postal' | 'city';
     city: string;
@@ -48,6 +55,21 @@ const LocationSearchInput = ({
       setSearchInput(value);
     }
   }, [value]);
+
+  // Handle fade out animation for postal code
+  useEffect(() => {
+    if (postalCodeCity) {
+      setIsFadingOut(false);
+      setDisplayedPostalCode(postalCodeCity);
+    } else if (displayedPostalCode && !postalCodeCity) {
+      setIsFadingOut(true);
+      const timer = setTimeout(() => {
+        setDisplayedPostalCode(null);
+        setIsFadingOut(false);
+      }, 300); // Match animation duration
+      return () => clearTimeout(timer);
+    }
+  }, [postalCodeCity, displayedPostalCode]);
 
   // Check if dropdown search is a postal code and fetch city
   useEffect(() => {
@@ -277,26 +299,32 @@ const LocationSearchInput = ({
               )}
               
               {/* Show postal code result if found */}
-              {postalCodeCity && (
-                <CommandGroup heading="Postnummer" className="text-white [&_[cmdk-group-heading]]:text-white animate-fade-in">
+              {displayedPostalCode && (
+                <CommandGroup 
+                  heading="Postnummer" 
+                  className={cn(
+                    "text-white [&_[cmdk-group-heading]]:text-white transition-opacity duration-300",
+                    isFadingOut ? "animate-fade-out opacity-0" : "animate-fade-in opacity-100"
+                  )}
+                >
                   <CommandItem
-                    value={postalCodeCity.city}
+                    value={displayedPostalCode.city}
                     onSelect={() => handleMunicipalitySelect(
-                      postalCodeCity.city, 
-                      postalCodeCity.postalCode,
-                      postalCodeCity.county
+                      displayedPostalCode.city, 
+                      displayedPostalCode.postalCode,
+                      displayedPostalCode.county
                     )}
                     className="cursor-pointer text-white hover:bg-slate-700/70 flex items-center justify-between transition-opacity duration-300"
                   >
                     <div className="flex flex-col">
-                      <span className="font-medium text-white">{postalCodeCity.city}</span>
+                      <span className="font-medium text-white">{displayedPostalCode.city}</span>
                       <span className="text-white text-xs">
-                        {postalCodeCity.postalCode}
-                        {postalCodeCity.municipality && ` · ${postalCodeCity.municipality}`}
-                        {postalCodeCity.county && ` · ${postalCodeCity.county}`}
+                        {displayedPostalCode.postalCode}
+                        {displayedPostalCode.municipality && ` · ${displayedPostalCode.municipality}`}
+                        {displayedPostalCode.county && ` · ${displayedPostalCode.county}`}
                       </span>
                     </div>
-                    {searchInput === postalCodeCity.city && (
+                    {searchInput === displayedPostalCode.city && (
                       <Check className="h-4 w-4 text-white flex-shrink-0" />
                     )}
                   </CommandItem>
