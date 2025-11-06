@@ -4,14 +4,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
 import JobSwipe from '@/components/JobSwipe';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
-import { MapPin, Clock, Euro, Heart, X, Building2, Mail, Info, ArrowLeft, Send } from 'lucide-react';
+import { MapPin, Clock, Euro, Heart, X, Building2, Mail, Info, ArrowLeft, Send, Users, Briefcase } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import JobApplicationDialog from '@/components/JobApplicationDialog';
 
@@ -163,134 +160,161 @@ const JobView = () => {
   }
 
   return (
-    <div className="min-h-screen py-6 px-3 md:px-6 max-w-4xl mx-auto">
-      {/* Back button */}
-      <Button
-        variant="ghost"
-        onClick={() => navigate('/search-jobs')}
-        className="mb-4 text-white hover:bg-white/10"
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Tillbaka till sökning
-      </Button>
+    <div className="min-h-screen bg-gradient-to-br from-primary via-purple-600 to-pink-500 py-8 px-4 md:px-8">
+      <div className="max-w-5xl mx-auto">
+        {/* Back button */}
+        <Button
+          variant="ghost"
+          onClick={() => navigate('/search-jobs')}
+          className="mb-6 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white"
+        >
+          <ArrowLeft className="mr-2 h-5 w-5" />
+          Tillbaka till sökning
+        </Button>
 
-      <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-        <CardHeader>
-          {/* Company info */}
-          <div className="flex items-center gap-2 mb-4">
-            <Building2 className="h-5 w-5 text-white/70" />
-            <span className="text-white/90 font-medium">
-              {job.profiles?.company_name || 
-               `${job.profiles?.first_name} ${job.profiles?.last_name}` || 
-               'Företag'}
-            </span>
-          </div>
-
-          <CardTitle className="text-2xl md:text-3xl text-white mb-4">
-            {job.title}
-          </CardTitle>
-
-          {/* Location and employment type */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            <Badge variant="outline" className="flex items-center gap-1 bg-white/10 text-white border-white/20">
-              <MapPin className="h-3 w-3" />
-              {job.location}
-            </Badge>
-            {job.employment_type && (
-              <Badge variant="outline" className="flex items-center gap-1 bg-white/10 text-white border-white/20">
-                <Clock className="h-3 w-3" />
-                {getEmploymentTypeLabel(job.employment_type)}
-              </Badge>
-            )}
-          </div>
-
-          {/* Salary */}
-          <div className="flex items-center gap-2 text-lg font-semibold text-green-400 mb-4">
-            <Euro className="h-5 w-5" />
-            {formatSalary(job.salary_min, job.salary_max)}
-          </div>
-        </CardHeader>
-
-        <CardContent className="space-y-6">
-          {/* Work schedule */}
-          {job.work_schedule && (
-            <div>
-              <h3 className="text-white font-semibold mb-2 flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                Arbetstider
-              </h3>
-              <p className="text-white/70">{job.work_schedule}</p>
-            </div>
-          )}
-
-          {/* Description */}
-          <div>
-            <h3 className="text-white font-semibold mb-2 text-lg">Om tjänsten</h3>
-            <p className="text-white/80 leading-relaxed whitespace-pre-wrap">
-              {job.description}
-            </p>
-          </div>
-
-          {/* Application Instructions */}
-          {job.application_instructions && (
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-              <h3 className="text-white font-semibold mb-2 flex items-center gap-2">
-                <Info className="h-4 w-4 text-blue-400" />
-                Ansökningsinstruktioner
-              </h3>
-              <p className="text-white/80 leading-relaxed whitespace-pre-wrap">
-                {job.application_instructions}
-              </p>
-            </div>
-          )}
-
-          {/* Contact Info */}
-          {job.contact_email && (
-            <div>
-              <h3 className="text-white font-semibold mb-2 flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                Kontaktinformation
-              </h3>
-              <div className="flex items-center gap-3">
-                <span className="text-white/70">{job.contact_email}</span>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="bg-white/5 border-white/20 text-white hover:bg-white/10"
-                  onClick={() => {
-                    window.open(`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`, '_blank');
-                  }}
-                >
-                  <Mail className="h-4 w-4 mr-2" />
-                  Kontakta arbetsgivaren
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Apply button */}
-          <div className="flex gap-3 pt-4">
-            <Button
-              size="lg"
-              className="flex-1 bg-green-500 hover:bg-green-600 text-white"
-              onClick={handleApply}
-            >
-              <Send className="mr-2 h-5 w-5" />
-              Ansök nu
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="bg-white/5 border-white/20 text-white hover:bg-white/10"
+        <Card className="bg-white/10 backdrop-blur-md border-white/20 rounded-2xl overflow-hidden shadow-2xl">
+          <CardContent className="p-8 md:p-10 space-y-8">
+            
+            {/* Company Header - Clickable */}
+            <div 
+              className="flex items-center space-x-4 cursor-pointer transition-all duration-300 md:hover:bg-white/10 p-5 rounded-xl -mx-5"
               onClick={() => {
-                toast({ title: 'Sparad!', description: 'Jobbet har sparats till dina favoriter' });
+                toast({ 
+                  title: 'Företagsprofil', 
+                  description: 'Företagsprofiler kommer snart!' 
+                });
               }}
             >
-              <Heart className="h-5 w-5" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+              <div className="bg-white/20 rounded-full p-4 shadow-lg">
+                <Building2 className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-xl md:text-2xl">
+                  {job.profiles?.company_name || 
+                   `${job.profiles?.first_name} ${job.profiles?.last_name}` || 
+                   'Företag'}
+                </h3>
+                <div className="flex items-center text-white/80 text-sm">
+                  <Users className="h-4 w-4 mr-1" />
+                  Klicka för att se företagsprofil
+                </div>
+              </div>
+            </div>
+
+            {/* Job Title - Large and prominent */}
+            <div>
+              <h1 className="text-white text-3xl md:text-4xl font-bold leading-tight mb-6">
+                {job.title}
+              </h1>
+
+              {/* Job details - Large icons and text */}
+              <div className="space-y-4">
+                <div className="flex items-center text-white/90 text-lg">
+                  <div className="bg-white/20 rounded-full p-2 mr-4">
+                    <MapPin className="h-5 w-5 text-white" />
+                  </div>
+                  <span>{job.location}</span>
+                </div>
+
+                {job.employment_type && (
+                  <div className="flex items-center text-white/90 text-lg">
+                    <div className="bg-white/20 rounded-full p-2 mr-4">
+                      <Clock className="h-5 w-5 text-white" />
+                    </div>
+                    <span>{getEmploymentTypeLabel(job.employment_type)}</span>
+                  </div>
+                )}
+
+                <div className="flex items-center text-green-300 text-xl font-semibold">
+                  <div className="bg-green-500/20 rounded-full p-2 mr-4">
+                    <Euro className="h-5 w-5 text-green-300" />
+                  </div>
+                  <span>{formatSalary(job.salary_min, job.salary_max)}</span>
+                </div>
+
+                {job.work_schedule && (
+                  <div className="flex items-center text-white/90 text-lg">
+                    <div className="bg-white/20 rounded-full p-2 mr-4">
+                      <Briefcase className="h-5 w-5 text-white" />
+                    </div>
+                    <span>{job.work_schedule}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="bg-white/10 rounded-xl p-6 md:p-8 border border-white/20">
+              <h4 className="text-white font-semibold text-xl mb-4 flex items-center">
+                <Info className="h-5 w-5 mr-2" />
+                Beskrivning
+              </h4>
+              <p className="text-white/90 text-base md:text-lg leading-relaxed whitespace-pre-wrap">
+                {job.description}
+              </p>
+            </div>
+
+            {/* Application Instructions */}
+            {job.application_instructions && (
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-6 md:p-8">
+                <h4 className="text-white font-semibold text-xl mb-4 flex items-center">
+                  <Info className="h-5 w-5 mr-2 text-blue-300" />
+                  Ansökningsinstruktioner
+                </h4>
+                <p className="text-white/90 text-base md:text-lg leading-relaxed whitespace-pre-wrap">
+                  {job.application_instructions}
+                </p>
+              </div>
+            )}
+
+            {/* Contact Info */}
+            {job.contact_email && (
+              <div className="bg-white/10 rounded-xl p-6 md:p-8 border border-white/20">
+                <h4 className="text-white font-semibold text-xl mb-4 flex items-center">
+                  <Mail className="h-5 w-5 mr-2" />
+                  Kontaktinformation
+                </h4>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <span className="text-white/90 text-lg">{job.contact_email}</span>
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    className="bg-white/20 border-white/40 text-white transition-all duration-300 md:hover:bg-white/30 md:hover:text-white"
+                    onClick={() => {
+                      window.open(`mailto:${job.contact_email}?subject=Fråga om tjänsten: ${job.title}`, '_blank');
+                    }}
+                  >
+                    <Mail className="h-5 w-5 mr-2" />
+                    Kontakta arbetsgivaren
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons - Large and prominent */}
+            <div className="flex flex-col sm:flex-row gap-4 pt-6">
+              <Button
+                size="lg"
+                className="flex-1 bg-green-500 hover:bg-green-600 text-white h-16 text-lg font-semibold shadow-lg transition-all duration-300 md:hover:scale-105"
+                onClick={handleApply}
+              >
+                <Send className="mr-3 h-6 w-6" />
+                Ansök nu
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="sm:w-16 h-16 bg-white/20 border-white/40 text-white transition-all duration-300 md:hover:bg-white/30 md:hover:text-white md:hover:scale-105 [&_svg]:text-white md:hover:[&_svg]:text-white"
+                onClick={() => {
+                  toast({ title: 'Sparad!', description: 'Jobbet har sparats till dina favoriter' });
+                }}
+              >
+                <Heart className="h-6 w-6" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       <JobApplicationDialog
         open={showApplicationDialog}
