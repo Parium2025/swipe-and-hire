@@ -278,7 +278,7 @@ const LocationSearchInput = ({
               
               {/* Show postal code result if found */}
               {postalCodeCity && (
-                <CommandGroup heading="Postnummer" className="text-white [&_[cmdk-group-heading]]:text-white">
+                <CommandGroup heading="Postnummer" className="text-white [&_[cmdk-group-heading]]:text-white animate-fade-in">
                   <CommandItem
                     value={postalCodeCity.city}
                     onSelect={() => handleMunicipalitySelect(
@@ -286,7 +286,7 @@ const LocationSearchInput = ({
                       postalCodeCity.postalCode,
                       postalCodeCity.county
                     )}
-                    className="cursor-pointer text-white hover:bg-slate-700/70 flex items-center justify-between"
+                    className="cursor-pointer text-white hover:bg-slate-700/70 flex items-center justify-between transition-opacity duration-300"
                   >
                     <div className="flex flex-col">
                       <span className="font-medium text-white">{postalCodeCity.city}</span>
