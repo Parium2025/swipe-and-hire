@@ -350,7 +350,7 @@ const LocationSearchInput = ({
                       >
                         <div className="flex items-center gap-2">
                           <span>{municipality}</span>
-                          <span className="text-white/50 text-xs">({county})</span>
+                          <span className="text-white text-xs">({county})</span>
                         </div>
                         {searchInput === municipality && (
                           <Check className="h-4 w-4 text-white flex-shrink-0" />
