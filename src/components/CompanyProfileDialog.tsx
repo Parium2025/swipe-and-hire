@@ -423,7 +423,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                           <Star
                             className={`h-5 w-5 ${
                               star <= newRating
-                                ? "fill-white text-white stroke-white stroke-[1.5]"
+                                ? "fill-yellow-400 text-yellow-400"
                                 : "fill-transparent text-white stroke-white stroke-[1.5]"
                             }`}
                           />
@@ -499,7 +499,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                                     key={i}
                                     className={`h-5 w-5 ${
                                       i < (review.rating || 0)
-                                        ? "fill-white text-white stroke-white stroke-[1.5]"
+                                        ? "fill-yellow-400 text-yellow-400"
                                         : "fill-transparent text-white stroke-white stroke-[1.5]"
                                     }`}
                                   />
