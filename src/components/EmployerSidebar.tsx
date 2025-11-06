@@ -257,26 +257,42 @@ export function EmployerSidebar() {
       collapsible="icon"
     >
       <SidebarContent className="gap-0">
-        {/* User Profile Section - only show when not collapsed */}
-        {!collapsed && (
-          <div className="p-4">
-            <div className="flex items-center gap-3">
-              <CompanyAvatar
-                companyLogoUrl={companyLogoUrl}
-                companyName={profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
-                initials={getCompanyInitials()}
-              />
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-white text-sm truncate">
-                  {profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
-                </p>
-                <p className="text-sm text-white truncate">
-                  {profile?.industry || 'Admin'}
-                </p>
-              </div>
+        {/* User Profile Section - always mounted to preload, but only visible when not collapsed */}
+        <div className={`p-4 ${collapsed ? 'hidden' : ''}`}>
+          <div className="flex items-center gap-3">
+            <CompanyAvatar
+              companyLogoUrl={companyLogoUrl}
+              companyName={profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
+              initials={getCompanyInitials()}
+            />
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-white text-sm truncate">
+                {profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
+              </p>
+              <p className="text-sm text-white truncate">
+                {profile?.industry || 'Admin'}
+              </p>
             </div>
           </div>
-        )}
+        </div>
+        
+        {/* Hidden preloader - always mounted to keep logo cached */}
+        <div className="hidden">
+          <CompanyAvatar
+            companyLogoUrl={companyLogoUrl}
+            companyName={profile?.company_name || `${profile?.first_name} ${profile?.last_name}`}
+            initials={getCompanyInitials()}
+          />
+          {companyLogoUrl && (
+            <img 
+              src={companyLogoUrl} 
+              alt="Preload" 
+              loading="eager"
+              decoding="sync"
+              fetchPriority="high"
+            />
+          )}
+        </div>
 
         <SidebarSeparator className="bg-white/20 mx-4" />
 
