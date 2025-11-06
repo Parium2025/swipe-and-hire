@@ -328,17 +328,18 @@ const LocationSearchInput = ({
                 </CommandGroup>
               )}
               
-              {/* Show counties */}
-              <CommandGroup heading="Län" className="[&_[cmdk-group-heading]]:text-white [&_[cmdk-group-heading]]:font-medium">
-                {swedishCounties
-                  .filter(county => 
-                    !dropdownSearch || 
-                    county.toLowerCase().includes(dropdownSearch.toLowerCase()) ||
-                    swedishCountiesWithMunicipalities[county].some(m => 
-                      m.toLowerCase().includes(dropdownSearch.toLowerCase())
+              {/* Show counties - hide when searching with numbers */}
+              {!(/^\d+$/.test(dropdownSearch.trim())) && (
+                <CommandGroup heading="Län" className="[&_[cmdk-group-heading]]:text-white [&_[cmdk-group-heading]]:font-medium">
+                  {swedishCounties
+                    .filter(county => 
+                      !dropdownSearch || 
+                      county.toLowerCase().includes(dropdownSearch.toLowerCase()) ||
+                      swedishCountiesWithMunicipalities[county].some(m => 
+                        m.toLowerCase().includes(dropdownSearch.toLowerCase())
+                      )
                     )
-                  )
-                  .map((county) => (
+                    .map((county) => (
                   <div key={county}>
                     <CommandItem
                       value={county}
@@ -376,7 +377,8 @@ const LocationSearchInput = ({
                     )}
                   </div>
                 ))}
-              </CommandGroup>
+                </CommandGroup>
+              )}
             </CommandList>
           </Command>
         </PopoverContent>
