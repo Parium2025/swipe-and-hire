@@ -332,7 +332,7 @@ const JobView = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary via-purple-600 to-pink-500">
+    <div className="min-h-screen bg-parium-gradient">
       {/* Back button - fixed top left */}
       <div className="fixed top-6 left-6 z-10">
         <Button
