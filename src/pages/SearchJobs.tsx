@@ -275,9 +275,10 @@ const SearchJobs = () => {
         </div>
       </div>
 
-      {/* Filters - Always Visible */}
-      <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-        <CardContent className="p-4 space-y-4">
+      {/* Filters - Hidden when searching */}
+      {!searchInput && (
+        <Card className="bg-white/5 backdrop-blur-sm border-white/20">
+          <CardContent className="p-4 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Location Filter - Postal Code OR City */}
             <div className="space-y-2">
@@ -506,6 +507,7 @@ const SearchJobs = () => {
           </div>
         </CardContent>
       </Card>
+      )}
 
       {/* Sort Dropdown */}
       <div className="flex justify-center">
