@@ -44,6 +44,7 @@ interface JobPosting {
     first_name?: string;
     last_name?: string;
     company_name?: string;
+    company_logo_url?: string;
   };
 }
 
@@ -74,7 +75,8 @@ const JobView = () => {
           profiles!job_postings_employer_id_fkey (
             first_name,
             last_name,
-            company_name
+            company_name,
+            company_logo_url
           )
         `)
         .eq('id', jobId)
@@ -354,9 +356,17 @@ const JobView = () => {
           onClick={() => setShowCompanyProfile(true)}
           className="w-full flex items-center space-x-2 mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg hover:bg-white/15 transition-all cursor-pointer"
         >
-          <div className="bg-white/20 rounded-full p-2">
-            <Building2 className="h-4 w-4 text-white" />
-          </div>
+          {job.profiles?.company_logo_url ? (
+            <img 
+              src={job.profiles.company_logo_url} 
+              alt={job.profiles.company_name || 'Företagslogga'}
+              className="h-10 w-10 rounded-full object-cover bg-white/20"
+            />
+          ) : (
+            <div className="bg-white/20 rounded-full p-2">
+              <Building2 className="h-4 w-4 text-white" />
+            </div>
+          )}
           <div className="text-left">
             <h3 className="text-white font-bold text-sm">
               {job.profiles?.company_name || 
