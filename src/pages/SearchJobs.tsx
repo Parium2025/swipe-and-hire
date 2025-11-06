@@ -22,15 +22,6 @@ import { StatsGrid } from '@/components/StatsGrid';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import LocationSearchInput from '@/components/LocationSearchInput';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { useQuery } from '@tanstack/react-query';
 
 interface Job {
@@ -69,15 +60,15 @@ const SearchJobs = () => {
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
   const [selectedEmploymentTypes, setSelectedEmploymentTypes] = useState<string[]>([]);
   
-  // Pagination
-  const [page, setPage] = useState(1);
-  const pageSize = 10;
+  // Lazy loading state
+  const [displayCount, setDisplayCount] = useState(10);
+  const initialLoadSize = 20; // Load first 20 jobs
+  const loadMoreSize = 10; // Load 10 more each time
   const listTopRef = useRef<HTMLDivElement>(null);
-  const didMountRef = useRef(false);
 
   const employmentTypes = SEARCH_EMPLOYMENT_TYPES;
 
-  // Use React Query for background caching and instant data
+  // Use React Query with lazy loading - load only what's needed
   const { data: jobs = [], isLoading } = useQuery({
     queryKey: ['public-jobs', selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes],
     queryFn: async () => {
@@ -142,7 +133,8 @@ const SearchJobs = () => {
         query = query.in('employment_type', employmentCodes);
       }
 
-      const { data, error } = await query.limit(100);
+      // Load initial batch - faster page load
+      const { data, error } = await query.limit(initialLoadSize);
       
       if (error) throw error;
       
@@ -190,21 +182,21 @@ const SearchJobs = () => {
     return filtered;
   }, [jobs, searchInput, sortBy]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredAndSortedJobs.length / pageSize));
-  const pageJobs = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filteredAndSortedJobs.slice(start, start + pageSize);
-  }, [filteredAndSortedJobs, page]);
+  // Display jobs with lazy loading
+  const displayedJobs = useMemo(() => {
+    return filteredAndSortedJobs.slice(0, displayCount);
+  }, [filteredAndSortedJobs, displayCount]);
 
+  const hasMoreJobs = displayCount < filteredAndSortedJobs.length;
+
+  // Reset display count when filters change
   useEffect(() => {
-    if (!didMountRef.current) {
-      didMountRef.current = true;
-      return;
-    }
-    if (listTopRef.current) {
-      listTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, [page]);
+    setDisplayCount(10);
+  }, [searchInput, selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes, sortBy]);
+
+  const handleLoadMore = () => {
+    setDisplayCount(prev => Math.min(prev + loadMoreSize, filteredAndSortedJobs.length));
+  };
 
   const formatSalary = (min?: number, max?: number) => {
     if (min && max) {
@@ -611,7 +603,7 @@ const SearchJobs = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {pageJobs.map((job) => (
+                    {displayedJobs.map((job) => (
                        <TableRow 
                         key={job.id} 
                         className="border-white/10 cursor-pointer transition-all duration-300 md:hover:bg-white/10"
@@ -677,7 +669,7 @@ const SearchJobs = () => {
               <div className="md:hidden">
                 <ScrollArea className="h-[calc(100vh-420px)]">
                   <div className="space-y-2 px-2 py-2">
-                    {pageJobs.map((job) => (
+                    {displayedJobs.map((job) => (
                       <ReadOnlyMobileJobCard
                         key={job.id}
                         job={job as any}
@@ -691,56 +683,25 @@ const SearchJobs = () => {
         </CardContent>
       </Card>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious 
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer transition-all duration-300 md:hover:bg-white/10 md:hover:text-white'}
-              />
-            </PaginationItem>
-            
-            {[...Array(Math.min(5, totalPages))].map((_, i) => {
-              let pageNum;
-              if (totalPages <= 5) {
-                pageNum = i + 1;
-              } else if (page <= 3) {
-                pageNum = i + 1;
-              } else if (page >= totalPages - 2) {
-                pageNum = totalPages - 4 + i;
-              } else {
-                pageNum = page - 2 + i;
-              }
-              
-              return (
-                <PaginationItem key={pageNum}>
-                  <PaginationLink
-                    onClick={() => setPage(pageNum)}
-                    isActive={page === pageNum}
-                    className="cursor-pointer transition-all duration-300 md:hover:bg-white/10 md:hover:text-white"
-                  >
-                    {pageNum}
-                  </PaginationLink>
-                </PaginationItem>
-              );
-            })}
-            
-            {totalPages > 5 && page < totalPages - 2 && (
-              <PaginationItem>
-                <PaginationEllipsis />
-              </PaginationItem>
-            )}
-            
-            <PaginationItem>
-              <PaginationNext 
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                className={page === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer transition-all duration-300 md:hover:bg-white/10 md:hover:text-white'}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+      {/* Load More Button */}
+      {hasMoreJobs && (
+        <div className="flex justify-center py-4">
+          <Button
+            onClick={handleLoadMore}
+            className="bg-white/10 border border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:text-white"
+          >
+            Ladda fler jobb ({displayCount} av {filteredAndSortedJobs.length})
+          </Button>
+        </div>
+      )}
+      
+      {/* Show message when all jobs are loaded */}
+      {!hasMoreJobs && filteredAndSortedJobs.length > 10 && (
+        <div className="text-center py-4">
+          <p className="text-white/60 text-sm">
+            Alla {filteredAndSortedJobs.length} jobb visas
+          </p>
+        </div>
       )}
     </div>
   );
