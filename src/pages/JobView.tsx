@@ -12,6 +12,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { MapPin, Clock, Euro, Building2, ArrowLeft, Send, FileText, Video, CheckSquare, List, Users, Briefcase } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 
 interface JobQuestion {
   id: string;
@@ -56,6 +57,7 @@ const JobView = () => {
   const [jobQuestions, setJobQuestions] = useState<JobQuestion[]>([]);
   const [applying, setApplying] = useState(false);
   const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [showCompanyProfile, setShowCompanyProfile] = useState(false);
 
   useEffect(() => {
     if (jobId) {
@@ -348,11 +350,14 @@ const JobView = () => {
 
       <div className="max-w-3xl mx-auto px-3 md:px-6 py-8">
         {/* Company header - clickable */}
-        <div className="flex items-center space-x-2 mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
+        <button
+          onClick={() => setShowCompanyProfile(true)}
+          className="w-full flex items-center space-x-2 mb-4 bg-white/10 backdrop-blur-sm p-3 rounded-lg hover:bg-white/15 transition-all cursor-pointer"
+        >
           <div className="bg-white/20 rounded-full p-2">
             <Building2 className="h-4 w-4 text-white" />
           </div>
-          <div>
+          <div className="text-left">
             <h3 className="text-white font-bold text-sm">
               {job.profiles?.company_name || 
                `${job.profiles?.first_name} ${job.profiles?.last_name}` || 
@@ -363,7 +368,7 @@ const JobView = () => {
               Se företagsprofil
             </div>
           </div>
-        </div>
+        </button>
 
         {/* Main content grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
@@ -521,6 +526,15 @@ const JobView = () => {
           </div>
         </div>
       </div>
+
+      {/* Company Profile Dialog */}
+      {job && (
+        <CompanyProfileDialog
+          open={showCompanyProfile}
+          onOpenChange={setShowCompanyProfile}
+          companyId={job.employer_id}
+        />
+      )}
     </div>
   );
 };
