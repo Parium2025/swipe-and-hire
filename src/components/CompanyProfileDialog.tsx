@@ -13,7 +13,6 @@ import {
   MapPin, 
   Briefcase, 
   Star,
-  MessageSquare,
   Send
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -323,7 +322,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                 <div>
                   <DialogTitle className="text-2xl text-white">{company.company_name}</DialogTitle>
                   <div className="flex items-center gap-2 mt-1">
-                    <Star className="h-4 w-4 fill-transparent text-white stroke-white stroke-[1.5]" />
+                    <Star className="h-5 w-5 fill-transparent text-white stroke-white stroke-[1.5]" />
                     <span className="text-sm text-white">
                       {averageRating} ({reviews.length} {reviews.length === 1 ? 'recension' : 'recensioner'})
                     </span>
@@ -400,10 +399,7 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
 
             {/* Kommentarer / Recensioner */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5" />
-                <h3 className="font-semibold text-lg">Kommentarer</h3>
-              </div>
+              <h3 className="font-semibold text-lg text-white">Kommentarer</h3>
 
               {/* Kommentarsfält eller informationstext */}
               {isOwnProfile ? (
@@ -425,10 +421,10 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                           className="transition-colors"
                         >
                           <Star
-                            className={`h-6 w-6 ${
+                            className={`h-5 w-5 ${
                               star <= newRating
-                                ? "fill-yellow-400 text-yellow-400"
-                                : "text-muted-foreground"
+                                ? "fill-white text-white stroke-white stroke-[1.5]"
+                                : "fill-transparent text-white stroke-white stroke-[1.5]"
                             }`}
                           />
                         </button>
@@ -501,15 +497,15 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
                                 {[...Array(5)].map((_, i) => (
                                   <Star
                                     key={i}
-                                    className={`h-4 w-4 ${
+                                    className={`h-5 w-5 ${
                                       i < (review.rating || 0)
-                                        ? "fill-yellow-400 text-yellow-400"
-                                        : "text-muted-foreground"
+                                        ? "fill-white text-white stroke-white stroke-[1.5]"
+                                        : "fill-transparent text-white stroke-white stroke-[1.5]"
                                     }`}
                                   />
                                 ))}
                               </div>
-                              <span className="text-sm text-muted-foreground">
+                              <span className="text-sm text-white">
                                 {new Date(review.created_at).toLocaleDateString("sv-SE")}
                               </span>
                             </div>
