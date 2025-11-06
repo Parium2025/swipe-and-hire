@@ -207,6 +207,25 @@ const LocationSearchInput = ({
     setOpen(false);
   }, [onLocationChange, onPostalCodeChange]);
 
+  // Check if there are any matching municipalities or counties for the search
+  const hasMatchingResults = useCallback(() => {
+    if (!dropdownSearch || /^\d+$/.test(dropdownSearch.trim())) return true;
+    
+    const normalizedSearch = dropdownSearch.toLowerCase();
+    
+    // Check if any municipality matches
+    const hasMunicipalities = Object.values(swedishCountiesWithMunicipalities)
+      .flat()
+      .some(m => m.toLowerCase().includes(normalizedSearch));
+    
+    // Check if any county matches
+    const hasCounties = swedishCounties.some(county => 
+      county.toLowerCase().includes(normalizedSearch)
+    );
+    
+    return hasMunicipalities || hasCounties;
+  }, [dropdownSearch]);
+
   return (
     <div className={`space-y-2 ${className}`}>
       <Popover open={open} onOpenChange={(isOpen) => {
@@ -286,9 +305,9 @@ const LocationSearchInput = ({
               />
             </div>
             <CommandList className="max-h-[300px] overflow-y-auto">
-              {/* Only show "no results" for text searches, not for incomplete postal codes */}
-              {!(/^\d+$/.test(dropdownSearch.trim())) && (
-                <CommandEmpty className="text-white py-6 text-center">Ingen plats hittades.</CommandEmpty>
+              {/* Only show "no results" for text searches when there are no matching results */}
+              {!(/^\d+$/.test(dropdownSearch.trim())) && !hasMatchingResults() && (
+                <CommandEmpty className="text-white py-4 text-center text-sm">Ingen plats hittades.</CommandEmpty>
               )}
               
               {/* Show postal code validation hint */}
@@ -331,8 +350,8 @@ const LocationSearchInput = ({
                 </CommandGroup>
               )}
               
-              {/* Show matching municipalities directly if there's a search - hide when searching with numbers */}
-              {dropdownSearch && !postalCodeCity && !(/^\d+$/.test(dropdownSearch.trim())) && (
+              {/* Show matching municipalities directly if there's a search - hide when searching with numbers or no results */}
+              {dropdownSearch && !postalCodeCity && !(/^\d+$/.test(dropdownSearch.trim())) && hasMatchingResults() && (
                 <CommandGroup heading="Kommuner" className="[&_[cmdk-group-heading]]:text-white [&_[cmdk-group-heading]]:font-medium">
                   {Object.entries(swedishCountiesWithMunicipalities)
                     .flatMap(([county, municipalities]) => 
@@ -361,8 +380,8 @@ const LocationSearchInput = ({
                 </CommandGroup>
               )}
               
-              {/* Show counties - hide when searching with numbers */}
-              {!(/^\d+$/.test(dropdownSearch.trim())) && (
+              {/* Show counties - hide when searching with numbers or no results */}
+              {!(/^\d+$/.test(dropdownSearch.trim())) && hasMatchingResults() && (
                 <CommandGroup heading="Län" className="[&_[cmdk-group-heading]]:text-white [&_[cmdk-group-heading]]:font-medium">
                   {swedishCounties
                     .filter(county => 
