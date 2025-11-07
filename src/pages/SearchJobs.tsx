@@ -329,10 +329,11 @@ const SearchJobs = () => {
                       setSelectedCategory('all-categories');
                       setSelectedSubcategories([]);
                     }}
-                    className="cursor-pointer hover:bg-slate-700/70 text-white font-medium border-b border-slate-600/30"
+                    className="cursor-pointer hover:bg-slate-700/70 text-white font-medium"
                   >
                     Alla yrkesområden
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-white/20" />
                   {OCCUPATION_CATEGORIES.map((category) => (
                     <DropdownMenuItem
                       key={category.value}
@@ -376,10 +377,11 @@ const SearchJobs = () => {
                 <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-72 bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white max-h-80 overflow-y-auto">
                   <DropdownMenuItem
                     onClick={() => setSelectedEmploymentTypes([])}
-                    className="cursor-pointer hover:bg-slate-700/70 text-white"
+                    className="cursor-pointer hover:bg-slate-700/70 text-white font-medium"
                   >
                     Alla typer
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-white/20" />
                   {employmentTypes.map((type) => (
                     <DropdownMenuItem
                       key={type.value}
@@ -453,10 +455,11 @@ const SearchJobs = () => {
                 <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white max-h-80 overflow-y-auto">
                   <DropdownMenuItem
                     onClick={() => setSelectedSubcategories([])}
-                    className="cursor-pointer hover:bg-slate-700/70 text-white font-medium border-b border-slate-600/30"
+                    className="cursor-pointer hover:bg-slate-700/70 text-white font-medium"
                   >
                     Alla roller
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-white/20" />
                   {OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.subcategories.map((subcat) => (
                     <DropdownMenuItem
                       key={subcat}

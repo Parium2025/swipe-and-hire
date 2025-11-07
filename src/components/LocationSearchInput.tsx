@@ -352,8 +352,10 @@ const LocationSearchInput = ({
               
               {/* Show matching municipalities directly if there's a search - hide when searching with numbers or no results */}
               {dropdownSearch && !postalCodeCity && !(/^\d+$/.test(dropdownSearch.trim())) && hasMatchingResults() && (
-                <CommandGroup heading="Kommuner" className="[&_[cmdk-group-heading]]:text-white [&_[cmdk-group-heading]]:font-medium">
-                  {Object.entries(swedishCountiesWithMunicipalities)
+                <>
+                  <div className="h-px bg-white/20 my-1" />
+                  <CommandGroup heading="Kommuner" className="[&_[cmdk-group-heading]]:text-white [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5">
+                    {Object.entries(swedishCountiesWithMunicipalities)
                     .flatMap(([county, municipalities]) => 
                       municipalities
                         .filter(m => m.toLowerCase().includes(dropdownSearch.toLowerCase()))
@@ -378,12 +380,15 @@ const LocationSearchInput = ({
                     ))
                   }
                 </CommandGroup>
+                </>
               )}
               
               {/* Show counties - hide when searching with numbers or no results */}
               {!(/^\d+$/.test(dropdownSearch.trim())) && hasMatchingResults() && (
-                <CommandGroup heading="Län" className="[&_[cmdk-group-heading]]:text-white [&_[cmdk-group-heading]]:font-medium">
-                  {swedishCounties
+                <>
+                  <div className="h-px bg-white/20 my-1" />
+                  <CommandGroup heading="Län" className="[&_[cmdk-group-heading]]:text-white [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5">
+                    {swedishCounties
                     .filter(county => 
                       county.toLowerCase().includes(dropdownSearch.toLowerCase()) ||
                       swedishCountiesWithMunicipalities[county].some(m => 
@@ -425,6 +430,7 @@ const LocationSearchInput = ({
                   </div>
                 ))}
                 </CommandGroup>
+                </>
               )}
             </CommandList>
           </Command>
