@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import { MapPin, Loader2, Check, X, ChevronDown, ChevronRight, Search } from 'lucide-react';
@@ -48,6 +48,7 @@ const LocationSearchInput = ({
     municipality?: string;
     county?: string;
   } | null>(null);
+  const skipSearchRef = useRef(false);
 
   // Sync with external value changes
   useEffect(() => {
@@ -113,6 +114,13 @@ const LocationSearchInput = ({
 
   useEffect(() => {
     const searchLocation = async () => {
+      // Skip search if we just selected from dropdown
+      if (skipSearchRef.current) {
+        skipSearchRef.current = false;
+        setIsLoading(false);
+        return;
+      }
+
       const trimmed = searchInput.trim();
       
       if (!trimmed) {
@@ -193,6 +201,7 @@ const LocationSearchInput = ({
   }, [expandedCounty]);
 
   const handleMunicipalitySelect = useCallback((municipality: string, postalCode?: string, county?: string) => {
+    skipSearchRef.current = true;
     setSearchInput(municipality);
     setDropdownSearch('');
     setPostalCodeCity(null);
