@@ -442,7 +442,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
       let urlToEdit = source;
       if (!source.startsWith('http')) {
-        const signed = await createSignedUrl('job-applications', source, 86400);
+        // Try job-images first (new public bucket), then job-applications as fallback (old private bucket)
+        let signed = await createSignedUrl('job-images', source, 86400);
+        if (!signed) {
+          signed = await createSignedUrl('job-applications', source, 86400);
+        }
         if (signed) urlToEdit = signed;
       }
       setEditingImageUrl(urlToEdit);
@@ -543,7 +547,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
         // If it's a storage path (not a full URL), create a signed URL
         if (!url.startsWith('http')) {
           try {
-            const signedUrl = await createSignedUrl('job-applications', url, 86400);
+            // Try job-images first (new public bucket), then job-applications as fallback (old private bucket)
+            let signedUrl = await createSignedUrl('job-images', url, 86400);
+            if (!signedUrl) {
+              signedUrl = await createSignedUrl('job-applications', url, 86400);
+            }
             if (signedUrl) {
               setJobImageDisplayUrl(signedUrl);
               setOriginalImageUrl(url); // Keep storage path as original

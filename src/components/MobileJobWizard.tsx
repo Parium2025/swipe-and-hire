@@ -742,7 +742,11 @@ const MobileJobWizard = ({
 
       let urlToEdit = source;
       if (!source.startsWith('http')) {
-        const signed = await createSignedUrl('job-images', source, 86400);
+        // Try job-images first (new public bucket), then job-applications as fallback (old private bucket)
+        let signed = await createSignedUrl('job-images', source, 86400);
+        if (!signed) {
+          signed = await createSignedUrl('job-applications', source, 86400);
+        }
         if (signed) urlToEdit = signed;
       }
       setEditingImageUrl(urlToEdit);
