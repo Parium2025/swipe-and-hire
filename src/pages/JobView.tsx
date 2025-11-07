@@ -14,7 +14,7 @@ import { MapPin, Clock, Euro, Building2, ArrowLeft, Send, FileText, Video, Check
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
-
+import { convertToSignedUrl } from '@/utils/storageUtils';
 interface JobQuestion {
   id: string;
   question_text: string;
@@ -91,38 +91,15 @@ const JobView = () => {
       // Load job image if exists
       if (data.job_image_url) {
         try {
-          // If it's already a full URL, use it directly
-          if (data.job_image_url.startsWith('http')) {
-            setImageUrl(data.job_image_url);
+          let signedUrl = await convertToSignedUrl(data.job_image_url, 'job-applications', 3600);
+          if (!signedUrl) {
+            signedUrl = await convertToSignedUrl(data.job_image_url, 'job-images', 3600);
+          }
+          if (signedUrl) {
+            console.log('Job image resolved URL:', { stored: data.job_image_url, resolved: signedUrl });
+            setImageUrl(signedUrl);
           } else {
-            // Try primary bucket used by editors
-            let signedUrl: string | null = null;
-            try {
-              const { data: signedData } = await supabase.storage
-                .from('job-applications')
-                .createSignedUrl(data.job_image_url, 3600);
-              signedUrl = signedData?.signedUrl || null;
-            } catch (e) {
-              // ignore and try fallback
-            }
-
-            // Fallback to legacy bucket name if needed
-            if (!signedUrl) {
-              try {
-                const { data: signedData2 } = await supabase.storage
-                  .from('job-images')
-                  .createSignedUrl(data.job_image_url, 3600);
-                signedUrl = signedData2?.signedUrl || null;
-              } catch (e2) {
-                // ignore
-              }
-            }
-
-            if (signedUrl) {
-              setImageUrl(signedUrl);
-            } else {
-              console.warn('Kunde inte skapa signed URL för jobbbild', data.job_image_url);
-            }
+            console.warn('Kunde inte skapa signed URL för jobbbild', data.job_image_url);
           }
         } catch (err) {
           console.error('Error loading job image:', err);
