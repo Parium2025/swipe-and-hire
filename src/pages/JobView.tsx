@@ -91,15 +91,37 @@ const JobView = () => {
       // Load job image if exists
       if (data.job_image_url) {
         try {
+          // If it's already a full URL, use it directly
           if (data.job_image_url.startsWith('http')) {
             setImageUrl(data.job_image_url);
           } else {
-            const { data: signedData, error: signedError } = await supabase.storage
-              .from('job-images')
-              .createSignedUrl(data.job_image_url, 3600);
-            
-            if (!signedError && signedData?.signedUrl) {
-              setImageUrl(signedData.signedUrl);
+            // Try primary bucket used by editors
+            let signedUrl: string | null = null;
+            try {
+              const { data: signedData } = await supabase.storage
+                .from('job-applications')
+                .createSignedUrl(data.job_image_url, 3600);
+              signedUrl = signedData?.signedUrl || null;
+            } catch (e) {
+              // ignore and try fallback
+            }
+
+            // Fallback to legacy bucket name if needed
+            if (!signedUrl) {
+              try {
+                const { data: signedData2 } = await supabase.storage
+                  .from('job-images')
+                  .createSignedUrl(data.job_image_url, 3600);
+                signedUrl = signedData2?.signedUrl || null;
+              } catch (e2) {
+                // ignore
+              }
+            }
+
+            if (signedUrl) {
+              setImageUrl(signedUrl);
+            } else {
+              console.warn('Kunde inte skapa signed URL för jobbbild', data.job_image_url);
             }
           }
         } catch (err) {
