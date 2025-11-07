@@ -451,8 +451,10 @@ const LocationSearchInput = ({
       {/* Success indicator */}
       {foundLocation && !isLoading && (
         <div className="flex items-center gap-3 text-sm pl-3">
-          <MapPin className="h-4 w-4 text-white flex-shrink-0" />
-          <p className="text-white/90 flex items-center gap-2">
+          <div className="w-4 h-4 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+            <Check className="w-2.5 h-2.5 text-green-400" />
+          </div>
+          <p className="text-white/90">
             {foundLocation.type === 'postal' ? (
               <>
                 <span className="font-medium">{foundLocation.city}</span>
@@ -462,9 +464,6 @@ const LocationSearchInput = ({
               <span className="font-medium">{foundLocation.city}</span>
             )}
           </p>
-          <div className="w-4 h-4 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0 ml-auto">
-            <Check className="w-2.5 h-2.5 text-green-400" />
-          </div>
         </div>
       )}
     </div>
