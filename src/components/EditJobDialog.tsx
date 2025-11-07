@@ -2347,27 +2347,28 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           Ladda upp en bild som representerar jobbet eller arbetsplatsen
                         </p>
                         
-                        {!jobImageDisplayUrl && (
-                          <FileUpload
-                            onFileUploaded={async (storagePath, fileName) => {
-                              handleInputChange('job_image_url', storagePath);
-                              setOriginalImageUrl(storagePath);
-                              
-                              // Create signed URL for display
-                              try {
-                                const signedUrl = await createSignedUrl('job-applications', storagePath, 86400);
-                                if (signedUrl) {
-                                  setJobImageDisplayUrl(signedUrl);
+                          {!jobImageDisplayUrl && (
+                            <FileUpload
+                              bucketName="job-images"
+                              onFileUploaded={async (storagePath, fileName) => {
+                                handleInputChange('job_image_url', storagePath);
+                                setOriginalImageUrl(storagePath);
+                                
+                                // Create signed URL for display
+                                try {
+                                  const signedUrl = await createSignedUrl('job-images', storagePath, 86400);
+                                  if (signedUrl) {
+                                    setJobImageDisplayUrl(signedUrl);
+                                  }
+                                } catch (error) {
+                                  console.error('Failed to create signed URL:', error);
+                                  setJobImageDisplayUrl(storagePath);
                                 }
-                              } catch (error) {
-                                console.error('Failed to create signed URL:', error);
-                                setJobImageDisplayUrl(storagePath);
-                              }
-                            }}
-                            acceptedFileTypes={['image/*']}
-                            maxFileSize={5 * 1024 * 1024}
-                          />
-                        )}
+                              }}
+                              acceptedFileTypes={['image/*']}
+                              maxFileSize={5 * 1024 * 1024}
+                            />
+                          )}
                         
                         {jobImageDisplayUrl && (
                           <>

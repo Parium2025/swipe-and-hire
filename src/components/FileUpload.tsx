@@ -13,6 +13,7 @@ interface FileUploadProps {
   acceptedFileTypes?: string[];
   maxFileSize?: number;
   questionType?: string;
+  bucketName?: string; // default: 'job-applications'
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({
@@ -21,7 +22,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
   currentFile,
   acceptedFileTypes = ['image/*', 'video/*', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
   maxFileSize = 10 * 1024 * 1024, // 10MB default
-  questionType
+  questionType,
+  bucketName = 'job-applications'
 }) => {
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
@@ -49,13 +51,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
       const fileName = `${user.data.user.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('job-applications')
+        .from(bucketName)
         .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
-      // Use signed URL for secure access (we will store the storage path and generate signed links on demand)
-      const signedUrl = await createSignedUrl('job-applications', fileName, 86400, file.name); // 24 hours, preserve download name
+      const signedUrl = await createSignedUrl(bucketName, fileName, 86400, file.name); // 24 hours, preserve download name
       if (!signedUrl) {
         throw new Error('Could not create secure access URL');
       }
@@ -152,10 +153,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 (async () => {
                   try {
                     if (isStoragePath) {
-                      const signedUrl = await createSignedUrl('job-applications', currentFile.url, 86400, currentFile.name);
+                      const signedUrl = await createSignedUrl(bucketName, currentFile.url, 86400, currentFile.name);
                       openUrl(signedUrl);
                     } else {
-                      const signedUrl = await convertToSignedUrl(currentFile.url, 'job-applications', 86400, currentFile.name);
+                      const signedUrl = await convertToSignedUrl(currentFile.url, bucketName, 86400, currentFile.name);
                       openUrl(signedUrl);
                     }
                   } catch (err) {

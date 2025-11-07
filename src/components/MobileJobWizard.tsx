@@ -641,7 +641,7 @@ const MobileJobWizard = ({
     (async () => {
       if (!url) { setJobImageDisplayUrl(null); return; }
       if (url.startsWith('http')) { setJobImageDisplayUrl(url); return; }
-      const signed = await createSignedUrl('job-applications', url, 86400);
+      const signed = await createSignedUrl('job-images', url, 86400);
       if (!cancelled) setJobImageDisplayUrl(signed);
     })();
     return () => { cancelled = true; };
@@ -700,13 +700,13 @@ const MobileJobWizard = ({
 
       // Ladda upp den redigerade bilden till Supabase Storage
       const { error: uploadError } = await supabase.storage
-        .from('job-applications')
+        .from('job-images')
         .upload(fileName, editedImageBlob);
 
       if (uploadError) throw uploadError;
 
       // Skapa signed URL och uppdatera formuläret
-      const signedUrl = await createSignedUrl('job-applications', fileName, 86400);
+      const signedUrl = await createSignedUrl('job-images', fileName, 86400);
       if (!signedUrl) {
         throw new Error('Could not create secure access URL');
       }
@@ -742,7 +742,7 @@ const MobileJobWizard = ({
 
       let urlToEdit = source;
       if (!source.startsWith('http')) {
-        const signed = await createSignedUrl('job-applications', source, 86400);
+        const signed = await createSignedUrl('job-images', source, 86400);
         if (signed) urlToEdit = signed;
       }
       setEditingImageUrl(urlToEdit);
@@ -2891,6 +2891,7 @@ const MobileJobWizard = ({
                   
                   {!jobImageDisplayUrl && (
                     <FileUpload
+                      bucketName="job-images"
                       onFileUploaded={(url, fileName) => {
                         handleInputChange('job_image_url', url);
                         setOriginalImageUrl(url); // Spara originalbilden
