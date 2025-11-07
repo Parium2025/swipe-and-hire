@@ -40,7 +40,7 @@ interface JobPosting {
   application_instructions?: string;
   created_at: string;
   employer_id: string;
-  image_url?: string;
+  job_image_url?: string;
   profiles: {
     first_name?: string;
     last_name?: string;
@@ -60,6 +60,7 @@ const JobView = () => {
   const [applying, setApplying] = useState(false);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (jobId) {
@@ -86,6 +87,25 @@ const JobView = () => {
 
       if (error) throw error;
       setJob(data);
+
+      // Load job image if exists
+      if (data.job_image_url) {
+        try {
+          if (data.job_image_url.startsWith('http')) {
+            setImageUrl(data.job_image_url);
+          } else {
+            const { data: signedData, error: signedError } = await supabase.storage
+              .from('job-images')
+              .createSignedUrl(data.job_image_url, 3600);
+            
+            if (!signedError && signedData?.signedUrl) {
+              setImageUrl(signedData.signedUrl);
+            }
+          }
+        } catch (err) {
+          console.error('Error loading job image:', err);
+        }
+      }
 
       // Fetch job questions
       const { data: questions, error: questionsError } = await supabase
@@ -389,6 +409,19 @@ const JobView = () => {
           {/* Left column - Job info */}
           <div className="lg:col-span-2 space-y-3">
             
+            {/* Job Image - Simplex style */}
+            {imageUrl && (
+              <div className="relative w-full h-64 md:h-80 overflow-hidden rounded-lg">
+                <img
+                  src={imageUrl}
+                  alt={`${job.title} hos ${job.profiles?.company_name || 'företaget'}`}
+                  className="w-full h-full object-cover"
+                  loading="eager"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              </div>
+            )}
+            
             {/* Job title & basic info */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
               <h1 className="text-white text-xl md:text-2xl font-bold mb-3 leading-tight">
@@ -424,16 +457,6 @@ const JobView = () => {
               </div>
             </div>
 
-            {/* Image if exists */}
-            {job.image_url && (
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 overflow-hidden">
-                <img 
-                  src={job.image_url} 
-                  alt={job.title}
-                  className="w-full h-40 object-cover rounded-md"
-                />
-              </div>
-            )}
 
             {/* Description */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
