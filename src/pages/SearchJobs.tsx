@@ -39,6 +39,7 @@ interface Job {
   is_active: boolean;
   views_count: number;
   applications_count: number;
+  job_image_url?: string;
   employer_profile?: {
     first_name: string;
     last_name: string;
@@ -76,6 +77,7 @@ const SearchJobs = () => {
         .from('job_postings')
         .select(`
           *,
+          job_image_url,
           profiles!job_postings_employer_id_fkey(company_name)
         `)
         .eq('is_active', true)
