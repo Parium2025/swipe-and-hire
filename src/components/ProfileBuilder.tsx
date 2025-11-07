@@ -182,6 +182,7 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
                 acceptedFileTypes={['image/*']}
                 maxFileSize={5 * 1024 * 1024} // 5MB
                 currentFile={formData.profileImageUrl ? { url: formData.profileImageUrl, name: 'Profilbild' } : undefined}
+                isProfileMedia={true}
               />
               
               <p className="text-sm text-muted-foreground text-center mt-4">
@@ -254,6 +255,7 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
                   onFileRemoved={() => handleInputChange('videoUrl', '')}
                   acceptedFileTypes={['video/*']}
                   maxFileSize={50 * 1024 * 1024} // 50MB
+                  isProfileMedia={true}
                 />
               )}
             </div>

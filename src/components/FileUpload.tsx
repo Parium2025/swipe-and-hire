@@ -14,6 +14,7 @@ interface FileUploadProps {
   maxFileSize?: number;
   questionType?: string;
   bucketName?: string; // default: 'job-applications'
+  isProfileMedia?: boolean; // Use public profile-media bucket
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({
@@ -23,8 +24,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
   acceptedFileTypes = ['image/*', 'video/*', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
   maxFileSize = 10 * 1024 * 1024, // 10MB default
   questionType,
-  bucketName = 'job-applications'
+  bucketName = 'job-applications',
+  isProfileMedia = false
 }) => {
+  const actualBucket = isProfileMedia ? 'profile-media' : bucketName;
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
@@ -51,18 +54,26 @@ const FileUpload: React.FC<FileUploadProps> = ({
       const fileName = `${user.data.user.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
-        .from(bucketName)
+        .from(actualBucket)
         .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
-      const signedUrl = await createSignedUrl(bucketName, fileName, 86400, file.name); // 24 hours, preserve download name
-      if (!signedUrl) {
-        throw new Error('Could not create secure access URL');
+      // For profile-media (public bucket), get public URL directly
+      if (isProfileMedia) {
+        const { data: { publicUrl } } = supabase.storage
+          .from(actualBucket)
+          .getPublicUrl(fileName);
+        
+        onFileUploaded(publicUrl, file.name);
+      } else {
+        // For private buckets, use signed URLs
+        const signedUrl = await createSignedUrl(actualBucket, fileName, 86400, file.name);
+        if (!signedUrl) {
+          throw new Error('Could not create secure access URL');
+        }
+        onFileUploaded(fileName, file.name);
       }
-
-      // Store the storage path (fileName) and the original filename
-      onFileUploaded(fileName, file.name);
       
       toast({
         title: "Fil uppladdad!",
@@ -152,11 +163,14 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 };
                 (async () => {
                   try {
-                    if (isStoragePath) {
-                      const signedUrl = await createSignedUrl(bucketName, currentFile.url, 86400, currentFile.name);
+                    // For profile-media bucket, just open the public URL directly
+                    if (isProfileMedia || currentFile.url.includes('/profile-media/')) {
+                      openUrl(currentFile.url);
+                    } else if (isStoragePath) {
+                      const signedUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
                       openUrl(signedUrl);
                     } else {
-                      const signedUrl = await convertToSignedUrl(currentFile.url, bucketName, 86400, currentFile.name);
+                      const signedUrl = await convertToSignedUrl(currentFile.url, actualBucket, 86400, currentFile.name);
                       openUrl(signedUrl);
                     }
                   } catch (err) {
