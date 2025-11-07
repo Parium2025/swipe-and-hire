@@ -27,6 +27,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
   bucketName = 'job-applications',
   isProfileMedia = false
 }) => {
+  // Determine if bucket is public (profile-media, company-logos, job-images)
+  const isPublicBucket = isProfileMedia || 
+                         bucketName === 'profile-media' || 
+                         bucketName === 'company-logos' || 
+                         bucketName === 'job-images';
   const actualBucket = isProfileMedia ? 'profile-media' : bucketName;
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
@@ -59,8 +64,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
       if (uploadError) throw uploadError;
 
-      // For profile-media (public bucket), get public URL directly
-      if (isProfileMedia) {
+      // For public buckets (profile-media, company-logos, job-images), get public URL directly
+      if (isPublicBucket) {
         const { data: { publicUrl } } = supabase.storage
           .from(actualBucket)
           .getPublicUrl(fileName);
@@ -163,8 +168,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 };
                 (async () => {
                   try {
-                    // For profile-media bucket, just open the public URL directly
-                    if (isProfileMedia || currentFile.url.includes('/profile-media/')) {
+                    // For public buckets, just open the URL directly
+                    if (isPublicBucket || 
+                        currentFile.url.includes('/profile-media/') ||
+                        currentFile.url.includes('/company-logos/') ||
+                        currentFile.url.includes('/job-images/')) {
                       openUrl(currentFile.url);
                     } else if (isStoragePath) {
                       const signedUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
