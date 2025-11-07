@@ -53,145 +53,162 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`📊 Found ${jobs?.length || 0} jobs with images to check`);
+    console.log(`📊 Found ${jobs?.length || 0} jobs to check`);
 
-    if (!jobs || jobs.length === 0) {
-      return new Response(
-        JSON.stringify({ 
-          message: 'No jobs found',
-          dry_run: dryRun,
-          deleted: 0,
-          failed: 0
-        }),
-        { 
-          status: 200, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+    // Build a Set of all image paths currently referenced in the database
+    const referencedPaths = new Set<string>();
+    if (jobs && jobs.length > 0) {
+      for (const job of jobs as JobImageRecord[]) {
+        if (job.job_image_url) {
+          // Extract just the storage path if it's a full URL
+          let path = job.job_image_url;
+          
+          // If it contains job-applications, extract the path part
+          if (path.includes('/job-applications/')) {
+            const match = path.match(/\/job-applications\/(.+)$/);
+            if (match) path = match[1];
+          }
+          
+          // Only add paths that look like they're in job-applications (not public URLs)
+          if (!path.startsWith('https://') && !path.includes('/job-images/')) {
+            referencedPaths.add(path);
+          }
         }
-      );
+      }
     }
+
+    console.log(`📝 Found ${referencedPaths.size} paths referenced in database`);
 
     let deletedCount = 0;
     let failedCount = 0;
     let skippedCount = 0;
     const cleanupResults: Array<{
-      jobId: string, 
-      title: string, 
+      path: string, 
       status: string, 
-      oldPath?: string,
+      size?: number,
       error?: string
     }> = [];
 
-    // Get list of all files in job-applications bucket
-    const { data: oldFiles, error: listError } = await supabase.storage
-      .from('job-applications')
-      .list();
-
-    if (listError) {
-      console.error('❌ Error listing files in job-applications bucket:', listError);
-    }
-
-    // Get unique paths that might be in job-applications
-    const pathsToCheck = new Set<string>();
-    
-    for (const job of jobs as JobImageRecord[]) {
-      if (!job.job_image_url) continue;
-
-      const imageUrl = job.job_image_url;
+    // Get list of all files in job-applications bucket (recursively scan all folders)
+    async function listAllFiles(bucket: string, prefix: string = ''): Promise<Array<{name: string, size?: number}>> {
+      const allFiles: Array<{name: string, size?: number}> = [];
       
-      // Skip if it's already a public URL (these don't need cleanup)
-      if (imageUrl.includes('/job-images/') || imageUrl.startsWith('https://')) {
-        console.log(`✅ Job "${job.title}" already using public URL, skipping`);
-        skippedCount++;
-        cleanupResults.push({
-          jobId: job.id,
-          title: job.title,
-          status: 'skipped_already_public'
+      const { data: items, error } = await supabase.storage
+        .from(bucket)
+        .list(prefix, {
+          limit: 1000,
+          offset: 0,
+          sortBy: { column: 'name', order: 'asc' }
         });
-        continue;
+
+      if (error) {
+        console.error(`Error listing ${prefix}:`, error);
+        return allFiles;
       }
 
-      // If it's a storage path, it might be in job-applications
-      pathsToCheck.add(imageUrl);
+      if (!items) return allFiles;
+
+      for (const item of items) {
+        const fullPath = prefix ? `${prefix}/${item.name}` : item.name;
+        
+        if (item.id === null) {
+          // It's a folder, recurse into it
+          const subFiles = await listAllFiles(bucket, fullPath);
+          allFiles.push(...subFiles);
+        } else {
+          // It's a file
+          allFiles.push({
+            name: fullPath,
+            size: item.metadata?.size
+          });
+        }
+      }
+
+      return allFiles;
     }
 
-    console.log(`🔍 Found ${pathsToCheck.size} potential paths to clean up`);
+    console.log(`🔍 Scanning all files in job-applications bucket...`);
+    const allFilesInBucket = await listAllFiles('job-applications');
+    console.log(`📦 Found ${allFilesInBucket.length} total files in job-applications bucket`);
 
-    // Check each path and try to delete if it exists in job-applications
-    for (const path of pathsToCheck) {
+    // Check each file - if it's NOT referenced in database, mark for deletion
+    for (const file of allFilesInBucket) {
       try {
-        console.log(`🔄 Checking path: ${path}`);
+        const filePath = file.name;
+        console.log(`🔄 Checking: ${filePath}`);
 
-        // First, verify the file exists in job-applications
-        const { data: fileExists, error: checkError } = await supabase.storage
-          .from('job-applications')
-          .download(path);
+        // Check if this file is referenced in the database
+        const isReferenced = referencedPaths.has(filePath);
 
-        if (checkError || !fileExists) {
-          console.log(`⚠️ File not found in job-applications: ${path}`);
+        if (isReferenced) {
+          console.log(`✅ File is still referenced: ${filePath}`);
+          skippedCount++;
+          cleanupResults.push({
+            path: filePath,
+            status: 'skipped_still_referenced',
+            size: file.size
+          });
           continue;
         }
 
-        // Find which job this path belongs to
-        const job = (jobs as JobImageRecord[]).find(j => j.job_image_url === path);
-        const jobTitle = job?.title || 'Unknown';
-        const jobId = job?.id || 'unknown';
-
+        // File is NOT referenced - it's orphaned and should be deleted
         if (dryRun) {
-          // Dry run: just log what would be deleted
-          console.log(`🗑️ [DRY RUN] Would delete: ${path} (from job: "${jobTitle}")`);
+          console.log(`🗑️ [DRY RUN] Would delete orphaned file: ${filePath} (${file.size} bytes)`);
           deletedCount++;
           cleanupResults.push({
-            jobId: jobId,
-            title: jobTitle,
-            status: 'would_delete',
-            oldPath: path
+            path: filePath,
+            status: 'would_delete_orphaned',
+            size: file.size
           });
         } else {
-          // Actually delete the file
+          // Actually delete the orphaned file
           const { error: deleteError } = await supabase.storage
             .from('job-applications')
-            .remove([path]);
+            .remove([filePath]);
 
           if (deleteError) {
-            console.error(`❌ Failed to delete ${path}:`, deleteError);
+            console.error(`❌ Failed to delete ${filePath}:`, deleteError);
             failedCount++;
             cleanupResults.push({
-              jobId: jobId,
-              title: jobTitle,
+              path: filePath,
               status: 'delete_failed',
-              oldPath: path,
+              size: file.size,
               error: deleteError.message
             });
           } else {
-            console.log(`✅ Deleted: ${path} (from job: "${jobTitle}")`);
+            console.log(`✅ Deleted orphaned file: ${filePath} (${file.size} bytes)`);
             deletedCount++;
             cleanupResults.push({
-              jobId: jobId,
-              title: jobTitle,
-              status: 'deleted',
-              oldPath: path
+              path: filePath,
+              status: 'deleted_orphaned',
+              size: file.size
             });
           }
         }
 
       } catch (error) {
-        console.error(`❌ Unexpected error processing path ${path}:`, error);
+        console.error(`❌ Unexpected error processing ${file.name}:`, error);
         failedCount++;
         cleanupResults.push({
-          jobId: 'unknown',
-          title: 'Unknown',
+          path: file.name,
           status: 'unexpected_error',
-          oldPath: path,
+          size: file.size,
           error: error instanceof Error ? error.message : 'Unknown error'
         });
       }
     }
+
+    const totalSizeBytes = cleanupResults
+      .filter(r => r.status.includes('delete') || r.status.includes('would_delete'))
+      .reduce((sum, r) => sum + (r.size || 0), 0);
+    const totalSizeMB = (totalSizeBytes / 1024 / 1024).toFixed(2);
 
     const message = dryRun 
       ? `🔍 Dry run completed - no files were actually deleted`
       : `🎉 Cleanup completed!`;
 
     console.log(`${message} Would delete/Deleted: ${deletedCount}, Failed: ${failedCount}, Skipped: ${skippedCount}`);
+    console.log(`💾 Total size to free: ${totalSizeMB} MB`);
 
     return new Response(
       JSON.stringify({ 
@@ -200,11 +217,12 @@ Deno.serve(async (req) => {
         deleted: deletedCount,
         failed: failedCount,
         skipped: skippedCount,
-        total_checked: pathsToCheck.size,
+        total_files_scanned: allFilesInBucket.length,
+        total_size_mb: totalSizeMB,
         results: cleanupResults,
         note: dryRun 
           ? 'This was a dry run. To actually delete files, send {"dry_run": false} in the request body.'
-          : 'Files have been permanently deleted from job-applications bucket.'
+          : 'Orphaned files have been permanently deleted from job-applications bucket.'
       }),
       { 
         status: 200, 
