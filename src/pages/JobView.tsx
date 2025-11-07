@@ -418,7 +418,6 @@ const JobView = () => {
           {/* Left column - Job info */}
           <div className="lg:col-span-2 space-y-3">
             
-            {/* Job Image - Simplex style */}
             {imageUrl && (
               <div className="relative w-full h-64 md:h-80 overflow-hidden rounded-lg">
                 <img
@@ -426,6 +425,11 @@ const JobView = () => {
                   alt={`${job.title} hos ${job.profiles?.company_name || 'företaget'}`}
                   className="w-full h-full object-cover"
                   loading="eager"
+                  onLoad={() => console.log('Job image loaded', imageUrl)}
+                  onError={(e) => {
+                    console.error('Job image failed to load', imageUrl);
+                    setImageUrl(null);
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               </div>
