@@ -295,7 +295,7 @@ const LocationSearchInput = ({
             loop={false}
             value=""
           >
-            <div className="flex items-center border-b border-white/10 px-3" cmdk-input-wrapper="">
+            <div className="flex items-center px-3" cmdk-input-wrapper="">
               <Search className="mr-2 h-4 w-4 shrink-0 text-white" />
               <input
                 value={dropdownSearch}
@@ -312,7 +312,7 @@ const LocationSearchInput = ({
               
               {/* Show postal code validation hint */}
               {dropdownSearch && /^\d+$/.test(dropdownSearch.trim()) && dropdownSearch.trim().length < 5 && (
-                <div className="py-2 px-3 text-white text-xs text-center border-t border-white/10">
+                <div className="py-2 px-3 text-white text-xs text-center">
                   {dropdownSearch.trim().length} av 5 siffror - Postnummer måste innehålla 5 siffror
                 </div>
               )}
