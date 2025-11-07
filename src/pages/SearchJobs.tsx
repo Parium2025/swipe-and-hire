@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -334,20 +334,24 @@ const SearchJobs = () => {
                     Alla yrkesområden
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-white/20" />
-                  {OCCUPATION_CATEGORIES.map((category) => (
-                    <DropdownMenuItem
-                      key={category.value}
-                      onClick={() => {
-                        setSelectedCategory(category.value);
-                        setSelectedSubcategories([]);
-                      }}
-                      className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
-                    >
-                      <span>{category.label}</span>
-                      {selectedCategory === category.value && (
-                        <Check className="h-4 w-4 text-white" />
+                  {OCCUPATION_CATEGORIES.map((category, index) => (
+                    <React.Fragment key={category.value}>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setSelectedCategory(category.value);
+                          setSelectedSubcategories([]);
+                        }}
+                        className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
+                      >
+                        <span>{category.label}</span>
+                        {selectedCategory === category.value && (
+                          <Check className="h-4 w-4 text-white" />
+                        )}
+                      </DropdownMenuItem>
+                      {index < OCCUPATION_CATEGORIES.length - 1 && (
+                        <DropdownMenuSeparator className="bg-white/20" />
                       )}
-                    </DropdownMenuItem>
+                    </React.Fragment>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -382,24 +386,28 @@ const SearchJobs = () => {
                     Alla typer
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-white/20" />
-                  {employmentTypes.map((type) => (
-                    <DropdownMenuItem
-                      key={type.value}
-                      onClick={() => {
-                        const isSelected = selectedEmploymentTypes.includes(type.value);
-                        if (isSelected) {
-                          setSelectedEmploymentTypes(prev => prev.filter(t => t !== type.value));
-                        } else {
-                          setSelectedEmploymentTypes(prev => [...prev, type.value]);
-                        }
-                      }}
-                      className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
-                    >
-                      <span>{type.label}</span>
-                      {selectedEmploymentTypes.includes(type.value) && (
-                        <Check className="h-4 w-4 text-white" />
+                  {employmentTypes.map((type, index) => (
+                    <React.Fragment key={type.value}>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          const isSelected = selectedEmploymentTypes.includes(type.value);
+                          if (isSelected) {
+                            setSelectedEmploymentTypes(prev => prev.filter(t => t !== type.value));
+                          } else {
+                            setSelectedEmploymentTypes(prev => [...prev, type.value]);
+                          }
+                        }}
+                        className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
+                      >
+                        <span>{type.label}</span>
+                        {selectedEmploymentTypes.includes(type.value) && (
+                          <Check className="h-4 w-4 text-white" />
+                        )}
+                      </DropdownMenuItem>
+                      {index < employmentTypes.length - 1 && (
+                        <DropdownMenuSeparator className="bg-white/20" />
                       )}
-                    </DropdownMenuItem>
+                    </React.Fragment>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -460,23 +468,27 @@ const SearchJobs = () => {
                     Alla roller
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-white/20" />
-                  {OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.subcategories.map((subcat) => (
-                    <DropdownMenuItem
-                      key={subcat}
-                      onClick={() => {
-                        setSelectedSubcategories(prev => 
-                          prev.includes(subcat) 
-                            ? prev.filter(s => s !== subcat)
-                            : [...prev, subcat]
-                        );
-                      }}
-                      className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
-                    >
-                      <span>{subcat}</span>
-                      {selectedSubcategories.includes(subcat) && (
-                        <Check className="h-4 w-4 text-white" />
+                  {OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.subcategories.map((subcat, index, array) => (
+                    <React.Fragment key={subcat}>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setSelectedSubcategories(prev => 
+                            prev.includes(subcat) 
+                              ? prev.filter(s => s !== subcat)
+                              : [...prev, subcat]
+                          );
+                        }}
+                        className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
+                      >
+                        <span>{subcat}</span>
+                        {selectedSubcategories.includes(subcat) && (
+                          <Check className="h-4 w-4 text-white" />
+                        )}
+                      </DropdownMenuItem>
+                      {index < array.length - 1 && (
+                        <DropdownMenuSeparator className="bg-white/20" />
                       )}
-                    </DropdownMenuItem>
+                    </React.Fragment>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { getCachedPostalCodeInfo, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import { MapPin, Loader2, Check, X, ChevronDown, ChevronRight, Search } from 'lucide-react';
@@ -361,24 +361,27 @@ const LocationSearchInput = ({
                         .filter(m => m.toLowerCase().includes(dropdownSearch.toLowerCase()))
                         .map(m => ({ municipality: m, county }))
                     )
-                    .slice(0, 10) // Limit to 10 direct results
-                    .map(({ municipality, county }) => (
-                      <CommandItem
-                        key={municipality}
-                        value={municipality}
-                        onSelect={() => handleMunicipalitySelect(municipality)}
-                        className="cursor-pointer text-white hover:bg-slate-700/70 flex items-center justify-between"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span>{municipality}</span>
-                          <span className="text-white text-xs">({county})</span>
-                        </div>
-                        {searchInput === municipality && (
-                          <Check className="h-4 w-4 text-white flex-shrink-0" />
+                    .slice(0, 50)
+                    .map((item, index, array) => (
+                      <React.Fragment key={`${item.county}-${item.municipality}`}>
+                        <CommandItem
+                          value={item.municipality}
+                          onSelect={() => {
+                            handleMunicipalitySelect(item.municipality);
+                            setOpen(false);
+                          }}
+                          className="text-white hover:bg-white/10 cursor-pointer"
+                        >
+                          <MapPin className="mr-2 h-4 w-4" />
+                          <span>{item.municipality}</span>
+                          <span className="ml-auto text-xs text-white/60">{item.county}</span>
+                        </CommandItem>
+                        {index < array.length - 1 && (
+                          <div className="h-px bg-white/20 mx-2" />
                         )}
-                      </CommandItem>
+                      </React.Fragment>
                     ))
-                  }
+                   }
                 </CommandGroup>
                 </>
               )}
@@ -395,39 +398,47 @@ const LocationSearchInput = ({
                         m.toLowerCase().includes(dropdownSearch.toLowerCase())
                       )
                     )
-                    .map((county) => (
-                  <div key={county}>
-                    <CommandItem
-                      value={county}
-                      onSelect={() => handleCountyClick(county)}
-                      className="cursor-pointer text-white hover:bg-slate-700/70 flex items-center justify-between"
-                    >
-                      <span>{county}</span>
-                      {expandedCounty === county ? (
-                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4 flex-shrink-0" />
-                      )}
-                    </CommandItem>
-                    {expandedCounty === county && (
-                      <div className="bg-slate-800/30">
-                        {swedishCountiesWithMunicipalities[county]
-                          .map((municipality) => (
-                            <CommandItem
-                              key={municipality}
-                              value={municipality}
-                              onSelect={() => handleMunicipalitySelect(municipality, undefined, county)}
-                              className="cursor-pointer text-white hover:bg-slate-700/50 text-sm pl-6 flex items-center justify-between"
-                            >
-                              <span>{municipality}</span>
-                              {searchInput === municipality && (
-                                <Check className="h-4 w-4 text-white flex-shrink-0" />
-                              )}
-                            </CommandItem>
-                          ))}
-                      </div>
-                    )}
-                  </div>
+                    .map((county, index, array) => (
+                      <React.Fragment key={county}>
+                        <CommandItem
+                          value={county}
+                          onSelect={() => {
+                            handleCountyClick(county);
+                          }}
+                          className="text-white hover:bg-white/10 cursor-pointer flex items-center"
+                        >
+                          <MapPin className="mr-2 h-4 w-4" />
+                          <span>{county}</span>
+                          {expandedCounty === county ? (
+                            <ChevronDown className="ml-auto h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="ml-auto h-4 w-4" />
+                          )}
+                        </CommandItem>
+                        {expandedCounty === county && (
+                          <>
+                            {swedishCountiesWithMunicipalities[county].map((municipality, mIndex, mArray) => (
+                              <React.Fragment key={municipality}>
+                                <div
+                                  onClick={() => {
+                                    handleMunicipalitySelect(municipality);
+                                    setOpen(false);
+                                  }}
+                                  className="pl-8 py-2 text-sm text-white/80 hover:bg-white/10 cursor-pointer"
+                                >
+                                  {municipality}
+                                </div>
+                                {mIndex < mArray.length - 1 && (
+                                  <div className="h-px bg-white/20 mx-2" />
+                                )}
+                              </React.Fragment>
+                            ))}
+                          </>
+                        )}
+                        {index < array.length - 1 && (
+                          <div className="h-px bg-white/20 mx-2" />
+                        )}
+                      </React.Fragment>
                 ))}
                 </CommandGroup>
                 </>
