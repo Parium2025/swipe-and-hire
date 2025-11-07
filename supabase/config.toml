@@ -39,6 +39,9 @@ verify_jwt = false
 [functions.migrate-job-images]
 verify_jwt = false
 
+[functions.cleanup-old-job-images]
+verify_jwt = false
+
 [auth]
 enable_signup = false
 enable_confirmations = false
