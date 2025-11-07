@@ -243,55 +243,35 @@ const SearchJobs = () => {
 
       <StatsGrid stats={statsCards} />
 
-      {/* Search Bar - Desktop */}
-      <div className="hidden md:flex items-center gap-4">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
-          <Input
-            placeholder="Sök efter jobbtitel, företag, plats..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-white/40"
-          />
-          {searchInput && (
-            <button
-              onClick={() => setSearchInput('')}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/10 rounded p-1 transition-colors"
-              aria-label="Rensa sökning"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Search Bar - Mobile */}
-      <div className="md:hidden space-y-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white" />
-          <Input
-            placeholder="Sök jobb..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-white/40"
-          />
-          {searchInput && (
-            <button
-              onClick={() => setSearchInput('')}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white active:bg-white/10 rounded p-1 transition-colors"
-              aria-label="Rensa sökning"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Filters - Hidden when searching */}
-      {!searchInput && (
-        <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-          <CardContent className="p-4 space-y-4">
+      {/* Filters Card */}
+      <Card className="bg-white/5 backdrop-blur-sm border-white/20">
+        <CardContent className="p-4 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Search Field */}
+            <div className="space-y-2 md:col-span-2">
+              <Label className="text-sm font-medium text-white flex items-center gap-2">
+                <Search className="h-3 w-3" />
+                Sök jobb
+              </Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                <Input
+                  placeholder="Sök efter jobbtitel, företag, plats..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                />
+                {searchInput && (
+                  <button
+                    onClick={() => setSearchInput('')}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/10 rounded p-1 transition-colors"
+                    aria-label="Rensa sökning"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            </div>
             {/* Location Filter - Postal Code OR City */}
             <div className="space-y-2">
               <Label className="text-sm font-medium text-white flex items-center gap-2">
@@ -371,6 +351,79 @@ const SearchJobs = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
+
+            {/* Employment Type Filter */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-white flex items-center gap-2">
+                <Clock className="h-3 w-3" />
+                Anställning
+              </Label>
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
+                  >
+                    <span className="truncate">
+                      {selectedEmploymentTypes.length === 0 
+                        ? 'Alla typer' 
+                        : `${selectedEmploymentTypes.length} valda`
+                      }
+                    </span>
+                    <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-72 bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white max-h-80 overflow-y-auto">
+                  <DropdownMenuItem
+                    onClick={() => setSelectedEmploymentTypes([])}
+                    className="cursor-pointer hover:bg-slate-700/70 text-white"
+                  >
+                    Alla typer
+                  </DropdownMenuItem>
+                  {employmentTypes.map((type) => (
+                    <DropdownMenuItem
+                      key={type.value}
+                      onClick={() => {
+                        const isSelected = selectedEmploymentTypes.includes(type.value);
+                        if (isSelected) {
+                          setSelectedEmploymentTypes(prev => prev.filter(t => t !== type.value));
+                        } else {
+                          setSelectedEmploymentTypes(prev => [...prev, type.value]);
+                        }
+                      }}
+                      className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
+                    >
+                      <span>{type.label}</span>
+                      {selectedEmploymentTypes.includes(type.value) && (
+                        <Check className="h-4 w-4 text-white" />
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Show selected employment types as badges */}
+              {selectedEmploymentTypes.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {selectedEmploymentTypes.map((type) => (
+                    <Badge 
+                      key={type}
+                      variant="secondary"
+                      className="bg-white/10 text-white flex items-center gap-1 cursor-pointer transition-all duration-300 md:hover:bg-white/20 md:hover:text-white"
+                    >
+                      {employmentTypes.find(t => t.value === type)?.label}
+                      <X 
+                        className="h-3 w-3" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedEmploymentTypes(prev => prev.filter(t => t !== type));
+                        }}
+                      />
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Subcategories Dropdown - shown only when category is selected */}
@@ -449,57 +502,6 @@ const SearchJobs = () => {
             </div>
           )}
 
-          {/* Employment Type Filter */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-white flex items-center gap-2">
-              <Clock className="h-3 w-3" />
-              Anställning
-            </Label>
-            <DropdownMenu modal={false}>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
-                >
-                  <span className="truncate">
-                    {selectedEmploymentTypes.length === 0 
-                      ? 'Alla typer' 
-                      : `${selectedEmploymentTypes.length} valda`
-                    }
-                  </span>
-                  <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-72 bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white max-h-80 overflow-y-auto">
-                <DropdownMenuItem
-                  onClick={() => setSelectedEmploymentTypes([])}
-                  className="cursor-pointer hover:bg-slate-700/70 text-white"
-                >
-                  Alla typer
-                </DropdownMenuItem>
-                {employmentTypes.map((type) => (
-                  <DropdownMenuItem
-                    key={type.value}
-                    onClick={() => {
-                      const isSelected = selectedEmploymentTypes.includes(type.value);
-                      if (isSelected) {
-                        setSelectedEmploymentTypes(prev => prev.filter(t => t !== type.value));
-                      } else {
-                        setSelectedEmploymentTypes(prev => [...prev, type.value]);
-                      }
-                    }}
-                    className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
-                  >
-                    <span>{type.label}</span>
-                    {selectedEmploymentTypes.includes(type.value) && (
-                      <Check className="h-4 w-4 text-white" />
-                    )}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
           {/* Clear all filters button */}
           <div className="pt-2">
             <Button 
@@ -519,7 +521,6 @@ const SearchJobs = () => {
           </div>
         </CardContent>
       </Card>
-      )}
 
       {/* Sort Dropdown */}
       <div className="flex justify-center">
