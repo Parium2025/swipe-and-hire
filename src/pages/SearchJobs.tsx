@@ -291,7 +291,7 @@ const SearchJobs = () => {
       {!searchInput && (
         <Card className="bg-white/5 backdrop-blur-sm border-white/20">
           <CardContent className="p-4 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Location Filter - Postal Code OR City */}
             <div className="space-y-2">
               <Label className="text-sm font-medium text-white flex items-center gap-2">
@@ -371,6 +371,7 @@ const SearchJobs = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
+
           </div>
 
           {/* Subcategories Dropdown - shown only when category is selected */}
