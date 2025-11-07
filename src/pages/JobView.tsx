@@ -91,15 +91,25 @@ const JobView = () => {
       // Load job image if exists
       if (data.job_image_url) {
         try {
-          let signedUrl = await convertToSignedUrl(data.job_image_url, 'job-applications', 3600);
-          if (!signedUrl) {
-            signedUrl = await convertToSignedUrl(data.job_image_url, 'job-images', 3600);
+          // 1) Try signed URL from old bucket
+          let resolved: string | null = await convertToSignedUrl(data.job_image_url, 'job-applications', 3600);
+          // 2) Fallback to new bucket
+          if (!resolved) resolved = await convertToSignedUrl(data.job_image_url, 'job-images', 3600);
+          // 3) As last resort, try public URL (bucket is public)
+          if (!resolved) {
+            const pub1 = supabase.storage.from('job-images').getPublicUrl(data.job_image_url).data.publicUrl;
+            if (pub1 && pub1.includes('/storage/')) resolved = pub1;
           }
-          if (signedUrl) {
-            console.log('Job image resolved URL:', { stored: data.job_image_url, resolved: signedUrl });
-            setImageUrl(signedUrl);
+          if (!resolved) {
+            const pub2 = supabase.storage.from('job-applications').getPublicUrl(data.job_image_url).data.publicUrl;
+            if (pub2 && pub2.includes('/storage/')) resolved = pub2;
+          }
+
+          if (resolved) {
+            console.log('Job image URL resolved', { stored: data.job_image_url, resolved });
+            setImageUrl(resolved);
           } else {
-            console.warn('Kunde inte skapa signed URL för jobbbild', data.job_image_url);
+            console.warn('Kunde inte lösa jobbbildens URL', data.job_image_url);
           }
         } catch (err) {
           console.error('Error loading job image:', err);
