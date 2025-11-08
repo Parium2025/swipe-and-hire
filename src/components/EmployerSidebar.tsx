@@ -119,11 +119,25 @@ export function EmployerSidebar() {
   const navigate = useNavigate();
   const { checkBeforeNavigation } = useUnsavedChanges();
   const queryClient = useQueryClient();
+  
+  // Konvertera storage-path till publik URL för company logos
+  const getPublicLogoUrl = (url: string | null | undefined): string | null => {
+    if (!url || typeof url !== 'string' || url.trim() === '') return null;
+    
+    // Om redan publik URL (company logos lagras som publika URLs i profiles-tabellen)
+    if (url.includes('/storage/v1/object/public/')) {
+      return url.split('?')[0]; // Ta bort query params
+    }
+    
+    // Returnera som är - company logos är redan publika URLs
+    return url;
+  };
+
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(() => {
     const fromProfile = (profile as any)?.company_logo_url as string | undefined;
     const cached = typeof window !== 'undefined' ? sessionStorage.getItem(LOGO_CACHE_KEY) : null;
     const raw = (typeof fromProfile === 'string' && fromProfile.trim() !== '') ? fromProfile : cached;
-    return raw ? raw.split('?')[0] : null;
+    return getPublicLogoUrl(raw);
   });
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [logoError, setLogoError] = useState(false);
@@ -144,13 +158,15 @@ export function EmployerSidebar() {
     const raw = (profile as any)?.company_logo_url;
     if (typeof raw === 'string' && raw.trim() !== '') {
       try {
-        const base = raw.split('?')[0];
+        const publicUrl = getPublicLogoUrl(raw);
         setCompanyLogoUrl((prev) => {
-          if (prev === base) return prev; // no change → avoid flicker
+          if (prev === publicUrl) return prev; // no change → avoid flicker
           setLogoLoaded(false);
           setLogoError(false);
-          try { sessionStorage.setItem(LOGO_CACHE_KEY, base); } catch {}
-          return base;
+          if (publicUrl) {
+            try { sessionStorage.setItem(LOGO_CACHE_KEY, publicUrl); } catch {}
+          }
+          return publicUrl;
         });
       } catch (error) {
         console.error('Failed to parse company logo:', error);

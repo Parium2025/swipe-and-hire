@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { preloadImages } from "@/lib/serviceWorkerManager";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Sidebar,
   SidebarContent,
@@ -54,11 +55,28 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
+  // Konvertera storage-path till publik URL
+  const getPublicImageUrl = (url: string | null | undefined): string | null => {
+    if (!url || typeof url !== 'string' || url.trim() === '') return null;
+    
+    // Om redan publik URL, returnera direkt
+    if (url.includes('/storage/v1/object/public/')) {
+      return url.split('?')[0]; // Ta bort query params
+    }
+    
+    // Konvertera storage-path till publik URL från profile-media bucket
+    const publicUrl = supabase.storage
+      .from('profile-media')
+      .getPublicUrl(url).data.publicUrl;
+    
+    return publicUrl;
+  };
+
   const [avatarUrl, setAvatarUrl] = useState<string | null>(() => {
     const fromProfile = profile?.profile_image_url || profile?.cover_image_url || '';
     const cached = typeof window !== 'undefined' ? sessionStorage.getItem(AVATAR_CACHE_KEY) : null;
     const raw = (typeof fromProfile === 'string' && fromProfile.trim() !== '') ? fromProfile : cached;
-    return raw ? raw.split('?')[0] : null;
+    return getPublicImageUrl(raw);
   });
   const [avatarLoaded, setAvatarLoaded] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
@@ -97,13 +115,15 @@ export function AppSidebar() {
     const raw = profile?.profile_image_url || profile?.cover_image_url || '';
     if (typeof raw === 'string' && raw.trim() !== '') {
       try {
-        const base = raw.split('?')[0];
+        const publicUrl = getPublicImageUrl(raw);
         setAvatarUrl((prev) => {
-          if (prev === base) return prev; // no change → avoid flicker
+          if (prev === publicUrl) return prev; // no change → avoid flicker
           setAvatarLoaded(false);
           setAvatarError(false);
-          try { sessionStorage.setItem(AVATAR_CACHE_KEY, base); } catch {}
-          return base;
+          if (publicUrl) {
+            try { sessionStorage.setItem(AVATAR_CACHE_KEY, publicUrl); } catch {}
+          }
+          return publicUrl;
         });
       } catch (error) {
         console.error('Failed to parse profile avatar:', error);

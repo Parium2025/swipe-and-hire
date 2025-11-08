@@ -37,16 +37,17 @@ export const useGlobalImagePreloader = () => {
           });
         }
 
-        // 2. Hämta ALLA profilbilder och cover images
+        // 2. Hämta ALLA profilbilder, cover images, videos och company logos
         const { data: profiles } = await supabase
           .from('profiles')
           .select('profile_image_url, cover_image_url, video_url, company_logo_url');
 
         if (profiles) {
           profiles.forEach(profile => {
+            // Profile images - konvertera storage-paths till publika URLs från profile-media
             if (profile.profile_image_url) {
               if (profile.profile_image_url.includes('/storage/v1/object/public/')) {
-                imagesToPreload.push(profile.profile_image_url);
+                imagesToPreload.push(profile.profile_image_url.split('?')[0]);
               } else {
                 const publicUrl = supabase.storage
                   .from('profile-media')
@@ -54,10 +55,36 @@ export const useGlobalImagePreloader = () => {
                 if (publicUrl) imagesToPreload.push(publicUrl);
               }
             }
-            if (profile.cover_image_url) imagesToPreload.push(profile.cover_image_url);
-            if (profile.video_url) imagesToPreload.push(profile.video_url);
-            // Company logos från profiles-tabellen (redan publika URLs)
-            if (profile.company_logo_url) imagesToPreload.push(profile.company_logo_url);
+            
+            // Cover images - konvertera storage-paths till publika URLs från profile-media
+            if (profile.cover_image_url) {
+              if (profile.cover_image_url.includes('/storage/v1/object/public/')) {
+                imagesToPreload.push(profile.cover_image_url.split('?')[0]);
+              } else {
+                const publicUrl = supabase.storage
+                  .from('profile-media')
+                  .getPublicUrl(profile.cover_image_url).data.publicUrl;
+                if (publicUrl) imagesToPreload.push(publicUrl);
+              }
+            }
+            
+            // Videos - konvertera storage-paths till publika URLs från profile-media
+            if (profile.video_url) {
+              if (profile.video_url.includes('/storage/v1/object/public/')) {
+                imagesToPreload.push(profile.video_url.split('?')[0]);
+              } else {
+                const publicUrl = supabase.storage
+                  .from('profile-media')
+                  .getPublicUrl(profile.video_url).data.publicUrl;
+                if (publicUrl) imagesToPreload.push(publicUrl);
+              }
+            }
+            
+            // Company logos - redan publika URLs i profiles-tabellen
+            if (profile.company_logo_url) {
+              const cleanUrl = profile.company_logo_url.split('?')[0];
+              imagesToPreload.push(cleanUrl);
+            }
           });
         }
 
