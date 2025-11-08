@@ -271,7 +271,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
       {duration > 0 && (
         <div 
           className={`absolute bottom-3 left-2 right-2 transition-opacity duration-300 ${
-            controlsVisible || isDragging ? 'opacity-100' : 'opacity-0'
+            (controlsVisible || isDragging) && isPlaying ? 'opacity-100' : 'opacity-0'
           }`}
           onMouseMove={handleProgressDrag}
         >
