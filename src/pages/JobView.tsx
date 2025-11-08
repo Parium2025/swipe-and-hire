@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { convertToSignedUrl } from '@/utils/storageUtils';
-import { useCachedImage } from '@/hooks/useCachedImage';
+import { useImagePreloader } from '@/hooks/useImagePreloader';
 interface JobQuestion {
   id: string;
   question_text: string;
@@ -63,8 +63,8 @@ const JobView = () => {
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   
-  // Använd cached image hook för permanent caching
-  const { cachedUrl } = useCachedImage(imageUrl);
+  // Preloada bilden när den finns tillgänglig
+  useImagePreloader(imageUrl ? [imageUrl] : [], { priority: 'high' });
 
   useEffect(() => {
     if (jobId) {
@@ -422,17 +422,17 @@ const JobView = () => {
           {/* Left column - Job info */}
           <div className="lg:col-span-2 space-y-3">
             
-            {cachedUrl && (
+            {imageUrl && (
               <div className="relative w-full h-64 md:h-80 overflow-hidden rounded-lg">
                 <img
-                  src={cachedUrl}
+                  src={imageUrl}
                   alt={`${job.title} hos ${job.profiles?.company_name || 'företaget'}`}
                   className="w-full h-full object-cover"
                   loading="eager"
                   fetchPriority="high"
-                  onLoad={() => console.log('Job image loaded', cachedUrl)}
+                  onLoad={() => console.log('Job image loaded', imageUrl)}
                   onError={(e) => {
-                    console.error('Job image failed to load', cachedUrl);
+                    console.error('Job image failed to load', imageUrl);
                     setImageUrl(null);
                   }}
                 />
@@ -488,7 +488,7 @@ const JobView = () => {
             )}
             
             {/* Om det inte finns bild, visa info i vanligt kort */}
-            {!cachedUrl && (
+            {!imageUrl && (
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
                 <h1 className="text-white text-xl md:text-2xl font-bold mb-3 leading-tight">
                   {job.title}
