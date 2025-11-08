@@ -15,13 +15,12 @@ export const useGlobalImagePreloader = () => {
 
         const imagesToPreload: string[] = [];
 
-        // 1. Hämta alla jobbbilder (max 50 senaste)
+        // 1. Hämta ALLA jobbbilder
         const { data: jobs } = await supabase
           .from('job_postings')
           .select('job_image_url')
           .eq('is_active', true)
-          .order('created_at', { ascending: false })
-          .limit(50);
+          .order('created_at', { ascending: false });
 
         if (jobs) {
           jobs.forEach(job => {
@@ -58,9 +57,9 @@ export const useGlobalImagePreloader = () => {
 
         // 3. Starta förladdning via Service Worker
         if (imagesToPreload.length > 0) {
-          console.log(`🚀 Preloading ${imagesToPreload.length} critical images in background...`);
+          console.log(`🚀 Preloading ${imagesToPreload.length} images (ALL active jobs) in background...`);
           await preloadImages(imagesToPreload);
-          console.log('✅ All critical images preloaded!');
+          console.log('✅ All images preloaded and ready for offline use!');
         }
       } catch (error) {
         console.error('Failed to preload images:', error);

@@ -24,9 +24,24 @@ const IMAGE_PATTERNS = [
   /\.gif$/
 ];
 
+// API-anrop som ska cachas för offline support
+const API_CACHE = 'parium-api-v1';
+const API_PATTERNS = [
+  /\/rest\/v1\/job_postings/,
+  /\/rest\/v1\/profiles/,
+  /\/rest\/v1\/job_applications/,
+  /\/rest\/v1\/organizations/,
+  /\/rest\/v1\/job_questions/
+];
+
 // Kolla om URL är en bild
 const isImageRequest = (url) => {
   return IMAGE_PATTERNS.some(pattern => pattern.test(url));
+};
+
+// Kolla om URL är ett API-anrop
+const isApiRequest = (url) => {
+  return API_PATTERNS.some(pattern => pattern.test(url));
 };
 
 // Install event - förbered cachen
@@ -54,7 +69,8 @@ self.addEventListener('activate', (event) => {
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME && 
               cacheName !== IMAGE_CACHE && 
-              cacheName !== STATIC_CACHE) {
+              cacheName !== STATIC_CACHE &&
+              cacheName !== API_CACHE) {
             console.log('[SW] Removing old cache:', cacheName);
             return caches.delete(cacheName);
           }
@@ -123,6 +139,46 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Hantera API-anrop med Cache-first strategin för offline support
+  if (isApiRequest(url)) {
+    event.respondWith(
+      caches.open(API_CACHE).then(async (cache) => {
+        // Försök hämta från nätverk först
+        try {
+          const networkResponse = await fetch(request);
+          
+          // Cacha lyckade GET requests
+          if (networkResponse && networkResponse.status === 200 && request.method === 'GET') {
+            cache.put(request, networkResponse.clone());
+            console.log('[SW] Cached API response:', url.substring(0, 80) + '...');
+          }
+          
+          return networkResponse;
+        } catch (error) {
+          // Om offline, försök hämta från cache
+          console.log('[SW] Network failed, trying cache for:', url.substring(0, 80) + '...');
+          const cachedResponse = await cache.match(request);
+          
+          if (cachedResponse) {
+            console.log('[SW] Serving API response from cache (offline mode)');
+            return cachedResponse;
+          }
+          
+          // Om ingen cache finns, returnera error response
+          console.error('[SW] No cache available for offline request');
+          return new Response(JSON.stringify({ 
+            error: 'Offline - ingen cachad data tillgänglig',
+            offline: true 
+          }), {
+            status: 503,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+      })
+    );
+    return;
+  }
+
   // För alla andra requests: Network-first med cache fallback
   event.respondWith(
     fetch(request)
@@ -181,9 +237,15 @@ self.addEventListener('message', (event) => {
   // Rensa image cache på begäran
   if (event.data && event.data.type === 'CLEAR_IMAGE_CACHE') {
     event.waitUntil(
-      caches.delete(IMAGE_CACHE).then(() => {
-        console.log('[SW] Image cache cleared');
-        return caches.open(IMAGE_CACHE);
+      Promise.all([
+        caches.delete(IMAGE_CACHE),
+        caches.delete(API_CACHE)
+      ]).then(() => {
+        console.log('[SW] Image and API cache cleared');
+        return Promise.all([
+          caches.open(IMAGE_CACHE),
+          caches.open(API_CACHE)
+        ]);
       })
     );
   }
