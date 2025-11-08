@@ -1005,14 +1005,14 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Input type="file" id="profileMedia" accept="image/*,video/*" className="hidden" onChange={handleMediaChange} disabled={isUploadingMedia} />
                 
                 {isUploadingMedia && (
-                  <Badge className="bg-white/10 text-white border-white/20 animate-pulse">
+                  <Badge variant="outline" className="bg-white/10 text-white border-white/20 animate-pulse">
                     <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
                     Laddar upp {uploadingMediaType === 'video' ? 'video' : 'bild'}...
                   </Badge>
                 )}
                 
                 {formData.profileImageUrl && !isUploadingMedia && (
-                  <Badge className="bg-white/20 text-white border-white/20 mt-12">
+                  <Badge variant="outline" className="bg-white/20 text-white border-white/20 mt-12">
                     {formData.profileMediaType === 'video' ? 'Video' : 'Bild'} uppladdad!
                   </Badge>
                 )}
@@ -1036,7 +1036,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   <Input type="file" id="coverImage" accept="image/*" className="hidden" onChange={handleCoverChange} disabled={isUploadingCover} />
                   
                   {isUploadingCover && (
-                    <Badge className="bg-white/10 text-white border-white/20 text-sm animate-pulse">
+                    <Badge variant="outline" className="bg-white/10 text-white border-white/20 text-sm animate-pulse">
                       <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
                       Laddar upp cover-bild...
                     </Badge>
@@ -1044,7 +1044,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   
                   {formData.coverImageUrl && !isUploadingCover && (
                     <div className="flex items-center justify-center">
-                       <Badge className="bg-white/20 text-white border-white/20 text-sm">
+                       <Badge variant="outline" className="bg-white/20 text-white border-white/20 text-sm">
                           Cover-bild uppladdad!
                         </Badge>
                     </div>
