@@ -276,10 +276,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             "Ogiltig videofil",
             "Videon har ingen giltig längdning. Välj en annan fil."
           );
-        } else if (video.duration > 30) {
+        } else if (video.duration > 60) {
           showError(
             "Videon är för lång",
-            `Videon är ${Math.round(video.duration)} sekunder. Max 30 sekunder tillåtet`
+            `Videon är ${Math.round(video.duration)} sekunder. Max 60 sekunder tillåtet`
           );
         } else {
           // Video är OK - ladda upp
