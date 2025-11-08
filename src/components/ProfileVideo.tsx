@@ -19,7 +19,12 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
   const [signedVideoUrl, setSignedVideoUrl] = useState<string | null>(null);
   const [signedCoverUrl, setSignedCoverUrl] = useState<string | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [controlsVisible, setControlsVisible] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
   const device = useDevice();
   const isMobile = device === 'mobile';
 
@@ -120,6 +125,79 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     }
   };
 
+  const handleTimeUpdate = () => {
+    if (videoRef.current && !isDragging) {
+      setProgress(videoRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (videoRef.current) {
+      setDuration(videoRef.current.duration);
+    }
+  };
+
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    if (!progressBarRef.current || !videoRef.current) return;
+    
+    const rect = progressBarRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = Math.max(0, Math.min(1, x / rect.width));
+    const newTime = percentage * duration;
+    
+    videoRef.current.currentTime = newTime;
+    setProgress(newTime);
+  };
+
+  const handleProgressDrag = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    handleProgressClick(e);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    setIsDragging(true);
+    handleProgressClick(e);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseEnter = () => {
+    if (!isMobile) {
+      setControlsVisible(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!isMobile && !isDragging) {
+      setControlsVisible(false);
+    }
+  };
+
+  const handleTouchStart = () => {
+    if (isMobile) {
+      setControlsVisible(true);
+      setTimeout(() => setControlsVisible(false), 3000);
+    }
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      const handleGlobalMouseUp = () => {
+        setIsDragging(false);
+        if (!isMobile) {
+          setControlsVisible(false);
+        }
+      };
+      
+      document.addEventListener('mouseup', handleGlobalMouseUp);
+      return () => document.removeEventListener('mouseup', handleGlobalMouseUp);
+    }
+  }, [isDragging, isMobile]);
+
   // Visa alltid omslagsbild/initialer medan URL:er signeras för att undvika blink
 
 
@@ -127,6 +205,9 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     <div 
       className={`relative overflow-hidden ${className}`}
       onClick={handleTap}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
     >
       {/* Cover image or poster frame - always mounted, fade only */}
       {signedCoverUrl ? (
@@ -156,6 +237,8 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
           preload="metadata"
           poster={signedCoverUrl || undefined}
           onEnded={handleVideoEnd}
+          onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={handleLoadedMetadata}
         />
       )}
       
@@ -181,6 +264,29 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
       {showCountdown && isPlaying && remainingSeconds !== null && (
         <div className="absolute top-2 right-2 px-2 py-1 text-white text-xs font-semibold" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
           {remainingSeconds}s
+        </div>
+      )}
+
+      {/* Video progress bar */}
+      {duration > 0 && (
+        <div 
+          className={`absolute bottom-0 left-0 right-0 transition-opacity duration-300 ${
+            controlsVisible || isDragging ? 'opacity-100' : 'opacity-0'
+          }`}
+          onMouseMove={handleProgressDrag}
+        >
+          <div
+            ref={progressBarRef}
+            className="h-1 bg-white/20 backdrop-blur-sm cursor-pointer hover:h-2 transition-all"
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onClick={handleProgressClick}
+          >
+            <div 
+              className="h-full bg-primary transition-all"
+              style={{ width: `${(progress / duration) * 100}%` }}
+            />
+          </div>
         </div>
       )}
     </div>
