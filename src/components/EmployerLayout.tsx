@@ -150,7 +150,9 @@ const EmployerLayout = memo(({ children, developerView, onViewChange }: Employer
       
       <div className="min-h-screen flex w-full overflow-x-hidden smooth-scroll touch-pan relative" style={{ WebkitOverflowScrolling: 'touch' }}>
         <AnimatedBackground showBubbles={false} />
-        <EmployerSidebar />
+        <div className="animate-fade-in">
+          <EmployerSidebar />
+        </div>
         <div className="flex-1 flex flex-col overflow-x-hidden relative z-10">
           <header className="sticky top-0 z-40 h-14 flex items-center justify-between border-b border-white/20 bg-transparent px-3">
             <div className="flex items-center gap-2">
