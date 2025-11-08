@@ -9,7 +9,7 @@ const CRITICAL_ASSETS = [
   '/manifest.json'
 ];
 
-// Mönster för bilder som ska cachas permanent
+// Mönster för bilder och filer som ska cachas permanent
 const IMAGE_PATTERNS = [
   /\/storage\/v1\/object\/public\//,
   /\/storage\/v1\/object\/sign\//,
@@ -21,7 +21,13 @@ const IMAGE_PATTERNS = [
   /\.jpeg$/,
   /\.png$/,
   /\.webp$/,
-  /\.gif$/
+  /\.gif$/,
+  /\.mp4$/,
+  /\.webm$/,
+  /\.mov$/,
+  /\.pdf$/,
+  /\.doc$/,
+  /\.docx$/
 ];
 
 // API-anrop som ska cachas för offline support

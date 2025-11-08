@@ -25,11 +25,9 @@ export const useGlobalImagePreloader = () => {
         if (jobs) {
           jobs.forEach(job => {
             if (job.job_image_url) {
-              // Om det är en public URL, använd den direkt
               if (job.job_image_url.includes('/storage/v1/object/public/')) {
                 imagesToPreload.push(job.job_image_url);
               } else {
-                // Annars, generera public URL
                 const publicUrl = supabase.storage
                   .from('job-images')
                   .getPublicUrl(job.job_image_url).data.publicUrl;
@@ -39,30 +37,67 @@ export const useGlobalImagePreloader = () => {
           });
         }
 
-        // 2. Hämta användarens profilbilder om inloggad
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('profile_image_url, cover_image_url, video_url')
-            .eq('id', user.id)
-            .single();
+        // 2. Hämta ALLA profilbilder och cover images
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('profile_image_url, cover_image_url, video_url, company_logo_url, cv_url');
 
-          if (profile) {
-            if (profile.profile_image_url) imagesToPreload.push(profile.profile_image_url);
+        if (profiles) {
+          profiles.forEach(profile => {
+            if (profile.profile_image_url) {
+              if (profile.profile_image_url.includes('/storage/v1/object/public/')) {
+                imagesToPreload.push(profile.profile_image_url);
+              } else {
+                const publicUrl = supabase.storage
+                  .from('profile-media')
+                  .getPublicUrl(profile.profile_image_url).data.publicUrl;
+                if (publicUrl) imagesToPreload.push(publicUrl);
+              }
+            }
             if (profile.cover_image_url) imagesToPreload.push(profile.cover_image_url);
             if (profile.video_url) imagesToPreload.push(profile.video_url);
+            if (profile.company_logo_url) imagesToPreload.push(profile.company_logo_url);
+            if (profile.cv_url) imagesToPreload.push(profile.cv_url);
+          });
+        }
+
+        // 3. Hämta ALLA företagslogotyper från company-logos bucket
+        const { data: companyLogos } = await supabase
+          .storage
+          .from('company-logos')
+          .list();
+
+        if (companyLogos) {
+          companyLogos.forEach(file => {
+            const publicUrl = supabase.storage
+              .from('company-logos')
+              .getPublicUrl(file.name).data.publicUrl;
+            if (publicUrl) imagesToPreload.push(publicUrl);
+          });
+        }
+
+        // 4. Hämta ALLA ansökningsbilder och CV:er från job-applications bucket
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: applications } = await supabase
+            .from('job_applications')
+            .select('cv_url');
+
+          if (applications) {
+            applications.forEach(app => {
+              if (app.cv_url) imagesToPreload.push(app.cv_url);
+            });
           }
         }
 
-        // 3. Starta förladdning via Service Worker
+        // 5. Starta förladdning via Service Worker
         if (imagesToPreload.length > 0) {
-          console.log(`🚀 Preloading ${imagesToPreload.length} images (ALL active jobs) in background...`);
+          console.log(`🚀 Preloading ${imagesToPreload.length} assets (ALL jobs, profiles, logos, CVs) in background...`);
           await preloadImages(imagesToPreload);
-          console.log('✅ All images preloaded and ready for offline use!');
+          console.log('✅ All assets preloaded and ready for offline use!');
         }
       } catch (error) {
-        console.error('Failed to preload images:', error);
+        console.error('Failed to preload assets:', error);
       }
     };
 
