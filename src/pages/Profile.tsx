@@ -1064,15 +1064,13 @@ const Profile = () => {
                     {(profile?.profile_image_url || coverImageUrl) ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
                   </Button>
                   {coverImageUrl && (
-                    <Button
-                      variant="outline"
-                      size="sm"
+                    <button
                       onClick={deleteCoverImage}
                       disabled={isUploadingCover}
-                      className="bg-white/5 backdrop-blur-sm border-white/10 !text-white disabled:opacity-50 hover:bg-destructive/20 hover:!text-white md:hover:bg-destructive/20 md:hover:!text-white md:hover:border-white/10 rounded-full p-2"
+                      className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors disabled:opacity-50"
                     >
                       <Trash2 className="h-4 w-4" />
-                    </Button>
+                    </button>
                   )}
                 </div>
                 <Input 
