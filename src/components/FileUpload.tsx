@@ -71,20 +71,13 @@ const FileUpload: React.FC<FileUploadProps> = ({
           .from(actualBucket)
           .getPublicUrl(fileName);
         
-        // Förladdda filen direkt i Service Worker för offline-tillgång
+        // Förladdda publika filer direkt i Service Worker för offline-tillgång
         await preloadSingleFile(publicUrl);
         
         onFileUploaded(publicUrl, file.name);
       } else {
-        // For private buckets, use signed URLs
-        const signedUrl = await createSignedUrl(actualBucket, fileName, 86400, file.name);
-        if (!signedUrl) {
-          throw new Error('Could not create secure access URL');
-        }
-        
-        // Förladdda även privata filer
-        await preloadSingleFile(signedUrl);
-        
+        // For private buckets, DO NOT cache signed URLs (they expire after 24h)
+        // Return storage path instead - signed URLs will be generated when needed
         onFileUploaded(fileName, file.name);
       }
       
