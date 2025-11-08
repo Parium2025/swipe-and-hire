@@ -1,11 +1,12 @@
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, X, File, Video, FileText } from 'lucide-react';
+import { Upload, X, File, Video, FileText, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
 import { preloadSingleFile } from '@/lib/serviceWorkerManager';
+import { Progress } from '@/components/ui/progress';
 
 interface FileUploadProps {
   onFileUploaded: (url: string, fileName: string) => void;
@@ -35,6 +36,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
                          bucketName === 'job-images';
   const actualBucket = isProfileMedia ? 'profile-media' : bucketName;
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [previewFile, setPreviewFile] = useState<{ file: File; url: string } | null>(null);
   const { toast } = useToast();
 
   const getFileIcon = (fileName: string) => {
@@ -50,6 +53,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
   const uploadFile = async (file: File) => {
     setUploading(true);
+    setUploadProgress(0);
     try {
       const user = await supabase.auth.getUser();
       if (!user.data.user) {
@@ -59,9 +63,20 @@ const FileUpload: React.FC<FileUploadProps> = ({
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.data.user.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
+      // Simulate progress for better UX
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) return prev;
+          return prev + 10;
+        });
+      }, 200);
+
       const { error: uploadError } = await supabase.storage
         .from(actualBucket)
         .upload(fileName, file);
+
+      clearInterval(progressInterval);
+      setUploadProgress(100);
 
       if (uploadError) throw uploadError;
 
@@ -85,6 +100,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
         title: "Fil uppladdad!",
         description: `${file.name} har laddats upp framgångsrikt.`
       });
+
+      // Clear preview after successful upload
+      if (previewFile) {
+        URL.revokeObjectURL(previewFile.url);
+        setPreviewFile(null);
+      }
     } catch (error) {
       console.error('Upload error:', error);
       toast({
@@ -94,13 +115,22 @@ const FileUpload: React.FC<FileUploadProps> = ({
       });
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   };
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
-      uploadFile(file);
+      // Check if it's a video file for preview
+      const isVideo = file.type.startsWith('video/');
+      if (isVideo) {
+        const url = URL.createObjectURL(file);
+        setPreviewFile({ file, url });
+      } else {
+        // Non-video files upload immediately
+        uploadFile(file);
+      }
     }
   }, []);
 
@@ -133,6 +163,19 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
   const handleRemoveFile = () => {
     onFileRemoved?.();
+  };
+
+  const handleCancelPreview = () => {
+    if (previewFile) {
+      URL.revokeObjectURL(previewFile.url);
+      setPreviewFile(null);
+    }
+  };
+
+  const handleConfirmUpload = () => {
+    if (previewFile) {
+      uploadFile(previewFile.file);
+    }
   };
 
   const getAcceptedTypesText = () => {
@@ -205,6 +248,44 @@ const FileUpload: React.FC<FileUploadProps> = ({
     );
   }
 
+  // Show video preview before upload
+  if (previewFile) {
+    return (
+      <div className="space-y-4">
+        <div className="border border-border rounded-lg overflow-hidden bg-muted/30">
+          <video 
+            src={previewFile.url} 
+            controls 
+            className="w-full h-auto max-h-64 object-contain bg-black"
+          />
+        </div>
+        <div className="flex gap-2">
+          <Button
+            onClick={handleConfirmUpload}
+            disabled={uploading}
+            className="flex-1"
+          >
+            <Check className="h-4 w-4 mr-2" />
+            {uploading ? 'Laddar upp...' : 'Spara video'}
+          </Button>
+          <Button
+            onClick={handleCancelPreview}
+            variant="outline"
+            disabled={uploading}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        {uploading && uploadProgress > 0 && (
+          <div className="space-y-2">
+            <Progress value={uploadProgress} className="h-2" />
+            <p className="text-xs text-center text-white">{uploadProgress}%</p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Hidden file input for better mobile support */}
@@ -230,7 +311,15 @@ const FileUpload: React.FC<FileUploadProps> = ({
         <div className="space-y-1.5 sm:space-y-2">
           <Upload className="h-6 w-6 sm:h-8 sm:w-8 mx-auto text-white" />
           {uploading ? (
-            <p className="text-xs sm:text-sm text-white">Laddar upp...</p>
+            <>
+              <p className="text-xs sm:text-sm text-white">Laddar upp...</p>
+              {uploadProgress > 0 && (
+                <div className="max-w-xs mx-auto space-y-1">
+                  <Progress value={uploadProgress} className="h-2" />
+                  <p className="text-xs text-white">{uploadProgress}%</p>
+                </div>
+              )}
+            </>
           ) : (
             <>
               <p className="text-xs sm:text-sm font-medium text-white">
