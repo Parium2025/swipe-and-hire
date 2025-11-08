@@ -1028,27 +1028,27 @@ const Profile = () => {
               </Label>
               
               {isUploadingMedia && (
-                <Badge variant="secondary" className="bg-white/10 text-white animate-pulse">
+                <Badge className="bg-white/10 text-white border-white/20 animate-pulse">
                   <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
                   Laddar upp {uploadingMediaType === 'video' ? 'video' : 'bild'}...
                 </Badge>
               )}
               
               {(isProfileVideo && !!profileImageUrl) && !isUploadingMedia && (
-                <Badge variant="secondary" className="bg-white/20 text-white">
+                <Badge className="bg-white/20 text-white border-white/20">
                   {isProfileVideo ? 'Video' : 'Bild'} uppladdad!
                 </Badge>
               )}
             </div>
 
             {/* Cover controls when no video is present */}
-            {!isProfileVideo && coverImageUrl && (
-              <div className="flex items-center justify-center gap-2 mt-2">
-                <Badge variant="secondary" className="bg-white/20 text-white text-sm font-normal">
-                  Cover-bild vald
-                </Badge>
-              </div>
-            )}
+              {!isProfileVideo && coverImageUrl && (
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  <Badge className="bg-white/20 text-white border-white/20 text-sm font-normal">
+                    Cover-bild vald
+                  </Badge>
+                </div>
+              )}
 
             {/* Cover image upload for videos */}
             {(isProfileVideo && !!profileImageUrl) && (
@@ -1073,7 +1073,7 @@ const Profile = () => {
                 
                 {isUploadingCover && (
                   <div className="flex flex-col items-center w-full">
-                    <Badge variant="secondary" className="bg-white/10 text-white text-sm animate-pulse">
+                    <Badge className="bg-white/10 text-white border-white/20 text-sm animate-pulse">
                       <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
                       Laddar upp cover-bild...
                     </Badge>
@@ -1083,7 +1083,7 @@ const Profile = () => {
                 {coverImageUrl && !isUploadingCover && (
                   <div className="flex flex-col items-center space-y-2 w-full">
                      <div className="flex items-center justify-center">
-                       <Badge variant="secondary" className="bg-white/20 text-white text-sm font-normal whitespace-nowrap">
+                       <Badge className="bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap">
                           Cover-bild uppladdad!
                         </Badge>
                      </div>
