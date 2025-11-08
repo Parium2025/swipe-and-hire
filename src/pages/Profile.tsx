@@ -560,18 +560,17 @@ const Profile = () => {
       const fileName = `${user.data.user.id}/${Date.now()}-profile-image.jpg`;
       
       const { error: uploadError } = await supabase.storage
-        .from('job-applications')
+        .from('profile-media')
         .upload(fileName, editedBlob);
 
       if (uploadError) throw uploadError;
 
-      // Use signed URL for secure access
-      const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
-      if (!signedUrl) {
-        throw new Error('Could not create secure access URL');
-      }
+      // Use public URL for profile media (no expiration)
+      const { data: { publicUrl } } = supabase.storage
+        .from('profile-media')
+        .getPublicUrl(fileName);
 
-      const imageUrl = `${signedUrl}&t=${Date.now()}`;
+      const imageUrl = `${publicUrl}?t=${Date.now()}`;
       
       // Förladdda bilden direkt i Service Worker
       const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
@@ -618,18 +617,17 @@ const Profile = () => {
       const fileName = `${user.data.user.id}/${Date.now()}-cover-image.jpg`;
       
       const { error: uploadError } = await supabase.storage
-        .from('job-applications')
+        .from('profile-media')
         .upload(fileName, editedBlob);
 
       if (uploadError) throw uploadError;
 
-      // Use signed URL for secure access
-      const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
-      if (!signedUrl) {
-        throw new Error('Could not create secure access URL');
-      }
+      // Use public URL for profile media (no expiration)
+      const { data: { publicUrl } } = supabase.storage
+        .from('profile-media')
+        .getPublicUrl(fileName);
 
-      const coverUrl = `${signedUrl}&t=${Date.now()}`;
+      const coverUrl = `${publicUrl}?t=${Date.now()}`;
       
       // Förladdda bilden direkt i Service Worker
       const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');

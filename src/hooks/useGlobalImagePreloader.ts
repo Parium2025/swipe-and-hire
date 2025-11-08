@@ -40,7 +40,7 @@ export const useGlobalImagePreloader = () => {
         // 2. Hämta ALLA profilbilder och cover images
         const { data: profiles } = await supabase
           .from('profiles')
-          .select('profile_image_url, cover_image_url, video_url, company_logo_url, cv_url');
+          .select('profile_image_url, cover_image_url, video_url, company_logo_url');
 
         if (profiles) {
           profiles.forEach(profile => {
@@ -56,43 +56,14 @@ export const useGlobalImagePreloader = () => {
             }
             if (profile.cover_image_url) imagesToPreload.push(profile.cover_image_url);
             if (profile.video_url) imagesToPreload.push(profile.video_url);
+            // Company logos från profiles-tabellen (redan publika URLs)
             if (profile.company_logo_url) imagesToPreload.push(profile.company_logo_url);
-            if (profile.cv_url) imagesToPreload.push(profile.cv_url);
           });
         }
 
-        // 3. Hämta ALLA företagslogotyper från company-logos bucket
-        const { data: companyLogos } = await supabase
-          .storage
-          .from('company-logos')
-          .list();
-
-        if (companyLogos) {
-          companyLogos.forEach(file => {
-            const publicUrl = supabase.storage
-              .from('company-logos')
-              .getPublicUrl(file.name).data.publicUrl;
-            if (publicUrl) imagesToPreload.push(publicUrl);
-          });
-        }
-
-        // 4. Hämta ALLA ansökningsbilder och CV:er från job-applications bucket
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: applications } = await supabase
-            .from('job_applications')
-            .select('cv_url');
-
-          if (applications) {
-            applications.forEach(app => {
-              if (app.cv_url) imagesToPreload.push(app.cv_url);
-            });
-          }
-        }
-
-        // 5. Starta förladdning via Service Worker
+        // 3. Starta förladdning via Service Worker
         if (imagesToPreload.length > 0) {
-          console.log(`🚀 Preloading ${imagesToPreload.length} assets (ALL jobs, profiles, logos, CVs) in background...`);
+          console.log(`🚀 Preloading ${imagesToPreload.length} assets (ALL jobs, profiles, logos) in background...`);
           await preloadImages(imagesToPreload);
           console.log('✅ All assets preloaded and ready for offline use!');
         }

@@ -67,18 +67,17 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       const fileName = `${user.data.user.id}/${Date.now()}-company-logo.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('job-applications')
+        .from('company-logos')
         .upload(fileName, editedBlob);
 
       if (uploadError) throw uploadError;
 
-      // Use signed URL for secure access
-      const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
-      if (!signedUrl) {
-        throw new Error('Could not create secure access URL');
-      }
+      // Use public URL for company logos (no expiration)
+      const { data: { publicUrl } } = supabase.storage
+        .from('company-logos')
+        .getPublicUrl(fileName);
 
-      const logoUrl = `${signedUrl}&t=${Date.now()}`;
+      const logoUrl = `${publicUrl}?t=${Date.now()}`;
       
       // Förladdda loggan direkt i Service Worker
       const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
