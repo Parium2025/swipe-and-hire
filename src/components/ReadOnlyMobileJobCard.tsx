@@ -35,7 +35,7 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
   // Get company name from either direct property or profiles join
   const companyName = job.company_name || job.profiles?.company_name || 'Okänt företag';
 
-  // Load and cache job image
+  // Load and cache job image using stable public URL
   useEffect(() => {
     const loadJobImage = async () => {
       if (!job.job_image_url) {
@@ -44,20 +44,22 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
       }
 
       try {
-        // If it's already a full URL, use it directly
         if (job.job_image_url.startsWith('http')) {
           setImageUrl(job.job_image_url);
           return;
         }
 
-        // Otherwise, get signed URL from Supabase storage
-        const { data, error } = await supabase.storage
+        // Prefer PUBLIC URL from job-images (stable, SW-cacheable)
+        const { data } = supabase.storage
           .from('job-images')
-          .createSignedUrl(job.job_image_url, 3600); // 1 hour cache
-
-        if (!error && data?.signedUrl) {
-          setImageUrl(data.signedUrl);
+          .getPublicUrl(job.job_image_url);
+        if (data?.publicUrl) {
+          setImageUrl(data.publicUrl);
+          return;
         }
+
+        // Legacy fallback: keep as null (handled elsewhere)
+        setImageUrl(null);
       } catch (err) {
         console.error('Error loading job image:', err);
         setImageUrl(null);

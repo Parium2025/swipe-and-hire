@@ -72,7 +72,7 @@ export const useGlobalImagePreloader = () => {
       }
     };
 
-    // Kör preload i bakgrunden efter en kort delay för att inte blockera initial render
-    setTimeout(preloadCriticalImages, 1000);
+    // Kör preload direkt vid app-start för minimal first-navigation-latens
+    preloadCriticalImages();
   }, []);
 };
