@@ -30,8 +30,10 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
 
   // Convert URLs to stable public URLs for caching
   useEffect(() => {
+    let isMounted = true;
+    
     const convertUrls = async () => {
-      if (videoUrl) {
+      if (videoUrl && isMounted) {
         // If already full URL, use it
         if (videoUrl.startsWith('http')) {
           setSignedVideoUrl(videoUrl);
@@ -40,13 +42,13 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
           const { data } = supabase.storage
             .from('profile-media')
             .getPublicUrl(videoUrl);
-          if (data?.publicUrl) {
+          if (data?.publicUrl && isMounted) {
             setSignedVideoUrl(data.publicUrl);
           }
         }
       }
       
-      if (coverImageUrl && coverImageUrl.trim()) {
+      if (coverImageUrl && coverImageUrl.trim() && isMounted) {
         // If already full URL, use it
         if (coverImageUrl.startsWith('http')) {
           setSignedCoverUrl(coverImageUrl);
@@ -55,17 +57,21 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
           const { data } = supabase.storage
             .from('profile-media')
             .getPublicUrl(coverImageUrl);
-          if (data?.publicUrl) {
+          if (data?.publicUrl && isMounted) {
             setSignedCoverUrl(data.publicUrl);
           }
         }
-      } else {
+      } else if (isMounted) {
         // Rensa cover-bild omedelbart när coverImageUrl är tom
         setSignedCoverUrl(null);
       }
     };
     
     convertUrls();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [videoUrl, coverImageUrl]);
 
   // Förladdda cover-bilden i bakgrunden
@@ -92,8 +98,26 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     updateTime();
     const interval = setInterval(updateTime, 100);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      setRemainingSeconds(null);
+    };
   }, [isPlaying]);
+
+  // Cleanup when component unmounts - reset video and clear all states
+  useEffect(() => {
+    return () => {
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
+      }
+      setIsPlaying(false);
+      setShowVideo(false);
+      setProgress(0);
+      setControlsVisible(false);
+      setIsDragging(false);
+    };
+  }, []);
 
   // Remove hover-based autoplay to avoid flicker; play only on explicit tap/click
   // (Keeping function names removed to simplify behavior)
@@ -192,11 +216,24 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
           setControlsVisible(false);
         }
       };
+      const handleGlobalMouseMove = (e: MouseEvent) => {
+        if (!progressBarRef.current || !videoRef.current) return;
+        const rect = progressBarRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const percentage = Math.max(0, Math.min(1, x / rect.width));
+        const newTime = percentage * duration;
+        videoRef.current.currentTime = newTime;
+        setProgress(newTime);
+      };
       
       document.addEventListener('mouseup', handleGlobalMouseUp);
-      return () => document.removeEventListener('mouseup', handleGlobalMouseUp);
+      document.addEventListener('mousemove', handleGlobalMouseMove);
+      return () => {
+        document.removeEventListener('mouseup', handleGlobalMouseUp);
+        document.removeEventListener('mousemove', handleGlobalMouseMove);
+      };
     }
-  }, [isDragging, isMobile]);
+  }, [isDragging, isMobile, duration]);
 
   // Visa alltid omslagsbild/initialer medan URL:er signeras för att undvika blink
 
