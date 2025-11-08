@@ -877,17 +877,16 @@ const Profile = () => {
         // Keep cover image when video exists
         updates.cover_image_url = coverImageUrl || null;
       } else if (!profileImageUrl && coverImageUrl) {
-        // No video/image but has cover - make cover the profile image
+        // No video/image but has cover - make cover the profile image (but keep cover as cover)
         updates.profile_image_url = coverImageUrl;
         updates.video_url = null;
-        updates.cover_image_url = null; // Clear cover since it's now the profile image
+        updates.cover_image_url = coverImageUrl; // Preserve cover image so it remains available when adding video again
         
         // Update local state to reflect this change
         setProfileImageUrl(coverImageUrl);
         setIsProfileVideo(false);
         setProfileFileName(coverFileName);
-        setCoverImageUrl('');
-        setCoverFileName('');
+        // Do NOT clear cover state here
         setDeletedCoverImage(null);
         setDeletedProfileMedia(null); // Clear undo states
       } else {
@@ -1093,7 +1092,7 @@ const Profile = () => {
             </div>
 
             {/* Cover image upload - show when video exists OR when cover image exists without video */}
-            {((isProfileVideo && !!profileImageUrl) || (!profileImageUrl && coverImageUrl)) && (
+            {((isProfileVideo && !!profileImageUrl) || !!coverImageUrl) && (
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
                 <div className="flex items-center gap-2">
                   <Button 
