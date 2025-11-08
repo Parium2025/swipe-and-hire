@@ -28,7 +28,7 @@ import { cn } from '@/lib/utils';
 import { isValidSwedishPhone } from '@/lib/phoneValidation';
 
 const Profile = () => {
-  const { profile, userRole, updateProfile, user } = useAuth();
+  const { profile, userRole, updateProfile, refreshProfile, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -905,6 +905,9 @@ const Profile = () => {
       const result = await updateProfile(updates);
       
       if (!result.error) {
+        // Refresh profile to ensure sidebar is updated immediately
+        await refreshProfile();
+        
         // Update original values after successful save
         const newOriginalValues = {
           firstName: firstName,

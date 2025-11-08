@@ -81,6 +81,7 @@ interface AuthContextType {
   verifyOtp: (phone: string, otp: string) => Promise<{ error?: any }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error?: any }>;
+  refreshProfile: () => Promise<void>;
   resendConfirmation: (email: string, userRole?: string, firstName?: string) => Promise<{ error?: any }>;
   resetPassword: (email: string) => Promise<{ error?: any }>;
   updatePassword: (newPassword: string) => Promise<{ error?: any }>;
@@ -598,6 +599,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const refreshProfile = async () => {
+    if (user) {
+      await fetchUserData(user.id);
+    }
+  };
+
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) return { error: 'No user logged in' };
 
@@ -868,6 +875,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     verifyOtp,
     signOut,
     updateProfile,
+    refreshProfile,
     resendConfirmation,
     resetPassword,
     updatePassword,
