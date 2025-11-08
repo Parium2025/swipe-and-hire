@@ -466,7 +466,7 @@ const JobView = () => {
                   </h1>
                   
                   {/* Work schedule och lön under */}
-                  <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-white/90 text-sm md:text-base">
+                  <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-white text-sm md:text-base">
                     {job.work_schedule && (
                       <div className="flex items-center gap-1.5">
                         <Clock className="h-4 w-4" />
@@ -528,7 +528,7 @@ const JobView = () => {
             {/* Description */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
               <h2 className="text-white font-bold text-base md:text-lg mb-3">Om tjänsten</h2>
-              <p className="text-white/90 leading-relaxed whitespace-pre-wrap text-sm md:text-base">
+              <p className="text-white leading-relaxed whitespace-pre-wrap text-sm md:text-base">
                 {job.description}
               </p>
             </div>
@@ -540,7 +540,7 @@ const JobView = () => {
                   <FileText className="h-4 w-4" />
                   Ansökningsinstruktioner
                 </h2>
-                <p className="text-white/90 leading-relaxed whitespace-pre-wrap text-sm md:text-base">
+                <p className="text-white leading-relaxed whitespace-pre-wrap text-sm md:text-base">
                   {job.application_instructions}
                 </p>
               </div>
