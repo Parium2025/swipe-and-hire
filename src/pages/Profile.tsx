@@ -874,14 +874,28 @@ const Profile = () => {
         // It's a video
         updates.video_url = profileImageUrl;
         updates.profile_image_url = null; // Clear profile image when using video
+        // Keep cover image when video exists
+        updates.cover_image_url = coverImageUrl || null;
+      } else if (!profileImageUrl && coverImageUrl) {
+        // No video/image but has cover - make cover the profile image
+        updates.profile_image_url = coverImageUrl;
+        updates.video_url = null;
+        updates.cover_image_url = null; // Clear cover since it's now the profile image
+        
+        // Update local state to reflect this change
+        setProfileImageUrl(coverImageUrl);
+        setIsProfileVideo(false);
+        setProfileFileName(coverFileName);
+        setCoverImageUrl('');
+        setCoverFileName('');
+        setDeletedCoverImage(null);
+        setDeletedProfileMedia(null); // Clear undo states
       } else {
         // It's an image or no media
         updates.profile_image_url = profileImageUrl || null;
         updates.video_url = null;
+        updates.cover_image_url = coverImageUrl || null;
       }
-      
-      // Always save cover image separately if available
-      updates.cover_image_url = coverImageUrl || null;
 
       if (isEmployer) {
         updates.company_name = companyName.trim() || null;
@@ -915,6 +929,10 @@ const Profile = () => {
         
         setOriginalValues(newOriginalValues);
         setHasUnsavedChanges(false);
+        
+        // Clear undo states after successful save
+        setDeletedProfileMedia(null);
+        setDeletedCoverImage(null);
         
         toast({
           title: "Profil uppdaterad",
@@ -1071,14 +1089,8 @@ const Profile = () => {
               )}
             </div>
 
-            {/* Cover controls when no video is present */}
-              {!isProfileVideo && coverImageUrl && (
-                <div className="flex items-center justify-center gap-2 mt-2">
-                  <Badge variant="outline" className="bg-white/20 text-white border-white/20 text-sm font-normal">
-                    Cover-bild vald
-                  </Badge>
-                </div>
-              )}
+            {/* Cover controls when no video is present - hide this section */}
+              {/* Removed - Cover-bild vald badge not needed */}
 
             {/* Cover image upload for videos */}
             {(isProfileVideo && !!profileImageUrl) && (
