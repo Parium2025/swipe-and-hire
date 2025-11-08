@@ -303,7 +303,7 @@ const Profile = () => {
 
   const handleBioChange = (value: string) => {
     const wordCount = countWords(value);
-    if (wordCount <= 100) {
+    if (wordCount <= 150) {
       setBio(value);
       setHasUnsavedChanges(true);
     }
@@ -1250,7 +1250,7 @@ const Profile = () => {
                 />
                 <div className="flex justify-end">
                   <span className="text-sm text-white">
-                    {countWords(bio)}/100 ord
+                    {countWords(bio)}/150 ord
                   </span>
                 </div>
               </div>
