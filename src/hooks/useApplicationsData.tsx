@@ -93,7 +93,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
       const from = pageParam * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
       
-      // Build query with job title included via join
+      // Build query with job title and profile image included via joins
       let query = supabase
         .from('job_applications')
         .select(`
@@ -109,7 +109,8 @@ export const useApplicationsData = (searchQuery: string = '') => {
           status,
           applied_at,
           updated_at,
-          job_postings!inner(title)
+          job_postings!inner(title),
+          profiles(profile_image_url)
         `);
 
       // Apply powerful global search across all relevant fields including job title
@@ -132,12 +133,28 @@ export const useApplicationsData = (searchQuery: string = '') => {
         return { items: [], hasMore: false };
       }
 
-      // Transform data to flatten job_postings
-      const items = baseData.map((item: any) => ({
-        ...item,
-        job_title: item.job_postings?.title || 'Okänt jobb',
-        job_postings: undefined, // Remove nested object
-      })) as ApplicationData[];
+      // Transform data to flatten job_postings and normalize profile images
+      const items = baseData.map((item: any) => {
+        let profileImageUrl = item.profiles?.profile_image_url;
+        
+        // Normalisera till publik URL från profile-media bucket
+        if (profileImageUrl && typeof profileImageUrl === 'string') {
+          if (!profileImageUrl.includes('/storage/v1/object/public/')) {
+            const publicUrl = supabase.storage
+              .from('profile-media')
+              .getPublicUrl(profileImageUrl).data.publicUrl;
+            profileImageUrl = publicUrl;
+          }
+        }
+        
+        return {
+          ...item,
+          job_title: item.job_postings?.title || 'Okänt jobb',
+          profile_image_url: profileImageUrl,
+          job_postings: undefined,
+          profiles: undefined
+        };
+      }) as ApplicationData[];
       
       const hasMore = items.length === PAGE_SIZE;
 

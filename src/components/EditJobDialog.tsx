@@ -442,12 +442,11 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
 
       let urlToEdit = source;
       if (!source.startsWith('http')) {
-        // Try job-images first (new public bucket), then job-applications as fallback (old private bucket)
-        let signed = await createSignedUrl('job-images', source, 86400);
-        if (!signed) {
-          signed = await createSignedUrl('job-applications', source, 86400);
-        }
-        if (signed) urlToEdit = signed;
+        // Use public URL from job-images bucket (no expiration)
+        const { data: { publicUrl } } = supabase.storage
+          .from('job-images')
+          .getPublicUrl(source);
+        if (publicUrl) urlToEdit = publicUrl;
       }
       setEditingImageUrl(urlToEdit);
       setShowImageEditor(true);
@@ -538,41 +537,32 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
     }
   };
 
-  // Load job image if exists - create signed URL for storage paths
+  // Load job image if exists - use public URL from job-images bucket
   useEffect(() => {
     const loadJobImage = async () => {
       if (job?.job_image_url && open) {
         const url = job.job_image_url;
         
-        // If it's a storage path (not a full URL), create a signed URL
+        // If it's a storage path (not a full URL), get public URL
         if (!url.startsWith('http')) {
-          try {
-            // Try job-images first (new public bucket), then job-applications as fallback (old private bucket)
-            let signedUrl = await createSignedUrl('job-images', url, 86400);
-            if (!signedUrl) {
-              signedUrl = await createSignedUrl('job-applications', url, 86400);
-            }
-            if (signedUrl) {
-              setJobImageDisplayUrl(signedUrl);
-              setOriginalImageUrl(url); // Keep storage path as original
-              return;
-            }
-          } catch (error) {
-            console.error('Failed to create signed URL for job image:', error);
+          const { data: { publicUrl } } = supabase.storage
+            .from('job-images')
+            .getPublicUrl(url);
+          if (publicUrl) {
+            setJobImageDisplayUrl(publicUrl);
+            setOriginalImageUrl(url); // Keep storage path as original
+            return;
           }
         }
         
-        // If it's already a full URL or signing failed, use as-is
+        // Otherwise use URL as-is
         setJobImageDisplayUrl(url);
         setOriginalImageUrl(url);
-      } else {
-        setJobImageDisplayUrl(null);
-        setOriginalImageUrl(null);
       }
     };
     
     loadJobImage();
-  }, [job, open]);
+  }, [job?.job_image_url, open]);
 
   // Preload image when user reaches step 2 (jobbild section) to make preview faster
   useEffect(() => {
@@ -2362,15 +2352,16 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                                 handleInputChange('job_image_url', storagePath);
                                 setOriginalImageUrl(storagePath);
                                 
-                                // Create signed URL for display
-                                try {
-                                  const signedUrl = await createSignedUrl('job-images', storagePath, 86400);
-                                  if (signedUrl) {
-                                    setJobImageDisplayUrl(signedUrl);
-                                  }
-                                } catch (error) {
-                                  console.error('Failed to create signed URL:', error);
-                                  setJobImageDisplayUrl(storagePath);
+                                // Get public URL for instant display
+                                const { data: { publicUrl } } = supabase.storage
+                                  .from('job-images')
+                                  .getPublicUrl(storagePath);
+                                  
+                                if (publicUrl) {
+                                  setJobImageDisplayUrl(publicUrl);
+                                  // Preload image in Service Worker
+                                  const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
+                                  await preloadSingleFile(publicUrl);
                                 }
                               }}
                               acceptedFileTypes={['image/*']}
