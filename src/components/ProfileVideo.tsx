@@ -270,20 +270,20 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
       {/* Video progress bar */}
       {duration > 0 && (
         <div 
-          className={`absolute bottom-0 left-0 right-0 transition-opacity duration-300 ${
+          className={`absolute bottom-1 left-1 right-1 transition-opacity duration-300 ${
             controlsVisible || isDragging ? 'opacity-100' : 'opacity-0'
           }`}
           onMouseMove={handleProgressDrag}
         >
           <div
             ref={progressBarRef}
-            className="h-1 bg-white/20 backdrop-blur-sm cursor-pointer hover:h-2 transition-all"
+            className="h-0.5 bg-white/30 backdrop-blur-sm cursor-pointer hover:h-1 transition-all rounded-full overflow-hidden"
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
             onClick={handleProgressClick}
           >
             <div 
-              className="h-full bg-primary transition-all"
+              className="h-full bg-white transition-all rounded-full"
               style={{ width: `${(progress / duration) * 100}%` }}
             />
           </div>
