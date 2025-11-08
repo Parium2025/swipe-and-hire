@@ -1028,8 +1028,8 @@ const Profile = () => {
               </Label>
               
               {isUploadingMedia && (
-                <Badge variant="secondary" className="bg-blue-500/20 text-blue-100 animate-pulse">
-                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-100 mr-2"></div>
+                <Badge variant="secondary" className="bg-white/10 text-white animate-pulse">
+                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
                   Laddar upp {uploadingMediaType === 'video' ? 'video' : 'bild'}...
                 </Badge>
               )}
@@ -1073,8 +1073,8 @@ const Profile = () => {
                 
                 {isUploadingCover && (
                   <div className="flex flex-col items-center w-full">
-                    <Badge variant="secondary" className="bg-blue-500/20 text-blue-100 text-sm animate-pulse">
-                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-100 mr-1"></div>
+                    <Badge variant="secondary" className="bg-white/10 text-white text-sm animate-pulse">
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
                       Laddar upp cover-bild...
                     </Badge>
                   </div>
