@@ -42,29 +42,25 @@ const ProfileSetup = () => {
   const uploadProfileImage = async (file: File) => {
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}/profile-image.${fileExt}`;
-
-      // Remove old image first
-      await supabase.storage
-        .from('job-applications')
-        .remove([fileName]);
+      const fileName = `${user?.id}/${Date.now()}-profile-image.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('job-applications')
-        .upload(fileName, file, {
-          upsert: true
-        });
+        .from('profile-media')
+        .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
-      // Use signed URL for secure access
-      const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
-      if (!signedUrl) {
-        throw new Error('Could not create secure access URL');
-      }
+      // Use public URL for profile media (no expiration)
+      const { data: { publicUrl } } = supabase.storage
+        .from('profile-media')
+        .getPublicUrl(fileName);
 
-      // Add cache busting parameter
-      const imageUrl = `${signedUrl}&t=${Date.now()}`;
+      const imageUrl = `${publicUrl}?t=${Date.now()}`;
+      
+      // Förladdda bilden direkt i Service Worker
+      const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
+      await preloadSingleFile(imageUrl);
+      
       setProfileImageUrl(imageUrl);
       
       toast({

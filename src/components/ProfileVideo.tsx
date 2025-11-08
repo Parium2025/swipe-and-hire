@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useDevice } from '@/hooks/use-device';
 import { Play, Pause } from 'lucide-react';
-import { convertToSignedUrl } from '@/utils/storageUtils';
+import { supabase } from '@/integrations/supabase/client';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
 
 interface ProfileVideoProps {
@@ -21,17 +21,37 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
   const device = useDevice();
   const isMobile = device === 'mobile';
 
-  // Convert URLs to signed URLs when they change
+  // Convert URLs to stable public URLs for caching
   useEffect(() => {
     const convertUrls = async () => {
       if (videoUrl) {
-        const signed = await convertToSignedUrl(videoUrl);
-        setSignedVideoUrl(signed);
+        // If already full URL, use it
+        if (videoUrl.startsWith('http')) {
+          setSignedVideoUrl(videoUrl);
+        } else {
+          // Get public URL from profile-media bucket
+          const { data } = supabase.storage
+            .from('profile-media')
+            .getPublicUrl(videoUrl);
+          if (data?.publicUrl) {
+            setSignedVideoUrl(data.publicUrl);
+          }
+        }
       }
       
       if (coverImageUrl && coverImageUrl.trim()) {
-        const signedCover = await convertToSignedUrl(coverImageUrl);
-        setSignedCoverUrl(signedCover);
+        // If already full URL, use it
+        if (coverImageUrl.startsWith('http')) {
+          setSignedCoverUrl(coverImageUrl);
+        } else {
+          // Get public URL from profile-media bucket
+          const { data } = supabase.storage
+            .from('profile-media')
+            .getPublicUrl(coverImageUrl);
+          if (data?.publicUrl) {
+            setSignedCoverUrl(data.publicUrl);
+          }
+        }
       } else {
         // Rensa cover-bild omedelbart när coverImageUrl är tom
         setSignedCoverUrl(null);

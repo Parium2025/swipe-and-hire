@@ -89,33 +89,34 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     setPhoneError(validation.error);
   };
 
-  // Convert old public URLs to signed URLs when component mounts
+  // Convert existing URLs to stable public URLs when component mounts
   useEffect(() => {
     const convertExistingUrls = async () => {
       if (profile?.profile_image_url || profile?.video_url || profile?.cv_url) {
         const updates: any = {};
         
-        // Handle profile image/video
+        // Handle profile image/video - use public URLs from profile-media
         if (profile.video_url) {
-          const signedVideoUrl = await convertToSignedUrl(profile.video_url);
-          if (signedVideoUrl) {
-            updates.profileImageUrl = signedVideoUrl;
+          const videoUrl = profile.video_url.startsWith('http') 
+            ? profile.video_url 
+            : supabase.storage.from('profile-media').getPublicUrl(profile.video_url).data.publicUrl;
+          if (videoUrl) {
+            updates.profileImageUrl = videoUrl;
             updates.profileMediaType = 'video';
           }
         } else if (profile.profile_image_url) {
-          const signedImageUrl = await convertToSignedUrl(profile.profile_image_url);
-          if (signedImageUrl) {
-            updates.profileImageUrl = signedImageUrl;
+          const imageUrl = profile.profile_image_url.startsWith('http')
+            ? profile.profile_image_url
+            : supabase.storage.from('profile-media').getPublicUrl(profile.profile_image_url).data.publicUrl;
+          if (imageUrl) {
+            updates.profileImageUrl = imageUrl;
             updates.profileMediaType = 'image';
           }
         }
         
-        // Handle CV
+        // Handle CV - keep as storage path (private bucket)
         if (profile.cv_url) {
-          const signedCvUrl = await convertToSignedUrl(profile.cv_url);
-          if (signedCvUrl) {
-            updates.cvUrl = signedCvUrl;
-          }
+          updates.cvUrl = profile.cv_url;
         }
         
         if (Object.keys(updates).length > 0) {

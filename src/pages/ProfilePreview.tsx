@@ -152,13 +152,20 @@ export default function ProfilePreview() {
     const [showVideo, setShowVideo] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
 
-    // Load signed URLs for media
+    // Load public URLs for media
     useEffect(() => {
       const loadMediaUrls = async () => {
         if (data.video_url) {
           try {
-            const signedVideoUrl = await convertToSignedUrl(data.video_url, 'job-applications', 86400);
-            setVideoUrl(signedVideoUrl || data.video_url);
+            // Use public URL from profile-media bucket
+            if (data.video_url.startsWith('http')) {
+              setVideoUrl(data.video_url);
+            } else {
+              const { data: urlData } = supabase.storage
+                .from('profile-media')
+                .getPublicUrl(data.video_url);
+              setVideoUrl(urlData?.publicUrl || data.video_url);
+            }
           } catch (error) {
             setVideoUrl(data.video_url);
           }
@@ -166,6 +173,7 @@ export default function ProfilePreview() {
 
         if (data.cv_url) {
           try {
+            // CV is private, needs signed URL
             const signedCvUrl = await convertToSignedUrl(data.cv_url, 'job-applications', 86400);
             setCvUrl(signedCvUrl || data.cv_url);
           } catch (error) {
