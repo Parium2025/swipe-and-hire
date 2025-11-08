@@ -442,7 +442,7 @@ const JobView = () => {
                 {/* Text overlay - Simplex style */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
                   {/* Kategori/plats info överst */}
-                  <div className="flex items-center gap-2 text-white/90 text-xs md:text-sm uppercase tracking-wider mb-3">
+                  <div className="flex items-center gap-2 text-white text-xs md:text-sm uppercase tracking-wider mb-3">
                     {job.employment_type && (
                       <>
                         <Briefcase className="h-3 w-3" />
