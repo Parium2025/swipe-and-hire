@@ -220,8 +220,8 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         message: 'Job image migration completed',
-        migrated: migratedCount,
-        failed: failedCount,
+        migratedCount: migratedCount,
+        failedCount: failedCount,
         total: jobs.length,
         results: migrationResults
       }),
