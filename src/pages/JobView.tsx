@@ -528,7 +528,7 @@ const JobView = () => {
             {/* Description */}
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
               <h2 className="text-white font-bold text-base md:text-lg mb-3">Om tjänsten</h2>
-              <p className="text-white leading-relaxed whitespace-pre-wrap text-sm md:text-base">
+              <p className="leading-relaxed whitespace-pre-wrap text-sm md:text-base" style={{ color: '#FFFFFF' }}>
                 {job.description}
               </p>
             </div>
@@ -540,7 +540,7 @@ const JobView = () => {
                   <FileText className="h-4 w-4" />
                   Ansökningsinstruktioner
                 </h2>
-                <p className="text-white leading-relaxed whitespace-pre-wrap text-sm md:text-base">
+                <p className="leading-relaxed whitespace-pre-wrap text-sm md:text-base" style={{ color: '#FFFFFF' }}>
                   {job.application_instructions}
                 </p>
               </div>
