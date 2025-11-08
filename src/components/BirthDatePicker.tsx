@@ -124,7 +124,7 @@ export function BirthDatePicker({
           ref={triggerRef}
           variant="outline"
           className={cn(
-            "w-full h-10 pl-3 pr-3 text-left font-normal bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 justify-start",
+            "w-full h-10 pl-3 pr-3 text-left font-normal bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 justify-start",
             !selectedDate && "text-white placeholder:text-white",
             className
           )}

@@ -1058,7 +1058,7 @@ const Profile = () => {
                   size="sm"
                   onClick={() => document.getElementById('cover-image')?.click()}
                   disabled={isUploadingCover}
-                  className="bg-white/20 border-white/30 text-white disabled:opacity-50 transition-all duration-300 hover:bg-white/10"
+                  className="bg-white/5 backdrop-blur-sm border-white/10 text-white disabled:opacity-50 hover:bg-white/10"
                 >
                   {(profile?.profile_image_url || coverImageUrl) ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
                 </Button>
@@ -1492,7 +1492,7 @@ const Profile = () => {
               <div className="flex justify-center">
                 <Button 
                   type="submit" 
-                  className="border border-white/30 text-white disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm transition-all duration-300 hover:bg-white/10 [&_svg]:text-white" 
+                  className="bg-white/5 backdrop-blur-sm border border-white/10 text-white disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm hover:bg-white/10 [&_svg]:text-white" 
                   disabled={loading}
                 >
                   {loading ? 'Sparar...' : 'Spara ändringar'}
