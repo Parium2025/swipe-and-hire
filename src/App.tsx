@@ -23,6 +23,7 @@ import { UnsavedChangesProvider } from "@/hooks/useUnsavedChanges";
 import { Header } from "@/components/Header";
 import AuthTokenBridge from "./components/AuthTokenBridge";
 import { useDevice } from "@/hooks/use-device";
+import { useGlobalImagePreloader } from "@/hooks/useGlobalImagePreloader";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -73,6 +74,9 @@ const AnimatedRoutes = () => {
 
 const App = () => {
   const showHeader = false; // Header removed for cleaner UI
+
+  // Förladdda alla kritiska bilder globalt vid app-start
+  useGlobalImagePreloader();
 
   const [animReady, setAnimReady] = useState(false);
   useEffect(() => {

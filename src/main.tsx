@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App'
 import './index.css'
 import GlobalErrorBoundary from './components/GlobalErrorBoundary'
+import { registerServiceWorker } from './lib/serviceWorkerManager'
 
 function redirectAuthTokensIfNeeded() {
   if (typeof window === 'undefined') return false;
@@ -47,6 +48,13 @@ function redirectAuthTokensIfNeeded() {
 
 const redirected = redirectAuthTokensIfNeeded();
 if (!redirected) {
+  // Registrera Service Worker för persistent image cache
+  registerServiceWorker().then(() => {
+    console.log('✅ Service Worker ready for offline caching');
+  }).catch((error) => {
+    console.warn('Service Worker registration failed:', error);
+  });
+
   const root = createRoot(document.getElementById("root")!);
   root.render(
     <GlobalErrorBoundary>

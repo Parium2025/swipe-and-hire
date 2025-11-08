@@ -2,7 +2,7 @@ import React, { useEffect, useState, memo, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
-import { usePreloadImages } from "@/hooks/useCachedImage";
+import { preloadImages } from "@/lib/serviceWorkerManager";
 import { 
   Sidebar,
   SidebarContent,
@@ -144,7 +144,7 @@ export function AppSidebar() {
            (url === "/" && location.pathname === "/");
   };
 
-  // Förladdda alla profilbilder permanent med blob cache
+  // Förladdda alla profilbilder via Service Worker för persistent cache
   const profileImages = useMemo(() => {
     const images: string[] = [];
     if (avatarUrl) images.push(avatarUrl);
@@ -153,7 +153,11 @@ export function AppSidebar() {
     return images;
   }, [avatarUrl, profile?.cover_image_url, profile?.profile_image_url]);
 
-  usePreloadImages(profileImages);
+  useEffect(() => {
+    if (profileImages.length > 0) {
+      preloadImages(profileImages);
+    }
+  }, [profileImages]);
 
   return (
     <Sidebar 
