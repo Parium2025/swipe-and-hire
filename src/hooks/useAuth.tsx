@@ -98,7 +98,15 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const CACHED_PROFILE_KEY = 'parium_cached_profile';
+  const [profile, setProfile] = useState<Profile | null>(() => {
+    try {
+      const raw = typeof window !== 'undefined' ? localStorage.getItem(CACHED_PROFILE_KEY) : null;
+      return raw ? JSON.parse(raw) as Profile : null;
+    } catch {
+      return null;
+    }
+  });
   const [userRole, setUserRole] = useState<UserRoleData | null>(null);
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
@@ -141,6 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setProfile(null);
           setUserRole(null);
           setOrganization(null);
+          try { if (typeof window !== 'undefined') localStorage.removeItem(CACHED_PROFILE_KEY); } catch {}
           if (event !== 'INITIAL_SESSION') {
             setLoading(false);
           }
@@ -202,6 +211,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             : []
         };
         setProfile(processedProfile);
+        try {
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(CACHED_PROFILE_KEY, JSON.stringify({
+              id: processedProfile.id,
+              user_id: processedProfile.user_id,
+              first_name: processedProfile.first_name,
+              last_name: processedProfile.last_name,
+              company_name: processedProfile.company_name,
+              industry: processedProfile.industry,
+              profile_image_url: processedProfile.profile_image_url,
+              cover_image_url: processedProfile.cover_image_url,
+              video_url: processedProfile.video_url,
+              company_logo_url: (processedProfile as any).company_logo_url
+            }));
+          }
+        } catch (e) {
+          console.warn('Failed to cache profile:', e);
+        }
 
         // Cache organization_id early for faster queries
         if (profileData.organization_id) {
