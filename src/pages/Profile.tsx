@@ -1002,7 +1002,7 @@ const Profile = () => {
                     e.stopPropagation();
                     restoreProfileMedia();
                   }}
-                  className="absolute -top-2 -right-2 bg-blue-500/80 hover:bg-blue-500 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                  className="absolute -top-2 -right-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
                   title="Ångra borttagning"
                 >
                   <RotateCcw className="h-4 w-4" />
