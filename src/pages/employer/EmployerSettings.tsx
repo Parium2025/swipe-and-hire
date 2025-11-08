@@ -48,7 +48,7 @@ const EmployerSettings = () => {
   };
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto">
+    <div className="space-y-8 max-w-4xl mx-auto animate-fade-in">
       <div className="text-center mb-6">
         <h1 className="text-xl md:text-2xl font-semibold text-white mb-1">Inställningar</h1>
       </div>
