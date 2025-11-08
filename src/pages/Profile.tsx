@@ -1101,7 +1101,7 @@ const Profile = () => {
               <User className="h-4 w-4" />
               Personlig Information
             </h3>
-            <p className="text-white/60 text-sm mt-1">
+            <p className="text-white text-sm mt-1">
               Uppdatera din grundläggande profilinformation
             </p>
           </div>
