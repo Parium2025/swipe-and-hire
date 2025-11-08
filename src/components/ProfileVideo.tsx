@@ -17,6 +17,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
   const [showVideo, setShowVideo] = useState(false);
   const [signedVideoUrl, setSignedVideoUrl] = useState<string | null>(null);
   const [signedCoverUrl, setSignedCoverUrl] = useState<string | null>(null);
+  const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const device = useDevice();
   const isMobile = device === 'mobile';
@@ -67,6 +68,26 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
   }, [signedCoverUrl]);
   
   useImagePreloader(coverImages, { priority: 'high' });
+
+  // Update countdown timer when video is playing
+  useEffect(() => {
+    if (!isPlaying || !videoRef.current) {
+      setRemainingSeconds(null);
+      return;
+    }
+
+    const updateTime = () => {
+      if (videoRef.current) {
+        const remaining = Math.ceil(videoRef.current.duration - videoRef.current.currentTime);
+        setRemainingSeconds(remaining > 0 ? remaining : 0);
+      }
+    };
+
+    updateTime();
+    const interval = setInterval(updateTime, 100);
+
+    return () => clearInterval(interval);
+  }, [isPlaying]);
 
   // Remove hover-based autoplay to avoid flicker; play only on explicit tap/click
   // (Keeping function names removed to simplify behavior)
@@ -152,6 +173,13 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
       {!isMobile && !isPlaying && (
         <div className="absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
           <Play className="h-6 w-6 text-white drop-shadow-lg" />
+        </div>
+      )}
+
+      {/* Countdown timer when video is playing */}
+      {isPlaying && remainingSeconds !== null && (
+        <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm px-2 py-1 rounded text-white text-xs font-semibold">
+          {remainingSeconds}s
         </div>
       )}
     </div>
