@@ -1298,7 +1298,7 @@ const Profile = () => {
                             align="center"
                             alignOffset={0}
                             sideOffset={6}
-                            avoidCollisions={true}
+                            avoidCollisions={false}
                           >
                             <DropdownMenuItem onClick={() => setEmploymentStatus('tillsvidareanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
                               Fast anställning
@@ -1357,7 +1357,7 @@ const Profile = () => {
                               align="center"
                               alignOffset={0}
                               sideOffset={6}
-                              avoidCollisions={true}
+                              avoidCollisions={false}
                             >
                               <DropdownMenuItem onClick={() => setWorkingHours('heltid')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
                                 Heltid
@@ -1407,7 +1407,7 @@ const Profile = () => {
                             align="center"
                             alignOffset={0}
                             sideOffset={6}
-                            avoidCollisions={true}
+                            avoidCollisions={false}
                           >
                             <DropdownMenuItem onClick={() => setAvailability('omgaende')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
                               Omgående
