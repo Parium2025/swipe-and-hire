@@ -15,7 +15,7 @@ import { BirthDatePicker } from '@/components/BirthDatePicker';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import phoneWithPariumLogo from '@/assets/phone-with-parium-logo.jpg';
-import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone, Play, Video, Trash2, ChevronDown } from 'lucide-react';
+import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone, Play, Video, Trash2, ChevronDown, RotateCcw } from 'lucide-react';
 import ProfileVideo from '@/components/ProfileVideo';
 import SwipeIntro from '@/components/SwipeIntro';
 import PostalCodeSelector from '@/components/PostalCodeSelector';
@@ -33,6 +33,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [uploadingMediaType, setUploadingMediaType] = useState<'image' | 'video' | null>(null);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
+  
+  // Undo state - store deleted media for restore
+  const [deletedProfileMedia, setDeletedProfileMedia] = useState<{
+    profileImageUrl: string;
+    coverImageUrl: string;
+    profileMediaType: string;
+  } | null>(null);
   
   // Image editor states
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
@@ -445,6 +452,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   };
 
   const deleteProfileMedia = () => {
+    // Save current values for undo
+    setDeletedProfileMedia({
+      profileImageUrl: formData.profileImageUrl,
+      coverImageUrl: formData.coverImageUrl,
+      profileMediaType: formData.profileMediaType
+    });
+    
     handleInputChange('profileImageUrl', '');
     handleInputChange('profileMediaType', 'image');
     handleInputChange('coverImageUrl', ''); // Also clear cover image
@@ -458,6 +472,23 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     toast({
       title: "Media borttagen",
       description: "Din profilbild/video har tagits bort"
+    });
+  };
+
+  const restoreProfileMedia = () => {
+    if (!deletedProfileMedia) return;
+    
+    // Restore all values
+    handleInputChange('profileImageUrl', deletedProfileMedia.profileImageUrl);
+    handleInputChange('coverImageUrl', deletedProfileMedia.coverImageUrl);
+    handleInputChange('profileMediaType', deletedProfileMedia.profileMediaType);
+    
+    // Clear undo data
+    setDeletedProfileMedia(null);
+    
+    toast({
+      title: "Återställd!",
+      description: "Din profilbild/video har återställts"
     });
   };
 
@@ -945,13 +976,24 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   </Avatar>
                 )}
                 
-                {/* Delete icon for profile media */}
+                {/* Delete/Restore icon for profile media */}
                 {formData.profileImageUrl && (
                   <button
                     onClick={deleteProfileMedia}
                     className="absolute -top-2 -right-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
                   >
                     <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
+                
+                {/* Undo button - shown when media was just deleted */}
+                {!formData.profileImageUrl && deletedProfileMedia && (
+                  <button
+                    onClick={restoreProfileMedia}
+                    className="absolute -top-2 -right-2 bg-blue-500/80 hover:bg-blue-500 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                    title="Ångra borttagning"
+                  >
+                    <RotateCcw className="h-4 w-4" />
                   </button>
                 )}
               </div>

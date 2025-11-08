@@ -14,7 +14,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { User, MapPin, Building, Camera, Mail, Phone, Calendar as CalendarIcon, Briefcase, Clock, FileText, Video, Play, Check, Trash2, ChevronDown } from 'lucide-react';
+import { User, MapPin, Building, Camera, Mail, Phone, Calendar as CalendarIcon, Briefcase, Clock, FileText, Video, Play, Check, Trash2, ChevronDown, RotateCcw } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
 import ProfileVideo from '@/components/ProfileVideo';
 import ImageEditor from '@/components/ImageEditor';
@@ -48,6 +48,15 @@ const Profile = () => {
   const [coverFileName, setCoverFileName] = useState(''); // Track filename for deletion
   const [profileFileName, setProfileFileName] = useState(''); // Track profile media filename
   const [isProfileVideo, setIsProfileVideo] = useState(false);
+  
+  // Undo state - store deleted media for restore
+  const [deletedProfileMedia, setDeletedProfileMedia] = useState<{
+    profileImageUrl: string;
+    coverImageUrl: string;
+    profileFileName: string;
+    coverFileName: string;
+    isProfileVideo: boolean;
+  } | null>(null);
   
   // Basic form fields
   const [firstName, setFirstName] = useState(profile?.first_name || '');
@@ -668,6 +677,15 @@ const Profile = () => {
 
   const deleteProfileMedia = async () => {
     try {
+      // Save current values for undo
+      setDeletedProfileMedia({
+        profileImageUrl,
+        coverImageUrl,
+        profileFileName,
+        coverFileName,
+        isProfileVideo
+      });
+      
       // Delete the actual profile media file from storage if we have a filename
       if (profileFileName) {
         const { error: deleteError } = await supabase.storage
@@ -725,6 +743,28 @@ const Profile = () => {
         description: "Tryck på \"Spara ändringar\" för att spara ändringen"
       });
     }
+  };
+
+  const restoreProfileMedia = () => {
+    if (!deletedProfileMedia) return;
+    
+    // Restore all values
+    setProfileImageUrl(deletedProfileMedia.profileImageUrl);
+    setCoverImageUrl(deletedProfileMedia.coverImageUrl);
+    setProfileFileName(deletedProfileMedia.profileFileName);
+    setCoverFileName(deletedProfileMedia.coverFileName);
+    setIsProfileVideo(deletedProfileMedia.isProfileVideo);
+    
+    // Clear undo data
+    setDeletedProfileMedia(null);
+    
+    // Mark as having unsaved changes
+    setHasUnsavedChanges(true);
+    
+    toast({
+      title: "Återställd!",
+      description: "Din profilbild/video har återställts"
+    });
   };
 
   const deleteCoverImage = async () => {
@@ -942,7 +982,7 @@ const Profile = () => {
                 </div>
               )}
 
-              {/* Delete icon for profile media */}
+              {/* Delete/Restore icon for profile media */}
               {!!profileImageUrl && (
                 <button
                   onClick={(e) => {
@@ -952,6 +992,20 @@ const Profile = () => {
                   className="absolute -top-2 -right-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
                 >
                   <Trash2 className="h-4 w-4" />
+                </button>
+              )}
+              
+              {/* Undo button - shown when media was just deleted */}
+              {!profileImageUrl && deletedProfileMedia && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    restoreProfileMedia();
+                  }}
+                  className="absolute -top-2 -right-2 bg-blue-500/80 hover:bg-blue-500 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                  title="Ångra borttagning"
+                >
+                  <RotateCcw className="h-4 w-4" />
                 </button>
               )}
 
