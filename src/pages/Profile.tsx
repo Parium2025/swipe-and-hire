@@ -1239,7 +1239,7 @@ const Profile = () => {
 
               {/* Bio */}
               <div className="space-y-2 md:space-y-1.5 pt-4 md:pt-3 border-t border-white/10">
-                <Label htmlFor="bio" className="text-white">Presentation</Label>
+                <Label htmlFor="bio" className="text-white">Presentation / Om mig</Label>
                 <Textarea
                   id="bio"
                   placeholder={isEmployer ? "Berätta om ditt företag..." : "Berätta kort om dig själv..."}
