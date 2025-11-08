@@ -313,7 +313,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               size="sm"
               onClick={zoomOut}
               disabled={scale <= minScale}
-              className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:hover:bg-slate-800"
+              className="bg-white/5 border-white/10 text-white hover:bg-white/10 md:hover:bg-white/10 disabled:opacity-50 disabled:hover:bg-white/5"
             >
               <ZoomOut className="h-4 w-4" />
             </Button>
@@ -322,7 +322,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               variant="outline"
               size="sm"
               onClick={resetPosition}
-              className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700"
+              className="bg-white/5 border-white/10 text-white hover:bg-white/10 md:hover:bg-white/10"
             >
               <RotateCcw className="h-4 w-4" />
             </Button>
@@ -332,7 +332,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               size="sm"
               onClick={zoomIn}
               disabled={scale >= MAX_SCALE}
-              className="bg-slate-800 border-slate-600 text-white hover:bg-slate-700 disabled:opacity-50 disabled:hover:bg-slate-800"
+              className="bg-white/5 border-white/10 text-white hover:bg-white/10 md:hover:bg-white/10 disabled:opacity-50 disabled:hover:bg-white/5"
             >
               <ZoomIn className="h-4 w-4" />
             </Button>
@@ -348,8 +348,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               onClick={handleCancelClick}
               className={`flex-1 transition-all duration-200 ${
                 activeButton === 'cancel'
-                  ? 'bg-slate-700 text-white border-slate-600' 
-                  : 'bg-transparent border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white'
+                  ? 'bg-white/10 text-white border-white/20' 
+                  : 'bg-white/5 border-white/10 text-white hover:bg-white/10 md:hover:bg-white/10'
               }`}
               variant="outline"
             >
@@ -359,8 +359,8 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               onClick={handleSaveClick}
               className={`flex-1 transition-all duration-200 ${
                 activeButton === 'save'
-                  ? 'bg-slate-800 text-white border-slate-800' 
-                  : 'bg-slate-900 text-white border-slate-900 hover:bg-slate-800'
+                  ? 'bg-white/15 text-white border-white/20' 
+                  : 'bg-white/5 border-white/10 text-white hover:bg-white/10 md:hover:bg-white/10'
               }`}
               variant="outline"
             >
