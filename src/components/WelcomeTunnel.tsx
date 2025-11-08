@@ -1005,8 +1005,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Input type="file" id="profileMedia" accept="image/*,video/*" className="hidden" onChange={handleMediaChange} disabled={isUploadingMedia} />
                 
                 {isUploadingMedia && (
-                  <Badge variant="secondary" className="bg-blue-500/20 text-blue-100 animate-pulse">
-                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-100 mr-2"></div>
+                  <Badge variant="secondary" className="bg-white/10 text-white animate-pulse">
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
                     Laddar upp {uploadingMediaType === 'video' ? 'video' : 'bild'}...
                   </Badge>
                 )}
@@ -1029,15 +1029,15 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     size="sm"
                     onClick={() => document.getElementById('coverImage')?.click()}
                     disabled={isUploadingCover}
-                    className="bg-white/20 border-white/30 text-white hover:bg-white/30 disabled:opacity-50"
+                    className="bg-white/5 border-white/10 !text-white hover:bg-white/10 hover:!text-white disabled:opacity-50"
                   >
                     {formData.coverImageUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
                   </Button>
                   <Input type="file" id="coverImage" accept="image/*" className="hidden" onChange={handleCoverChange} disabled={isUploadingCover} />
                   
                   {isUploadingCover && (
-                    <Badge variant="secondary" className="bg-blue-500/20 text-blue-100 text-sm animate-pulse">
-                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-100 mr-1"></div>
+                    <Badge variant="secondary" className="bg-white/10 text-white text-sm animate-pulse">
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
                       Laddar upp cover-bild...
                     </Badge>
                   )}
