@@ -19,7 +19,6 @@ import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRig
 import ProfileVideo from '@/components/ProfileVideo';
 import SwipeIntro from '@/components/SwipeIntro';
 import PostalCodeSelector from '@/components/PostalCodeSelector';
-import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
 import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
 
 interface WelcomeTunnelProps {
@@ -169,19 +168,22 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       const fileName = `${user?.id}/${Date.now()}-profile-media.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
-        .from('job-applications')
+        .from('profile-media')
         .upload(fileName, file);
       
       if (uploadError) throw uploadError;
       
-      // Use signed URL for secure access
-      const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
-      if (!signedUrl) {
-        throw new Error('Could not create secure access URL');
-      }
+      // Use public URL for profile media (no expiration)
+      const { data: { publicUrl } } = supabase.storage
+        .from('profile-media')
+        .getPublicUrl(fileName);
       
-      const mediaUrl = `${signedUrl}&t=${Date.now()}&v=${Math.random()}`;
+      const mediaUrl = `${publicUrl}?t=${Date.now()}`;
       const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
+      
+      // Preload in Service Worker immediately
+      const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
+      await preloadSingleFile(mediaUrl);
       
       handleInputChange('profileImageUrl', mediaUrl);
       handleInputChange('profileMediaType', mediaType);
@@ -210,18 +212,21 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       const fileName = `${user?.id}/${Date.now()}-cover-image.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
-        .from('job-applications')
+        .from('profile-media')
         .upload(fileName, file);
       
       if (uploadError) throw uploadError;
       
-      // Use signed URL for secure access
-      const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
-      if (!signedUrl) {
-        throw new Error('Could not create secure access URL');
-      }
+      // Use public URL for cover images (no expiration)
+      const { data: { publicUrl } } = supabase.storage
+        .from('profile-media')
+        .getPublicUrl(fileName);
       
-      const coverUrl = `${signedUrl}&t=${Date.now()}&v=${Math.random()}`;
+      const coverUrl = `${publicUrl}?t=${Date.now()}`;
+      
+      // Preload in Service Worker immediately
+      const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
+      await preloadSingleFile(coverUrl);
       
       handleInputChange('coverImageUrl', coverUrl);
     } catch (error) {
