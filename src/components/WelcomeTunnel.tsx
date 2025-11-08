@@ -30,7 +30,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(-1); // Start with SwipeIntro (-1)
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [isUploadingMedia, setIsUploadingMedia] = useState(false);
+  const [uploadingMediaType, setUploadingMediaType] = useState<'image' | 'video' | null>(null);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   
   // Image editor states
@@ -161,7 +162,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
   const uploadProfileMedia = async (file: File) => {
     const isVideo = file.type.startsWith('video/');
-    if (isVideo) setIsUploadingVideo(true);
+    setIsUploadingMedia(true);
+    setUploadingMediaType(isVideo ? 'video' : 'image');
     
     try {
       const fileExt = file.name.split('.').pop();
@@ -200,7 +202,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         variant: "destructive"
       });
     } finally {
-      if (isVideo) setIsUploadingVideo(false);
+      setIsUploadingMedia(false);
+      setUploadingMediaType(null);
     }
   };
 
@@ -350,7 +353,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
   const handleProfileImageSave = async (editedBlob: Blob) => {
     try {
-      setIsUploadingVideo(true);
+      setIsUploadingMedia(true);
+      setUploadingMediaType('image');
       
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('User not authenticated');
@@ -388,7 +392,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         variant: "destructive"
       });
     } finally {
-      setIsUploadingVideo(false);
+      setIsUploadingMedia(false);
+      setUploadingMediaType(null);
     }
   };
 
@@ -951,16 +956,16 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Label htmlFor="profileMedia" className="text-white cursor-pointer hover:text-white/90 transition-colors">
                   Klicka för att välja en bild eller video (max 60 sekunder)
                 </Label>
-                <Input type="file" id="profileMedia" accept="image/*,video/*" className="hidden" onChange={handleMediaChange} disabled={isUploadingVideo} />
+                <Input type="file" id="profileMedia" accept="image/*,video/*" className="hidden" onChange={handleMediaChange} disabled={isUploadingMedia} />
                 
-                {isUploadingVideo && (
+                {isUploadingMedia && (
                   <Badge variant="secondary" className="bg-blue-500/20 text-blue-100 animate-pulse">
                     <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-100 mr-2"></div>
-                    Laddar upp video...
+                    Laddar upp {uploadingMediaType === 'video' ? 'video' : 'bild'}...
                   </Badge>
                 )}
                 
-                {formData.profileImageUrl && !isUploadingVideo && (
+                {formData.profileImageUrl && !isUploadingMedia && (
                   <Badge variant="secondary" className="bg-white/20 text-white mt-12">
                     {formData.profileMediaType === 'video' ? 'Video' : 'Bild'} uppladdad!
                   </Badge>

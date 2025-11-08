@@ -34,7 +34,8 @@ const Profile = () => {
   const location = useLocation();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const [loading, setLoading] = useState(false);
-  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [isUploadingMedia, setIsUploadingMedia] = useState(false);
+  const [uploadingMediaType, setUploadingMediaType] = useState<'image' | 'video' | null>(null);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [originalValues, setOriginalValues] = useState<any>({});
   
@@ -338,7 +339,8 @@ const Profile = () => {
 
   const uploadProfileMedia = async (file: File) => {
     const isVideo = file.type.startsWith('video/');
-    if (isVideo) setIsUploadingVideo(true);
+    setIsUploadingMedia(true);
+    setUploadingMediaType(isVideo ? 'video' : 'image');
     
     try {
       // DO NOT delete old files automatically - only when user clicks delete button
@@ -390,7 +392,8 @@ const Profile = () => {
         variant: "destructive"
       });
     } finally {
-      if (isVideo) setIsUploadingVideo(false);
+      setIsUploadingMedia(false);
+      setUploadingMediaType(null);
     }
   };
 
@@ -549,7 +552,8 @@ const Profile = () => {
 
   const handleProfileImageSave = async (editedBlob: Blob) => {
     try {
-      setIsUploadingVideo(true);
+      setIsUploadingMedia(true);
+      setUploadingMediaType('image');
       
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('User not authenticated');
@@ -600,7 +604,8 @@ const Profile = () => {
         variant: "destructive"
       });
     } finally {
-      setIsUploadingVideo(false);
+      setIsUploadingMedia(false);
+      setUploadingMediaType(null);
     }
   };
 
@@ -954,7 +959,7 @@ const Profile = () => {
                 accept="image/*,video/*"
                 onChange={handleMediaChange}
                 className="hidden"
-                disabled={isUploadingVideo}
+                disabled={isUploadingMedia}
               />
             </div>
 
@@ -966,16 +971,16 @@ const Profile = () => {
                 Klicka för att välja en bild eller video (max 60 sekunder)
               </Label>
               
-              {isUploadingVideo && (
+              {isUploadingMedia && (
                 <Badge variant="secondary" className="bg-blue-500/20 text-blue-100 animate-pulse">
                   <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-100 mr-2"></div>
-                  Laddar upp video...
+                  Laddar upp {uploadingMediaType === 'video' ? 'video' : 'bild'}...
                 </Badge>
               )}
               
-              {(isProfileVideo && !!profileImageUrl) && !isUploadingVideo && (
+              {(isProfileVideo && !!profileImageUrl) && !isUploadingMedia && (
                 <Badge variant="secondary" className="bg-white/20 text-white">
-                  {profile?.video_url ? 'Video' : 'Bild'} uppladdad!
+                  {isProfileVideo ? 'Video' : 'Bild'} uppladdad!
                 </Badge>
               )}
             </div>
