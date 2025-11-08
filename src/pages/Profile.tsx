@@ -1126,7 +1126,7 @@ const Profile = () => {
                       }}
                       onBlur={() => setErrors(prev => ({ ...prev, firstName: firstName.trim() ? undefined : 'Förnamn är obligatoriskt.' }))}
                        aria-invalid={!!errors.firstName}
-                      className={`bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 ${errors.firstName ? 'border-red-400' : ''}`}
+                      className={`h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 ${errors.firstName ? 'border-red-400' : ''}`}
                     />
                     {errors.firstName && <p className="text-sm text-red-300">{errors.firstName}</p>}
                   </div>
@@ -1147,7 +1147,7 @@ const Profile = () => {
                       }}
                       onBlur={() => setErrors(prev => ({ ...prev, lastName: lastName.trim() ? undefined : 'Efternamn är obligatoriskt.' }))}
                        aria-invalid={!!errors.lastName}
-                      className={`bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 ${errors.lastName ? 'border-red-400' : ''}`}
+                      className={`h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 ${errors.lastName ? 'border-red-400' : ''}`}
                     />
                     {errors.lastName && <p className="text-sm text-red-300">{errors.lastName}</p>}
                   </div>
@@ -1177,7 +1177,7 @@ const Profile = () => {
                       Telefon <span className="text-white">*</span>
                     </Label>
                     <div className="relative">
-                      <Phone className="absolute left-3 top-3 h-4 w-4 text-white z-10" />
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white z-10" />
                       <Input
                         id="phone"
                         type="tel"
@@ -1191,7 +1191,7 @@ const Profile = () => {
                         }}
                         onBlur={() => setErrors(prev => ({ ...prev, phone: phone.trim() ? (isValidSwedishPhone(phone) ? undefined : 'Ange ett giltigt svenskt nummer (+46 eller 0).') : 'Telefonnummer är obligatoriskt.' }))}
                         aria-invalid={!!errors.phone}
-                        className={`pl-10 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 ${errors.phone ? 'border-red-400' : ''}`}
+                        className={`h-10 pl-10 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 ${errors.phone ? 'border-red-400' : ''}`}
                       />
                     </div>
                     {errors.phone && <p className="text-sm text-red-300">{errors.phone}</p>}
@@ -1210,8 +1210,8 @@ const Profile = () => {
                   <div className="space-y-2 md:space-y-1.5">
                     <Label className="text-white">E-post</Label>
                     <div className="relative group">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-white z-10" />
-                      <div className="flex h-10 w-full rounded-md border bg-white/5 backdrop-blur-sm border-white/10 text-white pl-10 pr-3 py-2 text-sm min-w-0">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white z-10" />
+                      <div className="flex h-10 w-full rounded-md border bg-white/5 backdrop-blur-sm border-white/10 text-white pl-10 pr-3 py-2 text-sm items-center min-w-0">
                         <span 
                           className="truncate hover:overflow-visible hover:whitespace-normal hover:break-all transition-all duration-200" 
                           title={user?.email || ''}
@@ -1371,9 +1371,11 @@ const Profile = () => {
                       )}
                     </div>
 
+                    </div>
+
                     {/* Visa tillgänglighet endast om användaren har valt något i anställningsstatus */}
                     {employmentStatus && (
-                      <div className="space-y-2">
+                      <div className="space-y-2 md:space-y-1.5">
                         <Label htmlFor="availability" className="text-white">När kan du börja nytt jobb? <span className="text-white">*</span></Label>
                         <DropdownMenu modal={false}>
                           <DropdownMenuTrigger asChild>
@@ -1426,7 +1428,6 @@ const Profile = () => {
                         </DropdownMenu>
                       </div>
                     )}
-                  </div>
 
                   <div className="space-y-4 md:space-y-3 pt-4 md:pt-3 border-t border-white/10">
                     <div className="flex items-center gap-2 mb-4">

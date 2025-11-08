@@ -80,7 +80,7 @@ const PostalCodeSelector = ({
   };
 
   return (
-    <div className={`space-y-4 ${className}`}>
+    <div className={`space-y-2 md:space-y-1.5 ${className}`}>
       {/* Postnummer input */}
       <div>
         <Label htmlFor="postalCode" className="text-white">
@@ -93,7 +93,7 @@ const PostalCodeSelector = ({
             value={postalCodeValue}
             onChange={handlePostalCodeChange}
             placeholder="Skriv in ditt postnummer"
-            className="pl-10 text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+            className="h-10 pl-10 text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
             maxLength={6}
             autoComplete="off"
           />
