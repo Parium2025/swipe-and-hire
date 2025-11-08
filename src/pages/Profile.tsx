@@ -386,9 +386,8 @@ const Profile = () => {
       } else {
         setProfileImageUrl(mediaUrl);
         setIsProfileVideo(false); // Mark as image
-        setCoverImageUrl(''); // Clear cover when uploading profile image
-        setCoverFileName(''); // Clear cover filename too
-        setDeletedCoverImage(null); // Clear cover undo state
+        // Keep cover image when uploading profile image too
+        // Cover image should only be deleted manually via deleteCoverImage
       }
       
       setProfileFileName(fileName); // Track the new filename
@@ -693,12 +692,12 @@ const Profile = () => {
 
   const deleteProfileMedia = async () => {
     try {
-      // Save current values for undo
+      // Save current values for undo (only profile media, not cover)
       setDeletedProfileMedia({
         profileImageUrl,
-        coverImageUrl,
+        coverImageUrl, // Save for restore, but don't delete
         profileFileName,
-        coverFileName,
+        coverFileName, // Save for restore, but don't delete
         isProfileVideo
       });
       
@@ -713,23 +712,14 @@ const Profile = () => {
         }
       }
 
-      // Also delete cover image file if it exists
-      if (coverFileName) {
-        const { error: deleteCoverError } = await supabase.storage
-          .from('job-applications')
-          .remove([coverFileName]);
-          
-        if (deleteCoverError) {
-          console.error('Error deleting cover image file:', deleteCoverError);
-        }
-      }
+      // DO NOT delete cover image file - keep it
+      // Cover image should only be deleted via deleteCoverImage function
       
-      // Clear both profile media AND cover image from local state
+      // Clear ONLY profile media from local state, keep cover image
       setProfileImageUrl('');
       setIsProfileVideo(false); // Reset video flag
       setProfileFileName(''); // Clear profile filename
-      setCoverImageUrl(''); // Clear cover image
-      setCoverFileName(''); // Clear cover filename
+      // Keep coverImageUrl and coverFileName - don't clear them
       
       // Reset the file input to allow new uploads
       const fileInput = document.getElementById('profile-image') as HTMLInputElement;
@@ -746,12 +736,11 @@ const Profile = () => {
       });
     } catch (error) {
       console.error('Error in deleteProfileMedia:', error);
-      // Clear local state anyway
+      // Clear local state anyway (but keep cover)
       setProfileImageUrl('');
       setIsProfileVideo(false);
       setProfileFileName('');
-      setCoverImageUrl('');
-      setCoverFileName('');
+      // Keep cover image even on error
       setHasUnsavedChanges(true);
       
       toast({
