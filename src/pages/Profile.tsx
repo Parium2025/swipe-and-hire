@@ -36,6 +36,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [uploadingMediaType, setUploadingMediaType] = useState<'image' | 'video' | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [originalValues, setOriginalValues] = useState<any>({});
   
@@ -356,6 +357,7 @@ const Profile = () => {
     const isVideo = file.type.startsWith('video/');
     setIsUploadingMedia(true);
     setUploadingMediaType(isVideo ? 'video' : 'image');
+    setUploadProgress(0);
     
     try {
       // DO NOT delete old files automatically - only when user clicks delete button
@@ -364,9 +366,23 @@ const Profile = () => {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user?.id}/${Date.now()}-profile-media.${fileExt}`;
       
+      // Simulate progress for videos
+      let progressInterval: number | null = null;
+      if (isVideo) {
+        progressInterval = window.setInterval(() => {
+          setUploadProgress(prev => {
+            if (prev >= 90) return prev; // Stop at 90% until upload completes
+            return prev + 10;
+          });
+        }, 200);
+      }
+      
       const { error: uploadError } = await supabase.storage
         .from('job-applications')
         .upload(fileName, file);
+      
+      if (progressInterval) clearInterval(progressInterval);
+      setUploadProgress(100);
       
       if (uploadError) throw uploadError;
       
@@ -412,6 +428,7 @@ const Profile = () => {
     } finally {
       setIsUploadingMedia(false);
       setUploadingMediaType(null);
+      setUploadProgress(0);
     }
   };
 
@@ -1086,7 +1103,7 @@ const Profile = () => {
               {isUploadingMedia && (
                 <Badge variant="outline" className="bg-white/10 text-white border-white/20 animate-pulse">
                   <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
-                  Laddar upp {uploadingMediaType === 'video' ? 'video' : 'bild'}...
+                  {uploadingMediaType === 'video' ? `${uploadProgress}%` : `Laddar upp bild...`}
                 </Badge>
               )}
               
