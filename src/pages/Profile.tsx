@@ -1023,11 +1023,17 @@ const Profile = () => {
                 >
                   <Avatar className="h-32 w-32 border-4 border-white/10 hover:border-white/20 transition-all">
                     {(profileImageUrl || coverImageUrl) ? (
-                      <AvatarImage src={profileImageUrl || coverImageUrl} alt="Profilbild" />
+                      <AvatarImage 
+                        src={profileImageUrl || coverImageUrl} 
+                        alt="Profilbild"
+                        className="object-cover"
+                      />
                     ) : null}
-                    <AvatarFallback delayMs={0} className="text-2xl font-semibold bg-white/15 text-white">
-                      {((firstName?.trim()?.[0]?.toUpperCase() || '') + (lastName?.trim()?.[0]?.toUpperCase() || '')) || '?'}
-                    </AvatarFallback>
+                    {!profileImageUrl && !coverImageUrl && (
+                      <AvatarFallback delayMs={0} className="text-2xl font-semibold bg-white/15 text-white">
+                        {((firstName?.trim()?.[0]?.toUpperCase() || '') + (lastName?.trim()?.[0]?.toUpperCase() || '')) || '?'}
+                      </AvatarFallback>
+                    )}
                   </Avatar>
                 </div>
               )}
