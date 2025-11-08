@@ -23,7 +23,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import LocationSearchInput from '@/components/LocationSearchInput';
 import { useQuery } from '@tanstack/react-query';
-import { useImagePreloader } from '@/hooks/useImagePreloader';
+import { usePreloadImages } from '@/hooks/useCachedImage';
 
 interface Job {
   id: string;
@@ -154,13 +154,13 @@ const SearchJobs = () => {
     refetchOnMount: false, // Använd cache när möjligt
   });
 
-  // Förladdda alla jobbbilder i bakgrunden med hög prioritet
+  // Förladdda alla jobbbilder permanent med blob cache
   const jobImageUrls = useMemo(() => {
     return jobs.map(job => job.job_image_url).filter(Boolean) as string[];
   }, [jobs]);
 
-  // Preload alla bilder så fort de laddas
-  useImagePreloader(jobImageUrls, { priority: 'high' });
+  // Preload alla bilder så fort de laddas - permanent cache
+  usePreloadImages(jobImageUrls);
 
   // Filter and sort jobs
   const filteredAndSortedJobs = useMemo(() => {

@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { convertToSignedUrl } from '@/utils/storageUtils';
-import { useImagePreloader } from '@/hooks/useImagePreloader';
+import { useCachedImage } from '@/hooks/useCachedImage';
 interface JobQuestion {
   id: string;
   question_text: string;
@@ -62,15 +62,15 @@ const JobView = () => {
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [showCompanyProfile, setShowCompanyProfile] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  
+  // Använd cached image hook för permanent caching
+  const { cachedUrl } = useCachedImage(imageUrl);
 
   useEffect(() => {
     if (jobId) {
       fetchJob();
     }
   }, [jobId]);
-
-  // Preload bilden så fort vi har den
-  useImagePreloader(imageUrl ? [imageUrl] : [], { priority: 'high' });
 
   const fetchJob = async () => {
     try {
@@ -422,17 +422,17 @@ const JobView = () => {
           {/* Left column - Job info */}
           <div className="lg:col-span-2 space-y-3">
             
-            {imageUrl && (
+            {cachedUrl && (
               <div className="relative w-full h-64 md:h-80 overflow-hidden rounded-lg">
                 <img
-                  src={imageUrl}
+                  src={cachedUrl}
                   alt={`${job.title} hos ${job.profiles?.company_name || 'företaget'}`}
                   className="w-full h-full object-cover"
                   loading="eager"
                   fetchPriority="high"
-                  onLoad={() => console.log('Job image loaded', imageUrl)}
+                  onLoad={() => console.log('Job image loaded', cachedUrl)}
                   onError={(e) => {
-                    console.error('Job image failed to load', imageUrl);
+                    console.error('Job image failed to load', cachedUrl);
                     setImageUrl(null);
                   }}
                 />
@@ -488,7 +488,7 @@ const JobView = () => {
             )}
             
             {/* Om det inte finns bild, visa info i vanligt kort */}
-            {!imageUrl && (
+            {!cachedUrl && (
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
                 <h1 className="text-white text-xl md:text-2xl font-bold mb-3 leading-tight">
                   {job.title}
