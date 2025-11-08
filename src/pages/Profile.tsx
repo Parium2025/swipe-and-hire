@@ -1092,7 +1092,7 @@ const Profile = () => {
             </div>
 
             {/* Cover image upload - show when video exists OR when cover image exists without video */}
-            {((isProfileVideo && !!profileImageUrl) || !!coverImageUrl) && (
+            {(isProfileVideo && !!profileImageUrl) && (
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
                 <div className="flex items-center gap-2">
                   <Button 
