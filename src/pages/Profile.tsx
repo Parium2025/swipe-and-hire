@@ -1110,8 +1110,8 @@ const Profile = () => {
               {/* Personal Information */}
               <div className="space-y-4 md:space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-white">
+                  <div className="space-y-2 md:space-y-1.5">
+                    <Label htmlFor="firstName" className="text-white text-sm">
                       Förnamn <span className="text-white">*</span>
                     </Label>
                     <Input
@@ -1126,13 +1126,13 @@ const Profile = () => {
                       }}
                       onBlur={() => setErrors(prev => ({ ...prev, firstName: firstName.trim() ? undefined : 'Förnamn är obligatoriskt.' }))}
                        aria-invalid={!!errors.firstName}
-                      className={`h-9 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 text-sm ${errors.firstName ? 'border-red-400' : ''}`}
+                      className={`h-9 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/40 text-sm ${errors.firstName ? 'border-red-400' : ''}`}
                     />
                     {errors.firstName && <p className="text-sm text-red-300">{errors.firstName}</p>}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-white">
+                  <div className="space-y-2 md:space-y-1.5">
+                    <Label htmlFor="lastName" className="text-white text-sm">
                       Efternamn <span className="text-white">*</span>
                     </Label>
                     <Input
@@ -1147,7 +1147,7 @@ const Profile = () => {
                       }}
                       onBlur={() => setErrors(prev => ({ ...prev, lastName: lastName.trim() ? undefined : 'Efternamn är obligatoriskt.' }))}
                        aria-invalid={!!errors.lastName}
-                      className={`h-9 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 text-sm ${errors.lastName ? 'border-red-400' : ''}`}
+                      className={`h-9 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/40 text-sm ${errors.lastName ? 'border-red-400' : ''}`}
                     />
                     {errors.lastName && <p className="text-sm text-red-300">{errors.lastName}</p>}
                   </div>
@@ -1173,7 +1173,7 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-2 md:space-y-1.5">
-                    <Label htmlFor="phone" className="text-white">
+                    <Label htmlFor="phone" className="text-white text-sm">
                       Telefon <span className="text-white">*</span>
                     </Label>
                     <div className="relative">
@@ -1191,7 +1191,7 @@ const Profile = () => {
                         }}
                         onBlur={() => setErrors(prev => ({ ...prev, phone: phone.trim() ? (isValidSwedishPhone(phone) ? undefined : 'Ange ett giltigt svenskt nummer (+46 eller 0).') : 'Telefonnummer är obligatoriskt.' }))}
                         aria-invalid={!!errors.phone}
-                        className={`h-9 pl-10 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/50 text-sm ${errors.phone ? 'border-red-400' : ''}`}
+                        className={`h-9 pl-10 bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/40 text-sm ${errors.phone ? 'border-red-400' : ''}`}
                       />
                     </div>
                     {errors.phone && <p className="text-sm text-red-300">{errors.phone}</p>}
@@ -1208,8 +1208,8 @@ const Profile = () => {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
                   <div className="space-y-2 md:space-y-1.5">
-                    <Label className="text-white">E-post</Label>
-                    <div className="relative group">
+                    <Label className="text-white text-sm">E-post</Label>
+                    <div className="relative group mt-1.5">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white z-10" />
                       <div className="flex h-9 w-full rounded-md border bg-white/5 backdrop-blur-sm border-white/10 text-white pl-10 pr-3 py-2 text-sm items-center min-w-0">
                         <span 

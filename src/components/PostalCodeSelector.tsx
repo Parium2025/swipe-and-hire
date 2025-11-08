@@ -80,37 +80,34 @@ const PostalCodeSelector = ({
   };
 
   return (
-    <div className={`space-y-2 md:space-y-1.5 ${className}`}>
-      {/* Postnummer input */}
-      <div>
-        <Label htmlFor="postalCode" className="text-white">
-          Var bor du? <span className="text-white">*</span>
-        </Label>
-        <div className="relative">
-          <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white z-10" />
-          <Input
-            id="postalCode"
-            value={postalCodeValue}
-            onChange={handlePostalCodeChange}
-            placeholder="Skriv in ditt postnummer"
-            className="h-9 pl-10 text-sm bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-            maxLength={6}
-            autoComplete="off"
-          />
-          {isLoading && (
-            <div className="absolute right-3 top-3">
-              <Loader2 className="h-4 w-4 animate-spin text-white" />
-            </div>
-          )}
-        </div>
-        
-        {/* Validering meddelande */}
-        {postalCodeValue && !isValid && postalCodeValue.replace(/\D/g, '').length >= 5 && (
-          <p className="text-sm text-red-300 mt-1">
-            Postnummer ska vara 5 siffror (t.ex. 136 55)
-          </p>
+    <div className={className}>
+      <Label htmlFor="postalCode" className="text-white text-sm">
+        Var bor du? <span className="text-white">*</span>
+      </Label>
+      <div className="relative mt-1.5">
+        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white z-10" />
+        <Input
+          id="postalCode"
+          value={postalCodeValue}
+          onChange={handlePostalCodeChange}
+          placeholder="Skriv in ditt postnummer"
+          className="h-9 pl-10 text-sm bg-white/5 backdrop-blur-sm border-white/10 text-white hover:bg-white/10 placeholder:text-white/40"
+          maxLength={6}
+          autoComplete="off"
+        />
+        {isLoading && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <Loader2 className="h-4 w-4 animate-spin text-white" />
+          </div>
         )}
       </div>
+      
+      {/* Validering meddelande */}
+      {postalCodeValue && !isValid && postalCodeValue.replace(/\D/g, '').length >= 5 && (
+        <p className="text-sm text-red-300 mt-1">
+          Postnummer ska vara 5 siffror (t.ex. 136 55)
+        </p>
+      )}
 
       {/* Resultat-ruta */}
       {foundLocation && isValid && !isLoading && (
