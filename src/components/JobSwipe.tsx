@@ -281,20 +281,20 @@ const JobSwipe = () => {
 
             {/* Description */}
             <div className="mb-3 md:mb-4">
-              <h4 className="font-semibold mb-1 md:mb-2 text-base md:text-lg">Beskrivning</h4>
-              <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
+              <h4 className="font-semibold mb-2 text-lg">Beskrivning</h4>
+              <p className="text-base text-muted-foreground leading-relaxed">
                 {currentJob.description}
               </p>
             </div>
 
             {/* Application Instructions */}
             {currentJob.application_instructions && (
-              <div className="mb-2 md:mb-4">
-                <h4 className="font-semibold mb-1 md:mb-2 text-base md:text-lg flex items-center gap-2">
+              <div className="mb-3 md:mb-4">
+                <h4 className="font-semibold mb-2 text-lg flex items-center gap-2">
                   <Info className="h-4 w-4" />
                   Så här ansöker du
                 </h4>
-                <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
+                <p className="text-base text-muted-foreground leading-relaxed">
                   {currentJob.application_instructions}
                 </p>
               </div>
