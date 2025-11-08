@@ -58,6 +58,12 @@ const Profile = () => {
     isProfileVideo: boolean;
   } | null>(null);
   
+  // Separate undo state for cover image only
+  const [deletedCoverImage, setDeletedCoverImage] = useState<{
+    coverImageUrl: string;
+    coverFileName: string;
+  } | null>(null);
+  
   // Basic form fields
   const [firstName, setFirstName] = useState(profile?.first_name || '');
   const [lastName, setLastName] = useState(profile?.last_name || '');
@@ -382,9 +388,13 @@ const Profile = () => {
         setIsProfileVideo(false); // Mark as image
         setCoverImageUrl(''); // Clear cover when uploading profile image
         setCoverFileName(''); // Clear cover filename too
+        setDeletedCoverImage(null); // Clear cover undo state
       }
       
       setProfileFileName(fileName); // Track the new filename
+      
+      // Clear profile undo state since we have new media
+      setDeletedProfileMedia(null);
       
       // Mark as having unsaved changes
       setHasUnsavedChanges(true);
@@ -596,6 +606,9 @@ const Profile = () => {
       setProfileFileName(fileName); // Track the new filename for deletion
       // Keep cover image when uploading profile image
       
+      // Clear undo state since we have a new profile image
+      setDeletedProfileMedia(null);
+      
       setImageEditorOpen(false);
       setPendingImageSrc('');
       
@@ -652,6 +665,9 @@ const Profile = () => {
       // Update local state instead of saving immediately
       setCoverImageUrl(coverUrl);
       setCoverFileName(fileName); // Track the new filename for deletion
+      
+      // Clear undo state since we have a new cover image
+      setDeletedCoverImage(null);
       
       setCoverEditorOpen(false);
       setPendingCoverSrc('');
@@ -769,6 +785,12 @@ const Profile = () => {
 
   const deleteCoverImage = async () => {
     try {
+      // Save current cover image for undo
+      setDeletedCoverImage({
+        coverImageUrl,
+        coverFileName
+      });
+      
       // Delete the actual file from storage if we have a filename
       if (coverFileName) {
         const { error: deleteError } = await supabase.storage
@@ -804,6 +826,25 @@ const Profile = () => {
         description: "Tryck på \"Spara ändringar\" för att spara ändringen"
       });
     }
+  };
+  
+  const restoreCoverImage = () => {
+    if (!deletedCoverImage) return;
+    
+    // Restore cover image values
+    setCoverImageUrl(deletedCoverImage.coverImageUrl);
+    setCoverFileName(deletedCoverImage.coverFileName);
+    
+    // Clear undo data
+    setDeletedCoverImage(null);
+    
+    // Mark as having unsaved changes
+    setHasUnsavedChanges(true);
+    
+    toast({
+      title: "Återställd!",
+      description: "Din cover-bild har återställts"
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -1070,6 +1111,16 @@ const Profile = () => {
                       className="bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors disabled:opacity-50"
                     >
                       <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                  {!coverImageUrl && deletedCoverImage && (
+                    <button
+                      onClick={restoreCoverImage}
+                      disabled={isUploadingCover}
+                      className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors disabled:opacity-50"
+                      title="Ångra borttagning"
+                    >
+                      <RotateCcw className="h-4 w-4" />
                     </button>
                   )}
                 </div>
