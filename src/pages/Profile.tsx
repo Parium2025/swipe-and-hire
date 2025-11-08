@@ -1212,7 +1212,7 @@ const Profile = () => {
                     <Label className="text-white text-sm">E-post</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white z-10" />
-                      <div className="flex h-9 w-full rounded-md border bg-white/5 backdrop-blur-sm border-white/10 text-white pl-10 pr-3 py-2 text-sm items-center min-w-0 hover:bg-white/10 transition-all duration-150">
+                      <div className="flex min-h-touch md:h-10 w-full rounded-md border bg-white/5 backdrop-blur-sm border-white/10 text-white pl-10 pr-3 py-2 text-sm items-center min-w-0 hover:bg-white/10 transition-all duration-150">
                         <span 
                           className="truncate" 
                           title={user?.email || ''}
