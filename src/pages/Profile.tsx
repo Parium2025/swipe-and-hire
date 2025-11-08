@@ -18,7 +18,7 @@ import { User, MapPin, Building, Camera, Mail, Phone, Calendar as CalendarIcon, 
 import FileUpload from '@/components/FileUpload';
 import ProfileVideo from '@/components/ProfileVideo';
 import ImageEditor from '@/components/ImageEditor';
-import PostalCodeSelector from '@/components/PostalCodeSelector';
+import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { BirthDatePicker } from '@/components/BirthDatePicker';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createSignedUrl } from '@/utils/storageUtils';
@@ -1223,10 +1223,13 @@ const Profile = () => {
                   </div>
 
                   <div className="space-y-2 md:space-y-1.5">
-                    <PostalCodeSelector
+                    <WorkplacePostalCodeSelector
                       postalCodeValue={postalCode}
+                      cityValue={userLocation}
                       onPostalCodeChange={setPostalCode}
-                      onLocationChange={setUserLocation}
+                      onLocationChange={(city, postalCode, municipality, county) => {
+                        setUserLocation(city);
+                      }}
                       onValidationChange={setHasValidLocation}
                     />
                     {errors.userLocation && !hasValidLocation && <p className="text-sm text-red-300">{errors.userLocation}</p>}
