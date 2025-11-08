@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useDevice } from '@/hooks/use-device';
 import { Play, Pause } from 'lucide-react';
 import { convertToSignedUrl } from '@/utils/storageUtils';
+import { useImagePreloader } from '@/hooks/useImagePreloader';
 
 interface ProfileVideoProps {
   videoUrl: string;
@@ -39,6 +40,13 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     
     convertUrls();
   }, [videoUrl, coverImageUrl]);
+
+  // Förladdda cover-bilden i bakgrunden
+  const coverImages = useMemo(() => {
+    return signedCoverUrl ? [signedCoverUrl] : [];
+  }, [signedCoverUrl]);
+  
+  useImagePreloader(coverImages, { priority: 'high' });
 
   // Remove hover-based autoplay to avoid flicker; play only on explicit tap/click
   // (Keeping function names removed to simplify behavior)
@@ -84,6 +92,8 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
           src={signedCoverUrl} 
           alt={alt}
           className={`w-full h-full object-cover transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
+          loading="eager"
+          fetchPriority="high"
         />
       ) : (
         <div className={`w-full h-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center text-white font-semibold text-2xl transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}>

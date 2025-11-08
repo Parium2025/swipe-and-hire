@@ -1,7 +1,8 @@
-import React, { useEffect, useState, memo } from "react";
+import React, { useEffect, useState, memo, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import { useImagePreloader } from "@/hooks/useImagePreloader";
 import { 
   Sidebar,
   SidebarContent,
@@ -142,6 +143,17 @@ export function AppSidebar() {
     return location.pathname === url || 
            (url === "/" && location.pathname === "/");
   };
+
+  // Förladdda alla profilbilder i bakgrunden
+  const profileImages = useMemo(() => {
+    const images: string[] = [];
+    if (avatarUrl) images.push(avatarUrl);
+    if (profile?.cover_image_url) images.push(profile.cover_image_url);
+    if (profile?.profile_image_url) images.push(profile.profile_image_url);
+    return images;
+  }, [avatarUrl, profile?.cover_image_url, profile?.profile_image_url]);
+
+  useImagePreloader(profileImages, { priority: 'high' });
 
   return (
     <Sidebar 
