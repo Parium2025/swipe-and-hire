@@ -195,6 +195,7 @@ export function AppSidebar() {
                 userInitials={`${profile?.first_name?.[0] || ''}${profile?.last_name?.[0] || ''}`}
                 alt="Profilvideo"
                 className="h-10 w-10 ring-2 ring-white/20 rounded-full"
+                showCountdown={false}
               />
             ) : (
               <Avatar className="h-10 w-10 ring-2 ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
@@ -236,6 +237,7 @@ export function AppSidebar() {
               userInitials={`${profile?.first_name?.[0] || ''}${profile?.last_name?.[0] || ''}`}
               alt="Profilvideo preload"
               className="h-10 w-10"
+              showCountdown={false}
             />
           )}
           {avatarUrl && (

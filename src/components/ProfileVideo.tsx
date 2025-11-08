@@ -10,9 +10,10 @@ interface ProfileVideoProps {
   alt?: string;
   className?: string;
   userInitials?: string;
+  showCountdown?: boolean; // Show countdown timer (default: true for employer view)
 }
 
-const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "", userInitials = "?" }: ProfileVideoProps) => {
+const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true }: ProfileVideoProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [signedVideoUrl, setSignedVideoUrl] = useState<string | null>(null);
@@ -177,7 +178,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
       )}
 
       {/* Countdown timer when video is playing */}
-      {isPlaying && remainingSeconds !== null && (
+      {showCountdown && isPlaying && remainingSeconds !== null && (
         <div className="absolute top-2 right-2 px-2 py-1 text-white text-xs font-semibold" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
           {remainingSeconds}s
         </div>
