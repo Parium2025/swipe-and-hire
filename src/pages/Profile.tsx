@@ -861,7 +861,7 @@ const Profile = () => {
     <div className="max-w-2xl mx-auto space-y-6 px-4 animate-fade-in">
       <div className="text-center">
         <h1 className="text-2xl font-semibold text-white mb-2">Min Profil</h1>
-        <p className="text-white/70 text-sm">
+        <p className="text-white text-sm">
           Hantera din personliga information
         </p>
       </div>
@@ -873,8 +873,8 @@ const Profile = () => {
             <h3 className="text-base font-semibold text-white text-center">
               Profilbild/Profilvideo
             </h3>
-            <p className="text-white/60 text-center text-sm">
-              Ladda upp en kort profilvideo eller en bild och gör ditt första intryck minnesvärt
+            <p className="text-white text-center text-sm">
+              Ladda upp en kort profilbild/profilvideo och gör ditt första intryck minnesvärt
             </p>
             
             {/* Video and Camera Icons */}
