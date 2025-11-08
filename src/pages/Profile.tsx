@@ -1092,11 +1092,8 @@ const Profile = () => {
               )}
             </div>
 
-            {/* Cover controls when no video is present - hide this section */}
-              {/* Removed - Cover-bild vald badge not needed */}
-
-            {/* Cover image upload for videos */}
-            {(isProfileVideo && !!profileImageUrl) && (
+            {/* Cover image upload - show when video exists OR when cover image exists without video */}
+            {((isProfileVideo && !!profileImageUrl) || (!profileImageUrl && coverImageUrl)) && (
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
                 <div className="flex items-center gap-2">
                   <Button 
@@ -1106,7 +1103,7 @@ const Profile = () => {
                     disabled={isUploadingCover}
                     className="bg-white/5 backdrop-blur-sm border-white/10 !text-white disabled:opacity-50 hover:bg-white/10 hover:!text-white md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/10"
                   >
-                    {(profile?.profile_image_url || coverImageUrl) ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
+                    {coverImageUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
                   </Button>
                   {coverImageUrl && (
                     <button
