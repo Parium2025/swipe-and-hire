@@ -1067,7 +1067,7 @@ const Profile = () => {
                     <button
                       onClick={deleteCoverImage}
                       disabled={isUploadingCover}
-                      className="bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors disabled:opacity-50 absolute -top-3 -right-3"
+                      className="bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors disabled:opacity-50"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
