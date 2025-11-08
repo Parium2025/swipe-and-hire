@@ -241,6 +241,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
   return (
     <div 
       className={`relative overflow-hidden ${className}`}
+      style={{ contain: 'paint' }}
       onClick={handleTap}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -253,6 +254,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
           alt={alt}
           className={`w-full h-full object-cover transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
           loading="eager"
+          decoding="async"
           fetchPriority="high"
         />
       ) : (

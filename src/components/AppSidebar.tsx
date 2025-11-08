@@ -208,7 +208,7 @@ export function AppSidebar() {
                   }}
                   onLoad={() => setAvatarLoaded(true)}
                   loading="eager"
-                  decoding="sync"
+                  decoding="async"
                   fetchPriority="high"
                   draggable={false}
                 />
@@ -230,22 +230,12 @@ export function AppSidebar() {
         
         {/* Hidden preloader - always mounted to keep video/image cached */}
         <div className="hidden">
-          {hasVideo && profile?.video_url && (
-            <ProfileVideo
-              videoUrl={profile.video_url}
-              coverImageUrl={profile.cover_image_url || profile.profile_image_url}
-              userInitials={`${profile?.first_name?.[0] || ''}${profile?.last_name?.[0] || ''}`}
-              alt="Profilvideo preload"
-              className="h-10 w-10"
-              showCountdown={false}
-            />
-          )}
           {avatarUrl && (
             <img 
               src={avatarUrl} 
               alt="Preload" 
               loading="eager"
-              decoding="sync"
+              decoding="async"
               fetchPriority="high"
             />
           )}
