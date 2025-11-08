@@ -436,44 +436,93 @@ const JobView = () => {
                     setImageUrl(null);
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                {/* Gradient overlay för läsbarhet */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                
+                {/* Text overlay - Simplex style */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+                  {/* Kategori/plats info överst */}
+                  <div className="flex items-center gap-2 text-white/90 text-xs md:text-sm uppercase tracking-wider mb-3">
+                    {job.employment_type && (
+                      <>
+                        <Briefcase className="h-3 w-3" />
+                        <span>{getEmploymentTypeLabel(job.employment_type)}</span>
+                      </>
+                    )}
+                    {job.employment_type && job.location && (
+                      <span className="text-white/60">·</span>
+                    )}
+                    {job.location && (
+                      <>
+                        <MapPin className="h-3 w-3" />
+                        <span>{job.location}</span>
+                      </>
+                    )}
+                  </div>
+                  
+                  {/* Huvudrubrik - stor och centrerad */}
+                  <h1 className="text-white text-2xl md:text-4xl lg:text-5xl font-bold leading-tight max-w-4xl">
+                    {job.title}
+                  </h1>
+                  
+                  {/* Work schedule och lön under */}
+                  <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-white/90 text-sm md:text-base">
+                    {job.work_schedule && (
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="h-4 w-4" />
+                        <span>{job.work_schedule}</span>
+                      </div>
+                    )}
+                    {formatSalary(job.salary_min, job.salary_max) && (
+                      <>
+                        {job.work_schedule && <span className="text-white/60">·</span>}
+                        <div className="flex items-center gap-1.5 text-green-300 font-semibold">
+                          <Euro className="h-4 w-4" />
+                          <span>{formatSalary(job.salary_min, job.salary_max)}</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
             
-            {/* Job title & basic info */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-              <h1 className="text-white text-xl md:text-2xl font-bold mb-3 leading-tight">
-                {job.title}
-              </h1>
+            {/* Om det inte finns bild, visa info i vanligt kort */}
+            {!imageUrl && (
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <h1 className="text-white text-xl md:text-2xl font-bold mb-3 leading-tight">
+                  {job.title}
+                </h1>
 
-              <div className="space-y-2">
-                <div className="flex items-center text-white/90 text-xs">
-                  <MapPin className="h-3.5 w-3.5 mr-1.5 text-white/70" />
-                  <span>{job.location}</span>
+                <div className="space-y-2">
+                  <div className="flex items-center text-white/90 text-xs">
+                    <MapPin className="h-3.5 w-3.5 mr-1.5 text-white/70" />
+                    <span>{job.location}</span>
+                  </div>
+
+                  {job.employment_type && (
+                    <div className="flex items-center text-white/90 text-xs">
+                      <Briefcase className="h-3.5 w-3.5 mr-1.5 text-white/70" />
+                      <span>{getEmploymentTypeLabel(job.employment_type)}</span>
+                    </div>
+                  )}
+
+                  {job.work_schedule && (
+                    <div className="flex items-center text-white/90 text-xs">
+                      <Clock className="h-3.5 w-3.5 mr-1.5 text-white/70" />
+                      <span>{job.work_schedule}</span>
+                    </div>
+                  )}
+
+                  {formatSalary(job.salary_min, job.salary_max) && (
+                    <div className="flex items-center text-green-300 text-sm font-semibold pt-0.5">
+                      <Euro className="h-4 w-4 mr-1.5" />
+                      <span>{formatSalary(job.salary_min, job.salary_max)}</span>
+                    </div>
+                  )}
                 </div>
-
-                {job.employment_type && (
-                  <div className="flex items-center text-white/90 text-xs">
-                    <Briefcase className="h-3.5 w-3.5 mr-1.5 text-white/70" />
-                    <span>{getEmploymentTypeLabel(job.employment_type)}</span>
-                  </div>
-                )}
-
-                {job.work_schedule && (
-                  <div className="flex items-center text-white/90 text-xs">
-                    <Clock className="h-3.5 w-3.5 mr-1.5 text-white/70" />
-                    <span>{job.work_schedule}</span>
-                  </div>
-                )}
-
-                {formatSalary(job.salary_min, job.salary_max) && (
-                  <div className="flex items-center text-green-300 text-sm font-semibold pt-0.5">
-                    <Euro className="h-4 w-4 mr-1.5" />
-                    <span>{formatSalary(job.salary_min, job.salary_max)}</span>
-                  </div>
-                )}
               </div>
-            </div>
+            )}
 
 
             {/* Description */}
