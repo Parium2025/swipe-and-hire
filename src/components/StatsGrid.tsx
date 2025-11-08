@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LucideIcon } from 'lucide-react';
 import { TruncatedText } from '@/components/TruncatedText';
+import { memo } from 'react';
 
 interface StatCard {
   icon: LucideIcon;
@@ -13,7 +14,7 @@ interface StatsGridProps {
   stats: StatCard[];
 }
 
-export const StatsGrid = ({ stats }: StatsGridProps) => {
+export const StatsGrid = memo(({ stats }: StatsGridProps) => {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 md:gap-2">
       {stats.map((stat, index) => (
@@ -39,4 +40,14 @@ export const StatsGrid = ({ stats }: StatsGridProps) => {
       ))}
     </div>
   );
-};
+}, (prevProps, nextProps) => {
+  // Custom comparison: only re-render if stat values actually changed
+  if (prevProps.stats.length !== nextProps.stats.length) return false;
+  
+  return prevProps.stats.every((stat, index) => {
+    const nextStat = nextProps.stats[index];
+    return stat.value === nextStat.value && 
+           stat.title === nextStat.title && 
+           stat.loading === nextStat.loading;
+  });
+});

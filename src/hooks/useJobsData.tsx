@@ -71,12 +71,13 @@ export const useJobsData = () => {
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
 
-  const stats = {
+  // Memoize stats to prevent unnecessary recalculations
+  const stats = useMemo(() => ({
     totalJobs: jobs.length,
     activeJobs: jobs.filter(job => job.is_active).length,
     totalViews: jobs.reduce((sum, job) => sum + (job.views_count || 0), 0),
     totalApplications: jobs.reduce((sum, job) => sum + (job.applications_count || 0), 0),
-  };
+  }), [jobs]);
 
   const invalidateJobs = () => {
     queryClient.invalidateQueries({ queryKey: ['jobs', profile?.organization_id] });

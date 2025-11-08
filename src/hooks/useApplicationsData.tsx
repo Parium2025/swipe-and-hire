@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 export interface ApplicationData {
   id: string;
@@ -213,13 +213,14 @@ export const useApplicationsData = (searchQuery: string = '') => {
   // Applications already have job_title from the join
   const enrichedApplications = applications;
 
-  const stats = {
+  // Memoize stats to prevent unnecessary recalculations
+  const stats = useMemo(() => ({
     total: enrichedApplications.length,
     new: enrichedApplications.filter(app => app.status === 'pending').length,
     reviewing: enrichedApplications.filter(app => app.status === 'reviewing').length,
     accepted: enrichedApplications.filter(app => app.status === 'accepted').length,
     rejected: enrichedApplications.filter(app => app.status === 'rejected').length,
-  };
+  }), [enrichedApplications]);
 
   const invalidateApplications = () => {
     queryClient.invalidateQueries({ queryKey: ['applications'] });
