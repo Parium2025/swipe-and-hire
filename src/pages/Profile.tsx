@@ -13,6 +13,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/hooks/use-toast';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { User, MapPin, Building, Camera, Mail, Phone, Calendar as CalendarIcon, Briefcase, Clock, FileText, Video, Play, Check, Trash2, ChevronDown, RotateCcw } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
@@ -1293,37 +1294,41 @@ const Profile = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent 
-                            className="w-72 max-h-[60vh] overflow-y-auto overscroll-contain touch-pan-y bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
+                            className="w-72 max-h-[60vh] p-0 overflow-hidden bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
                             side="bottom"
                             align="center"
                             alignOffset={0}
                             sideOffset={6}
                             avoidCollisions={false}
                           >
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('tillsvidareanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                              Fast anställning
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('visstidsanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                              Visstidsanställning
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('provanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                              Provanställning
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('interim')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                              Interim anställning
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('bemanningsanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                              Bemanningsanställning
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('egenforetagare')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                              Egenföretagare / Frilans
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('arbetssokande')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                              Arbetssökande
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('annat')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                              Annat
-                            </DropdownMenuItem>
+                            <ScrollArea className="max-h-[60vh]">
+                              <div className="p-1">
+                                <DropdownMenuItem onClick={() => setEmploymentStatus('tillsvidareanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                                  Fast anställning
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setEmploymentStatus('visstidsanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                                  Visstidsanställning
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setEmploymentStatus('provanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                                  Provanställning
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setEmploymentStatus('interim')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                                  Interim anställning
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setEmploymentStatus('bemanningsanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                                  Bemanningsanställning
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setEmploymentStatus('egenforetagare')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                                  Egenföretagare / Frilans
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setEmploymentStatus('arbetssokande')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                                  Arbetssökande
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setEmploymentStatus('annat')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                                  Annat
+                                </DropdownMenuItem>
+                              </div>
+                            </ScrollArea>
                           </DropdownMenuContent>
                         </DropdownMenu>
                         {errors.employmentStatus && <p className="text-sm text-red-300">{errors.employmentStatus}</p>}
@@ -1352,22 +1357,26 @@ const Profile = () => {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent 
-                              className="w-72 max-h-[60vh] overflow-y-auto overscroll-contain touch-pan-y bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
+                              className="w-72 max-h-[60vh] p-0 overflow-hidden bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
                               side="bottom"
                               align="center"
                               alignOffset={0}
                               sideOffset={6}
                               avoidCollisions={false}
                             >
-                              <DropdownMenuItem onClick={() => setWorkingHours('heltid')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                                Heltid
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setWorkingHours('deltid')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                                Deltid
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setWorkingHours('varierande')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                                Varierande / Flexibelt
-                              </DropdownMenuItem>
+                              <ScrollArea className="max-h-[60vh]">
+                                <div className="p-1">
+                                  <DropdownMenuItem onClick={() => setWorkingHours('heltid')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                                    Heltid
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => setWorkingHours('deltid')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                                    Deltid
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => setWorkingHours('varierande')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                                    Varierande / Flexibelt
+                                  </DropdownMenuItem>
+                                </div>
+                              </ScrollArea>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
@@ -1402,31 +1411,35 @@ const Profile = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent 
-                            className="w-72 max-h-[60vh] overflow-y-auto overscroll-contain touch-pan-y bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
+                            className="w-72 max-h-[60vh] p-0 overflow-hidden bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
                             side="bottom"
                             align="center"
                             alignOffset={0}
                             sideOffset={6}
                             avoidCollisions={false}
                           >
-                            <DropdownMenuItem onClick={() => setAvailability('omgaende')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                              Omgående
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAvailability('inom-1-manad')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                              Inom 1 månad
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAvailability('inom-3-manader')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                              Inom 3 månader
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAvailability('inom-6-manader')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                              Inom 6 månader
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAvailability('ej-aktuellt')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                              Inte aktuellt just nu
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAvailability('osaker')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                              Osäker
-                            </DropdownMenuItem>
+                            <ScrollArea className="max-h-[60vh]">
+                              <div className="p-1">
+                                <DropdownMenuItem onClick={() => setAvailability('omgaende')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                                  Omgående
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setAvailability('inom-1-manad')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                                  Inom 1 månad
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setAvailability('inom-3-manader')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                                  Inom 3 månader
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setAvailability('inom-6-manader')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                                  Inom 6 månader
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setAvailability('ej-aktuellt')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                                  Inte aktuellt just nu
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setAvailability('osaker')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                                  Osäker
+                                </DropdownMenuItem>
+                              </div>
+                            </ScrollArea>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
