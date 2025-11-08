@@ -183,9 +183,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       const mediaUrl = `${publicUrl}?t=${Date.now()}`;
       const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
       
-      // Preload in Service Worker immediately
-      const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
-      await preloadSingleFile(mediaUrl);
+      // Preload i bakgrunden (utan att blockera UI)
+      import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
+        preloadSingleFile(mediaUrl).catch(err => console.log('Preload error:', err));
+      });
       
       handleInputChange('profileImageUrl', mediaUrl);
       handleInputChange('profileMediaType', mediaType);
@@ -227,9 +228,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       
       const coverUrl = `${publicUrl}?t=${Date.now()}`;
       
-      // Preload in Service Worker immediately
-      const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
-      await preloadSingleFile(coverUrl);
+      // Preload i bakgrunden (utan att blockera UI)
+      import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
+        preloadSingleFile(coverUrl).catch(err => console.log('Preload error:', err));
+      });
       
       handleInputChange('coverImageUrl', coverUrl);
     } catch (error) {
@@ -375,9 +377,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
       const imageUrl = `${publicUrl}?t=${Date.now()}`;
       
-      // Förladdda bilden direkt i Service Worker
-      const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
-      await preloadSingleFile(imageUrl);
+      // Förladdda bilden i bakgrunden (utan att blockera UI)
+      import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
+        preloadSingleFile(imageUrl).catch(err => console.log('Preload error:', err));
+      });
       
       handleInputChange('profileImageUrl', imageUrl);
       handleInputChange('profileMediaType', 'image');
@@ -420,9 +423,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
       const coverUrl = `${publicUrl}?t=${Date.now()}`;
       
-      // Förladdda bilden direkt i Service Worker
-      const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
-      await preloadSingleFile(coverUrl);
+      // Förladdda bilden i bakgrunden (utan att blockera UI)
+      import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
+        preloadSingleFile(coverUrl).catch(err => console.log('Preload error:', err));
+      });
       
       handleInputChange('coverImageUrl', coverUrl);
       

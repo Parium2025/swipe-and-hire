@@ -576,9 +576,10 @@ const Profile = () => {
 
       const imageUrl = `${publicUrl}?t=${Date.now()}`;
       
-      // Förladdda bilden direkt i Service Worker
-      const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
-      await preloadSingleFile(imageUrl);
+      // Förladdda bilden i bakgrunden (utan att blockera UI)
+      import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
+        preloadSingleFile(imageUrl).catch(err => console.log('Preload error:', err));
+      });
       
       // Update local state instead of saving immediately
       setProfileImageUrl(imageUrl);
@@ -634,9 +635,10 @@ const Profile = () => {
 
       const coverUrl = `${publicUrl}?t=${Date.now()}`;
       
-      // Förladdda bilden direkt i Service Worker
-      const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
-      await preloadSingleFile(coverUrl);
+      // Förladdda bilden i bakgrunden (utan att blockera UI)
+      import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
+        preloadSingleFile(coverUrl).catch(err => console.log('Preload error:', err));
+      });
       
       // Update local state instead of saving immediately
       setCoverImageUrl(coverUrl);
