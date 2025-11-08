@@ -134,61 +134,59 @@ const WorkplacePostalCodeSelector = ({
   }, [onPostalCodeChange]);
 
   return (
-    <div className={`space-y-4 ${className}`}>
-      <div className="grid grid-cols-2 gap-3">
-        {/* Postnummer input */}
-        <div className="space-y-2">
-          <Label className="text-white font-medium text-sm">Postnummer *</Label>
-          <div className="relative">
-            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white z-10" />
-            <Input
-              value={postalCodeValue}
-              onChange={handlePostalCodeChange}
-              placeholder="XXX XX"
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pl-10 transition-all duration-150"
-              maxLength={6}
-              autoComplete="off"
-              autoCorrect="off"
-              spellCheck="false"
-            />
-            {isLoading && (
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <Loader2 className="h-4 w-4 animate-spin text-white/60" />
-              </div>
-            )}
-          </div>
-          
-          {/* Validering meddelande - visa endast när 1-4 siffror */}
-          {postalCodeValue && 
-           !isLoading && 
-           !foundLocation &&
-           postalCodeValue.replace(/\D/g, '').length > 0 && 
-           postalCodeValue.replace(/\D/g, '').length < 5 && (
-            <p className="text-sm text-red-300 mt-1">
-              Postnummer ska vara 5 siffror (t.ex. 111 11)
-            </p>
-          )}
-        </div>
-
-        {/* Ort input */}
-        <div className="space-y-2">
-          <Label className="text-white font-medium text-sm">Ort *</Label>
+    <div className={`grid grid-cols-2 gap-3 ${className}`}>
+      {/* Postnummer input */}
+      <div className="space-y-2 md:space-y-1.5">
+        <Label className="text-white text-sm">Postnummer *</Label>
+        <div className="relative">
+          <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white z-10" />
           <Input
-            value={cityValue}
-            onChange={(e) => onLocationChange(e.target.value)}
-            placeholder="Fylls i automatiskt"
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm transition-all duration-150"
-            readOnly={foundLocation !== null}
+            value={postalCodeValue}
+            onChange={handlePostalCodeChange}
+            placeholder="XXX XX"
+            className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm pl-10 transition-all duration-150 hover:bg-white/10"
+            maxLength={6}
             autoComplete="off"
             autoCorrect="off"
             spellCheck="false"
           />
+          {isLoading && (
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+              <Loader2 className="h-4 w-4 animate-spin text-white/60" />
+            </div>
+          )}
         </div>
+        
+        {/* Validering meddelande - visa endast när 1-4 siffror */}
+        {postalCodeValue && 
+         !isLoading && 
+         !foundLocation &&
+         postalCodeValue.replace(/\D/g, '').length > 0 && 
+         postalCodeValue.replace(/\D/g, '').length < 5 && (
+          <p className="text-sm text-red-300 mt-1">
+            Postnummer ska vara 5 siffror (t.ex. 111 11)
+          </p>
+        )}
+      </div>
+
+      {/* Ort input */}
+      <div className="space-y-2 md:space-y-1.5">
+        <Label className="text-white text-sm">Ort *</Label>
+        <Input
+          value={cityValue}
+          onChange={(e) => onLocationChange(e.target.value)}
+          placeholder="Fylls i automatiskt"
+          className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm transition-all duration-150 hover:bg-white/10"
+          readOnly={foundLocation !== null}
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck="false"
+        />
       </div>
 
       {/* Resultat-kort när location hittas */}
       {foundLocation && isValid && !isLoading && (
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20 p-3 animate-fade-in">
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20 p-3 animate-fade-in col-span-2">
           <div className="flex items-center space-x-2">
             <div className="flex-shrink-0">
               <div className="w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center">
@@ -209,7 +207,7 @@ const WorkplacePostalCodeSelector = ({
 
       {/* Om postnummer är giltigt men inte hittat */}
       {isValid && !foundLocation && !isLoading && postalCodeValue && postalCodeValue.replace(/\D/g, '').length === 5 && (
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20 p-3">
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20 p-3 col-span-2">
           <div className="flex items-center space-x-2">
             <div className="flex-shrink-0">
               <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
@@ -230,7 +228,7 @@ const WorkplacePostalCodeSelector = ({
 
       {/* Loading state med proffsig indikator */}
       {isLoading && (
-        <Card className="bg-white/10 backdrop-blur-sm border-white/20 p-3">
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20 p-3 col-span-2">
           <div className="flex items-center space-x-2">
             <div className="flex-shrink-0">
               <Loader2 className="h-4 w-4 animate-spin text-white/60" />
