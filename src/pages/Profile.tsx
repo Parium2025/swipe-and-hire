@@ -1035,7 +1035,7 @@ const Profile = () => {
               )}
               
               {(isProfileVideo && !!profileImageUrl) && !isUploadingMedia && (
-                <Badge variant="outline" className="bg-white/20 text-white border-white/20">
+                <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-md">
                   {isProfileVideo ? 'Video' : 'Bild'} uppladdad!
                 </Badge>
               )}
@@ -1083,7 +1083,7 @@ const Profile = () => {
                 {coverImageUrl && !isUploadingCover && (
                   <div className="flex flex-col items-center space-y-2 w-full">
                      <div className="flex items-center justify-center">
-                       <Badge variant="outline" className="bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap">
+                       <Badge variant="outline" className="bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-md">
                           Cover-bild uppladdad!
                         </Badge>
                      </div>
