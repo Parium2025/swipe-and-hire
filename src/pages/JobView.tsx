@@ -356,13 +356,9 @@ const JobView = () => {
     return <JobSwipe />;
   }
 
-  // Desktop/Tablet view
+  // Desktop/Tablet view - no loading text, just fade in content
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-white">Laddar jobb...</div>
-      </div>
-    );
+    return null; // Return nothing while loading for smooth fade-in
   }
 
   if (!job) {
@@ -374,7 +370,7 @@ const JobView = () => {
   }
 
   return (
-    <div className="min-h-screen bg-parium-gradient">
+    <div className="min-h-screen bg-parium-gradient animate-fade-in">
       {/* Back button - fixed top left */}
       <div className="fixed top-4 left-4 z-10">
         <Button
