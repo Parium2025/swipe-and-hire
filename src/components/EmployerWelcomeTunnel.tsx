@@ -80,6 +80,10 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
 
       const logoUrl = `${signedUrl}&t=${Date.now()}`;
       
+      // Förladdda loggan direkt i Service Worker
+      const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
+      await preloadSingleFile(logoUrl);
+      
       setFormData(prev => ({ ...prev, companyLogoUrl: logoUrl }));
       setImageEditorOpen(false);
       setPendingImageSrc('');

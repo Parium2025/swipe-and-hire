@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
+import { preloadSingleFile } from '@/lib/serviceWorkerManager';
 
 interface FileUploadProps {
   onFileUploaded: (url: string, fileName: string) => void;
@@ -70,6 +71,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
           .from(actualBucket)
           .getPublicUrl(fileName);
         
+        // Förladdda filen direkt i Service Worker för offline-tillgång
+        await preloadSingleFile(publicUrl);
+        
         onFileUploaded(publicUrl, file.name);
       } else {
         // For private buckets, use signed URLs
@@ -77,6 +81,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
         if (!signedUrl) {
           throw new Error('Could not create secure access URL');
         }
+        
+        // Förladdda även privata filer
+        await preloadSingleFile(signedUrl);
+        
         onFileUploaded(fileName, file.name);
       }
       

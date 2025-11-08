@@ -92,6 +92,31 @@ export const preloadImages = async (urls: string[]): Promise<void> => {
 };
 
 /**
+ * Förladdda en enskild fil direkt efter uppladdning
+ */
+export const preloadSingleFile = async (url: string): Promise<void> => {
+  if (!navigator.serviceWorker.controller) {
+    console.warn('Service Worker not ready, skipping single file preload');
+    return;
+  }
+
+  if (!url || url.trim() === '') return;
+
+  try {
+    console.log(`📦 Preloading newly uploaded file: ${url.substring(0, 80)}...`);
+    
+    await sendMessage({
+      type: 'PRELOAD_IMAGES',
+      urls: [url]
+    });
+
+    console.log('✅ File cached and ready for offline use');
+  } catch (error) {
+    console.error('Failed to preload file:', error);
+  }
+};
+
+/**
  * Rensa image cache
  */
 export const clearImageCache = async (): Promise<void> => {

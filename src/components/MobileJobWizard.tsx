@@ -705,15 +705,18 @@ const MobileJobWizard = ({
 
       if (uploadError) throw uploadError;
 
-      // Skapa signed URL och uppdatera formuläret
-      const signedUrl = await createSignedUrl('job-images', fileName, 86400);
-      if (!signedUrl) {
-        throw new Error('Could not create secure access URL');
-      }
+      // Hämta public URL för job-images (public bucket)
+      const { data: { publicUrl } } = supabase.storage
+        .from('job-images')
+        .getPublicUrl(fileName);
+
+      // Förladdda bilden direkt i Service Worker
+      const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
+      await preloadSingleFile(publicUrl);
 
       // Uppdatera med storage path (fileName) istället för blob URL
       handleInputChange('job_image_url', fileName);
-      setJobImageDisplayUrl(signedUrl);
+      setJobImageDisplayUrl(publicUrl);
       // Behåll originalImageUrl oförändrad så vi alltid kan fortsätta redigera från originalet
       setManualFocus(null);
       

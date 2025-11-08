@@ -573,6 +573,10 @@ const Profile = () => {
 
       const imageUrl = `${signedUrl}&t=${Date.now()}`;
       
+      // Förladdda bilden direkt i Service Worker
+      const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
+      await preloadSingleFile(imageUrl);
+      
       // Update local state instead of saving immediately
       setProfileImageUrl(imageUrl);
       setIsProfileVideo(false); // Mark as image, not video
@@ -626,6 +630,10 @@ const Profile = () => {
       }
 
       const coverUrl = `${signedUrl}&t=${Date.now()}`;
+      
+      // Förladdda bilden direkt i Service Worker
+      const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
+      await preloadSingleFile(coverUrl);
       
       // Update local state instead of saving immediately
       setCoverImageUrl(coverUrl);

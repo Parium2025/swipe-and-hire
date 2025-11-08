@@ -366,6 +366,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
       const imageUrl = `${signedUrl}&t=${Date.now()}`;
       
+      // Förladdda bilden direkt i Service Worker
+      const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
+      await preloadSingleFile(imageUrl);
+      
       handleInputChange('profileImageUrl', imageUrl);
       handleInputChange('profileMediaType', 'image');
       
@@ -406,6 +410,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       }
 
       const coverUrl = `${signedUrl}&t=${Date.now()}`;
+      
+      // Förladdda bilden direkt i Service Worker
+      const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
+      await preloadSingleFile(coverUrl);
       
       handleInputChange('coverImageUrl', coverUrl);
       
