@@ -948,8 +948,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               </div>
 
               <div className="space-y-2 text-center">
-                <Label htmlFor="profileMedia" className="text-white cursor-pointer hover:text-white/80 transition-colors">
-                  Klicka för att välja en bild eller video (max 30 sek)
+                <Label htmlFor="profileMedia" className="text-white cursor-pointer hover:text-white/90 transition-colors">
+                  Klicka för att välja en bild eller video (max 60 sekunder)
                 </Label>
                 <Input type="file" id="profileMedia" accept="image/*,video/*" className="hidden" onChange={handleMediaChange} disabled={isUploadingVideo} />
                 

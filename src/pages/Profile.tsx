@@ -961,9 +961,9 @@ const Profile = () => {
             <div className="space-y-2 text-center">
               <Label 
                 htmlFor="profile-image" 
-                className="text-white/70 cursor-pointer hover:text-white transition-colors text-center text-sm"
+                className="text-white cursor-pointer hover:text-white/90 transition-colors text-center text-sm"
               >
-                Klicka för att välja en bild eller video (max 30 sek)
+                Klicka för att välja en bild eller video (max 60 sekunder)
               </Label>
               
               {isUploadingVideo && (
