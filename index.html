@@ -155,6 +155,20 @@
         } catch (e) { /* noop */ }
       })();
     </script>
+    <!-- Service Worker för aggressiv bildcachning -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+              console.log('[SW] Service Worker registered successfully:', registration.scope);
+            })
+            .catch(error => {
+              console.log('[SW] Service Worker registration failed:', error);
+            });
+        });
+      }
+    </script>
     <script type="module" src="/src/main.tsx?v=20251004-1510"></script>
   </body>
 </html>

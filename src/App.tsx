@@ -24,7 +24,18 @@ import { Header } from "@/components/Header";
 import AuthTokenBridge from "./components/AuthTokenBridge";
 import { useDevice } from "@/hooks/use-device";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Längre cache-tider för bättre bildprestanda
+      staleTime: 30 * 60 * 1000, // 30 minuter - data anses färsk
+      gcTime: 60 * 60 * 1000, // 1 timme - behåll i minnet
+      refetchOnWindowFocus: false, // Ladda inte om när man kommer tillbaka
+      refetchOnMount: false, // Använd cache när möjligt
+      retry: 2, // Försök 2 gånger vid fel
+    },
+  },
+});
 
 // Routes without animations for instant navigation
 const AnimatedRoutes = () => {

@@ -83,7 +83,8 @@ export const ReadOnlyMobileJobCard = memo(({ job }: ReadOnlyMobileJobCardProps) 
             src={imageUrl}
             alt={`${job.title} hos ${companyName}`}
             className="w-full h-full object-cover"
-            loading="lazy"
+            loading="eager"
+            fetchPriority="high"
           />
           {/* Gradient overlay for better text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />

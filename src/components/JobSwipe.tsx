@@ -8,6 +8,7 @@ import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { MapPin, Clock, Euro, Heart, X, Building2, Users, Mail, Info } from 'lucide-react';
 import JobApplicationDialog from './JobApplicationDialog';
 import { toast } from '@/hooks/use-toast';
+import { useImagePreloader } from '@/hooks/useImagePreloader';
 
 interface JobPosting {
   id: string;
@@ -22,6 +23,7 @@ interface JobPosting {
   application_instructions?: string;
   created_at: string;
   employer_id: string;
+  job_image_url?: string;
   profiles: {
     first_name?: string;
     last_name?: string;
@@ -41,6 +43,13 @@ const JobSwipe = () => {
   useEffect(() => {
     fetchJobs();
   }, []);
+
+  // Förladdda alla jobbbilder i bakgrunden
+  const jobImageUrls = jobs
+    .map(job => job.job_image_url)
+    .filter(Boolean) as string[];
+  
+  useImagePreloader(jobImageUrls, { priority: 'high' });
 
   const fetchJobs = async () => {
     try {

@@ -23,6 +23,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import LocationSearchInput from '@/components/LocationSearchInput';
 import { useQuery } from '@tanstack/react-query';
+import { useImagePreloader } from '@/hooks/useImagePreloader';
 
 interface Job {
   id: string;
@@ -147,11 +148,19 @@ const SearchJobs = () => {
         applications_count: job.applications_count || 0,
       }));
     },
-    staleTime: 2 * 60 * 1000, // Cache for 2 minutes - fresh data
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
-    refetchOnWindowFocus: true, // Refresh when user comes back to tab
-    refetchOnMount: 'always', // Always check for fresh data
+    staleTime: 30 * 60 * 1000, // Cache for 30 minutes - länge cache för bilder
+    gcTime: 60 * 60 * 1000, // Keep in cache for 1 hour - behåll bildurls längre
+    refetchOnWindowFocus: false, // Lägg inte om bilder när man kommer tillbaka
+    refetchOnMount: false, // Använd cache när möjligt
   });
+
+  // Förladdda alla jobbbilder i bakgrunden med hög prioritet
+  const jobImageUrls = useMemo(() => {
+    return jobs.map(job => job.job_image_url).filter(Boolean) as string[];
+  }, [jobs]);
+
+  // Preload alla bilder så fort de laddas
+  useImagePreloader(jobImageUrls, { priority: 'high' });
 
   // Filter and sort jobs
   const filteredAndSortedJobs = useMemo(() => {

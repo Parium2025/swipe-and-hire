@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
 import { CompanyProfileDialog } from '@/components/CompanyProfileDialog';
 import { convertToSignedUrl } from '@/utils/storageUtils';
+import { useImagePreloader } from '@/hooks/useImagePreloader';
 interface JobQuestion {
   id: string;
   question_text: string;
@@ -67,6 +68,9 @@ const JobView = () => {
       fetchJob();
     }
   }, [jobId]);
+
+  // Preload bilden så fort vi har den
+  useImagePreloader(imageUrl ? [imageUrl] : [], { priority: 'high' });
 
   const fetchJob = async () => {
     try {
@@ -425,6 +429,7 @@ const JobView = () => {
                   alt={`${job.title} hos ${job.profiles?.company_name || 'företaget'}`}
                   className="w-full h-full object-cover"
                   loading="eager"
+                  fetchPriority="high"
                   onLoad={() => console.log('Job image loaded', imageUrl)}
                   onError={(e) => {
                     console.error('Job image failed to load', imageUrl);
