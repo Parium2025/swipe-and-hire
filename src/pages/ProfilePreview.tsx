@@ -332,17 +332,24 @@ export default function ProfilePreview() {
               )}
             </div>
 
+            {/* Text direkt under profilbilden */}
+            <div className="absolute top-40 left-1/2 transform -translate-x-1/2 text-center">
+              {/* Video tillgängligt text */}
+              {videoUrl && (
+                <p className="text-xs text-white mb-1">Video tillgängligt</p>
+              )}
+              {/* Ålder under video-texten */}
+              {isConsented && data.age && (
+                <p className="text-sm font-medium text-white/90">{data.age}</p>
+              )}
+            </div>
+
             {/* Tinder-stil gradient overlay längst ner med minimal info */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-3">
               <div className="text-white">
                 <h1 className="text-lg font-bold mb-0.5">
-                  {data.first_name}{isConsented && data.age && ` ${data.age}`}
+                  {data.first_name} {data.last_name}
                 </h1>
-                
-                {/* Video tillgängligt text */}
-                {videoUrl && (
-                  <p className="text-xs text-white mb-2">Video tillgängligt</p>
-                )}
                 
                 {/* Plats */}
                 {data.location && (
