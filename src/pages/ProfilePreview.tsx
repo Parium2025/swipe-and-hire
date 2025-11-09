@@ -307,8 +307,8 @@ export default function ProfilePreview() {
               <div className="text-white">
                 <TruncatedText
                   text={`${data.first_name} ${data.last_name}`}
-                  className="text-lg font-bold mb-0.5 break-words leading-tight max-w-full two-line-ellipsis block cursor-pointer"
-                  alwaysShowTooltip={false}
+                  className="text-lg font-bold mb-0.5 break-words leading-tight max-w-full two-line-ellipsis block cursor-pointer pointer-events-auto"
+                  alwaysShowTooltip={true}
                 >
                   <h1 className="text-lg font-bold mb-0.5 break-words leading-tight max-w-full two-line-ellipsis" style={{ color: '#FFFFFF' }}>
                     {data.first_name} {data.last_name}
