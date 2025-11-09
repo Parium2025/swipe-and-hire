@@ -14,6 +14,7 @@ import { convertToSignedUrl } from '@/utils/storageUtils';
 import { useToast } from '@/hooks/use-toast';
 import { useDevice } from '@/hooks/use-device';
 import ProfileVideo from '@/components/ProfileVideo';
+import { TruncatedText } from '@/components/TruncatedText';
 
 interface ProfileViewData {
   id: string;
@@ -304,18 +305,15 @@ export default function ProfilePreview() {
             {/* Tinder-stil gradient overlay längst ner med minimal info */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-3">
               <div className="text-white">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <h1 className="text-lg font-bold mb-0.5 break-words leading-tight max-w-full line-clamp-2 cursor-help" style={{ color: '#FFFFFF' }}>
-                        {data.first_name} {data.last_name}
-                      </h1>
-                    </TooltipTrigger>
-                    <TooltipContent className="bg-black/90 text-white border-white/20">
-                      <p>{data.first_name} {data.last_name}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <TruncatedText
+                  text={`${data.first_name} ${data.last_name}`}
+                  className="text-lg font-bold mb-0.5 break-words leading-tight max-w-full line-clamp-2 block cursor-pointer"
+                  alwaysShowTooltip={false}
+                >
+                  <h1 className="text-lg font-bold mb-0.5 break-words leading-tight max-w-full line-clamp-2" style={{ color: '#FFFFFF' }}>
+                    {data.first_name} {data.last_name}
+                  </h1>
+                </TruncatedText>
                 
                 {/* Ålder under namnet */}
                 {isConsented && data.age && (
