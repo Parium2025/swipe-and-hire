@@ -346,57 +346,44 @@ export default function ProfilePreview() {
     // ANDRA VY: Fullständig information - ersätter Tinder-kortet helt (ny sida)
     const DetailedView = () => (
       <div className="w-full h-full flex flex-col bg-transparent">
-        {/* Header med tillbaka-knapp och profilbild */}
-        <div className="relative h-40 w-full flex-shrink-0">
+        {/* Header med tillbaka-knapp och namn */}
+        <div className="relative px-4 pt-4 pb-3 flex items-center border-b border-white/10 flex-shrink-0">
           {/* Tillbaka-knapp */}
           <button
             onClick={() => setShowDetailedView(false)}
-            className="absolute top-3 left-3 z-10 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors"
+            className="bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5 transition-colors"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
 
-          {/* Profilbild som header */}
-          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/30 relative overflow-hidden">
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt="Profilbild"
-                className="w-full h-full object-cover"
-                draggable={false}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <User className="h-12 w-12 text-primary/60" />
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Scrollbart innehåll med exakt struktur från CandidateProfileDialog */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-6">
-          {/* Namn och titel */}
-          <div className="text-center space-y-1">
-            <h1 className="text-lg font-bold text-foreground">
+          {/* Namn och titel i header */}
+          <div className="flex-1 text-center">
+            <h1 className="text-sm font-bold text-foreground">
               {data.first_name} {isConsented ? data.last_name : '***'}
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-[10px] text-muted-foreground">
               {data.employment_status || 'Jobbsökande'}
             </p>
             {isConsented && data.age && (
-              <p className="text-xs text-muted-foreground">{data.age} år</p>
+              <p className="text-[10px] text-muted-foreground">{data.age} år</p>
             )}
           </div>
+          
+          {/* Tom div för att centrera namnet */}
+          <div className="w-6"></div>
+        </div>
 
+        {/* Scrollbart innehåll med box-struktur från CandidateProfileDialog */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-3">
           {/* Kontaktinformation */}
           {isConsented && (data.phone || data.location) && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Kontaktinformation</h3>
-              <div className="space-y-2">
+              <div className="bg-white/5 p-3 rounded-lg border border-white/10 space-y-2">
                 {data.phone && (
                   <button
                     onClick={handlePhoneClick}
-                    className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors w-full"
                   >
                     <Phone className="h-4 w-4" />
                     <span className="text-sm">{data.phone}</span>
@@ -413,48 +400,52 @@ export default function ProfilePreview() {
           )}
 
           {/* Personlig information */}
-          {isConsented && data.age && (
-            <div className="space-y-3">
+          {isConsented && (data.age || data.employment_status || data.availability) && (
+            <div className="space-y-2">
               <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Personlig information</h3>
-              <div className="grid grid-cols-2 gap-4">
-                {data.age && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    <span className="text-sm">{data.age} år</span>
-                  </div>
-                )}
-                {data.employment_status && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Briefcase className="h-4 w-4" />
-                    <span className="text-sm">{data.employment_status}</span>
-                  </div>
+              <div className="bg-white/5 p-3 rounded-lg border border-white/10 space-y-2">
+                <div className="grid grid-cols-2 gap-3">
+                  {data.age && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Calendar className="h-4 w-4" />
+                      <span className="text-sm">{data.age} år</span>
+                    </div>
+                  )}
+                  {data.employment_status && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Briefcase className="h-4 w-4" />
+                      <span className="text-sm">{data.employment_status}</span>
+                    </div>
+                  )}
+                </div>
+                {data.availability && (
+                  <p className="text-sm text-muted-foreground pt-1">
+                    <span className="font-medium text-foreground">Tillgänglighet:</span> {data.availability}
+                  </p>
                 )}
               </div>
-              {data.availability && (
-                <p className="text-sm text-muted-foreground">
-                  <span className="font-medium text-foreground">Tillgänglighet:</span> {data.availability}
-                </p>
-              )}
             </div>
           )}
 
           {/* Bio */}
           {data.bio && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Om kandidaten</h3>
-              <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                {data.bio}
-              </p>
+              <div className="bg-white/5 p-3 rounded-lg border border-white/10">
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                  {data.bio}
+                </p>
+              </div>
             </div>
           )}
 
           {/* Dokument */}
           {data.cv_url && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Dokument</h3>
               <button
                 onClick={handleCvClick}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors text-foreground"
+                className="w-full inline-flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors text-foreground"
               >
                 <FileText className="h-4 w-4" />
                 <span className="text-sm">Visa CV</span>
@@ -463,16 +454,17 @@ export default function ProfilePreview() {
           )}
 
           {/* Action buttons längst ner */}
-          <div className="flex gap-2 pt-4 border-t border-white/10">
+          <div className="flex gap-2 pt-2">
             <Button 
               variant="outline" 
+              size="sm"
               className="flex-1 bg-white/5 hover:bg-white/10 border-white/10"
             >
-              <Phone className="h-4 w-4 mr-2" />
+              <Phone className="h-3 w-3 mr-1" />
               Ring
             </Button>
-            <Button className="flex-1 bg-primary hover:bg-primary/90">
-              <Video className="h-4 w-4 mr-2" />
+            <Button size="sm" className="flex-1 bg-primary hover:bg-primary/90">
+              <Video className="h-3 w-3 mr-1" />
               Video
             </Button>
           </div>
