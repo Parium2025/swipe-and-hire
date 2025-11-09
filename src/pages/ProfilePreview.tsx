@@ -322,9 +322,9 @@ export default function ProfilePreview() {
                 
                 {/* Swipe-indikator */}
                 <div className="flex items-center justify-center mt-3">
-                  <div className="bg-white/20 rounded-full px-2 py-1 flex items-center gap-1">
-                    <span className="text-xs text-blue-400">Tryck för mer info</span>
-                    <ArrowRight className="h-3 w-3 text-white/80" />
+                  <div className="bg-white/20 rounded-md px-2 py-1 flex items-center gap-1">
+                    <span className="text-xs" style={{ color: '#FFFFFF' }}>Tryck för mer info</span>
+                    <ArrowRight className="h-3 w-3" style={{ color: '#FFFFFF' }} />
                   </div>
                 </div>
               </div>
