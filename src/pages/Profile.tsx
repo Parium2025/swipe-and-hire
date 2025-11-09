@@ -1047,7 +1047,7 @@ const Profile = () => {
                       />
                     ) : null}
                     {!profileImageUrl && !coverImageUrl && (
-                      <AvatarFallback delayMs={0} className="text-2xl font-semibold bg-white/20 text-white">
+                      <AvatarFallback delayMs={0} className="text-4xl font-semibold bg-white/20 text-white">
                         {((firstName?.trim()?.[0]?.toUpperCase() || '') + (lastName?.trim()?.[0]?.toUpperCase() || '')) || '?'}
                       </AvatarFallback>
                     )}

@@ -212,7 +212,7 @@ export function AppSidebar() {
                   fetchPriority="high"
                   draggable={false}
                 />
-                <AvatarFallback className="bg-white/20 text-white">
+                <AvatarFallback className="bg-white/20 text-white font-semibold">
                   {profile?.first_name?.[0]}{profile?.last_name?.[0]}
                 </AvatarFallback>
               </Avatar>
