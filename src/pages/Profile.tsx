@@ -1571,7 +1571,7 @@ const Profile = () => {
                 <Button 
                   type="submit" 
                   className="bg-white/5 backdrop-blur-sm border border-white/10 !text-white disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm hover:bg-white/10 hover:!text-white md:hover:bg-white/10 md:hover:!text-white [&_svg]:text-white" 
-                  disabled={loading}
+                  disabled={loading || isUploadingMedia || isUploadingCover}
                 >
                   {loading ? 'Sparar...' : 'Spara ändringar'}
                 </Button>
