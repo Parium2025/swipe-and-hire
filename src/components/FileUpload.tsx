@@ -63,19 +63,13 @@ const FileUpload: React.FC<FileUploadProps> = ({
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.data.user.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
-      // Simulate progress for better UX
-      const progressInterval = setInterval(() => {
-        setUploadProgress(prev => {
-          if (prev >= 90) return prev;
-          return prev + 10;
-        });
-      }, 200);
+      // Set to uploading state immediately
+      setUploadProgress(50);
 
       const { error: uploadError } = await supabase.storage
         .from(actualBucket)
         .upload(fileName, file);
 
-      clearInterval(progressInterval);
       setUploadProgress(100);
 
       if (uploadError) throw uploadError;
@@ -277,9 +271,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
           </Button>
         </div>
         {uploading && uploadProgress > 0 && (
-          <div className="space-y-2">
-            <Progress value={uploadProgress} className="h-2" />
-            <p className="text-xs text-center text-white">{uploadProgress}%</p>
+          <div className="flex justify-center">
+            <div className="w-20 h-20 rounded-lg border-2 border-primary bg-primary/10 flex items-center justify-center">
+              <p className="text-2xl font-bold text-white">{uploadProgress}%</p>
+            </div>
           </div>
         )}
       </div>
@@ -312,11 +307,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
           <Upload className="h-6 w-6 sm:h-8 sm:w-8 mx-auto text-white" />
           {uploading ? (
             <>
-              <p className="text-xs sm:text-sm text-white">Laddar upp...</p>
+              <p className="text-xs sm:text-sm text-white mb-2">Laddar upp...</p>
               {uploadProgress > 0 && (
-                <div className="max-w-xs mx-auto space-y-1">
-                  <Progress value={uploadProgress} className="h-2" />
-                  <p className="text-xs text-white">{uploadProgress}%</p>
+                <div className="flex justify-center">
+                  <div className="w-20 h-20 rounded-lg border-2 border-primary bg-primary/10 flex items-center justify-center">
+                    <p className="text-2xl font-bold text-white">{uploadProgress}%</p>
+                  </div>
                 </div>
               )}
             </>
