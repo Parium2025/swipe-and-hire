@@ -358,14 +358,14 @@ export default function ProfilePreview() {
 
           {/* Namn och titel i header */}
           <div className="flex-1 text-center">
-            <h1 className="text-sm font-bold text-foreground">
+            <h1 className="text-sm font-bold text-white">
               {data.first_name} {isConsented ? data.last_name : '***'}
             </h1>
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-[10px] text-white/80">
               {data.employment_status || 'Jobbsökande'}
             </p>
             {isConsented && data.age && (
-              <p className="text-[10px] text-muted-foreground">{data.age} år</p>
+              <p className="text-[10px] text-white/80">{data.age} år</p>
             )}
           </div>
           
@@ -378,20 +378,20 @@ export default function ProfilePreview() {
           {/* Kontaktinformation */}
           {isConsented && (data.phone || data.location) && (
             <div className="space-y-2">
-              <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Kontaktinformation</h3>
+              <h3 className="text-[10px] font-semibold text-white uppercase tracking-wide">Kontaktinformation</h3>
               <div className="bg-white/5 p-3 rounded-lg border border-white/10 space-y-2">
                 {data.phone && (
                   <button
                     onClick={handlePhoneClick}
-                    className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors w-full"
+                    className="flex items-center gap-2 text-white/90 hover:text-white transition-colors w-full"
                   >
-                    <Phone className="h-4 w-4" />
+                    <Phone className="h-4 w-4 text-white" />
                     <span className="text-sm">{data.phone}</span>
                   </button>
                 )}
                 {data.location && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
+                  <div className="flex items-center gap-2 text-white/90">
+                    <MapPin className="h-4 w-4 text-white" />
                     <span className="text-sm">{data.location}</span>
                   </div>
                 )}
@@ -402,25 +402,25 @@ export default function ProfilePreview() {
           {/* Personlig information */}
           {isConsented && (data.age || data.employment_status || data.availability) && (
             <div className="space-y-2">
-              <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Personlig information</h3>
+              <h3 className="text-[10px] font-semibold text-white uppercase tracking-wide">Personlig information</h3>
               <div className="bg-white/5 p-3 rounded-lg border border-white/10 space-y-2">
                 <div className="grid grid-cols-2 gap-3">
                   {data.age && (
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
+                    <div className="flex items-center gap-2 text-white/90">
+                      <Calendar className="h-4 w-4 text-white" />
                       <span className="text-sm">{data.age} år</span>
                     </div>
                   )}
                   {data.employment_status && (
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Briefcase className="h-4 w-4" />
+                    <div className="flex items-center gap-2 text-white/90">
+                      <Briefcase className="h-4 w-4 text-white" />
                       <span className="text-sm">{data.employment_status}</span>
                     </div>
                   )}
                 </div>
                 {data.availability && (
-                  <p className="text-sm text-muted-foreground pt-1">
-                    <span className="font-medium text-foreground">Tillgänglighet:</span> {data.availability}
+                  <p className="text-sm text-white/90 pt-1">
+                    <span className="font-medium text-white">Tillgänglighet:</span> {data.availability}
                   </p>
                 )}
               </div>
@@ -430,9 +430,9 @@ export default function ProfilePreview() {
           {/* Bio */}
           {data.bio && (
             <div className="space-y-2">
-              <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Om kandidaten</h3>
+              <h3 className="text-[10px] font-semibold text-white uppercase tracking-wide">Om kandidaten</h3>
               <div className="bg-white/5 p-3 rounded-lg border border-white/10">
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                <p className="text-sm text-white/90 whitespace-pre-wrap leading-relaxed">
                   {data.bio}
                 </p>
               </div>
@@ -442,12 +442,12 @@ export default function ProfilePreview() {
           {/* Dokument */}
           {data.cv_url && (
             <div className="space-y-2">
-              <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Dokument</h3>
+              <h3 className="text-[10px] font-semibold text-white uppercase tracking-wide">Dokument</h3>
               <button
                 onClick={handleCvClick}
-                className="w-full inline-flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors text-foreground"
+                className="w-full inline-flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors text-white"
               >
-                <FileText className="h-4 w-4" />
+                <FileText className="h-4 w-4 text-white" />
                 <span className="text-sm">Visa CV</span>
               </button>
             </div>
@@ -458,12 +458,12 @@ export default function ProfilePreview() {
             <Button 
               variant="outline" 
               size="sm"
-              className="flex-1 bg-white/5 hover:bg-white/10 border-white/10"
+              className="flex-1 bg-white/5 hover:bg-white/10 border-white/10 text-white"
             >
               <Phone className="h-3 w-3 mr-1" />
               Ring
             </Button>
-            <Button size="sm" className="flex-1 bg-primary hover:bg-primary/90">
+            <Button size="sm" className="flex-1 bg-primary hover:bg-primary/90 text-white">
               <Video className="h-3 w-3 mr-1" />
               Video
             </Button>
