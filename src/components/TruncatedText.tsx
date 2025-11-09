@@ -103,7 +103,7 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
 
   // Wrap in tooltip
   return (
-    <TooltipProvider delayDuration={200}>
+    <TooltipProvider delayDuration={0}>
       <Tooltip open={!supportsHover ? isOpen : undefined} onOpenChange={!supportsHover ? setIsOpen : undefined}>
         <TooltipTrigger asChild>
           <span ref={textRef} className={className} title={text} onClick={!supportsHover && isTouch ? handleTap : undefined}>
