@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { convertToSignedUrl } from '@/utils/storageUtils';
 import { useToast } from '@/hooks/use-toast';
 import { useDevice } from '@/hooks/use-device';
+import ProfileVideo from '@/components/ProfileVideo';
 
 interface ProfileViewData {
   id: string;
@@ -145,9 +146,6 @@ export default function ProfilePreview() {
 
     const [videoUrl, setVideoUrl] = useState<string>('');
     const [cvUrl, setCvUrl] = useState<string>('');
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [showVideo, setShowVideo] = useState(false);
-    const videoRef = useRef<HTMLVideoElement>(null);
 
     // Load public URLs for media
     useEffect(() => {
@@ -181,35 +179,6 @@ export default function ProfilePreview() {
 
       loadMediaUrls();
     }, [data.video_url, data.cv_url]);
-
-    const handleVideoTap = (e: React.MouseEvent) => {
-      e.stopPropagation(); // Förhindra att kort-klicket triggas
-      if (videoUrl) {
-        if (!isPlaying) {
-          setShowVideo(true);
-          setIsPlaying(true);
-          if (videoRef.current) {
-            videoRef.current.currentTime = 0;
-            videoRef.current.play();
-          }
-        } else {
-          setShowVideo(false);
-          setIsPlaying(false);
-          if (videoRef.current) {
-            videoRef.current.pause();
-            videoRef.current.currentTime = 0;
-          }
-        }
-      }
-    };
-
-    const handleVideoEnd = () => {
-      setIsPlaying(false);
-      if (videoRef.current) {
-        videoRef.current.currentTime = 0;
-      }
-      setShowVideo(false);
-    };
 
     const handlePhoneClick = () => {
       if (isConsented && data.phone) {
@@ -295,49 +264,32 @@ export default function ProfilePreview() {
           {/* Helskärm profilbild/video */}
           <div className="relative w-full h-full bg-transparent overflow-hidden">
             {/* Avatar-område för både bild och video - centrerat längst upp */}
-            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-full overflow-hidden border-2 border-white/40 shadow-2xl bg-gradient-to-br from-primary/20 to-primary/30 group/avatar">
+            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-full overflow-hidden border-2 border-white/40 shadow-2xl bg-gradient-to-br from-primary/20 to-primary/30">
               
-              {/* Cover Image - visas när video inte spelas */}
-              {(!showVideo || !isPlaying) && (
-                <>
-                  {avatarUrl ? (
-                    <img
-                      src={avatarUrl}
-                      alt="Profilbild"
-                      className="w-full h-full object-cover cursor-pointer"
-                      draggable={false}
-                      onClick={handleVideoTap}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center cursor-pointer" onClick={handleVideoTap}>
-                      <User className="h-8 w-8 text-primary/60" />
-                    </div>
-                  )}
-                  
-                  {/* Play button overlay vid hover - bara om video finns */}
-                  {videoUrl && (
-                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-200 flex items-center justify-center cursor-pointer" onClick={handleVideoTap}>
-                      <div className="bg-white/90 rounded-full p-2">
-                        <Play className="h-6 w-6 text-black" fill="black" />
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-              
-              {/* Video Element - spelas på exakt samma plats som bilden */}
-              {videoUrl && showVideo && isPlaying && (
-                <video 
-                  ref={videoRef}
-                  src={videoUrl}
-                  className="w-full h-full object-cover"
-                  loop={false}
-                  muted={false}
-                  playsInline
-                  onEnded={handleVideoEnd}
-                  onClick={handleVideoTap}
-                  autoPlay
+              {/* Använd ProfileVideo komponenten om video finns */}
+              {videoUrl ? (
+                <ProfileVideo
+                  videoUrl={videoUrl}
+                  coverImageUrl={avatarUrl || undefined}
+                  userInitials={`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`}
+                  alt="Profilbild"
+                  className="w-full h-full rounded-full"
+                  showCountdown={false}
                 />
+              ) : (
+                /* Om ingen video, visa bara bilden */
+                avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt="Profilbild"
+                    className="w-full h-full object-cover"
+                    draggable={false}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <User className="h-8 w-8 text-primary/60" />
+                  </div>
+                )
               )}
             </div>
 
