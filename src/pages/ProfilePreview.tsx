@@ -367,21 +367,21 @@ export default function ProfilePreview() {
     );
     };
 
-    // ANDRA VY: Fullständig information
+    // ANDRA VY: Fullständig information - anpassad för mobil-mockup
     const DetailedView = () => (
       <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div className="w-full max-w-sm mx-auto max-h-[90vh] overflow-y-auto">
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl overflow-visible rounded-3xl relative">
+        <div className="w-full max-w-[200px] max-h-[400px] overflow-y-auto custom-scrollbar">
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl overflow-visible rounded-xl relative">
             {/* Stäng-knapp */}
             <button
               onClick={() => setShowDetailedView(false)}
-              className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors"
+              className="absolute top-2 right-2 z-10 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors"
             >
-              ✕
+              <X className="h-3 w-3" />
             </button>
 
             {/* Kompakt profilbild */}
-            <div className="relative h-64 w-full bg-transparent overflow-hidden">
+            <div className="relative h-24 w-full bg-transparent overflow-hidden">
               {avatarUrl ? (
                 <img
                   src={avatarUrl}
@@ -391,31 +391,31 @@ export default function ProfilePreview() {
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/30">
-                  <User className="h-16 w-16 text-primary/60" />
+                  <User className="h-8 w-8 text-primary/60" />
                 </div>
               )}
             </div>
 
-            <CardContent className="p-6 space-y-6 text-white">
+            <CardContent className="p-3 space-y-3 text-white">
               {/* Namn och titel */}
               <div className="text-center">
-                <h1 className="text-2xl font-bold text-white">
+                <h1 className="text-sm font-bold text-white">
                   {data.first_name} {isConsented ? data.last_name : '***'}
                   {isConsented && data.age && (
-                    <span className="text-xl font-normal text-white/80 ml-2">{data.age}</span>
+                    <span className="text-xs font-normal text-white/80 ml-1">{data.age}</span>
                   )}
                 </h1>
-                <p className="text-lg text-white/90 font-medium mt-1">
+                <p className="text-xs text-white/90 font-medium mt-0.5">
                   {data.employment_status || 'Jobbsökande'}
                 </p>
               </div>
 
               {/* Bio */}
               {data.bio && (
-                <div className="space-y-3">
-                  <h2 className="text-lg font-bold text-white">Om mig</h2>
-                  <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-                    <p className="text-sm text-white/90 leading-relaxed">
+                <div className="space-y-1">
+                  <h2 className="text-xs font-bold text-white">Om mig</h2>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+                    <p className="text-[10px] text-white/90 leading-relaxed line-clamp-3">
                       {data.bio}
                     </p>
                   </div>
@@ -424,38 +424,38 @@ export default function ProfilePreview() {
 
               {/* Kontaktinformation (bara med samtycke) */}
               {isConsented && (data.phone || data.location) && (
-                <div className="space-y-3 bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-                  <h3 className="font-semibold text-white">Kontakt</h3>
+                <div className="space-y-2 bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+                  <h3 className="text-xs font-semibold text-white">Kontakt</h3>
                   {data.phone && (
                     <button
                       onClick={handlePhoneClick}
-                      className="flex items-center gap-3 text-white/90 hover:text-white transition-colors w-full text-left group"
+                      className="flex items-center gap-2 text-white/90 hover:text-white transition-colors w-full text-left group"
                     >
-                      <Phone className="h-5 w-5 flex-shrink-0 group-hover:scale-110 transition-transform" />
-                      <span className="underline decoration-dotted">{data.phone}</span>
+                      <Phone className="h-3 w-3 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                      <span className="text-[10px] underline decoration-dotted truncate">{data.phone}</span>
                     </button>
                   )}
                   {data.location && (
-                    <div className="flex items-center gap-3 text-white/90">
-                      <MapPin className="h-5 w-5 flex-shrink-0" />
-                      <span>{data.location} {data.postal_code && `(${data.postal_code})`}</span>
+                    <div className="flex items-center gap-2 text-white/90">
+                      <MapPin className="h-3 w-3 flex-shrink-0" />
+                      <span className="text-[10px] truncate">{data.location}</span>
                     </div>
                   )}
                 </div>
               )}
 
               {/* Action buttons */}
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-2 pt-2">
                 <Button 
                   variant="outline" 
-                  className="flex-1 rounded-2xl py-3 bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20"
+                  className="flex-1 rounded-lg py-1 h-auto bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 text-[10px]"
                 >
-                  <Phone className="h-4 w-4 mr-2" />
+                  <Phone className="h-3 w-3 mr-1" />
                   Ring
                 </Button>
-                <Button className="flex-1 bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 rounded-2xl py-3 text-white">
-                  <Video className="h-5 w-5 mr-2" />
-                  Video Chat
+                <Button className="flex-1 bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 rounded-lg py-1 h-auto text-white text-[10px]">
+                  <Video className="h-3 w-3 mr-1" />
+                  Video
                 </Button>
               </div>
 
@@ -463,29 +463,29 @@ export default function ProfilePreview() {
               {data.cv_url && (
                 <button
                   onClick={handleCvClick}
-                  className="w-full flex items-center gap-3 p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 hover:bg-white/20 transition-all group"
+                  className="w-full flex items-center gap-2 p-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 hover:bg-white/20 transition-all group"
                 >
-                  <FileText className="h-5 w-5 text-white group-hover:scale-110 transition-transform" />
-                  <span className="text-white font-medium">Visa CV</span>
-                  <ExternalLink className="h-4 w-4 text-white/80 ml-auto" />
+                  <FileText className="h-3 w-3 text-white group-hover:scale-110 transition-transform" />
+                  <span className="text-white font-medium text-[10px]">Visa CV</span>
+                  <ExternalLink className="h-2 w-2 text-white/80 ml-auto" />
                 </button>
               )}
 
               {/* Tillgänglighet */}
               {(data.working_hours || data.availability) && (
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-white">Tillgänglighet</h3>
-                  <div className="space-y-2">
+                <div className="space-y-1">
+                  <h3 className="text-xs font-semibold text-white">Tillgänglighet</h3>
+                  <div className="space-y-1">
                     {data.working_hours && (
-                      <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                        <span className="text-sm text-white/80 font-medium">Arbetstid</span>
-                        <p className="text-sm text-white">{data.working_hours}</p>
+                      <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+                        <span className="text-[9px] text-white/80 font-medium">Arbetstid</span>
+                        <p className="text-[10px] text-white truncate">{data.working_hours}</p>
                       </div>
                     )}
                     {data.availability && (
-                      <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                        <span className="text-sm text-white/80 font-medium">Kan börja</span>
-                        <p className="text-sm text-white">{data.availability}</p>
+                      <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
+                        <span className="text-[9px] text-white/80 font-medium">Kan börja</span>
+                        <p className="text-[10px] text-white truncate">{data.availability}</p>
                       </div>
                     )}
                   </div>
