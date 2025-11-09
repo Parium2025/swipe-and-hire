@@ -45,10 +45,34 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
       const element = textRef.current;
       if (!element) return;
 
-      // More robust truncation detection using integer comparisons
-      const truncated =
-        Math.ceil(element.scrollHeight) > Math.ceil(element.clientHeight) ||
-        Math.ceil(element.scrollWidth) > Math.ceil(element.clientWidth);
+      // Robust detection including multi-line clamp (-webkit-line-clamp)
+      const styles = window.getComputedStyle(element);
+      const webkitLineClamp = (styles.getPropertyValue("-webkit-line-clamp") || "").trim();
+      const hasClamp = webkitLineClamp !== "" && webkitLineClamp !== "none";
+
+      let truncated = false;
+      if (hasClamp) {
+        // Measure natural height without clamp by cloning the element offscreen
+        const clone = element.cloneNode(true) as HTMLElement;
+        clone.style.position = "absolute";
+        clone.style.visibility = "hidden";
+        clone.style.pointerEvents = "none";
+        // @ts-ignore - vendor property
+        clone.style.webkitLineClamp = "unset";
+        clone.style.display = "block";
+        clone.style.maxHeight = "none";
+        clone.style.overflow = "visible";
+        clone.style.width = `${element.clientWidth}px`;
+        element.parentElement?.appendChild(clone);
+        const naturalHeight = Math.ceil(clone.scrollHeight);
+        element.parentElement?.removeChild(clone);
+        const currentHeight = Math.ceil(element.clientHeight);
+        truncated = naturalHeight > currentHeight + 1;
+      } else {
+        truncated =
+          Math.ceil(element.scrollHeight) > Math.ceil(element.clientHeight) ||
+          Math.ceil(element.scrollWidth) > Math.ceil(element.clientWidth);
+      }
 
       setIsTruncated(truncated);
     };
@@ -106,7 +130,7 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
     <TooltipProvider delayDuration={0}>
       <Tooltip open={!supportsHover ? isOpen : undefined} onOpenChange={!supportsHover ? setIsOpen : undefined}>
         <TooltipTrigger asChild>
-          <span ref={textRef} className={className} title={text} onClick={!supportsHover && isTouch ? handleTap : undefined}>
+          <span ref={textRef} className={className} onClick={!supportsHover && isTouch ? handleTap : undefined}>
             {children || text}
           </span>
         </TooltipTrigger>
