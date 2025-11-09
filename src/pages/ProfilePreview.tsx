@@ -344,35 +344,27 @@ export default function ProfilePreview() {
             {/* Text direkt under profilbilden - bara om video finns */}
             {videoUrl && (
               <div className="absolute top-40 left-1/2 transform -translate-x-1/2 text-center">
-                <p className="text-xs text-white font-medium">Video tillgängligt</p>
+                <p className="text-xs font-medium" style={{ color: '#FFFFFF' }}>Video tillgängligt</p>
               </div>
             )}
 
             {/* Tinder-stil gradient overlay längst ner med minimal info */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-3">
               <div className="text-white">
-                <h1 className="text-lg font-bold mb-0.5 text-white">
+                <h1 className="text-lg font-bold mb-0.5" style={{ color: '#FFFFFF' }}>
                   {data.first_name} {data.last_name}
                 </h1>
                 
                 {/* Ålder under namnet */}
                 {isConsented && data.age && (
-                  <p className="text-sm text-white mb-2">{data.age}</p>
+                  <p className="text-sm mb-2" style={{ color: '#FFFFFF' }}>{data.age}</p>
                 )}
                 
                 {/* Plats */}
                 {data.location && (
                   <div className="flex items-center gap-1 mb-2">
-                    <MapPin className="h-3 w-3 text-white" />
-                    <span className="text-xs text-white">Bor i {data.location}</span>
-                  </div>
-                )}
-                
-                {/* Plats */}
-                {data.location && (
-                  <div className="flex items-center gap-1 mb-2">
-                    <MapPin className="h-3 w-3 text-white" />
-                    <span className="text-xs text-white">Bor i {data.location}</span>
+                    <MapPin className="h-3 w-3" style={{ color: '#FFFFFF' }} />
+                    <span className="text-xs" style={{ color: '#FFFFFF' }}>Bor i {data.location}</span>
                   </div>
                 )}
                 
