@@ -343,133 +343,132 @@ export default function ProfilePreview() {
     );
     };
 
-    // ANDRA VY: Fullständig information - anpassad för mobil-mockup
+    // ANDRA VY: Fullständig information - inuti mobilramen
     const DetailedView = () => (
-      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div className="w-full max-w-[200px] max-h-[400px] overflow-y-auto custom-scrollbar">
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl overflow-visible rounded-xl relative">
-            {/* Stäng-knapp */}
-            <button
-              onClick={() => setShowDetailedView(false)}
-              className="absolute top-2 right-2 z-10 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors"
-            >
-              <X className="h-3 w-3" />
-            </button>
+      <div className="w-full h-full relative">
+        <Card className="bg-transparent border-0 shadow-none overflow-visible rounded-xl h-full flex flex-col">
+          {/* Stäng-knapp */}
+          <button
+            onClick={() => setShowDetailedView(false)}
+            className="absolute top-2 left-2 z-10 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5 transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
 
-            {/* Kompakt profilbild */}
-            <div className="relative h-24 w-full bg-transparent overflow-hidden">
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt="Profilbild"
-                  className="absolute inset-0 w-full h-full object-cover"
-                  draggable={false}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/30">
-                  <User className="h-8 w-8 text-primary/60" />
-                </div>
+          {/* Kompakt profilbild */}
+          <div className="relative h-32 w-full bg-transparent overflow-hidden flex-shrink-0">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt="Profilbild"
+                className="absolute inset-0 w-full h-full object-cover"
+                draggable={false}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/30">
+                <User className="h-10 w-10 text-primary/60" />
+              </div>
+            )}
+          </div>
+
+          {/* Scrollbart innehåll */}
+          <CardContent className="p-4 space-y-3 text-white overflow-y-auto flex-1 custom-scrollbar">
+            {/* Namn och titel */}
+            <div className="text-center pb-2">
+              <h1 className="text-base font-bold text-white">
+                {data.first_name} {isConsented ? data.last_name : '***'}
+              </h1>
+              {isConsented && data.age && (
+                <span className="text-sm font-normal text-white/80">{data.age} år</span>
               )}
+              <p className="text-sm text-white/90 font-medium mt-1">
+                {data.employment_status || 'Jobbsökande'}
+              </p>
             </div>
 
-            <CardContent className="p-3 space-y-3 text-white">
-              {/* Namn och titel */}
-              <div className="text-center">
-                <h1 className="text-sm font-bold text-white">
-                  {data.first_name} {isConsented ? data.last_name : '***'}
-                  {isConsented && data.age && (
-                    <span className="text-xs font-normal text-white/80 ml-1">{data.age} år</span>
-                  )}
-                </h1>
-                <p className="text-xs text-white/90 font-medium mt-0.5">
-                  {data.employment_status || 'Jobbsökande'}
-                </p>
-              </div>
-
-              {/* Bio */}
-              {data.bio && (
-                <div className="space-y-1">
-                  <h2 className="text-xs font-bold text-white">Om mig</h2>
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                    <p className="text-[10px] text-white/90 leading-relaxed line-clamp-3">
-                      {data.bio}
-                    </p>
-                  </div>
+            {/* Bio */}
+            {data.bio && (
+              <div className="space-y-1.5">
+                <h2 className="text-xs font-bold text-white uppercase tracking-wide">Om mig</h2>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                  <p className="text-xs text-white/90 leading-relaxed">
+                    {data.bio}
+                  </p>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Kontaktinformation (bara med samtycke) */}
-              {isConsented && (data.phone || data.location) && (
-                <div className="space-y-2 bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                  <h3 className="text-xs font-semibold text-white">Kontakt</h3>
-                  {data.phone && (
-                    <button
-                      onClick={handlePhoneClick}
-                      className="flex items-center gap-2 text-white/90 hover:text-white transition-colors w-full text-left group"
-                    >
-                      <Phone className="h-3 w-3 flex-shrink-0 group-hover:scale-110 transition-transform" />
-                      <span className="text-[10px] underline decoration-dotted truncate">{data.phone}</span>
-                    </button>
+            {/* Kontaktinformation (bara med samtycke) */}
+            {isConsented && (data.phone || data.location) && (
+              <div className="space-y-2 bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                <h3 className="text-xs font-bold text-white uppercase tracking-wide">Kontakt</h3>
+                {data.phone && (
+                  <button
+                    onClick={handlePhoneClick}
+                    className="flex items-center gap-2 text-white/90 hover:text-white transition-colors w-full text-left group"
+                  >
+                    <Phone className="h-4 w-4 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs underline decoration-dotted truncate">{data.phone}</span>
+                  </button>
+                )}
+                {data.location && (
+                  <div className="flex items-center gap-2 text-white/90">
+                    <MapPin className="h-4 w-4 flex-shrink-0" />
+                    <span className="text-xs truncate">{data.location}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Action buttons */}
+            <div className="flex gap-2 pt-2">
+              <Button 
+                variant="outline" 
+                className="flex-1 rounded-lg py-2 h-auto bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 text-xs"
+              >
+                <Phone className="h-4 w-4 mr-1" />
+                Ring
+              </Button>
+              <Button className="flex-1 bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 rounded-lg py-2 h-auto text-white text-xs">
+                <Video className="h-4 w-4 mr-1" />
+                Video
+              </Button>
+            </div>
+
+            {/* CV */}
+            {data.cv_url && (
+              <button
+                onClick={handleCvClick}
+                className="w-full flex items-center gap-2 p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 hover:bg-white/20 transition-all group"
+              >
+                <FileText className="h-4 w-4 text-white group-hover:scale-110 transition-transform" />
+                <span className="text-white font-medium text-xs">Visa CV</span>
+                <ExternalLink className="h-3 w-3 text-white/80 ml-auto" />
+              </button>
+            )}
+
+            {/* Tillgänglighet */}
+            {(data.working_hours || data.availability) && (
+              <div className="space-y-2">
+                <h3 className="text-xs font-bold text-white uppercase tracking-wide">Tillgänglighet</h3>
+                <div className="space-y-2">
+                  {data.working_hours && (
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                      <span className="text-[10px] text-white/80 font-medium">Arbetstid</span>
+                      <p className="text-xs text-white mt-0.5">{data.working_hours}</p>
+                    </div>
                   )}
-                  {data.location && (
-                    <div className="flex items-center gap-2 text-white/90">
-                      <MapPin className="h-3 w-3 flex-shrink-0" />
-                      <span className="text-[10px] truncate">{data.location}</span>
+                  {data.availability && (
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                      <span className="text-[10px] text-white/80 font-medium">Kan börja</span>
+                      <p className="text-xs text-white mt-0.5">{data.availability}</p>
                     </div>
                   )}
                 </div>
-              )}
-
-              {/* Action buttons */}
-              <div className="flex gap-2 pt-2">
-                <Button 
-                  variant="outline" 
-                  className="flex-1 rounded-lg py-1 h-auto bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 text-[10px]"
-                >
-                  <Phone className="h-3 w-3 mr-1" />
-                  Ring
-                </Button>
-                <Button className="flex-1 bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 rounded-lg py-1 h-auto text-white text-[10px]">
-                  <Video className="h-3 w-3 mr-1" />
-                  Video
-                </Button>
               </div>
-
-              {/* CV */}
-              {data.cv_url && (
-                <button
-                  onClick={handleCvClick}
-                  className="w-full flex items-center gap-2 p-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 hover:bg-white/20 transition-all group"
-                >
-                  <FileText className="h-3 w-3 text-white group-hover:scale-110 transition-transform" />
-                  <span className="text-white font-medium text-[10px]">Visa CV</span>
-                  <ExternalLink className="h-2 w-2 text-white/80 ml-auto" />
-                </button>
-              )}
-
-              {/* Tillgänglighet */}
-              {(data.working_hours || data.availability) && (
-                <div className="space-y-1">
-                  <h3 className="text-xs font-semibold text-white">Tillgänglighet</h3>
-                  <div className="space-y-1">
-                    {data.working_hours && (
-                      <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                        <span className="text-[9px] text-white/80 font-medium">Arbetstid</span>
-                        <p className="text-[10px] text-white truncate">{data.working_hours}</p>
-                      </div>
-                    )}
-                    {data.availability && (
-                      <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                        <span className="text-[9px] text-white/80 font-medium">Kan börja</span>
-                        <p className="text-[10px] text-white truncate">{data.availability}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     );
 
