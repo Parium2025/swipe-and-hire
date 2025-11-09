@@ -1101,10 +1101,13 @@ const Profile = () => {
               </Label>
               
               {isUploadingMedia && (
-                <Badge variant="outline" className="bg-white/10 text-white border-white/20 animate-pulse">
-                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
-                  {uploadingMediaType === 'video' ? `${uploadProgress}%` : `Laddar upp bild...`}
-                </Badge>
+                <div className="flex justify-center">
+                  <div className="w-20 h-20 rounded-lg border-2 border-primary bg-primary/10 flex items-center justify-center">
+                    <span className="text-2xl font-bold text-white">
+                      {uploadingMediaType === 'video' ? `${uploadProgress}%` : '...'}
+                    </span>
+                  </div>
+                </div>
               )}
               
               {(isProfileVideo && !!profileImageUrl) && !isUploadingMedia && (
@@ -1158,10 +1161,9 @@ const Profile = () => {
                 
                 {isUploadingCover && (
                   <div className="flex flex-col items-center w-full">
-                    <Badge variant="outline" className="bg-white/10 text-white border-white/20 text-sm animate-pulse">
-                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
-                      Laddar upp cover-bild...
-                    </Badge>
+                    <div className="w-20 h-20 rounded-lg border-2 border-primary bg-primary/10 flex items-center justify-center">
+                      <span className="text-sm font-semibold text-white">...</span>
+                    </div>
                   </div>
                 )}
                 
