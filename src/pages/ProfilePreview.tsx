@@ -343,11 +343,11 @@ export default function ProfilePreview() {
     );
     };
 
-    // ANDRA VY: Fullständig information - anpassad för mobil-mockup
+    // ANDRA VY: Fullständig information - matchar arbetsgivarsidans stil
     const DetailedView = () => (
       <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div className="w-full max-w-[200px] max-h-[400px] overflow-y-auto custom-scrollbar">
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl overflow-visible rounded-xl relative">
+          <Card className="bg-background/95 backdrop-blur-xl border-white/10 shadow-2xl overflow-visible rounded-xl relative">
             {/* Stäng-knapp */}
             <button
               onClick={() => setShowDetailedView(false)}
@@ -356,115 +356,88 @@ export default function ProfilePreview() {
               <X className="h-3 w-3" />
             </button>
 
-            {/* Kompakt profilbild */}
-            <div className="relative h-24 w-full bg-transparent overflow-hidden">
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt="Profilbild"
-                  className="absolute inset-0 w-full h-full object-cover"
-                  draggable={false}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/30">
-                  <User className="h-8 w-8 text-primary/60" />
-                </div>
-              )}
-            </div>
-
-            <CardContent className="p-3 space-y-3 text-white">
+            <CardContent className="p-3 space-y-4">
               {/* Namn och titel */}
-              <div className="text-center">
-                <h1 className="text-sm font-bold text-white">
+              <div>
+                <h1 className="text-sm font-bold text-foreground">
                   {data.first_name} {isConsented ? data.last_name : '***'}
-                  {isConsented && data.age && (
-                    <span className="text-xs font-normal text-white/80 ml-1">{data.age} år</span>
-                  )}
                 </h1>
-                <p className="text-xs text-white/90 font-medium mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {data.employment_status || 'Jobbsökande'}
                 </p>
               </div>
 
-              {/* Bio */}
-              {data.bio && (
-                <div className="space-y-1">
-                  <h2 className="text-xs font-bold text-white">Om mig</h2>
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                    <p className="text-[10px] text-white/90 leading-relaxed line-clamp-3">
-                      {data.bio}
-                    </p>
+              {/* Kontaktinformation */}
+              {isConsented && (data.phone || data.location) && (
+                <div className="space-y-2">
+                  <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Kontaktinformation</h3>
+                  <div className="space-y-1.5">
+                    {data.phone && (
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Phone className="h-3 w-3" />
+                        <a 
+                          href={`tel:${data.phone}`} 
+                          className="text-[10px] hover:text-foreground transition-colors"
+                        >
+                          {data.phone}
+                        </a>
+                      </div>
+                    )}
+                    {data.location && (
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <MapPin className="h-3 w-3" />
+                        <span className="text-[10px]">{data.location}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
 
-              {/* Kontaktinformation (bara med samtycke) */}
-              {isConsented && (data.phone || data.location) && (
-                <div className="space-y-2 bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                  <h3 className="text-xs font-semibold text-white">Kontakt</h3>
-                  {data.phone && (
-                    <button
-                      onClick={handlePhoneClick}
-                      className="flex items-center gap-2 text-white/90 hover:text-white transition-colors w-full text-left group"
-                    >
-                      <Phone className="h-3 w-3 flex-shrink-0 group-hover:scale-110 transition-transform" />
-                      <span className="text-[10px] underline decoration-dotted truncate">{data.phone}</span>
-                    </button>
-                  )}
-                  {data.location && (
-                    <div className="flex items-center gap-2 text-white/90">
-                      <MapPin className="h-3 w-3 flex-shrink-0" />
-                      <span className="text-[10px] truncate">{data.location}</span>
+              {/* Personlig information */}
+              <div className="space-y-2">
+                <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Personlig information</h3>
+                <div className="space-y-1.5">
+                  {isConsented && data.age && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Calendar className="h-3 w-3" />
+                      <span className="text-[10px]">{data.age} år</span>
                     </div>
                   )}
+                  {data.working_hours && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      <span className="text-[10px]">{data.working_hours}</span>
+                    </div>
+                  )}
+                  {data.availability && (
+                    <p className="text-[10px] text-muted-foreground">
+                      <span className="font-medium text-foreground">Tillgänglighet:</span> {data.availability}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Bio */}
+              {data.bio && (
+                <div className="space-y-2">
+                  <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Om kandidaten</h3>
+                  <p className="text-[10px] text-muted-foreground whitespace-pre-wrap line-clamp-4">
+                    {data.bio}
+                  </p>
                 </div>
               )}
 
-              {/* Action buttons */}
-              <div className="flex gap-2 pt-2">
-                <Button 
-                  variant="outline" 
-                  className="flex-1 rounded-lg py-1 h-auto bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 text-[10px]"
-                >
-                  <Phone className="h-3 w-3 mr-1" />
-                  Ring
-                </Button>
-                <Button className="flex-1 bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 rounded-lg py-1 h-auto text-white text-[10px]">
-                  <Video className="h-3 w-3 mr-1" />
-                  Video
-                </Button>
-              </div>
-
-              {/* CV */}
+              {/* CV & Dokument */}
               {data.cv_url && (
-                <button
-                  onClick={handleCvClick}
-                  className="w-full flex items-center gap-2 p-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 hover:bg-white/20 transition-all group"
-                >
-                  <FileText className="h-3 w-3 text-white group-hover:scale-110 transition-transform" />
-                  <span className="text-white font-medium text-[10px]">Visa CV</span>
-                  <ExternalLink className="h-2 w-2 text-white/80 ml-auto" />
-                </button>
-              )}
-
-              {/* Tillgänglighet */}
-              {(data.working_hours || data.availability) && (
-                <div className="space-y-1">
-                  <h3 className="text-xs font-semibold text-white">Tillgänglighet</h3>
-                  <div className="space-y-1">
-                    {data.working_hours && (
-                      <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                        <span className="text-[9px] text-white/80 font-medium">Arbetstid</span>
-                        <p className="text-[10px] text-white truncate">{data.working_hours}</p>
-                      </div>
-                    )}
-                    {data.availability && (
-                      <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                        <span className="text-[9px] text-white/80 font-medium">Kan börja</span>
-                        <p className="text-[10px] text-white truncate">{data.availability}</p>
-                      </div>
-                    )}
-                  </div>
+                <div className="space-y-2">
+                  <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Dokument</h3>
+                  <button
+                    onClick={handleCvClick}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors text-foreground text-[10px]"
+                  >
+                    <FileText className="h-3 w-3" />
+                    Visa CV
+                  </button>
                 </div>
               )}
             </CardContent>
