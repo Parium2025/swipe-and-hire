@@ -347,7 +347,7 @@ export default function ProfilePreview() {
     const DetailedView = () => (
       <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div className="w-full max-w-[220px] max-h-[450px] overflow-y-auto custom-scrollbar">
-          <Card className="bg-background/95 backdrop-blur-xl border-white/10 shadow-2xl">
+          <Card className="bg-background/95 backdrop-blur-xl border-white/10 shadow-2xl relative">
             {/* Stäng-knapp */}
             <button
               onClick={() => setShowDetailedView(false)}
@@ -356,18 +356,18 @@ export default function ProfilePreview() {
               <X className="h-4 w-4" />
             </button>
 
-            <CardHeader className="pb-4">
+            <CardHeader className="pb-3">
               <div className="text-center">
-                <h2 className="text-base font-semibold text-foreground">
+                <h2 className="text-sm font-semibold text-foreground">
                   {data.first_name} {isConsented ? data.last_name : '***'}
                 </h2>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-[10px] text-muted-foreground mt-1">
                   {data.employment_status || 'Jobbsökande'}
                 </p>
               </div>
             </CardHeader>
 
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 pt-0">
               {/* Kontaktinformation */}
               {isConsented && (data.phone || data.location) && (
                 <div className="space-y-2">
@@ -398,7 +398,7 @@ export default function ProfilePreview() {
               {isConsented && (data.age || data.employment_status || data.availability) && (
                 <div className="space-y-2">
                   <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Personlig information</h3>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2">
                     {data.age && (
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Calendar className="h-4 w-4" />
