@@ -373,26 +373,26 @@ export default function ProfilePreview() {
           <div className="w-6"></div>
         </div>
 
-        {/* Scrollbart innehåll med box-struktur från CandidateProfileDialog */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-3">
+        {/* Scrollbart innehåll med box-struktur - anpassat för mobil */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-2">
           {/* Kontaktinformation */}
           {isConsented && (data.phone || data.location) && (
-            <div className="space-y-2">
-              <h3 className="text-[10px] font-semibold text-white uppercase tracking-wide">Kontaktinformation</h3>
-              <div className="bg-white/5 p-3 rounded-lg border border-white/10 space-y-2">
+            <div className="space-y-1">
+              <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1">Kontaktinformation</h3>
+              <div className="bg-white/5 p-2 rounded-lg border border-white/10 space-y-1.5">
                 {data.phone && (
                   <button
                     onClick={handlePhoneClick}
-                    className="flex items-center gap-2 text-white/90 hover:text-white transition-colors w-full"
+                    className="flex items-center gap-1.5 text-white/90 hover:text-white transition-colors w-full"
                   >
-                    <Phone className="h-4 w-4 text-white" />
-                    <span className="text-sm">{data.phone}</span>
+                    <Phone className="h-3 w-3 text-white flex-shrink-0" />
+                    <span className="text-xs">{data.phone}</span>
                   </button>
                 )}
                 {data.location && (
-                  <div className="flex items-center gap-2 text-white/90">
-                    <MapPin className="h-4 w-4 text-white" />
-                    <span className="text-sm">{data.location}</span>
+                  <div className="flex items-center gap-1.5 text-white/90">
+                    <MapPin className="h-3 w-3 text-white flex-shrink-0" />
+                    <span className="text-xs">{data.location}</span>
                   </div>
                 )}
               </div>
@@ -401,25 +401,25 @@ export default function ProfilePreview() {
 
           {/* Personlig information */}
           {isConsented && (data.age || data.employment_status || data.availability) && (
-            <div className="space-y-2">
-              <h3 className="text-[10px] font-semibold text-white uppercase tracking-wide">Personlig information</h3>
-              <div className="bg-white/5 p-3 rounded-lg border border-white/10 space-y-2">
-                <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1">Personlig information</h3>
+              <div className="bg-white/5 p-2 rounded-lg border border-white/10 space-y-1.5">
+                <div className="grid grid-cols-2 gap-2">
                   {data.age && (
-                    <div className="flex items-center gap-2 text-white/90">
-                      <Calendar className="h-4 w-4 text-white" />
-                      <span className="text-sm">{data.age} år</span>
+                    <div className="flex items-center gap-1.5 text-white/90">
+                      <Calendar className="h-3 w-3 text-white flex-shrink-0" />
+                      <span className="text-xs">{data.age} år</span>
                     </div>
                   )}
                   {data.employment_status && (
-                    <div className="flex items-center gap-2 text-white/90">
-                      <Briefcase className="h-4 w-4 text-white" />
-                      <span className="text-sm">{data.employment_status}</span>
+                    <div className="flex items-center gap-1.5 text-white/90">
+                      <Briefcase className="h-3 w-3 text-white flex-shrink-0" />
+                      <span className="text-xs truncate">{data.employment_status}</span>
                     </div>
                   )}
                 </div>
                 {data.availability && (
-                  <p className="text-sm text-white/90 pt-1">
+                  <p className="text-xs text-white/90 pt-0.5">
                     <span className="font-medium text-white">Tillgänglighet:</span> {data.availability}
                   </p>
                 )}
@@ -429,10 +429,10 @@ export default function ProfilePreview() {
 
           {/* Bio */}
           {data.bio && (
-            <div className="space-y-2">
-              <h3 className="text-[10px] font-semibold text-white uppercase tracking-wide">Om kandidaten</h3>
-              <div className="bg-white/5 p-3 rounded-lg border border-white/10">
-                <p className="text-sm text-white/90 whitespace-pre-wrap leading-relaxed">
+            <div className="space-y-1">
+              <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1">Om kandidaten</h3>
+              <div className="bg-white/5 p-2 rounded-lg border border-white/10">
+                <p className="text-xs text-white/90 whitespace-pre-wrap leading-relaxed">
                   {data.bio}
                 </p>
               </div>
@@ -441,29 +441,29 @@ export default function ProfilePreview() {
 
           {/* Dokument */}
           {data.cv_url && (
-            <div className="space-y-2">
-              <h3 className="text-[10px] font-semibold text-white uppercase tracking-wide">Dokument</h3>
+            <div className="space-y-1">
+              <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1">Dokument</h3>
               <button
                 onClick={handleCvClick}
-                className="w-full inline-flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors text-white"
+                className="w-full inline-flex items-center gap-1.5 px-2 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors text-white"
               >
-                <FileText className="h-4 w-4 text-white" />
-                <span className="text-sm">Visa CV</span>
+                <FileText className="h-3 w-3 text-white" />
+                <span className="text-xs">Visa CV</span>
               </button>
             </div>
           )}
 
           {/* Action buttons längst ner */}
-          <div className="flex gap-2 pt-2">
+          <div className="flex gap-1.5 pt-1">
             <Button 
               variant="outline" 
               size="sm"
-              className="flex-1 bg-white/5 hover:bg-white/10 border-white/10 text-white"
+              className="flex-1 bg-white/5 hover:bg-white/10 border-white/10 text-white h-7 text-xs px-2"
             >
               <Phone className="h-3 w-3 mr-1" />
               Ring
             </Button>
-            <Button size="sm" className="flex-1 bg-primary hover:bg-primary/90 text-white">
+            <Button size="sm" className="flex-1 bg-primary hover:bg-primary/90 text-white h-7 text-xs px-2">
               <Video className="h-3 w-3 mr-1" />
               Video
             </Button>
