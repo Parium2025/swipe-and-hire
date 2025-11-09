@@ -11,9 +11,6 @@ import { Eye, Lock, Unlock, User, Phone, MapPin, Calendar, FileText, Video, Info
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { convertToSignedUrl } from '@/utils/storageUtils';
 import { useToast } from '@/hooks/use-toast';
-import DeveloperControls from '@/components/DeveloperControls';
-import { AppSidebar } from '@/components/AppSidebar';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { useDevice } from '@/hooks/use-device';
 
 interface ProfileViewData {
@@ -41,7 +38,6 @@ export default function ProfilePreview() {
   const [maskedData, setMaskedData] = useState<ProfileViewData | null>(null);
   const [loading, setLoading] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string>('');
-  const [currentView, setCurrentView] = useState('profile');
   const [showDetailedView, setShowDetailedView] = useState(false);
 
   useEffect(() => {
@@ -520,50 +516,38 @@ export default function ProfilePreview() {
   }
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <div className="flex-1 flex flex-col">
-        {/* Header with developer controls */}
-        <div className="flex items-center justify-between p-4 bg-transparent">
-          <SidebarTrigger className="text-white" />
-          <DeveloperControls 
-            onViewChange={setCurrentView}
-            currentView={currentView}
-          />
-        </div>
-
-        <div className="p-6 max-w-4xl mx-auto space-y-6 animate-in fade-in duration-200">
-          {/* Header */}
-          <div className="text-center space-y-4 mb-6">
-            <div className="flex items-center justify-center gap-2 text-white">
-              <Eye className="h-6 w-6" />
-              <h1 className="text-2xl font-bold">Förhandsgranska Profil</h1>
-            </div>
-            <p className="text-white max-w-2xl mx-auto">
-              Se hur din profil visas för arbetsgivare i Tinder-stil.
-            </p>
+    <div className="min-h-screen w-full">
+      <div className="p-6 max-w-4xl mx-auto space-y-6 animate-in fade-in duration-200">
+        {/* Header */}
+        <div className="text-center space-y-4 mb-6">
+          <div className="flex items-center justify-center gap-2 text-white">
+            <Eye className="h-6 w-6" />
+            <h1 className="text-2xl font-bold">Förhandsgranska Profil</h1>
           </div>
-
-          {/* Profile View */}
-          <ProfileView data={consentedData} isConsented={true} />
-
-          {/* Tips */}
-          <Card className="bg-blue-500/20 backdrop-blur-sm border-blue-300/30 mt-8">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Info className="h-5 w-5" />
-                Tips för bättre profil
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-blue-100">
-              <p>• Första intrycket: Lägg till en bra profilbild eller video</p>
-              <p>• Fyll i en utförlig bio för att sticka ut</p>
-              <p>• Håll ditt CV uppdaterat med senaste erfarenheter</p>
-              <p>• Använd en professionell profilbild</p>
-            </CardContent>
-          </Card>
+          <p className="text-white max-w-2xl mx-auto">
+            Se hur din profil visas för arbetsgivare i Tinder-stil.
+          </p>
         </div>
+
+        {/* Profile View */}
+        <ProfileView data={consentedData} isConsented={true} />
+
+        {/* Tips */}
+        <Card className="bg-blue-500/20 backdrop-blur-sm border-blue-300/30 mt-8">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <Info className="h-5 w-5" />
+              Tips för bättre profil
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-blue-100">
+            <p>• Första intrycket: Lägg till en bra profilbild eller video</p>
+            <p>• Fyll i en utförlig bio för att sticka ut</p>
+            <p>• Håll ditt CV uppdaterat med senaste erfarenheter</p>
+            <p>• Använd en professionell profilbild</p>
+          </CardContent>
+        </Card>
       </div>
-    </SidebarProvider>
+    </div>
   );
 }
