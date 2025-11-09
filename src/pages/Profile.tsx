@@ -1101,9 +1101,9 @@ const Profile = () => {
               </Label>
               
               {isUploadingMedia && (
-                <div className="flex items-center justify-center w-20 h-20 rounded-lg border-2 border-primary bg-primary/10 text-white text-lg font-semibold">
-                  {uploadingMediaType === 'video' ? `${uploadProgress}%` : '...'}
-                </div>
+                <Badge variant="outline" className="bg-white/10 text-white border-white/20 animate-pulse rounded-md px-3 py-1.5">
+                  {uploadingMediaType === 'video' ? `${uploadProgress}%` : `Laddar upp bild...`}
+                </Badge>
               )}
               
               {(isProfileVideo && !!profileImageUrl) && !isUploadingMedia && (
