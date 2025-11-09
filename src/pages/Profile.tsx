@@ -1284,43 +1284,33 @@ const Profile = () => {
                 </div>
               </div>
 
-              {/* Contact Information */}
-              <div className="space-y-4 md:space-y-3 pt-4 md:pt-3 border-t border-white/10">
-                <div className="flex items-center gap-2 mb-2">
-                  <Mail className="h-4 w-4 text-white" />
-                  <Label className="text-base font-medium text-white">Kontaktinformation</Label>
-                </div>
-                
-                <div className="space-y-4 md:space-y-3">
-                  {/* E-post - full width */}
-                  <div className="space-y-2 md:space-y-1.5">
-                    <Label className="text-white text-sm">E-post</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white z-10" />
-                      <div className="flex min-h-touch md:h-10 w-full rounded-md border bg-white/5 backdrop-blur-sm border-white/10 text-white pl-10 pr-3 py-2 text-sm items-center min-w-0 hover:bg-white/10 transition-all duration-150">
-                        <span 
-                          className="truncate" 
-                          title={user?.email || ''}
-                        >
-                          {user?.email || ''}
-                        </span>
-                      </div>
-                    </div>
+              {/* E-post - full width */}
+              <div className="space-y-2 md:space-y-1.5">
+                <Label className="text-white text-sm">E-post</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white z-10" />
+                  <div className="flex min-h-touch md:h-10 w-full rounded-md border bg-white/5 backdrop-blur-sm border-white/10 text-white pl-10 pr-3 py-2 text-sm items-center min-w-0 hover:bg-white/10 transition-all duration-150">
+                    <span 
+                      className="truncate" 
+                      title={user?.email || ''}
+                    >
+                      {user?.email || ''}
+                    </span>
                   </div>
-
-                  {/* Postnummer & Ort */}
-                  <WorkplacePostalCodeSelector
-                    postalCodeValue={postalCode}
-                    cityValue={userLocation}
-                    onPostalCodeChange={setPostalCode}
-                    onLocationChange={(city, postalCode, municipality, county) => {
-                      setUserLocation(city);
-                    }}
-                    onValidationChange={setHasValidLocation}
-                  />
-                  {errors.userLocation && !hasValidLocation && <p className="text-sm text-red-300">{errors.userLocation}</p>}
                 </div>
               </div>
+
+              {/* Postnummer & Ort */}
+              <WorkplacePostalCodeSelector
+                postalCodeValue={postalCode}
+                cityValue={userLocation}
+                onPostalCodeChange={setPostalCode}
+                onLocationChange={(city, postalCode, municipality, county) => {
+                  setUserLocation(city);
+                }}
+                onValidationChange={setHasValidLocation}
+              />
+              {errors.userLocation && !hasValidLocation && <p className="text-sm text-red-300">{errors.userLocation}</p>}
 
               {/* Bio */}
               <div className="space-y-2 md:space-y-1.5 pt-4 md:pt-3 border-t border-white/10">
