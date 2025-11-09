@@ -238,7 +238,7 @@ export default function ProfilePreview() {
       }
     };
 
-    // FÖRSTA VY: Minimal Tinder-stil med swipe
+    // FÖRSTA VY: Minimal Tinder-stil med swipe - anpassat för mobil-mockup
     const TinderCard = () => {
       const [startX, setStartX] = useState(0);
       const [currentX, setCurrentX] = useState(0);
@@ -280,9 +280,9 @@ export default function ProfilePreview() {
       };
 
       return (
-      <div className="w-full max-w-sm mx-auto aspect-[9/16] relative">
+      <div className="w-full h-full relative">
         <Card 
-          className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl overflow-hidden rounded-3xl transition-all duration-300 hover:shadow-3xl cursor-pointer group h-full"
+          className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-3xl cursor-pointer group h-full"
           onClick={() => setShowDetailedView(true)}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -295,7 +295,7 @@ export default function ProfilePreview() {
           {/* Helskärm profilbild/video */}
           <div className="relative w-full h-full bg-transparent overflow-hidden">
             {/* Avatar-område för både bild och video - centrerat längst upp */}
-            <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-64 h-64 rounded-full overflow-hidden border-4 border-white/40 shadow-2xl bg-gradient-to-br from-primary/20 to-primary/30">
+            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-full overflow-hidden border-2 border-white/40 shadow-2xl bg-gradient-to-br from-primary/20 to-primary/30">
               
               {/* Cover Image - visas när video inte spelas */}
               {(!showVideo || !isPlaying) && (
@@ -310,7 +310,7 @@ export default function ProfilePreview() {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center cursor-pointer" onClick={handleVideoTap}>
-                      <User className="h-16 w-16 text-primary/60" />
+                      <User className="h-8 w-8 text-primary/60" />
                     </div>
                   )}
                 </>
@@ -333,30 +333,30 @@ export default function ProfilePreview() {
             </div>
 
             {/* Tinder-stil gradient overlay längst ner med minimal info */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-3">
               <div className="text-white">
-                <h1 className="text-3xl font-bold mb-1">
+                <h1 className="text-lg font-bold mb-0.5">
                   {data.first_name}{isConsented && data.age && ` ${data.age}`}
                 </h1>
                 
                 {/* Video tillgängligt text */}
                 {videoUrl && (
-                  <p className="text-sm text-white mb-3">Video tillgängligt</p>
+                  <p className="text-xs text-white mb-2">Video tillgängligt</p>
                 )}
                 
                 {/* Plats */}
                 {data.location && (
-                  <div className="flex items-center gap-2 mb-4">
-                    <MapPin className="h-4 w-4 text-white" />
-                    <span className="text-sm text-white/90">Bor i {data.location}</span>
+                  <div className="flex items-center gap-1 mb-2">
+                    <MapPin className="h-3 w-3 text-white" />
+                    <span className="text-xs text-white/90">Bor i {data.location}</span>
                   </div>
                 )}
                 
                 {/* Swipe-indikator */}
-                <div className="flex items-center justify-center mt-6">
-                  <div className="bg-white/20 rounded-full px-4 py-2 flex items-center gap-2">
-                    <span className="text-sm text-blue-400">Tryck för mer info</span>
-                    <ArrowRight className="h-4 w-4 text-white/80" />
+                <div className="flex items-center justify-center mt-3">
+                  <div className="bg-white/20 rounded-full px-2 py-1 flex items-center gap-1">
+                    <span className="text-xs text-blue-400">Tryck för mer info</span>
+                    <ArrowRight className="h-3 w-3 text-white/80" />
                   </div>
                 </div>
               </div>
@@ -689,19 +689,19 @@ export default function ProfilePreview() {
           <div className="flex flex-col items-center space-y-4">
             <p className="text-white/80 text-sm">Tinder-stil på mobil (tryck på kortet för mer info)</p>
             
-            {/* iPhone-stil telefonram */}
-            <div className="relative w-[160px] h-[320px] rounded-[2rem] bg-black p-1 shadow-2xl scale-90 sm:scale-100">
+            {/* iPhone-stil telefonram - något större */}
+            <div className="relative w-[200px] h-[400px] rounded-[2.4rem] bg-black p-1.5 shadow-2xl scale-90 sm:scale-100">
               {/* Skärm */}
-              <div className="relative w-full h-full rounded-[1.6rem] overflow-hidden bg-black">
+              <div className="relative w-full h-full rounded-[2rem] overflow-hidden bg-black">
                 {/* iPhone notch */}
-                <div className="absolute top-1 left-1/2 -translate-x-1/2 z-20 h-1 w-8 rounded-full bg-black border border-gray-800"></div>
+                <div className="absolute top-1.5 left-1/2 -translate-x-1/2 z-20 h-1.5 w-10 rounded-full bg-black border border-gray-800"></div>
 
                 {/* Innehåll med Parium bakgrund */}
                 <div 
-                  className="absolute inset-0 rounded-[1.6rem] overflow-y-auto"
+                  className="absolute inset-0 rounded-[2rem] overflow-y-auto custom-scrollbar"
                   style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}
                 >
-                  <div className="h-full p-2 pt-3">
+                  <div className="h-full p-3 pt-4">
                     <ProfileView data={consentedData} isConsented={true} />
                   </div>
                 </div>
