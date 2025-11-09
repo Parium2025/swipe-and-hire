@@ -303,7 +303,7 @@ export default function ProfilePreview() {
             {/* Tinder-stil gradient overlay längst ner med minimal info */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-3">
               <div className="text-white">
-                <h1 className="text-lg font-bold mb-0.5" style={{ color: '#FFFFFF' }}>
+                <h1 className="text-lg font-bold mb-0.5 break-words leading-tight max-w-full" style={{ color: '#FFFFFF' }}>
                   {data.first_name} {data.last_name}
                 </h1>
                 
