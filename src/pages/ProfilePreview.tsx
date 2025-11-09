@@ -357,103 +357,87 @@ export default function ProfilePreview() {
             </button>
 
             <CardContent className="p-3 space-y-3">
-              {/* Namn och titel */}
+              {/* Namn */}
               <div className="text-center">
-                <h1 className="text-sm font-bold text-foreground">
+                <h1 className="text-base font-semibold text-foreground">
                   {data.first_name} {isConsented ? data.last_name : '***'}
-                  {isConsented && data.age && (
-                    <span className="text-xs font-normal text-muted-foreground ml-1">{data.age} år</span>
-                  )}
                 </h1>
-                <p className="text-xs text-muted-foreground font-medium mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {data.employment_status || 'Jobbsökande'}
                 </p>
               </div>
 
-              {/* Bio */}
-              {data.bio && (
-                <div className="space-y-1">
-                  <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Om mig</h3>
-                  <div className="bg-white/5 p-2 rounded-lg border border-white/10">
-                    <p className="text-[10px] text-muted-foreground leading-relaxed line-clamp-3">
-                      {data.bio}
-                    </p>
+              {/* Personlig information */}
+              {isConsented && (data.age || data.employment_status) && (
+                <div className="space-y-2">
+                  <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Personlig information</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    {data.age && (
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        <span className="text-[10px]">{data.age} år</span>
+                      </div>
+                    )}
+                    {data.employment_status && (
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <Briefcase className="h-4 w-4" />
+                        <span className="text-[10px]">{data.employment_status}</span>
+                      </div>
+                    )}
                   </div>
+                  {data.availability && (
+                    <p className="text-[10px] text-muted-foreground">
+                      <span className="font-medium text-foreground">Tillgänglighet:</span> {data.availability}
+                    </p>
+                  )}
                 </div>
               )}
 
-              {/* Kontaktinformation (bara med samtycke) */}
+              {/* Bio */}
+              {data.bio && (
+                <div className="space-y-2">
+                  <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Om kandidaten</h3>
+                  <p className="text-muted-foreground text-[10px] whitespace-pre-wrap line-clamp-4">{data.bio}</p>
+                </div>
+              )}
+
+              {/* Kontaktinformation */}
               {isConsented && (data.phone || data.location) && (
                 <div className="space-y-2">
-                  <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Kontakt</h3>
-                  <div className="bg-white/5 p-2 rounded-lg border border-white/10 space-y-2">
+                  <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Kontaktinformation</h3>
+                  <div className="space-y-2">
                     {data.phone && (
-                      <button
-                        onClick={handlePhoneClick}
-                        className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors w-full text-left group"
-                      >
-                        <Phone className="h-4 w-4 flex-shrink-0 group-hover:scale-110 transition-transform" />
-                        <span className="text-[10px] underline decoration-dotted truncate">{data.phone}</span>
-                      </button>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Phone className="h-4 w-4" />
+                        <button
+                          onClick={handlePhoneClick}
+                          className="hover:text-foreground transition-colors"
+                        >
+                          <span className="text-[10px]">{data.phone}</span>
+                        </button>
+                      </div>
                     )}
                     {data.location && (
                       <div className="flex items-center gap-2 text-muted-foreground">
-                        <MapPin className="h-4 w-4 flex-shrink-0" />
-                        <span className="text-[10px] truncate">{data.location}</span>
+                        <MapPin className="h-4 w-4" />
+                        <span className="text-[10px]">{data.location}</span>
                       </div>
                     )}
                   </div>
                 </div>
               )}
 
-              {/* Action buttons */}
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  className="flex-1 rounded-lg py-1 h-auto text-[10px]"
-                >
-                  <Phone className="h-4 w-4 mr-1" />
-                  Ring
-                </Button>
-                <Button 
-                  variant="outline"
-                  className="flex-1 rounded-lg py-1 h-auto text-[10px]"
-                >
-                  <Video className="h-4 w-4 mr-1" />
-                  Video
-                </Button>
-              </div>
-
-              {/* CV */}
+              {/* CV & Dokument */}
               {data.cv_url && (
-                <button
-                  onClick={handleCvClick}
-                  className="w-full flex items-center gap-2 p-2 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-all group"
-                >
-                  <FileText className="h-4 w-4 text-foreground group-hover:scale-110 transition-transform" />
-                  <span className="text-foreground font-medium text-[10px]">Visa CV</span>
-                  <ExternalLink className="h-3 w-3 text-muted-foreground ml-auto" />
-                </button>
-              )}
-
-              {/* Tillgänglighet */}
-              {(data.working_hours || data.availability) && (
                 <div className="space-y-2">
-                  <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Tillgänglighet</h3>
-                  <div className="space-y-2">
-                    {data.working_hours && (
-                      <div className="bg-white/5 p-2 rounded-lg border border-white/10">
-                        <span className="text-[9px] text-muted-foreground font-medium block mb-0.5">Arbetstid</span>
-                        <p className="text-[10px] text-foreground truncate">{data.working_hours}</p>
-                      </div>
-                    )}
-                    {data.availability && (
-                      <div className="bg-white/5 p-2 rounded-lg border border-white/10">
-                        <span className="text-[9px] text-muted-foreground font-medium block mb-0.5">Kan börja</span>
-                        <p className="text-[10px] text-foreground truncate">{data.availability}</p>
-                      </div>
-                    )}
-                  </div>
+                  <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Dokument</h3>
+                  <button
+                    onClick={handleCvClick}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors text-foreground"
+                  >
+                    <FileText className="h-4 w-4" />
+                    <span className="text-[10px]">Visa CV</span>
+                  </button>
                 </div>
               )}
             </CardContent>
