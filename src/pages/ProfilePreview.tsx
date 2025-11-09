@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Eye, Lock, Unlock, User, Phone, MapPin, Calendar, FileText, Video, Info, Download, Play, ExternalLink, Pause, ArrowRight } from 'lucide-react';
+import { Eye, Lock, Unlock, User, Phone, MapPin, Calendar, FileText, Video, Info, Download, Play, ExternalLink, Pause, ArrowRight, Monitor, Smartphone, X, Mail, Briefcase, Clock } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { convertToSignedUrl } from '@/utils/storageUtils';
 import { useToast } from '@/hooks/use-toast';
@@ -39,6 +39,7 @@ export default function ProfilePreview() {
   const [loading, setLoading] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [showDetailedView, setShowDetailedView] = useState(false);
+  const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
 
   useEffect(() => {
     const loadPreviewData = async () => {
@@ -515,9 +516,135 @@ export default function ProfilePreview() {
     );
   }
 
+  // Desktop TeamTailor-style list view
+  const DesktopListView = () => {
+    const [selectedCandidate, setSelectedCandidate] = useState<boolean>(false);
+    
+    return (
+      <div className="flex h-[600px] max-w-5xl mx-auto bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden">
+        {/* Kandidatlista */}
+        <div className="w-80 border-r border-white/10 overflow-y-auto bg-white/5">
+          <div className="p-4 border-b border-white/10">
+            <h3 className="text-white font-semibold">Kandidater</h3>
+          </div>
+          
+          {/* Kandidatkort i lista - klickbar */}
+          <div 
+            onClick={() => setSelectedCandidate(true)}
+            className={`p-4 border-b border-white/10 cursor-pointer transition-colors ${
+              selectedCandidate ? 'bg-primary/20' : 'hover:bg-white/5'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={avatarUrl} />
+                <AvatarFallback className="bg-primary/20 text-white">
+                  {consentedData?.first_name?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-medium truncate">
+                  {consentedData?.first_name} {consentedData?.last_name}
+                </p>
+                <p className="text-white/60 text-sm truncate">
+                  {consentedData?.location}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Detaljvy */}
+        {selectedCandidate ? (
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-6 space-y-6">
+              {/* Header */}
+              <div className="flex items-start gap-4">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={avatarUrl} />
+                  <AvatarFallback className="bg-primary/20 text-white text-2xl">
+                    {consentedData?.first_name?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold text-white">
+                    {consentedData?.first_name} {consentedData?.last_name}
+                  </h2>
+                  {consentedData?.age && (
+                    <p className="text-white/60">{consentedData.age} år</p>
+                  )}
+                </div>
+                <button
+                  onClick={() => setSelectedCandidate(false)}
+                  className="text-white/60 hover:text-white"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Kontaktinformation */}
+              <div className="bg-white/5 rounded-lg p-4 space-y-3">
+                <h3 className="text-white font-semibold flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Kontaktinformation
+                </h3>
+                {consentedData?.phone && (
+                  <div className="flex items-center gap-2 text-white/80">
+                    <Phone className="h-4 w-4" />
+                    <span>{consentedData.phone}</span>
+                  </div>
+                )}
+                {consentedData?.location && (
+                  <div className="flex items-center gap-2 text-white/80">
+                    <MapPin className="h-4 w-4" />
+                    <span>{consentedData.location}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Bio */}
+              {consentedData?.bio && (
+                <div className="bg-white/5 rounded-lg p-4">
+                  <h3 className="text-white font-semibold mb-3">Om mig</h3>
+                  <p className="text-white/80 leading-relaxed whitespace-pre-wrap">
+                    {consentedData.bio}
+                  </p>
+                </div>
+              )}
+
+              {/* Tillgänglighet */}
+              <div className="bg-white/5 rounded-lg p-4 space-y-3">
+                <h3 className="text-white font-semibold flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Tillgänglighet
+                </h3>
+                {consentedData?.working_hours && (
+                  <div className="text-white/80">
+                    <span className="text-white/60 text-sm">Arbetstid:</span>{' '}
+                    {consentedData.working_hours}
+                  </div>
+                )}
+                {consentedData?.availability && (
+                  <div className="text-white/80">
+                    <span className="text-white/60 text-sm">Kan börja:</span>{' '}
+                    {consentedData.availability}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-white/60">
+            Välj en kandidat för att se detaljer
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen w-full">
-      <div className="p-6 max-w-4xl mx-auto space-y-6 animate-in fade-in duration-200">
+      <div className="p-6 max-w-6xl mx-auto space-y-6 animate-in fade-in duration-200">
         {/* Header */}
         <div className="text-center space-y-4 mb-6">
           <div className="flex items-center justify-center gap-2 text-white">
@@ -525,12 +652,68 @@ export default function ProfilePreview() {
             <h1 className="text-2xl font-bold">Förhandsgranska Profil</h1>
           </div>
           <p className="text-white max-w-2xl mx-auto">
-            Se hur din profil visas för arbetsgivare i Tinder-stil.
+            Se hur din profil visas för arbetsgivare på mobil och dator.
           </p>
         </div>
 
+        {/* View Mode Toggle */}
+        <div className="flex justify-center">
+          <div className="inline-flex bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20">
+            <button
+              onClick={() => setViewMode('mobile')}
+              className={`flex items-center gap-2 px-6 py-2 rounded-md transition-all ${
+                viewMode === 'mobile'
+                  ? 'bg-primary text-white'
+                  : 'text-white/70 hover:text-white'
+              }`}
+            >
+              <Smartphone className="h-4 w-4" />
+              Mobil vy
+            </button>
+            <button
+              onClick={() => setViewMode('desktop')}
+              className={`flex items-center gap-2 px-6 py-2 rounded-md transition-all ${
+                viewMode === 'desktop'
+                  ? 'bg-primary text-white'
+                  : 'text-white/70 hover:text-white'
+              }`}
+            >
+              <Monitor className="h-4 w-4" />
+              Datorvy
+            </button>
+          </div>
+        </div>
+
         {/* Profile View */}
-        <ProfileView data={consentedData} isConsented={true} />
+        {viewMode === 'mobile' ? (
+          <div className="flex flex-col items-center space-y-4">
+            <p className="text-white/80 text-sm">Tinder-stil på mobil (tryck på kortet för mer info)</p>
+            
+            {/* iPhone-stil telefonram */}
+            <div className="relative w-[340px] h-[680px] rounded-[3rem] bg-black p-2 shadow-2xl">
+              {/* Skärm */}
+              <div className="relative w-full h-full rounded-[2.5rem] overflow-hidden bg-black">
+                {/* iPhone notch */}
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 h-6 w-32 rounded-full bg-black"></div>
+
+                {/* Innehåll med Parium bakgrund */}
+                <div 
+                  className="absolute inset-0 rounded-[2.5rem] overflow-y-auto"
+                  style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}
+                >
+                  <div className="h-full p-4 pt-10">
+                    <ProfileView data={consentedData} isConsented={true} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center space-y-4">
+            <p className="text-white/80 text-sm">TeamTailor-stil på dator (klicka på kandidaten för att se detaljer)</p>
+            <DesktopListView />
+          </div>
+        )}
 
         {/* Tips */}
         <Card className="bg-blue-500/20 backdrop-blur-sm border-blue-300/30 mt-8">
