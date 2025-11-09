@@ -690,18 +690,18 @@ export default function ProfilePreview() {
             <p className="text-white/80 text-sm">Tinder-stil på mobil (tryck på kortet för mer info)</p>
             
             {/* iPhone-stil telefonram */}
-            <div className="relative w-[340px] h-[680px] rounded-[3rem] bg-black p-2 shadow-2xl">
+            <div className="relative w-[160px] h-[320px] rounded-[2rem] bg-black p-1 shadow-2xl scale-90 sm:scale-100">
               {/* Skärm */}
-              <div className="relative w-full h-full rounded-[2.5rem] overflow-hidden bg-black">
+              <div className="relative w-full h-full rounded-[1.6rem] overflow-hidden bg-black">
                 {/* iPhone notch */}
-                <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 h-6 w-32 rounded-full bg-black"></div>
+                <div className="absolute top-1 left-1/2 -translate-x-1/2 z-20 h-1 w-8 rounded-full bg-black border border-gray-800"></div>
 
                 {/* Innehåll med Parium bakgrund */}
                 <div 
-                  className="absolute inset-0 rounded-[2.5rem] overflow-y-auto"
+                  className="absolute inset-0 rounded-[1.6rem] overflow-y-auto"
                   style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}
                 >
-                  <div className="h-full p-4 pt-10">
+                  <div className="h-full p-2 pt-3">
                     <ProfileView data={consentedData} isConsented={true} />
                   </div>
                 </div>
