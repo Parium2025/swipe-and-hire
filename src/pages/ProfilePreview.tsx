@@ -343,43 +343,70 @@ export default function ProfilePreview() {
     );
     };
 
-    // ANDRA VY: Fullständig information - anpassad för mobil-mockup
+    // ANDRA VY: Fullständig information - exakt som CandidateProfileDialog
     const DetailedView = () => (
       <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div className="w-full max-w-[200px] max-h-[400px] overflow-y-auto custom-scrollbar">
-          <Card className="bg-background/95 backdrop-blur-xl border-white/10 shadow-2xl overflow-visible rounded-xl relative">
+        <div className="w-full max-w-[220px] max-h-[450px] overflow-y-auto custom-scrollbar">
+          <Card className="bg-background/95 backdrop-blur-xl border-white/10 shadow-2xl">
             {/* Stäng-knapp */}
             <button
               onClick={() => setShowDetailedView(false)}
-              className="absolute top-2 right-2 z-10 bg-black/50 hover:bg-black/70 text-foreground rounded-full p-1 transition-colors"
+              className="absolute top-2 right-2 z-10 bg-black/50 hover:bg-black/70 text-foreground rounded-full p-1.5 transition-colors"
             >
               <X className="h-4 w-4" />
             </button>
 
-            <CardContent className="p-3 space-y-3">
-              {/* Namn */}
+            <CardHeader className="pb-4">
               <div className="text-center">
-                <h1 className="text-base font-semibold text-foreground">
+                <h2 className="text-base font-semibold text-foreground">
                   {data.first_name} {isConsented ? data.last_name : '***'}
-                </h1>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                </h2>
+                <p className="text-xs text-muted-foreground mt-1">
                   {data.employment_status || 'Jobbsökande'}
                 </p>
               </div>
+            </CardHeader>
 
-              {/* Personlig information */}
-              {isConsented && (data.age || data.employment_status) && (
+            <CardContent className="space-y-4">
+              {/* Kontaktinformation */}
+              {isConsented && (data.phone || data.location) && (
+                <div className="space-y-2">
+                  <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Kontaktinformation</h3>
+                  <div className="space-y-2">
+                    {data.phone && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Phone className="h-4 w-4" />
+                        <button
+                          onClick={handlePhoneClick}
+                          className="text-[10px] hover:text-foreground transition-colors"
+                        >
+                          {data.phone}
+                        </button>
+                      </div>
+                    )}
+                    {data.location && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <MapPin className="h-4 w-4" />
+                        <span className="text-[10px]">{data.location}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Personlig Information */}
+              {isConsented && (data.age || data.employment_status || data.availability) && (
                 <div className="space-y-2">
                   <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Personlig information</h3>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-3">
                     {data.age && (
-                      <div className="flex items-center gap-1 text-muted-foreground">
+                      <div className="flex items-center gap-2 text-muted-foreground">
                         <Calendar className="h-4 w-4" />
                         <span className="text-[10px]">{data.age} år</span>
                       </div>
                     )}
                     {data.employment_status && (
-                      <div className="flex items-center gap-1 text-muted-foreground">
+                      <div className="flex items-center gap-2 text-muted-foreground">
                         <Briefcase className="h-4 w-4" />
                         <span className="text-[10px]">{data.employment_status}</span>
                       </div>
@@ -397,46 +424,20 @@ export default function ProfilePreview() {
               {data.bio && (
                 <div className="space-y-2">
                   <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Om kandidaten</h3>
-                  <p className="text-muted-foreground text-[10px] whitespace-pre-wrap line-clamp-4">{data.bio}</p>
+                  <p className="text-muted-foreground text-[10px] whitespace-pre-wrap">{data.bio}</p>
                 </div>
               )}
 
-              {/* Kontaktinformation */}
-              {isConsented && (data.phone || data.location) && (
-                <div className="space-y-2">
-                  <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Kontaktinformation</h3>
-                  <div className="space-y-2">
-                    {data.phone && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Phone className="h-4 w-4" />
-                        <button
-                          onClick={handlePhoneClick}
-                          className="hover:text-foreground transition-colors"
-                        >
-                          <span className="text-[10px]">{data.phone}</span>
-                        </button>
-                      </div>
-                    )}
-                    {data.location && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <MapPin className="h-4 w-4" />
-                        <span className="text-[10px]">{data.location}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* CV & Dokument */}
+              {/* CV & Documents */}
               {data.cv_url && (
                 <div className="space-y-2">
                   <h3 className="text-[10px] font-semibold text-foreground uppercase tracking-wide">Dokument</h3>
                   <button
                     onClick={handleCvClick}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors text-foreground"
+                    className="inline-flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors text-foreground text-[10px]"
                   >
                     <FileText className="h-4 w-4" />
-                    <span className="text-[10px]">Visa CV</span>
+                    Visa CV
                   </button>
                 </div>
               )}
