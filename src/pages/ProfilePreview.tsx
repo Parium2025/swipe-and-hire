@@ -295,7 +295,7 @@ export default function ProfilePreview() {
           {/* Helskärm profilbild/video */}
           <div className="relative w-full h-full bg-transparent overflow-hidden">
             {/* Avatar-område för både bild och video - centrerat längst upp */}
-            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-full overflow-hidden border-2 border-white/40 shadow-2xl bg-gradient-to-br from-primary/20 to-primary/30">
+            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-full overflow-hidden border-2 border-white/40 shadow-2xl bg-gradient-to-br from-primary/20 to-primary/30 group/avatar">
               
               {/* Cover Image - visas när video inte spelas */}
               {(!showVideo || !isPlaying) && (
@@ -311,6 +311,15 @@ export default function ProfilePreview() {
                   ) : (
                     <div className="w-full h-full flex items-center justify-center cursor-pointer" onClick={handleVideoTap}>
                       <User className="h-8 w-8 text-primary/60" />
+                    </div>
+                  )}
+                  
+                  {/* Play button overlay vid hover - bara om video finns */}
+                  {videoUrl && (
+                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-200 flex items-center justify-center cursor-pointer" onClick={handleVideoTap}>
+                      <div className="bg-white/90 rounded-full p-2">
+                        <Play className="h-6 w-6 text-black" fill="black" />
+                      </div>
                     </div>
                   )}
                 </>
@@ -332,30 +341,38 @@ export default function ProfilePreview() {
               )}
             </div>
 
-            {/* Text direkt under profilbilden */}
-            <div className="absolute top-40 left-1/2 transform -translate-x-1/2 text-center">
-              {/* Video tillgängligt text */}
-              {videoUrl && (
-                <p className="text-xs text-white mb-1">Video tillgängligt</p>
-              )}
-              {/* Ålder under video-texten */}
-              {isConsented && data.age && (
-                <p className="text-sm font-medium text-white/90">{data.age}</p>
-              )}
-            </div>
+            {/* Text direkt under profilbilden - bara om video finns */}
+            {videoUrl && (
+              <div className="absolute top-40 left-1/2 transform -translate-x-1/2 text-center">
+                <p className="text-xs text-white font-medium">Video tillgängligt</p>
+              </div>
+            )}
 
             {/* Tinder-stil gradient overlay längst ner med minimal info */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-3">
               <div className="text-white">
-                <h1 className="text-lg font-bold mb-0.5">
+                <h1 className="text-lg font-bold mb-0.5 text-white">
                   {data.first_name} {data.last_name}
                 </h1>
+                
+                {/* Ålder under namnet */}
+                {isConsented && data.age && (
+                  <p className="text-sm text-white mb-2">{data.age}</p>
+                )}
                 
                 {/* Plats */}
                 {data.location && (
                   <div className="flex items-center gap-1 mb-2">
                     <MapPin className="h-3 w-3 text-white" />
-                    <span className="text-xs text-white/90">Bor i {data.location}</span>
+                    <span className="text-xs text-white">Bor i {data.location}</span>
+                  </div>
+                )}
+                
+                {/* Plats */}
+                {data.location && (
+                  <div className="flex items-center gap-1 mb-2">
+                    <MapPin className="h-3 w-3 text-white" />
+                    <span className="text-xs text-white">Bor i {data.location}</span>
                   </div>
                 )}
                 
