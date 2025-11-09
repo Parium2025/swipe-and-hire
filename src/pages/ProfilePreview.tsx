@@ -309,7 +309,7 @@ export default function ProfilePreview() {
                 
                 {/* Ålder under namnet */}
                 {isConsented && data.age && (
-                  <p className="text-sm mb-2" style={{ color: '#FFFFFF' }}>{data.age}</p>
+                  <p className="text-sm mb-2" style={{ color: '#FFFFFF' }}>{data.age} år</p>
                 )}
                 
                 {/* Plats */}
@@ -370,7 +370,7 @@ export default function ProfilePreview() {
                 <h1 className="text-sm font-bold text-white">
                   {data.first_name} {isConsented ? data.last_name : '***'}
                   {isConsented && data.age && (
-                    <span className="text-xs font-normal text-white/80 ml-1">{data.age}</span>
+                    <span className="text-xs font-normal text-white/80 ml-1">{data.age} år</span>
                   )}
                 </h1>
                 <p className="text-xs text-white/90 font-medium mt-0.5">
