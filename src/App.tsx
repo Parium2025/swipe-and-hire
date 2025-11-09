@@ -92,7 +92,7 @@ const App = () => {
   return (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
+      <TooltipProvider delayDuration={0}>
       <Toaster />
       <OfflineIndicator />
       <BrowserRouter>

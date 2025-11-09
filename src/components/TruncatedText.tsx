@@ -77,17 +77,14 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
       setIsTruncated(truncated);
     };
 
-    // Schedule checks to ensure layout/fonts are ready
+    // Run immediately and schedule a few short re-checks
+    checkTruncation();
     const raf = requestAnimationFrame(checkTruncation);
     const timeouts = [
       setTimeout(checkTruncation, 50),
       setTimeout(checkTruncation, 150),
       setTimeout(checkTruncation, 300),
     ];
-
-    // Ensure after fonts load
-    // @ts-ignore - document.fonts not in all TS lib targets
-    document.fonts?.ready?.then(() => setTimeout(checkTruncation, 0));
 
     // Also check on resize of the element
     const resizeObserver = new ResizeObserver(() => {
@@ -119,7 +116,7 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
   if (!shouldShowTooltip) {
     // Render plain text without tooltip
     return (
-      <span ref={textRef} className={className} title={text}>
+      <span ref={textRef} className={className}>
         {children || text}
       </span>
     );
@@ -130,13 +127,18 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
     <TooltipProvider delayDuration={0}>
       <Tooltip open={!supportsHover ? isOpen : undefined} onOpenChange={!supportsHover ? setIsOpen : undefined}>
         <TooltipTrigger asChild>
-          <span ref={textRef} className={className} onClick={!supportsHover && isTouch ? handleTap : undefined}>
+          <span
+            ref={textRef}
+            className={`${className ?? ""} cursor-help`}
+            onClick={!supportsHover && isTouch ? handleTap : undefined}
+            onTouchStart={!supportsHover ? () => setIsOpen(true) : undefined}
+          >
             {children || text}
           </span>
         </TooltipTrigger>
         <TooltipContent
           side="top"
-          className="max-w-md bg-white text-gray-900 border-gray-200 shadow-xl z-50"
+          className="max-w-md bg-popover text-popover-foreground border border-border shadow-md z-50"
         >
           <p className="text-sm leading-relaxed break-words">{text}</p>
         </TooltipContent>
