@@ -357,7 +357,7 @@ export default function ProfilePreview() {
           </button>
 
           {/* Namn och titel i header - centrerat */}
-          <div className="text-center px-8">
+          <div className="text-center px-2">
             <TruncatedText
               text={`${data.first_name} ${isConsented ? data.last_name : '***'}`}
               className="text-sm font-bold text-white break-words leading-tight max-w-full cursor-pointer"
