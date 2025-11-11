@@ -363,7 +363,7 @@ export default function ProfilePreview() {
               className="text-sm font-bold text-white break-words leading-tight max-w-full cursor-pointer"
               alwaysShowTooltip={true}
             >
-              <h1 className="text-sm font-bold text-white break-words leading-tight truncate">
+              <h1 className="text-sm font-bold text-white break-words leading-tight max-w-full two-line-ellipsis">
                 {data.first_name} {isConsented ? data.last_name : '***'}
               </h1>
             </TruncatedText>
