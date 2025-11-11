@@ -264,7 +264,7 @@ export default function ProfilePreview() {
           }}
         >
           {/* Helskärm profilbild/video */}
-          <div className="relative w-full h-full overflow-hidden" style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}>
+          <div className="relative w-full h-full bg-transparent overflow-hidden">
             {/* Avatar-område för både bild och video - centrerat längst upp */}
             <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-full overflow-hidden border-2 border-white/40 shadow-2xl bg-gradient-to-br from-primary/20 to-primary/30">
               
@@ -303,8 +303,8 @@ export default function ProfilePreview() {
             )}
 
             {/* Tinder-stil gradient overlay längst ner med minimal info */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-0 py-4 pb-3">
-              <div className="text-white px-4">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-3">
+              <div className="text-white">
                 <TruncatedText
                   text={`${data.first_name} ${data.last_name}`}
                   className="text-lg font-bold mb-0.5 break-words leading-tight max-w-full two-line-ellipsis block cursor-pointer pointer-events-auto"
