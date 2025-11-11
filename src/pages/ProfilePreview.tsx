@@ -289,7 +289,7 @@ export default function ProfilePreview() {
                   userInitials={`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`}
                   alt="Profilbild"
                   className="w-full h-full rounded-full"
-                  showCountdown={false}
+                  showCountdown={true}
                 />
               ) : (
                 /* Om ingen video, visa bara bilden */
