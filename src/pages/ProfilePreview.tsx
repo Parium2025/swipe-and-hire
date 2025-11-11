@@ -319,10 +319,16 @@ export default function ProfilePreview() {
             {/* Tinder-stil gradient overlay längst ner med minimal info */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-3">
               <div className="text-white">
-                <NameAutoFit
+                <TruncatedText
                   text={`${data.first_name} ${data.last_name}`}
-                  className="text-lg font-bold mb-0.5 break-words max-w-full text-white"
-                />
+                  className="two-line-ellipsis pr-[1ch] block"
+                  alwaysShowTooltip={true}
+                >
+                  <NameAutoFit
+                    text={`${data.first_name} ${data.last_name}`}
+                    className="text-lg font-bold mb-0.5 break-words max-w-full text-white"
+                  />
+                </TruncatedText>
                 
                 {/* Ålder under namnet */}
                 {isConsented && data.age && (
@@ -404,10 +410,16 @@ export default function ProfilePreview() {
               ✕
             </button>
             <div className="text-center px-6">
-              <NameAutoFit
+              <TruncatedText
                 text={`${data.first_name} ${isConsented ? data.last_name || '' : '***'}`}
-                className="text-sm font-bold text-white break-words max-w-full"
-              />
+                className="two-line-ellipsis pr-[1ch] block"
+                alwaysShowTooltip={true}
+              >
+                <NameAutoFit
+                  text={`${data.first_name} ${isConsented ? data.last_name || '' : '***'}`}
+                  className="text-sm font-bold text-white break-words max-w-full"
+                />
+              </TruncatedText>
             </div>
           </div>
 

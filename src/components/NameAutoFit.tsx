@@ -59,7 +59,7 @@ export function NameAutoFit({ text, className, minFontPx = 12 }: NameAutoFitProp
     // Reset to base before fitting
     const base = baseSizeRef.current ?? currentBase;
     el.style.fontSize = `${base}px`;
-    el.style.letterSpacing = styles.letterSpacing || "";
+    
 
     // Iteratively reduce font size until it fits or we reach min
     let size = base;
@@ -70,16 +70,6 @@ export function NameAutoFit({ text, className, minFontPx = 12 }: NameAutoFitProp
       guard++;
     }
 
-    // Tiny tracking tweak if it's barely overflowing
-    if (isTruncated(el)) {
-      el.style.letterSpacing = "-0.2px";
-      let extraGuard = 0;
-      while (isTruncated(el) && size > minFontPx && extraGuard < 6) {
-        size -= 0.5;
-        el.style.fontSize = `${size}px`;
-        extraGuard++;
-      }
-    }
   };
 
   useEffect(() => {
@@ -94,7 +84,7 @@ export function NameAutoFit({ text, className, minFontPx = 12 }: NameAutoFitProp
     <span
       ref={ref}
       className={cn(
-        "two-line-ellipsis block", // keep 2-line clamp, no fades
+        "block",
         className
       )}
     >
