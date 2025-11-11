@@ -348,12 +348,12 @@ export default function ProfilePreview() {
       <div className="w-full h-full flex flex-col bg-transparent">
         {/* Header med tillbaka-knapp och namn */}
         <div className="relative px-4 pt-4 pb-3 flex items-center justify-center border-b border-white/10 flex-shrink-0">
-          {/* Tillbaka-knapp - absolut positionerad */}
+          {/* Stäng-knapp - absolut positionerad uppe till höger */}
           <button
             onClick={() => setShowDetailedView(false)}
-            className="absolute left-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-1.5 transition-colors"
+            className="absolute right-3 top-3 bg-white/10 hover:bg-white/20 text-white rounded-full p-1 transition-colors"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3 w-3" />
           </button>
 
           {/* Namn och titel i header - centrerat */}
