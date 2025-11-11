@@ -841,11 +841,14 @@ All colors MUST be HSL.
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    word-break: normal;
+    word-break: keep-all; /* never break mid-word */
     overflow-wrap: normal;
+    hyphens: none;
     line-height: 1.4;
     padding-top: 2px;
     padding-bottom: 2px;
+    padding-left: 2px;   /* avoid right-edge glyph clipping */
+    padding-right: 2px;  /* ensure full letter before wrap */
   }
 }
 
