@@ -356,142 +356,227 @@ export default function ProfilePreview() {
     );
     };
 
-    // ANDRA VY: Fullständig information - ersätter Tinder-kortet helt (ny sida)
-    const DetailedView = () => (
-      <div className="w-full h-full flex flex-col bg-transparent relative">
-        {/* Header med namn (samma stil som arbetsgivarsidan) */}
-        <div className="relative px-4 pt-3 pb-2 flex items-center justify-center bg-black/20 border-b border-white/20 flex-shrink-0">
-          {/* Stäng-kryss uppe till höger i headern */}
-          <button
-            onClick={() => setShowDetailedView(false)}
-            className="absolute right-2 top-1 text-white/90 hover:text-white text-xs"
-            aria-label="Stäng"
-          >
-            ✕
-          </button>
+    // ANDRA VY: Fullständig information - matchar exakt struktur från Min Profil
+    const DetailedView = () => {
+      // Helper för att översätta anställningsstatus
+      const getEmploymentStatusLabel = (status: string) => {
+        const labels: Record<string, string> = {
+          'tillsvidareanställning': 'Fast anställning',
+          'visstidsanställning': 'Visstidsanställning',
+          'provanställning': 'Provanställning',
+          'interim': 'Interim anställning',
+          'bemanningsanställning': 'Bemanningsanställning',
+          'egenforetagare': 'Egenföretagare / Frilans',
+          'arbetssokande': 'Arbetssökande',
+          'annat': 'Annat'
+        };
+        return labels[status] || status;
+      };
 
-          {/* Namn och titel i header - centrerat */}
-          <div className="text-center px-2">
-            <TruncatedText
-              text={`${data.first_name} ${isConsented ? data.last_name : '***'}`}
-              className="text-sm font-bold text-white break-words leading-tight max-w-full cursor-pointer"
-              alwaysShowTooltip={true}
+      // Helper för arbetstid
+      const getWorkingHoursLabel = (hours: string) => {
+        const labels: Record<string, string> = {
+          'heltid': 'Heltid',
+          'deltid': 'Deltid',
+          'varierande': 'Varierande / Flexibelt'
+        };
+        return labels[hours] || hours;
+      };
+
+      // Helper för tillgänglighet
+      const getAvailabilityLabel = (availability: string) => {
+        const labels: Record<string, string> = {
+          'omgaende': 'Omgående',
+          'inom-1-manad': 'Inom 1 månad',
+          'inom-3-manader': 'Inom 3 månader',
+          'inom-6-manader': 'Inom 6 månader',
+          'ej-aktuellt': 'Inte aktuellt just nu',
+          'osaker': 'Osäker'
+        };
+        return labels[availability] || availability;
+      };
+
+      return (
+        <div className="w-full h-full flex flex-col bg-transparent relative">
+          {/* Header med stäng-knapp */}
+          <div className="relative px-3 pt-2 pb-2 flex items-center justify-center bg-black/20 border-b border-white/20 flex-shrink-0">
+            <button
+              onClick={() => setShowDetailedView(false)}
+              className="absolute right-2 top-2 text-white/90 hover:text-white text-xs"
+              aria-label="Stäng"
             >
-              <h1 className="text-sm font-bold text-white break-words leading-tight max-w-full two-line-ellipsis">
-                {data.first_name} {isConsented ? data.last_name : '***'}
-              </h1>
-            </TruncatedText>
-            <p className="text-[10px] text-white/80">
-              {data.employment_status || 'Jobbsökande'}
-            </p>
-            {isConsented && data.age && (
-              <p className="text-[10px] text-white/80">{data.age} år</p>
-            )}
-          </div>
-        </div>
-
-        {/* Scrollbart innehåll med box-struktur - anpassat för mobil */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-2">
-          {/* Kontaktinformation */}
-          {isConsented && (data.phone || data.location) && (
-            <div className="space-y-1">
-              <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1">Kontaktinformation</h3>
-              <div className="bg-white/5 p-2 rounded-lg border border-white/10 space-y-1.5">
-                {data.phone && (
-                  <button
-                    onClick={handlePhoneClick}
-                    className="flex items-center gap-1.5 text-white/90 hover:text-white transition-colors w-full"
-                  >
-                    <Phone className="h-3 w-3 text-white flex-shrink-0" />
-                    <span className="text-xs">{data.phone}</span>
-                  </button>
-                )}
-                {data.location && (
-                  <div className="flex items-center gap-1.5 text-white/90">
-                    <MapPin className="h-3 w-3 text-white flex-shrink-0" />
-                    <span className="text-xs">{data.location}</span>
-                  </div>
-                )}
-              </div>
+              ✕
+            </button>
+            <div className="text-center px-6">
+              <TruncatedText
+                text={`${data.first_name} ${isConsented ? data.last_name || '' : '***'}`}
+                className="text-sm font-bold text-white break-words leading-tight max-w-full cursor-pointer"
+                alwaysShowTooltip={true}
+              >
+                <h1 className="text-sm font-bold text-white break-words leading-tight max-w-full two-line-ellipsis">
+                  {data.first_name} {isConsented ? data.last_name || '' : '***'}
+                </h1>
+              </TruncatedText>
+              <p className="text-[10px] text-white/80 mt-0.5">
+                {data.employment_status ? getEmploymentStatusLabel(data.employment_status) : 'Jobbsökande'}
+              </p>
             </div>
-          )}
+          </div>
 
-          {/* Personlig information */}
-          {isConsented && (data.age || data.employment_status || data.availability) && (
-            <div className="space-y-1">
-              <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1">Personlig information</h3>
-              <div className="bg-white/5 p-2 rounded-lg border border-white/10 space-y-1.5">
-                <div className="grid grid-cols-2 gap-2">
-                  {data.age && (
-                    <div className="flex items-center gap-1.5 text-white/90">
-                      <Calendar className="h-3 w-3 text-white flex-shrink-0" />
-                      <span className="text-xs">{data.age} år</span>
+          {/* Scrollbart innehåll - exakt samma struktur som Min Profil */}
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-2">
+            
+            {/* PERSONLIG INFORMATION */}
+            {isConsented && (
+              <div className="space-y-1">
+                <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1">Personlig Information</h3>
+                <div className="bg-white/5 p-2 rounded-lg border border-white/10 space-y-1.5">
+                  {/* Namn */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-[8px] text-white/60 uppercase">Förnamn</p>
+                      <p className="text-xs text-white/90">{data.first_name}</p>
+                    </div>
+                    <div>
+                      <p className="text-[8px] text-white/60 uppercase">Efternamn</p>
+                      <p className="text-xs text-white/90">{data.last_name || '***'}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Ålder & Telefon */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {data.age && (
+                      <div>
+                        <p className="text-[8px] text-white/60 uppercase">Ålder</p>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3 text-white/70" />
+                          <p className="text-xs text-white/90">{data.age} år</p>
+                        </div>
+                      </div>
+                    )}
+                    {data.phone && (
+                      <div>
+                        <p className="text-[8px] text-white/60 uppercase">Telefon</p>
+                        <button
+                          onClick={handlePhoneClick}
+                          className="flex items-center gap-1 text-white/90 hover:text-white transition-colors"
+                        >
+                          <Phone className="h-3 w-3 text-white/70" />
+                          <span className="text-xs">{data.phone}</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* E-post */}
+                  {data.user_id && user?.email && (
+                    <div>
+                      <p className="text-[8px] text-white/60 uppercase">E-post</p>
+                      <div className="flex items-center gap-1">
+                        <Mail className="h-3 w-3 text-white/70" />
+                        <p className="text-xs text-white/90 truncate">{user.email}</p>
+                      </div>
                     </div>
                   )}
-                  {data.employment_status && (
-                    <div className="flex items-center gap-1.5 text-white/90">
-                      <Briefcase className="h-3 w-3 text-white flex-shrink-0" />
-                      <span className="text-xs truncate">{data.employment_status}</span>
+
+                  {/* Postnummer & Ort */}
+                  {(data.postal_code || data.location) && (
+                    <div className="grid grid-cols-2 gap-2">
+                      {data.postal_code && (
+                        <div>
+                          <p className="text-[8px] text-white/60 uppercase">Postnummer</p>
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3 text-white/70" />
+                            <p className="text-xs text-white/90">{data.postal_code}</p>
+                          </div>
+                        </div>
+                      )}
+                      {data.location && (
+                        <div>
+                          <p className="text-[8px] text-white/60 uppercase">Ort</p>
+                          <p className="text-xs text-white/90">{data.location}</p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-                {data.availability && (
-                  <p className="text-xs text-white/90 pt-0.5">
-                    <span className="font-medium text-white">Tillgänglighet:</span> {data.availability}
+              </div>
+            )}
+
+            {/* PRESENTATION / OM MIG */}
+            {data.bio && (
+              <div className="space-y-1">
+                <div className="flex justify-between items-center px-1">
+                  <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide">Presentation / Om mig</h3>
+                  <span className="text-[9px] text-white/70">{countWords(data.bio)}/150 ord</span>
+                </div>
+                <div className="bg-white/5 p-2 rounded-lg border border-white/10">
+                  <p className="text-xs text-white/90 whitespace-pre-wrap leading-relaxed">
+                    {data.bio}
                   </p>
-                )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Bio */}
-          {data.bio && (
-            <div className="space-y-1">
-              <div className="flex justify-between items-center px-1">
-                <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide">Om kandidaten</h3>
-                <span className="text-[9px] text-white/70">{countWords(data.bio)}/150 ord</span>
+            {/* ANSTÄLLNINGSINFORMATION */}
+            {data.employment_status && (
+              <div className="space-y-1">
+                <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1 flex items-center gap-1">
+                  <Briefcase className="h-3 w-3" />
+                  Anställningsinformation
+                </h3>
+                <div className="bg-white/5 p-2 rounded-lg border border-white/10 space-y-1.5">
+                  {/* Anställningsstatus */}
+                  <div>
+                    <p className="text-[8px] text-white/60 uppercase">Anställningsstatus</p>
+                    <p className="text-xs text-white/90">{getEmploymentStatusLabel(data.employment_status)}</p>
+                  </div>
+
+                  {/* Arbetstid - visa bara om inte arbetssökande */}
+                  {data.employment_status !== 'arbetssokande' && data.working_hours && (
+                    <div>
+                      <p className="text-[8px] text-white/60 uppercase">Hur mycket jobbar du idag?</p>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3 w-3 text-white/70" />
+                        <p className="text-xs text-white/90">{getWorkingHoursLabel(data.working_hours)}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tillgänglighet */}
+                  {data.availability && (
+                    <div>
+                      <p className="text-[8px] text-white/60 uppercase">När kan du börja nytt jobb?</p>
+                      <p className="text-xs text-white/90">{getAvailabilityLabel(data.availability)}</p>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="bg-white/5 p-2 rounded-lg border border-white/10">
-                <p className="text-xs text-white/90 whitespace-pre-wrap leading-relaxed">
-                  {data.bio}
-                </p>
+            )}
+
+            {/* CV */}
+            {isConsented && cvUrl && (
+              <div className="space-y-1">
+                <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1 flex items-center gap-1">
+                  <FileText className="h-3 w-3" />
+                  CV
+                </h3>
+                <div className="bg-white/5 p-2 rounded-lg border border-white/10">
+                  <button
+                    onClick={handleCvClick}
+                    className="flex items-center gap-1.5 text-white/90 hover:text-white transition-colors w-full"
+                  >
+                    <FileText className="h-3 w-3 text-white flex-shrink-0" />
+                    <span className="text-xs">Visa CV</span>
+                    <ExternalLink className="h-3 w-3 text-white/70 ml-auto flex-shrink-0" />
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
-
-          {/* Dokument */}
-          {data.cv_url && (
-            <div className="space-y-1">
-              <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1">Dokument</h3>
-              <button
-                onClick={handleCvClick}
-                className="w-full inline-flex items-center gap-1.5 px-2 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors text-white"
-              >
-                <FileText className="h-3 w-3 text-white" />
-                <span className="text-xs">Visa CV</span>
-              </button>
-            </div>
-          )}
-
-          {/* Action buttons längst ner */}
-          <div className="flex gap-1.5 pt-1">
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="flex-1 bg-white/5 hover:bg-white/10 border-white/10 text-white h-7 text-xs px-2"
-            >
-              <Phone className="h-3 w-3 mr-1" />
-              Ring
-            </Button>
-            <Button size="sm" className="flex-1 bg-primary hover:bg-primary/90 text-white h-7 text-xs px-2">
-              <Video className="h-3 w-3 mr-1" />
-              Video
-            </Button>
+            )}
           </div>
         </div>
-      </div>
-
-    );
+      );
+    };
 
     return (
       <div className="w-full h-full">
