@@ -347,17 +347,17 @@ export default function ProfilePreview() {
     const DetailedView = () => (
       <div className="w-full h-full flex flex-col bg-transparent">
         {/* Header med tillbaka-knapp och namn */}
-        <div className="relative px-4 pt-4 pb-3 flex items-center border-b border-white/10 flex-shrink-0">
-          {/* Tillbaka-knapp */}
+        <div className="relative px-4 pt-4 pb-3 flex items-center justify-center border-b border-white/10 flex-shrink-0">
+          {/* Tillbaka-knapp - absolut positionerad */}
           <button
             onClick={() => setShowDetailedView(false)}
-            className="bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5 transition-colors"
+            className="absolute left-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-1.5 transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
 
-          {/* Namn och titel i header */}
-          <div className="flex-1 text-center">
+          {/* Namn och titel i header - centrerat */}
+          <div className="text-center">
             <h1 className="text-sm font-bold text-white">
               {data.first_name} {isConsented ? data.last_name : '***'}
             </h1>
@@ -368,9 +368,6 @@ export default function ProfilePreview() {
               <p className="text-[10px] text-white/80">{data.age} år</p>
             )}
           </div>
-          
-          {/* Tom div för att centrera namnet */}
-          <div className="w-6"></div>
         </div>
 
         {/* Scrollbart innehåll med box-struktur - anpassat för mobil */}
