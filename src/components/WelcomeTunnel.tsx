@@ -72,6 +72,14 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const [postalCode, setPostalCode] = useState((profile as any)?.postal_code || '');
   const [hasValidLocation, setHasValidLocation] = useState(false);
 
+  // Helper to build display URL from storage path or URL
+  const getDisplayUrl = (pathOrUrl: string) => {
+    if (!pathOrUrl) return '';
+    if (pathOrUrl.startsWith('http')) return pathOrUrl;
+    // Build public URL from storage path
+    return supabase.storage.from('profile-media').getPublicUrl(pathOrUrl).data.publicUrl;
+  };
+
   // Use centralized phone validation
   const validatePhoneNumber = (phoneNumber: string) => {
     return validateSwedishPhoneNumber(phoneNumber, true);
@@ -96,29 +104,41 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     setPhoneError(validation.error);
   };
 
-  // Convert existing URLs to stable public URLs when component mounts
+  // Load existing media as storage paths (not URLs) when component mounts
   useEffect(() => {
-    const convertExistingUrls = async () => {
+    const loadExistingMedia = async () => {
       if (profile?.profile_image_url || profile?.video_url || profile?.cv_url) {
         const updates: any = {};
         
-        // Handle profile image/video - use public URLs from profile-media
+        // Handle profile image/video - store as path
         if (profile.video_url) {
-          const videoUrl = profile.video_url.startsWith('http') 
-            ? profile.video_url 
-            : supabase.storage.from('profile-media').getPublicUrl(profile.video_url).data.publicUrl;
-          if (videoUrl) {
-            updates.profileImageUrl = videoUrl;
-            updates.profileMediaType = 'video';
+          // Extract storage path from URL if it's a full URL (backwards compatibility)
+          let videoPath = profile.video_url;
+          if (videoPath.includes('/profile-media/')) {
+            const match = videoPath.match(/\/profile-media\/(.+?)(\?|$)/);
+            if (match) videoPath = match[1];
+          }
+          updates.profileImageUrl = videoPath;
+          updates.profileMediaType = 'video';
+          
+          // Load cover image if exists
+          if (profile.cover_image_url) {
+            let coverPath = profile.cover_image_url;
+            if (coverPath.includes('/profile-media/')) {
+              const match = coverPath.match(/\/profile-media\/(.+?)(\?|$)/);
+              if (match) coverPath = match[1];
+            }
+            updates.coverImageUrl = coverPath;
           }
         } else if (profile.profile_image_url) {
-          const imageUrl = profile.profile_image_url.startsWith('http')
-            ? profile.profile_image_url
-            : supabase.storage.from('profile-media').getPublicUrl(profile.profile_image_url).data.publicUrl;
-          if (imageUrl) {
-            updates.profileImageUrl = imageUrl;
-            updates.profileMediaType = 'image';
+          // Extract storage path from URL if it's a full URL (backwards compatibility)
+          let imagePath = profile.profile_image_url;
+          if (imagePath.includes('/profile-media/')) {
+            const match = imagePath.match(/\/profile-media\/(.+?)(\?|$)/);
+            if (match) imagePath = match[1];
           }
+          updates.profileImageUrl = imagePath;
+          updates.profileMediaType = 'image';
         }
         
         // Handle CV - keep as storage path (private bucket)
@@ -132,7 +152,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       }
     };
     
-    convertExistingUrls();
+    loadExistingMedia();
   }, [profile]);
 
   const totalSteps = 8; // Introduktion + 5 profil steg + samtycke + submit + slutskärm
@@ -182,20 +202,23 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       
       if (uploadError) throw uploadError;
       
-      // Use public URL for profile media (no expiration)
+      // CRITICAL FIX: Store only the storage path, not the public URL
+      // This ensures videos never "disappear" due to URL issues
+      const storagePath = fileName;
+      const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
+      
+      // Build public URL for immediate preview (but don't store it)
       const { data: { publicUrl } } = supabase.storage
         .from('profile-media')
         .getPublicUrl(fileName);
       
-      const mediaUrl = `${publicUrl}?t=${Date.now()}`;
-      const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
-      
-      // Preload i bakgrunden (utan att blockera UI)
+      // Preload in background for offline access
       import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
-        preloadSingleFile(mediaUrl).catch(err => console.log('Preload error:', err));
+        preloadSingleFile(publicUrl).catch(err => console.log('Preload error:', err));
       });
       
-      handleInputChange('profileImageUrl', mediaUrl);
+      // Store the storage path (not the URL) so it never expires
+      handleInputChange('profileImageUrl', storagePath);
       handleInputChange('profileMediaType', mediaType);
       
       toast({
@@ -228,19 +251,20 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       
       if (uploadError) throw uploadError;
       
-      // Use public URL for cover images (no expiration)
+      // CRITICAL FIX: Store only the storage path for cover image too
+      const storagePath = fileName;
+      
+      // Build public URL for preview
       const { data: { publicUrl } } = supabase.storage
         .from('profile-media')
         .getPublicUrl(fileName);
       
-      const coverUrl = `${publicUrl}?t=${Date.now()}`;
-      
-      // Preload i bakgrunden (utan att blockera UI)
+      // Preload cover image
       import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
-        preloadSingleFile(coverUrl).catch(err => console.log('Preload error:', err));
+        preloadSingleFile(publicUrl).catch(err => console.log('Preload error:', err));
       });
       
-      handleInputChange('coverImageUrl', coverUrl);
+      handleInputChange('coverImageUrl', storagePath);
     } catch (error) {
       console.error('Cover upload error:', error);
       toast({
@@ -969,7 +993,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 ) : (
                   <Avatar className="w-32 h-32 cursor-pointer border-4 border-white/20 hover:border-white/40 transition-all" onClick={() => document.getElementById('profileMedia')?.click()}>
                     {formData.profileImageUrl ? (
-                      <AvatarImage src={formData.profileImageUrl} alt="Profile picture" />
+                      <AvatarImage src={getDisplayUrl(formData.profileImageUrl)} alt="Profile picture" />
                     ) : (
                       <AvatarFallback className="text-2xl bg-white/20 text-white">{formData.firstName?.[0]}{formData.lastName?.[0]}</AvatarFallback>
                     )}

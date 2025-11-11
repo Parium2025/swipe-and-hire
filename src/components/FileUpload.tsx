@@ -80,19 +80,21 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
       if (uploadError) throw uploadError;
 
-      // For public buckets (profile-media, company-logos, job-images), get public URL directly
+      // For public buckets (profile-media, company-logos, job-images)
       if (isPublicBucket) {
+        // CRITICAL FIX: Store storage path, not public URL (videos never expire this way)
+        // The component will build publicUrl when displaying
+        onFileUploaded(fileName, file.name);
+        
+        // Build public URL for preloading only
         const { data: { publicUrl } } = supabase.storage
           .from(actualBucket)
           .getPublicUrl(fileName);
         
-        // Förladdda publika filer direkt i Service Worker för offline-tillgång
+        // Preload public files in Service Worker for offline access
         await preloadSingleFile(publicUrl);
-        
-        onFileUploaded(publicUrl, file.name);
       } else {
-        // For private buckets, DO NOT cache signed URLs (they expire after 24h)
-        // Return storage path instead - signed URLs will be generated when needed
+        // For private buckets, return storage path (signed URLs generated on demand)
         onFileUploaded(fileName, file.name);
       }
       
