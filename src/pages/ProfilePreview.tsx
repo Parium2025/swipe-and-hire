@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useDevice } from '@/hooks/use-device';
 import ProfileVideo from '@/components/ProfileVideo';
 import { TruncatedText } from '@/components/TruncatedText';
+import NameAutoFit from '@/components/NameAutoFit';
 
 interface ProfileViewData {
   id: string;
@@ -318,15 +319,10 @@ export default function ProfilePreview() {
             {/* Tinder-stil gradient overlay längst ner med minimal info */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-3">
               <div className="text-white">
-                <TruncatedText
+                <NameAutoFit
                   text={`${data.first_name} ${data.last_name}`}
-                  className="text-lg font-bold mb-0.5 break-words max-w-full two-line-ellipsis-fade block cursor-pointer pointer-events-auto tracking-[0.01em]"
-                  alwaysShowTooltip={true}
-                >
-                  <h1 className="text-lg font-bold mb-0.5 break-words max-w-full two-line-ellipsis-fade pr-1 tracking-[0.01em]" style={{ color: '#FFFFFF' }}>
-                    {data.first_name} {data.last_name}
-                  </h1>
-                </TruncatedText>
+                  className="text-lg font-bold mb-0.5 break-words max-w-full text-white"
+                />
                 
                 {/* Ålder under namnet */}
                 {isConsented && data.age && (
@@ -408,15 +404,10 @@ export default function ProfilePreview() {
               ✕
             </button>
             <div className="text-center px-6">
-              <TruncatedText
+              <NameAutoFit
                 text={`${data.first_name} ${isConsented ? data.last_name || '' : '***'}`}
-                className="text-sm font-bold text-white break-words max-w-full two-line-ellipsis-fade cursor-pointer tracking-[0.01em]"
-                alwaysShowTooltip={true}
-              >
-                <h1 className="text-sm font-bold text-white break-words max-w-full two-line-ellipsis-fade pr-1 tracking-[0.01em]">
-                  {data.first_name} {isConsented ? data.last_name || '' : '***'}
-                </h1>
-              </TruncatedText>
+                className="text-sm font-bold text-white break-words max-w-full"
+              />
             </div>
           </div>
 
