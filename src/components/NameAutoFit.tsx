@@ -18,32 +18,42 @@ export function NameAutoFit({ text, className, minFontPx = 12 }: NameAutoFitProp
   const baseSizeRef = useRef<number | null>(null);
 
   const isTruncated = (el: HTMLElement) => {
-    const styles = window.getComputedStyle(el);
-    const clamp = (styles.getPropertyValue("-webkit-line-clamp") || "").trim();
-    const hasClamp = clamp !== "" && clamp !== "none";
-
-    if (hasClamp) {
-      // Clone and measure natural height without clamp
-      const clone = el.cloneNode(true) as HTMLElement;
-      clone.style.position = "absolute";
-      clone.style.visibility = "hidden";
-      clone.style.pointerEvents = "none";
-      // @ts-ignore vendor property
-      clone.style.webkitLineClamp = "unset";
-      clone.style.maxHeight = "none";
-      clone.style.overflow = "visible";
-      clone.style.width = `${el.clientWidth}px`;
-      el.parentElement?.appendChild(clone);
-      const natural = Math.ceil(clone.scrollHeight);
-      el.parentElement?.removeChild(clone);
-      const current = Math.ceil(el.clientHeight);
-      return natural > current + 1;
-    }
-
-    return (
-      Math.ceil(el.scrollHeight) > Math.ceil(el.clientHeight) ||
-      Math.ceil(el.scrollWidth) > Math.ceil(el.clientWidth)
-    );
+    // Get the actual available width from parent container
+    const parent = el.parentElement;
+    if (!parent) return false;
+    
+    const parentWidth = parent.clientWidth;
+    const styles = window.getComputedStyle(parent);
+    const paddingLeft = parseFloat(styles.paddingLeft);
+    const paddingRight = parseFloat(styles.paddingRight);
+    const availableWidth = parentWidth - paddingLeft - paddingRight;
+    
+    // Clone and measure natural width without clamp
+    const clone = el.cloneNode(true) as HTMLElement;
+    clone.style.position = "absolute";
+    clone.style.visibility = "hidden";
+    clone.style.pointerEvents = "none";
+    clone.style.width = "max-content";
+    clone.style.maxWidth = "none";
+    // @ts-ignore vendor property
+    clone.style.webkitLineClamp = "unset";
+    clone.style.overflow = "visible";
+    clone.style.whiteSpace = "normal";
+    clone.style.wordBreak = "break-word";
+    
+    parent.appendChild(clone);
+    const naturalWidth = clone.scrollWidth;
+    const naturalHeight = clone.scrollHeight;
+    parent.removeChild(clone);
+    
+    // Check if text needs more space than available
+    const currentHeight = el.clientHeight;
+    const lineHeight = parseFloat(window.getComputedStyle(el).lineHeight);
+    const maxLines = 2;
+    const maxHeight = lineHeight * maxLines;
+    
+    // If natural height exceeds max lines, it's truncated
+    return naturalHeight > maxHeight + 2;
   };
 
   const fit = () => {
@@ -59,13 +69,15 @@ export function NameAutoFit({ text, className, minFontPx = 12 }: NameAutoFitProp
     // Reset to base before fitting
     const base = baseSizeRef.current ?? currentBase;
     el.style.fontSize = `${base}px`;
+    el.style.width = "100%";
+    el.style.maxWidth = "100%";
     
 
     // Iteratively reduce font size until it fits or we reach min
     let size = base;
     let guard = 0;
-    while (isTruncated(el) && size > minFontPx && guard < 40) {
-      size -= 0.5; // gentle step for smoother sizing
+    while (isTruncated(el) && size > minFontPx && guard < 150) {
+      size -= 0.3; // even gentler step for better precision
       el.style.fontSize = `${size}px`;
       guard++;
     }
