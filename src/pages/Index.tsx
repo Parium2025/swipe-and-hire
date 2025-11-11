@@ -38,6 +38,7 @@ import { useApplicationsData } from '@/hooks/useApplicationsData';
 import { CandidatesTable } from '@/components/CandidatesTable';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { TruncatedText } from '@/components/TruncatedText';
 
 const CandidatesContent = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -400,11 +401,12 @@ const Index = () => {
     <div className="min-h-screen smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }}>
       <header className="border-b border-white/20 bg-white/10 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div>
+          <div className="flex-1 min-w-0 mr-3">
             <h1 className="text-2xl font-bold text-white">Parium</h1>
-            <p className="text-sm text-white/70">
-              Jobbsökare: {profile.first_name} {profile.last_name}
-            </p>
+            <TruncatedText
+              text={`Jobbsökare: ${profile.first_name} ${profile.last_name}`}
+              className="text-sm text-white/70 truncate block"
+            />
           </div>
           <div className="flex items-center gap-3">
             <Button 
