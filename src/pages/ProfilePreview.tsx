@@ -327,6 +327,7 @@ export default function ProfilePreview() {
                   <NameAutoFit
                     text={`${data.first_name} ${data.last_name}`}
                     className="text-lg font-bold mb-0.5 break-words max-w-full text-white"
+                    minFontPx={isMobile ? 13 : 14}
                   />
                 </TruncatedText>
                 
@@ -418,6 +419,7 @@ export default function ProfilePreview() {
                 <NameAutoFit
                   text={`${data.first_name} ${isConsented ? data.last_name || '' : '***'}`}
                   className="text-sm font-bold text-white break-words max-w-full"
+                  minFontPx={isMobile ? 13 : 14}
                 />
               </TruncatedText>
             </div>
