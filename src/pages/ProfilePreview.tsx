@@ -357,10 +357,16 @@ export default function ProfilePreview() {
           </button>
 
           {/* Namn och titel i header - centrerat */}
-          <div className="text-center">
-            <h1 className="text-sm font-bold text-white">
-              {data.first_name} {isConsented ? data.last_name : '***'}
-            </h1>
+          <div className="text-center px-8">
+            <TruncatedText
+              text={`${data.first_name} ${isConsented ? data.last_name : '***'}`}
+              className="text-sm font-bold text-white break-words leading-tight max-w-full cursor-pointer"
+              alwaysShowTooltip={true}
+            >
+              <h1 className="text-sm font-bold text-white break-words leading-tight truncate">
+                {data.first_name} {isConsented ? data.last_name : '***'}
+              </h1>
+            </TruncatedText>
             <p className="text-[10px] text-white/80">
               {data.employment_status || 'Jobbsökande'}
             </p>
