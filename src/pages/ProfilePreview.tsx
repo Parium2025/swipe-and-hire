@@ -402,7 +402,7 @@ export default function ProfilePreview() {
           <div className="relative px-3 pt-2 pb-2 flex items-center justify-center bg-black/20 border-b border-white/20 flex-shrink-0">
             <button
               onClick={() => setShowDetailedView(false)}
-              className="absolute right-2 top-2 text-white/90 hover:text-white text-xs"
+              className="absolute right-2 top-2 text-white hover:text-white text-xs"
               aria-label="Stäng"
             >
               ✕
@@ -432,21 +432,21 @@ export default function ProfilePreview() {
                   <div className="grid grid-cols-2 gap-2">
                     {data.age && (
                       <div>
-                        <p className="text-[8px] text-white/60 uppercase">Ålder</p>
+                        <p className="text-[8px] text-white uppercase">Ålder</p>
                         <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3 text-white/70" />
-                          <p className="text-xs text-white/90">{data.age} år</p>
+                          <Calendar className="h-3 w-3 text-white" />
+                          <p className="text-xs text-white">{data.age} år</p>
                         </div>
                       </div>
                     )}
                     {data.phone && (
                       <div>
-                        <p className="text-[8px] text-white/60 uppercase">Telefon</p>
+                        <p className="text-[8px] text-white uppercase">Telefon</p>
                         <button
                           onClick={handlePhoneClick}
-                          className="flex items-center gap-1 text-white/90 hover:text-white transition-colors"
+                          className="flex items-center gap-1 text-white hover:text-white transition-colors"
                         >
-                          <Phone className="h-3 w-3 text-white/70" />
+                          <Phone className="h-3 w-3 text-white" />
                           <span className="text-xs">{data.phone}</span>
                         </button>
                       </div>
@@ -456,10 +456,10 @@ export default function ProfilePreview() {
                   {/* E-post */}
                   {data.user_id && user?.email && (
                     <div>
-                      <p className="text-[8px] text-white/60 uppercase">E-post</p>
+                      <p className="text-[8px] text-white uppercase">E-post</p>
                       <div className="flex items-center gap-1">
-                        <Mail className="h-3 w-3 text-white/70" />
-                        <p className="text-xs text-white/90 truncate">{user.email}</p>
+                        <Mail className="h-3 w-3 text-white" />
+                        <p className="text-xs text-white truncate">{user.email}</p>
                       </div>
                     </div>
                   )}
@@ -469,17 +469,17 @@ export default function ProfilePreview() {
                     <div className="grid grid-cols-2 gap-2">
                       {data.postal_code && (
                         <div>
-                          <p className="text-[8px] text-white/60 uppercase">Postnummer</p>
+                          <p className="text-[8px] text-white uppercase">Postnummer</p>
                           <div className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3 text-white/70" />
-                            <p className="text-xs text-white/90">{data.postal_code}</p>
+                            <MapPin className="h-3 w-3 text-white" />
+                            <p className="text-xs text-white">{data.postal_code}</p>
                           </div>
                         </div>
                       )}
                       {data.location && (
                         <div>
-                          <p className="text-[8px] text-white/60 uppercase">Ort</p>
-                          <p className="text-xs text-white/90">{data.location}</p>
+                          <p className="text-[8px] text-white uppercase">Ort</p>
+                          <p className="text-xs text-white">{data.location}</p>
                         </div>
                       )}
                     </div>
@@ -493,10 +493,10 @@ export default function ProfilePreview() {
               <div className="space-y-1">
                 <div className="flex justify-between items-center px-1">
                   <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide">Presentation / Om mig</h3>
-                  <span className="text-[9px] text-white/70">{countWords(data.bio)}/150 ord</span>
+                  <span className="text-[9px] text-white">{countWords(data.bio)}/150 ord</span>
                 </div>
                 <div className="bg-white/5 p-2 rounded-lg border border-white/10">
-                  <p className="text-xs text-white/90 whitespace-pre-wrap leading-relaxed">
+                  <p className="text-xs text-white whitespace-pre-wrap leading-relaxed">
                     {data.bio}
                   </p>
                 </div>
@@ -507,23 +507,23 @@ export default function ProfilePreview() {
             {data.employment_status && (
               <div className="space-y-1">
                 <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1 flex items-center gap-1">
-                  <Briefcase className="h-3 w-3" />
+                  <Briefcase className="h-3 w-3 text-white" />
                   Anställningsinformation
                 </h3>
                 <div className="bg-white/5 p-2 rounded-lg border border-white/10 space-y-1.5">
                   {/* Anställningsstatus */}
                   <div>
-                    <p className="text-[8px] text-white/60 uppercase">Anställningsstatus</p>
-                    <p className="text-xs text-white/90">{getEmploymentStatusLabel(data.employment_status)}</p>
+                    <p className="text-[8px] text-white uppercase">Anställningsstatus</p>
+                    <p className="text-xs text-white">{getEmploymentStatusLabel(data.employment_status)}</p>
                   </div>
 
                   {/* Arbetstid - visa bara om inte arbetssökande */}
                   {data.employment_status !== 'arbetssokande' && data.working_hours && (
                     <div>
-                      <p className="text-[8px] text-white/60 uppercase">Hur mycket jobbar du idag?</p>
+                      <p className="text-[8px] text-white uppercase">Hur mycket jobbar du idag?</p>
                       <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3 text-white/70" />
-                        <p className="text-xs text-white/90">{getWorkingHoursLabel(data.working_hours)}</p>
+                        <Clock className="h-3 w-3 text-white" />
+                        <p className="text-xs text-white">{getWorkingHoursLabel(data.working_hours)}</p>
                       </div>
                     </div>
                   )}
@@ -531,8 +531,8 @@ export default function ProfilePreview() {
                   {/* Tillgänglighet */}
                   {data.availability && (
                     <div>
-                      <p className="text-[8px] text-white/60 uppercase">När kan du börja nytt jobb?</p>
-                      <p className="text-xs text-white/90">{getAvailabilityLabel(data.availability)}</p>
+                      <p className="text-[8px] text-white uppercase">När kan du börja nytt jobb?</p>
+                      <p className="text-xs text-white">{getAvailabilityLabel(data.availability)}</p>
                     </div>
                   )}
                 </div>
@@ -543,17 +543,17 @@ export default function ProfilePreview() {
             {isConsented && cvUrl && (
               <div className="space-y-1">
                 <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1 flex items-center gap-1">
-                  <FileText className="h-3 w-3" />
+                  <FileText className="h-3 w-3 text-white" />
                   CV
                 </h3>
                 <div className="bg-white/5 p-2 rounded-lg border border-white/10">
                   <button
                     onClick={handleCvClick}
-                    className="flex items-center gap-1.5 text-white/90 hover:text-white transition-colors w-full"
+                    className="flex items-center gap-1.5 text-white hover:text-white transition-colors w-full"
                   >
                     <FileText className="h-3 w-3 text-white flex-shrink-0" />
                     <span className="text-xs">Visa CV</span>
-                    <ExternalLink className="h-3 w-3 text-white/70 ml-auto flex-shrink-0" />
+                    <ExternalLink className="h-3 w-3 text-white ml-auto flex-shrink-0" />
                   </button>
                 </div>
               </div>
