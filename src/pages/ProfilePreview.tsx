@@ -320,10 +320,10 @@ export default function ProfilePreview() {
               <div className="text-white">
                 <TruncatedText
                   text={`${data.first_name} ${data.last_name}`}
-                  className="text-lg font-bold mb-0.5 break-words leading-normal max-w-full two-line-ellipsis block cursor-pointer pointer-events-auto"
+                  className="text-lg font-bold mb-0.5 break-words max-w-full two-line-ellipsis block cursor-pointer pointer-events-auto"
                   alwaysShowTooltip={true}
                 >
-                  <h1 className="text-lg font-bold mb-0.5 break-words leading-normal max-w-full two-line-ellipsis py-0.5" style={{ color: '#FFFFFF' }}>
+                  <h1 className="text-lg font-bold mb-0.5 break-words max-w-full two-line-ellipsis" style={{ color: '#FFFFFF' }}>
                     {data.first_name} {data.last_name}
                   </h1>
                 </TruncatedText>
@@ -410,10 +410,10 @@ export default function ProfilePreview() {
             <div className="text-center px-6">
               <TruncatedText
                 text={`${data.first_name} ${isConsented ? data.last_name || '' : '***'}`}
-                className="text-sm font-bold text-white break-words leading-normal max-w-full cursor-pointer"
+                className="text-sm font-bold text-white break-words max-w-full cursor-pointer"
                 alwaysShowTooltip={true}
               >
-                <h1 className="text-sm font-bold text-white break-words leading-normal max-w-full two-line-ellipsis py-0.5">
+                <h1 className="text-sm font-bold text-white break-words max-w-full two-line-ellipsis">
                   {data.first_name} {isConsented ? data.last_name || '' : '***'}
                 </h1>
               </TruncatedText>
