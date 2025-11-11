@@ -852,6 +852,26 @@ All colors MUST be HSL.
     padding-right: 1ch;     /* ensure full glyph before wrap/ellipsis */
     box-decoration-break: clone;
   }
+
+  /* Safer two-line clamp with subtle right fade to prevent harsh glyph cuts */
+  .two-line-ellipsis-fade {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: keep-all;
+    overflow-wrap: normal;
+    hyphens: none;
+    white-space: normal;
+    line-height: 1.4;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 0.25ch;
+    padding-right: 1.25ch; /* matches fade width */
+    -webkit-mask-image: linear-gradient(to right, black 0%, black calc(100% - 12px), transparent 100%);
+    mask-image: linear-gradient(to right, black 0%, black calc(100% - 12px), transparent 100%);
+    box-decoration-break: clone;
+  }
 }
 
 /* Mobile Scroll Optimization - Premium Touch Experience */
