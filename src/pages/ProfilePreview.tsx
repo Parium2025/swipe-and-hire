@@ -266,7 +266,15 @@ export default function ProfilePreview() {
           {/* Helskärm profilbild/video */}
           <div className="relative w-full h-full bg-transparent overflow-hidden">
             {/* Avatar-område för både bild och video - centrerat längst upp */}
-            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-full overflow-hidden border-2 border-white/40 shadow-2xl bg-gradient-to-br from-primary/20 to-primary/30">
+            <div 
+              className="absolute top-4 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-full overflow-hidden border-2 border-white/40 shadow-2xl bg-gradient-to-br from-primary/20 to-primary/30"
+              onClick={(e) => {
+                // Stoppa event propagation så att klick på video/bild inte öppnar detaljvyn
+                if (videoUrl) {
+                  e.stopPropagation();
+                }
+              }}
+            >
               
               {/* Använd ProfileVideo komponenten om video finns */}
               {videoUrl ? (
