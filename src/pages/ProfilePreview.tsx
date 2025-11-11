@@ -318,16 +318,16 @@ export default function ProfilePreview() {
 
             {/* Tinder-stil gradient overlay längst ner med minimal info */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-3">
-              <div className="text-white">
+              <div className="text-white max-w-full">
                 <TruncatedText
                   text={`${data.first_name} ${data.last_name}`}
-                  className="two-line-ellipsis pr-[1ch] block"
+                  className="two-line-ellipsis block w-full"
                   alwaysShowTooltip={true}
                 >
                   <NameAutoFit
                     text={`${data.first_name} ${data.last_name}`}
-                    className="text-lg font-bold mb-0.5 break-words max-w-full text-white"
-                    minFontPx={isMobile ? 10 : 12}
+                    className="text-lg font-bold mb-0.5 break-words w-full text-white"
+                    minFontPx={isMobile ? 13 : 14}
                   />
                 </TruncatedText>
                 
@@ -410,16 +410,16 @@ export default function ProfilePreview() {
             >
               ✕
             </button>
-            <div className="text-center px-6">
+            <div className="text-center px-8 w-full">
               <TruncatedText
                 text={`${data.first_name} ${isConsented ? data.last_name || '' : '***'}`}
-                className="two-line-ellipsis pr-[1ch] block"
+                className="two-line-ellipsis block w-full"
                 alwaysShowTooltip={true}
               >
                 <NameAutoFit
                   text={`${data.first_name} ${isConsented ? data.last_name || '' : '***'}`}
-                  className="text-sm font-bold text-white break-words max-w-full"
-                  minFontPx={isMobile ? 10 : 12}
+                  className="text-sm font-bold text-white break-words w-full"
+                  minFontPx={isMobile ? 13 : 14}
                 />
               </TruncatedText>
             </div>
