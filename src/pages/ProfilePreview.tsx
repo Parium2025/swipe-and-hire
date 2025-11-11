@@ -317,7 +317,7 @@ export default function ProfilePreview() {
             )}
 
             {/* Tinder-stil gradient overlay längst ner med minimal info */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-2 py-3">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent py-3">
               <div className="text-white w-full">
                 <TruncatedText
                   text={`${data.first_name} ${data.last_name}`}
@@ -402,7 +402,7 @@ export default function ProfilePreview() {
       return (
         <div className="w-full h-full flex flex-col bg-transparent relative">
           {/* Header med stäng-knapp */}
-          <div className="relative px-3 pt-2 pb-2 flex items-center justify-center bg-black/20 border-b border-white/20 flex-shrink-0">
+          <div className="relative pt-2 pb-2 flex items-center justify-center bg-black/20 border-b border-white/20 flex-shrink-0">
             <button
               onClick={() => setShowDetailedView(false)}
               className="absolute right-2 top-2 text-white hover:text-white text-xs"
@@ -410,7 +410,7 @@ export default function ProfilePreview() {
             >
               ✕
             </button>
-            <div className="text-center px-8 w-full">
+            <div className="text-center w-full">
               <TruncatedText
                 text={`${data.first_name} ${isConsented ? data.last_name || '' : '***'}`}
                 className="two-line-ellipsis block w-full"
