@@ -129,7 +129,7 @@ export function TruncatedText({ text, className, children, alwaysShowTooltip }: 
         <TooltipTrigger asChild>
           <span
             ref={textRef}
-            className={`${className ?? ""} cursor-help pointer-events-auto`}
+            className={`${className ?? ""} cursor-pointer pointer-events-auto`}
             onClick={!supportsHover && isTouch ? handleTap : undefined}
             onTouchStart={!supportsHover ? () => setIsOpen(true) : undefined}
           >
