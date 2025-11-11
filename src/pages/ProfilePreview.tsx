@@ -345,17 +345,17 @@ export default function ProfilePreview() {
 
     // ANDRA VY: Fullständig information - ersätter Tinder-kortet helt (ny sida)
     const DetailedView = () => (
-      <div className="w-full h-full flex flex-col bg-transparent">
-        {/* Header med tillbaka-knapp och namn */}
-        <div className="relative px-4 pt-4 pb-3 flex items-center justify-center border-b border-white/10 flex-shrink-0">
-          {/* Stäng-knapp - absolut positionerad längst upp till höger */}
-          <button
-            onClick={() => setShowDetailedView(false)}
-            className="absolute right-2 top-2 bg-white/10 hover:bg-white/20 text-white rounded-full p-1 transition-colors z-10"
-          >
-            <X className="h-3 w-3" />
-          </button>
+      <div className="w-full h-full flex flex-col bg-transparent relative">
+        {/* Stäng-knapp - absolut positionerad längst upp till höger på hela vyn */}
+        <button
+          onClick={() => setShowDetailedView(false)}
+          className="absolute right-2 top-2 bg-white/10 hover:bg-white/20 text-white rounded-full p-1 transition-colors z-20"
+        >
+          <X className="h-3 w-3" />
+        </button>
 
+        {/* Header med namn */}
+        <div className="relative px-4 pt-4 pb-3 flex items-center justify-center border-b border-white/10 flex-shrink-0">
           {/* Namn och titel i header - centrerat */}
           <div className="text-center px-2">
             <TruncatedText
