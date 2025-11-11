@@ -259,21 +259,22 @@ export default function ProfilePreview() {
       return (
       <div className="w-full h-full relative">
         <Card 
-          className="bg-transparent border-none shadow-none overflow-hidden rounded-none transition-all duration-300 cursor-pointer h-full"
+          className="bg-transparent border-none shadow-none overflow-hidden rounded-none transition-all duration-300 h-full"
           onClick={() => setShowDetailedView(true)}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           style={{
             transform: `translateX(${currentX}px) rotate(${currentX * 0.1}deg)`,
-            transition: isDragging ? 'none' : 'transform 0.3s ease-out'
+            transition: isDragging ? 'none' : 'transform 0.3s ease-out',
+            cursor: 'pointer'
           }}
         >
           {/* Helskärm profilbild/video */}
           <div className="relative w-full h-full bg-transparent overflow-hidden">
             {/* Avatar-område för både bild och video - centrerat längst upp */}
             <div 
-              className="absolute top-4 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-full overflow-hidden border-2 border-white/40 shadow-2xl bg-gradient-to-br from-primary/20 to-primary/30"
+              className="absolute top-4 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-full overflow-hidden border-2 border-white/40 shadow-2xl bg-gradient-to-br from-primary/20 to-primary/30 cursor-pointer"
               onClick={(e) => {
                 // Stoppa event propagation så att klick på video/bild inte öppnar detaljvyn
                 if (videoUrl) {
@@ -317,7 +318,7 @@ export default function ProfilePreview() {
             )}
 
             {/* Tinder-stil gradient overlay längst ner med minimal info */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-2 py-3">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-2 py-3 cursor-pointer">
               <div className="text-white w-full">
                 <TruncatedText
                   text={`${data.first_name} ${data.last_name}`}
