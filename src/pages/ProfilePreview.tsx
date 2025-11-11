@@ -146,6 +146,11 @@ export default function ProfilePreview() {
     const device = useDevice();
     const isMobile = device === 'mobile';
 
+    // Ordräknare för bio
+    const countWords = (text: string) => {
+      return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+    };
+
     const [videoUrl, setVideoUrl] = useState<string>('');
     const [cvUrl, setCvUrl] = useState<string>('');
 
@@ -442,7 +447,10 @@ export default function ProfilePreview() {
           {/* Bio */}
           {data.bio && (
             <div className="space-y-1">
-              <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1">Om kandidaten</h3>
+              <div className="flex justify-between items-center px-1">
+                <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide">Om kandidaten</h3>
+                <span className="text-[9px] text-white/70">{countWords(data.bio)}/150 ord</span>
+              </div>
               <div className="bg-white/5 p-2 rounded-lg border border-white/10">
                 <p className="text-xs text-white/90 whitespace-pre-wrap leading-relaxed">
                   {data.bio}
