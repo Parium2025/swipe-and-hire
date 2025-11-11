@@ -5,6 +5,7 @@ interface NameAutoFitProps {
   text: string;
   className?: string;
   minFontPx?: number; // lowest we will go
+  stepPx?: number; // decrement step
 }
 
 /**
@@ -13,7 +14,7 @@ interface NameAutoFitProps {
  * - Falls back to minFontPx if still overflowing
  * - Re-evaluates on resize
  */
-export function NameAutoFit({ text, className, minFontPx = 12 }: NameAutoFitProps) {
+export function NameAutoFit({ text, className, minFontPx = 13, stepPx = 0.25 }: NameAutoFitProps) {
   const ref = useRef<HTMLSpanElement>(null);
   const baseSizeRef = useRef<number | null>(null);
 
@@ -64,8 +65,8 @@ export function NameAutoFit({ text, className, minFontPx = 12 }: NameAutoFitProp
     // Iteratively reduce font size until it fits or we reach min
     let size = base;
     let guard = 0;
-    while (isTruncated(el) && size > minFontPx && guard < 40) {
-      size -= 0.5; // gentle step for smoother sizing
+    while (isTruncated(el) && size > minFontPx && guard < 120) {
+      size -= stepPx;
       el.style.fontSize = `${size}px`;
       guard++;
     }
@@ -84,7 +85,7 @@ export function NameAutoFit({ text, className, minFontPx = 12 }: NameAutoFitProp
     <span
       ref={ref}
       className={cn(
-        "block",
+        "two-line-ellipsis pr-[1ch] block",
         className
       )}
     >
