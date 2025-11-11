@@ -431,18 +431,6 @@ export default function ProfilePreview() {
               <div className="space-y-1">
                 <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1">Personlig Information</h3>
                 <div className="bg-white/5 p-2 rounded-lg border border-white/10 space-y-1.5">
-                  {/* Namn */}
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <p className="text-[8px] text-white/60 uppercase">Förnamn</p>
-                      <p className="text-xs text-white/90">{data.first_name}</p>
-                    </div>
-                    <div>
-                      <p className="text-[8px] text-white/60 uppercase">Efternamn</p>
-                      <p className="text-xs text-white/90">{data.last_name || '***'}</p>
-                    </div>
-                  </div>
-                  
                   {/* Ålder & Telefon */}
                   <div className="grid grid-cols-2 gap-2">
                     {data.age && (
