@@ -417,9 +417,6 @@ export default function ProfilePreview() {
                   {data.first_name} {isConsented ? data.last_name || '' : '***'}
                 </h1>
               </TruncatedText>
-              <p className="text-[10px] text-white/80 mt-0.5">
-                {data.employment_status ? getEmploymentStatusLabel(data.employment_status) : 'Jobbsökande'}
-              </p>
             </div>
           </div>
 
