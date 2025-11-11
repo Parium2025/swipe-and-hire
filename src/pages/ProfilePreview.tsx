@@ -253,7 +253,7 @@ export default function ProfilePreview() {
       return (
       <div className="w-full h-full relative">
         <Card 
-          className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-3xl cursor-pointer group h-full"
+          className="bg-transparent border-none shadow-none overflow-hidden rounded-none transition-all duration-300 cursor-pointer h-full"
           onClick={() => setShowDetailedView(true)}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -680,7 +680,7 @@ export default function ProfilePreview() {
                   className="absolute inset-0 rounded-[2rem] overflow-y-auto custom-scrollbar"
                   style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}
                 >
-                  <div className="h-full p-3 pt-4">
+                  <div className="h-full p-0">
                     <ProfileView data={consentedData} isConsented={true} />
                   </div>
                 </div>
