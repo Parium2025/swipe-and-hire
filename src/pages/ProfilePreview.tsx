@@ -320,12 +320,11 @@ export default function ProfilePreview() {
               <div className="text-white">
                 <TruncatedText
                   text={`${data.first_name} ${data.last_name}`}
-                  className="text-lg font-bold mb-0.5 break-words max-w-full block cursor-pointer pointer-events-auto"
+                  className="text-lg font-bold mb-0.5 break-words max-w-full two-line-ellipsis block cursor-pointer pointer-events-auto tracking-[0.01em]"
                   alwaysShowTooltip={true}
                 >
-                  <h1 className="text-lg font-bold mb-0.5 break-words max-w-full" style={{ color: '#FFFFFF' }}>
-                    <span className="block whitespace-nowrap">{data.first_name}</span>
-                    {data.last_name && <span className="block">{data.last_name}</span>}
+                  <h1 className="text-lg font-bold mb-0.5 break-words max-w-full two-line-ellipsis pr-1 tracking-[0.01em]" style={{ color: '#FFFFFF' }}>
+                    {data.first_name} {data.last_name}
                   </h1>
                 </TruncatedText>
                 
@@ -411,16 +410,11 @@ export default function ProfilePreview() {
             <div className="text-center px-6">
               <TruncatedText
                 text={`${data.first_name} ${isConsented ? data.last_name || '' : '***'}`}
-                className="text-sm font-bold text-white break-words max-w-full cursor-pointer"
+                className="text-sm font-bold text-white break-words max-w-full two-line-ellipsis cursor-pointer tracking-[0.01em]"
                 alwaysShowTooltip={true}
               >
-                <h1 className="text-sm font-bold text-white break-words max-w-full">
-                  <span className="block whitespace-nowrap">{data.first_name}</span>
-                  {isConsented ? (
-                    (data.last_name && <span className="block">{data.last_name}</span>)
-                  ) : (
-                    <span className="block">***</span>
-                  )}
+                <h1 className="text-sm font-bold text-white break-words max-w-full two-line-ellipsis pr-1 tracking-[0.01em]">
+                  {data.first_name} {isConsented ? data.last_name || '' : '***'}
                 </h1>
               </TruncatedText>
             </div>
