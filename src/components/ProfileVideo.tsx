@@ -33,36 +33,40 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     let isMounted = true;
     
     const convertUrls = async () => {
-      if (videoUrl && isMounted) {
-        // If already full URL, use it
-        if (videoUrl.startsWith('http')) {
-          setSignedVideoUrl(videoUrl);
-        } else {
-          // Get public URL from profile-media bucket
-          const { data } = supabase.storage
-            .from('profile-media')
-            .getPublicUrl(videoUrl);
-          if (data?.publicUrl && isMounted) {
-            setSignedVideoUrl(data.publicUrl);
+      if (!isMounted) return;
+
+      if (videoUrl) {
+        try {
+          if (videoUrl.startsWith('http')) {
+            setSignedVideoUrl(videoUrl);
+          } else {
+            const { data } = supabase.storage
+              .from('profile-media')
+              .getPublicUrl(videoUrl);
+            // Fallback to raw path if SDK doesn't return a URL
+            setSignedVideoUrl(data?.publicUrl || videoUrl);
           }
+        } catch {
+          setSignedVideoUrl(videoUrl);
         }
+      } else {
+        setSignedVideoUrl(null);
       }
       
-      if (coverImageUrl && coverImageUrl.trim() && isMounted) {
-        // If already full URL, use it
-        if (coverImageUrl.startsWith('http')) {
-          setSignedCoverUrl(coverImageUrl);
-        } else {
-          // Get public URL from profile-media bucket
-          const { data } = supabase.storage
-            .from('profile-media')
-            .getPublicUrl(coverImageUrl);
-          if (data?.publicUrl && isMounted) {
-            setSignedCoverUrl(data.publicUrl);
+      if (coverImageUrl && coverImageUrl.trim()) {
+        try {
+          if (coverImageUrl.startsWith('http')) {
+            setSignedCoverUrl(coverImageUrl);
+          } else {
+            const { data } = supabase.storage
+              .from('profile-media')
+              .getPublicUrl(coverImageUrl);
+            setSignedCoverUrl(data?.publicUrl || coverImageUrl);
           }
+        } catch {
+          setSignedCoverUrl(coverImageUrl);
         }
-      } else if (isMounted) {
-        // Rensa cover-bild omedelbart när coverImageUrl är tom
+      } else {
         setSignedCoverUrl(null);
       }
     };
@@ -122,13 +126,27 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
   // Remove hover-based autoplay to avoid flicker; play only on explicit tap/click
   // (Keeping function names removed to simplify behavior)
 
-  const handleTap = () => {
+  const handleTap = async () => {
+    // Do nothing if we don't have a playable URL yet
+    if (!signedVideoUrl) return;
+
     if (!isPlaying) {
       setShowVideo(true);
       setIsPlaying(true);
       if (videoRef.current) {
-        videoRef.current.currentTime = 0;
-        videoRef.current.play();
+        try {
+          videoRef.current.currentTime = 0;
+          const playPromise = videoRef.current.play();
+          if (playPromise && typeof (playPromise as any).catch === 'function') {
+            await (playPromise as Promise<void>);
+          }
+        } catch (err) {
+          // As a fallback (some browsers block unmuted play), try muted
+          try {
+            videoRef.current.muted = true;
+            await videoRef.current.play();
+          } catch {}
+        }
       }
     } else {
       setShowVideo(false);
@@ -283,7 +301,13 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
       
       {/* Play/Pause overlay for mobile */}
       {isMobile && (
-        <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+        <div
+          className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleTap();
+          }}
+        >
           {isPlaying ? (
             <Pause className="h-8 w-8 text-white" />
           ) : (
