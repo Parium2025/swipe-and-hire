@@ -303,8 +303,8 @@ export default function ProfilePreview() {
             )}
 
             {/* Tinder-stil gradient overlay längst ner med minimal info */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 pb-3">
-              <div className="text-white">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-0 py-4 pb-3">
+              <div className="text-white px-4">
                 <TruncatedText
                   text={`${data.first_name} ${data.last_name}`}
                   className="text-lg font-bold mb-0.5 break-words leading-tight max-w-full two-line-ellipsis block cursor-pointer pointer-events-auto"
