@@ -44,12 +44,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const getFileIcon = (fileName: string) => {
     const extension = fileName.toLowerCase().split('.').pop();
     if (['mp4', 'mov', 'avi', 'mkv'].includes(extension || '')) {
-      return <Video className="h-4 w-4" />;
+      return <Video className="h-4 w-4 text-white" />;
     }
     if (['pdf'].includes(extension || '')) {
-      return <FileText className="h-4 w-4" />;
+      return <FileText className="h-4 w-4 text-white" />;
     }
-    return <File className="h-4 w-4" />;
+    return <File className="h-4 w-4 text-white" />;
   };
 
   const uploadFile = async (file: File) => {
@@ -269,7 +269,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
             variant="ghost"
             size="sm"
             onClick={handleRemoveFile}
-            className="h-6 w-6 p-0 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+            className="h-6 w-6 p-0 text-white transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
           >
             <X className="h-3 w-3" />
           </Button>
