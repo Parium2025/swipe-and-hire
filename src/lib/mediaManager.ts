@@ -1,7 +1,11 @@
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Centraliserad media-hantering med konsistent bucket-strategi
+ * 🔒 KRITISKT: DETTA ÄR DEN ENDA KÄLLAN TILL SANNING FÖR MEDIA-HANTERING
+ * 
+ * ⚠️ LÄSA MEDIA_SYSTEM_CRITICAL.md INNAN DU GÖR NÅGRA ÄNDRINGAR! ⚠️
+ * 
+ * ARKITEKTUR (ÄNDRA ALDRIG):
  * 
  * PRIVATE BUCKETS (kräver signed URLs med behörighetskontroll):
  * - job-applications: Profilbilder, videor, cover-bilder, CV:n, ansökningsdokument
@@ -12,6 +16,13 @@ import { supabase } from '@/integrations/supabase/client';
  * PUBLIC BUCKETS (direkt åtkomst, ingen signering):
  * - company-logos: Företagslogotyper (publikt tillgängliga)
  * - job-images: Jobbannonsbilder (publikt tillgängliga)
+ * 
+ * REGLER:
+ * 1. ANVÄND ALLTID denna fil för uppladdningar (ingen direkt supabase.storage-anrop)
+ * 2. SPARA ENDAST storage paths i databasen (aldrig URLs)
+ * 3. ANVÄND useMediaUrl hook för visning (genererar signed URLs automatiskt)
+ * 4. ÄNDRA ALDRIG bucket-konfigurationen för kandidatmedia
+ * 5. ÄNDRA ALDRIG isPublic för kandidatmedia (måste vara false)
  */
 
 export type MediaType = 
@@ -91,7 +102,17 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
 };
 
 /**
- * Ladda upp en fil till rätt bucket baserat på mediatyp
+ * 🔒 KRITISKT: Ladda upp en fil till rätt bucket baserat på mediatyp
+ * 
+ * ⚠️ ANVÄND ALLTID DENNA FUNKTION FÖR UPPLADDNINGAR - ALDRIG DIREKT SUPABASE.STORAGE ⚠️
+ * 
+ * @param file - Filen som ska laddas upp
+ * @param mediaType - Typ av media (bestämmer bucket och validering)
+ * @param userId - User ID (används för att skapa säker mapstruktur)
+ * @returns {{ storagePath: string; error?: Error }} - ENDAST STORAGE PATH (aldrig URL)
+ * 
+ * VIKTIGT: Returnerar ENDAST storage path (t.ex. "user-id/timestamp.jpg")
+ * Spara detta värde direkt i databasen. Använd useMediaUrl för att visa media.
  */
 export async function uploadMedia(
   file: File,
@@ -136,9 +157,19 @@ export async function uploadMedia(
 }
 
 /**
- * Generera URL för att visa/ladda ner media
- * - Public buckets: returnerar public URL direkt
- * - Private buckets: genererar signed URL med expiration
+ * 🔒 KRITISKT: Generera URL för att visa/ladda ner media
+ * 
+ * ⚠️ ANVÄND useMediaUrl HOOK I KOMPONENTER - ANROPA INTE DIREKT ⚠️
+ * 
+ * @param storagePath - Storage path från databasen (t.ex. "user-id/timestamp.jpg")
+ * @param mediaType - Typ av media (bestämmer bucket)
+ * @param expiresInSeconds - Hur länge signed URL ska vara giltig (default 24h)
+ * @returns {Promise<string | null>} Signed URL för private media, public URL för public media
+ * 
+ * FUNKTIONALITET:
+ * - Public buckets: Returnerar public URL direkt
+ * - Private buckets: Genererar signed URL med expiration
+ * - Backward compatibility: Fallback till gamla profile-media bucket
  */
 export async function getMediaUrl(
   storagePath: string,
