@@ -38,6 +38,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [previewFile, setPreviewFile] = useState<{ file: File; url: string } | null>(null);
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
   const getFileIcon = (fileName: string) => {
@@ -50,6 +51,39 @@ const FileUpload: React.FC<FileUploadProps> = ({
     }
     return <File className="h-4 w-4" />;
   };
+
+  // Generate PDF preview URL when currentFile changes
+  useEffect(() => {
+    const generatePdfUrl = async () => {
+      if (!currentFile || !currentFile.name.toLowerCase().endsWith('.pdf')) {
+        setPdfPreviewUrl(null);
+        return;
+      }
+
+      try {
+        if (isPublicBucket || 
+            currentFile.url.includes('/profile-media/') ||
+            currentFile.url.includes('/company-logos/') ||
+            currentFile.url.includes('/job-images/')) {
+          setPdfPreviewUrl(currentFile.url);
+        } else {
+          const isStoragePath = !currentFile.url.startsWith('http');
+          if (isStoragePath) {
+            const signedUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
+            setPdfPreviewUrl(signedUrl || null);
+          } else {
+            const signedUrl = await convertToSignedUrl(currentFile.url, actualBucket, 86400, currentFile.name);
+            setPdfPreviewUrl(signedUrl || null);
+          }
+        }
+      } catch (err) {
+        console.error('Error generating PDF URL:', err);
+        setPdfPreviewUrl(null);
+      }
+    };
+    
+    generatePdfUrl();
+  }, [currentFile?.url, actualBucket, isPublicBucket]);
 
   const uploadFile = async (file: File) => {
     setUploading(true);
@@ -188,39 +222,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   if (currentFile) {
-    // Determine display URL behavior; for storage paths and conversions, we open on click
     const isPublicUrl = currentFile.url.includes('/storage/v1/object/public/');
-    const isSignedUrl = currentFile.url.includes('/storage/v1/object/sign/');
     const isStoragePath = !currentFile.url.startsWith('http');
-    const displayUrl = (isPublicUrl || isStoragePath) ? '#' : currentFile.url;
     const isPDF = currentFile.name.toLowerCase().endsWith('.pdf');
-    const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-
-    // Generate PDF URL for preview
-    useEffect(() => {
-      const generatePdfUrl = async () => {
-        try {
-          if (isPublicBucket || 
-              currentFile.url.includes('/profile-media/') ||
-              currentFile.url.includes('/company-logos/') ||
-              currentFile.url.includes('/job-images/')) {
-            setPdfUrl(currentFile.url);
-          } else if (isStoragePath) {
-            const signedUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
-            setPdfUrl(signedUrl || null);
-          } else {
-            const signedUrl = await convertToSignedUrl(currentFile.url, actualBucket, 86400, currentFile.name);
-            setPdfUrl(signedUrl || null);
-          }
-        } catch (err) {
-          console.error('Error generating PDF URL:', err);
-        }
-      };
-      
-      if (isPDF) {
-        generatePdfUrl();
-      }
-    }, [currentFile.url]);
 
     const handleOpenFile = async (e: React.MouseEvent) => {
       e.preventDefault();
@@ -253,10 +257,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
     return (
       <div className="border border-border rounded-lg overflow-hidden bg-muted/30">
         {/* PDF Preview */}
-        {isPDF && pdfUrl ? (
+        {isPDF && pdfPreviewUrl ? (
           <div className="relative">
             <iframe
-              src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+              src={`${pdfPreviewUrl}#toolbar=0&navpanes=0&scrollbar=0`}
               className="w-full h-48 bg-white"
               title="CV Preview"
             />
