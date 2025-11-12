@@ -551,27 +551,30 @@ const Profile = () => {
       // DO NOT delete old files automatically - only when user clicks delete button
       // Old files remain in storage for permanent access
 
-      const fileName = `${user.data.user.id}/${Date.now()}-profile-image.jpg`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('profile-media')
-        .upload(fileName, editedBlob);
+      // Skapa File från Blob så vi kan använda mediaManager
+      const editedFile = new File([editedBlob], 'profile-image.jpg', { type: 'image/jpeg' });
 
-      if (uploadError) throw uploadError;
+      // Ladda upp till privata bucketen via mediaManager (sparar endast storage path)
+      const { storagePath, error: uploadError } = await uploadMedia(
+        editedFile,
+        'profile-image',
+        user.data.user.id
+      );
 
-      // Store ONLY storage path, not URL (permanent access)
-      const storagePath = fileName;
-      
-      // Förladdda bilden i bakgrunden (utan att blockera UI)
-      import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
-        const { data: { publicUrl } } = supabase.storage.from('profile-media').getPublicUrl(storagePath);
-        preloadSingleFile(publicUrl).catch(err => console.log('Preload error:', err));
+      if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
+
+      // Förladda den signerade URL:en i bakgrunden (utan att blockera UI)
+      import('@/lib/serviceWorkerManager').then(async ({ preloadSingleFile }) => {
+        const signed = await getMediaUrl(storagePath, 'profile-image', 86400);
+        if (signed) {
+          preloadSingleFile(signed).catch(err => console.log('Preload error:', err));
+        }
       });
       
       // Update local state instead of saving immediately
       setProfileImageUrl(storagePath);
       setIsProfileVideo(false); // Mark as image, not video
-      setProfileFileName(fileName); // Track the new filename for deletion
+      setProfileFileName(storagePath); // Track the new filename (storage path) for deletion
       // Keep cover image when uploading profile image
       
       // Clear undo state since we have a new profile image
@@ -610,26 +613,29 @@ const Profile = () => {
       // DO NOT delete old files automatically - only when user clicks delete button
       // Old files remain in storage for permanent access
 
-      const fileName = `${user.data.user.id}/${Date.now()}-cover-image.jpg`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('profile-media')
-        .upload(fileName, editedBlob);
+      // Skapa File från Blob så vi kan använda mediaManager
+      const editedFile = new File([editedBlob], 'cover-image.jpg', { type: 'image/jpeg' });
 
-      if (uploadError) throw uploadError;
+      // Ladda upp till privata bucketen via mediaManager (sparar endast storage path)
+      const { storagePath, error: uploadError } = await uploadMedia(
+        editedFile,
+        'cover-image',
+        user.data.user.id
+      );
 
-      // Store ONLY storage path, not URL (permanent access)
-      const storagePath = fileName;
-      
-      // Förladdda bilden i bakgrunden (utan att blockera UI)
-      import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
-        const { data: { publicUrl } } = supabase.storage.from('profile-media').getPublicUrl(storagePath);
-        preloadSingleFile(publicUrl).catch(err => console.log('Preload error:', err));
+      if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
+
+      // Förladdda den signerade URL:en i bakgrunden (utan att blockera UI)
+      import('@/lib/serviceWorkerManager').then(async ({ preloadSingleFile }) => {
+        const signed = await getMediaUrl(storagePath, 'cover-image', 86400);
+        if (signed) {
+          preloadSingleFile(signed).catch(err => console.log('Preload error:', err));
+        }
       });
       
       // Update local state instead of saving immediately
       setCoverImageUrl(storagePath);
-      setCoverFileName(fileName); // Track the new filename for deletion
+      setCoverFileName(storagePath); // Track the new filename (storage path) for deletion
       
       // Clear undo state since we have a new cover image
       setDeletedCoverImage(null);
