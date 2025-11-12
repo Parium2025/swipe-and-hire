@@ -183,6 +183,31 @@ export async function getMediaUrl(
     return null;
   }
   
+  // Backward compatibility: some older images may still live in the public 'profile-media' bucket
+  if (mediaType === 'profile-image' || mediaType === 'cover-image') {
+    try {
+      // Verify that the signed URL actually resolves (file exists in the private bucket)
+      const head = await fetch(data.signedUrl, { method: 'HEAD' });
+      if (!head.ok) {
+        // Fallback to public URL from legacy bucket
+        const publicFallback = supabase.storage
+          .from('profile-media')
+          .getPublicUrl(cleanPath);
+        if (publicFallback?.data?.publicUrl) {
+          return publicFallback.data.publicUrl;
+        }
+      }
+    } catch (e) {
+      // Network/CORS issues: try returning public fallback as a best-effort if available
+      const publicFallback = supabase.storage
+        .from('profile-media')
+        .getPublicUrl(cleanPath);
+      if (publicFallback?.data?.publicUrl) {
+        return publicFallback.data.publicUrl;
+      }
+    }
+  }
+  
   return data.signedUrl;
 }
 
