@@ -242,7 +242,7 @@ export default function ProfilePreview() {
               style={{ cursor: 'pointer' }}
               onClick={(e) => {
                 // Stoppa event propagation så att klick på video/bild inte öppnar detaljvyn
-                if (videoUrl) {
+                if (data.video_url) {
                   e.stopPropagation();
                 }
               }}
