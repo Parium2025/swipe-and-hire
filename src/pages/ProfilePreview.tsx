@@ -162,18 +162,53 @@ export default function ProfilePreview() {
       }
     };
 
-    const handleCvClick = (e: React.MouseEvent) => {
+    const handleCvClick = async (e: React.MouseEvent) => {
       e.preventDefault();
-      if (data.cv_url) {
-        window.open(data.cv_url, '_blank');
+      if (!data.cv_url) {
+        toast({
+          title: "CV ej tillgängligt",
+          description: "Inget CV har laddats upp",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      try {
+        // Open popup immediately for better UX
+        const popup = window.open('', '_blank');
+        
+        // Check if cv_url is a storage path or full URL
+        const isStoragePath = !data.cv_url.startsWith('http');
+        const isPrivateBucket = data.cv_url.includes('/job-applications/') || isStoragePath;
+        
+        let finalUrl = data.cv_url;
+        
+        // Generate signed URL for private buckets
+        if (isStoragePath || isPrivateBucket) {
+          const { createSignedUrl, convertToSignedUrl } = await import('@/utils/storageUtils');
+          
+          if (isStoragePath) {
+            finalUrl = await createSignedUrl('job-applications', data.cv_url, 86400) || data.cv_url;
+          } else {
+            finalUrl = await convertToSignedUrl(data.cv_url, 'job-applications', 86400) || data.cv_url;
+          }
+        }
+        
+        if (popup) {
+          popup.location.href = finalUrl;
+        } else {
+          window.open(finalUrl, '_blank');
+        }
+        
         toast({
           title: "CV öppnat",
           description: "CV:t öppnas i en ny flik",
         });
-      } else {
+      } catch (error) {
+        console.error('Error opening CV:', error);
         toast({
-          title: "CV ej tillgängligt",
-          description: "CV-länken kunde inte laddas",
+          title: "Fel vid öppning",
+          description: "Kunde inte öppna CV:t",
           variant: "destructive"
         });
       }
