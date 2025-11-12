@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { preloadImages } from "@/lib/serviceWorkerManager";
 import { supabase } from "@/integrations/supabase/client";
+import { getMediaUrl } from "@/lib/mediaManager";
 import { 
   Sidebar,
   SidebarContent,
@@ -46,8 +47,6 @@ const businessItems = [
   { title: 'Betalningar', url: '/billing', icon: CreditCard },
 ];
 
-const AVATAR_CACHE_KEY = 'parium_profile_avatar_base';
-
 export function AppSidebar() {
   const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
   const collapsed = state === 'collapsed';
@@ -55,29 +54,10 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
-  // Konvertera storage-path till publik URL
-  const getPublicImageUrl = (url: string | null | undefined): string | null => {
-    if (!url || typeof url !== 'string' || url.trim() === '') return null;
-    
-    // Om redan publik URL, returnera direkt
-    if (url.includes('/storage/v1/object/public/')) {
-      return url.split('?')[0]; // Ta bort query params
-    }
-    
-    // Konvertera storage-path till publik URL från profile-media bucket
-    const publicUrl = supabase.storage
-      .from('profile-media')
-      .getPublicUrl(url).data.publicUrl;
-    
-    return publicUrl;
-  };
 
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(() => {
-    const fromProfile = profile?.profile_image_url || profile?.cover_image_url || '';
-    const cached = typeof window !== 'undefined' ? sessionStorage.getItem(AVATAR_CACHE_KEY) : null;
-    const raw = (typeof fromProfile === 'string' && fromProfile.trim() !== '') ? fromProfile : cached;
-    return getPublicImageUrl(raw);
-  });
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [avatarLoaded, setAvatarLoaded] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
   
@@ -110,31 +90,59 @@ export function AppSidebar() {
     return () => window.removeEventListener('unsaved-cancel', handleUnsavedCancel);
   }, [isMobile, setOpenMobile, setOpen]);
 
-  // Keep last known avatar; don't reset state unless value actually changes
+  // Generate signed URLs for all media using mediaManager
   useEffect(() => {
-    const raw = profile?.profile_image_url || profile?.cover_image_url || '';
-    if (typeof raw === 'string' && raw.trim() !== '') {
-      try {
-        const publicUrl = getPublicImageUrl(raw);
-        setAvatarUrl((prev) => {
-          if (prev === publicUrl) return prev; // no change → avoid flicker
-          setAvatarLoaded(false);
-          setAvatarError(false);
-          if (publicUrl) {
-            try { sessionStorage.setItem(AVATAR_CACHE_KEY, publicUrl); } catch {}
-          }
-          return publicUrl;
-        });
-      } catch (error) {
-        console.error('Failed to parse profile avatar:', error);
+    const loadMedia = async () => {
+      // Video URL (private bucket)
+      if (profile?.video_url) {
+        try {
+          const url = await getMediaUrl(profile.video_url, 'profile-video', 86400);
+          if (url) setVideoUrl(url);
+        } catch (error) {
+          console.error('Failed to load video URL:', error);
+          setVideoUrl(null);
+        }
+      } else {
+        setVideoUrl(null);
       }
-    } else if (raw === '' || raw === null) {
-      setAvatarUrl(null);
-      setAvatarLoaded(false);
-      setAvatarError(false);
-      try { sessionStorage.removeItem(AVATAR_CACHE_KEY); } catch {}
-    }
-    // if undefined, keep previous URL while profile is re-fetching
+
+      // Cover image URL (public bucket)
+      if (profile?.cover_image_url) {
+        try {
+          const url = await getMediaUrl(profile.cover_image_url, 'cover-image', 86400);
+          if (url) setCoverUrl(url);
+        } catch (error) {
+          console.error('Failed to load cover URL:', error);
+          setCoverUrl(null);
+        }
+      } else {
+        setCoverUrl(null);
+      }
+
+      // Profile image URL (public bucket) - for avatar fallback
+      if (profile?.profile_image_url && !profile?.video_url) {
+        try {
+          const url = await getMediaUrl(profile.profile_image_url, 'profile-image', 86400);
+          if (url) setAvatarUrl(url);
+        } catch (error) {
+          console.error('Failed to load avatar URL:', error);
+          setAvatarUrl(null);
+        }
+      } else if (profile?.cover_image_url && !profile?.video_url) {
+        // Use cover as fallback if no video and no profile image
+        try {
+          const url = await getMediaUrl(profile.cover_image_url, 'cover-image', 86400);
+          if (url) setAvatarUrl(url);
+        } catch (error) {
+          console.error('Failed to load cover as avatar:', error);
+          setAvatarUrl(null);
+        }
+      } else {
+        setAvatarUrl(null);
+      }
+    };
+
+    loadMedia();
   }, [profile?.profile_image_url, profile?.cover_image_url, profile?.video_url]);
 
   const handleNavigation = (href: string) => {
@@ -188,10 +196,10 @@ export function AppSidebar() {
         {/* User Profile Section - always mounted to preload, but only visible when not collapsed */}
         <div className={`p-4 ${collapsed ? 'hidden' : ''}`}>
           <div className="flex items-center gap-3">
-            {hasVideo && profile?.video_url ? (
+            {hasVideo && videoUrl ? (
               <ProfileVideo
-                videoUrl={profile.video_url}
-                coverImageUrl={profile.cover_image_url || profile.profile_image_url}
+                videoUrl={videoUrl}
+                coverImageUrl={coverUrl || avatarUrl || undefined}
                 userInitials={`${profile?.first_name?.[0] || ''}${profile?.last_name?.[0] || ''}`}
                 alt="Profilvideo"
                 className="h-10 w-10 ring-2 ring-white/20 rounded-full"
