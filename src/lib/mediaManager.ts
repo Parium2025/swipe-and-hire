@@ -30,8 +30,8 @@ interface MediaConfig {
 
 const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
   'profile-image': {
-    bucket: 'profile-media',
-    isPublic: true,
+    bucket: 'job-applications',
+    isPublic: false,
     maxSizeMB: 10,
     allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
   },
@@ -42,8 +42,8 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
     allowedTypes: ['video/mp4', 'video/quicktime', 'video/x-msvideo']
   },
   'cover-image': {
-    bucket: 'profile-media',
-    isPublic: true,
+    bucket: 'job-applications',
+    isPublic: false,
     maxSizeMB: 10,
     allowedTypes: ['image/jpeg', 'image/png', 'image/webp']
   },
@@ -218,7 +218,7 @@ export function detectMediaType(file: File): MediaType | null {
  * Kontrollera om en bucket är public
  */
 export function isBucketPublic(bucket: string): boolean {
-  return ['profile-media', 'company-logos', 'job-images'].includes(bucket);
+  return ['company-logos', 'job-images'].includes(bucket);
 }
 
 /**

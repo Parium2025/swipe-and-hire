@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
       errors: []
     };
 
-    // Migrera profilbilder och cover till profile-media (PUBLIC), videor stannar i job-applications (PRIVATE)
+    // All profilmedia ska vara i job-applications (PRIVATE) för säkerhet
     console.log('Fetching profiles with media...');
     const { data: profiles, error: profilesError } = await supabaseClient
       .from('profiles')
@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
         try {
           const updates: any = {};
           
-          // Video ska ALLTID vara i job-applications (private) - extrahera bara storage path
+          // Video - extrahera storage path (redan i job-applications)
           if (profile.video_url && profile.video_url.startsWith('http')) {
             const videoPath = extractStoragePath(profile.video_url);
             if (videoPath && videoPath.includes('/')) {
@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
             }
           }
           
-          // Profilbild ska vara i profile-media (public) - extrahera storage path
+          // Profilbild - extrahera storage path (ska vara i job-applications)
           if (profile.profile_image_url && profile.profile_image_url.startsWith('http')) {
             const imagePath = extractStoragePath(profile.profile_image_url);
             if (imagePath && imagePath.includes('/')) {
@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
             }
           }
           
-          // Cover-bild ska vara i profile-media (public) - extrahera storage path
+          // Cover-bild - extrahera storage path (ska vara i job-applications)
           if (profile.cover_image_url && profile.cover_image_url.startsWith('http')) {
             const coverPath = extractStoragePath(profile.cover_image_url);
             if (coverPath && coverPath.includes('/')) {

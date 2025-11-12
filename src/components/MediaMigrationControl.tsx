@@ -79,10 +79,10 @@ export function MediaMigrationControl() {
             Denna migrering kommer att:
           </p>
           <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
-            <li>Konvertera profilbilder och cover-bilder till storage paths i profile-media bucket (PUBLIC)</li>
-            <li>Konvertera profilvideor till storage paths i job-applications bucket (PRIVATE)</li>
+            <li>Konvertera ALL profilmedia (videor, bilder, cover) till storage paths i job-applications bucket (PRIVATE)</li>
             <li>Konvertera CV:n till storage paths i job-applications bucket (PRIVATE)</li>
             <li>Ta bort alla temporära URL:er från databasen</li>
+            <li>Endast jobbsökaren själv + arbetsgivare med permission kan se media</li>
           </ul>
         </div>
 
