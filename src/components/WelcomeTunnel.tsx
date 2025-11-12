@@ -1102,7 +1102,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 }} 
                 acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']} 
                 maxFileSize={10 * 1024 * 1024} 
-                currentFile={formData.cvUrl ? { url: formData.cvUrl, name: formData.cvFileName || "Din valda fil" } : undefined} 
+                currentFile={formData.cvUrl ? { url: formData.cvUrl, name: "Din valda fil" } : undefined} 
               />
               {formData.cvUrl && (
                 <Badge variant="secondary" className="bg-white/20 text-white">

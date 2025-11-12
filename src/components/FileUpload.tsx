@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, File, Video, FileText, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -38,7 +38,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [previewFile, setPreviewFile] = useState<{ file: File; url: string } | null>(null);
-  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
   const getFileIcon = (fileName: string) => {
@@ -51,60 +50,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
     }
     return <File className="h-4 w-4" />;
   };
-
-  // Generate PDF preview URL when currentFile changes
-  useEffect(() => {
-    const generatePreviewUrl = async () => {
-      if (!currentFile) {
-        setPdfPreviewUrl(null);
-        return;
-      }
-
-      const name = currentFile.name.toLowerCase();
-      const isPDF = name.endsWith('.pdf');
-      const isWord = name.endsWith('.doc') || name.endsWith('.docx');
-
-      // Reset both when file changes
-      setPdfPreviewUrl(null);
-
-      try {
-        const isStoragePath = !currentFile.url.startsWith('http');
-
-        // Resolve a fetchable URL first (public, signed, or converted)
-        let fetchableUrl: string | null = null;
-        if (isPublicBucket) {
-          if (isStoragePath) {
-            const { data } = supabase.storage.from(actualBucket).getPublicUrl(currentFile.url);
-            fetchableUrl = data.publicUrl;
-          } else {
-            fetchableUrl = currentFile.url;
-          }
-        } else if (isStoragePath) {
-          fetchableUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
-        } else {
-          fetchableUrl = await convertToSignedUrl(currentFile.url, actualBucket, 86400, currentFile.name);
-        }
-
-        if (!fetchableUrl) {
-          setPdfPreviewUrl(null);
-          return;
-        }
-
-        if (isPDF) {
-          setPdfPreviewUrl(fetchableUrl);
-        } else if (isWord) {
-          // Use Microsoft Office viewer for Word docs
-          const officeUrl = `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(fetchableUrl)}`;
-          setPdfPreviewUrl(officeUrl);
-        }
-      } catch (err) {
-        console.error('Error generating preview URL:', err);
-        setPdfPreviewUrl(null);
-      }
-    };
-
-    generatePreviewUrl();
-  }, [currentFile, actualBucket, isPublicBucket]);
 
   const uploadFile = async (file: File) => {
     setUploading(true);
@@ -243,85 +188,62 @@ const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   if (currentFile) {
+    // Determine display URL behavior; for storage paths and conversions, we open on click
+    const isPublicUrl = currentFile.url.includes('/storage/v1/object/public/');
+    const isSignedUrl = currentFile.url.includes('/storage/v1/object/sign/');
     const isStoragePath = !currentFile.url.startsWith('http');
-    const lowerName = currentFile.name.toLowerCase();
-    const isPDF = lowerName.endsWith('.pdf');
-    const isWord = lowerName.endsWith('.doc') || lowerName.endsWith('.docx');
-
-    const handleOpenFile = async (e: React.MouseEvent) => {
-      e.preventDefault();
-      const popup = window.open('', '_blank');
-      
-      try {
-        let finalUrl = currentFile.url;
-        
-        // Resolve final URL
-        if (isPublicBucket) {
-          if (isStoragePath) {
-            const { data } = supabase.storage.from(actualBucket).getPublicUrl(currentFile.url);
-            finalUrl = data.publicUrl;
-          } else {
-            finalUrl = currentFile.url;
-          }
-        } else if (isStoragePath) {
-          const signedUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
-          finalUrl = signedUrl || currentFile.url;
-        } else {
-          const signedUrl = await convertToSignedUrl(currentFile.url, actualBucket, 86400, currentFile.name);
-          finalUrl = signedUrl || currentFile.url;
-        }
-        
-        if (popup) {
-          popup.location.href = finalUrl;
-        } else {
-          window.open(finalUrl, '_blank');
-        }
-      } catch (err) {
-        console.error('Error opening file:', err);
-        popup?.close();
-      }
-    };
+    const displayUrl = (isPublicUrl || isStoragePath) ? '#' : currentFile.url;
 
     return (
-      <div className="border border-border rounded-lg overflow-hidden bg-muted/30">
-        {/* PDF Preview */}
-        {(isPDF || isWord) && pdfPreviewUrl ? (
-          <div className="relative">
-            <iframe
-              src={isPDF ? `${pdfPreviewUrl}#toolbar=0&navpanes=0&scrollbar=0` : pdfPreviewUrl}
-              className="w-full h-48 bg-white"
-              title="CV Preview"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-            <button
-              onClick={handleOpenFile}
-              className="absolute inset-0 w-full h-full cursor-pointer hover:bg-black/10 transition-colors flex items-center justify-center group"
-            >
-              <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="text-sm font-medium text-gray-900">Klicka för att öppna i ny flik</span>
-              </div>
-            </button>
-          </div>
-        ) : null}
-        
-        {/* File info and remove button */}
-        <div className="p-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
+      <div className="border border-border rounded-md p-4 bg-muted/30">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
             {getFileIcon(currentFile.name)}
-            <button
-              onClick={handleOpenFile}
-              className="text-sm font-medium truncate text-white hover:text-primary underline cursor-pointer"
+            <a
+              href={displayUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium truncate max-w-[200px] text-white hover:text-primary underline cursor-pointer"
+              onClick={(e) => {
+                e.preventDefault();
+                const popup = window.open('', '_blank');
+                const openUrl = (url?: string | null) => {
+                  if (!url) { popup?.close(); return; }
+                  if (popup) popup.location.href = url;
+                  else window.open(url, '_blank');
+                };
+                (async () => {
+                  try {
+                    // For public buckets, just open the URL directly
+                    if (isPublicBucket || 
+                        currentFile.url.includes('/profile-media/') ||
+                        currentFile.url.includes('/company-logos/') ||
+                        currentFile.url.includes('/job-images/')) {
+                      openUrl(currentFile.url);
+                    } else if (isStoragePath) {
+                      const signedUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
+                      openUrl(signedUrl);
+                    } else {
+                      const signedUrl = await convertToSignedUrl(currentFile.url, actualBucket, 86400, currentFile.name);
+                      openUrl(signedUrl);
+                    }
+                  } catch (err) {
+                    console.error('Error opening file:', err);
+                    popup?.close();
+                  }
+                })();
+              }}
             >
               {currentFile.name}
-            </button>
+            </a>
           </div>
           <Button
             variant="ghost"
             size="sm"
             onClick={handleRemoveFile}
-            className="h-8 w-8 p-0 flex-shrink-0 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+            className="h-6 w-6 p-0 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3 w-3" />
           </Button>
         </div>
       </div>
