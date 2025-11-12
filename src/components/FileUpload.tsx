@@ -255,12 +255,14 @@ const FileUpload: React.FC<FileUploadProps> = ({
       try {
         let finalUrl = currentFile.url;
         
-        // Generate signed URL for private buckets
-        if (isPublicBucket || 
-            currentFile.url.includes('/profile-media/') ||
-            currentFile.url.includes('/company-logos/') ||
-            currentFile.url.includes('/job-images/')) {
-          finalUrl = currentFile.url;
+        // Resolve final URL
+        if (isPublicBucket) {
+          if (isStoragePath) {
+            const { data } = supabase.storage.from(actualBucket).getPublicUrl(currentFile.url);
+            finalUrl = data.publicUrl;
+          } else {
+            finalUrl = currentFile.url;
+          }
         } else if (isStoragePath) {
           const signedUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
           finalUrl = signedUrl || currentFile.url;
