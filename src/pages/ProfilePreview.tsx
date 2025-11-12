@@ -17,6 +17,7 @@ import { openCvFile } from '@/utils/cvUtils';
 import ProfileVideo from '@/components/ProfileVideo';
 import { TruncatedText } from '@/components/TruncatedText';
 import NameAutoFit from '@/components/NameAutoFit';
+import { useMediaUrl } from '@/hooks/useMediaUrl';
 
 interface ProfileViewData {
   id: string;
@@ -42,13 +43,13 @@ export default function ProfilePreview() {
   const [consentedData, setConsentedData] = useState<ProfileViewData | null>(null);
   const [maskedData, setMaskedData] = useState<ProfileViewData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [showDetailedView, setShowDetailedView] = useState(false);
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
   
-  // Signed URLs for secure video and cover display
-  const [signedVideoUrl, setSignedVideoUrl] = useState<string>('');
-  const [signedCoverUrl, setSignedCoverUrl] = useState<string>('');
+  // Use hooks to generate signed URLs automatically
+  const profileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image');
+  const signedVideoUrl = useMediaUrl(profile?.video_url, 'profile-video');
+  const signedCoverUrl = useMediaUrl(profile?.cover_image_url, 'cover-image');
 
   useEffect(() => {
     const loadPreviewData = async () => {
@@ -110,53 +111,6 @@ export default function ProfilePreview() {
     loadPreviewData();
   }, [user?.id, profile]);
 
-  // Generate avatar URL using mediaManager
-  useEffect(() => {
-    const loadAvatar = async () => {
-      const candidate = profile?.cover_image_url || profile?.profile_image_url || '';
-      if (!candidate) {
-        setAvatarUrl('');
-        return;
-      }
-
-      try {
-        // Använd mediaManager för cover eller profil-bild
-        const mediaType = profile?.cover_image_url ? 'cover-image' : 'profile-image';
-        const url = await getMediaUrl(candidate, mediaType);
-        setAvatarUrl(url || candidate);
-      } catch (error) {
-        console.error('Error loading avatar:', error);
-        setAvatarUrl(candidate);
-      }
-    };
-
-    loadAvatar();
-  }, [profile?.cover_image_url, profile?.profile_image_url]);
-
-  // Generate signed URLs for video and cover
-  useEffect(() => {
-    const loadSignedUrls = async () => {
-      if (profile?.video_url) {
-        try {
-          const url = await getMediaUrl(profile.video_url, 'profile-video', 86400);
-          if (url) setSignedVideoUrl(url);
-        } catch (error) {
-          console.error('Error generating video URL:', error);
-        }
-      }
-      
-      if (profile?.cover_image_url) {
-        try {
-          const url = await getMediaUrl(profile.cover_image_url, 'cover-image', 86400);
-          if (url) setSignedCoverUrl(url);
-        } catch (error) {
-          console.error('Error generating cover URL:', error);
-        }
-      }
-    };
-
-    loadSignedUrls();
-  }, [profile?.video_url, profile?.cover_image_url]);
 
   const ProfileView = ({ data, isConsented }: { data: ProfileViewData | null; isConsented: boolean }) => {
     if (!data) return <div className="text-white">Ingen data tillgänglig</div>;
@@ -267,7 +221,7 @@ export default function ProfilePreview() {
           <div className="relative w-full h-full bg-transparent overflow-hidden" style={{ cursor: 'pointer' }}>
             {/* Avatar-område för både bild och video - centrerat längst upp */}
             <div 
-              className="absolute top-4 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-full overflow-hidden border-2 border-white/40 shadow-2xl bg-gradient-to-br from-primary/20 to-primary/30"
+              className="absolute top-4 left-1/2 transform -translate-x-1/2 w-32 h-32"
               style={{ cursor: 'pointer' }}
               onClick={(e) => {
                 // Stoppa event propagation så att klick på video/bild inte öppnar detaljvyn
@@ -276,31 +230,28 @@ export default function ProfilePreview() {
                 }
               }}
             >
-              
               {/* Använd ProfileVideo komponenten om video finns */}
               {data.video_url && signedVideoUrl ? (
                 <ProfileVideo
                   videoUrl={signedVideoUrl}
-                  coverImageUrl={signedCoverUrl || avatarUrl || undefined}
+                  coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
                   userInitials={`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`}
                   alt="Profilbild"
                   className="w-full h-full rounded-full"
                   showCountdown={true}
                 />
               ) : (
-                /* Om ingen video, visa bara bilden */
-                avatarUrl ? (
-                  <img
-                    src={avatarUrl}
+                /* Om ingen video, visa Avatar med fallback till initialer */
+                <Avatar className="w-32 h-32 border-2 border-white/40 shadow-2xl">
+                  <AvatarImage 
+                    src={profileImageUrl || signedCoverUrl || undefined} 
                     alt="Profilbild"
-                    className="w-full h-full object-cover"
-                    draggable={false}
+                    className="object-cover"
                   />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <User className="h-8 w-8 text-primary/60" />
-                  </div>
-                )
+                  <AvatarFallback className="bg-primary/20 text-white text-3xl font-bold">
+                    {`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
               )}
             </div>
 
@@ -606,7 +557,7 @@ export default function ProfilePreview() {
           >
             <div className="flex items-center gap-3">
               <Avatar className="h-12 w-12">
-                <AvatarImage src={avatarUrl} />
+                <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} />
                 <AvatarFallback className="bg-primary/20 text-white">
                   {consentedData?.first_name?.[0]}
                 </AvatarFallback>
@@ -630,7 +581,7 @@ export default function ProfilePreview() {
               {/* Header */}
               <div className="flex items-start gap-4">
                 <Avatar className="h-20 w-20">
-                  <AvatarImage src={avatarUrl} />
+                  <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} />
                   <AvatarFallback className="bg-primary/20 text-white text-2xl">
                     {consentedData?.first_name?.[0]}
                   </AvatarFallback>
