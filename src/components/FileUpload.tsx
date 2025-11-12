@@ -196,7 +196,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
     const displayUrl = (isPublicUrl || isStoragePath) ? '#' : currentFile.url;
 
     return (
-      <div className="border border-border rounded-md p-4 bg-white/5 backdrop-blur-sm">
+      <div className="border border-white/10 rounded-md p-4 bg-white/5 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {getFileIcon(currentFile.name)}
