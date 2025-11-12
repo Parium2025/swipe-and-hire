@@ -117,7 +117,7 @@ export default function ProfilePreview() {
 
       try {
         // Use convertToSignedUrl which auto-detects bucket and handles paths/URLs
-        const finalUrl = await convertToSignedUrl(candidate, 'job-applications', 86400);
+        const finalUrl = await convertToSignedUrl(candidate, 'profile-media', 86400);
         setAvatarUrl(finalUrl || candidate);
       } catch {
         setAvatarUrl(candidate);

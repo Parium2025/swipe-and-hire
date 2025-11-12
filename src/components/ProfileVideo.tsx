@@ -41,11 +41,20 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
             // Already a full URL
             setSignedVideoUrl(videoUrl);
           } else {
-            // Storage path - generate public URL (profile-media is public bucket)
-            const { data } = supabase.storage
-              .from('profile-media')
-              .getPublicUrl(videoUrl);
-            setSignedVideoUrl(data?.publicUrl || videoUrl);
+            // Storage path - try private job-applications first, then fallback to public profile-media
+            try {
+              const { createSignedUrl } = await import('@/utils/storageUtils');
+              const signed = await createSignedUrl('job-applications', videoUrl, 86400);
+              if (signed) {
+                setSignedVideoUrl(signed);
+              } else {
+                const { data } = supabase.storage.from('profile-media').getPublicUrl(videoUrl);
+                setSignedVideoUrl(data?.publicUrl || videoUrl);
+              }
+            } catch {
+              const { data } = supabase.storage.from('profile-media').getPublicUrl(videoUrl);
+              setSignedVideoUrl(data?.publicUrl || videoUrl);
+            }
           }
         } catch {
           setSignedVideoUrl(videoUrl);

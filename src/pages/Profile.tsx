@@ -378,7 +378,7 @@ const Profile = () => {
       }
       
       const { error: uploadError } = await supabase.storage
-        .from('job-applications')
+        .from('profile-media')
         .upload(fileName, file);
       
       if (progressInterval) clearInterval(progressInterval);
@@ -439,7 +439,7 @@ const Profile = () => {
       const fileName = `${user?.id}/${Date.now()}-cover-image.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
-        .from('job-applications')
+        .from('profile-media')
         .upload(fileName, file);
 
       if (uploadError) throw uploadError;
