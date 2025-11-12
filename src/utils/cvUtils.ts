@@ -71,11 +71,35 @@ export async function openCvFile({ cvUrl, fileName = 'cv.pdf', onSuccess, onErro
     let opened = false;
     if (popup) {
       try {
-        // Render an inline viewer in the popup to avoid Chrome/extension blocking of blob navigations
         const doc = popup.document;
         const safeTitle = fileName || 'CV';
         doc.open();
-        doc.write(`<!doctype html><html lang="sv"><head><meta charset="utf-8"><title>${safeTitle}</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;height:100%;background:#111}</style></head><body><embed src="${blobUrl}" type="${blob.type || 'application/pdf'}" style="width:100%;height:100%"/></body></html>`);
+        doc.write(`<!doctype html><html lang="sv"><head><meta charset="utf-8"><title>${safeTitle}</title><meta name="viewport" content="width=device-width,initial-scale=1">
+        <style>
+          html,body{margin:0;height:100%;background:#111;color:#fff}
+          #loading{position:absolute;top:16px;left:16px;font:14px system-ui, -apple-system, Segoe UI, Roboto, sans-serif;opacity:.8}
+          a#download{position:absolute;bottom:16px;right:16px;background:#2563eb;color:#fff;padding:10px 14px;border-radius:8px;text-decoration:none}
+        </style></head><body>
+        <div id="loading">Öppnar CV…</div>
+        <iframe id="pdfFrame" src="${blobUrl}#toolbar=1&navpanes=0&view=FitH" style="width:100%;height:100%;border:0;display:block" allow="fullscreen"></iframe>
+        <object id="pdfObject" data="${blobUrl}" type="${blob.type || 'application/pdf'}" style="width:100%;height:100%;display:none"></object>
+        <a id="download" href="${blobUrl}" download="${safeTitle}" style="display:none">Ladda ner</a>
+        <script>(function(){
+          const iframe = document.getElementById('pdfFrame');
+          const objectEl = document.getElementById('pdfObject');
+          const dl = document.getElementById('download');
+          let decided = false;
+          function showIframe(){ if(decided) return; decided=true; objectEl.style.display='none'; iframe.style.display='block'; dl.style.display='none'; }
+          function showObject(){ if(decided) return; decided=true; iframe.style.display='none'; objectEl.style.display='block'; dl.style.display='none'; }
+          function showDownload(){ if(decided) return; decided=true; iframe.style.display='none'; objectEl.style.display='none'; dl.style.display='inline-flex'; }
+          const timer = setTimeout(function(){ showObject(); setTimeout(showDownload, 1200); }, 1500);
+          iframe.addEventListener('load', function(){ clearTimeout(timer); showIframe(); });
+          objectEl.addEventListener('load', function(){ showObject(); });
+          if(!navigator.mimeTypes || !navigator.mimeTypes['application/pdf']){
+            setTimeout(showDownload, 1500);
+          }
+        })();<\/script>
+        </body></html>`);
         doc.close();
         opened = true;
       } catch {
