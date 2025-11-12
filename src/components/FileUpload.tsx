@@ -54,34 +54,56 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
   // Generate PDF preview URL when currentFile changes
   useEffect(() => {
-    const generatePdfUrl = async () => {
-      if (!currentFile || !currentFile.name.toLowerCase().endsWith('.pdf')) {
+    const generatePreviewUrl = async () => {
+      if (!currentFile) {
         setPdfPreviewUrl(null);
         return;
       }
 
+      const name = currentFile.name.toLowerCase();
+      const isPDF = name.endsWith('.pdf');
+      const isWord = name.endsWith('.doc') || name.endsWith('.docx');
+
+      // Reset both when file changes
+      setPdfPreviewUrl(null);
+
       try {
         const isStoragePath = !currentFile.url.startsWith('http');
-        
-        if (isPublicBucket || 
-            currentFile.url.includes('/profile-media/') ||
-            currentFile.url.includes('/company-logos/') ||
-            currentFile.url.includes('/job-images/')) {
-          setPdfPreviewUrl(currentFile.url);
+
+        // Resolve a fetchable URL first (public, signed, or converted)
+        let fetchableUrl: string | null = null;
+        if (isPublicBucket) {
+          if (isStoragePath) {
+            const { data } = supabase.storage.from(actualBucket).getPublicUrl(currentFile.url);
+            fetchableUrl = data.publicUrl;
+          } else {
+            fetchableUrl = currentFile.url;
+          }
         } else if (isStoragePath) {
-          const signedUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
-          setPdfPreviewUrl(signedUrl || null);
+          fetchableUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
         } else {
-          const signedUrl = await convertToSignedUrl(currentFile.url, actualBucket, 86400, currentFile.name);
-          setPdfPreviewUrl(signedUrl || null);
+          fetchableUrl = await convertToSignedUrl(currentFile.url, actualBucket, 86400, currentFile.name);
+        }
+
+        if (!fetchableUrl) {
+          setPdfPreviewUrl(null);
+          return;
+        }
+
+        if (isPDF) {
+          setPdfPreviewUrl(fetchableUrl);
+        } else if (isWord) {
+          // Use Microsoft Office viewer for Word docs
+          const officeUrl = `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(fetchableUrl)}`;
+          setPdfPreviewUrl(officeUrl);
         }
       } catch (err) {
-        console.error('Error generating PDF URL:', err);
+        console.error('Error generating preview URL:', err);
         setPdfPreviewUrl(null);
       }
     };
-    
-    generatePdfUrl();
+
+    generatePreviewUrl();
   }, [currentFile, actualBucket, isPublicBucket]);
 
   const uploadFile = async (file: File) => {
@@ -222,7 +244,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
   if (currentFile) {
     const isStoragePath = !currentFile.url.startsWith('http');
-    const isPDF = currentFile.name.toLowerCase().endsWith('.pdf');
+    const lowerName = currentFile.name.toLowerCase();
+    const isPDF = lowerName.endsWith('.pdf');
+    const isWord = lowerName.endsWith('.doc') || lowerName.endsWith('.docx');
 
     const handleOpenFile = async (e: React.MouseEvent) => {
       e.preventDefault();
@@ -231,12 +255,14 @@ const FileUpload: React.FC<FileUploadProps> = ({
       try {
         let finalUrl = currentFile.url;
         
-        // Generate signed URL for private buckets
-        if (isPublicBucket || 
-            currentFile.url.includes('/profile-media/') ||
-            currentFile.url.includes('/company-logos/') ||
-            currentFile.url.includes('/job-images/')) {
-          finalUrl = currentFile.url;
+        // Resolve final URL
+        if (isPublicBucket) {
+          if (isStoragePath) {
+            const { data } = supabase.storage.from(actualBucket).getPublicUrl(currentFile.url);
+            finalUrl = data.publicUrl;
+          } else {
+            finalUrl = currentFile.url;
+          }
         } else if (isStoragePath) {
           const signedUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
           finalUrl = signedUrl || currentFile.url;
@@ -259,10 +285,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
     return (
       <div className="border border-border rounded-lg overflow-hidden bg-muted/30">
         {/* PDF Preview */}
-        {isPDF && pdfPreviewUrl ? (
+        {(isPDF || isWord) && pdfPreviewUrl ? (
           <div className="relative">
             <iframe
-              src={`${pdfPreviewUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+              src={isPDF ? `${pdfPreviewUrl}#toolbar=0&navpanes=0&scrollbar=0` : pdfPreviewUrl}
               className="w-full h-48 bg-white"
               title="CV Preview"
             />
