@@ -428,9 +428,13 @@ export default function ProfilePreview() {
                   {data.user_id && user?.email && (
                     <div>
                       <p className="text-[8px] text-white uppercase">E-post</p>
-                      <div className="flex items-center gap-1">
-                        <Mail className="h-3 w-3 text-white" />
-                        <p className="text-xs text-white truncate">{user.email}</p>
+                      <div className="flex items-center gap-1 min-w-0">
+                        <Mail className="h-3 w-3 text-white flex-shrink-0" />
+                        <TruncatedText
+                          text={user.email}
+                          className="text-xs text-white truncate block flex-1 min-w-0"
+                          alwaysShowTooltip={false}
+                        />
                       </div>
                     </div>
                   )}
