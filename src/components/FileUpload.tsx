@@ -61,20 +61,19 @@ const FileUpload: React.FC<FileUploadProps> = ({
       }
 
       try {
+        const isStoragePath = !currentFile.url.startsWith('http');
+        
         if (isPublicBucket || 
             currentFile.url.includes('/profile-media/') ||
             currentFile.url.includes('/company-logos/') ||
             currentFile.url.includes('/job-images/')) {
           setPdfPreviewUrl(currentFile.url);
+        } else if (isStoragePath) {
+          const signedUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
+          setPdfPreviewUrl(signedUrl || null);
         } else {
-          const isStoragePath = !currentFile.url.startsWith('http');
-          if (isStoragePath) {
-            const signedUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
-            setPdfPreviewUrl(signedUrl || null);
-          } else {
-            const signedUrl = await convertToSignedUrl(currentFile.url, actualBucket, 86400, currentFile.name);
-            setPdfPreviewUrl(signedUrl || null);
-          }
+          const signedUrl = await convertToSignedUrl(currentFile.url, actualBucket, 86400, currentFile.name);
+          setPdfPreviewUrl(signedUrl || null);
         }
       } catch (err) {
         console.error('Error generating PDF URL:', err);
@@ -83,7 +82,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
     };
     
     generatePdfUrl();
-  }, [currentFile?.url, actualBucket, isPublicBucket]);
+  }, [currentFile, actualBucket, isPublicBucket]);
 
   const uploadFile = async (file: File) => {
     setUploading(true);
@@ -222,31 +221,34 @@ const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   if (currentFile) {
-    const isPublicUrl = currentFile.url.includes('/storage/v1/object/public/');
     const isStoragePath = !currentFile.url.startsWith('http');
     const isPDF = currentFile.name.toLowerCase().endsWith('.pdf');
 
     const handleOpenFile = async (e: React.MouseEvent) => {
       e.preventDefault();
       const popup = window.open('', '_blank');
-      const openUrl = (url?: string | null) => {
-        if (!url) { popup?.close(); return; }
-        if (popup) popup.location.href = url;
-        else window.open(url, '_blank');
-      };
       
       try {
+        let finalUrl = currentFile.url;
+        
+        // Generate signed URL for private buckets
         if (isPublicBucket || 
             currentFile.url.includes('/profile-media/') ||
             currentFile.url.includes('/company-logos/') ||
             currentFile.url.includes('/job-images/')) {
-          openUrl(currentFile.url);
+          finalUrl = currentFile.url;
         } else if (isStoragePath) {
           const signedUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
-          openUrl(signedUrl);
+          finalUrl = signedUrl || currentFile.url;
         } else {
           const signedUrl = await convertToSignedUrl(currentFile.url, actualBucket, 86400, currentFile.name);
-          openUrl(signedUrl);
+          finalUrl = signedUrl || currentFile.url;
+        }
+        
+        if (popup) {
+          popup.location.href = finalUrl;
+        } else {
+          window.open(finalUrl, '_blank');
         }
       } catch (err) {
         console.error('Error opening file:', err);
