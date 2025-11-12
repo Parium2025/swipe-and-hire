@@ -26,6 +26,7 @@ import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { isValidSwedishPhone } from '@/lib/phoneValidation';
+import { useMediaUrl } from '@/hooks/useMediaUrl';
 
 const Profile = () => {
   const { profile, userRole, updateProfile, refreshProfile, user } = useAuth();
@@ -77,10 +78,11 @@ const Profile = () => {
   const [videoUrl, setVideoUrl] = useState(profile?.video_url || '');
   const [cvUrl, setCvUrl] = useState((profile as any)?.cv_url || '');
   const [cvFileName, setCvFileName] = useState((profile as any)?.cv_filename || '');
+  const signedProfileImageUrl = useMediaUrl(profileImageUrl || (profile as any)?.profile_image_url, 'profile-image');
   
   // Signed URLs for displaying private media
-  const [signedVideoUrl, setSignedVideoUrl] = useState<string>('');
-  const [signedCoverUrl, setSignedCoverUrl] = useState<string>('');
+  const signedVideoUrl = useMediaUrl(videoUrl || (profile as any)?.video_url, 'profile-video');
+  const signedCoverUrl = useMediaUrl(coverImageUrl || (profile as any)?.cover_image_url, 'cover-image');
   
   // Extended profile fields that we'll need to add to database
   const [employmentStatus, setEmploymentStatus] = useState('');
@@ -145,10 +147,7 @@ const Profile = () => {
         values.profileImageUrl = '';
         values.isProfileVideo = true;
         
-        // Generate signed URL for video display
-        getMediaUrl((profile as any).video_url, 'profile-video', 86400).then((url) => {
-          if (url) setSignedVideoUrl(url);
-        });
+          // Signed URL handled by useMediaUrl hook
       } else {
         setVideoUrl('');
         setProfileImageUrl(values.profileImageUrl);
@@ -162,12 +161,7 @@ const Profile = () => {
       setCoverImageUrl(dbCoverImage);
       values.coverImageUrl = dbCoverImage;
       
-      // Generate signed URL for cover image if it exists
-      if (dbCoverImage) {
-        getMediaUrl(dbCoverImage, 'cover-image', 86400).then((url) => {
-          if (url) setSignedCoverUrl(url);
-        });
-      }
+      // Signed URL handled by useMediaUrl hook
       
       setCvUrl(values.cvUrl);
       // Only extract from URL if no filename in DB (for old records)
@@ -372,10 +366,7 @@ const Profile = () => {
         setProfileImageUrl(''); // Clear regular image when video is uploaded
         setIsProfileVideo(true);
         
-        // Generate signed URL for immediate display
-        getMediaUrl(storagePath, 'profile-video', 86400).then((url) => {
-          if (url) setSignedVideoUrl(url);
-        });
+        // Signed URL handled by useMediaUrl hook
       } else {
         setProfileImageUrl(storagePath);
         setVideoUrl('');
@@ -423,10 +414,7 @@ const Profile = () => {
       setCoverImageUrl(storagePath);
       setCoverFileName(storagePath); // Store path for deletion
       
-      // Generate signed URL for immediate display
-      getMediaUrl(storagePath, 'cover-image', 86400).then((url) => {
-        if (url) setSignedCoverUrl(url);
-      });
+      // Signed URL handled by useMediaUrl hook
       
       // Mark as having unsaved changes
       setHasUnsavedChanges(true);
@@ -1000,14 +988,14 @@ const Profile = () => {
                   onClick={() => document.getElementById('profile-image')?.click()}
                 >
                   <Avatar className="h-32 w-32 border-4 border-white/10 hover:border-white/20 transition-all">
-                    {(profileImageUrl || coverImageUrl) ? (
+                    {(signedProfileImageUrl || signedCoverUrl) ? (
                       <AvatarImage 
-                        src={profileImageUrl || coverImageUrl} 
+                        src={signedProfileImageUrl || signedCoverUrl || undefined} 
                         alt="Profilbild"
                         className="object-cover"
                       />
                     ) : null}
-                    {!profileImageUrl && !coverImageUrl && (
+                    {!(signedProfileImageUrl || signedCoverUrl) && (
                       <AvatarFallback delayMs={0} className="text-4xl font-semibold bg-white/20 text-white">
                         {((firstName?.trim()?.[0]?.toUpperCase() || '') + (lastName?.trim()?.[0]?.toUpperCase() || '')) || '?'}
                       </AvatarFallback>

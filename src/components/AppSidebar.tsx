@@ -119,8 +119,8 @@ export function AppSidebar() {
         setCoverUrl(null);
       }
 
-      // Profile image URL (public bucket) - for avatar fallback
-      if (profile?.profile_image_url && !profile?.video_url) {
+      // Profile image URL - ALWAYS prefer profile image for avatar, regardless of video presence
+      if (profile?.profile_image_url) {
         try {
           const url = await getMediaUrl(profile.profile_image_url, 'profile-image', 86400);
           if (url) setAvatarUrl(url);
@@ -128,8 +128,8 @@ export function AppSidebar() {
           console.error('Failed to load avatar URL:', error);
           setAvatarUrl(null);
         }
-      } else if (profile?.cover_image_url && !profile?.video_url) {
-        // Use cover as fallback if no video and no profile image
+      } else if (profile?.cover_image_url) {
+        // Use cover as fallback if no profile image
         try {
           const url = await getMediaUrl(profile.cover_image_url, 'cover-image', 86400);
           if (url) setAvatarUrl(url);
