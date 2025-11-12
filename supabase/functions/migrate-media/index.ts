@@ -55,30 +55,91 @@ Deno.serve(async (req) => {
         try {
           const updates: any = {};
           
-          // Video - extrahera storage path (redan i job-applications)
-          if (profile.video_url && profile.video_url.startsWith('http')) {
-            const videoPath = extractStoragePath(profile.video_url);
-            if (videoPath && videoPath.includes('/')) {
-              updates.video_url = videoPath;
-              console.log(`Converting video URL to storage path for user ${profile.user_id}: ${videoPath}`);
+          // Video - move from public profile-media to private job-applications and store storage path
+          if (profile.video_url) {
+            const original = profile.video_url as string;
+            if (original.startsWith('http') && original.includes('/storage/v1/object/public/profile-media/')) {
+              const path = extractStoragePath(original);
+              try {
+                const { data: fileData, error: dlErr } = await supabaseClient.storage
+                  .from('profile-media')
+                  .download(path!);
+                if (dlErr) throw dlErr;
+                const ext = path!.split('.').pop() || 'mp4';
+                const newPath = `${profile.user_id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+                const { error: upErr } = await supabaseClient.storage
+                  .from('job-applications')
+                  .upload(newPath, fileData);
+                if (upErr) throw upErr;
+                updates.video_url = newPath;
+                // best-effort delete old
+                await supabaseClient.storage.from('profile-media').remove([path!]);
+                console.log(`Moved video for ${profile.user_id} to private: ${newPath}`);
+              } catch (e) {
+                console.error('Video move error:', e);
+                result.errors.push(`Video move error for ${profile.user_id}: ${e.message || e}`);
+              }
+            } else if (original.startsWith('http')) {
+              const path = extractStoragePath(original);
+              if (path && path.includes('/')) updates.video_url = path;
             }
           }
           
-          // Profilbild - extrahera storage path (ska vara i job-applications)
-          if (profile.profile_image_url && profile.profile_image_url.startsWith('http')) {
-            const imagePath = extractStoragePath(profile.profile_image_url);
-            if (imagePath && imagePath.includes('/')) {
-              updates.profile_image_url = imagePath;
-              console.log(`Converting profile image URL to storage path for user ${profile.user_id}: ${imagePath}`);
+          // Profile image - move to private and store path
+          if (profile.profile_image_url) {
+            const original = profile.profile_image_url as string;
+            if (original.startsWith('http') && original.includes('/storage/v1/object/public/profile-media/')) {
+              const path = extractStoragePath(original);
+              try {
+                const { data: fileData, error: dlErr } = await supabaseClient.storage
+                  .from('profile-media')
+                  .download(path!);
+                if (dlErr) throw dlErr;
+                const ext = path!.split('.').pop() || 'jpg';
+                const newPath = `${profile.user_id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+                const { error: upErr } = await supabaseClient.storage
+                  .from('job-applications')
+                  .upload(newPath, fileData);
+                if (upErr) throw upErr;
+                updates.profile_image_url = newPath;
+                await supabaseClient.storage.from('profile-media').remove([path!]);
+                console.log(`Moved profile image for ${profile.user_id} to private: ${newPath}`);
+              } catch (e) {
+                console.error('Profile image move error:', e);
+                result.errors.push(`Profile image move error for ${profile.user_id}: ${e.message || e}`);
+              }
+            } else if (original.startsWith('http')) {
+              const path = extractStoragePath(original);
+              if (path && path.includes('/')) updates.profile_image_url = path;
             }
           }
-          
-          // Cover-bild - extrahera storage path (ska vara i job-applications)
-          if (profile.cover_image_url && profile.cover_image_url.startsWith('http')) {
-            const coverPath = extractStoragePath(profile.cover_image_url);
-            if (coverPath && coverPath.includes('/')) {
-              updates.cover_image_url = coverPath;
-              console.log(`Converting cover image URL to storage path for user ${profile.user_id}: ${coverPath}`);
+
+          // Cover image - move to private and store path
+          if (profile.cover_image_url) {
+            const original = profile.cover_image_url as string;
+            if (original.startsWith('http') && original.includes('/storage/v1/object/public/profile-media/')) {
+              const path = extractStoragePath(original);
+              try {
+                const { data: fileData, error: dlErr } = await supabaseClient.storage
+                  .from('profile-media')
+                  .download(path!);
+                if (dlErr) throw dlErr;
+                const ext = path!.split('.').pop() || 'jpg';
+                const newPath = `${profile.user_id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+                const { error: upErr } = await supabaseClient.storage
+                  .from('job-applications')
+                  .upload(newPath, fileData);
+                if (upErr) throw upErr;
+                updates.cover_image_url = newPath;
+                await supabaseClient.storage.from('profile-media').remove([path!]);
+                console.log(`Moved cover image for ${profile.user_id} to private: ${newPath}`);
+              } catch (e) {
+                console.error('Cover image move error:', e);
+                result.errors.push(`Cover image move error for ${profile.user_id}: ${e.message || e}`);
+              }
+            } else if (original.startsWith('http')) {
+              const path = extractStoragePath(original);
+              if (path && path.includes('/')) updates.cover_image_url = path;
             }
           }
           
@@ -120,15 +181,14 @@ Deno.serve(async (req) => {
       for (const profile of cvProfiles || []) {
         try {
           if (profile.cv_url) {
-            const cvPath = extractStoragePath(profile.cv_url);
-            if (cvPath && cvPath.includes('/')) {
-              // Uppdatera till storage path om det inte redan är det
-              if (profile.cv_url.startsWith('http')) {
+            const original = profile.cv_url as string;
+            if (original.startsWith('http')) {
+              const cvPath = extractStoragePath(original);
+              if (cvPath && cvPath.includes('/')) {
                 const { error: updateError } = await supabaseClient
                   .from('profiles')
                   .update({ cv_url: cvPath })
                   .eq('user_id', profile.user_id);
-                
                 if (updateError) {
                   console.error(`Error updating CV for ${profile.user_id}:`, updateError);
                   result.errors.push(`CV update error for ${profile.user_id}: ${updateError.message}`);

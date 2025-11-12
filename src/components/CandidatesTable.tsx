@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -6,6 +6,7 @@ import { ApplicationData } from '@/hooks/useApplicationsData';
 import { formatDistanceToNow } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { CandidateProfileDialog } from './CandidateProfileDialog';
+import { useMediaUrl } from '@/hooks/useMediaUrl';
 
 interface CandidatesTableProps {
   applications: ApplicationData[];
@@ -95,7 +96,7 @@ export function CandidatesTable({
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src={application.profile_image_url || undefined} />
+                        <AvatarImage src={useMediaUrl(application.profile_image_url, 'profile-image') || undefined} />
                         <AvatarFallback className="bg-primary/20 text-primary">
                           {initials}
                         </AvatarFallback>

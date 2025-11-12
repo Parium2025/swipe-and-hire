@@ -26,6 +26,7 @@ import AuthTokenBridge from "./components/AuthTokenBridge";
 import { useDevice } from "@/hooks/use-device";
 import { useGlobalImagePreloader } from "@/hooks/useGlobalImagePreloader";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
+import { supabase } from "@/integrations/supabase/client";
 
 const queryClient = new QueryClient({
   defaultOptions: {

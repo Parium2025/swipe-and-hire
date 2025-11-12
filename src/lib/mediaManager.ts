@@ -135,12 +135,17 @@ export async function getMediaUrl(
   // Om det redan är en full URL, extrahera storage path först
   let cleanPath = storagePath;
   if (storagePath.startsWith('http')) {
-    // Extrahera path från URL
+    // If URL points to public profile-media, return as-is (backward compatibility during migration)
+    if (storagePath.includes('/storage/v1/object/public/profile-media/')) {
+      // Strip query params for stability
+      return storagePath.split('?')[0];
+    }
+    // Extract path from other URL formats
     const match = storagePath.match(/\/storage\/v1\/object\/(?:public|sign)\/[^/]+\/(.+?)(?:\?|$)/);
     if (match) {
       cleanPath = match[1];
     } else {
-      // Kan inte extrahera path, returnera original
+      // Cannot extract path, return original
       return storagePath;
     }
   }

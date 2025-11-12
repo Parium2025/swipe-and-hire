@@ -7,6 +7,11 @@ import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, Video } from 'lucid
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { openCvFile } from '@/utils/cvUtils';
+import { useMediaUrl } from '@/hooks/useMediaUrl';
+
+function useProfileImageUrl(path: string | null | undefined) {
+  return useMediaUrl(path, 'profile-image')
+}
 
 interface CandidateProfileDialogProps {
   application: ApplicationData | null;
@@ -53,7 +58,8 @@ export const CandidateProfileDialog = ({
         <DialogHeader>
           <div className="flex items-start gap-4">
             <Avatar className="h-16 w-16">
-              <AvatarImage src={application.profile_image_url || undefined} />
+              {/* Resolve private storage path to signed URL */}
+              <AvatarImage src={useProfileImageUrl(application.profile_image_url) || undefined} />
               <AvatarFallback className="bg-primary/20 text-primary text-lg">
                 {initials}
               </AvatarFallback>
