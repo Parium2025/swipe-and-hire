@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
       errors: []
     };
 
-    // Migrera profilmedia (video, profile_image, cover_image) från job-applications till profile-media
+    // Migrera profilbilder och cover till profile-media (PUBLIC), videor stannar i job-applications (PRIVATE)
     console.log('Fetching profiles with media...');
     const { data: profiles, error: profilesError } = await supabaseClient
       .from('profiles')
@@ -55,37 +55,30 @@ Deno.serve(async (req) => {
         try {
           const updates: any = {};
           
-          // Migrera video_url
-          if (profile.video_url) {
+          // Video ska ALLTID vara i job-applications (private) - extrahera bara storage path
+          if (profile.video_url && profile.video_url.startsWith('http')) {
             const videoPath = extractStoragePath(profile.video_url);
             if (videoPath && videoPath.includes('/')) {
-              // Om det ser ut som en path i job-applications, flytta till profile-media
-              if (!profile.video_url.includes('profile-media')) {
-                updates.video_url = videoPath;
-                console.log(`Migrating video for user ${profile.user_id}: ${videoPath}`);
-              }
+              updates.video_url = videoPath;
+              console.log(`Converting video URL to storage path for user ${profile.user_id}: ${videoPath}`);
             }
           }
           
-          // Migrera profile_image_url
-          if (profile.profile_image_url) {
+          // Profilbild ska vara i profile-media (public) - extrahera storage path
+          if (profile.profile_image_url && profile.profile_image_url.startsWith('http')) {
             const imagePath = extractStoragePath(profile.profile_image_url);
             if (imagePath && imagePath.includes('/')) {
-              if (!profile.profile_image_url.includes('profile-media')) {
-                updates.profile_image_url = imagePath;
-                console.log(`Migrating profile image for user ${profile.user_id}: ${imagePath}`);
-              }
+              updates.profile_image_url = imagePath;
+              console.log(`Converting profile image URL to storage path for user ${profile.user_id}: ${imagePath}`);
             }
           }
           
-          // Migrera cover_image_url
-          if (profile.cover_image_url) {
+          // Cover-bild ska vara i profile-media (public) - extrahera storage path
+          if (profile.cover_image_url && profile.cover_image_url.startsWith('http')) {
             const coverPath = extractStoragePath(profile.cover_image_url);
             if (coverPath && coverPath.includes('/')) {
-              if (!profile.cover_image_url.includes('profile-media')) {
-                updates.cover_image_url = coverPath;
-                console.log(`Migrating cover image for user ${profile.user_id}: ${coverPath}`);
-              }
+              updates.cover_image_url = coverPath;
+              console.log(`Converting cover image URL to storage path for user ${profile.user_id}: ${coverPath}`);
             }
           }
           

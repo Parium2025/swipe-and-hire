@@ -33,15 +33,15 @@ export default function MediaMigration() {
             <div>
               <p className="font-medium text-foreground mb-1">PUBLIC buckets (direkt åtkomst):</p>
               <ul className="list-disc list-inside space-y-1 ml-4">
-                <li><code className="text-xs bg-background px-1.5 py-0.5 rounded">profile-media</code> → Profilbilder, videor, cover-bilder</li>
+                <li><code className="text-xs bg-background px-1.5 py-0.5 rounded">profile-media</code> → Profilbilder, cover-bilder</li>
                 <li><code className="text-xs bg-background px-1.5 py-0.5 rounded">company-logos</code> → Företagslogotyper</li>
                 <li><code className="text-xs bg-background px-1.5 py-0.5 rounded">job-images</code> → Jobbannonsbilder</li>
               </ul>
             </div>
             <div>
-              <p className="font-medium text-foreground mb-1">PRIVATE bucket (kräver signed URLs):</p>
+              <p className="font-medium text-foreground mb-1">PRIVATE buckets (kräver signed URLs):</p>
               <ul className="list-disc list-inside space-y-1 ml-4">
-                <li><code className="text-xs bg-background px-1.5 py-0.5 rounded">job-applications</code> → CV:n, ansökningsdokument</li>
+                <li><code className="text-xs bg-background px-1.5 py-0.5 rounded">job-applications</code> → Profilvideor, CV:n, ansökningsdokument</li>
               </ul>
             </div>
             <div className="pt-2 border-t border-border">
