@@ -23,6 +23,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
   const [duration, setDuration] = useState(0);
   const [controlsVisible, setControlsVisible] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [fallbackTried, setFallbackTried] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const device = useDevice();
@@ -170,6 +171,19 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     }
   };
 
+  const handleVideoError = async () => {
+    if (fallbackTried) return;
+    setFallbackTried(true);
+    try {
+      if (!videoUrl || videoUrl.startsWith('http')) return;
+      const { createSignedUrl } = await import('@/utils/storageUtils');
+      const signed = await createSignedUrl('job-applications', videoUrl, 86400);
+      if (signed) setSignedVideoUrl(signed);
+    } catch (e) {
+      // ignore
+    }
+  };
+
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     if (!progressBarRef.current || !videoRef.current) return;
@@ -287,6 +301,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
           onEnded={handleVideoEnd}
           onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={handleLoadedMetadata}
+          onError={handleVideoError}
         />
       )}
       
