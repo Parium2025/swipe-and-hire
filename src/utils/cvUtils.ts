@@ -71,7 +71,12 @@ export async function openCvFile({ cvUrl, fileName = 'cv.pdf', onSuccess, onErro
     let opened = false;
     if (popup) {
       try {
-        popup.location.href = blobUrl;
+        // Render an inline viewer in the popup to avoid Chrome/extension blocking of blob navigations
+        const doc = popup.document;
+        const safeTitle = fileName || 'CV';
+        doc.open();
+        doc.write(`<!doctype html><html lang="sv"><head><meta charset="utf-8"><title>${safeTitle}</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;height:100%;background:#111}</style></head><body><embed src="${blobUrl}" type="${blob.type || 'application/pdf'}" style="width:100%;height:100%"/></body></html>`);
+        doc.close();
         opened = true;
       } catch {
         opened = false;
@@ -89,6 +94,9 @@ export async function openCvFile({ cvUrl, fileName = 'cv.pdf', onSuccess, onErro
       a.click();
       document.body.removeChild(a);
     }
+
+    // Revoke the object URL later to free memory (popup keeps its own reference)
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
 
     onSuccess?.('CV öppnat (eller nedladdat om fliken blockerades)');
   } catch (error) {
