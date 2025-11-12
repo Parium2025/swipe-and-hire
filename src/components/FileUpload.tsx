@@ -54,34 +54,56 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
   // Generate PDF preview URL when currentFile changes
   useEffect(() => {
-    const generatePdfUrl = async () => {
-      if (!currentFile || !currentFile.name.toLowerCase().endsWith('.pdf')) {
+    const generatePreviewUrl = async () => {
+      if (!currentFile) {
         setPdfPreviewUrl(null);
         return;
       }
 
+      const name = currentFile.name.toLowerCase();
+      const isPDF = name.endsWith('.pdf');
+      const isWord = name.endsWith('.doc') || name.endsWith('.docx');
+
+      // Reset both when file changes
+      setPdfPreviewUrl(null);
+
       try {
         const isStoragePath = !currentFile.url.startsWith('http');
-        
-        if (isPublicBucket || 
-            currentFile.url.includes('/profile-media/') ||
-            currentFile.url.includes('/company-logos/') ||
-            currentFile.url.includes('/job-images/')) {
-          setPdfPreviewUrl(currentFile.url);
+
+        // Resolve a fetchable URL first (public, signed, or converted)
+        let fetchableUrl: string | null = null;
+        if (isPublicBucket) {
+          if (isStoragePath) {
+            const { data } = supabase.storage.from(actualBucket).getPublicUrl(currentFile.url);
+            fetchableUrl = data.publicUrl;
+          } else {
+            fetchableUrl = currentFile.url;
+          }
         } else if (isStoragePath) {
-          const signedUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
-          setPdfPreviewUrl(signedUrl || null);
+          fetchableUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
         } else {
-          const signedUrl = await convertToSignedUrl(currentFile.url, actualBucket, 86400, currentFile.name);
-          setPdfPreviewUrl(signedUrl || null);
+          fetchableUrl = await convertToSignedUrl(currentFile.url, actualBucket, 86400, currentFile.name);
+        }
+
+        if (!fetchableUrl) {
+          setPdfPreviewUrl(null);
+          return;
+        }
+
+        if (isPDF) {
+          setPdfPreviewUrl(fetchableUrl);
+        } else if (isWord) {
+          // Use Microsoft Office viewer for Word docs
+          const officeUrl = `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(fetchableUrl)}`;
+          setPdfPreviewUrl(officeUrl);
         }
       } catch (err) {
-        console.error('Error generating PDF URL:', err);
+        console.error('Error generating preview URL:', err);
         setPdfPreviewUrl(null);
       }
     };
-    
-    generatePdfUrl();
+
+    generatePreviewUrl();
   }, [currentFile, actualBucket, isPublicBucket]);
 
   const uploadFile = async (file: File) => {
