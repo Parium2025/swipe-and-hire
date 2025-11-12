@@ -150,15 +150,44 @@ export const CandidateProfileDialog = ({
           {application.cv_url && (
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">Dokument</h3>
-              <a
-                href={application.cv_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors text-foreground"
+              <button
+                onClick={async (e) => {
+                  e.preventDefault();
+                  try {
+                    // Open popup immediately
+                    const popup = window.open('', '_blank');
+                    
+                    // Check if storage path or full URL
+                    const isStoragePath = !application.cv_url.startsWith('http');
+                    const isPrivateBucket = application.cv_url.includes('/job-applications/') || isStoragePath;
+                    
+                    let finalUrl = application.cv_url;
+                    
+                    // Generate signed URL for private buckets
+                    if (isStoragePath || isPrivateBucket) {
+                      const { createSignedUrl, convertToSignedUrl } = await import('@/utils/storageUtils');
+                      
+                      if (isStoragePath) {
+                        finalUrl = await createSignedUrl('job-applications', application.cv_url, 86400) || application.cv_url;
+                      } else {
+                        finalUrl = await convertToSignedUrl(application.cv_url, 'job-applications', 86400) || application.cv_url;
+                      }
+                    }
+                    
+                    if (popup) {
+                      popup.location.href = finalUrl;
+                    } else {
+                      window.open(finalUrl, '_blank');
+                    }
+                  } catch (error) {
+                    console.error('Error opening CV:', error);
+                  }
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors text-foreground cursor-pointer"
               >
                 <FileText className="h-4 w-4" />
                 Visa CV
-              </a>
+              </button>
             </div>
           )}
 
