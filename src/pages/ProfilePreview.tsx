@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { preloadImages } from '@/lib/serviceWorkerManager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -140,6 +141,37 @@ export default function ProfilePreview() {
 
     loadAvatar();
   }, [profile?.cover_image_url, profile?.profile_image_url]);
+
+  // Förladdda alla mediafiler i bakgrunden (samma som AppSidebar)
+  const mediaToPreload = useMemo(() => {
+    const media: string[] = [];
+    if (avatarUrl) media.push(avatarUrl);
+    if (profile?.cover_image_url) {
+      const url = profile.cover_image_url.includes('/storage/v1/object/public/') 
+        ? profile.cover_image_url 
+        : supabase.storage.from('profile-media').getPublicUrl(profile.cover_image_url).data.publicUrl;
+      if (url) media.push(url);
+    }
+    if (profile?.profile_image_url) {
+      const url = profile.profile_image_url.includes('/storage/v1/object/public/')
+        ? profile.profile_image_url
+        : supabase.storage.from('profile-media').getPublicUrl(profile.profile_image_url).data.publicUrl;
+      if (url) media.push(url);
+    }
+    if (profile?.video_url) {
+      const url = profile.video_url.includes('/storage/v1/object/public/')
+        ? profile.video_url
+        : supabase.storage.from('profile-media').getPublicUrl(profile.video_url).data.publicUrl;
+      if (url) media.push(url);
+    }
+    return media;
+  }, [avatarUrl, profile?.cover_image_url, profile?.profile_image_url, profile?.video_url]);
+
+  useEffect(() => {
+    if (mediaToPreload.length > 0) {
+      preloadImages(mediaToPreload);
+    }
+  }, [mediaToPreload]);
 
   const ProfileView = ({ data, isConsented }: { data: ProfileViewData | null; isConsented: boolean }) => {
     if (!data) return <div className="text-white">Ingen data tillgänglig</div>;
