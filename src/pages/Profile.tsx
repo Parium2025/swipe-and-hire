@@ -949,19 +949,6 @@ const Profile = () => {
         </p>
       </div>
 
-      {signedCoverUrl && (
-        <div className="relative w-full h-40 rounded-lg overflow-hidden bg-white/5 border border-white/10">
-          <img
-            src={signedCoverUrl}
-            alt="Cover-bild"
-            className="w-full h-full object-cover"
-            loading="eager"
-            decoding="async"
-            fetchPriority="high"
-          />
-        </div>
-      )}
-
       <div className="space-y-6">
         {/* Profile Image/Video Card */}
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
