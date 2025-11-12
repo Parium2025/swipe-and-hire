@@ -33,7 +33,15 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
     bucket: 'job-applications',
     isPublic: false,
     maxSizeMB: 10,
-    allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    allowedTypes: [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+      'image/gif',
+      'image/heic',
+      'image/heif'
+    ]
   },
   'profile-video': {
     bucket: 'job-applications',
@@ -45,7 +53,14 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
     bucket: 'job-applications',
     isPublic: false,
     maxSizeMB: 10,
-    allowedTypes: ['image/jpeg', 'image/png', 'image/webp']
+    allowedTypes: [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+      'image/heic',
+      'image/heif'
+    ]
   },
   'cv': {
     bucket: 'job-applications',
