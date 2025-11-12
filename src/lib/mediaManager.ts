@@ -36,8 +36,8 @@ const MEDIA_CONFIG: Record<MediaType, MediaConfig> = {
     allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
   },
   'profile-video': {
-    bucket: 'profile-media',
-    isPublic: true,
+    bucket: 'job-applications',
+    isPublic: false,
     maxSizeMB: 50,
     allowedTypes: ['video/mp4', 'video/quicktime', 'video/x-msvideo']
   },
