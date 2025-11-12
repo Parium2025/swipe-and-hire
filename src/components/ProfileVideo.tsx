@@ -28,7 +28,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
   const device = useDevice();
   const isMobile = device === 'mobile';
 
-  // Convert URLs to stable public URLs for caching
+  // Generate signed URLs on-demand from storage paths
   useEffect(() => {
     let isMounted = true;
     
@@ -38,12 +38,13 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
       if (videoUrl) {
         try {
           if (videoUrl.startsWith('http')) {
+            // Already a full URL
             setSignedVideoUrl(videoUrl);
           } else {
+            // Storage path - generate public URL (profile-media is public bucket)
             const { data } = supabase.storage
               .from('profile-media')
               .getPublicUrl(videoUrl);
-            // Fallback to raw path if SDK doesn't return a URL
             setSignedVideoUrl(data?.publicUrl || videoUrl);
           }
         } catch {
@@ -56,12 +57,26 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
       if (coverImageUrl && coverImageUrl.trim()) {
         try {
           if (coverImageUrl.startsWith('http')) {
-            setSignedCoverUrl(coverImageUrl);
+            // Already a full URL - could be from job-applications bucket
+            // Use convertToSignedUrl for auto-bucket detection
+            const { convertToSignedUrl } = await import('@/utils/storageUtils');
+            const url = await convertToSignedUrl(coverImageUrl, 'job-applications', 86400);
+            setSignedCoverUrl(url || coverImageUrl);
           } else {
-            const { data } = supabase.storage
+            // Storage path - could be in profile-media or job-applications
+            // Try profile-media first (public), then job-applications (private)
+            const { data: profileData } = supabase.storage
               .from('profile-media')
               .getPublicUrl(coverImageUrl);
-            setSignedCoverUrl(data?.publicUrl || coverImageUrl);
+            
+            // Check if it's likely a job-applications path (has UUID folder structure)
+            if (coverImageUrl.includes('/') && coverImageUrl.match(/^[a-f0-9-]{36}\//)) {
+              const { convertToSignedUrl } = await import('@/utils/storageUtils');
+              const signedUrl = await convertToSignedUrl(coverImageUrl, 'job-applications', 86400);
+              setSignedCoverUrl(signedUrl || profileData?.publicUrl || coverImageUrl);
+            } else {
+              setSignedCoverUrl(profileData?.publicUrl || coverImageUrl);
+            }
           }
         } catch {
           setSignedCoverUrl(coverImageUrl);

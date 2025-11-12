@@ -872,6 +872,7 @@ export type Database = {
       cleanup_expired_confirmations: { Args: never; Returns: undefined }
       cleanup_expired_profile_permissions: { Args: never; Returns: undefined }
       create_secure_confirmation_token: { Args: never; Returns: string }
+      extract_storage_path: { Args: { url: string }; Returns: string }
       get_confirmation_status: {
         Args: { user_uuid: string }
         Returns: {

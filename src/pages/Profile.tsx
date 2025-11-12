@@ -386,21 +386,17 @@ const Profile = () => {
       
       if (uploadError) throw uploadError;
       
-      // Use signed URL for secure access
-      const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
-      if (!signedUrl) {
-        throw new Error('Could not create secure access URL');
-      }
-      
-      const mediaUrl = `${signedUrl}&t=${Date.now()}&v=${Math.random()}`;
+      // Store ONLY storage path, not signed URL (permanent access)
+      // Signed URLs will be generated on-demand when displaying
+      const storagePath = fileName;
       
       // Update local state and track filename
       if (isVideo) {
-        setProfileImageUrl(mediaUrl); // Store video URL in profileImageUrl for now
+        setProfileImageUrl(storagePath); // Store path only
         setIsProfileVideo(true); // Mark as video
         // Keep existing cover image when uploading video - don't clear it
       } else {
-        setProfileImageUrl(mediaUrl);
+        setProfileImageUrl(storagePath); // Store path only
         setIsProfileVideo(false); // Mark as image
         // Keep cover image when uploading profile image too
         // Cover image should only be deleted manually via deleteCoverImage
@@ -448,17 +444,11 @@ const Profile = () => {
 
       if (uploadError) throw uploadError;
 
-      // Use signed URL for secure access  
-      const signedUrl = await createSignedUrl('job-applications', fileName, 86400); // 24 hours
-      if (!signedUrl) {
-        throw new Error('Could not create secure access URL');
-      }
-      
-      // Add stronger cache-busting
-      const coverUrl = `${signedUrl}&t=${Date.now()}&v=${Math.random()}`;
+      // Store ONLY storage path, not signed URL (permanent access)
+      const storagePath = fileName;
       
       // Update local state and track filename  
-      setCoverImageUrl(coverUrl);
+      setCoverImageUrl(storagePath);
       setCoverFileName(fileName); // Store for deletion
       
       // Mark as having unsaved changes
@@ -604,20 +594,17 @@ const Profile = () => {
 
       if (uploadError) throw uploadError;
 
-      // Use public URL for profile media (no expiration)
-      const { data: { publicUrl } } = supabase.storage
-        .from('profile-media')
-        .getPublicUrl(fileName);
-
-      const imageUrl = `${publicUrl}?t=${Date.now()}`;
+      // Store ONLY storage path, not URL (permanent access)
+      const storagePath = fileName;
       
       // Förladdda bilden i bakgrunden (utan att blockera UI)
       import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
-        preloadSingleFile(imageUrl).catch(err => console.log('Preload error:', err));
+        const { data: { publicUrl } } = supabase.storage.from('profile-media').getPublicUrl(storagePath);
+        preloadSingleFile(publicUrl).catch(err => console.log('Preload error:', err));
       });
       
       // Update local state instead of saving immediately
-      setProfileImageUrl(imageUrl);
+      setProfileImageUrl(storagePath);
       setIsProfileVideo(false); // Mark as image, not video
       setProfileFileName(fileName); // Track the new filename for deletion
       // Keep cover image when uploading profile image
@@ -666,20 +653,17 @@ const Profile = () => {
 
       if (uploadError) throw uploadError;
 
-      // Use public URL for profile media (no expiration)
-      const { data: { publicUrl } } = supabase.storage
-        .from('profile-media')
-        .getPublicUrl(fileName);
-
-      const coverUrl = `${publicUrl}?t=${Date.now()}`;
+      // Store ONLY storage path, not URL (permanent access)
+      const storagePath = fileName;
       
       // Förladdda bilden i bakgrunden (utan att blockera UI)
       import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
-        preloadSingleFile(coverUrl).catch(err => console.log('Preload error:', err));
+        const { data: { publicUrl } } = supabase.storage.from('profile-media').getPublicUrl(storagePath);
+        preloadSingleFile(publicUrl).catch(err => console.log('Preload error:', err));
       });
       
       // Update local state instead of saving immediately
-      setCoverImageUrl(coverUrl);
+      setCoverImageUrl(storagePath);
       setCoverFileName(fileName); // Track the new filename for deletion
       
       // Clear undo state since we have a new cover image

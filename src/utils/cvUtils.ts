@@ -13,6 +13,7 @@ interface OpenCvOptions {
  * - Tvingar rätt MIME-typ (application/pdf) för inbäddad visning
  * - Stabil cache-nyckel (baserad på storage path) för offline-åtkomst
  * - Ny flik med inbäddad viewer + automatisk nedladdning som sista fallback
+ * - Enhanced error handling för 4xx-fel och icke-PDF-filer
  */
 export async function openCvFile({ cvUrl, fileName = 'cv.pdf', onSuccess, onError }: OpenCvOptions): Promise<void> {
   if (!cvUrl) {
@@ -50,9 +51,23 @@ export async function openCvFile({ cvUrl, fileName = 'cv.pdf', onSuccess, onErro
     let blob: Blob | null = null;
     try {
       const res = await fetch(finalUrl);
-      if (!res.ok) throw new Error(`Kunde inte hämta filen (${res.status})`);
+      
+      // Enhanced error handling for 4xx errors (file not found, access denied, etc.)
+      if (!res.ok) {
+        if (res.status >= 400 && res.status < 500) {
+          throw new Error(`Filen kunde inte hittas eller är inte tillgänglig (${res.status}). Den kan ha flyttats, ändrats eller tagits bort.`);
+        }
+        throw new Error(`Kunde inte hämta filen (${res.status})`);
+      }
+      
       const ct = res.headers.get('Content-Type') || '';
       const looksPdf = /\.pdf($|\?)/i.test(finalUrl) || /\.pdf($|\?)/i.test(cvUrl) || /\.pdf$/i.test(fileName) || ct.includes('pdf');
+      
+      // Validate content type - must be PDF
+      if (!looksPdf && !ct.includes('pdf') && !ct.includes('octet-stream')) {
+        throw new Error('Filen är inte ett giltigt PDF-dokument. Kontrollera att rätt fil har laddats upp.');
+      }
+      
       const buffer = await res.arrayBuffer();
       blob = new Blob([buffer], { type: looksPdf ? 'application/pdf' : (ct || 'application/pdf') });
     } catch (fetchErr) {
@@ -114,7 +129,9 @@ export async function openCvFile({ cvUrl, fileName = 'cv.pdf', onSuccess, onErro
           const timer = setTimeout(function(){ showObject(); setTimeout(showDownload, 1200); }, 1500);
           iframe.addEventListener('load', function(){ try{ clearTimeout(timer); showIframe(); }catch(e){} });
           objectEl.addEventListener('load', function(){ try{ showObject(); }catch(e){} });
-          if(!navigator.mimeTypes || !navigator.mimeTypes['application/pdf']){ setTimeout(showDownload, 1500); }
+          if(!navigator.mimeTypes || !navigator.mimeTypes['application/pdf']){
+            setTimeout(showDownload, 1500);
+          }
         })();<\/script>
         </body></html>`);
         doc.close();

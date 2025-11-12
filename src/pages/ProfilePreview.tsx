@@ -106,7 +106,7 @@ export default function ProfilePreview() {
     loadPreviewData();
   }, [user?.id, profile]);
 
-  // Ladda avatar URL med caching
+  // Generate avatar URL on-demand from storage path
   useEffect(() => {
     const loadAvatar = async () => {
       const candidate = profile?.cover_image_url || profile?.profile_image_url || '';
@@ -115,25 +115,10 @@ export default function ProfilePreview() {
         return;
       }
 
-      // Check if URL is already fresh (has timestamp within last 5 minutes)
       try {
-        const urlObj = new URL(candidate, window.location.origin);
-        const timestamp = urlObj.searchParams.get('t');
-        if (timestamp) {
-          const age = Date.now() - parseInt(timestamp);
-          if (age < 5 * 60 * 1000) { // Less than 5 minutes old
-            setAvatarUrl(candidate);
-            return;
-          }
-        }
-      } catch {
-        // Invalid URL, proceed with refresh
-      }
-
-      try {
-        const refreshed = await convertToSignedUrl(candidate, 'job-applications', 86400);
-        const finalUrl = refreshed || candidate;
-        setAvatarUrl(finalUrl);
+        // Use convertToSignedUrl which auto-detects bucket and handles paths/URLs
+        const finalUrl = await convertToSignedUrl(candidate, 'job-applications', 86400);
+        setAvatarUrl(finalUrl || candidate);
       } catch {
         setAvatarUrl(candidate);
       }

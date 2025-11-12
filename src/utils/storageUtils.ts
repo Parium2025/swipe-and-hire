@@ -74,8 +74,8 @@ export const getStoragePathFromUrl = (url: string): string | null => {
 };
 
 /**
- * Converts old public URLs to secure signed URLs
- * This is needed after making storage bucket private
+ * Auto-detects bucket from URL and converts to signed URL
+ * Skips signing for public buckets (profile-media, company-logos, job-images)
  */
 export const convertToSignedUrl = async (
   url: string,
@@ -85,8 +85,21 @@ export const convertToSignedUrl = async (
 ): Promise<string | null> => {
   if (!url) return null;
 
+  // Auto-detect bucket from URL if it's a Supabase URL
+  let detectedBucket = bucket;
+  if (url.includes('/storage/v1/object/')) {
+    const match = url.match(/\/storage\/v1\/object\/(?:public|sign)\/([^/]+)/);
+    if (match) {
+      detectedBucket = match[1];
+    }
+  }
+
+  // Public buckets don't need signing - return public URL directly
+  const publicBuckets = ['profile-media', 'company-logos', 'job-images'];
+  const isPublicBucket = publicBuckets.includes(detectedBucket);
+
   const ensureCached = (path: string) => {
-    const key = `${bucket}/${path}`;
+    const key = `${detectedBucket}/${path}`;
     const now = Date.now();
     const maxAgeMs = Math.max(60_000, Math.min(expiresIn * 1000 - 60_000, DEFAULT_CACHE_MAX_AGE_MS));
     const cached = signedUrlCache.get(key);
@@ -97,7 +110,7 @@ export const convertToSignedUrl = async (
   };
 
   const setCache = (path: string, signed: string) => {
-    const key = `${bucket}/${path}`;
+    const key = `${detectedBucket}/${path}`;
     const maxAgeMs = Math.max(60_000, Math.min(expiresIn * 1000 - 60_000, DEFAULT_CACHE_MAX_AGE_MS));
     signedUrlCache.set(key, { url: signed, fetchedAt: Date.now(), maxAgeMs });
   };
@@ -106,34 +119,56 @@ export const convertToSignedUrl = async (
   if (url.includes('/storage/v1/object/sign/')) {
     const existingPath = getStoragePathFromUrl(url);
     if (existingPath) {
+      if (isPublicBucket) {
+        // Return public URL for public buckets
+        const { data } = supabase.storage.from(detectedBucket).getPublicUrl(existingPath);
+        return data.publicUrl;
+      }
       const cached = ensureCached(existingPath);
       if (cached) return cached;
-      const refreshed = await createSignedUrl(bucket, existingPath, expiresIn, downloadName);
+      const refreshed = await createSignedUrl(detectedBucket, existingPath, expiresIn, downloadName);
       if (refreshed) setCache(existingPath, refreshed);
       return refreshed;
     }
     return url; // If we can't parse, just reuse the given URL
   }
 
-  // Case 2: Raw storage path like `folder/id/filename.ext`
+  // Case 2: Already a public URL -> just return it
+  if (url.includes('/storage/v1/object/public/')) {
+    return url;
+  }
+
+  // Case 3: Raw storage path like `folder/id/filename.ext`
   const isLikelyPath = !/^https?:\/\//i.test(url) && !url.startsWith('data:');
   if (isLikelyPath) {
+    if (isPublicBucket) {
+      // Return public URL for public buckets
+      const { data } = supabase.storage.from(detectedBucket).getPublicUrl(url);
+      return data.publicUrl;
+    }
     const cached = ensureCached(url);
     if (cached) return cached;
-    const signed = await createSignedUrl(bucket, url, expiresIn, downloadName);
+    const signed = await createSignedUrl(detectedBucket, url, expiresIn, downloadName);
     if (signed) setCache(url, signed);
     return signed;
   }
 
-  // Case 3: Public or other absolute URL -> try extracting a storage path first
+  // Case 4: Public or other absolute URL -> try extracting a storage path first
   const path = getStoragePathFromUrl(url);
   if (!path) {
     // Not a Supabase storage URL; just return original
     return url;
   }
+  
+  if (isPublicBucket) {
+    // Return public URL for public buckets
+    const { data } = supabase.storage.from(detectedBucket).getPublicUrl(path);
+    return data.publicUrl;
+  }
+  
   const cached = ensureCached(path);
   if (cached) return cached;
-  const signed = await createSignedUrl(bucket, path, expiresIn, downloadName);
+  const signed = await createSignedUrl(detectedBucket, path, expiresIn, downloadName);
   if (signed) setCache(path, signed);
   return signed;
 };
