@@ -283,10 +283,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
     return (
       <div className="border border-border rounded-lg overflow-hidden bg-muted/30">
         {/* PDF Preview */}
-        {isPDF && pdfPreviewUrl ? (
+        {(isPDF || isWord) && pdfPreviewUrl ? (
           <div className="relative">
             <iframe
-              src={`${pdfPreviewUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+              src={isPDF ? `${pdfPreviewUrl}#toolbar=0&navpanes=0&scrollbar=0` : pdfPreviewUrl}
               className="w-full h-48 bg-white"
               title="CV Preview"
             />
