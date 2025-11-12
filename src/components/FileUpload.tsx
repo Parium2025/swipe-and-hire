@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, File, Video, FileText, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -193,57 +193,103 @@ const FileUpload: React.FC<FileUploadProps> = ({
     const isSignedUrl = currentFile.url.includes('/storage/v1/object/sign/');
     const isStoragePath = !currentFile.url.startsWith('http');
     const displayUrl = (isPublicUrl || isStoragePath) ? '#' : currentFile.url;
+    const isPDF = currentFile.name.toLowerCase().endsWith('.pdf');
+    const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+
+    // Generate PDF URL for preview
+    useEffect(() => {
+      const generatePdfUrl = async () => {
+        try {
+          if (isPublicBucket || 
+              currentFile.url.includes('/profile-media/') ||
+              currentFile.url.includes('/company-logos/') ||
+              currentFile.url.includes('/job-images/')) {
+            setPdfUrl(currentFile.url);
+          } else if (isStoragePath) {
+            const signedUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
+            setPdfUrl(signedUrl || null);
+          } else {
+            const signedUrl = await convertToSignedUrl(currentFile.url, actualBucket, 86400, currentFile.name);
+            setPdfUrl(signedUrl || null);
+          }
+        } catch (err) {
+          console.error('Error generating PDF URL:', err);
+        }
+      };
+      
+      if (isPDF) {
+        generatePdfUrl();
+      }
+    }, [currentFile.url]);
+
+    const handleOpenFile = async (e: React.MouseEvent) => {
+      e.preventDefault();
+      const popup = window.open('', '_blank');
+      const openUrl = (url?: string | null) => {
+        if (!url) { popup?.close(); return; }
+        if (popup) popup.location.href = url;
+        else window.open(url, '_blank');
+      };
+      
+      try {
+        if (isPublicBucket || 
+            currentFile.url.includes('/profile-media/') ||
+            currentFile.url.includes('/company-logos/') ||
+            currentFile.url.includes('/job-images/')) {
+          openUrl(currentFile.url);
+        } else if (isStoragePath) {
+          const signedUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
+          openUrl(signedUrl);
+        } else {
+          const signedUrl = await convertToSignedUrl(currentFile.url, actualBucket, 86400, currentFile.name);
+          openUrl(signedUrl);
+        }
+      } catch (err) {
+        console.error('Error opening file:', err);
+        popup?.close();
+      }
+    };
 
     return (
-      <div className="border border-border rounded-md p-4 bg-muted/30">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+      <div className="border border-border rounded-lg overflow-hidden bg-muted/30">
+        {/* PDF Preview */}
+        {isPDF && pdfUrl ? (
+          <div className="relative">
+            <iframe
+              src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+              className="w-full h-48 bg-white"
+              title="CV Preview"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+            <button
+              onClick={handleOpenFile}
+              className="absolute inset-0 w-full h-full cursor-pointer hover:bg-black/10 transition-colors flex items-center justify-center group"
+            >
+              <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="text-sm font-medium text-gray-900">Klicka för att öppna i ny flik</span>
+              </div>
+            </button>
+          </div>
+        ) : null}
+        
+        {/* File info and remove button */}
+        <div className="p-3 flex items-center justify-between">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
             {getFileIcon(currentFile.name)}
-            <a
-              href={displayUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-medium truncate max-w-[200px] text-white hover:text-primary underline cursor-pointer"
-              onClick={(e) => {
-                e.preventDefault();
-                const popup = window.open('', '_blank');
-                const openUrl = (url?: string | null) => {
-                  if (!url) { popup?.close(); return; }
-                  if (popup) popup.location.href = url;
-                  else window.open(url, '_blank');
-                };
-                (async () => {
-                  try {
-                    // For public buckets, just open the URL directly
-                    if (isPublicBucket || 
-                        currentFile.url.includes('/profile-media/') ||
-                        currentFile.url.includes('/company-logos/') ||
-                        currentFile.url.includes('/job-images/')) {
-                      openUrl(currentFile.url);
-                    } else if (isStoragePath) {
-                      const signedUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
-                      openUrl(signedUrl);
-                    } else {
-                      const signedUrl = await convertToSignedUrl(currentFile.url, actualBucket, 86400, currentFile.name);
-                      openUrl(signedUrl);
-                    }
-                  } catch (err) {
-                    console.error('Error opening file:', err);
-                    popup?.close();
-                  }
-                })();
-              }}
+            <button
+              onClick={handleOpenFile}
+              className="text-sm font-medium truncate text-white hover:text-primary underline cursor-pointer"
             >
               {currentFile.name}
-            </a>
+            </button>
           </div>
           <Button
             variant="ghost"
             size="sm"
             onClick={handleRemoveFile}
-            className="h-6 w-6 p-0 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+            className="h-8 w-8 p-0 flex-shrink-0 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
           >
-            <X className="h-3 w-3" />
+            <X className="h-4 w-4" />
           </Button>
         </div>
       </div>
