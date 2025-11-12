@@ -21,7 +21,7 @@ import ImageEditor from '@/components/ImageEditor';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { BirthDatePicker } from '@/components/BirthDatePicker';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { createSignedUrl } from '@/utils/storageUtils';
+import { uploadMedia, getMediaUrl, deleteMedia } from '@/lib/mediaManager';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -360,54 +360,42 @@ const Profile = () => {
     setUploadProgress(0);
     
     try {
-      // DO NOT delete old files automatically - only when user clicks delete button
-      // Old files remain in storage for permanent access
-      
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}/${Date.now()}-profile-media.${fileExt}`;
+      if (!user?.id) throw new Error('User not found');
       
       // Simulate progress for videos
       let progressInterval: number | null = null;
       if (isVideo) {
         progressInterval = window.setInterval(() => {
           setUploadProgress(prev => {
-            if (prev >= 90) return prev; // Stop at 90% until upload completes
+            if (prev >= 90) return prev;
             return prev + 10;
           });
         }, 200);
       }
       
-      const { error: uploadError } = await supabase.storage
-        .from('profile-media')
-        .upload(fileName, file);
+      // Använd mediaManager för konsistent bucket-hantering
+      const { storagePath, error: uploadError } = await uploadMedia(
+        file,
+        isVideo ? 'profile-video' : 'profile-image',
+        user.id
+      );
       
       if (progressInterval) clearInterval(progressInterval);
       setUploadProgress(100);
       
       if (uploadError) throw uploadError;
       
-      // Store ONLY storage path, not signed URL (permanent access)
-      // Signed URLs will be generated on-demand when displaying
-      const storagePath = fileName;
-      
-      // Update local state and track filename
+      // Update local state
       if (isVideo) {
-        setProfileImageUrl(storagePath); // Store path only
-        setIsProfileVideo(true); // Mark as video
-        // Keep existing cover image when uploading video - don't clear it
+        setProfileImageUrl(storagePath);
+        setIsProfileVideo(true);
       } else {
-        setProfileImageUrl(storagePath); // Store path only
-        setIsProfileVideo(false); // Mark as image
-        // Keep cover image when uploading profile image too
-        // Cover image should only be deleted manually via deleteCoverImage
+        setProfileImageUrl(storagePath);
+        setIsProfileVideo(false);
       }
       
-      setProfileFileName(fileName); // Track the new filename
-      
-      // Clear profile undo state since we have new media
+      setProfileFileName(storagePath);
       setDeletedProfileMedia(null);
-      
-      // Mark as having unsaved changes
       setHasUnsavedChanges(true);
       
       toast({
@@ -418,7 +406,7 @@ const Profile = () => {
       console.error('Upload error:', error);
       toast({
         title: "Fel vid uppladdning",
-        description: "Kunde inte ladda upp filen.",
+        description: error instanceof Error ? error.message : "Kunde inte ladda upp filen.",
         variant: "destructive"
       });
     } finally {
@@ -432,24 +420,20 @@ const Profile = () => {
     setIsUploadingCover(true);
     
     try {
-      // DO NOT delete old files automatically - only when user clicks delete button
-      // Old files remain in storage for permanent access
+      if (!user?.id) throw new Error('User not found');
       
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}/${Date.now()}-cover-image.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('profile-media')
-        .upload(fileName, file);
+      // Använd mediaManager för cover-bild
+      const { storagePath, error: uploadError } = await uploadMedia(
+        file,
+        'cover-image',
+        user.id
+      );
 
       if (uploadError) throw uploadError;
-
-      // Store ONLY storage path, not signed URL (permanent access)
-      const storagePath = fileName;
       
       // Update local state and track filename  
       setCoverImageUrl(storagePath);
-      setCoverFileName(fileName); // Store for deletion
+      setCoverFileName(storagePath); // Store path for deletion
       
       // Mark as having unsaved changes
       setHasUnsavedChanges(true);

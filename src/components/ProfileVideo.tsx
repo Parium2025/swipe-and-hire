@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useDevice } from '@/hooks/use-device';
 import { Play, Pause } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
+import { getMediaUrl } from '@/lib/mediaManager';
 
 interface ProfileVideoProps {
   videoUrl: string;
@@ -28,67 +28,34 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
   const device = useDevice();
   const isMobile = device === 'mobile';
 
-  // Generate signed URLs on-demand from storage paths
+  // Generate URLs on-demand using mediaManager
   useEffect(() => {
     let isMounted = true;
     
     const convertUrls = async () => {
       if (!isMounted) return;
 
+      // Video URL - alltid från profile-media (public bucket)
       if (videoUrl) {
         try {
-          if (videoUrl.startsWith('http')) {
-            // Already a full URL
-            setSignedVideoUrl(videoUrl);
-          } else {
-            // Storage path - try private job-applications first, then fallback to public profile-media
-            try {
-              const { createSignedUrl } = await import('@/utils/storageUtils');
-              const signed = await createSignedUrl('job-applications', videoUrl, 86400);
-              if (signed) {
-                setSignedVideoUrl(signed);
-              } else {
-                const { data } = supabase.storage.from('profile-media').getPublicUrl(videoUrl);
-                setSignedVideoUrl(data?.publicUrl || videoUrl);
-              }
-            } catch {
-              const { data } = supabase.storage.from('profile-media').getPublicUrl(videoUrl);
-              setSignedVideoUrl(data?.publicUrl || videoUrl);
-            }
-          }
-        } catch {
-          setSignedVideoUrl(videoUrl);
+          const url = await getMediaUrl(videoUrl, 'profile-video');
+          if (isMounted) setSignedVideoUrl(url);
+        } catch (error) {
+          console.error('Error getting video URL:', error);
+          if (isMounted) setSignedVideoUrl(videoUrl);
         }
       } else {
         setSignedVideoUrl(null);
       }
       
+      // Cover URL - alltid från profile-media (public bucket)
       if (coverImageUrl && coverImageUrl.trim()) {
         try {
-          if (coverImageUrl.startsWith('http')) {
-            // Already a full URL - could be from job-applications bucket
-            // Use convertToSignedUrl for auto-bucket detection
-            const { convertToSignedUrl } = await import('@/utils/storageUtils');
-            const url = await convertToSignedUrl(coverImageUrl, 'job-applications', 86400);
-            setSignedCoverUrl(url || coverImageUrl);
-          } else {
-            // Storage path - could be in profile-media or job-applications
-            // Try profile-media first (public), then job-applications (private)
-            const { data: profileData } = supabase.storage
-              .from('profile-media')
-              .getPublicUrl(coverImageUrl);
-            
-            // Check if it's likely a job-applications path (has UUID folder structure)
-            if (coverImageUrl.includes('/') && coverImageUrl.match(/^[a-f0-9-]{36}\//)) {
-              const { convertToSignedUrl } = await import('@/utils/storageUtils');
-              const signedUrl = await convertToSignedUrl(coverImageUrl, 'job-applications', 86400);
-              setSignedCoverUrl(signedUrl || profileData?.publicUrl || coverImageUrl);
-            } else {
-              setSignedCoverUrl(profileData?.publicUrl || coverImageUrl);
-            }
-          }
-        } catch {
-          setSignedCoverUrl(coverImageUrl);
+          const url = await getMediaUrl(coverImageUrl, 'cover-image');
+          if (isMounted) setSignedCoverUrl(url);
+        } catch (error) {
+          console.error('Error getting cover URL:', error);
+          if (isMounted) setSignedCoverUrl(coverImageUrl);
         }
       } else {
         setSignedCoverUrl(null);

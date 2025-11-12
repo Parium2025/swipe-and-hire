@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Eye, Lock, Unlock, User, Phone, MapPin, Calendar, FileText, Video, Info, Download, Play, ExternalLink, Pause, ArrowRight, Monitor, Smartphone, X, Mail, Briefcase, Clock } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { convertToSignedUrl } from '@/utils/storageUtils';
+import { getMediaUrl } from '@/lib/mediaManager';
 import { useToast } from '@/hooks/use-toast';
 import { useDevice } from '@/hooks/use-device';
 import { openCvFile } from '@/utils/cvUtils';
@@ -106,7 +106,7 @@ export default function ProfilePreview() {
     loadPreviewData();
   }, [user?.id, profile]);
 
-  // Generate avatar URL on-demand from storage path
+  // Generate avatar URL using mediaManager
   useEffect(() => {
     const loadAvatar = async () => {
       const candidate = profile?.cover_image_url || profile?.profile_image_url || '';
@@ -116,10 +116,12 @@ export default function ProfilePreview() {
       }
 
       try {
-        // Use convertToSignedUrl which auto-detects bucket and handles paths/URLs
-        const finalUrl = await convertToSignedUrl(candidate, 'profile-media', 86400);
-        setAvatarUrl(finalUrl || candidate);
-      } catch {
+        // Använd mediaManager för cover eller profil-bild
+        const mediaType = profile?.cover_image_url ? 'cover-image' : 'profile-image';
+        const url = await getMediaUrl(candidate, mediaType);
+        setAvatarUrl(url || candidate);
+      } catch (error) {
+        console.error('Error loading avatar:', error);
         setAvatarUrl(candidate);
       }
     };

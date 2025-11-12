@@ -18,7 +18,7 @@ import JobDetails from "./pages/JobDetails";
 import JobView from "./pages/JobView";
 import NotFound from "./pages/NotFound";
 // import MyJobs from "./pages/MyJobs";
-import MigrateMedia from "./pages/MigrateMedia";
+import MediaMigration from "./pages/MediaMigration";
 import { AuthProvider } from "@/hooks/useAuth";
 import { UnsavedChangesProvider } from "@/hooks/useUnsavedChanges";
 import { Header } from "@/components/Header";
@@ -69,7 +69,7 @@ const AnimatedRoutes = () => {
       <Route path="/reviews" element={<Index />} />
       <Route path="/job-application/:jobId" element={<JobApplication />} />
       <Route path="/reset-redirect" element={<ResetRedirect />} />
-      <Route path="/migrate-media" element={<MigrateMedia />} />
+      <Route path="/migrate-media" element={<MediaMigration />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
