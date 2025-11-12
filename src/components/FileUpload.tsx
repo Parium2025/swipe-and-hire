@@ -244,7 +244,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
   if (currentFile) {
     const isStoragePath = !currentFile.url.startsWith('http');
-    const isPDF = currentFile.name.toLowerCase().endsWith('.pdf');
+    const lowerName = currentFile.name.toLowerCase();
+    const isPDF = lowerName.endsWith('.pdf');
+    const isWord = lowerName.endsWith('.doc') || lowerName.endsWith('.docx');
 
     const handleOpenFile = async (e: React.MouseEvent) => {
       e.preventDefault();
