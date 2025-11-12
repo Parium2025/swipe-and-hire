@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useDevice } from '@/hooks/use-device';
 import { Play, Pause } from 'lucide-react';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
-import { getMediaUrl } from '@/lib/mediaManager';
 
 interface ProfileVideoProps {
   videoUrl: string;
@@ -16,64 +15,20 @@ interface ProfileVideoProps {
 const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true }: ProfileVideoProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
-  const [signedVideoUrl, setSignedVideoUrl] = useState<string | null>(null);
-  const [signedCoverUrl, setSignedCoverUrl] = useState<string | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [controlsVisible, setControlsVisible] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [fallbackTried, setFallbackTried] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const device = useDevice();
   const isMobile = device === 'mobile';
 
-  // Generate URLs on-demand using mediaManager
-  useEffect(() => {
-    let isMounted = true;
-    
-    const convertUrls = async () => {
-      if (!isMounted) return;
-
-      // Video URL - alltid från profile-media (public bucket)
-      if (videoUrl) {
-        try {
-          const url = await getMediaUrl(videoUrl, 'profile-video');
-          if (isMounted) setSignedVideoUrl(url);
-        } catch (error) {
-          console.error('Error getting video URL:', error);
-          if (isMounted) setSignedVideoUrl(videoUrl);
-        }
-      } else {
-        setSignedVideoUrl(null);
-      }
-      
-      // Cover URL - alltid från profile-media (public bucket)
-      if (coverImageUrl && coverImageUrl.trim()) {
-        try {
-          const url = await getMediaUrl(coverImageUrl, 'cover-image');
-          if (isMounted) setSignedCoverUrl(url);
-        } catch (error) {
-          console.error('Error getting cover URL:', error);
-          if (isMounted) setSignedCoverUrl(coverImageUrl);
-        }
-      } else {
-        setSignedCoverUrl(null);
-      }
-    };
-    
-    convertUrls();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, [videoUrl, coverImageUrl]);
-
-  // Förladdda cover-bilden i bakgrunden
+  // Preload cover image if provided (videoUrl and coverImageUrl are now pre-signed by parent)
   const coverImages = useMemo(() => {
-    return signedCoverUrl ? [signedCoverUrl] : [];
-  }, [signedCoverUrl]);
+    return coverImageUrl ? [coverImageUrl] : [];
+  }, [coverImageUrl]);
   
   useImagePreloader(coverImages, { priority: 'high' });
 
@@ -120,7 +75,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
 
   const handleTap = async () => {
     // Do nothing if we don't have a playable URL yet
-    if (!signedVideoUrl) return;
+    if (!videoUrl) return;
 
     if (!isPlaying) {
       setShowVideo(true);
@@ -171,17 +126,8 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     }
   };
 
-  const handleVideoError = async () => {
-    if (fallbackTried) return;
-    setFallbackTried(true);
-    try {
-      if (!videoUrl || videoUrl.startsWith('http')) return;
-      const { createSignedUrl } = await import('@/utils/storageUtils');
-      const signed = await createSignedUrl('job-applications', videoUrl, 86400);
-      if (signed) setSignedVideoUrl(signed);
-    } catch (e) {
-      // ignore
-    }
+  const handleVideoError = () => {
+    console.error('Video playback error');
   };
 
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -271,9 +217,9 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
       onTouchStart={handleTouchStart}
     >
       {/* Cover image or poster frame - always mounted, fade only */}
-      {signedCoverUrl ? (
+      {coverImageUrl ? (
         <img 
-          src={signedCoverUrl} 
+          src={coverImageUrl} 
           alt={alt}
           className={`w-full h-full object-cover transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
           loading="eager"
@@ -286,10 +232,10 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
         </div>
       )}
       
-      {signedVideoUrl && (
+      {videoUrl && (
         <video 
           ref={videoRef}
-          src={signedVideoUrl}
+          src={videoUrl}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
             isPlaying ? 'opacity-100' : 'opacity-0'
           }`}
@@ -297,7 +243,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
           muted={false}
           playsInline
           preload="metadata"
-          poster={signedCoverUrl || undefined}
+          poster={coverImageUrl || undefined}
           onEnded={handleVideoEnd}
           onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={handleLoadedMetadata}

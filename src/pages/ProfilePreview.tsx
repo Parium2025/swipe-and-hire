@@ -45,6 +45,10 @@ export default function ProfilePreview() {
   const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [showDetailedView, setShowDetailedView] = useState(false);
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
+  
+  // Signed URLs for secure video and cover display
+  const [signedVideoUrl, setSignedVideoUrl] = useState<string>('');
+  const [signedCoverUrl, setSignedCoverUrl] = useState<string>('');
 
   useEffect(() => {
     const loadPreviewData = async () => {
@@ -128,6 +132,31 @@ export default function ProfilePreview() {
 
     loadAvatar();
   }, [profile?.cover_image_url, profile?.profile_image_url]);
+
+  // Generate signed URLs for video and cover
+  useEffect(() => {
+    const loadSignedUrls = async () => {
+      if (profile?.video_url) {
+        try {
+          const url = await getMediaUrl(profile.video_url, 'profile-video', 86400);
+          if (url) setSignedVideoUrl(url);
+        } catch (error) {
+          console.error('Error generating video URL:', error);
+        }
+      }
+      
+      if (profile?.cover_image_url) {
+        try {
+          const url = await getMediaUrl(profile.cover_image_url, 'cover-image', 86400);
+          if (url) setSignedCoverUrl(url);
+        } catch (error) {
+          console.error('Error generating cover URL:', error);
+        }
+      }
+    };
+
+    loadSignedUrls();
+  }, [profile?.video_url, profile?.cover_image_url]);
 
   const ProfileView = ({ data, isConsented }: { data: ProfileViewData | null; isConsented: boolean }) => {
     if (!data) return <div className="text-white">Ingen data tillgänglig</div>;
@@ -249,10 +278,10 @@ export default function ProfilePreview() {
             >
               
               {/* Använd ProfileVideo komponenten om video finns */}
-              {data.video_url ? (
+              {data.video_url && signedVideoUrl ? (
                 <ProfileVideo
-                  videoUrl={data.video_url}
-                  coverImageUrl={avatarUrl || undefined}
+                  videoUrl={signedVideoUrl}
+                  coverImageUrl={signedCoverUrl || avatarUrl || undefined}
                   userInitials={`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`}
                   alt="Profilbild"
                   className="w-full h-full rounded-full"

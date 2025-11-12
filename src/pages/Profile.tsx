@@ -74,8 +74,13 @@ const Profile = () => {
   const [phone, setPhone] = useState(profile?.phone || '');
   const [birthDate, setBirthDate] = useState(profile?.birth_date || '');
   const [profileImageUrl, setProfileImageUrl] = useState(profile?.profile_image_url || '');
+  const [videoUrl, setVideoUrl] = useState(profile?.video_url || '');
   const [cvUrl, setCvUrl] = useState((profile as any)?.cv_url || '');
   const [cvFileName, setCvFileName] = useState((profile as any)?.cv_filename || '');
+  
+  // Signed URLs for displaying private media
+  const [signedVideoUrl, setSignedVideoUrl] = useState<string>('');
+  const [signedCoverUrl, setSignedCoverUrl] = useState<string>('');
   
   // Extended profile fields that we'll need to add to database
   const [employmentStatus, setEmploymentStatus] = useState('');
@@ -110,6 +115,7 @@ const Profile = () => {
         phone: profile.phone || '',
         birthDate: profile.birth_date || '',
         profileImageUrl: profile.profile_image_url || '',
+        videoUrl: profile.video_url || '',
         cvUrl: (profile as any)?.cv_url || '',
         companyName: profile.company_name || '',
         orgNumber: profile.org_number || '',
@@ -132,41 +138,23 @@ const Profile = () => {
       
       // Handle video/image loading from database
       if ((profile as any)?.video_url) {
-        setProfileImageUrl((profile as any).video_url);
+        setVideoUrl((profile as any).video_url);
+        setProfileImageUrl(''); // Clear regular profile image when video exists
         setIsProfileVideo(true);
-        // Set original values to match current for video
-        values.profileImageUrl = (profile as any).video_url;
+        values.videoUrl = (profile as any).video_url;
+        values.profileImageUrl = '';
         values.isProfileVideo = true;
         
-        // Extract filename from video URL for cleanup
-        try {
-          const url = new URL((profile as any).video_url);
-          const fileName = url.pathname.split('/').pop()?.split('?')[0] || '';
-          if (fileName) {
-            setProfileFileName(fileName);
-            values.profileFileName = fileName;
-          }
-        } catch (error) {
-          console.log('Could not extract video filename from URL');
-        }
+        // Generate signed URL for video display
+        getMediaUrl((profile as any).video_url, 'profile-video', 86400).then((url) => {
+          if (url) setSignedVideoUrl(url);
+        });
       } else {
+        setVideoUrl('');
         setProfileImageUrl(values.profileImageUrl);
         setIsProfileVideo(false);
+        values.videoUrl = '';
         values.isProfileVideo = false;
-        
-        // Extract filename from image URL if it exists
-        if (values.profileImageUrl) {
-          try {
-            const url = new URL(values.profileImageUrl);
-            const fileName = url.pathname.split('/').pop()?.split('?')[0] || '';
-            if (fileName) {
-              setProfileFileName(fileName);
-              values.profileFileName = fileName;
-            }
-          } catch (error) {
-            console.log('Could not extract image filename from URL');
-          }
-        }
       }
       
       // Always load current cover image from DB - use dedicated field if available
@@ -174,18 +162,11 @@ const Profile = () => {
       setCoverImageUrl(dbCoverImage);
       values.coverImageUrl = dbCoverImage;
       
-      // Extract cover image filename for cleanup
+      // Generate signed URL for cover image if it exists
       if (dbCoverImage) {
-        try {
-          const url = new URL(dbCoverImage);
-          const fileName = url.pathname.split('/').pop()?.split('?')[0] || '';
-          if (fileName) {
-            setCoverFileName(fileName);
-            values.coverFileName = fileName;
-          }
-        } catch (error) {
-          console.log('Could not extract cover filename from URL');
-        }
+        getMediaUrl(dbCoverImage, 'cover-image', 86400).then((url) => {
+          if (url) setSignedCoverUrl(url);
+        });
       }
       
       setCvUrl(values.cvUrl);
@@ -387,10 +368,17 @@ const Profile = () => {
       
       // Update local state
       if (isVideo) {
-        setProfileImageUrl(storagePath);
+        setVideoUrl(storagePath);
+        setProfileImageUrl(''); // Clear regular image when video is uploaded
         setIsProfileVideo(true);
+        
+        // Generate signed URL for immediate display
+        getMediaUrl(storagePath, 'profile-video', 86400).then((url) => {
+          if (url) setSignedVideoUrl(url);
+        });
       } else {
         setProfileImageUrl(storagePath);
+        setVideoUrl('');
         setIsProfileVideo(false);
       }
       
@@ -434,6 +422,11 @@ const Profile = () => {
       // Update local state and track filename  
       setCoverImageUrl(storagePath);
       setCoverFileName(storagePath); // Store path for deletion
+      
+      // Generate signed URL for immediate display
+      getMediaUrl(storagePath, 'cover-image', 86400).then((url) => {
+        if (url) setSignedCoverUrl(url);
+      });
       
       // Mark as having unsaved changes
       setHasUnsavedChanges(true);
@@ -855,9 +848,9 @@ const Profile = () => {
       };
 
       // Handle profile image/video updates
-      if (isProfileVideo && profileImageUrl) {
-        // It's a video
-        updates.video_url = profileImageUrl;
+      if (isProfileVideo && videoUrl) {
+        // It's a video - save storage path only
+        updates.video_url = videoUrl;
         updates.profile_image_url = null; // Clear profile image when using video
         // Keep cover image when video exists
         updates.cover_image_url = coverImageUrl || null;
@@ -993,10 +986,10 @@ const Profile = () => {
           </div>
           <div className="p-4 flex flex-col items-center space-y-4">
             <div className="relative">
-              {(isProfileVideo && !!profileImageUrl) ? (
+              {(isProfileVideo && !!videoUrl) ? (
                 <ProfileVideo
-                  videoUrl={profileImageUrl}
-                  coverImageUrl={coverImageUrl || profile?.profile_image_url || undefined}
+                  videoUrl={signedVideoUrl}
+                  coverImageUrl={signedCoverUrl}
                   userInitials={`${firstName.charAt(0)}${lastName.charAt(0)}`}
                   alt="Profile video"
                   className="w-32 h-32 border-4 border-white/10 hover:border-white/20 transition-all rounded-full overflow-hidden"
@@ -1024,7 +1017,7 @@ const Profile = () => {
               )}
 
               {/* Delete/Restore icon for profile media */}
-              {!!profileImageUrl && (
+              {!!(videoUrl || profileImageUrl) && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1037,7 +1030,7 @@ const Profile = () => {
               )}
               
               {/* Undo button - shown when media was just deleted */}
-              {!profileImageUrl && deletedProfileMedia && (
+              {!(videoUrl || profileImageUrl) && deletedProfileMedia && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1074,7 +1067,7 @@ const Profile = () => {
                 </Badge>
               )}
               
-              {(isProfileVideo && !!profileImageUrl) && !isUploadingMedia && (
+              {(isProfileVideo && !!videoUrl) && !isUploadingMedia && (
                 <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-md">
                   {isProfileVideo ? 'Video' : 'Bild'} uppladdad!
                 </Badge>
@@ -1082,7 +1075,7 @@ const Profile = () => {
             </div>
 
             {/* Cover image upload - show when video exists OR when cover image exists without video */}
-            {(isProfileVideo && !!profileImageUrl) && (
+            {(isProfileVideo && !!videoUrl) && (
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
                 <div className="flex items-center gap-2">
                   <Button 

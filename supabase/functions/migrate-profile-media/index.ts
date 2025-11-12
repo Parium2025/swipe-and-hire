@@ -17,171 +17,122 @@ Deno.serve(async (req) => {
 
     const { dryRun = true } = await req.json();
 
-    console.log(`Starting profile media migration (dry run: ${dryRun})`);
+    console.log(`Starting profile media security migration (dry run: ${dryRun})`);
+    console.log('Moving videos from profile-media (public) to job-applications (private) for security');
 
-    // Get all profiles with media URLs in job-applications bucket
+    // Get all profiles with video URLs in profile-media bucket (OLD insecure location)
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
-      .select('id, user_id, profile_image_url, video_url')
-      .or('profile_image_url.ilike.%/job-applications/%,video_url.ilike.%/job-applications/%');
+      .select('id, user_id, video_url, cover_image_url')
+      .not('video_url', 'is', null)
+      .ilike('video_url', '%/profile-media/%');
 
     if (profilesError) {
       throw new Error(`Failed to fetch profiles: ${profilesError.message}`);
     }
 
-    console.log(`Found ${profiles?.length || 0} profiles with media in job-applications bucket`);
+    console.log(`Found ${profiles?.length || 0} profiles with videos in profile-media bucket (need to move to private bucket)`);
 
     const results = {
       profilesProcessed: 0,
-      filesMovedOrPlanned: 0,
+      videosMovedOrPlanned: 0,
       errors: [] as string[],
       details: [] as any[],
     };
 
     for (const profile of profiles || []) {
-      const updates: any = {};
-      let moved = false;
-
-      // Handle profile image
-      if (profile.profile_image_url?.includes('/job-applications/')) {
+      // Handle video - move from public profile-media to private job-applications
+      if (profile.video_url?.includes('/profile-media/')) {
         try {
-          // Extract path from URL or use as-is if it's a path
-          let oldPath = profile.profile_image_url;
-          if (oldPath.includes('/storage/v1/object/')) {
-            const match = oldPath.match(/\/job-applications\/(.+?)(\?|$)/);
-            if (match) oldPath = match[1];
-          }
-
-          const fileExt = oldPath.split('.').pop();
-          const newPath = `${profile.user_id}/${Date.now()}-profile-image.${fileExt}`;
-
-          if (!dryRun) {
-            // Download from old bucket
-            const { data: fileData, error: downloadError } = await supabase.storage
-              .from('job-applications')
-              .download(oldPath);
-
-            if (downloadError) {
-              console.error(`Failed to download profile image: ${downloadError.message}`);
-              results.errors.push(`Profile ${profile.id}: ${downloadError.message}`);
-              continue;
-            }
-
-            // Upload to new bucket
-            const { error: uploadError } = await supabase.storage
-              .from('profile-media')
-              .upload(newPath, fileData, {
-                contentType: fileData.type,
-                upsert: false,
-              });
-
-            if (uploadError) {
-              console.error(`Failed to upload profile image: ${uploadError.message}`);
-              results.errors.push(`Profile ${profile.id}: ${uploadError.message}`);
-              continue;
-            }
-
-            // Get public URL
-            const { data: { publicUrl } } = supabase.storage
-              .from('profile-media')
-              .getPublicUrl(newPath);
-
-            updates.profile_image_url = publicUrl;
-            moved = true;
-          } else {
-            console.log(`[DRY RUN] Would move profile image: ${oldPath} -> ${newPath}`);
-            results.details.push({
-              profile_id: profile.id,
-              type: 'profile_image',
-              old_path: oldPath,
-              new_path: newPath,
-            });
-            moved = true;
-          }
-        } catch (error) {
-          console.error('Error processing profile image:', error);
-          results.errors.push(`Profile ${profile.id} image: ${error.message}`);
-        }
-      }
-
-      // Handle video
-      if (profile.video_url?.includes('/job-applications/')) {
-        try {
+          // Extract storage path from URL or use as-is if it's already a path
           let oldPath = profile.video_url;
           if (oldPath.includes('/storage/v1/object/')) {
-            const match = oldPath.match(/\/job-applications\/(.+?)(\?|$)/);
+            const match = oldPath.match(/\/profile-media\/(.+?)(\?|$)/);
             if (match) oldPath = match[1];
+          } else if (oldPath.startsWith('http')) {
+            // Full URL without /storage/ - try to extract path
+            const parts = oldPath.split('/profile-media/');
+            if (parts.length > 1) {
+              oldPath = parts[1].split('?')[0];
+            }
           }
 
           const fileExt = oldPath.split('.').pop()?.split('?')[0];
-          const newPath = `${profile.user_id}/${Date.now()}-profile-video.${fileExt}`;
+          const newPath = `${profile.user_id}/${Date.now()}-video.${fileExt}`;
 
           if (!dryRun) {
+            // Download from old PUBLIC bucket
             const { data: fileData, error: downloadError } = await supabase.storage
-              .from('job-applications')
+              .from('profile-media')
               .download(oldPath);
 
             if (downloadError) {
               console.error(`Failed to download video: ${downloadError.message}`);
-              results.errors.push(`Profile ${profile.id} video: ${downloadError.message}`);
+              results.errors.push(`Profile ${profile.id} video download: ${downloadError.message}`);
               continue;
             }
 
+            // Upload to new PRIVATE bucket
             const { error: uploadError } = await supabase.storage
-              .from('profile-media')
+              .from('job-applications')
               .upload(newPath, fileData, {
                 contentType: fileData.type,
                 upsert: false,
               });
 
             if (uploadError) {
-              console.error(`Failed to upload video: ${uploadError.message}`);
-              results.errors.push(`Profile ${profile.id} video: ${uploadError.message}`);
+              console.error(`Failed to upload video to private bucket: ${uploadError.message}`);
+              results.errors.push(`Profile ${profile.id} video upload: ${uploadError.message}`);
               continue;
             }
 
-            const { data: { publicUrl } } = supabase.storage
-              .from('profile-media')
-              .getPublicUrl(newPath);
+            // Update profile with STORAGE PATH (not URL) - critical for security
+            const { error: updateError } = await supabase
+              .from('profiles')
+              .update({ video_url: newPath }) // Store path only, not URL
+              .eq('id', profile.id);
 
-            updates.video_url = publicUrl;
-            moved = true;
+            if (updateError) {
+              console.error(`Failed to update profile: ${updateError.message}`);
+              results.errors.push(`Profile ${profile.id} update: ${updateError.message}`);
+              continue;
+            }
+
+            // Delete old video from public bucket
+            const { error: deleteError } = await supabase.storage
+              .from('profile-media')
+              .remove([oldPath]);
+
+            if (deleteError) {
+              console.warn(`Could not delete old video (non-critical): ${deleteError.message}`);
+            }
+
+            results.videosMovedOrPlanned++;
+            results.profilesProcessed++;
+            
+            console.log(`✓ Moved video for profile ${profile.id}: ${oldPath} -> ${newPath} (now PRIVATE)`);
           } else {
-            console.log(`[DRY RUN] Would move video: ${oldPath} -> ${newPath}`);
+            console.log(`[DRY RUN] Would move video to PRIVATE bucket: ${oldPath} -> job-applications/${newPath}`);
             results.details.push({
               profile_id: profile.id,
+              user_id: profile.user_id,
               type: 'video',
+              old_bucket: 'profile-media (PUBLIC)',
+              new_bucket: 'job-applications (PRIVATE)',
               old_path: oldPath,
               new_path: newPath,
             });
-            moved = true;
+            results.videosMovedOrPlanned++;
           }
         } catch (error) {
           console.error('Error processing video:', error);
           results.errors.push(`Profile ${profile.id} video: ${error.message}`);
         }
       }
-
-      // Update profile if we have changes
-      if (!dryRun && Object.keys(updates).length > 0) {
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update(updates)
-          .eq('id', profile.id);
-
-        if (updateError) {
-          console.error(`Failed to update profile: ${updateError.message}`);
-          results.errors.push(`Profile ${profile.id} update: ${updateError.message}`);
-        }
-      }
-
-      if (moved) {
-        results.filesMovedOrPlanned++;
-        results.profilesProcessed++;
-      }
     }
 
-    console.log('Migration completed:', results);
+    console.log('Security migration completed:', results);
+    console.log(`Videos are now stored in PRIVATE bucket and require permissions to view`);
 
     return new Response(JSON.stringify(results), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
