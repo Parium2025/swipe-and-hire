@@ -3,13 +3,15 @@ import { supabase } from '@/integrations/supabase/client';
 /**
  * Centraliserad media-hantering med konsistent bucket-strategi
  * 
- * PUBLIC BUCKETS (direkt åtkomst, ingen signering):
- * - profile-media: Profilbilder, videor, cover-bilder
- * - company-logos: Företagslogotyper  
- * - job-images: Jobbannonsbilder
+ * PRIVATE BUCKETS (kräver signed URLs med behörighetskontroll):
+ * - job-applications: Profilbilder, videor, cover-bilder, CV:n, ansökningsdokument
+ *   → Jobbsökare ser sina egna filer
+ *   → Arbetsgivare ser kandidatfiler när de har permission (via ansökan)
+ *   → Super admins ser allt
  * 
- * PRIVATE BUCKETS (kräver signed URLs):
- * - job-applications: CV:n, ansökningsdokument
+ * PUBLIC BUCKETS (direkt åtkomst, ingen signering):
+ * - company-logos: Företagslogotyper (publikt tillgängliga)
+ * - job-images: Jobbannonsbilder (publikt tillgängliga)
  */
 
 export type MediaType = 
