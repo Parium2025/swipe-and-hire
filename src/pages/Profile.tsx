@@ -361,17 +361,22 @@ const Profile = () => {
       if (uploadError) throw uploadError;
       
       // Update local state
-      if (isVideo) {
-        setVideoUrl(storagePath);
-        setProfileImageUrl(''); // Clear regular image when video is uploaded
-        setIsProfileVideo(true);
-        
-        // Signed URL handled by useMediaUrl hook
-      } else {
-        setProfileImageUrl(storagePath);
-        setVideoUrl('');
-        setIsProfileVideo(false);
-      }
+        if (isVideo) {
+          // Preserve current profile image as cover if none set yet
+          const previousImage = profileImageUrl || (originalValues?.profileImageUrl || '');
+          if (!coverImageUrl && previousImage) {
+            setCoverImageUrl(previousImage);
+            setCoverFileName(previousImage);
+          }
+          setVideoUrl(storagePath);
+          setProfileImageUrl(''); // Clear regular image when video is uploaded
+          setIsProfileVideo(true);
+          // Signed URL handled by useMediaUrl hook
+        } else {
+          setProfileImageUrl(storagePath);
+          setVideoUrl('');
+          setIsProfileVideo(false);
+        }
       
       setProfileFileName(storagePath);
       setDeletedProfileMedia(null);
@@ -943,6 +948,19 @@ const Profile = () => {
           Hantera din personliga information
         </p>
       </div>
+
+      {signedCoverUrl && (
+        <div className="relative w-full h-40 rounded-lg overflow-hidden bg-white/5 border border-white/10">
+          <img
+            src={signedCoverUrl}
+            alt="Cover-bild"
+            className="w-full h-full object-cover"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+          />
+        </div>
+      )}
 
       <div className="space-y-6">
         {/* Profile Image/Video Card */}
