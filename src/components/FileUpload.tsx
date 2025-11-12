@@ -331,7 +331,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
         className={`border-2 border-dashed rounded-lg p-3 sm:p-4 text-center cursor-pointer transition-colors ${
           isDragActive
             ? 'border-primary bg-primary/5'
-            : 'border-border hover:border-muted-foreground bg-muted/30'
+            : 'border-border hover:border-muted-foreground bg-background/40'
         } ${uploading ? 'pointer-events-none opacity-50' : ''}`}
         onClick={(e) => {
           e.preventDefault();
