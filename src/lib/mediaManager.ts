@@ -180,32 +180,15 @@ export async function getMediaUrl(
   
   if (error) {
     console.error(`Error creating signed URL for ${mediaType}:`, error);
-    return null;
-  }
-  
-  // Backward compatibility: some older images may still live in the public 'profile-media' bucket
-  if (mediaType === 'profile-image' || mediaType === 'cover-image') {
-    try {
-      // Verify that the signed URL actually resolves (file exists in the private bucket)
-      const head = await fetch(data.signedUrl, { method: 'HEAD' });
-      if (!head.ok) {
-        // Fallback to public URL from legacy bucket
-        const publicFallback = supabase.storage
-          .from('profile-media')
-          .getPublicUrl(cleanPath);
-        if (publicFallback?.data?.publicUrl) {
-          return publicFallback.data.publicUrl;
-        }
-      }
-    } catch (e) {
-      // Network/CORS issues: try returning public fallback as a best-effort if available
-      const publicFallback = supabase.storage
+    // Backwards compatibility: some older profile/cover images may live in public 'profile-media'
+    if ((mediaType === 'profile-image' || mediaType === 'cover-image') &&
+        (error as any)?.statusCode === '404' || (error as any)?.message?.includes('Object not found')) {
+      const { data: pub } = supabase.storage
         .from('profile-media')
         .getPublicUrl(cleanPath);
-      if (publicFallback?.data?.publicUrl) {
-        return publicFallback.data.publicUrl;
-      }
+      return pub?.publicUrl ?? null;
     }
+    return null;
   }
   
   return data.signedUrl;
