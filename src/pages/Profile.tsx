@@ -845,9 +845,18 @@ const Profile = () => {
       if (isProfileVideo && videoUrl) {
         // It's a video - save storage path only
         updates.video_url = videoUrl;
+        
+        // If user had a profile image but no cover, make the profile image the cover
+        if (profileImageUrl && !coverImageUrl) {
+          updates.cover_image_url = profileImageUrl; // Preserve old profile image as cover
+          setCoverImageUrl(profileImageUrl); // Update local state
+          setCoverFileName(profileFileName); // Track for deletion
+        } else {
+          // Keep existing cover image when video exists
+          updates.cover_image_url = coverImageUrl || null;
+        }
+        
         updates.profile_image_url = null; // Clear profile image when using video
-        // Keep cover image when video exists
-        updates.cover_image_url = coverImageUrl || null;
       } else if (!profileImageUrl && coverImageUrl) {
         // No video/image but has cover - make cover the profile image (but keep cover as cover)
         updates.profile_image_url = coverImageUrl;
