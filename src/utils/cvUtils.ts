@@ -18,15 +18,15 @@ export async function openCvFile({ cvUrl, onSuccess, onError }: OpenCvOptions): 
   }
 
   try {
-    // Open popup immediately for better UX
+    // Prepare a popup immediately to avoid blockers
     const popup = window.open('', '_blank');
-    
-    // Check if cv_url is a storage path or full URL
+
+    // Determine URL type
     const isStoragePath = !cvUrl.startsWith('http');
     const isPrivateBucket = cvUrl.includes('/job-applications/') || isStoragePath;
-    
+
     let finalUrl = cvUrl;
-    
+
     // Generate signed URL for private buckets
     if (isStoragePath || isPrivateBucket) {
       if (isStoragePath) {
@@ -35,13 +35,28 @@ export async function openCvFile({ cvUrl, onSuccess, onError }: OpenCvOptions): 
         finalUrl = await convertToSignedUrl(cvUrl, 'job-applications', 86400) || cvUrl;
       }
     }
-    
-    if (popup) {
-      popup.location.href = finalUrl;
-    } else {
-      window.open(finalUrl, '_blank');
+
+    // Fetch the file and open via blob URL to avoid extension blocks
+    const res = await fetch(finalUrl);
+    if (!res.ok) throw new Error(`Kunde inte hämta filen (${res.status})`);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+
+    // Try to persist in cache for offline reuse
+    try {
+      if ('caches' in window) {
+        const cache = await caches.open('parium-images-v1');
+        const headers = new Headers({ 'Content-Type': res.headers.get('Content-Type') || 'application/octet-stream' });
+        await cache.put(finalUrl, new Response(blob.slice(0, blob.size), { headers }));
+      }
+    } catch (e) {
+      // Non-fatal
+      console.debug('Cache store skipped:', e);
     }
-    
+
+    if (popup) popup.location.href = blobUrl;
+    else window.open(blobUrl, '_blank');
+
     onSuccess?.('CV öppnat i ny flik');
   } catch (error) {
     console.error('Error opening CV:', error);
