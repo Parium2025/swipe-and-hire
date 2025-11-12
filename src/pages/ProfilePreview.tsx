@@ -13,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { convertToSignedUrl } from '@/utils/storageUtils';
 import { useToast } from '@/hooks/use-toast';
 import { useDevice } from '@/hooks/use-device';
+import { openCvFile } from '@/utils/cvUtils';
 import ProfileVideo from '@/components/ProfileVideo';
 import { TruncatedText } from '@/components/TruncatedText';
 import NameAutoFit from '@/components/NameAutoFit';
@@ -173,45 +174,22 @@ export default function ProfilePreview() {
         return;
       }
 
-      try {
-        // Open popup immediately for better UX
-        const popup = window.open('', '_blank');
-        
-        // Check if cv_url is a storage path or full URL
-        const isStoragePath = !data.cv_url.startsWith('http');
-        const isPrivateBucket = data.cv_url.includes('/job-applications/') || isStoragePath;
-        
-        let finalUrl = data.cv_url;
-        
-        // Generate signed URL for private buckets
-        if (isStoragePath || isPrivateBucket) {
-          const { createSignedUrl, convertToSignedUrl } = await import('@/utils/storageUtils');
-          
-          if (isStoragePath) {
-            finalUrl = await createSignedUrl('job-applications', data.cv_url, 86400) || data.cv_url;
-          } else {
-            finalUrl = await convertToSignedUrl(data.cv_url, 'job-applications', 86400) || data.cv_url;
-          }
+      await openCvFile({
+        cvUrl: data.cv_url,
+        onSuccess: (message) => {
+          toast({
+            title: "CV öppnat",
+            description: message || "CV:t öppnas i en ny flik"
+          });
+        },
+        onError: (error) => {
+          toast({
+            title: "Fel vid öppning",
+            description: error.message || "Kunde inte öppna CV:t",
+            variant: "destructive"
+          });
         }
-        
-        if (popup) {
-          popup.location.href = finalUrl;
-        } else {
-          window.open(finalUrl, '_blank');
-        }
-        
-        toast({
-          title: "CV öppnat",
-          description: "CV:t öppnas i en ny flik",
-        });
-      } catch (error) {
-        console.error('Error opening CV:', error);
-        toast({
-          title: "Fel vid öppning",
-          description: "Kunde inte öppna CV:t",
-          variant: "destructive"
-        });
-      }
+      });
     };
 
     // FÖRSTA VY: Minimal Tinder-stil med swipe - anpassat för mobil-mockup

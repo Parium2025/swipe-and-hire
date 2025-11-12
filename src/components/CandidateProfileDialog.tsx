@@ -6,6 +6,7 @@ import { ApplicationData } from '@/hooks/useApplicationsData';
 import { Mail, Phone, MapPin, Briefcase, Calendar, FileText, Video } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { openCvFile } from '@/utils/cvUtils';
 
 interface CandidateProfileDialogProps {
   application: ApplicationData | null;
@@ -153,35 +154,15 @@ export const CandidateProfileDialog = ({
               <button
                 onClick={async (e) => {
                   e.preventDefault();
-                  try {
-                    // Open popup immediately
-                    const popup = window.open('', '_blank');
-                    
-                    // Check if storage path or full URL
-                    const isStoragePath = !application.cv_url.startsWith('http');
-                    const isPrivateBucket = application.cv_url.includes('/job-applications/') || isStoragePath;
-                    
-                    let finalUrl = application.cv_url;
-                    
-                    // Generate signed URL for private buckets
-                    if (isStoragePath || isPrivateBucket) {
-                      const { createSignedUrl, convertToSignedUrl } = await import('@/utils/storageUtils');
-                      
-                      if (isStoragePath) {
-                        finalUrl = await createSignedUrl('job-applications', application.cv_url, 86400) || application.cv_url;
-                      } else {
-                        finalUrl = await convertToSignedUrl(application.cv_url, 'job-applications', 86400) || application.cv_url;
-                      }
+                  await openCvFile({
+                    cvUrl: application.cv_url,
+                    onSuccess: (message) => {
+                      toast.success(message || 'CV öppnat i ny flik');
+                    },
+                    onError: (error) => {
+                      toast.error(error.message || 'Kunde inte öppna CV');
                     }
-                    
-                    if (popup) {
-                      popup.location.href = finalUrl;
-                    } else {
-                      window.open(finalUrl, '_blank');
-                    }
-                  } catch (error) {
-                    console.error('Error opening CV:', error);
-                  }
+                  });
                 }}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors text-foreground cursor-pointer"
               >

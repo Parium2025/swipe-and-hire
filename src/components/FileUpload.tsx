@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
 import { preloadSingleFile } from '@/lib/serviceWorkerManager';
 import { Progress } from '@/components/ui/progress';
+import { openCvFile } from '@/utils/cvUtils';
 
 interface FileUploadProps {
   onFileUploaded: (url: string, fileName: string) => void;
@@ -204,34 +205,61 @@ const FileUpload: React.FC<FileUploadProps> = ({
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-medium truncate max-w-[200px] text-white hover:text-primary underline cursor-pointer"
-              onClick={(e) => {
+              onClick={async (e) => {
                 e.preventDefault();
+                
+                // Use centralized CV opening utility for job-applications bucket
+                if (actualBucket === 'job-applications') {
+                  await openCvFile({
+                    cvUrl: currentFile.url,
+                    onSuccess: (message) => {
+                      toast({
+                        title: "Fil öppnad",
+                        description: message || "Filen öppnas i en ny flik"
+                      });
+                    },
+                    onError: (error) => {
+                      toast({
+                        title: "Fel vid öppning",
+                        description: error.message,
+                        variant: "destructive"
+                      });
+                    }
+                  });
+                  return;
+                }
+                
+                // For other buckets (public buckets), use original logic
                 const popup = window.open('', '_blank');
                 const openUrl = (url?: string | null) => {
                   if (!url) { popup?.close(); return; }
                   if (popup) popup.location.href = url;
                   else window.open(url, '_blank');
                 };
-                (async () => {
-                  try {
-                    // For public buckets, just open the URL directly
-                    if (isPublicBucket || 
-                        currentFile.url.includes('/profile-media/') ||
-                        currentFile.url.includes('/company-logos/') ||
-                        currentFile.url.includes('/job-images/')) {
-                      openUrl(currentFile.url);
-                    } else if (isStoragePath) {
-                      const signedUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
-                      openUrl(signedUrl);
-                    } else {
-                      const signedUrl = await convertToSignedUrl(currentFile.url, actualBucket, 86400, currentFile.name);
-                      openUrl(signedUrl);
-                    }
-                  } catch (err) {
-                    console.error('Error opening file:', err);
-                    popup?.close();
+                
+                try {
+                  // For public buckets, just open the URL directly
+                  if (isPublicBucket || 
+                      currentFile.url.includes('/profile-media/') ||
+                      currentFile.url.includes('/company-logos/') ||
+                      currentFile.url.includes('/job-images/')) {
+                    openUrl(currentFile.url);
+                  } else if (isStoragePath) {
+                    const signedUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
+                    openUrl(signedUrl);
+                  } else {
+                    const signedUrl = await convertToSignedUrl(currentFile.url, actualBucket, 86400, currentFile.name);
+                    openUrl(signedUrl);
                   }
-                })();
+                } catch (err) {
+                  console.error('Error opening file:', err);
+                  popup?.close();
+                  toast({
+                    title: "Fel vid öppning",
+                    description: "Kunde inte öppna filen",
+                    variant: "destructive"
+                  });
+                }
               }}
             >
               {currentFile.name}
