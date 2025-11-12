@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { preloadImages } from '@/lib/serviceWorkerManager';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -142,37 +141,6 @@ export default function ProfilePreview() {
     loadAvatar();
   }, [profile?.cover_image_url, profile?.profile_image_url]);
 
-  // Förladdda alla mediafiler i bakgrunden (samma som AppSidebar)
-  const mediaToPreload = useMemo(() => {
-    const media: string[] = [];
-    if (avatarUrl) media.push(avatarUrl);
-    if (profile?.cover_image_url) {
-      const url = profile.cover_image_url.includes('/storage/v1/object/public/') 
-        ? profile.cover_image_url 
-        : supabase.storage.from('profile-media').getPublicUrl(profile.cover_image_url).data.publicUrl;
-      if (url) media.push(url);
-    }
-    if (profile?.profile_image_url) {
-      const url = profile.profile_image_url.includes('/storage/v1/object/public/')
-        ? profile.profile_image_url
-        : supabase.storage.from('profile-media').getPublicUrl(profile.profile_image_url).data.publicUrl;
-      if (url) media.push(url);
-    }
-    if (profile?.video_url) {
-      const url = profile.video_url.includes('/storage/v1/object/public/')
-        ? profile.video_url
-        : supabase.storage.from('profile-media').getPublicUrl(profile.video_url).data.publicUrl;
-      if (url) media.push(url);
-    }
-    return media;
-  }, [avatarUrl, profile?.cover_image_url, profile?.profile_image_url, profile?.video_url]);
-
-  useEffect(() => {
-    if (mediaToPreload.length > 0) {
-      preloadImages(mediaToPreload);
-    }
-  }, [mediaToPreload]);
-
   const ProfileView = ({ data, isConsented }: { data: ProfileViewData | null; isConsented: boolean }) => {
     if (!data) return <div className="text-white">Ingen data tillgänglig</div>;
     const { toast } = useToast();
@@ -183,42 +151,6 @@ export default function ProfilePreview() {
     const countWords = (text: string) => {
       return text.trim().split(/\s+/).filter(word => word.length > 0).length;
     };
-
-    const [videoUrl, setVideoUrl] = useState<string>('');
-    const [cvUrl, setCvUrl] = useState<string>('');
-
-    // Load public URLs for media
-    useEffect(() => {
-      const loadMediaUrls = async () => {
-        if (data.video_url) {
-          try {
-            // Use public URL from profile-media bucket
-            if (data.video_url.startsWith('http')) {
-              setVideoUrl(data.video_url);
-            } else {
-              const { data: urlData } = supabase.storage
-                .from('profile-media')
-                .getPublicUrl(data.video_url);
-              setVideoUrl(urlData?.publicUrl || data.video_url);
-            }
-          } catch (error) {
-            setVideoUrl(data.video_url);
-          }
-        }
-
-        if (data.cv_url) {
-          try {
-            // CV is private, needs signed URL
-            const signedCvUrl = await convertToSignedUrl(data.cv_url, 'job-applications', 86400);
-            setCvUrl(signedCvUrl || data.cv_url);
-          } catch (error) {
-            setCvUrl(data.cv_url);
-          }
-        }
-      };
-
-      loadMediaUrls();
-    }, [data.video_url, data.cv_url]);
 
     const handlePhoneClick = () => {
       if (isConsented && data.phone) {
@@ -232,8 +164,8 @@ export default function ProfilePreview() {
 
     const handleCvClick = (e: React.MouseEvent) => {
       e.preventDefault();
-      if (cvUrl) {
-        window.open(cvUrl, '_blank');
+      if (data.cv_url) {
+        window.open(data.cv_url, '_blank');
         toast({
           title: "CV öppnat",
           description: "CV:t öppnas i en ny flik",
@@ -310,16 +242,16 @@ export default function ProfilePreview() {
               style={{ cursor: 'pointer' }}
               onClick={(e) => {
                 // Stoppa event propagation så att klick på video/bild inte öppnar detaljvyn
-                if (videoUrl) {
+                if (data.video_url) {
                   e.stopPropagation();
                 }
               }}
             >
               
               {/* Använd ProfileVideo komponenten om video finns */}
-              {videoUrl ? (
+              {data.video_url ? (
                 <ProfileVideo
-                  videoUrl={videoUrl}
+                  videoUrl={data.video_url}
                   coverImageUrl={avatarUrl || undefined}
                   userInitials={`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`}
                   alt="Profilbild"
@@ -344,7 +276,7 @@ export default function ProfilePreview() {
             </div>
 
             {/* Text direkt under profilbilden - bara om video finns */}
-            {videoUrl && (
+            {data.video_url && (
               <div className="absolute top-40 left-1/2 transform -translate-x-1/2 text-center">
                 <p className="text-xs font-medium" style={{ color: '#FFFFFF' }}>Video tillgängligt</p>
               </div>
@@ -579,7 +511,7 @@ export default function ProfilePreview() {
             )}
 
             {/* CV */}
-            {isConsented && cvUrl && (
+            {isConsented && data.cv_url && (
               <div className="space-y-1">
                 <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1 flex items-center gap-1">
                   <FileText className="h-3 w-3 text-white" />
