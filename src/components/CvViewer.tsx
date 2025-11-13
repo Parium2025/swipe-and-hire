@@ -22,6 +22,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
   const [loading, setLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
 
   const isStoragePath = useMemo(() => !/^https?:\/\//i.test(src), [src]);
 
@@ -62,6 +63,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
         const container = containerRef.current;
         if (!container) { setLoading(false); return; }
         container.innerHTML = '';
+        canvasRefs.current.clear();
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
@@ -75,7 +77,9 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           canvas.style.display = 'block';
           canvas.style.margin = '0 auto 16px auto';
           canvas.style.background = 'white';
+          canvas.dataset.pageNumber = i.toString();
           container.appendChild(canvas);
+          canvasRefs.current.set(i, canvas);
           await page.render({
             canvas: canvas,
             canvasContext: ctx,
@@ -130,6 +134,13 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
     return () => scrollContainer.removeEventListener('scroll', handleScroll);
   }, [numPages]);
 
+  const scrollToPage = (pageNumber: number) => {
+    const canvas = canvasRefs.current.get(pageNumber);
+    if (canvas && scrollContainerRef.current) {
+      canvas.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <div className="w-full flex flex-col gap-3">
       <div className="flex items-center gap-2 flex-wrap">
@@ -174,23 +185,46 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
         )}
       </div>
 
-      <div
-        ref={scrollContainerRef}
-        className="w-full overflow-auto rounded-lg relative"
-        style={{ height }}
-      >
-        {error && (
-          <div className="h-full flex items-center justify-center p-6 text-sm">{error}</div>
-        )}
-        {!error && (
-          <>
-            <div ref={containerRef} className="p-4 min-h-[220px]" />
-            {loading && (
-              <div className="absolute inset-0 flex items-center justify-center p-6 text-sm pointer-events-none">
-                Laddar CV…
-              </div>
-            )}
-          </>
+      <div className="flex gap-3 w-full" style={{ height }}>
+        <div
+          ref={scrollContainerRef}
+          className="flex-1 overflow-auto rounded-lg relative"
+        >
+          {error && (
+            <div className="h-full flex items-center justify-center p-6 text-sm">{error}</div>
+          )}
+          {!error && (
+            <>
+              <div ref={containerRef} className="p-4 min-h-[220px]" />
+              {loading && (
+                <div className="absolute inset-0 flex items-center justify-center p-6 text-sm pointer-events-none">
+                  Laddar CV…
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Sidebar for page navigation */}
+        {numPages > 0 && (
+          <div className="w-20 overflow-y-auto rounded-lg bg-white/5 backdrop-blur-sm p-2 flex flex-col gap-2">
+            {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
+              <button
+                key={pageNum}
+                onClick={() => scrollToPage(pageNum)}
+                className={`
+                  h-12 rounded flex items-center justify-center text-sm font-medium
+                  transition-all duration-200
+                  ${pageNum === currentPage
+                    ? 'bg-white/20 text-white border border-white/40'
+                    : 'bg-white/5 text-white/70 border border-white/20 hover:bg-white/10 hover:text-white'
+                  }
+                `}
+              >
+                {pageNum}
+              </button>
+            ))}
+          </div>
         )}
       </div>
       {numPages > 0 && (
