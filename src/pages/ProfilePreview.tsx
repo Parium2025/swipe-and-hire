@@ -518,8 +518,9 @@ export default function ProfilePreview() {
               exit={{ y: '100%' }}
               transition={{ 
                 type: 'spring',
-                damping: 30,
-                stiffness: 300
+                damping: 35,
+                stiffness: 400,
+                mass: 0.8
               }}
               className="w-full h-full absolute inset-0"
             >
