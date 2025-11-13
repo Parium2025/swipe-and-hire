@@ -516,13 +516,23 @@ export default function ProfilePreview() {
             <motion.div
               key="detailed-view"
               initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ 
-                type: 'spring',
-                damping: 30,
-                stiffness: 350,
-                mass: 0.8
+              animate={{ 
+                y: 0,
+                transition: { 
+                  type: 'spring',
+                  damping: 30,
+                  stiffness: 350,
+                  mass: 0.8
+                }
+              }}
+              exit={{ 
+                y: '100%',
+                transition: { 
+                  type: 'spring',
+                  damping: 30,
+                  stiffness: 350,
+                  mass: 0.8
+                }
               }}
               className="w-full h-full absolute inset-0"
             >
