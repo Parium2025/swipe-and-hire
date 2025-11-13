@@ -476,10 +476,7 @@ export default function ProfilePreview() {
                   {data.employment_status !== 'arbetssokande' && data.working_hours && (
                     <div>
                       <p className="text-[9px] text-white uppercase">Hur mycket jobbar du idag?</p>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3 text-white" />
-                        <p className="text-[11px] text-white">{getWorkingHoursLabel(data.working_hours)}</p>
-                      </div>
+                      <p className="text-[11px] text-white">{getWorkingHoursLabel(data.working_hours)}</p>
                     </div>
                   )}
 
