@@ -27,6 +27,8 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
   const containerRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
+  const baseZoomRef = useRef(1);
+  const userZoomedRef = useRef(false);
 
   const isStoragePath = useMemo(() => !/^https?:\/\//i.test(src), [src]);
 
@@ -99,10 +101,20 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           }).promise;
         }
         setLoading(false);
-      } catch (e: any) {
-        if (!cancelled) {
-          setError(e?.message || 'Kunde inte rendera CV.');
-          setLoading(false);
+
+        // Compute 'fit-to-width' as base zoom and apply if user hasn't changed zoom
+        if (scrollContainerRef.current && containerRef.current && !userZoomedRef.current) {
+          const firstCanvas = containerRef.current.querySelector('canvas');
+          if (firstCanvas) {
+            const containerWidth = scrollContainerRef.current.clientWidth;
+            const paddingX = 16 * 2; // p-4 on containerRef
+            const canvasWidth = firstCanvas.clientWidth || firstCanvas.width;
+            const fit = Math.max(0.6, Math.min(3, (containerWidth - paddingX) / canvasWidth));
+            baseZoomRef.current = fit;
+            setZoomLevel(fit);
+            setPanPosition({ x: 0, y: 0 });
+          }
+        }
         }
       }
     }
