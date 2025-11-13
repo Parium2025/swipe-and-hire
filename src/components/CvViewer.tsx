@@ -78,14 +78,14 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           const ctx = canvas.getContext('2d');
           if (!ctx) continue;
           
-          // Use higher resolution for sharper text
-          const outputScale = window.devicePixelRatio || 2;
+          // Use higher resolution for sharper text even when zoomed
+          const outputScale = 4; // Higher scale for crisp text at all zoom levels
           canvas.width = Math.floor(viewport.width * outputScale);
           canvas.height = Math.floor(viewport.height * outputScale);
           canvas.style.width = `${Math.floor(viewport.width)}px`;
           canvas.style.height = `${Math.floor(viewport.height)}px`;
           
-          const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+          const transform = [outputScale, 0, 0, outputScale, 0, 0];
           canvas.style.display = 'block';
           canvas.style.margin = '0 auto 16px auto';
           canvas.style.background = 'white';
@@ -96,7 +96,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
             canvas: canvas,
             canvasContext: ctx,
             viewport: viewport,
-            transform: transform || undefined
+            transform: transform
           }).promise;
         }
         setLoading(false);
