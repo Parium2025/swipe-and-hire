@@ -468,17 +468,17 @@ export default function ProfilePreview() {
                 <div className="bg-white/5 p-2 rounded-lg border border-white/10 space-y-1.5">
                   {/* Anställningsstatus */}
                   <div>
-                    <p className="text-[8px] text-white uppercase">Anställningsstatus</p>
-                    <p className="text-xs text-white">{getEmploymentStatusLabel(data.employment_status)}</p>
+                    <p className="text-xs text-white uppercase">Anställningsstatus</p>
+                    <p className="text-[8px] text-white">{getEmploymentStatusLabel(data.employment_status)}</p>
                   </div>
 
                   {/* Arbetstid - visa bara om inte arbetssökande */}
                   {data.employment_status !== 'arbetssokande' && data.working_hours && (
                     <div>
-                      <p className="text-[8px] text-white uppercase">Hur mycket jobbar du idag?</p>
+                      <p className="text-xs text-white uppercase">Hur mycket jobbar du idag?</p>
                       <div className="flex items-center gap-1">
                         <Clock className="h-3 w-3 text-white" />
-                        <p className="text-xs text-white">{getWorkingHoursLabel(data.working_hours)}</p>
+                        <p className="text-[8px] text-white">{getWorkingHoursLabel(data.working_hours)}</p>
                       </div>
                     </div>
                   )}
@@ -486,8 +486,8 @@ export default function ProfilePreview() {
                   {/* Tillgänglighet */}
                   {data.availability && (
                     <div>
-                      <p className="text-[8px] text-white uppercase">När kan du börja nytt jobb?</p>
-                      <p className="text-xs text-white">{getAvailabilityLabel(data.availability)}</p>
+                      <p className="text-xs text-white uppercase">När kan du börja nytt jobb?</p>
+                      <p className="text-[8px] text-white">{getAvailabilityLabel(data.availability)}</p>
                     </div>
                   )}
                 </div>
