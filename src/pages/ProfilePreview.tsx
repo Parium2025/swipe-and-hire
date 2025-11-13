@@ -19,7 +19,7 @@ import { TruncatedText } from '@/components/TruncatedText';
 import NameAutoFit from '@/components/NameAutoFit';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { CvViewer } from '@/components/CvViewer';
-import { motion, AnimatePresence, useAnimation } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProfileViewData {
   id: string;
@@ -292,7 +292,7 @@ export default function ProfilePreview() {
     };
 
     // ANDRA VY: Fullständig information - matchar exakt struktur från Min Profil
-    const DetailedView = ({ onRequestClose }: { onRequestClose: () => void }) => {
+    const DetailedView = () => {
       // Helper för att översätta anställningsstatus
       const getEmploymentStatusLabel = (status: string) => {
         const labels: Record<string, string> = {
@@ -336,7 +336,7 @@ export default function ProfilePreview() {
           {/* Header med stäng-knapp */}
           <div className="relative px-3 pt-2 pb-2 flex items-center justify-center bg-black/20 border-b border-white/20 flex-shrink-0">
             <button
-              onClick={onRequestClose}
+              onClick={() => setShowDetailedView(false)}
               className="absolute right-3 top-2 text-white hover:text-white text-base"
               aria-label="Stäng"
             >
@@ -497,26 +497,6 @@ export default function ProfilePreview() {
       );
     };
 
-    // Animations for slide-up/down detailed view
-    const detailedControls = useAnimation();
-    const spring = { type: 'spring', damping: 30, stiffness: 350, mass: 0.8 } as const;
-
-    useEffect(() => {
-      if (showDetailedView) {
-        // Prepare off-screen then slide up
-        detailedControls.set({ y: '100%' });
-        detailedControls.start({ y: 0, transition: spring });
-      } else {
-        // Keep it off-screen when not visible
-        detailedControls.set({ y: '100%' });
-      }
-    }, [showDetailedView]);
-
-    const handleCloseDetailed = async () => {
-      // Smooth slide down before unmounting
-      await detailedControls.start({ y: '100%', transition: spring });
-      setShowDetailedView(false);
-    };
 
     return (
       <div className="w-full h-full relative overflow-hidden">
@@ -536,11 +516,17 @@ export default function ProfilePreview() {
             <motion.div
               key="detailed-view"
               initial={{ y: '100%' }}
-              animate={detailedControls}
-              transition={spring}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ 
+                type: 'spring',
+                damping: 30,
+                stiffness: 350,
+                mass: 0.8
+              }}
               className="w-full h-full absolute inset-0"
             >
-              <DetailedView onRequestClose={handleCloseDetailed} />
+              <DetailedView />
             </motion.div>
           )}
         </AnimatePresence>
