@@ -23,15 +23,38 @@ export async function openCvFile({ cvUrl, fileName = 'cv.pdf', onSuccess, onErro
   }
 
   try {
-    // CV-tunnel: navigera till in-app viewer för stabil öppning utan popups
+    const isEmbedded = window.self !== window.top; // inside editor/iframe (incognito often blocks iframe PDF)
     const isStoragePath = !/^https?:\/\//i.test(cvUrl);
+
+    // Prepare a signed URL up-front so we can open directly on user gesture when embedded
+    let finalUrl = cvUrl;
+    if (isStoragePath) {
+      finalUrl = (await createSignedUrl('job-applications', cvUrl, 86400, fileName)) || cvUrl;
+    } else {
+      finalUrl = (await convertToSignedUrl(cvUrl, 'job-applications', 86400, fileName)) || cvUrl;
+    }
+
+    if (isEmbedded) {
+      // Open in a new tab immediately from the click gesture to avoid Chrome/incognito iframe blocks
+      const popup = window.open('', '_blank', 'noopener,noreferrer');
+      if (popup) {
+        popup.location.href = finalUrl;
+        onSuccess?.('CV öppnas i ny flik');
+      } else {
+        // Fallback: navigate this tab
+        window.location.href = finalUrl;
+        onSuccess?.('Öppnar CV…');
+      }
+      return;
+    }
+
+    // Otherwise use in-app viewer (CV-tunnel)
     const params = new URLSearchParams();
     if (isStoragePath) params.set('path', cvUrl);
     else params.set('url', cvUrl);
     if (fileName) params.set('name', fileName);
 
     onSuccess?.('Öppnar CV…');
-    // Använd samma flik så att det aldrig blockeras av popup-blockerare
     window.location.href = `/cv-tunnel?${params.toString()}`;
   } catch (error) {
     console.error('Error opening CV:', error);
