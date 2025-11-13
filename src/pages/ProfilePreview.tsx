@@ -504,18 +504,21 @@ export default function ProfilePreview() {
           <TinderCard />
         </div>
 
-        {/* Detaljvyn glider upp/ner överst, men avmonteras inte => alltid smooth */}
-        <motion.div
-          key="detailed-view"
-          initial={{ y: '100%' }}
-          animate={{ y: showDetailedView ? 0 : '100%' }}
-          transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
-          className="w-full h-full absolute inset-0 z-10 bg-transparent"
-          aria-hidden={!showDetailedView}
-          style={{ pointerEvents: showDetailedView ? 'auto' : 'none' }}
-        >
-          <DetailedView />
-        </motion.div>
+        {/* Detaljvyn mountas/unmountas med AnimatePresence för smooth slide up/down */}
+        <AnimatePresence>
+          {showDetailedView && (
+            <motion.div
+              key="detailed-view"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="w-full h-full absolute inset-0 z-10 bg-transparent"
+            >
+              <DetailedView />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   };
