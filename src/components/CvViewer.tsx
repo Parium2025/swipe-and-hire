@@ -207,7 +207,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
       <div className="flex gap-3 w-full" style={{ height }}>
         <div
           ref={scrollContainerRef}
-          className="flex-1 overflow-hidden rounded-lg relative"
+          className="flex-1 overflow-auto rounded-lg relative"
           style={{ cursor: zoomLevel > 1 ? (isPanning ? 'grabbing' : 'grab') : 'default' }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
@@ -239,6 +239,21 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
             </>
           )}
         </div>
+
+        {/* Sidebar for page navigation */}
+        {numPages > 0 && (
+          <div className="w-16 overflow-y-auto rounded-lg bg-white/5 backdrop-blur-sm p-2 flex flex-col gap-2">
+            {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
+              <button
+                key={pageNum}
+                type="button"
+                className="h-12 rounded flex items-center justify-center text-sm font-medium transition-all duration-200 bg-white/5 text-white/70 border border-white/20 hover:bg-white/10 hover:text-white"
+              >
+                {pageNum}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
       {numPages > 0 && (
         <div className="text-xs text-white">{numPages} {numPages === 1 ? 'sida' : 'sidor'}</div>
