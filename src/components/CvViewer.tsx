@@ -17,7 +17,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [scale, setScale] = useState(1.5);
+  const [scale, setScale] = useState(2.2);
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
@@ -103,18 +103,21 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
         setLoading(false);
 
         // Compute 'fit-to-width' as base zoom and apply if user hasn't changed zoom
-        if (scrollContainerRef.current && containerRef.current && !userZoomedRef.current) {
-          const firstCanvas = containerRef.current.querySelector('canvas');
-          if (firstCanvas) {
-            const containerWidth = scrollContainerRef.current.clientWidth;
-            const paddingX = 16 * 2; // p-4 on containerRef
-            const canvasWidth = firstCanvas.clientWidth || firstCanvas.width;
-            const fit = Math.max(0.6, Math.min(3, (containerWidth - paddingX) / canvasWidth));
-            baseZoomRef.current = fit;
-            setZoomLevel(fit);
-            setPanPosition({ x: 0, y: 0 });
+        requestAnimationFrame(() => {
+          if (scrollContainerRef.current && containerRef.current && !userZoomedRef.current) {
+            const firstCanvas = containerRef.current.querySelector('canvas');
+            if (firstCanvas) {
+              const containerWidth = scrollContainerRef.current.clientWidth;
+              const paddingX = 32; // p-4 padding
+              const canvasWidth = parseInt(firstCanvas.style.width) || firstCanvas.width;
+              const fit = Math.max(0.5, Math.min(2, (containerWidth - paddingX) / canvasWidth));
+              console.log('Fit-to-width:', { containerWidth, canvasWidth, fit });
+              baseZoomRef.current = fit;
+              setZoomLevel(fit);
+              setPanPosition({ x: 0, y: 0 });
+            }
           }
-        }
+        });
       } catch (e: any) {
         if (!cancelled) {
           setError(e?.message || 'Kunde inte rendera CV.');
