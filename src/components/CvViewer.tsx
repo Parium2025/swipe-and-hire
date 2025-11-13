@@ -16,7 +16,8 @@ interface CvViewerProps {
 export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewerProps) {
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
-  const [scale, setScale] = useState(1.2);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [scale, setScale] = useState(1.5);
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
@@ -108,6 +109,48 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
     render();
     return () => { cancelled = true; };
   }, [resolvedUrl, scale]);
+
+  // Track current page based on scroll position
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer || numPages === 0) return;
+
+    const handleScroll = () => {
+      const canvases = scrollContainer.querySelectorAll('canvas');
+      
+      let currentVisiblePage = 1;
+      let maxVisibleArea = 0;
+
+      canvases.forEach((canvas, index) => {
+        const rect = canvas.getBoundingClientRect();
+        const containerRect = scrollContainer.getBoundingClientRect();
+        
+        // Calculate visible area of this canvas
+        const visibleTop = Math.max(rect.top, containerRect.top);
+        const visibleBottom = Math.min(rect.bottom, containerRect.bottom);
+        const visibleArea = Math.max(0, visibleBottom - visibleTop);
+        
+        if (visibleArea > maxVisibleArea) {
+          maxVisibleArea = visibleArea;
+          currentVisiblePage = index + 1;
+        }
+      });
+
+      setCurrentPage(currentVisiblePage);
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
+    
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, [numPages]);
+
+  const scrollToPage = (pageNumber: number) => {
+    const canvas = canvasRefs.current.get(pageNumber);
+    if (canvas && scrollContainerRef.current) {
+      canvas.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   // Reset pan when zoom changes
   useEffect(() => {
@@ -247,7 +290,15 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
               <button
                 key={pageNum}
                 type="button"
-                className="h-12 rounded flex items-center justify-center text-sm font-medium transition-all duration-200 bg-white/5 text-white/70 border border-white/20 hover:bg-white/10 hover:text-white"
+                onClick={() => scrollToPage(pageNum)}
+                className={`
+                  h-12 rounded flex items-center justify-center text-sm font-medium
+                  transition-all duration-200
+                  ${pageNum === currentPage
+                    ? 'bg-white/20 text-white border border-white/40'
+                    : 'bg-white/5 text-white/70 border border-white/20 hover:bg-white/10 hover:text-white'
+                  }
+                `}
               >
                 {pageNum}
               </button>
@@ -256,7 +307,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
         )}
       </div>
       {numPages > 0 && (
-        <div className="text-xs text-white">{numPages} {numPages === 1 ? 'sida' : 'sidor'}</div>
+        <div className="text-xs text-white">Sida {currentPage} av {numPages}</div>
       )}
     </div>
   );
