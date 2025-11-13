@@ -385,10 +385,10 @@ export default function ProfilePreview() {
                   {/* Ålder */}
                   {data.age && (
                     <div>
-                      <p className="text-[8px] text-white uppercase">Ålder</p>
+                      <p className="text-[8px] uppercase" style={{ color: '#FFFFFF' }}>Ålder</p>
                       <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3 text-white" />
-                        <p className="text-xs text-white">{data.age} år</p>
+                        <Calendar className="h-3 w-3" style={{ color: '#FFFFFF' }} />
+                        <p className="text-xs" style={{ color: '#FFFFFF' }}>{data.age} år</p>
                       </div>
                     </div>
                   )}
@@ -396,13 +396,14 @@ export default function ProfilePreview() {
                   {/* Telefon */}
                   {data.phone && (
                     <div>
-                      <p className="text-[8px] text-white uppercase">Telefon</p>
+                      <p className="text-[8px] uppercase" style={{ color: '#FFFFFF' }}>Telefon</p>
                       <button
                         onClick={handlePhoneClick}
-                        className="flex items-center gap-1 text-white hover:text-white transition-colors"
+                        className="flex items-center gap-1 transition-colors"
+                        style={{ color: '#FFFFFF' }}
                       >
-                        <Phone className="h-3 w-3 text-white" />
-                        <span className="text-xs">{data.phone}</span>
+                        <Phone className="h-3 w-3" style={{ color: '#FFFFFF' }} />
+                        <span className="text-xs" style={{ color: '#FFFFFF' }}>{data.phone}</span>
                       </button>
                     </div>
                   )}
@@ -410,14 +411,10 @@ export default function ProfilePreview() {
                   {/* E-post */}
                   {data.user_id && user?.email && (
                     <div>
-                      <p className="text-[8px] text-white uppercase">E-post</p>
+                      <p className="text-[8px] uppercase" style={{ color: '#FFFFFF' }}>E-post</p>
                       <div className="flex items-center gap-1 min-w-0">
-                        <Mail className="h-3 w-3 text-white flex-shrink-0" />
-                        <TruncatedText
-                          text={user.email}
-                          className="text-xs text-white truncate block flex-1 min-w-0"
-                          alwaysShowTooltip={false}
-                        />
+                        <Mail className="h-3 w-3 flex-shrink-0" style={{ color: '#FFFFFF' }} />
+                        <span className="text-xs truncate block flex-1 min-w-0" style={{ color: '#FFFFFF' }}>{user.email}</span>
                       </div>
                     </div>
                   )}
@@ -425,10 +422,10 @@ export default function ProfilePreview() {
                   {/* Postnummer */}
                   {data.postal_code && (
                     <div>
-                      <p className="text-[8px] text-white uppercase">Postnummer</p>
+                      <p className="text-[8px] uppercase" style={{ color: '#FFFFFF' }}>Postnummer</p>
                       <div className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3 text-white" />
-                        <p className="text-xs text-white">{data.postal_code}</p>
+                        <MapPin className="h-3 w-3" style={{ color: '#FFFFFF' }} />
+                        <p className="text-xs" style={{ color: '#FFFFFF' }}>{data.postal_code}</p>
                       </div>
                     </div>
                   )}
@@ -436,9 +433,9 @@ export default function ProfilePreview() {
                   {/* Ort */}
                   {data.location && (
                     <div>
-                      <p className="text-[8px] text-white uppercase">Ort</p>
-                      <p className="text-xs text-white">{data.location}</p>
-                      <p className="text-xs text-white">Stockholms län</p>
+                      <p className="text-[8px] uppercase" style={{ color: '#FFFFFF' }}>Ort</p>
+                      <p className="text-xs" style={{ color: '#FFFFFF' }}>{data.location}</p>
+                      <p className="text-xs" style={{ color: '#FFFFFF' }}>Stockholms län</p>
                     </div>
                   )}
                 </div>
