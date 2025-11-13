@@ -53,7 +53,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
     return () => { mounted = false; };
   }, [src, isStoragePath, fileName]);
 
-  // Load and render PDF with pdfjs directly (only once at base scale)
+  // Load and render PDF with pdfjs directly (render once, zoom is CSS transform only)
   useEffect(() => {
     if (!resolvedUrl) return;
     let cancelled = false;
@@ -70,10 +70,8 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
         container.innerHTML = '';
         canvasRefs.current.clear();
 
-        // Dynamic resolution based on zoom level
-        // At 100% zoom: 2x for good quality
-        // At higher zoom: 4x for crisp text
-        const outputScale = zoomLevel > 1.0 ? 4 : 2;
+        // Use 2x resolution for good quality at all zoom levels without re-rendering
+        const outputScale = 2;
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
@@ -112,7 +110,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
     }
     render();
     return () => { cancelled = true; };
-  }, [resolvedUrl, scale, zoomLevel]);
+  }, [resolvedUrl, scale]);
 
   // Track current page based on scroll position
   useEffect(() => {
