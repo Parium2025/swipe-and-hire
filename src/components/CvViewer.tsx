@@ -16,8 +16,11 @@ interface CvViewerProps {
 export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewerProps) {
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
-  const [currentPage, setCurrentPage] = useState<number>(1);
   const [scale, setScale] = useState(1.8);
+  const [zoomLevel, setZoomLevel] = useState(1.0);
+  const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [startPanPosition, setStartPanPosition] = useState({ x: 0, y: 0 });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -48,7 +51,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
     return () => { mounted = false; };
   }, [src, isStoragePath, fileName]);
 
-  // Load and render PDF with pdfjs directly
+  // Load and render PDF with pdfjs directly (only once at base scale)
   useEffect(() => {
     if (!resolvedUrl) return;
     let cancelled = false;
@@ -58,12 +61,6 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
         const pdf = await pdfjsLib.getDocument({ url: resolvedUrl }).promise;
         if (cancelled) return;
         setNumPages(pdf.numPages);
-
-        // Save scroll position before re-render (as percentage)
-        const scrollContainer = scrollContainerRef.current;
-        const savedScrollPercentage = scrollContainer 
-          ? scrollContainer.scrollTop / scrollContainer.scrollHeight 
-          : 0;
 
         // Clear previous canvases
         const container = containerRef.current;
@@ -101,13 +98,6 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           }).promise;
         }
         setLoading(false);
-
-        // Restore scroll position after re-render
-        if (scrollContainer && savedScrollPercentage > 0) {
-          requestAnimationFrame(() => {
-            scrollContainer.scrollTop = savedScrollPercentage * scrollContainer.scrollHeight;
-          });
-        }
       } catch (e: any) {
         if (!cancelled) {
           setError(e?.message || 'Kunde inte rendera CV.');
@@ -119,48 +109,65 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
     return () => { cancelled = true; };
   }, [resolvedUrl, scale]);
 
-  // Track current page based on scroll position
+  // Reset pan when zoom changes
   useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer || numPages === 0) return;
-
-    const handleScroll = () => {
-      const scrollTop = scrollContainer.scrollTop;
-      const canvases = scrollContainer.querySelectorAll('canvas');
-      
-      let currentVisiblePage = 1;
-      let maxVisibleArea = 0;
-
-      canvases.forEach((canvas, index) => {
-        const rect = canvas.getBoundingClientRect();
-        const containerRect = scrollContainer.getBoundingClientRect();
-        
-        // Calculate visible area of this canvas
-        const visibleTop = Math.max(rect.top, containerRect.top);
-        const visibleBottom = Math.min(rect.bottom, containerRect.bottom);
-        const visibleArea = Math.max(0, visibleBottom - visibleTop);
-        
-        if (visibleArea > maxVisibleArea) {
-          maxVisibleArea = visibleArea;
-          currentVisiblePage = index + 1;
-        }
+    if (zoomLevel === 1) {
+      setPanPosition({ x: 0, y: 0 });
+    }
+  }, [zoomLevel]);
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoomLevel > 1) {
+      setIsPanning(true);
+      setStartPanPosition({
+        x: e.clientX - panPosition.x,
+        y: e.clientY - panPosition.y
       });
-
-      setCurrentPage(currentVisiblePage);
-    };
-
-    scrollContainer.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial check
-    
-    return () => scrollContainer.removeEventListener('scroll', handleScroll);
-  }, [numPages]);
-
-  const scrollToPage = (pageNumber: number) => {
-    const canvas = canvasRefs.current.get(pageNumber);
-    if (canvas && scrollContainerRef.current) {
-      canvas.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isPanning && zoomLevel > 1) {
+      setPanPosition({
+        x: e.clientX - startPanPosition.x,
+        y: e.clientY - startPanPosition.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsPanning(false);
+  };
+
+  // Handle touch panning
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (zoomLevel > 1 && e.touches.length === 1) {
+      setIsPanning(true);
+      setStartPanPosition({
+        x: e.touches[0].clientX - panPosition.x,
+        y: e.touches[0].clientY - panPosition.y
+      });
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isPanning && zoomLevel > 1 && e.touches.length === 1) {
+      setPanPosition({
+        x: e.touches[0].clientX - startPanPosition.x,
+        y: e.touches[0].clientY - startPanPosition.y
+      });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsPanning(false);
+  };
+
+  // Reset pan when zoom changes
+  useEffect(() => {
+    if (zoomLevel === 1) {
+      setPanPosition({ x: 0, y: 0 });
+    }
+  }, [zoomLevel]);
 
   return (
     <div className="w-full flex flex-col gap-3">
@@ -169,17 +176,17 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           type="button"
           variant="ghost" 
           size="sm" 
-          onClick={() => setScale(s => Math.max(1.0, s - 0.5))} 
+          onClick={() => setZoomLevel(z => Math.max(1.0, z - 0.5))} 
           className="h-8 w-8 p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
         >
           -
         </Button>
-        <span className="text-sm text-white">Zoom {Math.round((scale / 1.8) * 100)}%</span>
+        <span className="text-sm text-white">Zoom {Math.round(zoomLevel * 100)}%</span>
         <Button 
           type="button"
           variant="ghost" 
           size="sm" 
-          onClick={() => setScale(s => Math.min(5.0, s + 0.5))} 
+          onClick={() => setZoomLevel(z => Math.min(3.0, z + 0.5))} 
           className="h-8 w-8 p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
         >
           +
@@ -200,14 +207,30 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
       <div className="flex gap-3 w-full" style={{ height }}>
         <div
           ref={scrollContainerRef}
-          className="flex-1 overflow-auto rounded-lg relative"
+          className="flex-1 overflow-hidden rounded-lg relative"
+          style={{ cursor: zoomLevel > 1 ? (isPanning ? 'grabbing' : 'grab') : 'default' }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           {error && (
             <div className="h-full flex items-center justify-center p-6 text-sm">{error}</div>
           )}
           {!error && (
             <>
-              <div ref={containerRef} className="p-4 min-h-[220px]" />
+              <div 
+                ref={containerRef} 
+                className="p-4 min-h-[220px]"
+                style={{
+                  transform: `scale(${zoomLevel}) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
+                  transformOrigin: 'center center',
+                  transition: isPanning ? 'none' : 'transform 0.2s ease-out'
+                }}
+              />
               {loading && (
                 <div className="absolute inset-0 flex items-center justify-center p-6 text-sm pointer-events-none">
                   Laddar CV…
@@ -216,32 +239,9 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
             </>
           )}
         </div>
-
-        {/* Sidebar for page navigation */}
-        {numPages > 0 && (
-          <div className="w-16 overflow-y-auto rounded-lg bg-white/5 backdrop-blur-sm p-2 flex flex-col gap-2">
-            {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
-              <button
-                key={pageNum}
-                type="button"
-                onClick={() => scrollToPage(pageNum)}
-                className={`
-                  h-12 rounded flex items-center justify-center text-sm font-medium
-                  transition-all duration-200
-                  ${pageNum === currentPage
-                    ? 'bg-white/20 text-white border border-white/40'
-                    : 'bg-white/5 text-white/70 border border-white/20 hover:bg-white/10 hover:text-white'
-                  }
-                `}
-              >
-                {pageNum}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
       {numPages > 0 && (
-        <div className="text-xs text-white">Sida {currentPage} av {numPages}</div>
+        <div className="text-xs text-white">{numPages} {numPages === 1 ? 'sida' : 'sidor'}</div>
       )}
     </div>
   );
