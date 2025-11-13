@@ -16,10 +16,12 @@ interface CvViewerProps {
 export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewerProps) {
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [scale, setScale] = useState(1.1);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const isStoragePath = useMemo(() => !/^https?:\/\//i.test(src), [src]);
 
@@ -92,6 +94,42 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
     return () => { cancelled = true; };
   }, [resolvedUrl, scale]);
 
+  // Track current page based on scroll position
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer || numPages === 0) return;
+
+    const handleScroll = () => {
+      const scrollTop = scrollContainer.scrollTop;
+      const canvases = scrollContainer.querySelectorAll('canvas');
+      
+      let currentVisiblePage = 1;
+      let maxVisibleArea = 0;
+
+      canvases.forEach((canvas, index) => {
+        const rect = canvas.getBoundingClientRect();
+        const containerRect = scrollContainer.getBoundingClientRect();
+        
+        // Calculate visible area of this canvas
+        const visibleTop = Math.max(rect.top, containerRect.top);
+        const visibleBottom = Math.min(rect.bottom, containerRect.bottom);
+        const visibleArea = Math.max(0, visibleBottom - visibleTop);
+        
+        if (visibleArea > maxVisibleArea) {
+          maxVisibleArea = visibleArea;
+          currentVisiblePage = index + 1;
+        }
+      });
+
+      setCurrentPage(currentVisiblePage);
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
+    
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
+  }, [numPages]);
+
   return (
     <div className="w-full flex flex-col gap-3">
       <div className="flex items-center gap-2 flex-wrap">
@@ -137,6 +175,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
       </div>
 
       <div
+        ref={scrollContainerRef}
         className="w-full overflow-auto rounded-lg relative"
         style={{ height }}
       >
@@ -155,7 +194,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
         )}
       </div>
       {numPages > 0 && (
-        <div className="text-xs opacity-70">Sidor: {numPages}</div>
+        <div className="text-xs text-white">Sida {currentPage} av {numPages}</div>
       )}
     </div>
   );
