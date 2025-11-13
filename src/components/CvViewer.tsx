@@ -58,7 +58,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
 
         // Clear previous canvases
         const container = containerRef.current;
-        if (!container) return;
+        if (!container) { setLoading(false); return; }
         container.innerHTML = '';
 
         for (let i = 1; i <= pdf.numPages; i++) {
@@ -111,17 +111,21 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
       </div>
 
       <div
-        className="w-full overflow-auto border border-white/10 rounded-md"
+        className="w-full overflow-auto border border-white/10 rounded-md relative"
         style={{ height, background: 'transparent' }}
       >
         {error && (
           <div className="h-full flex items-center justify-center p-6 text-sm">{error}</div>
         )}
-        {!error && loading && (
-          <div className="h-full flex items-center justify-center p-6 text-sm">Laddar CV…</div>
-        )}
-        {!error && !loading && (
-          <div ref={containerRef} className="p-4" />
+        {!error && (
+          <>
+            <div ref={containerRef} className="p-4 min-h-[220px]" />
+            {loading && (
+              <div className="absolute inset-0 flex items-center justify-center p-6 text-sm pointer-events-none">
+                Laddar CV…
+              </div>
+            )}
+          </>
         )}
       </div>
       {numPages > 0 && (
