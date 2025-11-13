@@ -72,19 +72,35 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
           if (!ctx) continue;
-          canvas.width = viewport.width;
-          canvas.height = viewport.height;
+
+          // Ensure visual zoom works reliably across DPI by separating CSS size and backing store size
+          const dpr = window.devicePixelRatio || 1;
+          const displayWidth = Math.floor(viewport.width);
+          const displayHeight = Math.floor(viewport.height);
+
+          // CSS size (what you see)
+          canvas.style.width = `${displayWidth}px`;
+          canvas.style.height = `${displayHeight}px`;
+
+          // Backing store size (what we draw into)
+          canvas.width = Math.floor(displayWidth * dpr);
+          canvas.height = Math.floor(displayHeight * dpr);
+
+          // Basic styling
           canvas.style.display = 'block';
           canvas.style.margin = '0 auto 16px auto';
           canvas.style.background = 'white';
           canvas.dataset.pageNumber = i.toString();
           container.appendChild(canvas);
           canvasRefs.current.set(i, canvas);
-          await page.render({
+
+          const renderTask = page.render({
             canvas: canvas,
             canvasContext: ctx,
-            viewport: viewport
-          }).promise;
+            viewport: viewport,
+            transform: dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : undefined,
+          });
+          await renderTask.promise;
         }
         setLoading(false);
       } catch (e: any) {
