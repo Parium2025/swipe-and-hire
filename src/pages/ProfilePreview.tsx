@@ -732,9 +732,9 @@ export default function ProfilePreview() {
 
       {/* CV Dialog */}
       <Dialog open={cvOpen} onOpenChange={setCvOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden bg-background/95 backdrop-blur-xl border-white/20">
-          <DialogHeader>
-            <DialogTitle className="text-white">CV</DialogTitle>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden bg-transparent border-none shadow-none p-8">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-white text-2xl">CV</DialogTitle>
           </DialogHeader>
           {consentedData?.cv_url && (
             <CvViewer src={consentedData.cv_url} fileName="cv.pdf" height="70vh" />
