@@ -4,6 +4,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { Button } from '@/components/ui/button';
 import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
+import { RotateCcw } from 'lucide-react';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl as any;
 
@@ -212,6 +213,11 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
     }
   }, [zoomLevel]);
 
+  const handleReset = () => {
+    setZoomLevel(1.0);
+    setPanPosition({ x: 0, y: 0 });
+  };
+
   return (
     <div className="w-full flex flex-col gap-3">
       <div className="flex items-center gap-2 flex-wrap">
@@ -233,6 +239,15 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           className="h-8 w-8 p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
         >
           +
+        </Button>
+        <Button 
+          type="button"
+          variant="ghost" 
+          size="sm" 
+          onClick={handleReset} 
+          className="h-8 w-8 p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
+        >
+          <RotateCcw className="h-4 w-4" />
         </Button>
         {resolvedUrl && (
           <a href={resolvedUrl} download={fileName} className="ml-auto">
