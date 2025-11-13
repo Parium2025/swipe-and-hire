@@ -16,7 +16,7 @@ interface CvViewerProps {
 export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewerProps) {
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
-  const [scale, setScale] = useState(1.8);
+  const [scale, setScale] = useState(1.2);
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
