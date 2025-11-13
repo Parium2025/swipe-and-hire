@@ -284,9 +284,12 @@ export default function ProfilePreview() {
                 
                 {/* Plats */}
                 {data.location && (
-                  <div className="flex items-center gap-1 mb-2">
-                    <MapPin className="h-3 w-3" style={{ color: '#FFFFFF' }} />
-                    <span className="text-xs" style={{ color: '#FFFFFF' }}>Bor i {data.location}, Stockholms län</span>
+                  <div className="mb-2">
+                    <div className="flex items-center gap-1">
+                      <MapPin className="h-3 w-3" style={{ color: '#FFFFFF' }} />
+                      <span className="text-xs" style={{ color: '#FFFFFF' }}>Bor i {data.location}</span>
+                    </div>
+                    <p className="text-xs ml-4" style={{ color: '#FFFFFF' }}>Stockholms län</p>
                   </div>
                 )}
                 
@@ -434,7 +437,8 @@ export default function ProfilePreview() {
                       {data.location && (
                         <div>
                           <p className="text-[8px] text-white uppercase">Ort</p>
-                          <p className="text-xs text-white">{data.location}, Stockholms län</p>
+                          <p className="text-xs text-white">{data.location}</p>
+                          <p className="text-xs text-white">Stockholms län</p>
                         </div>
                       )}
                     </div>
