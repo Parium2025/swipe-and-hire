@@ -382,30 +382,30 @@ export default function ProfilePreview() {
               <div className="space-y-1">
                 <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1">Personlig Information</h3>
                 <div className="bg-white/5 p-2 rounded-lg border border-white/10 space-y-1.5">
-                  {/* Ålder & Telefon */}
-                  <div className="grid grid-cols-2 gap-2">
-                    {data.age && (
-                      <div>
-                        <p className="text-[8px] text-white uppercase">Ålder</p>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3 text-white" />
-                          <p className="text-xs text-white">{data.age} år</p>
-                        </div>
+                  {/* Ålder */}
+                  {data.age && (
+                    <div>
+                      <p className="text-[8px] text-white uppercase">Ålder</p>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3 text-white" />
+                        <p className="text-xs text-white">{data.age} år</p>
                       </div>
-                    )}
-                    {data.phone && (
-                      <div>
-                        <p className="text-[8px] text-white uppercase">Telefon</p>
-                        <button
-                          onClick={handlePhoneClick}
-                          className="flex items-center gap-1 text-white hover:text-white transition-colors"
-                        >
-                          <Phone className="h-3 w-3 text-white" />
-                          <span className="text-xs">{data.phone}</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
+                  
+                  {/* Telefon */}
+                  {data.phone && (
+                    <div>
+                      <p className="text-[8px] text-white uppercase">Telefon</p>
+                      <button
+                        onClick={handlePhoneClick}
+                        className="flex items-center gap-1 text-white hover:text-white transition-colors"
+                      >
+                        <Phone className="h-3 w-3 text-white" />
+                        <span className="text-xs">{data.phone}</span>
+                      </button>
+                    </div>
+                  )}
 
                   {/* E-post */}
                   {data.user_id && user?.email && (
@@ -422,25 +422,23 @@ export default function ProfilePreview() {
                     </div>
                   )}
 
-                  {/* Postnummer & Ort */}
-                  {(data.postal_code || data.location) && (
-                    <div className="grid grid-cols-2 gap-2">
-                      {data.postal_code && (
-                        <div>
-                          <p className="text-[8px] text-white uppercase">Postnummer</p>
-                          <div className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3 text-white" />
-                            <p className="text-xs text-white">{data.postal_code}</p>
-                          </div>
-                        </div>
-                      )}
-                      {data.location && (
-                        <div>
-                          <p className="text-[8px] text-white uppercase">Ort</p>
-                          <p className="text-xs text-white">{data.location}</p>
-                          <p className="text-xs text-white">Stockholms län</p>
-                        </div>
-                      )}
+                  {/* Postnummer */}
+                  {data.postal_code && (
+                    <div>
+                      <p className="text-[8px] text-white uppercase">Postnummer</p>
+                      <div className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3 text-white" />
+                        <p className="text-xs text-white">{data.postal_code}</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Ort */}
+                  {data.location && (
+                    <div>
+                      <p className="text-[8px] text-white uppercase">Ort</p>
+                      <p className="text-xs text-white">{data.location}</p>
+                      <p className="text-xs text-white">Stockholms län</p>
                     </div>
                   )}
                 </div>
