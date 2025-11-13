@@ -69,7 +69,11 @@ All colors MUST be HSL.
 */
 
 @layer base {
-  /* Global icon color - all icons should be pure white */
+  /* Global styles - all text and icons should be pure white */
+  * {
+    color: #FFFFFF;
+  }
+  
   svg {
     color: #FFFFFF;
   }
