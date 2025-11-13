@@ -222,7 +222,34 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
 
   return (
     <div className="w-full flex flex-col gap-3">
-      <div className="flex items-center gap-2 flex-wrap">
+      {/* Header med stäng och ladda ner */}
+      <div className="flex items-center justify-end gap-2">
+        {onClose && (
+          <Button 
+            type="button"
+            variant="ghost" 
+            size="sm" 
+            onClick={onClose}
+            className="h-8 w-8 p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+        {resolvedUrl && (
+          <a href={resolvedUrl} download={fileName}>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
+            >
+              Ladda ner
+            </Button>
+          </a>
+        )}
+      </div>
+
+      {/* Zoom-kontroller linjerade med CV-innehållet */}
+      <div className="flex items-center gap-2">
         <Button 
           type="button"
           variant="ghost" 
@@ -251,30 +278,6 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
         >
           <RotateCcw className="h-4 w-4" />
         </Button>
-        <div className="ml-auto flex items-center gap-2">
-          {onClose && (
-            <Button 
-              type="button"
-              variant="ghost" 
-              size="sm" 
-              onClick={onClose}
-              className="h-8 w-8 p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-          {resolvedUrl && (
-            <a href={resolvedUrl} download={fileName}>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
-              >
-                Ladda ner
-              </Button>
-            </a>
-          )}
-        </div>
       </div>
 
       <div className="flex gap-3 w-full" style={{ height }}>
