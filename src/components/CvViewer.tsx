@@ -266,6 +266,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           {resolvedUrl && (
             <a href={resolvedUrl} download={fileName}>
               <Button 
+                type="button"
                 variant="ghost" 
                 size="sm" 
                 className="border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
