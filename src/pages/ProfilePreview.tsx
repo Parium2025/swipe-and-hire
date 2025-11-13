@@ -286,7 +286,7 @@ export default function ProfilePreview() {
                 {data.location && (
                   <div className="flex items-center gap-1 mb-2">
                     <MapPin className="h-3 w-3" style={{ color: '#FFFFFF' }} />
-                    <span className="text-xs" style={{ color: '#FFFFFF' }}>Bor i {data.location}</span>
+                    <span className="text-xs" style={{ color: '#FFFFFF' }}>Bor i {data.location}, Stockholms län</span>
                   </div>
                 )}
                 
@@ -434,7 +434,7 @@ export default function ProfilePreview() {
                       {data.location && (
                         <div>
                           <p className="text-[8px] text-white uppercase">Ort</p>
-                          <p className="text-xs text-white">{data.location}</p>
+                          <p className="text-xs text-white">{data.location}, Stockholms län</p>
                         </div>
                       )}
                     </div>
