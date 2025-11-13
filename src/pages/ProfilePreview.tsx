@@ -272,8 +272,7 @@ export default function ProfilePreview() {
                 >
                   <NameAutoFit
                     text={`${data.first_name} ${data.last_name}`}
-                    className="text-lg font-bold mb-0.5 break-words w-full"
-                    style={{ color: '#FFFFFF' }}
+                    className="text-lg font-bold mb-0.5 break-words w-full text-[#FFFFFF]"
                     minFontPx={isMobile ? 13 : 14}
                   />
                 </TruncatedText>
