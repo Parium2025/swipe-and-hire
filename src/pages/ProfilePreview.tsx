@@ -499,11 +499,12 @@ export default function ProfilePreview() {
 
     return (
       <div className="w-full h-full relative overflow-hidden">
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
           {!showDetailedView ? (
             <motion.div
               key="tinder-card"
-              initial={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
               className="w-full h-full absolute inset-0"
@@ -519,7 +520,8 @@ export default function ProfilePreview() {
               transition={{ 
                 type: 'spring',
                 damping: 30,
-                stiffness: 350
+                stiffness: 350,
+                mass: 0.8
               }}
               className="w-full h-full absolute inset-0"
             >
