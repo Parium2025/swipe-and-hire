@@ -136,30 +136,10 @@ export default function ProfilePreview() {
     const handleCvClick = async (e: React.MouseEvent) => {
       e.preventDefault();
       if (!data.cv_url) {
-        toast({
-          title: "CV ej tillgängligt",
-          description: "Inget CV har laddats upp",
-          variant: "destructive"
-        });
+        toast({ title: 'CV ej tillgängligt', description: 'Inget CV har laddats upp', variant: 'destructive' });
         return;
       }
-
-      await openCvFile({
-        cvUrl: data.cv_url,
-        onSuccess: (message) => {
-          toast({
-            title: "CV öppnat",
-            description: message || "CV:t öppnas i en ny flik"
-          });
-        },
-        onError: (error) => {
-          toast({
-            title: "Fel vid öppning",
-            description: error.message || "Kunde inte öppna CV:t",
-            variant: "destructive"
-          });
-        }
-      });
+      setCvOpen(true);
     };
 
     // FÖRSTA VY: Minimal Tinder-stil med swipe - anpassat för mobil-mockup
