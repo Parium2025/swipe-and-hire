@@ -17,7 +17,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [scale, setScale] = useState(1.1);
+  const [scale, setScale] = useState(1.8);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -78,8 +78,15 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
           if (!ctx) continue;
-          canvas.width = viewport.width;
-          canvas.height = viewport.height;
+          
+          // Use higher resolution for sharper text
+          const outputScale = window.devicePixelRatio || 2;
+          canvas.width = Math.floor(viewport.width * outputScale);
+          canvas.height = Math.floor(viewport.height * outputScale);
+          canvas.style.width = `${Math.floor(viewport.width)}px`;
+          canvas.style.height = `${Math.floor(viewport.height)}px`;
+          
+          const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
           canvas.style.display = 'block';
           canvas.style.margin = '0 auto 16px auto';
           canvas.style.background = 'white';
@@ -89,7 +96,8 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           await page.render({
             canvas: canvas,
             canvasContext: ctx,
-            viewport: viewport
+            viewport: viewport,
+            transform: transform || undefined
           }).promise;
         }
         setLoading(false);
@@ -161,17 +169,17 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           type="button"
           variant="ghost" 
           size="sm" 
-          onClick={() => setScale(s => Math.max(0.6, s - 0.4))} 
+          onClick={() => setScale(s => Math.max(1.0, s - 0.5))} 
           className="h-8 w-8 p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
         >
           -
         </Button>
-        <span className="text-sm text-white">Zoom {(scale * 100).toFixed(0)}%</span>
+        <span className="text-sm text-white">Zoom {Math.round((scale / 1.8) * 100)}%</span>
         <Button 
           type="button"
           variant="ghost" 
           size="sm" 
-          onClick={() => setScale(s => Math.min(3.5, s + 0.4))} 
+          onClick={() => setScale(s => Math.min(5.0, s + 0.5))} 
           className="h-8 w-8 p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
         >
           +
