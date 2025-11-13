@@ -115,6 +115,10 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
             setPanPosition({ x: 0, y: 0 });
           }
         }
+      } catch (e: any) {
+        if (!cancelled) {
+          setError(e?.message || 'Kunde inte rendera CV.');
+          setLoading(false);
         }
       }
     }
@@ -231,7 +235,10 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           type="button"
           variant="ghost" 
           size="sm" 
-          onClick={() => setZoomLevel(z => Math.max(1.0, z - 0.5))} 
+          onClick={() => {
+            userZoomedRef.current = true;
+            setZoomLevel(z => Math.max(0.5, z - 0.5));
+          }} 
           className="h-8 w-8 p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
         >
           -
@@ -241,7 +248,10 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           type="button"
           variant="ghost" 
           size="sm" 
-          onClick={() => setZoomLevel(z => Math.min(3.0, z + 0.5))} 
+          onClick={() => {
+            userZoomedRef.current = true;
+            setZoomLevel(z => Math.min(3.0, z + 0.5));
+          }} 
           className="h-8 w-8 p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
         >
           +
