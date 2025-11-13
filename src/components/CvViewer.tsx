@@ -70,6 +70,11 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
         container.innerHTML = '';
         canvasRefs.current.clear();
 
+        // Dynamic resolution based on zoom level
+        // At 100% zoom: 2x for good quality
+        // At higher zoom: 4x for crisp text
+        const outputScale = zoomLevel > 1.0 ? 4 : 2;
+
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           if (cancelled) return;
@@ -78,8 +83,6 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           const ctx = canvas.getContext('2d');
           if (!ctx) continue;
           
-          // Use higher resolution for sharper text even when zoomed
-          const outputScale = 4; // Higher scale for crisp text at all zoom levels
           canvas.width = Math.floor(viewport.width * outputScale);
           canvas.height = Math.floor(viewport.height * outputScale);
           canvas.style.width = `${Math.floor(viewport.width)}px`;
@@ -109,7 +112,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
     }
     render();
     return () => { cancelled = true; };
-  }, [resolvedUrl, scale]);
+  }, [resolvedUrl, scale, zoomLevel]);
 
   // Track current page based on scroll position
   useEffect(() => {
