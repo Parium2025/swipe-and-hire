@@ -60,7 +60,6 @@ export function AppSidebar() {
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [avatarLoaded, setAvatarLoaded] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   
   const hasVideo = !!profile?.video_url;
 
@@ -193,7 +192,7 @@ export function AppSidebar() {
       className={`border-r-0 bg-transparent ${collapsed ? 'w-16' : 'w-64'}`}
       collapsible="icon"
     >
-      <SidebarContent className={`gap-0 ${isVideoPlaying ? 'overflow-hidden' : ''}`}>
+      <SidebarContent className="gap-0">
         {/* User Profile Section - always mounted to preload, but only visible when not collapsed */}
         <div className={`p-4 ${collapsed ? 'hidden' : ''}`}>
           <div className="flex items-center gap-3">
@@ -205,7 +204,6 @@ export function AppSidebar() {
                 alt="Profilvideo"
                 className="h-10 w-10 ring-2 ring-white/20 rounded-full"
                 showCountdown={false}
-                onPlayingChange={setIsVideoPlaying}
               />
             ) : (
               <Avatar className="h-10 w-10 ring-2 ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
