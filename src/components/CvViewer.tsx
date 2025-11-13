@@ -211,6 +211,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
             {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
               <button
                 key={pageNum}
+                type="button"
                 onClick={() => scrollToPage(pageNum)}
                 className={`
                   h-12 rounded flex items-center justify-center text-sm font-medium
