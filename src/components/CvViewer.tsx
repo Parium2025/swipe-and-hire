@@ -145,6 +145,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
     <div className="w-full flex flex-col gap-3">
       <div className="flex items-center gap-2 flex-wrap">
         <Button 
+          type="button"
           variant="ghost" 
           size="sm" 
           onClick={() => setScale(s => Math.max(0.6, s - 0.1))} 
@@ -154,6 +155,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
         </Button>
         <span className="text-sm text-white">Zoom {(scale * 100).toFixed(0)}%</span>
         <Button 
+          type="button"
           variant="ghost" 
           size="sm" 
           onClick={() => setScale(s => Math.min(2.0, s + 0.1))} 
