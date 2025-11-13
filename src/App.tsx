@@ -17,6 +17,7 @@ import JobApplication from "./pages/JobApplication";
 import JobDetails from "./pages/JobDetails";
 import JobView from "./pages/JobView";
 import NotFound from "./pages/NotFound";
+import CvTunnel from "./pages/CvTunnel";
 // import MyJobs from "./pages/MyJobs";
 import MediaMigration from "./pages/MediaMigration";
 import { AuthProvider } from "@/hooks/useAuth";
@@ -71,6 +72,7 @@ const AnimatedRoutes = () => {
       <Route path="/job-application/:jobId" element={<JobApplication />} />
       <Route path="/reset-redirect" element={<ResetRedirect />} />
       <Route path="/migrate-media" element={<MediaMigration />} />
+      <Route path="/cv-tunnel" element={<CvTunnel />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
