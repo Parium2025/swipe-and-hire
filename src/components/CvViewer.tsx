@@ -111,7 +111,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
       </div>
 
       <div
-        className="w-full overflow-auto rounded-lg relative bg-white/95 shadow-2xl"
+        className="w-full overflow-auto rounded-lg relative"
         style={{ height }}
       >
         {error && (
