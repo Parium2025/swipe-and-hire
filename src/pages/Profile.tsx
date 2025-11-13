@@ -1148,7 +1148,7 @@ const Profile = () => {
         </div>
 
         {/* Profile Information */}
-        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
+        <div className="rounded-lg">
           <div className="p-6 md:p-4 border-b border-white/10">
             <h3 className="flex items-center gap-2 text-base font-semibold text-white">
               <User className="h-4 w-4" />
@@ -1481,7 +1481,7 @@ const Profile = () => {
                       <Label className="text-base font-medium text-white">CV</Label>
                     </div>
                     
-                    <div className="bg-white/5 rounded-lg p-4">
+                    <div className="p-0">
                       <FileUpload
                         onFileUploaded={(url, fileName) => {
                           console.log('CV uploaded, received:', { url, fileName });
