@@ -94,25 +94,25 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
 
   return (
     <div className="w-full flex flex-col gap-3">
-      <div className="flex items-center gap-2">
-        <Button variant="secondary" onClick={() => setScale(s => Math.max(0.6, s - 0.1))}>-</Button>
-        <span className="text-sm">Zoom {(scale * 100).toFixed(0)}%</span>
-        <Button variant="secondary" onClick={() => setScale(s => Math.min(2.0, s + 0.1))}>+</Button>
+      <div className="flex items-center gap-2 flex-wrap">
+        <Button variant="secondary" size="sm" onClick={() => setScale(s => Math.max(0.6, s - 0.1))}>-</Button>
+        <span className="text-sm text-white">Zoom {(scale * 100).toFixed(0)}%</span>
+        <Button variant="secondary" size="sm" onClick={() => setScale(s => Math.min(2.0, s + 0.1))}>+</Button>
         {resolvedUrl && (
           <>
             <a href={resolvedUrl} target="_blank" rel="noopener noreferrer" className="ml-auto">
-              <Button variant="secondary">Öppna i ny flik</Button>
+              <Button variant="secondary" size="sm">Öppna i ny flik</Button>
             </a>
             <a href={resolvedUrl} download={fileName}>
-              <Button variant="default">Ladda ner</Button>
+              <Button variant="default" size="sm">Ladda ner</Button>
             </a>
           </>
         )}
       </div>
 
       <div
-        className="w-full overflow-auto border border-white/10 rounded-md relative"
-        style={{ height, background: 'transparent' }}
+        className="w-full overflow-auto rounded-md relative bg-white/5"
+        style={{ height }}
       >
         {error && (
           <div className="h-full flex items-center justify-center p-6 text-sm">{error}</div>
