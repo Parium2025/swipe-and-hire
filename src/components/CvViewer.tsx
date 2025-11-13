@@ -27,8 +27,6 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
   const containerRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
-  const baseZoomRef = useRef(1);
-  const userZoomedRef = useRef(false);
 
   const isStoragePath = useMemo(() => !/^https?:\/\//i.test(src), [src]);
 
@@ -101,23 +99,6 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           }).promise;
         }
         setLoading(false);
-
-        // Compute 'fit-to-width' as base zoom and apply if user hasn't changed zoom
-        requestAnimationFrame(() => {
-          if (scrollContainerRef.current && containerRef.current && !userZoomedRef.current) {
-            const firstCanvas = containerRef.current.querySelector('canvas');
-            if (firstCanvas) {
-              const containerWidth = scrollContainerRef.current.clientWidth;
-              const paddingX = 32; // p-4 padding
-              const canvasWidth = parseInt(firstCanvas.style.width) || firstCanvas.width;
-              const fit = Math.max(0.5, Math.min(2, (containerWidth - paddingX) / canvasWidth));
-              console.log('Fit-to-width:', { containerWidth, canvasWidth, fit });
-              baseZoomRef.current = fit;
-              setZoomLevel(fit);
-              setPanPosition({ x: 0, y: 0 });
-            }
-          }
-        });
       } catch (e: any) {
         if (!cancelled) {
           setError(e?.message || 'Kunde inte rendera CV.');
@@ -238,10 +219,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           type="button"
           variant="ghost" 
           size="sm" 
-          onClick={() => {
-            userZoomedRef.current = true;
-            setZoomLevel(z => Math.max(0.5, z - 0.5));
-          }} 
+          onClick={() => setZoomLevel(z => Math.max(0.5, z - 0.5))} 
           className="h-8 w-8 p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
         >
           -
@@ -251,10 +229,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           type="button"
           variant="ghost" 
           size="sm" 
-          onClick={() => {
-            userZoomedRef.current = true;
-            setZoomLevel(z => Math.min(3.0, z + 0.5));
-          }} 
+          onClick={() => setZoomLevel(z => Math.min(3.0, z + 0.5))} 
           className="h-8 w-8 p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
         >
           +
