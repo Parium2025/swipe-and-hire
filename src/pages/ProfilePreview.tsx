@@ -19,6 +19,7 @@ import { TruncatedText } from '@/components/TruncatedText';
 import NameAutoFit from '@/components/NameAutoFit';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { CvViewer } from '@/components/CvViewer';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProfileViewData {
   id: string;
@@ -497,8 +498,35 @@ export default function ProfilePreview() {
     };
 
     return (
-      <div className="w-full h-full">
-        {showDetailedView ? <DetailedView /> : <TinderCard />}
+      <div className="w-full h-full relative overflow-hidden">
+        <AnimatePresence mode="wait">
+          {!showDetailedView ? (
+            <motion.div
+              key="tinder-card"
+              initial={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+              className="w-full h-full absolute inset-0"
+            >
+              <TinderCard />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="detailed-view"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ 
+                type: 'spring',
+                damping: 30,
+                stiffness: 300
+              }}
+              className="w-full h-full absolute inset-0"
+            >
+              <DetailedView />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   };
