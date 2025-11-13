@@ -67,13 +67,18 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           const viewport = page.getViewport({ scale });
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
+          if (!ctx) continue;
           canvas.width = viewport.width;
           canvas.height = viewport.height;
           canvas.style.display = 'block';
           canvas.style.margin = '0 auto 16px auto';
           canvas.style.background = 'white';
           container.appendChild(canvas);
-          await page.render({ canvasContext: ctx as CanvasRenderingContext2D, viewport }).promise;
+          await page.render({
+            canvas: canvas,
+            canvasContext: ctx,
+            viewport: viewport
+          }).promise;
         }
         setLoading(false);
       } catch (e: any) {
