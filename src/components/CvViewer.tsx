@@ -59,6 +59,12 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
         if (cancelled) return;
         setNumPages(pdf.numPages);
 
+        // Save scroll position before re-render (as percentage)
+        const scrollContainer = scrollContainerRef.current;
+        const savedScrollPercentage = scrollContainer 
+          ? scrollContainer.scrollTop / scrollContainer.scrollHeight 
+          : 0;
+
         // Clear previous canvases
         const container = containerRef.current;
         if (!container) { setLoading(false); return; }
@@ -87,6 +93,13 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           }).promise;
         }
         setLoading(false);
+
+        // Restore scroll position after re-render
+        if (scrollContainer && savedScrollPercentage > 0) {
+          requestAnimationFrame(() => {
+            scrollContainer.scrollTop = savedScrollPercentage * scrollContainer.scrollHeight;
+          });
+        }
       } catch (e: any) {
         if (!cancelled) {
           setError(e?.message || 'Kunde inte rendera CV.');
