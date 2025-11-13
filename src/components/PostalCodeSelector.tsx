@@ -127,7 +127,7 @@ const PostalCodeSelector = ({
                 )}
               </p>
               {foundLocation.county && (
-                <p className="text-sm text-white font-medium">{foundLocation.county}</p>
+                <p className="text-lg font-semibold text-white">{foundLocation.county}</p>
               )}
             </div>
           </div>
