@@ -4,7 +4,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { Button } from '@/components/ui/button';
 import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, X } from 'lucide-react';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl as any;
 
@@ -12,9 +12,10 @@ interface CvViewerProps {
   src: string; // storage path or absolute URL
   fileName?: string;
   height?: number | string; // e.g. 600 or '70vh'
+  onClose?: () => void;
 }
 
-export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewerProps) {
+export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }: CvViewerProps) {
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -260,6 +261,17 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
               Ladda ner
             </Button>
           </a>
+        )}
+        {onClose && (
+          <Button 
+            type="button"
+            variant="ghost" 
+            size="sm" 
+            onClick={onClose}
+            className="h-8 w-8 p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         )}
       </div>
 
