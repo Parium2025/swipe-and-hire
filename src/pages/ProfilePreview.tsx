@@ -248,7 +248,7 @@ export default function ProfilePreview() {
                     alt="Profilbild"
                     className="object-cover"
                   />
-                  <AvatarFallback className="bg-primary/20 text-3xl font-bold" style={{ color: '#FFFFFF' }}>
+                  <AvatarFallback className="bg-primary/20 text-white text-3xl font-bold">
                     {`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -264,7 +264,7 @@ export default function ProfilePreview() {
 
             {/* Tinder-stil gradient overlay längst ner med minimal info */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-2 py-3" style={{ cursor: 'pointer' }}>
-              <div className="w-full" style={{ color: '#FFFFFF' }}>
+              <div className="text-white w-full">
                 <TruncatedText
                   text={`${data.first_name} ${data.last_name}`}
                   className="two-line-ellipsis block w-full"
@@ -272,7 +272,7 @@ export default function ProfilePreview() {
                 >
                   <NameAutoFit
                     text={`${data.first_name} ${data.last_name}`}
-                    className="text-lg font-bold mb-0.5 break-words w-full text-[#FFFFFF]"
+                    className="text-lg font-bold mb-0.5 break-words w-full text-white"
                     minFontPx={isMobile ? 13 : 14}
                   />
                 </TruncatedText>
@@ -380,7 +380,7 @@ export default function ProfilePreview() {
             {/* PERSONLIG INFORMATION */}
             {isConsented && (
               <div className="space-y-1">
-                <h3 className="text-[9px] font-semibold uppercase tracking-wide px-1" style={{ color: '#FFFFFF' }}>Personlig Information</h3>
+                <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1">Personlig Information</h3>
                 <div className="bg-white/5 p-2 rounded-lg border border-white/10 space-y-1.5">
                   {/* Ålder */}
                   {data.age && (
@@ -446,11 +446,11 @@ export default function ProfilePreview() {
             {data.bio && (
               <div className="space-y-1">
                 <div className="flex justify-between items-center px-1">
-                  <h3 className="text-[9px] font-semibold uppercase tracking-wide" style={{ color: '#FFFFFF' }}>Presentation / Om mig</h3>
-                  <span className="text-[9px]" style={{ color: '#FFFFFF' }}>{countWords(data.bio)}/150 ord</span>
+                  <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide">Presentation / Om mig</h3>
+                  <span className="text-[9px] text-white">{countWords(data.bio)}/150 ord</span>
                 </div>
                 <div className="bg-white/5 p-2 rounded-lg border border-white/10">
-                  <p className="text-xs whitespace-pre-wrap leading-relaxed" style={{ color: '#FFFFFF' }}>
+                  <p className="text-xs text-white whitespace-pre-wrap leading-relaxed">
                     {data.bio}
                   </p>
                 </div>
@@ -460,30 +460,30 @@ export default function ProfilePreview() {
             {/* ANSTÄLLNINGSINFORMATION */}
             {data.employment_status && (
               <div className="space-y-1">
-                <h3 className="text-[9px] font-semibold uppercase tracking-wide px-1 flex items-center gap-1" style={{ color: '#FFFFFF' }}>
-                  <Briefcase className="h-3 w-3" style={{ color: '#FFFFFF' }} />
+                <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1 flex items-center gap-1">
+                  <Briefcase className="h-3 w-3 text-white" />
                   Anställningsinformation
                 </h3>
                 <div className="bg-white/5 p-2 rounded-lg border border-white/10 space-y-1.5">
                   {/* Anställningsstatus */}
                   <div>
-                    <p className="text-[9px] uppercase" style={{ color: '#FFFFFF' }}>Anställningsstatus</p>
-                    <p className="text-[11px]" style={{ color: '#FFFFFF' }}>{getEmploymentStatusLabel(data.employment_status)}</p>
+                    <p className="text-[9px] text-white uppercase">Anställningsstatus</p>
+                    <p className="text-[11px] text-white">{getEmploymentStatusLabel(data.employment_status)}</p>
                   </div>
 
                   {/* Arbetstid - visa bara om inte arbetssökande */}
                   {data.employment_status !== 'arbetssokande' && data.working_hours && (
                     <div>
-                      <p className="text-[9px] uppercase" style={{ color: '#FFFFFF' }}>Hur mycket jobbar du idag?</p>
-                      <p className="text-[11px]" style={{ color: '#FFFFFF' }}>{getWorkingHoursLabel(data.working_hours)}</p>
+                      <p className="text-[9px] text-white uppercase">Hur mycket jobbar du idag?</p>
+                      <p className="text-[11px] text-white">{getWorkingHoursLabel(data.working_hours)}</p>
                     </div>
                   )}
 
                   {/* Tillgänglighet */}
                   {data.availability && (
                     <div>
-                      <p className="text-[9px] uppercase" style={{ color: '#FFFFFF' }}>När kan du börja nytt jobb?</p>
-                      <p className="text-[11px]" style={{ color: '#FFFFFF' }}>{getAvailabilityLabel(data.availability)}</p>
+                      <p className="text-[9px] text-white uppercase">När kan du börja nytt jobb?</p>
+                      <p className="text-[11px] text-white">{getAvailabilityLabel(data.availability)}</p>
                     </div>
                   )}
                 </div>
@@ -493,19 +493,18 @@ export default function ProfilePreview() {
             {/* CV */}
             {isConsented && data.cv_url && (
               <div className="space-y-1">
-                <h3 className="text-[9px] font-semibold uppercase tracking-wide px-1 flex items-center gap-1" style={{ color: '#FFFFFF' }}>
-                  <FileText className="h-3 w-3" style={{ color: '#FFFFFF' }} />
+                <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1 flex items-center gap-1">
+                  <FileText className="h-3 w-3 text-white" />
                   CV
                 </h3>
                 <div className="bg-white/5 p-2 rounded-lg border border-white/10">
                   <button
                     onClick={handleCvClick}
-                    className="flex items-center gap-1.5 transition-colors w-full"
-                    style={{ color: '#FFFFFF' }}
+                    className="flex items-center gap-1.5 text-white hover:text-white transition-colors w-full"
                   >
-                    <FileText className="h-3 w-3 flex-shrink-0" style={{ color: '#FFFFFF' }} />
-                    <span className="text-xs" style={{ color: '#FFFFFF' }}>Visa CV</span>
-                    <ExternalLink className="h-3 w-3 ml-auto flex-shrink-0" style={{ color: '#FFFFFF' }} />
+                    <FileText className="h-3 w-3 text-white flex-shrink-0" />
+                    <span className="text-xs">Visa CV</span>
+                    <ExternalLink className="h-3 w-3 text-white ml-auto flex-shrink-0" />
                   </button>
                 </div>
               </div>

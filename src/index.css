@@ -69,15 +69,6 @@ All colors MUST be HSL.
 */
 
 @layer base {
-  /* Global styles - all text and icons should be pure white */
-  * {
-    color: #FFFFFF;
-  }
-  
-  svg {
-    color: #FFFFFF;
-  }
-  
   :root {
     /* Parium Brand Colors - från logotypen */
     --background: 0 0% 100%;
