@@ -8,6 +8,7 @@ import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
 import { preloadSingleFile } from '@/lib/serviceWorkerManager';
 import { Progress } from '@/components/ui/progress';
 import { openCvFile } from '@/utils/cvUtils';
+import { CvViewer } from '@/components/CvViewer';
 
 interface FileUploadProps {
   onFileUploaded: (url: string, fileName: string) => void;
@@ -183,14 +184,14 @@ const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   if (currentFile) {
-    // Determine display URL behavior; for storage paths and conversions, we open on click
     const isPublicUrl = currentFile.url.includes('/storage/v1/object/public/');
     const isSignedUrl = currentFile.url.includes('/storage/v1/object/sign/');
     const isStoragePath = !currentFile.url.startsWith('http');
+    const isPdf = /\.pdf($|\?)/i.test(currentFile.url) || /\.pdf($|\?)/i.test(currentFile.name || '');
     const displayUrl = (isPublicUrl || isStoragePath) ? '#' : currentFile.url;
 
     return (
-      <div className="border border-white/10 rounded-md p-4 bg-white/5 backdrop-blur-sm">
+      <div className="border border-white/10 rounded-md p-4 bg-white/5 backdrop-blur-sm space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {getFileIcon(currentFile.name)}
@@ -201,17 +202,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
               className="text-sm font-medium truncate max-w-[200px] text-white hover:text-primary underline cursor-pointer"
               onClick={async (e) => {
                 e.preventDefault();
+                if (isPdf) return; // Inline viewer below
                 
-                // Use centralized CV opening utility for job-applications bucket
                 if (actualBucket === 'job-applications') {
                   await openCvFile({
                     cvUrl: currentFile.url,
-                    onSuccess: (message) => {
-                      toast({
-                        title: "Fil öppnad",
-                        description: message || "Filen öppnas i en ny flik"
-                      });
-                    },
                     onError: (error) => {
                       toast({
                         title: "Fel vid öppning",
@@ -223,7 +218,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
                   return;
                 }
                 
-                // For other buckets (public buckets), use original logic
                 const popup = window.open('', '_blank');
                 const openUrl = (url?: string | null) => {
                   if (!url) { popup?.close(); return; }
@@ -232,7 +226,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 };
                 
                 try {
-                  // For public buckets, just open the URL directly
                   if (isPublicBucket || 
                       currentFile.url.includes('/profile-media/') ||
                       currentFile.url.includes('/company-logos/') ||
@@ -268,6 +261,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
             <X className="h-3 w-3" />
           </Button>
         </div>
+
+        {isPdf && (
+          <div className="pt-1">
+            <CvViewer src={currentFile.url} fileName={currentFile.name} height={480} />
+          </div>
+        )}
       </div>
     );
   }

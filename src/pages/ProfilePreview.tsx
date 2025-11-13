@@ -18,6 +18,7 @@ import ProfileVideo from '@/components/ProfileVideo';
 import { TruncatedText } from '@/components/TruncatedText';
 import NameAutoFit from '@/components/NameAutoFit';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { CvViewer } from '@/components/CvViewer';
 
 interface ProfileViewData {
   id: string;
@@ -45,6 +46,7 @@ export default function ProfilePreview() {
   const [loading, setLoading] = useState(true);
   const [showDetailedView, setShowDetailedView] = useState(false);
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
+  const [cvOpen, setCvOpen] = useState(false);
   
   // Use hooks to generate signed URLs automatically
   const profileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image');
@@ -727,6 +729,18 @@ export default function ProfilePreview() {
           </CardContent>
         </Card>
       </div>
+
+      {/* CV Dialog */}
+      <Dialog open={cvOpen} onOpenChange={setCvOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>CV</DialogTitle>
+          </DialogHeader>
+          {consentedData?.cv_url && (
+            <CvViewer src={consentedData.cv_url} fileName="cv.pdf" height="70vh" />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
