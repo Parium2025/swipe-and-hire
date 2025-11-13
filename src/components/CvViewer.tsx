@@ -70,8 +70,8 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
         container.innerHTML = '';
         canvasRefs.current.clear();
 
-        // Use 3x resolution for crisp text even at 100% zoom
-        const outputScale = 3;
+        // Use 4x resolution for maximum clarity at 100% zoom
+        const outputScale = 4;
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
