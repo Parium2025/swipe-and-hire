@@ -95,16 +95,16 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
   return (
     <div className="w-full flex flex-col gap-3">
       <div className="flex items-center gap-2 flex-wrap">
-        <Button variant="secondary" size="sm" onClick={() => setScale(s => Math.max(0.6, s - 0.1))}>-</Button>
+        <Button variant="secondary" size="sm" onClick={() => setScale(s => Math.max(0.6, s - 0.1))} className="bg-white/5 text-white hover:bg-white/10">-</Button>
         <span className="text-sm text-white">Zoom {(scale * 100).toFixed(0)}%</span>
-        <Button variant="secondary" size="sm" onClick={() => setScale(s => Math.min(2.0, s + 0.1))}>+</Button>
+        <Button variant="secondary" size="sm" onClick={() => setScale(s => Math.min(2.0, s + 0.1))} className="bg-white/5 text-white hover:bg-white/10">+</Button>
         {resolvedUrl && (
           <>
             <a href={resolvedUrl} target="_blank" rel="noopener noreferrer" className="ml-auto">
-              <Button variant="secondary" size="sm">Öppna i ny flik</Button>
+              <Button variant="secondary" size="sm" className="bg-white/5 text-white hover:bg-white/10">Öppna i ny flik</Button>
             </a>
             <a href={resolvedUrl} download={fileName}>
-              <Button variant="default" size="sm">Ladda ner</Button>
+              <Button variant="default" size="sm" className="bg-white/5 text-white hover:bg-white/10">Ladda ner</Button>
             </a>
           </>
         )}
