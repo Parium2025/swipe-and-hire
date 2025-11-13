@@ -10,9 +10,10 @@ interface ProfileVideoProps {
   className?: string;
   userInitials?: string;
   showCountdown?: boolean; // Show countdown timer (default: true for employer view)
+  onPlayingChange?: (isPlaying: boolean) => void; // Callback when playing state changes
 }
 
-const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true }: ProfileVideoProps) => {
+const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true, onPlayingChange }: ProfileVideoProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
@@ -80,6 +81,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     if (!isPlaying) {
       setShowVideo(true);
       setIsPlaying(true);
+      onPlayingChange?.(true);
       if (videoRef.current) {
         try {
           videoRef.current.currentTime = 0;
@@ -98,6 +100,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
     } else {
       setShowVideo(false);
       setIsPlaying(false);
+      onPlayingChange?.(false);
       if (videoRef.current) {
         videoRef.current.pause();
         videoRef.current.currentTime = 0;
@@ -106,6 +109,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
   };
   const handleVideoEnd = () => {
     setIsPlaying(false);
+    onPlayingChange?.(false);
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
     }
