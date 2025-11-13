@@ -499,33 +499,23 @@ export default function ProfilePreview() {
 
     return (
       <div className="w-full h-full relative overflow-hidden">
-        <AnimatePresence initial={false}>
-          {!showDetailedView ? (
-            <motion.div
-              key="tinder-card"
-              initial={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-              className="w-full h-full absolute inset-0"
-            >
-              <TinderCard />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="detailed-view"
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ 
-                duration: 0.3,
-                ease: [0.32, 0.72, 0, 1]
-              }}
-              className="w-full h-full absolute inset-0 bg-transparent"
-            >
-              <DetailedView />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Bas-kortet (TinderCard) ligger alltid underst */}
+        <div className="w-full h-full absolute inset-0">
+          <TinderCard />
+        </div>
+
+        {/* Detaljvyn glider upp/ner överst, men avmonteras inte => alltid smooth */}
+        <motion.div
+          key="detailed-view"
+          initial={{ y: '100%' }}
+          animate={{ y: showDetailedView ? 0 : '100%' }}
+          transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+          className="w-full h-full absolute inset-0 z-10 bg-transparent"
+          aria-hidden={!showDetailedView}
+          style={{ pointerEvents: showDetailedView ? 'auto' : 'none' }}
+        >
+          <DetailedView />
+        </motion.div>
       </div>
     );
   };
