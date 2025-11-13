@@ -10,9 +10,10 @@ interface ProfileVideoProps {
   className?: string;
   userInitials?: string;
   showCountdown?: boolean; // Show countdown timer (default: true for employer view)
+  showProgressBar?: boolean; // Show progress/scrubbing bar on hover (default: true)
 }
 
-const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true }: ProfileVideoProps) => {
+const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", className = "", userInitials = "?", showCountdown = true, showProgressBar = true }: ProfileVideoProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
@@ -283,7 +284,7 @@ const ProfileVideo = ({ videoUrl, coverImageUrl, alt = "Profile video", classNam
       )}
 
       {/* Video progress bar */}
-      {duration > 0 && (
+      {showProgressBar && duration > 0 && (
         <div 
           className={`absolute bottom-3 left-2 right-2 transition-opacity duration-300 ${
             (controlsVisible || isDragging) && isPlaying ? 'opacity-100' : 'opacity-0'

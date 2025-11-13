@@ -204,6 +204,7 @@ export function AppSidebar() {
                 alt="Profilvideo"
                 className="h-10 w-10 ring-2 ring-white/20 rounded-full"
                 showCountdown={false}
+                showProgressBar={false}
               />
             ) : (
               <Avatar className="h-10 w-10 ring-2 ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
