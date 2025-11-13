@@ -72,35 +72,19 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
           if (!ctx) continue;
-
-          // Ensure visual zoom works reliably across DPI by separating CSS size and backing store size
-          const dpr = window.devicePixelRatio || 1;
-          const displayWidth = Math.floor(viewport.width);
-          const displayHeight = Math.floor(viewport.height);
-
-          // CSS size (what you see)
-          canvas.style.width = `${displayWidth}px`;
-          canvas.style.height = `${displayHeight}px`;
-
-          // Backing store size (what we draw into)
-          canvas.width = Math.floor(displayWidth * dpr);
-          canvas.height = Math.floor(displayHeight * dpr);
-
-          // Basic styling
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
           canvas.style.display = 'block';
           canvas.style.margin = '0 auto 16px auto';
           canvas.style.background = 'white';
           canvas.dataset.pageNumber = i.toString();
           container.appendChild(canvas);
           canvasRefs.current.set(i, canvas);
-
-          const renderTask = page.render({
+          await page.render({
             canvas: canvas,
             canvasContext: ctx,
-            viewport: viewport,
-            transform: dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : undefined,
-          });
-          await renderTask.promise;
+            viewport: viewport
+          }).promise;
         }
         setLoading(false);
       } catch (e: any) {
@@ -164,16 +148,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           type="button"
           variant="ghost" 
           size="sm" 
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('Zoom out clicked, current scale:', scale);
-            setScale(s => {
-              const newScale = Math.max(0.6, s - 0.1);
-              console.log('New scale:', newScale);
-              return newScale;
-            });
-          }} 
+          onClick={() => setScale(s => Math.max(0.6, s - 0.1))} 
           className="h-8 w-8 p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
         >
           -
@@ -183,16 +158,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
           type="button"
           variant="ghost" 
           size="sm" 
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('Zoom in clicked, current scale:', scale);
-            setScale(s => {
-              const newScale = Math.min(2.0, s + 0.1);
-              console.log('New scale:', newScale);
-              return newScale;
-            });
-          }} 
+          onClick={() => setScale(s => Math.min(2.0, s + 0.1))} 
           className="h-8 w-8 p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
         >
           +
