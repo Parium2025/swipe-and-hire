@@ -207,7 +207,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh' }: CvViewer
 
         {/* Sidebar for page navigation */}
         {numPages > 0 && (
-          <div className="w-20 overflow-y-auto rounded-lg bg-white/5 backdrop-blur-sm p-2 flex flex-col gap-2">
+          <div className="w-16 overflow-y-auto rounded-lg bg-white/5 backdrop-blur-sm p-2 flex flex-col gap-2">
             {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
               <button
                 key={pageNum}
