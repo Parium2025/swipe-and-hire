@@ -21,8 +21,8 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
   const isMobile = device === 'mobile';
   const isTablet = device === 'tablet';
   
-  // Mobile gets larger initial scale for better readability
-  const initialScale = isMobile ? 1.5 : isTablet ? 1.2 : 0.9;
+  // Same scale for all devices to maintain consistent rendering
+  const initialScale = 0.9;
   
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
