@@ -5,6 +5,7 @@ import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { Button } from '@/components/ui/button';
 import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
 import { RotateCcw, X } from 'lucide-react';
+import { useDevice } from '@/hooks/use-device';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl as any;
 
@@ -16,10 +17,17 @@ interface CvViewerProps {
 }
 
 export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }: CvViewerProps) {
+  const device = useDevice();
+  const isMobile = device === 'mobile';
+  const isTablet = device === 'tablet';
+  
+  // Mobile gets larger initial scale for better readability
+  const initialScale = isMobile ? 1.5 : isTablet ? 1.2 : 0.9;
+  
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [scale, setScale] = useState(0.9);
+  const [scale, setScale] = useState(initialScale);
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
@@ -232,7 +240,9 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
         >
           -
         </Button>
-        <span className="text-sm text-white">Zoom {Math.round(zoomLevel * 100)}%</span>
+        <span className={`${isMobile ? 'text-xs' : 'text-sm'} text-white`}>
+          {isMobile ? `${Math.round(zoomLevel * 100)}%` : `Zoom ${Math.round(zoomLevel * 100)}%`}
+        </span>
         <Button 
           type="button"
           variant="ghost" 
@@ -269,7 +279,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
                 type="button"
                 variant="ghost" 
                 size="sm" 
-                className="border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
+                className={`${isMobile ? 'text-xs px-2' : ''} border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
               >
                 Ladda ner
               </Button>
@@ -278,7 +288,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
         </div>
       </div>
 
-      <div className="flex gap-3 w-full" style={{ height }}>
+      <div className="flex gap-2 w-full" style={{ height }}>
         <div
           ref={scrollContainerRef}
           className="flex-1 overflow-auto rounded-lg relative"
@@ -298,7 +308,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
             <>
               <div 
                 ref={containerRef} 
-                className="p-4 min-h-[220px]"
+                className={isMobile ? "p-2 min-h-[220px]" : "p-4 min-h-[220px]"}
                 style={{
                   transform: `scale(${zoomLevel}) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
                   transformOrigin: 'center center',
@@ -314,16 +324,16 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           )}
         </div>
 
-        {/* Sidebar for page navigation */}
-        {numPages > 0 && (
-          <div className="w-16 overflow-y-auto rounded-lg bg-white/5 backdrop-blur-sm p-2 flex flex-col gap-2">
+        {/* Sidebar for page navigation - hidden on mobile */}
+        {numPages > 0 && !isMobile && (
+          <div className={`${isTablet ? 'w-12' : 'w-16'} overflow-y-auto rounded-lg bg-white/5 backdrop-blur-sm p-2 flex flex-col gap-2`}>
             {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
               <button
                 key={pageNum}
                 type="button"
                 onClick={() => scrollToPage(pageNum)}
                 className={`
-                  h-12 rounded flex items-center justify-center text-sm font-medium
+                  ${isTablet ? 'h-10 text-xs' : 'h-12 text-sm'} rounded flex items-center justify-center font-medium
                   transition-all duration-200
                   ${pageNum === currentPage
                     ? 'bg-white/20 text-white border border-white/40'
@@ -338,7 +348,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
         )}
       </div>
       {numPages > 0 && (
-        <div className="text-xs text-white">Sida {currentPage} av {numPages}</div>
+        <div className="text-xs text-white text-center">Sida {currentPage} av {numPages}</div>
       )}
     </div>
   );
