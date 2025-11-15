@@ -695,29 +695,45 @@ export default function ProfilePreview() {
           </p>
         </div>
 
-        {/* View Mode Toggle */}
+        {/* View Mode Toggle - iOS Style */}
         <div className="flex justify-center">
-          <div className="inline-flex bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20">
+          <div className="relative inline-flex bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20">
+            {/* Sliding background */}
+            <motion.div
+              className="absolute top-1 bottom-1 bg-primary rounded-md"
+              initial={false}
+              animate={{
+                left: viewMode === 'mobile' ? '4px' : '50%',
+                width: viewMode === 'mobile' ? 'calc(50% - 4px)' : 'calc(50% - 4px)',
+              }}
+              transition={{
+                type: "spring",
+                stiffness: 500,
+                damping: 30,
+              }}
+            />
+            
+            {/* Buttons */}
             <button
               onClick={() => setViewMode('mobile')}
-              className={`flex items-center gap-2 px-6 py-2 rounded-md transition-all ${
+              className={`relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm ${
                 viewMode === 'mobile'
-                  ? 'bg-primary text-white'
-                  : 'text-white/70 hover:text-white'
+                  ? 'text-white'
+                  : 'text-white/60 hover:text-white/80'
               }`}
             >
-              <Smartphone className="h-4 w-4" />
+              <Smartphone className="h-3.5 w-3.5" />
               Mobil vy
             </button>
             <button
               onClick={() => setViewMode('desktop')}
-              className={`flex items-center gap-2 px-6 py-2 rounded-md transition-all ${
+              className={`relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm ${
                 viewMode === 'desktop'
-                  ? 'bg-primary text-white'
-                  : 'text-white/70 hover:text-white'
+                  ? 'text-white'
+                  : 'text-white/60 hover:text-white/80'
               }`}
             >
-              <Monitor className="h-4 w-4" />
+              <Monitor className="h-3.5 w-3.5" />
               Datorvy
             </button>
           </div>
