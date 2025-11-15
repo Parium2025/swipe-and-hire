@@ -853,6 +853,12 @@ All colors MUST be HSL.
     box-decoration-break: clone;
   }
 
+  /* Remove padding for precise left alignment when needed */
+  .two-line-ellipsis-nopad {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
   /* Safer two-line clamp with subtle right fade to prevent harsh glyph cuts */
   .two-line-ellipsis-fade {
     display: -webkit-box;
