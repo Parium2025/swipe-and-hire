@@ -27,6 +27,7 @@ import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { isValidSwedishPhone } from '@/lib/phoneValidation';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { useCachedImage } from '@/hooks/useCachedImage';
 
 const Profile = () => {
   const { profile, userRole, updateProfile, refreshProfile, user } = useAuth();
@@ -83,6 +84,10 @@ const Profile = () => {
   // Signed URLs for displaying private media
   const signedVideoUrl = useMediaUrl(videoUrl || (profile as any)?.video_url, 'profile-video');
   const signedCoverUrl = useMediaUrl(coverImageUrl || (profile as any)?.cover_image_url, 'cover-image');
+  
+  // Cache images to prevent blinking during re-renders
+  const { cachedUrl: cachedProfileImageUrl } = useCachedImage(signedProfileImageUrl);
+  const { cachedUrl: cachedCoverUrl } = useCachedImage(signedCoverUrl);
   
   // Extended profile fields that we'll need to add to database
   const [employmentStatus, setEmploymentStatus] = useState('');
@@ -1008,14 +1013,14 @@ const Profile = () => {
                   onClick={() => document.getElementById('profile-image')?.click()}
                 >
                   <Avatar className="h-32 w-32 border-4 border-white/10 hover:border-white/20 transition-all">
-                    {(signedProfileImageUrl || signedCoverUrl) ? (
+                    {(cachedProfileImageUrl || cachedCoverUrl) ? (
                       <AvatarImage 
-                        src={signedProfileImageUrl || signedCoverUrl || undefined} 
+                        src={cachedProfileImageUrl || cachedCoverUrl || undefined} 
                         alt="Profilbild"
                         className="object-cover"
                       />
                     ) : null}
-                    {!(signedProfileImageUrl || signedCoverUrl) && (
+                    {!(cachedProfileImageUrl || cachedCoverUrl) && (
                       <AvatarFallback delayMs={0} className="text-4xl font-semibold bg-white/20 text-white">
                         {((firstName?.trim()?.[0]?.toUpperCase() || '') + (lastName?.trim()?.[0]?.toUpperCase() || '')) || '?'}
                       </AvatarFallback>
