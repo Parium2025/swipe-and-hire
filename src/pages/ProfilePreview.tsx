@@ -754,8 +754,6 @@ export default function ProfilePreview() {
         {/* Profile View */}
         {viewMode === 'mobile' ? (
           <div className="flex flex-col items-center space-y-4">
-            <p className="text-white text-sm">Tinder-stil på mobil (tryck på kortet för mer info)</p>
-            
             {/* iPhone-stil telefonram - något större */}
             <div className="relative w-[200px] h-[400px] rounded-[2.4rem] bg-black p-1.5 shadow-2xl scale-90 sm:scale-100">
               {/* Skärm */}
@@ -777,7 +775,6 @@ export default function ProfilePreview() {
           </div>
         ) : (
           <div className="flex flex-col items-center space-y-4">
-            <p className="text-white text-sm">TeamTailor-stil på dator (klicka på kandidaten för att se detaljer)</p>
             <DesktopListView />
           </div>
         )}
