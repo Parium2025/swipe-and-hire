@@ -946,7 +946,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 px-4 animate-fade-in">
+    <div className="max-w-2xl mx-auto space-y-6 px-4">
       <div className="text-center">
         <h1 className="text-2xl font-semibold text-white mb-2">Min Profil</h1>
         <p className="text-white text-sm">
