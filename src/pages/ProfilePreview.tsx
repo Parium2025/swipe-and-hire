@@ -570,10 +570,8 @@ export default function ProfilePreview() {
     );
   }
 
-  // Desktop view med strukturerad information som i "Min Profil"
+  // Desktop view - stor profil som mobilvyn men desktop-layout
   const DesktopListView = () => {
-    const [selectedCandidate, setSelectedCandidate] = useState<boolean>(true); // Automatiskt vald
-    
     // Format employment status för visning
     const getEmploymentStatusLabel = (status: string) => {
       const statusLabels: Record<string, string> = {
@@ -612,202 +610,175 @@ export default function ProfilePreview() {
     };
     
     return (
-      <div className="flex h-[600px] max-w-5xl mx-auto bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden">
-        {/* Kandidatlista */}
-        <div className="w-80 border-r border-white/10 overflow-y-auto bg-white/5">
-          <div className="p-4 border-b border-white/10">
-            <h3 className="text-white font-semibold">Kandidater</h3>
-          </div>
-          
-          {/* Kandidatkort i lista - klickbar */}
-          <div 
-            onClick={() => setSelectedCandidate(true)}
-            className={`p-4 border-b border-white/10 cursor-pointer transition-colors ${
-              selectedCandidate ? 'bg-primary/20' : 'hover:bg-white/5'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <Avatar className="h-12 w-12">
-                <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} />
-                <AvatarFallback className="bg-primary/20 text-white">
-                  {consentedData?.first_name?.[0]}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-white font-medium truncate">
-                  {consentedData?.first_name} {consentedData?.last_name}
-                </p>
-                <p className="text-white/60 text-sm truncate">
-                  {consentedData?.location}
-                </p>
+      <div className="max-w-4xl mx-auto">
+        {/* Stor profilkort med video/bild */}
+        <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border-white/20 shadow-2xl overflow-hidden mb-6">
+          <div className="relative h-[500px]">
+            {/* Video eller profilbild som bakgrund */}
+            {signedVideoUrl ? (
+              <div className="absolute inset-0">
+                <ProfileVideo 
+                  videoUrl={signedVideoUrl}
+                  className="w-full h-full object-cover"
+                />
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Detaljvy */}
-        {selectedCandidate ? (
-          <div className="flex-1 overflow-y-auto">
-            <div className="p-6 space-y-6">
-              {/* Header med profilbild och namn */}
-              <div className="flex items-start gap-4 pb-4 border-b border-white/10">
-                <Avatar className="h-20 w-20 ring-2 ring-primary/20">
+            ) : profileImageUrl || signedCoverUrl ? (
+              <div className="absolute inset-0">
+                <img 
+                  src={profileImageUrl || signedCoverUrl || undefined} 
+                  alt="Profil"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/10" />
+            )}
+            
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+            
+            {/* Namn och info över video/bild */}
+            <div className="absolute bottom-0 left-0 right-0 p-8">
+              <div className="flex items-end gap-4">
+                <Avatar className="h-24 w-24 ring-4 ring-white/20 shadow-2xl">
                   <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} />
-                  <AvatarFallback className="bg-primary/20 text-white text-2xl">
+                  <AvatarFallback className="bg-primary text-white text-3xl">
                     {consentedData?.first_name?.[0]}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-white">
+                <div className="flex-1 pb-2">
+                  <h2 className="text-4xl font-bold text-white drop-shadow-lg">
                     {consentedData?.first_name} {consentedData?.last_name}
                   </h2>
                   {consentedData?.age && (
-                    <p className="text-white/60 text-sm mt-1">{consentedData.age} år</p>
-                  )}
-                </div>
-                <button
-                  onClick={() => setSelectedCandidate(false)}
-                  className="text-white/60 hover:text-white transition-colors"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              {/* Personlig information */}
-              <div className="space-y-3">
-                <h3 className="text-white font-semibold text-lg flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Personlig information
-                </h3>
-                <div className="bg-white/5 rounded-lg p-4 space-y-3">
-                  {consentedData?.phone && (
-                    <div className="flex items-center gap-3 text-white/80">
-                      <Phone className="h-4 w-4 text-white/60" />
-                      <div>
-                        <p className="text-xs text-white/60">Telefon</p>
-                        <p className="text-sm">{consentedData.phone}</p>
-                      </div>
-                    </div>
-                  )}
-                  {consentedData?.location && (
-                    <div className="flex items-center gap-3 text-white/80">
-                      <MapPin className="h-4 w-4 text-white/60" />
-                      <div>
-                        <p className="text-xs text-white/60">Plats</p>
-                        <p className="text-sm">{consentedData.location}</p>
-                      </div>
-                    </div>
-                  )}
-                  {user?.email && (
-                    <div className="flex items-center gap-3 text-white/80">
-                      <Mail className="h-4 w-4 text-white/60" />
-                      <div>
-                        <p className="text-xs text-white/60">E-post</p>
-                        <p className="text-sm">{user.email}</p>
-                      </div>
-                    </div>
+                    <p className="text-white/90 text-lg mt-1 drop-shadow">{consentedData.age} år</p>
                   )}
                 </div>
               </div>
+            </div>
+          </div>
+        </Card>
 
-              {/* Presentation om mig */}
-              {consentedData?.bio && (
-                <div className="space-y-3">
-                  <h3 className="text-white font-semibold text-lg flex items-center gap-2">
-                    <Info className="h-5 w-5" />
-                    Presentation om mig
-                  </h3>
-                  <div className="bg-white/5 rounded-lg p-4">
-                    <p className="text-white/80 whitespace-pre-wrap leading-relaxed text-sm">
-                      {consentedData.bio}
+        {/* Innehållssektioner i grid */}
+        <div className="grid grid-cols-2 gap-6">
+          {/* Personlig information */}
+          <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Personlig information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {consentedData?.phone && (
+                <div className="flex items-start gap-3">
+                  <Phone className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="text-xs text-white/60 mb-1">Telefon</p>
+                    <p className="text-white">{consentedData.phone}</p>
+                  </div>
+                </div>
+              )}
+              {consentedData?.location && (
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="text-xs text-white/60 mb-1">Plats</p>
+                    <p className="text-white">{consentedData.location}</p>
+                  </div>
+                </div>
+              )}
+              {user?.email && (
+                <div className="flex items-start gap-3">
+                  <Mail className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="text-xs text-white/60 mb-1">E-post</p>
+                    <p className="text-white">{user.email}</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Anställningsinformation */}
+          {(consentedData?.employment_status || consentedData?.working_hours || consentedData?.availability) && (
+            <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Briefcase className="h-5 w-5" />
+                  Anställningsinformation
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {consentedData?.employment_status && (
+                  <div>
+                    <p className="text-xs text-white/60 mb-1">Anställningsstatus</p>
+                    <p className="text-white font-medium">
+                      {getEmploymentStatusLabel(consentedData.employment_status)}
                     </p>
                   </div>
-                </div>
-              )}
-
-              {/* Anställningsinformation */}
-              {(consentedData?.employment_status || consentedData?.working_hours || consentedData?.availability) && (
-                <div className="space-y-3">
-                  <h3 className="text-white font-semibold text-lg flex items-center gap-2">
-                    <Briefcase className="h-5 w-5" />
-                    Anställningsinformation
-                  </h3>
-                  <div className="bg-white/5 rounded-lg p-4 space-y-3">
-                    {consentedData?.employment_status && (
-                      <div>
-                        <p className="text-xs text-white/60 mb-1">Anställningsstatus</p>
-                        <p className="text-sm text-white/80">
-                          {getEmploymentStatusLabel(consentedData.employment_status)}
-                        </p>
-                      </div>
-                    )}
-                    {consentedData?.working_hours && (
-                      <div className="flex items-center gap-3 text-white/80">
-                        <Clock className="h-4 w-4 text-white/60" />
-                        <div>
-                          <p className="text-xs text-white/60">Arbetstid</p>
-                          <p className="text-sm">{getWorkingHoursLabel(consentedData.working_hours)}</p>
-                        </div>
-                      </div>
-                    )}
-                    {consentedData?.availability && (
-                      <div className="flex items-center gap-3 text-white/80">
-                        <Calendar className="h-4 w-4 text-white/60" />
-                        <div>
-                          <p className="text-xs text-white/60">Tillgänglighet</p>
-                          <p className="text-sm">{getAvailabilityLabel(consentedData.availability)}</p>
-                        </div>
-                      </div>
-                    )}
+                )}
+                {consentedData?.working_hours && (
+                  <div className="flex items-start gap-3">
+                    <Clock className="h-5 w-5 text-primary mt-0.5" />
+                    <div>
+                      <p className="text-xs text-white/60 mb-1">Arbetstid</p>
+                      <p className="text-white">{getWorkingHoursLabel(consentedData.working_hours)}</p>
+                    </div>
                   </div>
-                </div>
-              )}
-
-              {/* CV */}
-              {consentedData?.cv_url && (
-                <div className="space-y-3">
-                  <h3 className="text-white font-semibold text-lg flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    CV
-                  </h3>
-                  <div className="bg-white/5 rounded-lg p-4">
-                    <Button 
-                      onClick={() => setCvOpen(true)}
-                      className="w-full bg-primary hover:bg-primary/90 text-white"
-                      size="lg"
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      Öppna CV
-                    </Button>
+                )}
+                {consentedData?.availability && (
+                  <div className="flex items-start gap-3">
+                    <Calendar className="h-5 w-5 text-primary mt-0.5" />
+                    <div>
+                      <p className="text-xs text-white/60 mb-1">Tillgänglighet</p>
+                      <p className="text-white">{getAvailabilityLabel(consentedData.availability)}</p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </CardContent>
+            </Card>
+          )}
 
-              {/* Video (om det finns) */}
-              {signedVideoUrl && (
-                <div className="space-y-3">
-                  <h3 className="text-white font-semibold text-lg flex items-center gap-2">
-                    <Video className="h-5 w-5" />
-                    Videopresentation
-                  </h3>
-                  <div className="bg-white/5 rounded-lg p-4">
-                    <ProfileVideo 
-                      videoUrl={signedVideoUrl}
-                      className="rounded-lg overflow-hidden"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="flex-1 flex items-center justify-center text-white/60">
-            <div className="text-center">
-              <User className="h-12 w-12 mx-auto mb-3 opacity-40" />
-              <p>Välj en kandidat för att se detaljer</p>
-            </div>
-          </div>
-        )}
+          {/* Presentation - tar upp full bredd */}
+          {consentedData?.bio && (
+            <Card className="col-span-2 bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Info className="h-5 w-5" />
+                  Presentation om mig
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-white/90 whitespace-pre-wrap leading-relaxed">
+                  {consentedData.bio}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* CV - tar upp full bredd */}
+          {consentedData?.cv_url && (
+            <Card className="col-span-2 bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  CV
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button 
+                  onClick={() => setCvOpen(true)}
+                  className="w-full bg-primary hover:bg-primary/90 text-white h-12 text-base"
+                  size="lg"
+                >
+                  <FileText className="h-5 w-5 mr-2" />
+                  Öppna CV
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     );
   };
