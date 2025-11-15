@@ -20,6 +20,8 @@ import NameAutoFit from '@/components/NameAutoFit';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { CvViewer } from '@/components/CvViewer';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAggressiveImagePreload } from '@/hooks/useAggressiveImagePreload';
+import { useCachedImage } from '@/hooks/useCachedImage';
 
 interface ProfileViewData {
   id: string;
@@ -53,6 +55,13 @@ export default function ProfilePreview() {
   const profileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image');
   const signedVideoUrl = useMediaUrl(profile?.video_url, 'profile-video');
   const signedCoverUrl = useMediaUrl(profile?.cover_image_url, 'cover-image');
+  
+  // Aggressively preload ALL profile images immediately
+  useAggressiveImagePreload([profileImageUrl, signedCoverUrl]);
+  
+  // Use cached versions for instant display
+  const { cachedUrl: cachedProfileImage } = useCachedImage(profileImageUrl);
+  const { cachedUrl: cachedCoverImage } = useCachedImage(signedCoverUrl);
 
   useEffect(() => {
     const loadPreviewData = async () => {
@@ -217,7 +226,7 @@ export default function ProfilePreview() {
               {data.video_url && signedVideoUrl ? (
                 <ProfileVideo
                   videoUrl={signedVideoUrl}
-                  coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
+                  coverImageUrl={cachedCoverImage || cachedProfileImage || undefined}
                   userInitials={`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`}
                   alt="Profilbild"
                   className="w-full h-full rounded-full"
@@ -227,7 +236,7 @@ export default function ProfilePreview() {
                 /* Om ingen video, visa Avatar med fallback till initialer */
                 <Avatar className="w-32 h-32 border-2 border-white/40 shadow-2xl">
                   <AvatarImage 
-                    src={profileImageUrl || signedCoverUrl || undefined} 
+                    src={cachedProfileImage || cachedCoverImage || undefined} 
                     alt="Profilbild"
                     className="object-cover"
                   />
@@ -576,7 +585,7 @@ export default function ProfilePreview() {
           >
             <div className="flex items-center gap-3">
               <Avatar className="h-12 w-12">
-                <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} />
+                <AvatarImage src={cachedProfileImage || cachedCoverImage || undefined} />
                 <AvatarFallback className="bg-primary/20 text-white">
                   {consentedData?.first_name?.[0]}
                 </AvatarFallback>
@@ -600,7 +609,7 @@ export default function ProfilePreview() {
               {/* Header */}
               <div className="flex items-start gap-4">
                 <Avatar className="h-20 w-20">
-                  <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} />
+                  <AvatarImage src={cachedProfileImage || cachedCoverImage || undefined} />
                   <AvatarFallback className="bg-primary/20 text-white text-2xl">
                     {consentedData?.first_name?.[0]}
                   </AvatarFallback>

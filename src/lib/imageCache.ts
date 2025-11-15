@@ -53,10 +53,11 @@ class ImageCache {
 
   private async fetchAndCache(url: string): Promise<CachedImage> {
     try {
-      // Använd no-cache för att undvika browser cache problem
+      // Använd force-cache och high priority för maximal hastighet
       const response = await fetch(url, {
         cache: 'force-cache',
-        credentials: 'include'
+        credentials: 'include',
+        priority: 'high' as RequestPriority
       });
 
       if (!response.ok) {
@@ -85,15 +86,21 @@ class ImageCache {
   }
 
   /**
-   * Förladdda flera bilder samtidigt
+   * Förladdda flera bilder samtidigt med högsta prioritet
    */
-  async preloadImages(urls: string[]): Promise<void> {
+  async preloadImages(urls: string[], batchSize: number = 10): Promise<void> {
     const uniqueUrls = [...new Set(urls.filter(url => url && url.trim() !== ''))];
     
-    // Ladda alla bilder parallellt
-    await Promise.allSettled(
-      uniqueUrls.map(url => this.loadImage(url))
-    );
+    // Ladda i batchar för att undvika att överbelasta nätverket
+    for (let i = 0; i < uniqueUrls.length; i += batchSize) {
+      const batch = uniqueUrls.slice(i, i + batchSize);
+      await Promise.allSettled(
+        batch.map(url => this.loadImage(url).catch(() => {
+          // Logga men fortsätt
+          console.warn(`Failed to preload: ${url.substring(0, 50)}...`);
+        }))
+      );
+    }
   }
 
   /**
