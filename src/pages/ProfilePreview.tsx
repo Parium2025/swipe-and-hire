@@ -252,7 +252,7 @@ export default function ProfilePreview() {
             {(data.video_url || data.profile_image_url) && (
               <div className="absolute top-[185px] left-1/2 transform -translate-x-1/2 text-center">
                 <p className="text-xs font-medium" style={{ color: '#FFFFFF' }}>
-                  {data.video_url ? 'Video tillgängligt' : 'Profilbild vald'}
+                  {data.video_url ? 'Video tillgängligt' : 'Enbart profilbild vald'}
                 </p>
               </div>
             )}
