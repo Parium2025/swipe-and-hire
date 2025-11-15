@@ -12,9 +12,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { User, MapPin, Building, Camera, Mail, Phone, Calendar as CalendarIcon, Briefcase, Clock, FileText, Video, Play, Check, Trash2, ChevronDown, RotateCcw } from 'lucide-react';
+import { User, MapPin, Building, Camera, Mail, Phone, Calendar as CalendarIcon, Briefcase, Clock, FileText, Video, Play, Check, Trash2, ChevronDown, RotateCcw, HelpCircle } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
 import ProfileVideo from '@/components/ProfileVideo';
 import ImageEditor from '@/components/ImageEditor';
@@ -1318,8 +1319,18 @@ const Profile = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
                       <div className="space-y-2 md:space-y-1.5">
-                        <Label htmlFor="employmentStatus" className="text-white">
+                        <Label htmlFor="employmentStatus" className="text-white flex items-center gap-1.5">
                           Anställningsstatus <span className="text-white">*</span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <HelpCircle className="h-3.5 w-3.5 text-white/60 cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Din nuvarande anställningsform</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </Label>
                         <DropdownMenu modal={false}>
                           <DropdownMenuTrigger asChild>
