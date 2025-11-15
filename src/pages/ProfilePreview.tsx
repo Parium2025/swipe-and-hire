@@ -405,7 +405,7 @@ export default function ProfilePreview() {
                   {data.user_id && user?.email && (
                     <div>
                       <p className="text-[8px] uppercase" style={{ color: '#FFFFFF' }}>E-post</p>
-                      <TooltipProvider>
+                      <TooltipProvider delayDuration={0}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button
