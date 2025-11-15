@@ -250,7 +250,7 @@ export default function ProfilePreview() {
 
             {/* Text direkt under profilbilden - bara om video finns */}
             {data.video_url && (
-              <div className="absolute top-[175px] left-1/2 transform -translate-x-1/2 text-center">
+              <div className="absolute top-[185px] left-1/2 transform -translate-x-1/2 text-center">
                 <p className="text-xs font-medium" style={{ color: '#FFFFFF' }}>Video tillgängligt</p>
               </div>
             )}
@@ -608,9 +608,6 @@ export default function ProfilePreview() {
       };
       return availLabels[avail] || avail;
     };
-
-    const fullName = `${consentedData?.first_name || ''} ${consentedData?.last_name || ''}`.trim();
-    
     
     return (
       <div className="max-w-4xl mx-auto">
@@ -641,25 +638,9 @@ export default function ProfilePreview() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
             
             {/* Namn och info över video/bild */}
-            <div 
-              className="absolute bottom-0 left-0 right-0 transition-all duration-300"
-              style={{
-                padding: fullName.length > 25 ? '2rem' : '1.5rem'
-              }}
-            >
-              <div 
-                className="flex items-end transition-all duration-300"
-                style={{
-                  gap: fullName.length > 25 ? '1rem' : '0.75rem'
-                }}
-              >
-                <Avatar 
-                  className="ring-4 ring-white/20 shadow-2xl transition-all duration-300"
-                  style={{
-                    height: fullName.length > 25 ? '5rem' : '6rem',
-                    width: fullName.length > 25 ? '5rem' : '6rem'
-                  }}
-                >
+            <div className="absolute bottom-0 left-0 right-0 p-8">
+              <div className="flex items-end gap-4">
+                <Avatar className="h-24 w-24 ring-4 ring-white/20 shadow-2xl">
                   <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} />
                   <AvatarFallback className="bg-primary text-white text-3xl">
                     {consentedData?.first_name?.[0]}
