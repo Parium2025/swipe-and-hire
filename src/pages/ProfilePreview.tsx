@@ -48,6 +48,8 @@ export default function ProfilePreview() {
   const [showDetailedView, setShowDetailedView] = useState(false);
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
   const [cvOpen, setCvOpen] = useState(false);
+  const device = useDevice();
+  const isMobile = device === 'mobile';
   
   // Use hooks to generate signed URLs automatically
   const profileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image');
@@ -754,21 +756,23 @@ export default function ProfilePreview() {
           </div>
         )}
 
-        {/* Tips */}
-        <Card className="bg-blue-500/20 backdrop-blur-sm border-blue-300/30 mt-8">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Info className="h-5 w-5" />
-              Tips för bättre profil
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-blue-100">
-            <p>• Första intrycket: Lägg till en bra profilbild eller video</p>
-            <p>• Fyll i en utförlig bio för att sticka ut</p>
-            <p>• Håll ditt CV uppdaterat med senaste erfarenheter</p>
-            <p>• Använd en professionell profilbild</p>
-          </CardContent>
-        </Card>
+        {/* Tips - Dold på mobil */}
+        {!isMobile && (
+          <Card className="bg-blue-500/20 backdrop-blur-sm border-blue-300/30 mt-8">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Info className="h-5 w-5" />
+                Tips för bättre profil
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-blue-100">
+              <p>• Första intrycket: Lägg till en bra profilbild eller video</p>
+              <p>• Fyll i en utförlig bio för att sticka ut</p>
+              <p>• Håll ditt CV uppdaterat med senaste erfarenheter</p>
+              <p>• Använd en professionell profilbild</p>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* CV Dialog */}
