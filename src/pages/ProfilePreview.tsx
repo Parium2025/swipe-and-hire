@@ -49,15 +49,24 @@ export default function ProfilePreview() {
   const [showDetailedView, setShowDetailedView] = useState(false);
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
   const [cvOpen, setCvOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   
   // Persistent media URLs: omedelbar data-URL vid start + uppdatering i bakgrunden
-  const profileImageUrl = usePersistentMediaUrl(profile?.profile_image_url, 'profile-image');
-  const signedVideoUrl = usePersistentMediaUrl(profile?.video_url, 'profile-video');
-  const signedCoverUrl = usePersistentMediaUrl(profile?.cover_image_url, 'cover-image');
+  // Använd refreshKey för att forcera omladdning när profilen uppdateras
+  const profileImageUrl = usePersistentMediaUrl(profile?.profile_image_url, 'profile-image', 86400, refreshKey > 0);
+  const signedVideoUrl = usePersistentMediaUrl(profile?.video_url, 'profile-video', 86400, refreshKey > 0);
+  const signedCoverUrl = usePersistentMediaUrl(profile?.cover_image_url, 'cover-image', 86400, refreshKey > 0);
   
   // Dessa är redan "stabila" och kommer från local cache direkt
   const cachedProfileImage = profileImageUrl;
   const cachedCoverImage = signedCoverUrl;
+
+  // Lyssna på profil-uppdateringar och forcera refresh
+  useEffect(() => {
+    if (profile) {
+      setRefreshKey(prev => prev + 1);
+    }
+  }, [profile?.profile_image_url, profile?.video_url, profile?.cover_image_url]);
 
   useEffect(() => {
     const loadPreviewData = async () => {
