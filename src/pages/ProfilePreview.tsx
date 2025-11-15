@@ -451,14 +451,14 @@ export default function ProfilePreview() {
                   {/* Anställningsstatus */}
                   <div className="space-y-0.5">
                     <p className="text-[10px] text-white uppercase tracking-wide leading-relaxed">Anställningsstatus?</p>
-                    <p className="text-[10px] text-white/80 leading-relaxed">Svar: {getEmploymentStatusLabel(data.employment_status)}</p>
+                    <p className="text-[10px] text-white leading-relaxed">Svar: {getEmploymentStatusLabel(data.employment_status)}</p>
                   </div>
 
                   {/* Arbetstid - visa bara om inte arbetssökande */}
                   {data.employment_status !== 'arbetssokande' && data.working_hours && (
                     <div className="space-y-0.5">
                       <p className="text-[10px] text-white uppercase tracking-wide leading-relaxed">Hur mycket jobbar du idag?</p>
-                      <p className="text-[10px] text-white/80 leading-relaxed">Svar: {getWorkingHoursLabel(data.working_hours)}</p>
+                      <p className="text-[10px] text-white leading-relaxed">Svar: {getWorkingHoursLabel(data.working_hours)}</p>
                     </div>
                   )}
 
@@ -466,7 +466,7 @@ export default function ProfilePreview() {
                   {data.availability && (
                     <div className="space-y-0.5">
                       <p className="text-[10px] text-white uppercase tracking-wide leading-relaxed">När kan du börja nytt jobb?</p>
-                      <p className="text-[10px] text-white/80 leading-relaxed">Svar: {getAvailabilityLabel(data.availability)}</p>
+                      <p className="text-[10px] text-white leading-relaxed">Svar: {getAvailabilityLabel(data.availability)}</p>
                     </div>
                   )}
                 </div>
