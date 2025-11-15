@@ -196,10 +196,7 @@ export default function ProfilePreview() {
         setCurrentX(0);
       };
 
-        const fullName = `${data.first_name} ${data.last_name}`.trim();
-        const nameLength = fullName.length;
-        const overlayLift = nameLength < 14 ? -24 : nameLength < 20 ? -16 : nameLength < 28 ? -8 : 0;
-        return (
+      return (
       <div className="w-full h-full relative">
         <Card 
           className="bg-transparent border-none shadow-none overflow-hidden rounded-none transition-all duration-300 h-full"
@@ -259,7 +256,7 @@ export default function ProfilePreview() {
             )}
 
             {/* Tinder-stil gradient overlay längst ner med minimal info */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-2 py-3" style={{ cursor: 'pointer', transform: `translateY(${overlayLift}px)`, transition: 'transform 200ms ease' }}>
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-2 py-3" style={{ cursor: 'pointer' }}>
               <div className="text-white w-full">
                 <TruncatedText
                   text={`${data.first_name} ${data.last_name}`}
