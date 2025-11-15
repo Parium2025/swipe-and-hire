@@ -1319,7 +1319,7 @@ const Profile = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
                       <div className="space-y-2 md:space-y-1.5">
                         <Label htmlFor="employmentStatus" className="text-white">
-                          Anställningsstatus <span className="text-white">*</span>
+                          Anställningsstatus? <span className="text-white">*</span>
                         </Label>
                         <DropdownMenu modal={false}>
                           <DropdownMenuTrigger asChild>
