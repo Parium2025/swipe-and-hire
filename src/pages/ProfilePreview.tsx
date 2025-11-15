@@ -261,7 +261,6 @@ export default function ProfilePreview() {
                 <TruncatedText
                   text={`${data.first_name} ${data.last_name}`}
                   className="two-line-ellipsis block w-full"
-                  alwaysShowTooltip={true}
                 >
                   <NameAutoFit
                     text={`${data.first_name} ${data.last_name}`}
@@ -356,7 +355,6 @@ export default function ProfilePreview() {
               <TruncatedText
                 text={`${data.first_name} ${isConsented ? data.last_name || '' : '***'}`}
                 className="two-line-ellipsis block w-full"
-                alwaysShowTooltip={true}
               >
                 <NameAutoFit
                   text={`${data.first_name} ${isConsented ? data.last_name || '' : '***'}`}
