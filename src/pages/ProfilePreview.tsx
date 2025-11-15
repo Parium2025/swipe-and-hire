@@ -370,7 +370,7 @@ export default function ProfilePreview() {
                   {/* Ålder */}
                   {data.age && (
                     <div>
-                      <p className="text-[11px] uppercase" style={{ color: '#FFFFFF' }}>Ålder:</p>
+                      <p className="text-[11px]" style={{ color: '#FFFFFF' }}>Ålder:</p>
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" style={{ color: '#FFFFFF' }} />
                         <p className="text-[11px]" style={{ color: '#FFFFFF' }}>{data.age} år</p>
@@ -381,7 +381,7 @@ export default function ProfilePreview() {
                   {/* Telefon */}
                   {data.phone && (
                     <div>
-                      <p className="text-[11px] uppercase" style={{ color: '#FFFFFF' }}>Telefon:</p>
+                      <p className="text-[11px]" style={{ color: '#FFFFFF' }}>Telefon:</p>
                       <button
                         onClick={handlePhoneClick}
                         className="flex items-center gap-1 transition-colors"
@@ -396,7 +396,7 @@ export default function ProfilePreview() {
                   {/* E-post */}
                   {data.user_id && user?.email && (
                     <div>
-                      <p className="text-xs uppercase" style={{ color: '#FFFFFF' }}>E-post:</p>
+                      <p className="text-xs" style={{ color: '#FFFFFF' }}>E-post:</p>
                       <TooltipProvider delayDuration={0}>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -420,7 +420,7 @@ export default function ProfilePreview() {
                   {/* Postnummer */}
                   {data.postal_code && (
                     <div>
-                      <p className="text-xs uppercase" style={{ color: '#FFFFFF' }}>Postnummer:</p>
+                      <p className="text-xs" style={{ color: '#FFFFFF' }}>Postnummer:</p>
                       <div className="flex items-center gap-1">
                         <MapPin className="h-3 w-3" style={{ color: '#FFFFFF' }} />
                         <p className="text-[11px]" style={{ color: '#FFFFFF' }}>{data.postal_code}</p>
@@ -431,7 +431,7 @@ export default function ProfilePreview() {
                   {/* Ort */}
                   {data.location && (
                     <div>
-                      <p className="text-xs uppercase" style={{ color: '#FFFFFF' }}>Ort:</p>
+                      <p className="text-xs" style={{ color: '#FFFFFF' }}>Ort:</p>
                       <p className="text-[11px]" style={{ color: '#FFFFFF' }}>{data.location}</p>
                       <p className="text-[11px]" style={{ color: '#FFFFFF' }}>Stockholms län</p>
                     </div>
