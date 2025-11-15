@@ -269,13 +269,13 @@ export default function ProfilePreview() {
                   />
                 </TruncatedText>
                 
-                {/* Info på separata rader */}
-                <div className="space-y-0.5 text-xs" style={{ color: '#FFFFFF' }}>
+                {/* Info på separata rader - samma storlek som namnet */}
+                <div className="space-y-0 text-lg text-white w-full">
                   {isConsented && data.age && (
-                    <p>{data.age} år</p>
+                    <p className="text-lg" style={{ color: '#FFFFFF' }}>{data.age} år</p>
                   )}
                   {data.location && (
-                    <p>Bor i {data.location}, Stockholms län</p>
+                    <p className="text-lg" style={{ color: '#FFFFFF' }}>Bor i {data.location}, Stockholms län</p>
                   )}
                 </div>
                 
