@@ -136,6 +136,16 @@ export default function ProfilePreview() {
       }
     };
 
+    const handleEmailClick = () => {
+      if (user?.email) {
+        navigator.clipboard.writeText(user.email);
+        toast({
+          title: "E-post kopierad",
+          description: "E-postadressen har kopierats till urklipp",
+        });
+      }
+    };
+
     const handleCvClick = async (e: React.MouseEvent) => {
       e.preventDefault();
       if (!data.cv_url) {
@@ -395,10 +405,23 @@ export default function ProfilePreview() {
                   {data.user_id && user?.email && (
                     <div>
                       <p className="text-[8px] uppercase" style={{ color: '#FFFFFF' }}>E-post</p>
-                      <div className="flex items-center gap-1 min-w-0">
-                        <Mail className="h-3 w-3 flex-shrink-0" style={{ color: '#FFFFFF' }} />
-                        <span className="text-xs truncate block flex-1 min-w-0" style={{ color: '#FFFFFF' }}>{user.email}</span>
-                      </div>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={handleEmailClick}
+                              className="flex items-center gap-1 min-w-0 w-full transition-colors"
+                              style={{ color: '#FFFFFF' }}
+                            >
+                              <Mail className="h-3 w-3 flex-shrink-0" style={{ color: '#FFFFFF' }} />
+                              <span className="text-xs truncate block flex-1 min-w-0" style={{ color: '#FFFFFF' }}>{user.email}</span>
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{user.email}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                   )}
 
