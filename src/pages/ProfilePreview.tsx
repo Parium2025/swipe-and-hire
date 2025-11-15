@@ -697,30 +697,45 @@ export default function ProfilePreview() {
           </p>
         </div>
 
-        {/* View Mode Toggle */}
+        {/* View Mode Toggle - iOS style */}
         <div className="flex justify-center">
-          <div className="inline-flex bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20">
+          <div className="relative inline-flex bg-white/10 backdrop-blur-sm rounded-lg p-0.5 border border-white/20">
+            {/* Sliding background indicator */}
+            <motion.div
+              className="absolute top-0.5 bottom-0.5 rounded-md bg-primary"
+              initial={false}
+              animate={{
+                left: viewMode === 'mobile' ? '0.125rem' : '50%',
+                right: viewMode === 'mobile' ? '50%' : '0.125rem',
+              }}
+              transition={{
+                type: "spring",
+                stiffness: 500,
+                damping: 30
+              }}
+            />
+            
             <button
               onClick={() => setViewMode('mobile')}
-              className={`flex items-center gap-2 px-6 py-2 rounded-md transition-all ${
+              className={`relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors ${
                 viewMode === 'mobile'
-                  ? 'bg-primary text-white'
+                  ? 'text-white'
                   : 'text-white/70 hover:text-white'
               }`}
             >
-              <Smartphone className="h-4 w-4" />
-              Mobil vy
+              <Smartphone className="h-3.5 w-3.5" />
+              <span className="text-sm">Mobil vy</span>
             </button>
             <button
               onClick={() => setViewMode('desktop')}
-              className={`flex items-center gap-2 px-6 py-2 rounded-md transition-all ${
+              className={`relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors ${
                 viewMode === 'desktop'
-                  ? 'bg-primary text-white'
+                  ? 'text-white'
                   : 'text-white/70 hover:text-white'
               }`}
             >
-              <Monitor className="h-4 w-4" />
-              Datorvy
+              <Monitor className="h-3.5 w-3.5" />
+              <span className="text-sm">Datorvy</span>
             </button>
           </div>
         </div>
