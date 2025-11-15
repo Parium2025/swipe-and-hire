@@ -17,11 +17,9 @@ import { openCvFile } from '@/utils/cvUtils';
 import ProfileVideo from '@/components/ProfileVideo';
 import { TruncatedText } from '@/components/TruncatedText';
 import NameAutoFit from '@/components/NameAutoFit';
-import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { usePersistentMediaUrl } from '@/hooks/usePersistentMediaUrl';
 import { CvViewer } from '@/components/CvViewer';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAggressiveImagePreload } from '@/hooks/useAggressiveImagePreload';
-import { useCachedImage } from '@/hooks/useCachedImage';
 import { InvisibleImagePreloader } from '@/components/InvisibleImagePreloader';
 
 interface ProfileViewData {
@@ -52,17 +50,14 @@ export default function ProfilePreview() {
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
   const [cvOpen, setCvOpen] = useState(false);
   
-  // Use hooks to generate signed URLs automatically
-  const profileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image');
-  const signedVideoUrl = useMediaUrl(profile?.video_url, 'profile-video');
-  const signedCoverUrl = useMediaUrl(profile?.cover_image_url, 'cover-image');
+  // Persistent media URLs: omedelbar data-URL vid start + uppdatering i bakgrunden
+  const profileImageUrl = usePersistentMediaUrl(profile?.profile_image_url, 'profile-image');
+  const signedVideoUrl = usePersistentMediaUrl(profile?.video_url, 'profile-video');
+  const signedCoverUrl = usePersistentMediaUrl(profile?.cover_image_url, 'cover-image');
   
-  // Aggressively preload ALL profile images immediately
-  useAggressiveImagePreload([profileImageUrl, signedCoverUrl]);
-  
-  // Use cached versions for instant display
-  const { cachedUrl: cachedProfileImage } = useCachedImage(profileImageUrl);
-  const { cachedUrl: cachedCoverImage } = useCachedImage(signedCoverUrl);
+  // Dessa är redan "stabila" och kommer från local cache direkt
+  const cachedProfileImage = profileImageUrl;
+  const cachedCoverImage = signedCoverUrl;
 
   useEffect(() => {
     const loadPreviewData = async () => {
