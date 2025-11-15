@@ -450,7 +450,7 @@ export default function ProfilePreview() {
                 <div className="bg-white/5 p-2 rounded-lg border border-white/10 space-y-1.5">
                   {/* Anställningsstatus */}
                   <div>
-                    <p className="text-[9px] text-white uppercase">Anställningsstatus</p>
+                    <p className="text-[9px] text-white uppercase">Anställningsstatus?</p>
                     <p className="text-[11px] text-white">{getEmploymentStatusLabel(data.employment_status)}</p>
                   </div>
 
