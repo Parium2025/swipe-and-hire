@@ -709,10 +709,7 @@ export default function ProfilePreview() {
       <div className="p-6 max-w-6xl mx-auto space-y-6 animate-in fade-in duration-200">
         {/* Header */}
         <div className="text-center space-y-4 mb-6">
-          <div className="flex items-center justify-center gap-2 text-white">
-            <Eye className="h-6 w-6" />
-            <h1 className="text-2xl font-bold">Förhandsgranska Profil</h1>
-          </div>
+          <h1 className="text-2xl font-semibold text-white">Förhandsgranska Profil</h1>
           <p className="text-white max-w-2xl mx-auto">
             Se hur din profil visas för arbetsgivare på mobil och dator.
           </p>
