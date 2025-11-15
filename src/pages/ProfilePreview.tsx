@@ -214,7 +214,7 @@ export default function ProfilePreview() {
           <div className="relative w-full h-full bg-transparent overflow-hidden" style={{ cursor: 'pointer' }}>
             {/* Avatar-område för både bild och video - centrerat längst upp */}
             <div 
-              className="absolute top-4 left-1/2 transform -translate-x-1/2 w-40 h-40"
+              className="absolute top-4 left-1/2 transform -translate-x-1/2 w-[165px] h-[165px]"
               style={{ cursor: 'pointer' }}
               onClick={(e) => {
                 // Stoppa event propagation så att klick på video/bild inte öppnar detaljvyn
@@ -235,7 +235,7 @@ export default function ProfilePreview() {
                 />
               ) : (
                 /* Om ingen video, visa Avatar med fallback till initialer */
-                <Avatar className="w-40 h-40 border-2 border-white/40 shadow-2xl">
+                <Avatar className="w-[165px] h-[165px] border-2 border-white/40 shadow-2xl">
                   <AvatarImage 
                     src={profileImageUrl || signedCoverUrl || undefined} 
                     alt="Profilbild"
@@ -250,7 +250,7 @@ export default function ProfilePreview() {
 
             {/* Text direkt under profilbilden - bara om video finns */}
             {data.video_url && (
-              <div className="absolute top-48 left-1/2 transform -translate-x-1/2 text-center">
+              <div className="absolute top-[185px] left-1/2 transform -translate-x-1/2 text-center">
                 <p className="text-xs font-medium" style={{ color: '#FFFFFF' }}>Video tillgängligt</p>
               </div>
             )}
