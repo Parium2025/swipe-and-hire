@@ -570,9 +570,46 @@ export default function ProfilePreview() {
     );
   }
 
-  // Desktop TeamTailor-style list view
+  // Desktop view med strukturerad information som i "Min Profil"
   const DesktopListView = () => {
     const [selectedCandidate, setSelectedCandidate] = useState<boolean>(false);
+    
+    // Format employment status för visning
+    const getEmploymentStatusLabel = (status: string) => {
+      const statusLabels: Record<string, string> = {
+        'tillsvidareanställning': 'Fast anställning',
+        'visstidsanställning': 'Visstidsanställning',
+        'provanställning': 'Provanställning',
+        'interim': 'Interim anställning',
+        'bemanningsanställning': 'Bemanningsanställning',
+        'egenforetagare': 'Egenföretagare / Frilans',
+        'arbetssokande': 'Arbetssökande',
+        'annat': 'Annat',
+      };
+      return statusLabels[status] || status;
+    };
+
+    const getWorkingHoursLabel = (hours: string) => {
+      const hoursLabels: Record<string, string> = {
+        'heltid': 'Heltid',
+        'deltid': 'Deltid',
+        'timmar': 'Timmar',
+        'flexibla_tider': 'Flexibla tider'
+      };
+      return hoursLabels[hours] || hours;
+    };
+
+    const getAvailabilityLabel = (avail: string) => {
+      const availLabels: Record<string, string> = {
+        'omedelbart': 'Omedelbart',
+        '2_veckor': 'Inom 2 veckor',
+        '1_manad': 'Inom 1 månad',
+        '2_manader': 'Inom 2 månader',
+        '3_manader': 'Inom 3 månader',
+        'overenskommelse': 'Enligt överenskommelse'
+      };
+      return availLabels[avail] || avail;
+    };
     
     return (
       <div className="flex h-[600px] max-w-5xl mx-auto bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden">
@@ -612,9 +649,9 @@ export default function ProfilePreview() {
         {selectedCandidate ? (
           <div className="flex-1 overflow-y-auto">
             <div className="p-6 space-y-6">
-              {/* Header */}
-              <div className="flex items-start gap-4">
-                <Avatar className="h-20 w-20">
+              {/* Header med profilbild och namn */}
+              <div className="flex items-start gap-4 pb-4 border-b border-white/10">
+                <Avatar className="h-20 w-20 ring-2 ring-primary/20">
                   <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} />
                   <AvatarFallback className="bg-primary/20 text-white text-2xl">
                     {consentedData?.first_name?.[0]}
@@ -625,71 +662,150 @@ export default function ProfilePreview() {
                     {consentedData?.first_name} {consentedData?.last_name}
                   </h2>
                   {consentedData?.age && (
-                    <p className="text-white/60">{consentedData.age} år</p>
+                    <p className="text-white/60 text-sm mt-1">{consentedData.age} år</p>
                   )}
                 </div>
                 <button
                   onClick={() => setSelectedCandidate(false)}
-                  className="text-white/60 hover:text-white"
+                  className="text-white/60 hover:text-white transition-colors"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
-              {/* Kontaktinformation */}
-              <div className="bg-white/5 rounded-lg p-4 space-y-3">
-                <h3 className="text-white font-semibold flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Kontaktinformation
+              {/* Personlig information */}
+              <div className="space-y-3">
+                <h3 className="text-white font-semibold text-lg flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Personlig information
                 </h3>
-                {consentedData?.phone && (
-                  <div className="flex items-center gap-2 text-white/80">
-                    <Phone className="h-4 w-4" />
-                    <span>{consentedData.phone}</span>
-                  </div>
-                )}
-                {consentedData?.location && (
-                  <div className="flex items-center gap-2 text-white/80">
-                    <MapPin className="h-4 w-4" />
-                    <span>{consentedData.location}</span>
-                  </div>
-                )}
+                <div className="bg-white/5 rounded-lg p-4 space-y-3">
+                  {consentedData?.phone && (
+                    <div className="flex items-center gap-3 text-white/80">
+                      <Phone className="h-4 w-4 text-white/60" />
+                      <div>
+                        <p className="text-xs text-white/60">Telefon</p>
+                        <p className="text-sm">{consentedData.phone}</p>
+                      </div>
+                    </div>
+                  )}
+                  {consentedData?.location && (
+                    <div className="flex items-center gap-3 text-white/80">
+                      <MapPin className="h-4 w-4 text-white/60" />
+                      <div>
+                        <p className="text-xs text-white/60">Plats</p>
+                        <p className="text-sm">{consentedData.location}</p>
+                      </div>
+                    </div>
+                  )}
+                  {user?.email && (
+                    <div className="flex items-center gap-3 text-white/80">
+                      <Mail className="h-4 w-4 text-white/60" />
+                      <div>
+                        <p className="text-xs text-white/60">E-post</p>
+                        <p className="text-sm">{user.email}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Bio */}
+              {/* Presentation om mig */}
               {consentedData?.bio && (
-                <div className="bg-white/5 rounded-lg p-4">
-                  <h3 className="text-white font-semibold mb-3">Om mig</h3>
-                  <p className="text-white/80 leading-relaxed whitespace-pre-wrap">
-                    {consentedData.bio}
-                  </p>
+                <div className="space-y-3">
+                  <h3 className="text-white font-semibold text-lg flex items-center gap-2">
+                    <Info className="h-5 w-5" />
+                    Presentation om mig
+                  </h3>
+                  <div className="bg-white/5 rounded-lg p-4">
+                    <p className="text-white/80 whitespace-pre-wrap leading-relaxed text-sm">
+                      {consentedData.bio}
+                    </p>
+                  </div>
                 </div>
               )}
 
-              {/* Tillgänglighet */}
-              <div className="bg-white/5 rounded-lg p-4 space-y-3">
-                <h3 className="text-white font-semibold flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  Tillgänglighet
-                </h3>
-                {consentedData?.working_hours && (
-                  <div className="text-white/80">
-                    <span className="text-white/60 text-sm">Arbetstid:</span>{' '}
-                    {consentedData.working_hours}
+              {/* Anställningsinformation */}
+              {(consentedData?.employment_status || consentedData?.working_hours || consentedData?.availability) && (
+                <div className="space-y-3">
+                  <h3 className="text-white font-semibold text-lg flex items-center gap-2">
+                    <Briefcase className="h-5 w-5" />
+                    Anställningsinformation
+                  </h3>
+                  <div className="bg-white/5 rounded-lg p-4 space-y-3">
+                    {consentedData?.employment_status && (
+                      <div>
+                        <p className="text-xs text-white/60 mb-1">Anställningsstatus</p>
+                        <p className="text-sm text-white/80">
+                          {getEmploymentStatusLabel(consentedData.employment_status)}
+                        </p>
+                      </div>
+                    )}
+                    {consentedData?.working_hours && (
+                      <div className="flex items-center gap-3 text-white/80">
+                        <Clock className="h-4 w-4 text-white/60" />
+                        <div>
+                          <p className="text-xs text-white/60">Arbetstid</p>
+                          <p className="text-sm">{getWorkingHoursLabel(consentedData.working_hours)}</p>
+                        </div>
+                      </div>
+                    )}
+                    {consentedData?.availability && (
+                      <div className="flex items-center gap-3 text-white/80">
+                        <Calendar className="h-4 w-4 text-white/60" />
+                        <div>
+                          <p className="text-xs text-white/60">Tillgänglighet</p>
+                          <p className="text-sm">{getAvailabilityLabel(consentedData.availability)}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-                {consentedData?.availability && (
-                  <div className="text-white/80">
-                    <span className="text-white/60 text-sm">Kan börja:</span>{' '}
-                    {consentedData.availability}
+                </div>
+              )}
+
+              {/* CV */}
+              {consentedData?.cv_url && (
+                <div className="space-y-3">
+                  <h3 className="text-white font-semibold text-lg flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    CV
+                  </h3>
+                  <div className="bg-white/5 rounded-lg p-4">
+                    <Button 
+                      onClick={() => setCvOpen(true)}
+                      className="w-full bg-primary hover:bg-primary/90 text-white"
+                      size="lg"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Öppna CV
+                    </Button>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
+
+              {/* Video (om det finns) */}
+              {signedVideoUrl && (
+                <div className="space-y-3">
+                  <h3 className="text-white font-semibold text-lg flex items-center gap-2">
+                    <Video className="h-5 w-5" />
+                    Videopresentation
+                  </h3>
+                  <div className="bg-white/5 rounded-lg p-4">
+                    <ProfileVideo 
+                      videoUrl={signedVideoUrl}
+                      className="rounded-lg overflow-hidden"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ) : (
           <div className="flex-1 flex items-center justify-center text-white/60">
-            Välj en kandidat för att se detaljer
+            <div className="text-center">
+              <User className="h-12 w-12 mx-auto mb-3 opacity-40" />
+              <p>Välj en kandidat för att se detaljer</p>
+            </div>
           </div>
         )}
       </div>
