@@ -1012,7 +1012,7 @@ const Profile = () => {
                   className="cursor-pointer" 
                   onClick={() => document.getElementById('profile-image')?.click()}
                 >
-                  <Avatar className="h-32 w-32 border-4 border-white/10 hover:border-white/20 transition-all">
+                  <Avatar className="h-32 w-32 border-4 border-white/10 hover:border-white/20 [transition:border-color_0.2s]">
                     {(cachedProfileImageUrl || cachedCoverUrl || signedProfileImageUrl || signedCoverUrl) ? (
                       <AvatarImage 
                         src={cachedProfileImageUrl || cachedCoverUrl || signedProfileImageUrl || signedCoverUrl || undefined} 
