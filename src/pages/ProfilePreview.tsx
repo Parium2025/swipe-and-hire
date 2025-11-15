@@ -260,7 +260,7 @@ export default function ProfilePreview() {
               <div className="text-white w-full">
                 <TruncatedText
                   text={`${data.first_name} ${data.last_name}`}
-                  className="two-line-ellipsis block w-full"
+                  className="two-line-ellipsis two-line-ellipsis-nopad block w-full"
                 >
                   <NameAutoFit
                     text={`${data.first_name} ${data.last_name}`}
