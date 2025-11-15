@@ -572,7 +572,7 @@ export default function ProfilePreview() {
 
   // Desktop view med strukturerad information som i "Min Profil"
   const DesktopListView = () => {
-    const [selectedCandidate, setSelectedCandidate] = useState<boolean>(false);
+    const [selectedCandidate, setSelectedCandidate] = useState<boolean>(true); // Automatiskt vald
     
     // Format employment status för visning
     const getEmploymentStatusLabel = (status: string) => {
