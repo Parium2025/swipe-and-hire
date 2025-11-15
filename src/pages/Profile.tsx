@@ -84,6 +84,7 @@ const Profile = () => {
   // Signed URLs for displaying private media
   const signedVideoUrl = useMediaUrl(videoUrl || (profile as any)?.video_url, 'profile-video');
   const signedCoverUrl = useMediaUrl(coverImageUrl || (profile as any)?.cover_image_url, 'cover-image');
+  const signedCvUrl = useMediaUrl(cvUrl || (profile as any)?.cv_url, 'cv');
   
   // Cache images to prevent blinking during re-renders
   const { cachedUrl: cachedProfileImageUrl } = useCachedImage(signedProfileImageUrl);
@@ -1502,7 +1503,7 @@ const Profile = () => {
                           setCvUrl('');
                           setCvFileName('');
                         }}
-                        currentFile={cvUrl ? { url: cvUrl, name: "Din valda fil" } : undefined}
+                        currentFile={cvUrl ? { url: signedCvUrl || cvUrl, name: cvFileName || "Din valda fil" } : undefined}
                         acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
                         maxFileSize={5 * 1024 * 1024}
                       />
