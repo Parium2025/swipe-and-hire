@@ -771,8 +771,8 @@ export default function ProfilePreview() {
           </div>
         )}
 
-        {/* Tips - Dold på mobil */}
-        {!isMobile && (
+        {/* Tips - endast i datorvyn */}
+        {viewMode === 'desktop' && (
           <Card className="bg-blue-500/20 backdrop-blur-sm border-blue-300/30 mt-8">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
