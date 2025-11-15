@@ -269,21 +269,18 @@ export default function ProfilePreview() {
                   />
                 </TruncatedText>
                 
-                {/* Ålder under namnet */}
-                {isConsented && data.age && (
-                  <p className="text-sm mb-2" style={{ color: '#FFFFFF' }}>{data.age} år</p>
-                )}
-                
-                {/* Plats */}
-                {data.location && (
-                  <div className="mb-2">
-                    <div className="flex items-center gap-1">
-                      <MapPin className="h-3 w-3" style={{ color: '#FFFFFF' }} />
-                      <span className="text-xs" style={{ color: '#FFFFFF' }}>Bor i {data.location}</span>
-                    </div>
-                    <p className="text-xs ml-4" style={{ color: '#FFFFFF' }}>Stockholms län</p>
-                  </div>
-                )}
+                {/* Info i en symmetrisk linje */}
+                <div className="flex items-center justify-start gap-2 text-xs" style={{ color: '#FFFFFF' }}>
+                  {isConsented && data.age && (
+                    <span>{data.age} år</span>
+                  )}
+                  {isConsented && data.age && data.location && (
+                    <span>•</span>
+                  )}
+                  {data.location && (
+                    <span>Bor i {data.location}, Stockholms län</span>
+                  )}
+                </div>
                 
                 {/* Swipe-indikator */}
                 <div className="flex items-center justify-center mt-3">
