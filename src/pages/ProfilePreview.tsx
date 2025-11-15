@@ -439,9 +439,9 @@ export default function ProfilePreview() {
                   {/* Ort */}
                   {data.location && (
                     <div>
-                      <p className="text-[8px] uppercase" style={{ color: '#FFFFFF' }}>Ort</p>
-                      <p className="text-xs" style={{ color: '#FFFFFF' }}>{data.location}</p>
-                      <p className="text-xs" style={{ color: '#FFFFFF' }}>Stockholms län</p>
+                      <p className="text-[11px] uppercase" style={{ color: '#FFFFFF' }}>Ort</p>
+                      <p className="text-[11px]" style={{ color: '#FFFFFF' }}>{data.location}</p>
+                      <p className="text-[11px]" style={{ color: '#FFFFFF' }}>Stockholms län</p>
                     </div>
                   )}
                 </div>
@@ -473,23 +473,23 @@ export default function ProfilePreview() {
                 <div className="bg-white/5 p-3 rounded-lg border border-white/10 space-y-3">
                   {/* Anställningsstatus */}
                   <div className="space-y-0.5">
-                    <p className="text-[11px] text-white font-medium tracking-wide leading-relaxed">Anställningsstatus?</p>
-                    <p className="text-[10px] text-white leading-relaxed">Svar: {getEmploymentStatusLabel(data.employment_status)}</p>
+                    <p className="text-xs text-white font-medium tracking-wide leading-relaxed">Anställningsstatus?</p>
+                    <p className="text-[11px] text-white leading-relaxed">Svar: {getEmploymentStatusLabel(data.employment_status)}</p>
                   </div>
 
                   {/* Arbetstid - visa bara om inte arbetssökande */}
                   {data.employment_status !== 'arbetssokande' && data.working_hours && (
                     <div className="space-y-0.5">
-                      <p className="text-[11px] text-white font-medium tracking-wide leading-relaxed">Hur mycket jobbar du idag?</p>
-                      <p className="text-[10px] text-white leading-relaxed">Svar: {getWorkingHoursLabel(data.working_hours)}</p>
+                      <p className="text-xs text-white font-medium tracking-wide leading-relaxed">Hur mycket jobbar du idag?</p>
+                      <p className="text-[11px] text-white leading-relaxed">Svar: {getWorkingHoursLabel(data.working_hours)}</p>
                     </div>
                   )}
 
                   {/* Tillgänglighet */}
                   {data.availability && (
                     <div className="space-y-0.5">
-                      <p className="text-[11px] text-white font-medium tracking-wide leading-relaxed">När kan du börja nytt jobb?</p>
-                      <p className="text-[10px] text-white leading-relaxed">Svar: {getAvailabilityLabel(data.availability)}</p>
+                      <p className="text-xs text-white font-medium tracking-wide leading-relaxed">När kan du börja nytt jobb?</p>
+                      <p className="text-[11px] text-white leading-relaxed">Svar: {getAvailabilityLabel(data.availability)}</p>
                     </div>
                   )}
                 </div>
