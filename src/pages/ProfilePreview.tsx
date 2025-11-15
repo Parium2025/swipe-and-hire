@@ -17,10 +17,9 @@ import { openCvFile } from '@/utils/cvUtils';
 import ProfileVideo from '@/components/ProfileVideo';
 import { TruncatedText } from '@/components/TruncatedText';
 import NameAutoFit from '@/components/NameAutoFit';
-import { usePersistentMediaUrl } from '@/hooks/usePersistentMediaUrl';
+import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { CvViewer } from '@/components/CvViewer';
 import { motion, AnimatePresence } from 'framer-motion';
-import { InvisibleImagePreloader } from '@/components/InvisibleImagePreloader';
 
 interface ProfileViewData {
   id: string;
@@ -49,24 +48,11 @@ export default function ProfilePreview() {
   const [showDetailedView, setShowDetailedView] = useState(false);
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
   const [cvOpen, setCvOpen] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
   
-  // Persistent media URLs: omedelbar data-URL vid start + uppdatering i bakgrunden
-  // Använd refreshKey för att forcera omladdning när profilen uppdateras
-  const profileImageUrl = usePersistentMediaUrl(profile?.profile_image_url, 'profile-image', 86400, refreshKey > 0);
-  const signedVideoUrl = usePersistentMediaUrl(profile?.video_url, 'profile-video', 86400, refreshKey > 0);
-  const signedCoverUrl = usePersistentMediaUrl(profile?.cover_image_url, 'cover-image', 86400, refreshKey > 0);
-  
-  // Dessa är redan "stabila" och kommer från local cache direkt
-  const cachedProfileImage = profileImageUrl;
-  const cachedCoverImage = signedCoverUrl;
-
-  // Lyssna på profil-uppdateringar och forcera refresh
-  useEffect(() => {
-    if (profile) {
-      setRefreshKey(prev => prev + 1);
-    }
-  }, [profile?.profile_image_url, profile?.video_url, profile?.cover_image_url]);
+  // Use hooks to generate signed URLs automatically
+  const profileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image');
+  const signedVideoUrl = useMediaUrl(profile?.video_url, 'profile-video');
+  const signedCoverUrl = useMediaUrl(profile?.cover_image_url, 'cover-image');
 
   useEffect(() => {
     const loadPreviewData = async () => {
@@ -231,7 +217,7 @@ export default function ProfilePreview() {
               {data.video_url && signedVideoUrl ? (
                 <ProfileVideo
                   videoUrl={signedVideoUrl}
-                  coverImageUrl={cachedCoverImage || cachedProfileImage || undefined}
+                  coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
                   userInitials={`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`}
                   alt="Profilbild"
                   className="w-full h-full rounded-full"
@@ -241,10 +227,9 @@ export default function ProfilePreview() {
                 /* Om ingen video, visa Avatar med fallback till initialer */
                 <Avatar className="w-32 h-32 border-2 border-white/40 shadow-2xl">
                   <AvatarImage 
-                    src={cachedProfileImage || cachedCoverImage || undefined} 
+                    src={profileImageUrl || signedCoverUrl || undefined} 
                     alt="Profilbild"
-                    className="object-cover transition-opacity duration-300"
-                    style={{ opacity: cachedProfileImage ? 1 : 0 }}
+                    className="object-cover"
                   />
                   <AvatarFallback className="bg-primary/20 text-white text-3xl font-bold">
                     {`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`.toUpperCase()}
@@ -465,7 +450,7 @@ export default function ProfilePreview() {
                 <div className="bg-white/5 p-2 rounded-lg border border-white/10 space-y-1.5">
                   {/* Anställningsstatus */}
                   <div>
-                    <p className="text-[9px] text-white uppercase">Anställningsstatus?</p>
+                    <p className="text-[9px] text-white uppercase">Anställningsstatus</p>
                     <p className="text-[11px] text-white">{getEmploymentStatusLabel(data.employment_status)}</p>
                   </div>
 
@@ -591,11 +576,7 @@ export default function ProfilePreview() {
           >
             <div className="flex items-center gap-3">
               <Avatar className="h-12 w-12">
-                <AvatarImage 
-                  src={cachedProfileImage || cachedCoverImage || undefined} 
-                  className="transition-opacity duration-300"
-                  style={{ opacity: cachedProfileImage ? 1 : 0 }}
-                />
+                <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} />
                 <AvatarFallback className="bg-primary/20 text-white">
                   {consentedData?.first_name?.[0]}
                 </AvatarFallback>
@@ -619,11 +600,7 @@ export default function ProfilePreview() {
               {/* Header */}
               <div className="flex items-start gap-4">
                 <Avatar className="h-20 w-20">
-                  <AvatarImage 
-                    src={cachedProfileImage || cachedCoverImage || undefined} 
-                    className="transition-opacity duration-300"
-                    style={{ opacity: cachedProfileImage ? 1 : 0 }}
-                  />
+                  <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} />
                   <AvatarFallback className="bg-primary/20 text-white text-2xl">
                     {consentedData?.first_name?.[0]}
                   </AvatarFallback>
@@ -706,9 +683,6 @@ export default function ProfilePreview() {
 
   return (
     <div className="min-h-screen w-full">
-      {/* Invisible preloader - håller bilderna redo hela tiden */}
-      <InvisibleImagePreloader urls={[cachedProfileImage, cachedCoverImage, profileImageUrl, signedCoverUrl]} />
-      
       <div className="p-6 max-w-6xl mx-auto space-y-6 animate-in fade-in duration-200">
         {/* Header */}
         <div className="text-center space-y-4 mb-6">
@@ -721,37 +695,29 @@ export default function ProfilePreview() {
           </p>
         </div>
 
-        {/* View Mode Toggle - iOS Style */}
+        {/* View Mode Toggle */}
         <div className="flex justify-center">
-          <div className="relative inline-flex bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20">
-            {/* Sliding background */}
-            <motion.div
-              className="absolute top-1 bottom-1 bg-primary rounded-md"
-              initial={false}
-              animate={{
-                left: viewMode === 'mobile' ? '4px' : '50%',
-                width: viewMode === 'mobile' ? 'calc(50% - 4px)' : 'calc(50% - 4px)',
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 500,
-                damping: 30,
-              }}
-            />
-            
-            {/* Buttons */}
+          <div className="inline-flex bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20">
             <button
               onClick={() => setViewMode('mobile')}
-              className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white"
+              className={`flex items-center gap-2 px-6 py-2 rounded-md transition-all ${
+                viewMode === 'mobile'
+                  ? 'bg-primary text-white'
+                  : 'text-white/70 hover:text-white'
+              }`}
             >
-              <Smartphone className="h-3.5 w-3.5" />
+              <Smartphone className="h-4 w-4" />
               Mobil vy
             </button>
             <button
               onClick={() => setViewMode('desktop')}
-              className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white"
+              className={`flex items-center gap-2 px-6 py-2 rounded-md transition-all ${
+                viewMode === 'desktop'
+                  ? 'bg-primary text-white'
+                  : 'text-white/70 hover:text-white'
+              }`}
             >
-              <Monitor className="h-3.5 w-3.5" />
+              <Monitor className="h-4 w-4" />
               Datorvy
             </button>
           </div>
@@ -760,7 +726,7 @@ export default function ProfilePreview() {
         {/* Profile View */}
         {viewMode === 'mobile' ? (
           <div className="flex flex-col items-center space-y-4">
-            <p className="text-white text-sm">Tinder-stil på mobil (tryck på kortet för mer info)</p>
+            <p className="text-white/80 text-sm">Tinder-stil på mobil (tryck på kortet för mer info)</p>
             
             {/* iPhone-stil telefonram - något större */}
             <div className="relative w-[200px] h-[400px] rounded-[2.4rem] bg-black p-1.5 shadow-2xl scale-90 sm:scale-100">
@@ -783,28 +749,26 @@ export default function ProfilePreview() {
           </div>
         ) : (
           <div className="flex flex-col items-center space-y-4">
-            <p className="text-white text-sm">TeamTailor-stil på dator (klicka på kandidaten för att se detaljer)</p>
+            <p className="text-white/80 text-sm">TeamTailor-stil på dator (klicka på kandidaten för att se detaljer)</p>
             <DesktopListView />
           </div>
         )}
 
-        {/* Tips - endast i datorvyn */}
-        {viewMode === 'desktop' && (
-          <Card className="bg-blue-500/20 backdrop-blur-sm border-blue-300/30 mt-8">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Info className="h-5 w-5" />
-                Tips för bättre profil
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-blue-100">
-              <p>• Första intrycket: Lägg till en bra profilbild eller video</p>
-              <p>• Fyll i en utförlig bio för att sticka ut</p>
-              <p>• Håll ditt CV uppdaterat med senaste erfarenheter</p>
-              <p>• Använd en professionell profilbild</p>
-            </CardContent>
-          </Card>
-        )}
+        {/* Tips */}
+        <Card className="bg-blue-500/20 backdrop-blur-sm border-blue-300/30 mt-8">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <Info className="h-5 w-5" />
+              Tips för bättre profil
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-blue-100">
+            <p>• Första intrycket: Lägg till en bra profilbild eller video</p>
+            <p>• Fyll i en utförlig bio för att sticka ut</p>
+            <p>• Håll ditt CV uppdaterat med senaste erfarenheter</p>
+            <p>• Använd en professionell profilbild</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* CV Dialog */}

@@ -1,22 +1,17 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { preloadImages, waitForServiceWorker } from '@/lib/serviceWorkerManager';
-import { imageCache } from '@/lib/imageCache';
 
 /**
  * Global hook som förladddar alla kritiska bilder vid app-start
- * Körs kontinuerligt för att hålla alla bilder redo
+ * Körs en gång när appen startar
  */
 export const useGlobalImagePreloader = () => {
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  
   useEffect(() => {
     const preloadCriticalImages = async () => {
       try {
-        // Vänta på service worker endast i produktion
-        if (import.meta.env.PROD) {
-          await waitForServiceWorker();
-        }
+        // Vänta på att service worker ska bli aktiv
+        await waitForServiceWorker();
 
         const imagesToPreload: string[] = [];
 
@@ -93,37 +88,18 @@ export const useGlobalImagePreloader = () => {
           });
         }
 
-        // 3. Ladda ALLT i imageCache först (högsta prioritet)
+        // 3. Starta förladdning via Service Worker
         if (imagesToPreload.length > 0) {
-          console.log(`🚀 Aggressively preloading ${imagesToPreload.length} assets in memory cache...`);
-          
-          // Ladda i imageCache för omedelbar tillgång
-          await imageCache.preloadImages(imagesToPreload);
-          console.log('✅ All assets cached in memory!');
-          
-          // Sedan ladda i Service Worker för offline
-          if (import.meta.env.PROD) {
-            await preloadImages(imagesToPreload);
-            console.log('✅ All assets cached in Service Worker!');
-          }
+          console.log(`🚀 Preloading ${imagesToPreload.length} assets (ALL jobs, profiles, logos) in background...`);
+          await preloadImages(imagesToPreload);
+          console.log('✅ All assets preloaded and ready for offline use!');
         }
       } catch (error) {
         console.error('Failed to preload assets:', error);
       }
     };
 
-    // Kör preload direkt vid app-start
+    // Kör preload direkt vid app-start för minimal first-navigation-latens
     preloadCriticalImages();
-    
-    // Uppdatera cache var 30:e sekund för att hålla den fräsch
-    intervalRef.current = setInterval(() => {
-      preloadCriticalImages();
-    }, 30000);
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
   }, []);
 };

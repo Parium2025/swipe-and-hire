@@ -25,28 +25,6 @@ import { supabase } from '@/integrations/supabase/client';
  * 5. ÄNDRA ALDRIG isPublic för kandidatmedia (måste vara false)
  */
 
-// ========== SIGNED URL CACHE ==========
-// Cache för att undvika att generera nya signed URLs hela tiden
-interface CachedSignedUrl {
-  url: string;
-  expiresAt: number;
-  createdAt: number;
-}
-
-const signedUrlCache = new Map<string, CachedSignedUrl>();
-
-// Rensa utgångna URLs varje 5 minuter
-if (typeof window !== 'undefined') {
-  setInterval(() => {
-    const now = Date.now();
-    for (const [key, cached] of signedUrlCache.entries()) {
-      if (now >= cached.expiresAt) {
-        signedUrlCache.delete(key);
-      }
-    }
-  }, 5 * 60 * 1000);
-}
-
 export type MediaType = 
   | 'profile-image'
   | 'profile-video'
@@ -228,18 +206,7 @@ export async function getMediaUrl(
     return data.publicUrl;
   }
   
-  // Private bucket → generera signed URL (med cache)
-  const cacheKey = `${config.bucket}:${cleanPath}:${expiresInSeconds}`;
-  const cached = signedUrlCache.get(cacheKey);
-  
-  // Om vi har en cachad URL som fortfarande är giltig i minst 1 timme, använd den
-  const now = Date.now();
-  const oneHour = 60 * 60 * 1000;
-  if (cached && (cached.expiresAt - now) > oneHour) {
-    return cached.url;
-  }
-  
-  // Skapa ny signed URL
+  // Private bucket → generera signed URL
   const { data, error } = await supabase.storage
     .from(config.bucket)
     .createSignedUrl(cleanPath, expiresInSeconds);
@@ -256,13 +223,6 @@ export async function getMediaUrl(
     }
     return null;
   }
-  
-  // Cacha signed URL
-  signedUrlCache.set(cacheKey, {
-    url: data.signedUrl,
-    expiresAt: now + (expiresInSeconds * 1000),
-    createdAt: now
-  });
   
   return data.signedUrl;
 }
