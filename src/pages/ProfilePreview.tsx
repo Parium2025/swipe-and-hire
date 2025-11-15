@@ -447,26 +447,26 @@ export default function ProfilePreview() {
                   <Briefcase className="h-3 w-3 text-white" />
                   Anställningsinformation
                 </h3>
-                <div className="bg-white/5 p-2 rounded-lg border border-white/10 space-y-1.5">
+                <div className="bg-white/5 p-3 rounded-lg border border-white/10 space-y-3">
                   {/* Anställningsstatus */}
-                  <div>
-                    <p className="text-[9px] text-white uppercase">Anställningsstatus?</p>
-                    <p className="text-[11px] text-white">{getEmploymentStatusLabel(data.employment_status)}</p>
+                  <div className="space-y-0.5">
+                    <p className="text-[10px] text-white/80 uppercase tracking-wide leading-relaxed">Anställningsstatus?</p>
+                    <p className="text-xs text-white font-medium leading-relaxed">{getEmploymentStatusLabel(data.employment_status)}</p>
                   </div>
 
                   {/* Arbetstid - visa bara om inte arbetssökande */}
                   {data.employment_status !== 'arbetssokande' && data.working_hours && (
-                    <div>
-                      <p className="text-[9px] text-white uppercase">Hur mycket jobbar du idag?</p>
-                      <p className="text-[11px] text-white">{getWorkingHoursLabel(data.working_hours)}</p>
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] text-white/80 uppercase tracking-wide leading-relaxed">Hur mycket jobbar du idag?</p>
+                      <p className="text-xs text-white font-medium leading-relaxed">{getWorkingHoursLabel(data.working_hours)}</p>
                     </div>
                   )}
 
                   {/* Tillgänglighet */}
                   {data.availability && (
-                    <div>
-                      <p className="text-[9px] text-white uppercase">När kan du börja nytt jobb?</p>
-                      <p className="text-[11px] text-white">{getAvailabilityLabel(data.availability)}</p>
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] text-white/80 uppercase tracking-wide leading-relaxed">När kan du börja nytt jobb?</p>
+                      <p className="text-xs text-white font-medium leading-relaxed">{getAvailabilityLabel(data.availability)}</p>
                     </div>
                   )}
                 </div>
