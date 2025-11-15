@@ -10,8 +10,10 @@ export const useGlobalImagePreloader = () => {
   useEffect(() => {
     const preloadCriticalImages = async () => {
       try {
-        // Vänta på att service worker ska bli aktiv
-        await waitForServiceWorker();
+        // Vänta på service worker endast i produktion
+        if (import.meta.env.PROD) {
+          await waitForServiceWorker();
+        }
 
         const imagesToPreload: string[] = [];
 

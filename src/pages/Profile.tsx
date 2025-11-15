@@ -27,6 +27,7 @@ import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { isValidSwedishPhone } from '@/lib/phoneValidation';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { useCachedImage } from '@/hooks/useCachedImage';
 
 const Profile = () => {
   const { profile, userRole, updateProfile, refreshProfile, user } = useAuth();
@@ -83,6 +84,10 @@ const Profile = () => {
   // Signed URLs for displaying private media
   const signedVideoUrl = useMediaUrl(videoUrl || (profile as any)?.video_url, 'profile-video');
   const signedCoverUrl = useMediaUrl(coverImageUrl || (profile as any)?.cover_image_url, 'cover-image');
+  
+  // Cache images to prevent blinking during re-renders
+  const { cachedUrl: cachedProfileImageUrl } = useCachedImage(signedProfileImageUrl);
+  const { cachedUrl: cachedCoverUrl } = useCachedImage(signedCoverUrl);
   
   // Extended profile fields that we'll need to add to database
   const [employmentStatus, setEmploymentStatus] = useState('');
@@ -941,7 +946,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 px-4 animate-fade-in">
+    <div className="max-w-2xl mx-auto space-y-6 px-4">
       <div className="text-center">
         <h1 className="text-2xl font-semibold text-white mb-2">Min Profil</h1>
         <p className="text-white text-sm">
@@ -1007,16 +1012,20 @@ const Profile = () => {
                   className="cursor-pointer" 
                   onClick={() => document.getElementById('profile-image')?.click()}
                 >
-                  <Avatar className="h-32 w-32 border-4 border-white/10 hover:border-white/20 transition-all">
-                    {(signedProfileImageUrl || signedCoverUrl) ? (
+                  <Avatar className="h-32 w-32 border-4 border-white/10 hover:border-white/20 [transition:border-color_0.2s]">
+                    {(cachedProfileImageUrl || cachedCoverUrl || signedProfileImageUrl || signedCoverUrl) ? (
                       <AvatarImage 
-                        src={signedProfileImageUrl || signedCoverUrl || undefined} 
+                        src={cachedProfileImageUrl || cachedCoverUrl || signedProfileImageUrl || signedCoverUrl || undefined} 
                         alt="Profilbild"
                         className="object-cover"
+                        decoding="sync"
+                        loading="eager"
+                        fetchPriority="high"
+                        draggable={false}
                       />
                     ) : null}
-                    {!(signedProfileImageUrl || signedCoverUrl) && (
-                      <AvatarFallback delayMs={0} className="text-4xl font-semibold bg-white/20 text-white">
+                    {!(cachedProfileImageUrl || cachedCoverUrl || signedProfileImageUrl || signedCoverUrl) && (
+                      <AvatarFallback delayMs={300} className="text-4xl font-semibold bg-white/20 text-white">
                         {((firstName?.trim()?.[0]?.toUpperCase() || '') + (lastName?.trim()?.[0]?.toUpperCase() || '')) || '?'}
                       </AvatarFallback>
                     )}
@@ -1310,7 +1319,7 @@ const Profile = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
                       <div className="space-y-2 md:space-y-1.5">
                         <Label htmlFor="employmentStatus" className="text-white">
-                          Anställningsstatus <span className="text-white">*</span>
+                          Anställningsstatus? <span className="text-white">*</span>
                         </Label>
                         <DropdownMenu modal={false}>
                           <DropdownMenuTrigger asChild>

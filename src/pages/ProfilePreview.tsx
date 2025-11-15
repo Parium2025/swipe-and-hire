@@ -48,8 +48,6 @@ export default function ProfilePreview() {
   const [showDetailedView, setShowDetailedView] = useState(false);
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
   const [cvOpen, setCvOpen] = useState(false);
-  const device = useDevice();
-  const isMobile = device === 'mobile';
   
   // Use hooks to generate signed URLs automatically
   const profileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image');
@@ -452,7 +450,7 @@ export default function ProfilePreview() {
                 <div className="bg-white/5 p-2 rounded-lg border border-white/10 space-y-1.5">
                   {/* Anställningsstatus */}
                   <div>
-                    <p className="text-[9px] text-white uppercase">Anställningsstatus</p>
+                    <p className="text-[9px] text-white uppercase">Anställningsstatus?</p>
                     <p className="text-[11px] text-white">{getEmploymentStatusLabel(data.employment_status)}</p>
                   </div>
 
@@ -697,45 +695,38 @@ export default function ProfilePreview() {
           </p>
         </div>
 
-        {/* View Mode Toggle - iOS style */}
+        {/* View Mode Toggle - iOS Style */}
         <div className="flex justify-center">
-          <div className="relative inline-flex bg-white/10 backdrop-blur-sm rounded-lg p-0.5 border border-white/20">
-            {/* Sliding background indicator */}
+          <div className="relative inline-flex bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20">
+            {/* Sliding background */}
             <motion.div
-              className="absolute top-0.5 bottom-0.5 rounded-md bg-primary"
+              className="absolute top-1 bottom-1 bg-primary rounded-md"
               initial={false}
               animate={{
-                left: viewMode === 'mobile' ? '0.125rem' : '50%',
-                right: viewMode === 'mobile' ? '50%' : '0.125rem',
+                left: viewMode === 'mobile' ? '4px' : '50%',
+                width: viewMode === 'mobile' ? 'calc(50% - 4px)' : 'calc(50% - 4px)',
               }}
               transition={{
                 type: "spring",
                 stiffness: 500,
-                damping: 30
+                damping: 30,
               }}
             />
             
+            {/* Buttons */}
             <button
               onClick={() => setViewMode('mobile')}
-              className={`relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors ${
-                viewMode === 'mobile'
-                  ? 'text-white'
-                  : 'text-white/70 hover:text-white'
-              }`}
+              className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white"
             >
               <Smartphone className="h-3.5 w-3.5" />
-              <span className="text-sm">Mobil vy</span>
+              Mobil vy
             </button>
             <button
               onClick={() => setViewMode('desktop')}
-              className={`relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors ${
-                viewMode === 'desktop'
-                  ? 'text-white'
-                  : 'text-white/70 hover:text-white'
-              }`}
+              className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white"
             >
               <Monitor className="h-3.5 w-3.5" />
-              <span className="text-sm">Datorvy</span>
+              Datorvy
             </button>
           </div>
         </div>
@@ -743,7 +734,7 @@ export default function ProfilePreview() {
         {/* Profile View */}
         {viewMode === 'mobile' ? (
           <div className="flex flex-col items-center space-y-4">
-            <p className="text-white/80 text-sm">Tinder-stil på mobil (tryck på kortet för mer info)</p>
+            <p className="text-white text-sm">Tinder-stil på mobil (tryck på kortet för mer info)</p>
             
             {/* iPhone-stil telefonram - något större */}
             <div className="relative w-[200px] h-[400px] rounded-[2.4rem] bg-black p-1.5 shadow-2xl scale-90 sm:scale-100">
@@ -766,7 +757,7 @@ export default function ProfilePreview() {
           </div>
         ) : (
           <div className="flex flex-col items-center space-y-4">
-            <p className="text-white/80 text-sm">TeamTailor-stil på dator (klicka på kandidaten för att se detaljer)</p>
+            <p className="text-white text-sm">TeamTailor-stil på dator (klicka på kandidaten för att se detaljer)</p>
             <DesktopListView />
           </div>
         )}

@@ -48,12 +48,16 @@ function redirectAuthTokensIfNeeded() {
 
 const redirected = redirectAuthTokensIfNeeded();
 if (!redirected) {
-  // Registrera Service Worker för persistent image cache
-  registerServiceWorker().then(() => {
-    console.log('✅ Service Worker ready for offline caching');
-  }).catch((error) => {
-    console.warn('Service Worker registration failed:', error);
-  });
+  // Registrera Service Worker endast i produktion för att undvika störande reloads i utveckling
+  if (import.meta.env.PROD) {
+    registerServiceWorker()
+      .then(() => {
+        console.log('✅ Service Worker ready for offline caching');
+      })
+      .catch((error) => {
+        console.warn('Service Worker registration failed:', error);
+      });
+  }
 
   const root = createRoot(document.getElementById("root")!);
   root.render(
