@@ -57,7 +57,7 @@ const Subscription = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-white">Abonnemang</h1>
+        <h1 className="text-2xl font-semibold text-white">Abonnemang</h1>
         <p className="text-white">
           Hantera ditt abonnemang och uppgradera din plan
         </p>
