@@ -11,10 +11,13 @@ import { getImmediateDataUrl, upsertDataUrl } from '@/lib/persistentImageCache';
 export function usePersistentMediaUrl(
   storagePath: string | null | undefined,
   mediaType: MediaType,
-  expiresInSeconds: number = 86400
+  expiresInSeconds: number = 86400,
+  forceRefresh: boolean = false
 ) {
-  // Ge omedelbart en eventuell tidigare sparad data-URL
-  const [url, setUrl] = useState<string | null>(() => getImmediateDataUrl(storagePath));
+  // Ge omedelbart en eventuell tidigare sparad data-URL (om inte forceRefresh)
+  const [url, setUrl] = useState<string | null>(() => 
+    forceRefresh ? null : getImmediateDataUrl(storagePath)
+  );
 
   useEffect(() => {
     let alive = true;
@@ -29,7 +32,11 @@ export function usePersistentMediaUrl(
         if (!signed) return;
 
         // 2) Hämta blob och uppdatera persistent cache
-        const resp = await fetch(signed, { cache: 'force-cache', credentials: 'include' });
+        // Använd 'no-cache' om forceRefresh för att alltid få färsk data
+        const resp = await fetch(signed, { 
+          cache: forceRefresh ? 'no-cache' : 'force-cache', 
+          credentials: 'include' 
+        });
         if (!resp.ok) return;
         const blob = await resp.blob();
         upsertDataUrl(storagePath, blob).catch(() => {});
@@ -43,7 +50,7 @@ export function usePersistentMediaUrl(
     }
     run();
     return () => { alive = false; };
-  }, [storagePath, mediaType, expiresInSeconds]);
+  }, [storagePath, mediaType, expiresInSeconds, forceRefresh]);
 
   return url;
 }
