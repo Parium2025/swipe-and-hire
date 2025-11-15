@@ -269,16 +269,13 @@ export default function ProfilePreview() {
                   />
                 </TruncatedText>
                 
-                {/* Info i en symmetrisk linje */}
-                <div className="flex items-center justify-start gap-2 text-xs" style={{ color: '#FFFFFF' }}>
+                {/* Info på separata rader */}
+                <div className="space-y-0.5 text-xs" style={{ color: '#FFFFFF' }}>
                   {isConsented && data.age && (
-                    <span>{data.age} år</span>
-                  )}
-                  {isConsented && data.age && data.location && (
-                    <span>•</span>
+                    <p>{data.age} år</p>
                   )}
                   {data.location && (
-                    <span>Bor i {data.location}, Stockholms län</span>
+                    <p>Bor i {data.location}, Stockholms län</p>
                   )}
                 </div>
                 
