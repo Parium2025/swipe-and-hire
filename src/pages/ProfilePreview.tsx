@@ -22,6 +22,7 @@ import { CvViewer } from '@/components/CvViewer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAggressiveImagePreload } from '@/hooks/useAggressiveImagePreload';
 import { useCachedImage } from '@/hooks/useCachedImage';
+import { InvisibleImagePreloader } from '@/components/InvisibleImagePreloader';
 
 interface ProfileViewData {
   id: string;
@@ -238,7 +239,8 @@ export default function ProfilePreview() {
                   <AvatarImage 
                     src={cachedProfileImage || cachedCoverImage || undefined} 
                     alt="Profilbild"
-                    className="object-cover"
+                    className="object-cover transition-opacity duration-300"
+                    style={{ opacity: cachedProfileImage ? 1 : 0 }}
                   />
                   <AvatarFallback className="bg-primary/20 text-white text-3xl font-bold">
                     {`${data.first_name?.[0] || ''}${data.last_name?.[0] || ''}`.toUpperCase()}
@@ -585,7 +587,11 @@ export default function ProfilePreview() {
           >
             <div className="flex items-center gap-3">
               <Avatar className="h-12 w-12">
-                <AvatarImage src={cachedProfileImage || cachedCoverImage || undefined} />
+                <AvatarImage 
+                  src={cachedProfileImage || cachedCoverImage || undefined} 
+                  className="transition-opacity duration-300"
+                  style={{ opacity: cachedProfileImage ? 1 : 0 }}
+                />
                 <AvatarFallback className="bg-primary/20 text-white">
                   {consentedData?.first_name?.[0]}
                 </AvatarFallback>
@@ -609,7 +615,11 @@ export default function ProfilePreview() {
               {/* Header */}
               <div className="flex items-start gap-4">
                 <Avatar className="h-20 w-20">
-                  <AvatarImage src={cachedProfileImage || cachedCoverImage || undefined} />
+                  <AvatarImage 
+                    src={cachedProfileImage || cachedCoverImage || undefined} 
+                    className="transition-opacity duration-300"
+                    style={{ opacity: cachedProfileImage ? 1 : 0 }}
+                  />
                   <AvatarFallback className="bg-primary/20 text-white text-2xl">
                     {consentedData?.first_name?.[0]}
                   </AvatarFallback>
@@ -692,6 +702,9 @@ export default function ProfilePreview() {
 
   return (
     <div className="min-h-screen w-full">
+      {/* Invisible preloader - håller bilderna redo hela tiden */}
+      <InvisibleImagePreloader urls={[cachedProfileImage, cachedCoverImage, profileImageUrl, signedCoverUrl]} />
+      
       <div className="p-6 max-w-6xl mx-auto space-y-6 animate-in fade-in duration-200">
         {/* Header */}
         <div className="text-center space-y-4 mb-6">
