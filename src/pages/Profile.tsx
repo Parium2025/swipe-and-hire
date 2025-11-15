@@ -1013,15 +1013,19 @@ const Profile = () => {
                   onClick={() => document.getElementById('profile-image')?.click()}
                 >
                   <Avatar className="h-32 w-32 border-4 border-white/10 hover:border-white/20 transition-all">
-                    {(cachedProfileImageUrl || cachedCoverUrl) ? (
+                    {(cachedProfileImageUrl || cachedCoverUrl || signedProfileImageUrl || signedCoverUrl) ? (
                       <AvatarImage 
-                        src={cachedProfileImageUrl || cachedCoverUrl || undefined} 
+                        src={cachedProfileImageUrl || cachedCoverUrl || signedProfileImageUrl || signedCoverUrl || undefined} 
                         alt="Profilbild"
                         className="object-cover"
+                        decoding="sync"
+                        loading="eager"
+                        fetchPriority="high"
+                        draggable={false}
                       />
                     ) : null}
-                    {!(cachedProfileImageUrl || cachedCoverUrl) && (
-                      <AvatarFallback delayMs={0} className="text-4xl font-semibold bg-white/20 text-white">
+                    {!(cachedProfileImageUrl || cachedCoverUrl || signedProfileImageUrl || signedCoverUrl) && (
+                      <AvatarFallback delayMs={300} className="text-4xl font-semibold bg-white/20 text-white">
                         {((firstName?.trim()?.[0]?.toUpperCase() || '') + (lastName?.trim()?.[0]?.toUpperCase() || '')) || '?'}
                       </AvatarFallback>
                     )}
