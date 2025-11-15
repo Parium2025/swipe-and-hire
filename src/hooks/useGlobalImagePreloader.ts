@@ -1,12 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { preloadImages, waitForServiceWorker } from '@/lib/serviceWorkerManager';
+import { imageCache } from '@/lib/imageCache';
 
 /**
  * Global hook som förladddar alla kritiska bilder vid app-start
- * Körs en gång när appen startar
+ * Körs kontinuerligt för att hålla alla bilder redo
  */
 export const useGlobalImagePreloader = () => {
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  
   useEffect(() => {
     const preloadCriticalImages = async () => {
       try {
@@ -90,18 +93,37 @@ export const useGlobalImagePreloader = () => {
           });
         }
 
-        // 3. Starta förladdning via Service Worker
+        // 3. Ladda ALLT i imageCache först (högsta prioritet)
         if (imagesToPreload.length > 0) {
-          console.log(`🚀 Preloading ${imagesToPreload.length} assets (ALL jobs, profiles, logos) in background...`);
-          await preloadImages(imagesToPreload);
-          console.log('✅ All assets preloaded and ready for offline use!');
+          console.log(`🚀 Aggressively preloading ${imagesToPreload.length} assets in memory cache...`);
+          
+          // Ladda i imageCache för omedelbar tillgång
+          await imageCache.preloadImages(imagesToPreload);
+          console.log('✅ All assets cached in memory!');
+          
+          // Sedan ladda i Service Worker för offline
+          if (import.meta.env.PROD) {
+            await preloadImages(imagesToPreload);
+            console.log('✅ All assets cached in Service Worker!');
+          }
         }
       } catch (error) {
         console.error('Failed to preload assets:', error);
       }
     };
 
-    // Kör preload direkt vid app-start för minimal first-navigation-latens
+    // Kör preload direkt vid app-start
     preloadCriticalImages();
+    
+    // Uppdatera cache var 30:e sekund för att hålla den fräsch
+    intervalRef.current = setInterval(() => {
+      preloadCriticalImages();
+    }, 30000);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
   }, []);
 };
