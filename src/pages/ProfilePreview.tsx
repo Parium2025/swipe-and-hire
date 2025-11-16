@@ -785,7 +785,7 @@ export default function ProfilePreview() {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-white">
-                    Presentation om mig
+                    Presentation / Om mig
                   </CardTitle>
                   <span className="text-sm text-white/60">{countWords(consentedData.bio)}/150 ord</span>
                 </div>
