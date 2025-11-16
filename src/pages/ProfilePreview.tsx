@@ -754,7 +754,7 @@ export default function ProfilePreview() {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Briefcase className="h-5 w-5 text-white flex-shrink-0" />
-                  <h3 className="text-2xl font-semibold leading-none tracking-tight text-white">
+                  <h3 className="text-lg font-semibold leading-none tracking-tight text-white">
                     Anställningsinformation
                   </h3>
                 </div>
