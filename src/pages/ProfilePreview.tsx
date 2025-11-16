@@ -752,9 +752,11 @@ export default function ProfilePreview() {
           {(consentedData?.employment_status || consentedData?.working_hours || consentedData?.availability) && (
             <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Briefcase className="h-5 w-5" />
-                  Anställningsinformation
+                <CardTitle className="text-white">
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="h-5 w-5" />
+                    <span>Anställningsinformation</span>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
