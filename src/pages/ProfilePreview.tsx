@@ -903,7 +903,32 @@ export default function ProfilePreview() {
           </div>
         ) : (
           <div className="flex flex-col items-center space-y-4">
-            <DesktopListView />
+            {/* Desktop monitor frame - professional mockup */}
+            <div className="relative">
+              {/* Monitor screen */}
+              <div className="relative w-[700px] rounded-t-lg bg-black p-3 shadow-2xl">
+                {/* Screen bezel */}
+                <div className="relative w-full h-[500px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
+                  {/* Innehåll med Parium bakgrund */}
+                  <div 
+                    className="absolute inset-0 overflow-y-auto custom-scrollbar"
+                    style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}
+                  >
+                    <div className="p-6">
+                      <DesktopListView />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Monitor stand */}
+              <div className="flex flex-col items-center">
+                {/* Stand neck */}
+                <div className="w-16 h-8 bg-gradient-to-b from-gray-700 to-gray-800 rounded-b-sm"></div>
+                {/* Stand base */}
+                <div className="w-40 h-3 bg-gradient-to-b from-gray-800 to-gray-900 rounded-full shadow-lg"></div>
+              </div>
+            </div>
           </div>
         )}
       </div>
