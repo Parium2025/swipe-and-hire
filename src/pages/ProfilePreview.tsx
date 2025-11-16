@@ -575,6 +575,8 @@ export default function ProfilePreview() {
 
   // Desktop view - stor profil som mobilvyn men desktop-layout
   const DesktopListView = () => {
+    const { toast } = useToast();
+    
     // Format employment status för visning - använder samma mappings som mobilvy
     const getEmploymentStatusLabel = (status: string) => {
       const statusLabels: Record<string, string> = {
@@ -617,6 +619,26 @@ export default function ProfilePreview() {
         'overenskommelse': 'Enligt överenskommelse'
       };
       return availLabels[avail] || avail;
+    };
+
+    const handlePhoneClick = () => {
+      if (consentedData?.phone) {
+        navigator.clipboard.writeText(consentedData.phone);
+        toast({
+          title: "Telefonnummer kopierat",
+          description: "Telefonnumret har kopierats till urklipp",
+        });
+      }
+    };
+
+    const handleEmailClick = () => {
+      if (user?.email) {
+        navigator.clipboard.writeText(user.email);
+        toast({
+          title: "E-post kopierad",
+          description: "E-postadressen har kopierats till urklipp",
+        });
+      }
     };
     
     return (
@@ -683,7 +705,12 @@ export default function ProfilePreview() {
                   <Phone className="h-5 w-5 text-white mt-0.5" />
                   <div>
                     <p className="text-xs text-white/60 mb-1">Telefon</p>
-                    <p className="text-white">{consentedData.phone}</p>
+                    <p 
+                      className="text-white cursor-pointer hover:text-primary transition-colors"
+                      onClick={handlePhoneClick}
+                    >
+                      {consentedData.phone}
+                    </p>
                   </div>
                 </div>
               )}
@@ -701,7 +728,12 @@ export default function ProfilePreview() {
                   <Mail className="h-5 w-5 text-white mt-0.5" />
                   <div>
                     <p className="text-xs text-white/60 mb-1">E-post</p>
-                    <p className="text-white">{user.email}</p>
+                    <p 
+                      className="text-white cursor-pointer hover:text-primary transition-colors"
+                      onClick={handleEmailClick}
+                    >
+                      {user.email}
+                    </p>
                   </div>
                 </div>
               )}
