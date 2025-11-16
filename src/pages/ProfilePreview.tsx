@@ -613,24 +613,37 @@ export default function ProfilePreview() {
     
     return (
       <div className="max-w-4xl mx-auto">
-        {/* Stor rund profilbild med namn - direkt på bakgrunden */}
+        {/* Stor rund profilbild/video med namn - direkt på bakgrunden */}
         <div className="mb-6">
           <div className="relative p-12">
-            {/* Stor rund profilbild */}
+            {/* Stor rund profilbild eller video */}
             <div className="flex flex-col items-center gap-6">
-              <Avatar className="h-[400px] w-[400px] ring-8 ring-white/20 shadow-2xl">
-                <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} className="object-cover" />
-                <AvatarFallback className="bg-primary text-white text-8xl">
-                  {consentedData?.first_name?.[0]}
-                </AvatarFallback>
-              </Avatar>
+              {/* Använd ProfileVideo om video finns, annars Avatar */}
+              {signedVideoUrl ? (
+                <div className="relative h-[400px] w-[400px]">
+                  <ProfileVideo
+                    videoUrl={signedVideoUrl}
+                    coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
+                    userInitials={`${consentedData?.first_name?.[0] || ''}${consentedData?.last_name?.[0] || ''}`}
+                    alt="Profilbild"
+                    className="w-full h-full rounded-full ring-8 ring-white/20 shadow-2xl"
+                    showCountdown={true}
+                  />
+                </div>
+              ) : (
+                <Avatar className="h-[400px] w-[400px] ring-8 ring-white/20 shadow-2xl">
+                  <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} className="object-cover" />
+                  <AvatarFallback className="bg-primary text-white text-8xl">
+                    {consentedData?.first_name?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+              )}
               
-              {/* Video badge om video finns */}
-              {signedVideoUrl && (
-                <Badge variant="secondary" className="text-sm px-4 py-2 bg-white/20 text-white backdrop-blur-sm border-white/30">
-                  <Video className="h-4 w-4 mr-2" />
-                  Video tillgänglig
-                </Badge>
+              {/* Status text under bild/video */}
+              {(signedVideoUrl || profileImageUrl) && (
+                <p className="text-sm font-medium text-white">
+                  {signedVideoUrl ? 'Video tillgängligt' : 'Enbart profilbild vald'}
+                </p>
               )}
               
               {/* Namn och ålder */}
