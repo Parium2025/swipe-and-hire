@@ -784,21 +784,23 @@ export default function ProfilePreview() {
 
           {/* Presentation - tar upp full bredd */}
           {consentedData?.bio && (
-            <Card className="col-span-2 bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
-              <CardHeader>
-                <CardTitle className="text-white">
-                  Presentation/Om mig
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <p className="text-white/90 whitespace-pre-wrap leading-relaxed">
-                  {consentedData.bio}
-                </p>
-                <div className="flex justify-end">
-                  <span className="text-sm text-white">{countWords(consentedData.bio)}/150 ord</span>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="col-span-2 space-y-1">
+              <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
+                <CardHeader>
+                  <CardTitle className="text-white">
+                    Presentation/Om mig
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-white/90 whitespace-pre-wrap leading-relaxed">
+                    {consentedData.bio}
+                  </p>
+                </CardContent>
+              </Card>
+              <div className="flex justify-end px-1">
+                <span className="text-sm text-white">{countWords(consentedData.bio)}/150 ord</span>
+              </div>
+            </div>
           )}
 
           {/* CV - tar upp full bredd */}
