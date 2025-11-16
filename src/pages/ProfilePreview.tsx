@@ -613,8 +613,8 @@ export default function ProfilePreview() {
     
     return (
       <div className="max-w-4xl mx-auto">
-        {/* Stor rund profilbild med namn */}
-        <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border-white/20 shadow-2xl overflow-hidden mb-6">
+        {/* Stor rund profilbild med namn - direkt på bakgrunden */}
+        <div className="mb-6">
           <div className="relative p-12">
             {/* Stor rund profilbild */}
             <div className="flex flex-col items-center gap-6">
@@ -644,7 +644,7 @@ export default function ProfilePreview() {
               </div>
             </div>
           </div>
-        </Card>
+        </div>
 
         {/* Innehållssektioner i grid */}
         <div className="grid grid-cols-2 gap-6">
