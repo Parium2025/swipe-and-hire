@@ -672,7 +672,7 @@ export default function ProfilePreview() {
             <CardContent className="space-y-4">
               {consentedData?.phone && (
                 <div className="flex items-start gap-3">
-                  <Phone className="h-5 w-5 text-primary mt-0.5" />
+                  <Phone className="h-5 w-5 text-white mt-0.5" />
                   <div>
                     <p className="text-xs text-white/60 mb-1">Telefon</p>
                     <p className="text-white">{consentedData.phone}</p>
@@ -681,7 +681,7 @@ export default function ProfilePreview() {
               )}
               {consentedData?.location && (
                 <div className="flex items-start gap-3">
-                  <MapPin className="h-5 w-5 text-primary mt-0.5" />
+                  <MapPin className="h-5 w-5 text-white mt-0.5" />
                   <div>
                     <p className="text-xs text-white/60 mb-1">Plats</p>
                     <p className="text-white">{consentedData.location}</p>
@@ -690,7 +690,7 @@ export default function ProfilePreview() {
               )}
               {user?.email && (
                 <div className="flex items-start gap-3">
-                  <Mail className="h-5 w-5 text-primary mt-0.5" />
+                  <Mail className="h-5 w-5 text-white mt-0.5" />
                   <div>
                     <p className="text-xs text-white/60 mb-1">E-post</p>
                     <p className="text-white">{user.email}</p>
@@ -720,7 +720,7 @@ export default function ProfilePreview() {
                 )}
                 {consentedData?.working_hours && (
                   <div className="flex items-start gap-3">
-                    <Clock className="h-5 w-5 text-primary mt-0.5" />
+                    <Clock className="h-5 w-5 text-white mt-0.5" />
                     <div>
                       <p className="text-xs text-white/60 mb-1">Arbetstid</p>
                       <p className="text-white">{getWorkingHoursLabel(consentedData.working_hours)}</p>
@@ -729,7 +729,7 @@ export default function ProfilePreview() {
                 )}
                 {consentedData?.availability && (
                   <div className="flex items-start gap-3">
-                    <Calendar className="h-5 w-5 text-primary mt-0.5" />
+                    <Calendar className="h-5 w-5 text-white mt-0.5" />
                     <div>
                       <p className="text-xs text-white/60 mb-1">Tillgänglighet</p>
                       <p className="text-white">{getAvailabilityLabel(consentedData.availability)}</p>
