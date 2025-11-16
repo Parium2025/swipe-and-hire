@@ -53,6 +53,7 @@ export default function ProfilePreview() {
   const profileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image');
   const signedVideoUrl = useMediaUrl(profile?.video_url, 'profile-video');
   const signedCoverUrl = useMediaUrl(profile?.cover_image_url, 'cover-image');
+  const signedCvUrl = useMediaUrl(profile?.cv_url, 'cv');
 
   useEffect(() => {
     const loadPreviewData = async () => {
@@ -758,7 +759,7 @@ export default function ProfilePreview() {
           )}
 
           {/* CV - tar upp full bredd */}
-          {consentedData?.cv_url && (
+          {consentedData?.cv_url && signedCvUrl && (
             <Card className="col-span-2 bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
@@ -767,14 +768,11 @@ export default function ProfilePreview() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <Button 
-                  onClick={() => setCvOpen(true)}
-                  className="w-full bg-primary hover:bg-primary/90 text-white h-12 text-base"
-                  size="lg"
-                >
-                  <FileText className="h-5 w-5 mr-2" />
-                  Öppna CV
-                </Button>
+                <CvViewer 
+                  src={signedCvUrl} 
+                  fileName="CV" 
+                  height="600px"
+                />
               </CardContent>
             </Card>
           )}
