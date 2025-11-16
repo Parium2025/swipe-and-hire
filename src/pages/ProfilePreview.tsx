@@ -577,6 +577,11 @@ export default function ProfilePreview() {
   const DesktopListView = () => {
     const { toast } = useToast();
     
+    // Ordräknare för bio
+    const countWords = (text: string) => {
+      return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+    };
+    
     // Format employment status för visning - använder samma mappings som mobilvy
     const getEmploymentStatusLabel = (status: string) => {
       const statusLabels: Record<string, string> = {
@@ -778,9 +783,12 @@ export default function ProfilePreview() {
           {consentedData?.bio && (
             <Card className="col-span-2 bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
               <CardHeader>
-                <CardTitle className="text-white">
-                  Presentation om mig
-                </CardTitle>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-white">
+                    Presentation om mig
+                  </CardTitle>
+                  <span className="text-sm text-white/60">{countWords(consentedData.bio)}/150 ord</span>
+                </div>
               </CardHeader>
               <CardContent>
                 <p className="text-white/90 whitespace-pre-wrap leading-relaxed">
