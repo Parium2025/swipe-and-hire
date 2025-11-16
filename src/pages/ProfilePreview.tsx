@@ -368,7 +368,7 @@ export default function ProfilePreview() {
             {/* PERSONLIG INFORMATION */}
             {isConsented && (
               <div className="space-y-1">
-                <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1">Personlig Information</h3>
+                <h3 className="text-[9px] font-semibold text-white tracking-wide px-1">Personlig information</h3>
                 <div className="bg-white/5 p-2 rounded-lg border border-white/10 space-y-1.5">
                   {/* Ålder */}
                   {data.age && (
@@ -446,14 +446,14 @@ export default function ProfilePreview() {
             {/* PRESENTATION / OM MIG */}
             {data.bio && (
               <div className="space-y-1">
-                <div className="flex justify-between items-center px-1">
-                  <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide">Presentation / Om mig</h3>
-                  <span className="text-[9px] text-white">{countWords(data.bio)}/150 ord</span>
-                </div>
-                <div className="bg-white/5 p-2 rounded-lg border border-white/10">
+                <h3 className="text-[9px] font-semibold text-white tracking-wide px-1">Presentation/Om mig</h3>
+                <div className="bg-white/5 p-2 rounded-lg border border-white/10 space-y-2">
                   <p className="text-xs text-white whitespace-pre-wrap leading-relaxed">
                     {data.bio}
                   </p>
+                  <div className="flex justify-end">
+                    <span className="text-[9px] text-white">{countWords(data.bio)}/150 ord</span>
+                  </div>
                 </div>
               </div>
             )}
@@ -461,7 +461,7 @@ export default function ProfilePreview() {
             {/* ANSTÄLLNINGSINFORMATION */}
             {data.employment_status && (
               <div className="space-y-1">
-                <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1 flex items-center gap-1">
+                <h3 className="text-[9px] font-semibold text-white tracking-wide px-1 flex items-center gap-1">
                   <Briefcase className="h-3 w-3 text-white" />
                   Anställningsinformation
                 </h3>
@@ -494,7 +494,7 @@ export default function ProfilePreview() {
             {/* CV */}
             {isConsented && data.cv_url && (
               <div className="space-y-1">
-                <h3 className="text-[9px] font-semibold text-white uppercase tracking-wide px-1 flex items-center gap-1">
+                <h3 className="text-[9px] font-semibold text-white tracking-wide px-1 flex items-center gap-1">
                   <FileText className="h-3 w-3 text-white" />
                   CV
                 </h3>
