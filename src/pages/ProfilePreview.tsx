@@ -714,7 +714,7 @@ export default function ProfilePreview() {
                 <div className="flex items-start gap-2">
                   <Phone className="h-4 w-4 text-white mt-0.5" />
                   <div>
-                    <p className="text-[10px] text-white/60 mb-0.5">Telefon</p>
+                    <p className="text-sm text-white mb-0.5 font-medium">Telefon</p>
                     <p 
                       className="text-white cursor-pointer transition-opacity hover:opacity-80 text-base"
                       onClick={handlePhoneClick}
@@ -728,7 +728,7 @@ export default function ProfilePreview() {
                 <div className="flex items-start gap-2">
                   <MapPin className="h-4 w-4 text-white mt-0.5" />
                   <div>
-                    <p className="text-[10px] text-white/60 mb-0.5">Plats</p>
+                    <p className="text-sm text-white mb-0.5 font-medium">Plats</p>
                     <p className="text-white text-base">{consentedData.location}</p>
                   </div>
                 </div>
@@ -737,7 +737,7 @@ export default function ProfilePreview() {
                 <div className="flex items-start gap-2">
                   <Mail className="h-4 w-4 text-white mt-0.5" />
                   <div>
-                    <p className="text-[10px] text-white/60 mb-0.5">E-post</p>
+                    <p className="text-sm text-white mb-0.5 font-medium">E-post</p>
                     <p 
                       className="text-white cursor-pointer transition-opacity hover:opacity-80 text-base"
                       onClick={handleEmailClick}
@@ -764,7 +764,7 @@ export default function ProfilePreview() {
               <CardContent className="space-y-2 text-sm">
                 {consentedData?.employment_status && (
                   <div>
-                    <p className="text-[10px] text-white/60 mb-0.5">Anställningsstatus</p>
+                    <p className="text-sm text-white mb-0.5 font-medium">Anställningsstatus</p>
                     <p className="text-white font-medium text-base">
                       {getEmploymentStatusLabel(consentedData.employment_status)}
                     </p>
@@ -772,13 +772,13 @@ export default function ProfilePreview() {
                 )}
                 {consentedData?.working_hours && (
                   <div>
-                    <p className="text-[10px] text-white/60 mb-0.5">Arbetstid</p>
+                    <p className="text-sm text-white mb-0.5 font-medium">Arbetstid</p>
                     <p className="text-white text-base">{getWorkingHoursLabel(consentedData.working_hours)}</p>
                   </div>
                 )}
                 {consentedData?.availability && (
                   <div>
-                    <p className="text-[10px] text-white/60 mb-0.5">Tillgänglighet</p>
+                    <p className="text-sm text-white mb-0.5 font-medium">Tillgänglighet</p>
                     <p className="text-white text-base">{getAvailabilityLabel(consentedData.availability)}</p>
                   </div>
                 )}
