@@ -753,7 +753,7 @@ export default function ProfilePreview() {
             <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <Briefcase className="h-5 w-5 text-white" />
+                  <Briefcase className="h-5 w-5 flex-none" color="white" strokeWidth={2} />
                   Anställningsinformation
                 </CardTitle>
               </CardHeader>
