@@ -726,21 +726,15 @@ export default function ProfilePreview() {
                   </div>
                 )}
                 {consentedData?.working_hours && (
-                  <div className="flex items-start gap-3">
-                    <Clock className="h-5 w-5 text-white mt-0.5" />
-                    <div>
-                      <p className="text-xs text-white/60 mb-1">Arbetstid</p>
-                      <p className="text-white">{getWorkingHoursLabel(consentedData.working_hours)}</p>
-                    </div>
+                  <div>
+                    <p className="text-xs text-white/60 mb-1">Arbetstid</p>
+                    <p className="text-white">{getWorkingHoursLabel(consentedData.working_hours)}</p>
                   </div>
                 )}
                 {consentedData?.availability && (
-                  <div className="flex items-start gap-3">
-                    <Calendar className="h-5 w-5 text-white mt-0.5" />
-                    <div>
-                      <p className="text-xs text-white/60 mb-1">Tillgänglighet</p>
-                      <p className="text-white">{getAvailabilityLabel(consentedData.availability)}</p>
-                    </div>
+                  <div>
+                    <p className="text-xs text-white/60 mb-1">Tillgänglighet</p>
+                    <p className="text-white">{getAvailabilityLabel(consentedData.availability)}</p>
                   </div>
                 )}
               </CardContent>
