@@ -622,25 +622,25 @@ export default function ProfilePreview() {
       <div className="max-w-4xl mx-auto">
         {/* Stor rund profilbild/video med namn - direkt på bakgrunden */}
         <div className="mb-6">
-          <div className="relative p-12">
+          <div className="relative p-8">
             {/* Stor rund profilbild eller video */}
-            <div className="flex flex-col items-center gap-6">
+            <div className="flex flex-col items-center gap-4">
               {/* Använd ProfileVideo om video finns, annars Avatar */}
               {signedVideoUrl ? (
-                <div className="relative h-[400px] w-[400px]">
+                <div className="relative h-[280px] w-[280px]">
                   <ProfileVideo
                     videoUrl={signedVideoUrl}
                     coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
                     userInitials={`${consentedData?.first_name?.[0] || ''}${consentedData?.last_name?.[0] || ''}`}
                     alt="Profilbild"
-                    className="w-full h-full rounded-full ring-8 ring-white/20 shadow-2xl"
+                    className="w-full h-full rounded-full ring-4 ring-white/20 shadow-2xl"
                     showCountdown={true}
                   />
                 </div>
               ) : (
-                <Avatar className="h-[400px] w-[400px] ring-8 ring-white/20 shadow-2xl">
+                <Avatar className="h-[280px] w-[280px] ring-4 ring-white/20 shadow-2xl">
                   <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} className="object-cover" />
-                  <AvatarFallback className="bg-primary text-white text-8xl">
+                  <AvatarFallback className="bg-primary text-white text-7xl">
                     {consentedData?.first_name?.[0]}
                   </AvatarFallback>
                 </Avatar>
@@ -655,11 +655,11 @@ export default function ProfilePreview() {
               
               {/* Namn och ålder */}
               <div className="text-center">
-                <h2 className="text-4xl font-bold text-white drop-shadow-lg">
+                <h2 className="text-3xl font-bold text-white drop-shadow-lg">
                   {consentedData?.first_name} {consentedData?.last_name}
                 </h2>
                 {consentedData?.age && (
-                  <p className="text-white/90 text-lg mt-2 drop-shadow">{consentedData.age} år</p>
+                  <p className="text-white/90 text-lg mt-1 drop-shadow">{consentedData.age} år</p>
                 )}
               </div>
             </div>
