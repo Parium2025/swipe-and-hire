@@ -716,7 +716,7 @@ export default function ProfilePreview() {
                   <div>
                     <p className="text-[10px] text-white/60 mb-0.5">Telefon</p>
                     <p 
-                      className="text-white cursor-pointer transition-opacity hover:opacity-80 text-xs"
+                      className="text-white cursor-pointer transition-opacity hover:opacity-80 text-base"
                       onClick={handlePhoneClick}
                     >
                       {consentedData.phone}
@@ -729,7 +729,7 @@ export default function ProfilePreview() {
                   <MapPin className="h-4 w-4 text-white mt-0.5" />
                   <div>
                     <p className="text-[10px] text-white/60 mb-0.5">Plats</p>
-                    <p className="text-white text-xs">{consentedData.location}</p>
+                    <p className="text-white text-base">{consentedData.location}</p>
                   </div>
                 </div>
               )}
@@ -739,7 +739,7 @@ export default function ProfilePreview() {
                   <div>
                     <p className="text-[10px] text-white/60 mb-0.5">E-post</p>
                     <p 
-                      className="text-white cursor-pointer transition-opacity hover:opacity-80 text-xs"
+                      className="text-white cursor-pointer transition-opacity hover:opacity-80 text-base"
                       onClick={handleEmailClick}
                     >
                       {user.email}
@@ -765,7 +765,7 @@ export default function ProfilePreview() {
                 {consentedData?.employment_status && (
                   <div>
                     <p className="text-[10px] text-white/60 mb-0.5">Anställningsstatus</p>
-                    <p className="text-white font-medium text-xs">
+                    <p className="text-white font-medium text-base">
                       {getEmploymentStatusLabel(consentedData.employment_status)}
                     </p>
                   </div>
@@ -773,13 +773,13 @@ export default function ProfilePreview() {
                 {consentedData?.working_hours && (
                   <div>
                     <p className="text-[10px] text-white/60 mb-0.5">Arbetstid</p>
-                    <p className="text-white text-xs">{getWorkingHoursLabel(consentedData.working_hours)}</p>
+                    <p className="text-white text-base">{getWorkingHoursLabel(consentedData.working_hours)}</p>
                   </div>
                 )}
                 {consentedData?.availability && (
                   <div>
                     <p className="text-[10px] text-white/60 mb-0.5">Tillgänglighet</p>
-                    <p className="text-white text-xs">{getAvailabilityLabel(consentedData.availability)}</p>
+                    <p className="text-white text-base">{getAvailabilityLabel(consentedData.availability)}</p>
                   </div>
                 )}
               </CardContent>
