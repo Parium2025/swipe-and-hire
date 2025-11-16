@@ -701,12 +701,14 @@ export default function ProfilePreview() {
         <div className="grid grid-cols-2 gap-6">
           {/* Personlig information */}
           <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Personlig information
-              </CardTitle>
-            </CardHeader>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <User className="h-5 w-5 text-white flex-shrink-0" />
+                  <h3 className="text-lg font-semibold leading-none tracking-tight text-white">
+                    Personlig information
+                  </h3>
+                </div>
+              </CardHeader>
             <CardContent className="space-y-4">
               {consentedData?.phone && (
                 <div className="flex items-start gap-3">
@@ -789,9 +791,9 @@ export default function ProfilePreview() {
             <div className="col-span-2 space-y-1">
               <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
                 <CardHeader>
-                  <CardTitle className="text-white">
+                  <h3 className="text-lg font-semibold leading-none tracking-tight text-white">
                     Presentation/Om mig
-                  </CardTitle>
+                  </h3>
                 </CardHeader>
                 <CardContent>
                   <p className="text-white/90 whitespace-pre-wrap leading-relaxed">
@@ -809,10 +811,12 @@ export default function ProfilePreview() {
           {consentedData?.cv_url && signedCvUrl && (
             <Card className="col-span-2 bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  CV
-                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-white flex-shrink-0" />
+                  <h3 className="text-lg font-semibold leading-none tracking-tight text-white">
+                    CV
+                  </h3>
+                </div>
               </CardHeader>
               <CardContent>
                 <CvViewer 
