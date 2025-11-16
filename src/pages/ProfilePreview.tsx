@@ -745,8 +745,7 @@ export default function ProfilePreview() {
           {consentedData?.bio && (
             <Card className="col-span-2 bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Info className="h-5 w-5" />
+                <CardTitle className="text-white">
                   Presentation om mig
                 </CardTitle>
               </CardHeader>
