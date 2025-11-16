@@ -783,17 +783,17 @@ export default function ProfilePreview() {
           {consentedData?.bio && (
             <Card className="col-span-2 bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
               <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-white">
-                    Presentation/Om mig
-                  </CardTitle>
-                  <span className="text-sm text-white/60">{countWords(consentedData.bio)}/150 ord</span>
-                </div>
+                <CardTitle className="text-white">
+                  Presentation/Om mig
+                </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-2">
                 <p className="text-white/90 whitespace-pre-wrap leading-relaxed">
                   {consentedData.bio}
                 </p>
+                <div className="flex justify-end">
+                  <span className="text-sm text-white">{countWords(consentedData.bio)}/150 ord</span>
+                </div>
               </CardContent>
             </Card>
           )}
