@@ -250,7 +250,7 @@ export default function ProfilePreview() {
 
             {/* Text direkt under profilbilden - beroende på media */}
             {(data.video_url || data.profile_image_url) && (
-              <div className="absolute top-[240px] left-1/2 transform -translate-x-1/2 text-center">
+              <div className="absolute top-[210px] left-1/2 transform -translate-x-1/2 text-center">
                 <p className="text-xs font-medium" style={{ color: '#FFFFFF' }}>
                   {data.video_url ? 'Video tillgängligt' : 'Enbart profilbild vald'}
                 </p>
