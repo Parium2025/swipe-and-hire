@@ -807,26 +807,31 @@ export default function ProfilePreview() {
             </div>
           )}
 
-          {/* CV - tar upp full bredd */}
-          {consentedData?.cv_url && signedCvUrl && (
-            <Card className="col-span-2 bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-white flex-shrink-0" />
-                  <h3 className="text-sm font-semibold leading-none tracking-tight text-white">
-                    CV
-                  </h3>
-                </div>
-              </CardHeader>
-              <CardContent>
+          {/* CV - tar upp full bredd - visas alltid */}
+          <Card className="col-span-2 bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-white flex-shrink-0" />
+                <h3 className="text-sm font-semibold leading-none tracking-tight text-white">
+                  CV
+                </h3>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {consentedData?.cv_url && signedCvUrl ? (
                 <CvViewer 
                   src={signedCvUrl} 
                   fileName="CV" 
                   height="400px"
                 />
-              </CardContent>
-            </Card>
-          )}
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <FileText className="h-12 w-12 text-white/30 mb-2" />
+                  <p className="text-sm text-white/60">Inget CV uppladdat</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
