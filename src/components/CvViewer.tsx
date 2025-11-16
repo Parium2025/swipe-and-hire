@@ -326,14 +326,14 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
 
         {/* Sidebar for page navigation - hidden on mobile */}
         {numPages > 0 && !isMobile && (
-          <div className={`${isTablet ? 'w-12' : 'w-16'} overflow-y-auto rounded-lg bg-white/5 backdrop-blur-sm p-2 flex flex-col gap-2`}>
+          <div className={`${isTablet ? 'w-8' : 'w-10'} overflow-y-auto rounded-lg bg-white/5 backdrop-blur-sm p-1.5 flex flex-col gap-1.5`}>
             {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
               <button
                 key={pageNum}
                 type="button"
                 onClick={() => scrollToPage(pageNum)}
                 className={`
-                  ${isTablet ? 'h-10 text-xs' : 'h-12 text-sm'} rounded flex items-center justify-center font-medium
+                  ${isTablet ? 'h-8 text-xs' : 'h-9 text-xs'} rounded flex items-center justify-center font-medium
                   transition-all duration-200
                   ${pageNum === currentPage
                     ? 'bg-white/20 text-white border border-white/40'
