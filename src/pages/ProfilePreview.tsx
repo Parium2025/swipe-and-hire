@@ -711,11 +711,12 @@ export default function ProfilePreview() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {consentedData?.employment_status && (
-                  <div>
-                    <p className="text-xs text-white/60 mb-1">Anställningsstatus</p>
-                    <p className="text-white font-medium">
-                      {getEmploymentStatusLabel(consentedData.employment_status)}
-                    </p>
+                  <div className="flex items-start gap-3">
+                    <Briefcase className="h-5 w-5 text-white mt-0.5" />
+                    <div>
+                      <p className="text-xs text-white/60 mb-1">Anställningsstatus</p>
+                      <p className="text-white">{getEmploymentStatusLabel(consentedData.employment_status)}</p>
+                    </div>
                   </div>
                 )}
                 {consentedData?.working_hours && (
