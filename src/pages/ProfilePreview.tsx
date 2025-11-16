@@ -613,49 +613,34 @@ export default function ProfilePreview() {
     
     return (
       <div className="max-w-4xl mx-auto">
-        {/* Stor profilkort med video/bild */}
+        {/* Stor rund profilbild med namn */}
         <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border-white/20 shadow-2xl overflow-hidden mb-6">
-          <div className="relative h-[500px]">
-            {/* Video eller profilbild som bakgrund */}
-            {signedVideoUrl ? (
-              <div className="absolute inset-0">
-                <ProfileVideo 
-                  videoUrl={signedVideoUrl}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : profileImageUrl || signedCoverUrl ? (
-              <div className="absolute inset-0">
-                <img 
-                  src={profileImageUrl || signedCoverUrl || undefined} 
-                  alt="Profil"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/10" />
-            )}
-            
-            {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-            
-            {/* Namn och info över video/bild */}
-            <div className="absolute bottom-0 left-0 right-0 p-8">
-              <div className="flex items-end gap-4">
-                <Avatar className="h-24 w-24 ring-4 ring-white/20 shadow-2xl">
-                  <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} />
-                  <AvatarFallback className="bg-primary text-white text-3xl">
-                    {consentedData?.first_name?.[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 pb-2">
-                  <h2 className="text-4xl font-bold text-white drop-shadow-lg">
-                    {consentedData?.first_name} {consentedData?.last_name}
-                  </h2>
-                  {consentedData?.age && (
-                    <p className="text-white/90 text-lg mt-1 drop-shadow">{consentedData.age} år</p>
-                  )}
-                </div>
+          <div className="relative p-12">
+            {/* Stor rund profilbild */}
+            <div className="flex flex-col items-center gap-6">
+              <Avatar className="h-[400px] w-[400px] ring-8 ring-white/20 shadow-2xl">
+                <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} className="object-cover" />
+                <AvatarFallback className="bg-primary text-white text-8xl">
+                  {consentedData?.first_name?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              
+              {/* Video badge om video finns */}
+              {signedVideoUrl && (
+                <Badge variant="secondary" className="text-sm px-4 py-2 bg-white/20 text-white backdrop-blur-sm border-white/30">
+                  <Video className="h-4 w-4 mr-2" />
+                  Video tillgänglig
+                </Badge>
+              )}
+              
+              {/* Namn och ålder */}
+              <div className="text-center">
+                <h2 className="text-4xl font-bold text-white drop-shadow-lg">
+                  {consentedData?.first_name} {consentedData?.last_name}
+                </h2>
+                {consentedData?.age && (
+                  <p className="text-white/90 text-lg mt-2 drop-shadow">{consentedData.age} år</p>
+                )}
               </div>
             </div>
           </div>
