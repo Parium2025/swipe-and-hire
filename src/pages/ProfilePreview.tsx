@@ -340,7 +340,7 @@ export default function ProfilePreview() {
       return (
         <div className="w-full h-full flex flex-col bg-transparent relative">
           {/* Header med stäng-knapp */}
-          <div className="relative px-3 pt-2 pb-2 flex items-center justify-center bg-black/20 border-b border-white/20 flex-shrink-0">
+          <div className="relative px-3 pt-4 pb-2 flex items-center justify-center bg-black/20 border-b border-white/20 flex-shrink-0">
             <button
               onClick={() => setShowDetailedView(false)}
               className="absolute right-3 top-2 text-white hover:text-white text-base"
