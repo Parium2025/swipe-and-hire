@@ -709,42 +709,36 @@ export default function ProfilePreview() {
                   </h3>
                 </div>
               </CardHeader>
-            <CardContent className="space-y-2 text-sm">
+            <CardContent className="space-y-3 text-sm">
               {consentedData?.phone && (
-                <div className="flex items-start gap-2">
-                  <Phone className="h-4 w-4 text-white mt-0.5" />
-                  <div>
-                    <p className="text-sm text-white mb-0.5 font-medium">Telefon</p>
-                    <p 
-                      className="text-white cursor-pointer transition-opacity hover:opacity-80 text-base"
-                      onClick={handlePhoneClick}
-                    >
-                      {consentedData.phone}
-                    </p>
-                  </div>
+                <div className="flex flex-col items-center text-center gap-1">
+                  <Phone className="h-5 w-5 text-white/80 mb-1" />
+                  <p className="text-sm text-white font-medium">Telefon</p>
+                  <p 
+                    className="text-white/90 cursor-pointer transition-opacity hover:opacity-80 text-xs"
+                    onClick={handlePhoneClick}
+                  >
+                    {consentedData.phone}
+                  </p>
                 </div>
               )}
               {consentedData?.location && (
-                <div className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 text-white mt-0.5" />
-                  <div>
-                    <p className="text-sm text-white mb-0.5 font-medium">Plats</p>
-                    <p className="text-white text-base">{consentedData.location}</p>
-                  </div>
+                <div className="flex flex-col items-center text-center gap-1">
+                  <MapPin className="h-5 w-5 text-white/80 mb-1" />
+                  <p className="text-sm text-white font-medium">Plats</p>
+                  <p className="text-white/90 text-xs">{consentedData.location}</p>
                 </div>
               )}
               {user?.email && (
-                <div className="flex items-start gap-2">
-                  <Mail className="h-4 w-4 text-white mt-0.5" />
-                  <div>
-                    <p className="text-sm text-white mb-0.5 font-medium">E-post</p>
-                    <p 
-                      className="text-white cursor-pointer transition-opacity hover:opacity-80 text-base"
-                      onClick={handleEmailClick}
-                    >
-                      {user.email}
-                    </p>
-                  </div>
+                <div className="flex flex-col items-center text-center gap-1">
+                  <Mail className="h-5 w-5 text-white/80 mb-1" />
+                  <p className="text-sm text-white font-medium">E-post</p>
+                  <p 
+                    className="text-white/90 cursor-pointer transition-opacity hover:opacity-80 text-xs"
+                    onClick={handleEmailClick}
+                  >
+                    {user.email}
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -761,25 +755,28 @@ export default function ProfilePreview() {
                   </h3>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2 text-sm">
+              <CardContent className="space-y-3 text-sm">
                 {consentedData?.employment_status && (
-                  <div>
-                    <p className="text-sm text-white mb-0.5 font-medium">Anställningsstatus</p>
-                    <p className="text-white font-medium text-base">
+                  <div className="flex flex-col items-center text-center gap-1">
+                    <Briefcase className="h-5 w-5 text-white/80 mb-1" />
+                    <p className="text-sm text-white font-medium">Anställningsstatus</p>
+                    <p className="text-white/90 text-xs">
                       {getEmploymentStatusLabel(consentedData.employment_status)}
                     </p>
                   </div>
                 )}
                 {consentedData?.working_hours && (
-                  <div>
-                    <p className="text-sm text-white mb-0.5 font-medium">Arbetstid</p>
-                    <p className="text-white text-base">{getWorkingHoursLabel(consentedData.working_hours)}</p>
+                  <div className="flex flex-col items-center text-center gap-1">
+                    <Clock className="h-5 w-5 text-white/80 mb-1" />
+                    <p className="text-sm text-white font-medium">Arbetstid</p>
+                    <p className="text-white/90 text-xs">{getWorkingHoursLabel(consentedData.working_hours)}</p>
                   </div>
                 )}
                 {consentedData?.availability && (
-                  <div>
-                    <p className="text-sm text-white mb-0.5 font-medium">Tillgänglighet</p>
-                    <p className="text-white text-base">{getAvailabilityLabel(consentedData.availability)}</p>
+                  <div className="flex flex-col items-center text-center gap-1">
+                    <Calendar className="h-5 w-5 text-white/80 mb-1" />
+                    <p className="text-sm text-white font-medium">Tillgänglighet</p>
+                    <p className="text-white/90 text-xs">{getAvailabilityLabel(consentedData.availability)}</p>
                   </div>
                 )}
               </CardContent>
