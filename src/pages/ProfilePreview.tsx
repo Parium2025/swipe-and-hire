@@ -706,7 +706,7 @@ export default function ProfilePreview() {
                   <div>
                     <p className="text-xs text-white/60 mb-1">Telefon</p>
                     <p 
-                      className="text-white cursor-pointer hover:text-primary transition-colors"
+                      className="text-white cursor-pointer transition-opacity hover:opacity-80"
                       onClick={handlePhoneClick}
                     >
                       {consentedData.phone}
@@ -729,7 +729,7 @@ export default function ProfilePreview() {
                   <div>
                     <p className="text-xs text-white/60 mb-1">E-post</p>
                     <p 
-                      className="text-white cursor-pointer hover:text-primary transition-colors"
+                      className="text-white cursor-pointer transition-opacity hover:opacity-80"
                       onClick={handleEmailClick}
                     >
                       {user.email}
