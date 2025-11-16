@@ -574,7 +574,7 @@ export default function ProfilePreview() {
 
   // Desktop view - stor profil som mobilvyn men desktop-layout
   const DesktopListView = () => {
-    // Format employment status för visning
+    // Format employment status för visning - använder samma mappings som mobilvy
     const getEmploymentStatusLabel = (status: string) => {
       const statusLabels: Record<string, string> = {
         'tillsvidareanställning': 'Fast anställning',
@@ -593,6 +593,7 @@ export default function ProfilePreview() {
       const hoursLabels: Record<string, string> = {
         'heltid': 'Heltid',
         'deltid': 'Deltid',
+        'varierande': 'Varierande / Flexibelt',
         'timmar': 'Timmar',
         'flexibla_tider': 'Flexibla tider'
       };
@@ -601,7 +602,13 @@ export default function ProfilePreview() {
 
     const getAvailabilityLabel = (avail: string) => {
       const availLabels: Record<string, string> = {
+        'omgaende': 'Omgående',
         'omedelbart': 'Omedelbart',
+        'inom-1-manad': 'Inom 1 månad',
+        'inom-3-manader': 'Inom 3 månader',
+        'inom-6-manader': 'Inom 6 månader',
+        'ej-aktuellt': 'Inte aktuellt just nu',
+        'osaker': 'Osäker',
         '2_veckor': 'Inom 2 veckor',
         '1_manad': 'Inom 1 månad',
         '2_manader': 'Inom 2 månader',
