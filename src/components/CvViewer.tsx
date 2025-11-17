@@ -65,8 +65,8 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
     (async () => {
       try {
         const signed = isStoragePath
-          ? await createSignedUrl('job-applications', src, 86400, fileName)
-          : await convertToSignedUrl(src, 'job-applications', 86400, fileName);
+          ? await createSignedUrl('job-applications', src, 86400)
+          : await convertToSignedUrl(src, 'job-applications', 86400);
         if (mounted) setResolvedUrl(signed || src);
       } catch (e: any) {
         if (mounted) {
@@ -77,6 +77,13 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
     })();
     return () => { mounted = false; };
   }, [src, isStoragePath, fileName]);
+
+  // Mark load complete when using native iframe once URL is resolved
+  useEffect(() => {
+    if (renderMode === 'native' && resolvedUrl) {
+      setLoading(false);
+    }
+  }, [renderMode, resolvedUrl]);
 
   // Load and render PDF with pdfjs directly - Ultra HiDPI rendering without textLayer
   useEffect(() => {
@@ -365,6 +372,8 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
                       : {}),
                     transition: isPanning ? 'none' : 'transform 0.2s ease-out'
                   }}
+                  onLoad={() => setLoading(false)}
+                  onError={() => { setError('Kunde inte visa PDF i denna vy.'); setLoading(false); }}
                 />
               ) : (
                 <div 
