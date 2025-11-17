@@ -157,7 +157,6 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
             span.style.fontSize = `${Math.sqrt(tx[0] * tx[0] + tx[1] * tx[1])}px`;
             span.style.fontFamily = item.fontName || 'sans-serif';
             span.style.color = 'transparent';
-            span.style.textShadow = '0 0 0 #000';
             span.style.transform = `scaleX(${tx[0] / Math.sqrt(tx[0] * tx[0] + tx[1] * tx[1])})`;
             span.style.transformOrigin = '0% 0%';
             span.style.whiteSpace = 'pre';
