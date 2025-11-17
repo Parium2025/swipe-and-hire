@@ -3,7 +3,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 // @ts-ignore - import worker file as URL string for Vite
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { Button } from '@/components/ui/button';
-import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
+import { createSignedUrl, convertToSignedUrl, getStoragePathFromUrl } from '@/utils/storageUtils';
 import { RotateCcw, X, Maximize2, Minimize2 } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
 
@@ -39,6 +39,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
   const containerRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
+  const [previewImages, setPreviewImages] = useState<string[] | null>(null);
 
   // Inject minimal styles for pdf.js textLayer (once)
   useEffect(() => {
@@ -86,9 +87,46 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
     }
   }, [renderMode, resolvedUrl]);
 
-  // Load and render PDF with pdfjs directly - Ultra HiDPI rendering without textLayer
+  // Try to load pre-rendered WebP page previews from storage (if available)
   useEffect(() => {
-    if (!resolvedUrl || renderMode === 'native') return;
+    (async () => {
+      try {
+        setPreviewImages(null);
+        const path = isStoragePath ? src : getStoragePathFromUrl(src || '');
+        if (!path) return;
+        // Expect original path format: {userId}/{base}.pdf
+        const parts = path.split('/');
+        if (parts.length < 2) return;
+        const userId = parts[0];
+        const base = parts[1].replace(/\.[^.]+$/, '');
+        const folder = `cv-previews/${userId}/${base}`;
+        const { data, error } = await (await import('@/integrations/supabase/client')).supabase.storage
+          .from('job-applications')
+          .list(folder, { limit: 100 });
+        if (error || !data) return;
+        const pages = data
+          .filter((o) => o.name.endsWith('.webp') && o.name.startsWith('page-'))
+          .sort((a, b) => parseInt(a.name.match(/page-(\d+)/)?.[1] || '0') - parseInt(b.name.match(/page-(\d+)/)?.[1] || '0'));
+        if (pages.length === 0) return;
+        const urls: string[] = [];
+        for (const p of pages) {
+          const signed = await createSignedUrl('job-applications', `${folder}/${p.name}`, 86400);
+          if (signed) urls.push(signed);
+        }
+        if (urls.length > 0) {
+          setPreviewImages(urls);
+          setNumPages(urls.length);
+          setLoading(false);
+        }
+      } catch (e) {
+        console.warn('Preview image probe failed', e);
+      }
+    })();
+  }, [src, isStoragePath]);
+
+  // Load and render PDF with pdfjs directly (only if no previews)
+  useEffect(() => {
+    if (!resolvedUrl || renderMode === 'native' || (previewImages && previewImages.length > 0)) return;
     let cancelled = false;
     async function render() {
       try {
@@ -452,7 +490,19 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
                       : {}),
                     transition: isPanning ? 'none' : 'transform 0.2s ease-out'
                   }}
-                />
+                >
+                  {previewImages && previewImages.length > 0 ? (
+                    <div className="w-full flex flex-col items-center">
+                      {previewImages.map((u, idx) => (
+                        <img key={idx} src={u} alt={`CV sida ${idx+1}`}
+                          loading="lazy"
+                          className="block mb-4 max-w-full h-auto bg-white"
+                          style={{ imageRendering: 'crisp-edges' as any }}
+                        />
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
               )}
               {loading && (
                 <div className="absolute inset-0 flex items-center justify-center p-6 text-sm pointer-events-none">
@@ -463,7 +513,6 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
           )}
         </div>
 
-        {/* Sidebar for page navigation - hidden on mobile */}
         {numPages > 0 && !isMobile && (
           <div className={`${isTablet ? 'w-8' : 'w-10'} overflow-y-auto rounded-lg bg-white/5 backdrop-blur-sm p-1.5 flex flex-col gap-1.5`}>
             {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
