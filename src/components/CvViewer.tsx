@@ -236,7 +236,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           variant="ghost" 
           size="sm" 
           onClick={() => setZoomLevel(z => Math.max(0.5, z - 0.5))} 
-          className="h-6 w-6 p-0 border border-white/30 text-white text-xs transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
+          className="h-5 w-5 p-0 border border-white/30 text-white text-xs transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
         >
           -
         </Button>
@@ -248,7 +248,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           variant="ghost" 
           size="sm" 
           onClick={() => setZoomLevel(z => Math.min(3.0, z + 0.5))} 
-          className="h-6 w-6 p-0 border border-white/30 text-white text-xs transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
+          className="h-5 w-5 p-0 border border-white/30 text-white text-xs transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
         >
           +
         </Button>
@@ -257,7 +257,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           variant="ghost" 
           size="sm" 
           onClick={handleReset} 
-          className="h-6 w-6 p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
+          className="h-5 w-5 p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
         >
           <RotateCcw className="h-3 w-3" />
         </Button>
@@ -268,7 +268,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
               variant="ghost" 
               size="sm" 
               onClick={onClose}
-              className="h-6 w-6 p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
+              className="h-5 w-5 p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
             >
               <X className="h-3 w-3" />
             </Button>
@@ -279,7 +279,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
                 type="button"
                 variant="ghost" 
                 size="sm" 
-                className="h-6 text-xs px-2 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
+                className="h-5 text-[10px] px-1.5 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
               >
                 Ladda ner
               </Button>
