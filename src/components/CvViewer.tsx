@@ -4,7 +4,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { Button } from '@/components/ui/button';
 import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
-import { RotateCcw, X } from 'lucide-react';
+import { RotateCcw, X, Maximize2, Minimize2 } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl as any;
@@ -35,6 +35,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
   const [startPanPosition, setStartPanPosition] = useState({ x: 0, y: 0 });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
@@ -244,7 +245,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
     setIsPanning(false);
   };
 
-  // Handle touch panning
+  // Handle touch panning (restored)
   const handleTouchStart = (e: React.TouchEvent) => {
     if (zoomLevel > 1 && e.touches.length === 1) {
       setIsPanning(true);
@@ -266,6 +267,27 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
 
   const handleTouchEnd = () => {
     setIsPanning(false);
+  };
+
+  // Fullscreen handlers
+  useEffect(() => {
+    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onFsChange);
+    return () => document.removeEventListener('fullscreenchange', onFsChange);
+  }, []);
+
+  const toggleFullscreen = async () => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    try {
+      if (!document.fullscreenElement) {
+        await el.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch (e) {
+      console.error('Fullscreen error', e);
+    }
   };
 
   // Reset pan when zoom changes
