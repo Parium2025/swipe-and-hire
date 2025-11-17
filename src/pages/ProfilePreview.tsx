@@ -910,7 +910,7 @@ export default function ProfilePreview() {
               {/* Monitor screen */}
               <div className="relative w-[560px] rounded-t-lg bg-black p-2.5 shadow-2xl">
                 {/* Screen bezel */}
-                <div className="relative w-full h-[380px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
+                <div className="relative w-full h-[315px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
                   {/* Innehåll med Parium bakgrund */}
                   <div 
                     className="absolute inset-0 overflow-y-auto custom-scrollbar"
