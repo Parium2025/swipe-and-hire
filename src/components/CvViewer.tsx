@@ -28,7 +28,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [scale, setScale] = useState(initialScale);
-  const [zoomLevel, setZoomLevel] = useState(1.8);
+  const [zoomLevel, setZoomLevel] = useState(1.0);
   const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const [startPanPosition, setStartPanPosition] = useState({ x: 0, y: 0 });
@@ -94,16 +94,23 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
         container.innerHTML = '';
         canvasRefs.current.clear();
 
-        // Use device pixel ratio for sharp rendering on all screens
-        const devicePixelRatio = window.devicePixelRatio || 1;
-        // High quality supersampling with zoom-aware re-rendering
-        const outputScale = Math.min(8, Math.max(2, devicePixelRatio) * 3);
-        const renderedScale = scale * zoomLevel;
+        // Determine a CSS size that fits container width, then render at DPR for crispness
+        const dpr = Math.max(1, window.devicePixelRatio || 1);
+        const scrollEl = scrollContainerRef.current;
+        const containerWidth = scrollEl ? scrollEl.clientWidth : window.innerWidth;
+        const firstPage = await pdf.getPage(1);
+        const unscaledViewport = firstPage.getViewport({ scale: 1 });
+        const pageWidthPts = unscaledViewport.width;
+        // Fit-to-width baseline scale, honoring our initialScale preference
+        const fitScale = containerWidth / pageWidthPts;
+        const baseScale = Math.min(fitScale, initialScale); // keeps baseline around 0.9
+        const effectiveScale = Math.max(0.5, baseScale * zoomLevel);
+        const outputScale = Math.min(4 * dpr, 8); // DPR-aware, avoid huge bitmaps
 
         for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
+          const page = i === 1 ? firstPage : await pdf.getPage(i);
           if (cancelled) return;
-          const viewport = page.getViewport({ scale: renderedScale });
+          const viewport = page.getViewport({ scale: effectiveScale });
 
           // Page wrapper for canvas + text
           const pageContainer = document.createElement('div');
