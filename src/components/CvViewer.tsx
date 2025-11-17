@@ -102,8 +102,8 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
         container.innerHTML = '';
         canvasRefs.current.clear();
 
-        // Ultra HiDPI rendering: Use minimum 4x DPR for crisp text
-        const dpr = Math.max(4, window.devicePixelRatio || 1);
+        // Ultra HiDPI rendering: aggressive scaling for crisp text
+        const dpr = Math.max(1, window.devicePixelRatio || 1);
         const scrollEl = scrollContainerRef.current;
         const containerWidth = scrollEl ? scrollEl.clientWidth : window.innerWidth;
         const firstPage = await pdf.getPage(1);
@@ -113,8 +113,8 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
         const fitScale = containerWidth / pageWidthPts;
         const baseScale = Math.min(fitScale, initialScale);
         const effectiveScale = Math.max(0.5, baseScale * zoomLevel);
-        // Ultra HiDPI: render at very high resolution
-        const outputScale = dpr * 2; // At least 8x on Retina displays
+        // Ultra HiDPI: render at very high resolution (8x–16x)
+        const outputScale = Math.min(16, Math.max(8, dpr * 4));
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = i === 1 ? firstPage : await pdf.getPage(i);
@@ -145,6 +145,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
           canvas.style.position = 'absolute';
           canvas.style.left = '0';
           canvas.style.top = '0';
+          ;(canvas.style as any).imageRendering = 'crisp-edges';
 
           const transform = [outputScale, 0, 0, outputScale, 0, 0];
           canvas.dataset.pageNumber = i.toString();
