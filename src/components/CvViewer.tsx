@@ -79,8 +79,10 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
         container.innerHTML = '';
         canvasRefs.current.clear();
 
-        // Use 4x resolution for maximum clarity at 100% zoom
-        const outputScale = 4;
+        // Use device pixel ratio for sharp rendering on all screens
+        const devicePixelRatio = window.devicePixelRatio || 1;
+        // Use high resolution multiplier for crystal clear text
+        const outputScale = devicePixelRatio * 3;
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
