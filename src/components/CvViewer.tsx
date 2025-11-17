@@ -230,17 +230,17 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
 
   return (
     <div className="w-full flex flex-col gap-3">
-      <div className="flex items-center gap-1.5 flex-wrap">
+      <div className="flex items-center gap-1 flex-wrap">
         <Button 
           type="button"
           variant="ghost" 
           size="sm" 
           onClick={() => setZoomLevel(z => Math.max(0.5, z - 0.5))} 
-          className={`${isMobile ? 'h-8 w-8' : 'h-8 w-8'} p-0 text-xs border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
+          className={`${isMobile ? 'h-8 w-8' : 'h-6 w-6'} p-0 text-[10px] border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
         >
           -
         </Button>
-        <span className="text-xs text-white min-w-[50px] text-center">
+        <span className="text-[10px] text-white min-w-[40px] text-center">
           {Math.round(zoomLevel * 100)}%
         </span>
         <Button 
@@ -248,7 +248,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           variant="ghost" 
           size="sm" 
           onClick={() => setZoomLevel(z => Math.min(3.0, z + 0.5))} 
-          className={`${isMobile ? 'h-8 w-8' : 'h-8 w-8'} p-0 text-xs border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
+          className={`${isMobile ? 'h-8 w-8' : 'h-6 w-6'} p-0 text-[10px] border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
         >
           +
         </Button>
@@ -257,20 +257,20 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           variant="ghost" 
           size="sm" 
           onClick={handleReset} 
-          className={`${isMobile ? 'h-8 w-8' : 'h-8 w-8'} p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
+          className={`${isMobile ? 'h-8 w-8' : 'h-6 w-6'} p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
         >
-          <RotateCcw className="h-3.5 w-3.5" />
+          <RotateCcw className="h-3 w-3" />
         </Button>
-        <div className="ml-auto flex items-center gap-1.5">
+        <div className="ml-auto flex items-center gap-1">
           {onClose && (
             <Button 
               type="button"
               variant="ghost" 
               size="sm" 
               onClick={onClose}
-              className={`${isMobile ? 'h-8 w-8' : 'h-8 w-8'} p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
+              className={`${isMobile ? 'h-8 w-8' : 'h-6 w-6'} p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-3 w-3" />
             </Button>
           )}
           {resolvedUrl && (
@@ -279,7 +279,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
                 type="button"
                 variant="ghost" 
                 size="sm" 
-                className="text-xs px-2.5 h-8 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75"
+                className={`${isMobile ? 'text-xs px-2.5 h-8' : 'text-[10px] px-2 h-6'} border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
               >
                 Ladda ner
               </Button>
