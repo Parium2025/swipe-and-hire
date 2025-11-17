@@ -700,7 +700,7 @@ export default function ProfilePreview() {
         {/* Innehållssektioner i grid */}
         <div className="grid grid-cols-2 gap-2.5">
           {/* Personlig information */}
-          <Card className="bg-white/5 border-white/10 shadow-xl">
+          <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
               <CardHeader className="pb-1.5 pt-2">
                 <div className="flex items-center gap-1.5">
                   <User className="h-3.5 w-3.5 text-white flex-shrink-0" />
@@ -749,7 +749,7 @@ export default function ProfilePreview() {
 
           {/* Anställningsinformation */}
           {(consentedData?.employment_status || consentedData?.working_hours || consentedData?.availability) && (
-            <Card className="bg-white/5 border-white/10 shadow-xl">
+            <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
               <CardHeader className="pb-1.5 pt-2">
                 <div className="flex items-center gap-1.5">
                   <Briefcase className="h-3.5 w-3.5 text-white flex-shrink-0" />
@@ -786,7 +786,7 @@ export default function ProfilePreview() {
           {/* Presentation - tar upp full bredd */}
           {consentedData?.bio && (
             <div className="col-span-2 space-y-0.5">
-              <Card className="bg-white/5 border-white/10 shadow-xl">
+              <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
                 <CardHeader className="pb-1.5 pt-2">
                   <h3 className="text-xs font-semibold leading-none tracking-tight text-white">
                     Presentation/Om mig
@@ -805,7 +805,7 @@ export default function ProfilePreview() {
           )}
 
           {/* CV - tar upp full bredd - visas alltid */}
-          <Card className="col-span-2 bg-white/5 border-white/10 shadow-xl">
+          <Card className="col-span-2 bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
             <CardHeader className="pb-1.5 pt-2">
               <div className="flex items-center gap-1.5">
                 <FileText className="h-3.5 w-3.5 text-white flex-shrink-0" />
@@ -819,7 +819,7 @@ export default function ProfilePreview() {
                 <CvViewer 
                   src={signedCvUrl} 
                   fileName="CV" 
-                  height="460px"
+                  height="280px"
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center py-6 text-center">
@@ -847,7 +847,7 @@ export default function ProfilePreview() {
 
         {/* View Mode Toggle - iOS Style */}
         <div className="flex justify-center">
-          <div className="relative inline-flex bg-white/10 rounded-lg p-1 border border-white/20">
+          <div className="relative inline-flex bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20">
             {/* Sliding background */}
             <motion.div
               className="absolute top-1 bottom-1 bg-primary rounded-md"
@@ -908,9 +908,9 @@ export default function ProfilePreview() {
             {/* Desktop monitor frame - professional mockup */}
             <div className="relative">
               {/* Monitor screen */}
-              <div className="relative w-[920px] rounded-t-lg bg-black p-3 shadow-2xl">
+              <div className="relative w-[560px] rounded-t-lg bg-black p-2.5 shadow-2xl">
                 {/* Screen bezel */}
-                <div className="relative w-full h-[540px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
+                <div className="relative w-full h-[290px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
                   {/* Innehåll med Parium bakgrund */}
                   <div 
                     className="absolute inset-0 overflow-y-auto custom-scrollbar"

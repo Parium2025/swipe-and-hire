@@ -85,22 +85,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       // ALWAYS store storage path, never URLs (signed or public)
       // This ensures permanent access - URLs are generated on-demand when needed
       onFileUploaded(fileName, file.name);
-
-      // Generate high‑DPI previews for PDFs (client-side) and upload to private bucket
-      if (file.type === 'application/pdf') {
-        try {
-          const { generateAndUploadCvPreviews } = await import('@/utils/cvPreviewGenerator');
-          // Fire and forget; we don't block the UI
-          generateAndUploadCvPreviews(file, user.data.user.id, fileName).then(res => {
-            if (res.paths.length > 0) {
-              console.info('CV previews generated:', res.paths);
-            }
-          });
-        } catch (e) {
-          console.warn('Failed to generate CV previews:', e);
-        }
-      }
-
+      
       // For public buckets, preload for offline access
       if (isPublicBucket) {
         const { data: { publicUrl } } = supabase.storage
@@ -108,7 +93,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
           .getPublicUrl(fileName);
         await preloadSingleFile(publicUrl);
       }
-
+      
       toast({
         title: "Fil uppladdad!",
         description: `${file.name} har laddats upp framgångsrikt.`

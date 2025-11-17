@@ -23,9 +23,10 @@ export async function openCvFile({ cvUrl, fileName = 'cv.pdf', onSuccess, onErro
   }
 
   try {
+    const isEmbedded = window.self !== window.top; // inside editor/iframe (incognito often blocks iframe PDF)
     const isStoragePath = !/^https?:\/\//i.test(cvUrl);
 
-    // Prepare a signed URL
+    // Prepare a signed URL up-front so we can open directly on user gesture when embedded
     let finalUrl = cvUrl;
     if (isStoragePath) {
       finalUrl = (await createSignedUrl('job-applications', cvUrl, 86400, fileName)) || cvUrl;
@@ -33,15 +34,28 @@ export async function openCvFile({ cvUrl, fileName = 'cv.pdf', onSuccess, onErro
       finalUrl = (await convertToSignedUrl(cvUrl, 'job-applications', 86400, fileName)) || cvUrl;
     }
 
-    // Always open in new tab - browser will render PDF natively
-    const win = window.open(finalUrl, '_blank', 'noopener,noreferrer');
-    if (win) {
-      onSuccess?.('CV öppnas i ny flik');
-    } else {
-      // Popup blocked - try direct navigation as fallback
-      window.location.href = finalUrl;
-      onSuccess?.('Öppnar CV…');
+    if (isEmbedded) {
+      // Open in a new tab immediately from the click gesture to avoid Chrome/incognito iframe blocks
+      const popup = window.open('', '_blank', 'noopener,noreferrer');
+      if (popup) {
+        popup.location.href = finalUrl;
+        onSuccess?.('CV öppnas i ny flik');
+      } else {
+        // Fallback: navigate this tab
+        window.location.href = finalUrl;
+        onSuccess?.('Öppnar CV…');
+      }
+      return;
     }
+
+    // Otherwise use in-app viewer (CV-tunnel)
+    const params = new URLSearchParams();
+    if (isStoragePath) params.set('path', cvUrl);
+    else params.set('url', cvUrl);
+    if (fileName) params.set('name', fileName);
+
+    onSuccess?.('Öppnar CV…');
+    window.location.href = `/cv-tunnel?${params.toString()}`;
   } catch (error) {
     console.error('Error opening CV:', error);
     onError?.(error instanceof Error ? error : new Error('Unknown error opening CV'));
