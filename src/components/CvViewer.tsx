@@ -173,20 +173,23 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d', { alpha: false });
           if (!ctx) continue;
-          // Use default smoothing for vector text
-          ctx.imageSmoothingEnabled = true;
+          // Prefer no additional smoothing; rely on high pixel density
+          ctx.imageSmoothingEnabled = false;
 
-          // Render at DPR resolution
-          canvas.width = Math.floor(viewport.width * outputScale);
-          canvas.height = Math.floor(viewport.height * outputScale);
+          // Render at DPR resolution (optionally oversample x2 for extra sharpness)
+          const oversample = 2;
+          const scaleOut = outputScale * oversample;
+          canvas.width = Math.floor(viewport.width * scaleOut);
+          canvas.height = Math.floor(viewport.height * scaleOut);
           // CSS size matches viewport exactly (no scaling by CSS)
           canvas.style.width = `${Math.floor(viewport.width)}px`;
           canvas.style.height = `${Math.floor(viewport.height)}px`;
           canvas.style.position = 'absolute';
           canvas.style.left = '0';
           canvas.style.top = '0';
+          (canvas.style as any).imageRendering = 'crisp-edges';
 
-          const transform = [outputScale, 0, 0, outputScale, 0, 0];
+          const transform = [scaleOut, 0, 0, scaleOut, 0, 0];
           canvas.dataset.pageNumber = i.toString();
           pageContainer.appendChild(canvas);
           canvasRefs.current.set(i, canvas);
