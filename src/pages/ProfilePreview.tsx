@@ -721,9 +721,15 @@ export default function ProfilePreview() {
                   </p>
                 </div>
               )}
+              {consentedData?.postal_code && (
+                <div className="flex flex-col items-start gap-0.5">
+                  <p className="text-xs text-white font-medium">Postnummer:</p>
+                  <p className="text-white/90 text-[10px]">{consentedData.postal_code}</p>
+                </div>
+              )}
               {consentedData?.location && (
                 <div className="flex flex-col items-start gap-0.5">
-                  <p className="text-xs text-white font-medium">Plats:</p>
+                  <p className="text-xs text-white font-medium">Ort:</p>
                   <p className="text-white/90 text-[10px]">{consentedData.location}</p>
                 </div>
               )}
