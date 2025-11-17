@@ -2,8 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 // @ts-ignore - import worker file as URL string for Vite
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-// @ts-ignore - textLayer renderer for crisp selectable text
-import { renderTextLayer } from 'pdfjs-dist/web/pdf_viewer.mjs';
 import { Button } from '@/components/ui/button';
 import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
 import { RotateCcw, X } from 'lucide-react';
@@ -98,7 +96,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
 
         // Use device pixel ratio for sharp rendering on all screens
         const devicePixelRatio = window.devicePixelRatio || 1;
-        // Aggressive supersampling for ultra-sharp text
+        // Aggressive supersampling (8-10x) for ultra-sharp text
         const outputScale = Math.min(10, Math.max(2, devicePixelRatio) * 4);
 
         for (let i = 1; i <= pdf.numPages; i++) {
@@ -106,7 +104,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           if (cancelled) return;
           const viewport = page.getViewport({ scale });
 
-          // Wrapper per page to host canvas + text layer
+          // Page wrapper for canvas + text
           const pageContainer = document.createElement('div');
           pageContainer.style.position = 'relative';
           pageContainer.style.width = `${Math.floor(viewport.width)}px`;
@@ -116,7 +114,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           container.appendChild(pageContainer);
 
           const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
+          const ctx = canvas.getContext('2d', { alpha: false });
           if (!ctx) continue;
           ctx.imageSmoothingEnabled = false;
 
@@ -125,13 +123,14 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           canvas.style.width = `${Math.floor(viewport.width)}px`;
           canvas.style.height = `${Math.floor(viewport.height)}px`;
           canvas.style.position = 'absolute';
-          canvas.style.left = '0px';
-          canvas.style.top = '0px';
+          canvas.style.left = '0';
+          canvas.style.top = '0';
 
           const transform = [outputScale, 0, 0, outputScale, 0, 0];
           canvas.dataset.pageNumber = i.toString();
           pageContainer.appendChild(canvas);
           canvasRefs.current.set(i, canvas);
+          
           await page.render({
             canvas: canvas,
             canvasContext: ctx,
@@ -139,19 +138,32 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
             transform: transform
           }).promise;
 
-          // Add crisp selectable text layer above canvas
-          const textLayerDiv = document.createElement('div');
-          textLayerDiv.className = 'textLayer';
-          textLayerDiv.style.pointerEvents = 'none';
-          pageContainer.appendChild(textLayerDiv);
-
+          // Manual crisp text layer above canvas
           const textContent = await page.getTextContent();
-          await (renderTextLayer as any)({
-            textContentSource: textContent,
-            container: textLayerDiv,
-            viewport,
-            textDivs: []
+          const textLayerDiv = document.createElement('div');
+          textLayerDiv.style.position = 'absolute';
+          textLayerDiv.style.inset = '0';
+          textLayerDiv.style.overflow = 'hidden';
+          textLayerDiv.style.pointerEvents = 'none';
+          
+          textContent.items.forEach((item: any) => {
+            if (!item.str) return;
+            const tx = item.transform;
+            const span = document.createElement('span');
+            span.textContent = item.str;
+            span.style.position = 'absolute';
+            span.style.left = `${tx[4]}px`;
+            span.style.top = `${tx[5]}px`;
+            span.style.fontSize = `${Math.sqrt(tx[0] * tx[0] + tx[1] * tx[1])}px`;
+            span.style.fontFamily = item.fontName || 'sans-serif';
+            span.style.color = 'transparent';
+            span.style.textShadow = '0 0 0 #000';
+            span.style.transform = `scaleX(${tx[0] / Math.sqrt(tx[0] * tx[0] + tx[1] * tx[1])})`;
+            span.style.transformOrigin = '0% 0%';
+            span.style.whiteSpace = 'pre';
+            textLayerDiv.appendChild(span);
           });
+          pageContainer.appendChild(textLayerDiv);
         }
         setLoading(false);
       } catch (e: any) {
