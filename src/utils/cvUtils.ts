@@ -42,8 +42,13 @@ export async function openCvFile({ cvUrl, fileName = 'cv.pdf', onSuccess, onErro
         const blob = await res.blob();
         const pdfBlob = blob.type && blob.type.includes('pdf') ? blob : new Blob([blob], { type: 'application/pdf' });
         const objectUrl = URL.createObjectURL(pdfBlob);
-        const popup = window.open(objectUrl, '_blank', 'noopener,noreferrer');
-        if (!popup) {
+        const win = window.open('', '_blank', 'noopener,noreferrer');
+        if (win) {
+          const viewerHtml = `<!doctype html><html><head><meta charset="utf-8"><title>${fileName}</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{height:100%;margin:0;background:#121212} iframe{border:0;position:fixed;inset:0;width:100%;height:100%;background:#121212}</style></head><body><iframe src="${objectUrl}" allow="fullscreen"></iframe></body></html>`;
+          win.document.open();
+          win.document.write(viewerHtml);
+          win.document.close();
+        } else {
           // Fallback: navigate current tab to blob URL
           window.location.href = objectUrl;
         }
