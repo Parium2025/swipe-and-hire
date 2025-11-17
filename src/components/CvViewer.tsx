@@ -3,7 +3,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 // @ts-ignore - import worker file as URL string for Vite
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
-import { RotateCcw, X } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl as any;
@@ -268,15 +268,6 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           <RotateCcw className="h-3 w-3" />
         </button>
         <div className="ml-auto flex items-center gap-1">
-          {onClose && (
-            <button
-              type="button"
-              onClick={onClose}
-              className={`${isMobile ? 'h-7 w-7' : 'h-5 w-5'} min-h-0 min-w-0 aspect-square p-0 leading-none rounded-md border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95 active:bg-white/20 active:duration-75 flex items-center justify-center`}
-            >
-              <X className="h-3 w-3" />
-            </button>
-          )}
           {resolvedUrl && (
             <a href={resolvedUrl} download={fileName}>
               <button
