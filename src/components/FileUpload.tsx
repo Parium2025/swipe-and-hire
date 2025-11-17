@@ -279,7 +279,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
         {isPdf && (
           <div className="pt-1">
-            <CvViewer src={currentFile.url} fileName={currentFile.name} height="70vh" />
+            <CvViewer src={currentFile.url} fileName={currentFile.name} height="70vh" preferCanvas={true} />
           </div>
         )}
       </div>
