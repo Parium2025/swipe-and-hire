@@ -649,16 +649,16 @@ export default function ProfilePreview() {
       }
     };
     
-    return (
-      <div className="max-w-full mx-auto space-y-4">
+      return (
+        <div className="max-w-full mx-auto space-y-3">
         {/* Mindre rund profilbild/video med namn - direkt på bakgrunden */}
-        <div className="mb-4">
-          <div className="relative p-4">
+        <div className="mb-3">
+          <div className="relative p-3">
             {/* Mindre rund profilbild eller video */}
-            <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col items-center gap-2">
               {/* Använd ProfileVideo om video finns, annars Avatar */}
               {signedVideoUrl ? (
-                <div className="relative h-[160px] w-[160px]">
+                <div className="relative h-[120px] w-[120px]">
                   <ProfileVideo
                     videoUrl={signedVideoUrl}
                     coverImageUrl={signedCoverUrl || profileImageUrl || undefined}
@@ -669,9 +669,9 @@ export default function ProfilePreview() {
                   />
                 </div>
               ) : (
-                <Avatar className="h-[160px] w-[160px] ring-2 ring-white/20 shadow-xl">
+                <Avatar className="h-[120px] w-[120px] ring-2 ring-white/20 shadow-xl">
                   <AvatarImage src={profileImageUrl || signedCoverUrl || undefined} className="object-cover" />
-                  <AvatarFallback className="bg-primary text-white text-4xl">
+                  <AvatarFallback className="bg-primary text-white text-3xl">
                     {consentedData?.first_name?.[0]}
                   </AvatarFallback>
                 </Avatar>
@@ -679,18 +679,18 @@ export default function ProfilePreview() {
               
               {/* Status text under bild/video */}
               {(signedVideoUrl || profileImageUrl) && (
-                <p className="text-xs font-medium text-white">
+                <p className="text-[10px] font-medium text-white">
                   {signedVideoUrl ? 'Video tillgängligt' : 'Enbart profilbild vald'}
                 </p>
               )}
               
               {/* Namn och ålder */}
               <div className="text-center">
-                <h2 className="text-xl font-bold text-white drop-shadow-lg">
+                <h2 className="text-lg font-bold text-white drop-shadow-lg">
                   {consentedData?.first_name} {consentedData?.last_name}
                 </h2>
                 {consentedData?.age && (
-                  <p className="text-white/90 text-sm mt-0.5 drop-shadow">{consentedData.age} år</p>
+                  <p className="text-white/90 text-xs mt-0.5 drop-shadow">{consentedData.age} år</p>
                 )}
               </div>
             </div>
@@ -698,24 +698,24 @@ export default function ProfilePreview() {
         </div>
 
         {/* Innehållssektioner i grid */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2.5">
           {/* Personlig information */}
           <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-white flex-shrink-0" />
-                  <h3 className="text-sm font-semibold leading-none tracking-tight text-white">
+              <CardHeader className="pb-1.5 pt-2">
+                <div className="flex items-center gap-1.5">
+                  <User className="h-3.5 w-3.5 text-white flex-shrink-0" />
+                  <h3 className="text-xs font-semibold leading-none tracking-tight text-white">
                     Personlig information
                   </h3>
                 </div>
               </CardHeader>
-            <CardContent className="space-y-3 text-sm">
+            <CardContent className="space-y-2 text-xs pb-2">
               {consentedData?.phone && (
-                <div className="flex flex-col items-center text-center gap-1">
-                  <Phone className="h-5 w-5 text-white/80 mb-1" />
-                  <p className="text-sm text-white font-medium">Telefon</p>
+                <div className="flex flex-col items-center text-center gap-0.5">
+                  <Phone className="h-4 w-4 text-white/80" />
+                  <p className="text-xs text-white font-medium">Telefon</p>
                   <p 
-                    className="text-white/90 cursor-pointer transition-opacity hover:opacity-80 text-xs"
+                    className="text-white/90 cursor-pointer transition-opacity hover:opacity-80 text-[10px]"
                     onClick={handlePhoneClick}
                   >
                     {consentedData.phone}
@@ -723,18 +723,18 @@ export default function ProfilePreview() {
                 </div>
               )}
               {consentedData?.location && (
-                <div className="flex flex-col items-center text-center gap-1">
-                  <MapPin className="h-5 w-5 text-white/80 mb-1" />
-                  <p className="text-sm text-white font-medium">Plats</p>
-                  <p className="text-white/90 text-xs">{consentedData.location}</p>
+                <div className="flex flex-col items-center text-center gap-0.5">
+                  <MapPin className="h-4 w-4 text-white/80" />
+                  <p className="text-xs text-white font-medium">Plats</p>
+                  <p className="text-white/90 text-[10px]">{consentedData.location}</p>
                 </div>
               )}
               {user?.email && (
-                <div className="flex flex-col items-center text-center gap-1">
-                  <Mail className="h-5 w-5 text-white/80 mb-1" />
-                  <p className="text-sm text-white font-medium">E-post</p>
+                <div className="flex flex-col items-center text-center gap-0.5">
+                  <Mail className="h-4 w-4 text-white/80" />
+                  <p className="text-xs text-white font-medium">E-post</p>
                   <p 
-                    className="text-white/90 cursor-pointer transition-opacity hover:opacity-80 text-xs"
+                    className="text-white/90 cursor-pointer transition-opacity hover:opacity-80 text-[10px]"
                     onClick={handleEmailClick}
                   >
                     {user.email}
@@ -747,36 +747,35 @@ export default function ProfilePreview() {
           {/* Anställningsinformation */}
           {(consentedData?.employment_status || consentedData?.working_hours || consentedData?.availability) && (
             <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-2">
-                  <Briefcase className="h-4 w-4 text-white flex-shrink-0" />
-                  <h3 className="text-sm font-semibold leading-none tracking-tight text-white">
+              <CardHeader className="pb-1.5 pt-2">
+                <div className="flex items-center gap-1.5">
+                  <Briefcase className="h-3.5 w-3.5 text-white flex-shrink-0" />
+                  <h3 className="text-xs font-semibold leading-none tracking-tight text-white">
                     Anställningsinformation
                   </h3>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3 text-sm">
+              <CardContent className="space-y-2 text-xs pb-2">
                 {consentedData?.employment_status && (
-                  <div className="flex flex-col items-center text-center gap-1">
-                    <Briefcase className="h-5 w-5 text-white/80 mb-1" />
-                    <p className="text-sm text-white font-medium">Anställningsstatus</p>
-                    <p className="text-white/90 text-xs">
+                  <div className="flex flex-col items-center text-center gap-0.5">
+                    <Briefcase className="h-4 w-4 text-white/80" />
+                    <p className="text-xs text-white font-medium">Anställningsstatus</p>
+                    <p className="text-white/90 text-[10px]">
                       {getEmploymentStatusLabel(consentedData.employment_status)}
                     </p>
                   </div>
                 )}
                 {consentedData?.working_hours && (
-                  <div className="flex flex-col items-center text-center gap-1">
-                    <Clock className="h-5 w-5 text-white/80 mb-1" />
-                    <p className="text-sm text-white font-medium">Arbetstid</p>
-                    <p className="text-white/90 text-xs">{getWorkingHoursLabel(consentedData.working_hours)}</p>
+                  <div className="flex flex-col items-center text-center gap-0.5">
+                    <p className="text-xs text-white font-medium">Arbetstid</p>
+                    <p className="text-white/90 text-[10px]">{getWorkingHoursLabel(consentedData.working_hours)}</p>
                   </div>
                 )}
                 {consentedData?.availability && (
-                  <div className="flex flex-col items-center text-center gap-1">
-                    <Calendar className="h-5 w-5 text-white/80 mb-1" />
-                    <p className="text-sm text-white font-medium">Tillgänglighet</p>
-                    <p className="text-white/90 text-xs">{getAvailabilityLabel(consentedData.availability)}</p>
+                  <div className="flex flex-col items-center text-center gap-0.5">
+                    <Calendar className="h-4 w-4 text-white/80" />
+                    <p className="text-xs text-white font-medium">Tillgänglighet</p>
+                    <p className="text-white/90 text-[10px]">{getAvailabilityLabel(consentedData.availability)}</p>
                   </div>
                 )}
               </CardContent>
@@ -785,46 +784,46 @@ export default function ProfilePreview() {
 
           {/* Presentation - tar upp full bredd */}
           {consentedData?.bio && (
-            <div className="col-span-2 space-y-1">
+            <div className="col-span-2 space-y-0.5">
               <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
-                <CardHeader className="pb-2">
-                  <h3 className="text-sm font-semibold leading-none tracking-tight text-white">
+                <CardHeader className="pb-1.5 pt-2">
+                  <h3 className="text-xs font-semibold leading-none tracking-tight text-white">
                     Presentation/Om mig
                   </h3>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-white/90 whitespace-pre-wrap leading-relaxed text-xs">
+                <CardContent className="pb-2">
+                  <p className="text-white/90 whitespace-pre-wrap leading-relaxed text-[10px]">
                     {consentedData.bio}
                   </p>
                 </CardContent>
               </Card>
               <div className="flex justify-end px-1">
-                <span className="text-xs text-white">{countWords(consentedData.bio)}/150 ord</span>
+                <span className="text-[10px] text-white">{countWords(consentedData.bio)}/150 ord</span>
               </div>
             </div>
           )}
 
           {/* CV - tar upp full bredd - visas alltid */}
           <Card className="col-span-2 bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-white flex-shrink-0" />
-                <h3 className="text-sm font-semibold leading-none tracking-tight text-white">
+            <CardHeader className="pb-1.5 pt-2">
+              <div className="flex items-center gap-1.5">
+                <FileText className="h-3.5 w-3.5 text-white flex-shrink-0" />
+                <h3 className="text-xs font-semibold leading-none tracking-tight text-white">
                   CV
                 </h3>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pb-2">
               {consentedData?.cv_url && signedCvUrl ? (
                 <CvViewer 
                   src={signedCvUrl} 
                   fileName="CV" 
-                  height="400px"
+                  height="280px"
                 />
               ) : (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <FileText className="h-12 w-12 text-white/30 mb-2" />
-                  <p className="text-sm text-white/60">Inget CV uppladdat</p>
+                <div className="flex flex-col items-center justify-center py-6 text-center">
+                  <FileText className="h-8 w-8 text-white/30 mb-1.5" />
+                  <p className="text-xs text-white/60">Inget CV uppladdat</p>
                 </div>
               )}
             </CardContent>
@@ -910,7 +909,7 @@ export default function ProfilePreview() {
               {/* Monitor screen */}
               <div className="relative w-[560px] rounded-t-lg bg-black p-2.5 shadow-2xl">
                 {/* Screen bezel */}
-                <div className="relative w-full h-[315px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
+                <div className="relative w-full h-[290px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
                   {/* Innehåll med Parium bakgrund */}
                   <div 
                     className="absolute inset-0 overflow-y-auto custom-scrollbar"
