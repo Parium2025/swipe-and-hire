@@ -77,7 +77,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
     return () => { mounted = false; };
   }, [src, isStoragePath, fileName]);
 
-  // Load and render PDF with pdfjs directly (render once, zoom is CSS transform only)
+  // Load and render PDF with pdfjs directly - Ultra HiDPI rendering without textLayer
   useEffect(() => {
     if (!resolvedUrl) return;
     let cancelled = false;
@@ -94,25 +94,26 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
         container.innerHTML = '';
         canvasRefs.current.clear();
 
-        // Determine a CSS size that fits container width, then render at DPR for crispness
-        const dpr = Math.max(1, window.devicePixelRatio || 1);
+        // Ultra HiDPI rendering: Use minimum 4x DPR for crisp text
+        const dpr = Math.max(4, window.devicePixelRatio || 1);
         const scrollEl = scrollContainerRef.current;
         const containerWidth = scrollEl ? scrollEl.clientWidth : window.innerWidth;
         const firstPage = await pdf.getPage(1);
         const unscaledViewport = firstPage.getViewport({ scale: 1 });
         const pageWidthPts = unscaledViewport.width;
-        // Fit-to-width baseline scale, honoring our initialScale preference
+        // Fit-to-width baseline scale
         const fitScale = containerWidth / pageWidthPts;
-        const baseScale = Math.min(fitScale, initialScale); // keeps baseline around 0.9
+        const baseScale = Math.min(fitScale, initialScale);
         const effectiveScale = Math.max(0.5, baseScale * zoomLevel);
-        const outputScale = Math.min(4 * dpr, 8); // DPR-aware, avoid huge bitmaps
+        // Ultra HiDPI: render at very high resolution
+        const outputScale = dpr * 2; // At least 8x on Retina displays
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = i === 1 ? firstPage : await pdf.getPage(i);
           if (cancelled) return;
           const viewport = page.getViewport({ scale: effectiveScale });
 
-          // Page wrapper for canvas + text
+          // Page wrapper for canvas only (no textLayer)
           const pageContainer = document.createElement('div');
           pageContainer.style.position = 'relative';
           pageContainer.style.width = `${Math.floor(viewport.width)}px`;
@@ -124,10 +125,13 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d', { alpha: false });
           if (!ctx) continue;
+          // Disable image smoothing for crisp rendering
           ctx.imageSmoothingEnabled = false;
 
+          // Render at ultra high resolution
           canvas.width = Math.floor(viewport.width * outputScale);
           canvas.height = Math.floor(viewport.height * outputScale);
+          // CSS size matches viewport exactly (1:1, no extra scaling)
           canvas.style.width = `${Math.floor(viewport.width)}px`;
           canvas.style.height = `${Math.floor(viewport.height)}px`;
           canvas.style.position = 'absolute';
@@ -146,31 +150,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
             transform: transform
           }).promise;
 
-          // Manual crisp text layer above canvas
-          const textContent = await page.getTextContent();
-          const textLayerDiv = document.createElement('div');
-          textLayerDiv.style.position = 'absolute';
-          textLayerDiv.style.inset = '0';
-          textLayerDiv.style.overflow = 'hidden';
-          textLayerDiv.style.pointerEvents = 'none';
-          
-          textContent.items.forEach((item: any) => {
-            if (!item.str) return;
-            const tx = item.transform;
-            const span = document.createElement('span');
-            span.textContent = item.str;
-            span.style.position = 'absolute';
-            span.style.left = `${tx[4]}px`;
-            span.style.top = `${tx[5]}px`;
-            span.style.fontSize = `${Math.sqrt(tx[0] * tx[0] + tx[1] * tx[1])}px`;
-            span.style.fontFamily = item.fontName || 'sans-serif';
-            span.style.color = 'transparent';
-            span.style.transform = `scaleX(${tx[0] / Math.sqrt(tx[0] * tx[0] + tx[1] * tx[1])})`;
-            span.style.transformOrigin = '0% 0%';
-            span.style.whiteSpace = 'pre';
-            textLayerDiv.appendChild(span);
-          });
-          pageContainer.appendChild(textLayerDiv);
+          // NO textLayer injection - pure canvas rendering only
         }
         setLoading(false);
       } catch (e: any) {
