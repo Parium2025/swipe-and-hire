@@ -650,7 +650,7 @@ export default function ProfilePreview() {
     };
     
     return (
-      <div className="max-w-4xl mx-auto space-y-4">
+      <div className="max-w-full mx-auto space-y-4">
         {/* Mindre rund profilbild/video med namn - direkt på bakgrunden */}
         <div className="mb-4">
           <div className="relative p-4">
@@ -745,7 +745,7 @@ export default function ProfilePreview() {
           </Card>
 
           {/* Anställningsinformation */}
-          {consentedData?.employment_status && (
+          {(consentedData?.employment_status || consentedData?.working_hours || consentedData?.availability) && (
             <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
@@ -756,13 +756,29 @@ export default function ProfilePreview() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
-                <div className="flex flex-col items-center text-center gap-1">
-                  <Briefcase className="h-5 w-5 text-white/80 mb-1" />
-                  <p className="text-sm text-white font-medium">Anställningsstatus</p>
-                  <p className="text-white/90 text-xs">
-                    {getEmploymentStatusLabel(consentedData.employment_status)}
-                  </p>
-                </div>
+                {consentedData?.employment_status && (
+                  <div className="flex flex-col items-center text-center gap-1">
+                    <Briefcase className="h-5 w-5 text-white/80 mb-1" />
+                    <p className="text-sm text-white font-medium">Anställningsstatus</p>
+                    <p className="text-white/90 text-xs">
+                      {getEmploymentStatusLabel(consentedData.employment_status)}
+                    </p>
+                  </div>
+                )}
+                {consentedData?.working_hours && (
+                  <div className="flex flex-col items-center text-center gap-1">
+                    <Clock className="h-5 w-5 text-white/80 mb-1" />
+                    <p className="text-sm text-white font-medium">Arbetstid</p>
+                    <p className="text-white/90 text-xs">{getWorkingHoursLabel(consentedData.working_hours)}</p>
+                  </div>
+                )}
+                {consentedData?.availability && (
+                  <div className="flex flex-col items-center text-center gap-1">
+                    <Calendar className="h-5 w-5 text-white/80 mb-1" />
+                    <p className="text-sm text-white font-medium">Tillgänglighet</p>
+                    <p className="text-white/90 text-xs">{getAvailabilityLabel(consentedData.availability)}</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
