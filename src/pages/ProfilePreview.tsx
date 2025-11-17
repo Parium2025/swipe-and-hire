@@ -755,22 +755,22 @@ export default function ProfilePreview() {
               <CardContent className="space-y-2 text-xs pb-2">
                 {consentedData?.employment_status && (
                   <div className="flex flex-col items-start gap-0.5">
-                    <p className="text-xs text-white font-medium">Anställningsstatus, Svar:</p>
+                    <p className="text-xs text-white font-medium">Anställningsstatus?</p>
                     <p className="text-white/90 text-[10px]">
-                      {getEmploymentStatusLabel(consentedData.employment_status)}
+                      Svar: {getEmploymentStatusLabel(consentedData.employment_status)}
                     </p>
                   </div>
                 )}
                 {consentedData?.working_hours && (
                   <div className="flex flex-col items-start gap-0.5">
-                    <p className="text-xs text-white font-medium">Arbetstid, Svar:</p>
-                    <p className="text-white/90 text-[10px]">{getWorkingHoursLabel(consentedData.working_hours)}</p>
+                    <p className="text-xs text-white font-medium">Hur mycket jobbar du idag?</p>
+                    <p className="text-white/90 text-[10px]">Svar: {getWorkingHoursLabel(consentedData.working_hours)}</p>
                   </div>
                 )}
                 {consentedData?.availability && (
                   <div className="flex flex-col items-start gap-0.5">
-                    <p className="text-xs text-white font-medium">Tillgänglighet, Svar:</p>
-                    <p className="text-white/90 text-[10px]">{getAvailabilityLabel(consentedData.availability)}</p>
+                    <p className="text-xs text-white font-medium">När kan du börja ett nytt jobb?</p>
+                    <p className="text-white/90 text-[10px]">Svar: {getAvailabilityLabel(consentedData.availability)}</p>
                   </div>
                 )}
               </CardContent>
