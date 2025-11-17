@@ -763,13 +763,13 @@ export default function ProfilePreview() {
                 )}
                 {consentedData?.working_hours && (
                   <div className="flex flex-col items-start gap-0.5">
-                    <p className="text-xs text-white font-medium">Hur mycket jobbar du idag?</p>
+                    <p className="text-xs text-white font-medium">Arbetstid?</p>
                     <p className="text-white/90 text-[10px]">Svar: {getWorkingHoursLabel(consentedData.working_hours)}</p>
                   </div>
                 )}
                 {consentedData?.availability && (
                   <div className="flex flex-col items-start gap-0.5">
-                    <p className="text-xs text-white font-medium">När kan du börja ett nytt jobb?</p>
+                    <p className="text-xs text-white font-medium">Tillgänglighet?</p>
                     <p className="text-white/90 text-[10px]">Svar: {getAvailabilityLabel(consentedData.availability)}</p>
                   </div>
                 )}
