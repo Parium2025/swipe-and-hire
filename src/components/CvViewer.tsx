@@ -15,9 +15,10 @@ interface CvViewerProps {
   height?: number | string; // e.g. 600 or '70vh'
   onClose?: () => void;
   renderMode?: 'canvas' | 'native'; // 'native' uses browser PDF viewer via iframe
+  preferCanvas?: boolean; // if true, ignore image previews and force canvas
 }
 
-export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, renderMode = 'canvas' }: CvViewerProps) {
+export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, renderMode = 'canvas', preferCanvas = true }: CvViewerProps) {
   const device = useDevice();
   const isMobile = device === 'mobile';
   const isTablet = device === 'tablet';
@@ -91,10 +92,10 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
   useEffect(() => {
     (async () => {
       try {
+        if (preferCanvas) { setPreviewImages(null); return; }
         setPreviewImages(null);
         const path = isStoragePath ? src : getStoragePathFromUrl(src || '');
         if (!path) return;
-        // Expect original path format: {userId}/{base}.pdf
         const parts = path.split('/');
         if (parts.length < 2) return;
         const userId = parts[0];
@@ -122,7 +123,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
         console.warn('Preview image probe failed', e);
       }
     })();
-  }, [src, isStoragePath]);
+  }, [src, isStoragePath, preferCanvas]);
 
   // Load and render PDF with pdfjs directly (only if no previews)
   useEffect(() => {
@@ -456,6 +457,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onDoubleClick={() => setZoomLevel(z => (z < 2 ? 2 : 1))}
         >
           {error && (
             <div className="h-full flex items-center justify-center p-6 text-sm">{error}</div>
