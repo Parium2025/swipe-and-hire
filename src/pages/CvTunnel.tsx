@@ -24,7 +24,7 @@ export default function CvTunnel() {
     async function run() {
       setLoading(true);
       setError(null);
-      setBlobUrl(null);
+      setOpenUrl(null);
       try {
         if (!ref) throw new Error('Ingen CV-referens angavs.');
         const isStoragePath = !/^https?:\/\//i.test(ref);
@@ -49,7 +49,7 @@ export default function CvTunnel() {
         const blob = new Blob([buf], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         revoked = url;
-        setBlobUrl(url);
+        setOpenUrl(url);
       } catch (e: any) {
         setError(e?.message || 'Kunde inte visa CV.');
       } finally {
@@ -74,17 +74,17 @@ export default function CvTunnel() {
       <header className="flex items-center justify-between p-3 border-b border-border/20 bg-background/80 backdrop-blur">
         <div className="text-sm opacity-80">CV‑visning</div>
         <div className="flex items-center gap-2">
-          {blobUrl && (
+          {openUrl && (
             <>
               <a
-                href={blobUrl}
+                href={openUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hidden md:inline-flex"
               >
                 <Button variant="secondary">Öppna i ny flik</Button>
               </a>
-              <a href={blobUrl} download={fileName}>
+              <a href={openUrl} download={fileName}>
                 <Button variant="default">Ladda ner</Button>
               </a>
             </>
@@ -120,9 +120,9 @@ export default function CvTunnel() {
             </div>
           </div>
         )}
-        {!loading && !error && blobUrl && (
+        {!loading && !error && openUrl && (
           <iframe
-            src={blobUrl}
+            src={openUrl}
             title="CV"
             className="w-full h-[calc(100vh-56px)]"
           />
