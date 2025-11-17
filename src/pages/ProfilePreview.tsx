@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Eye, Lock, Unlock, User, Phone, MapPin, Calendar, FileText, Video, Info, Download, Play, ExternalLink, Pause, ArrowRight, Monitor, Smartphone, X, Mail, Briefcase, Clock, Trash2 } from 'lucide-react';
+import { Eye, Lock, Unlock, User, Phone, MapPin, Calendar, FileText, Video, Info, Download, Play, ExternalLink, Pause, ArrowRight, Monitor, Smartphone, X, Mail, Briefcase, Clock } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getMediaUrl } from '@/lib/mediaManager';
@@ -657,43 +657,6 @@ export default function ProfilePreview() {
       }
       setCvOpen(true);
     };
-
-    const handleDeleteCv = async (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      if (!user?.id) return;
-
-      try {
-        // Update database to remove CV
-        const { error } = await supabase
-          .from('profiles')
-          .update({ 
-            cv_url: null,
-            cv_filename: null 
-          })
-          .eq('user_id', user.id);
-
-        if (error) throw error;
-
-        // Update local state
-        if (consentedData) {
-          setConsentedData({ ...consentedData, cv_url: undefined });
-        }
-
-        toast({
-          title: "CV borttaget",
-          description: "Ditt CV har tagits bort från din profil"
-        });
-      } catch (error) {
-        console.error('Error deleting CV:', error);
-        toast({
-          title: "Kunde inte ta bort CV",
-          description: "Ett fel uppstod vid borttagning av CV",
-          variant: "destructive"
-        });
-      }
-    };
     
       return (
         <div className="max-w-full mx-auto space-y-3">
@@ -862,22 +825,14 @@ export default function ProfilePreview() {
             </CardHeader>
             <CardContent className="pb-2">
               {consentedData?.cv_url && signedCvUrl ? (
-                <div className="bg-white/5 p-3 rounded-lg border border-white/10 flex items-center gap-2">
+                <div className="bg-white/5 p-3 rounded-lg border border-white/10">
                   <button
                     onClick={handleCvClick}
-                    className="flex items-center gap-2 text-white hover:text-white transition-colors flex-1"
+                    className="flex items-center gap-2 text-white hover:text-white transition-colors w-full"
                   >
                     <FileText className="h-4 w-4 text-white flex-shrink-0" />
                     <span className="text-sm">Visa CV</span>
                     <ExternalLink className="h-4 w-4 text-white ml-auto flex-shrink-0" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleDeleteCv}
-                    className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded transition-all flex-shrink-0"
-                    title="Ta bort CV"
-                  >
-                    <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               ) : (
