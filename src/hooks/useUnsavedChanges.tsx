@@ -7,6 +7,7 @@ interface UnsavedChangesContextType {
   setHasUnsavedChanges: (value: boolean) => void;
   checkBeforeNavigation: (targetUrl: string) => boolean;
   setSaving: (saving: boolean) => void;
+  markJustSaved: () => void;
 }
 
 const UnsavedChangesContext = createContext<UnsavedChangesContextType | undefined>(undefined);
@@ -19,6 +20,7 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
 const lastSafePathRef = useRef<string>(location.pathname);
 const isSavingRef = useRef<boolean>(false);
+const lastSavedAtRef = useRef<number>(0);
 
   // Track the last safe path (where the user currently is) to return on cancel
   useEffect(() => {
@@ -29,8 +31,8 @@ const isSavingRef = useRef<boolean>(false);
 
 const checkBeforeNavigation = (targetUrl: string): boolean => {
   console.log('checkBeforeNavigation called, hasUnsavedChanges:', hasUnsavedChanges, 'isSaving:', isSavingRef.current);
-  // Allow navigation freely while a save is in progress
-  if (isSavingRef.current) {
+  // Allow navigation while saving or just after a successful save (grace period)
+  if (isSavingRef.current || Date.now() - lastSavedAtRef.current < 1500) {
     return true;
   }
   if (hasUnsavedChanges) {
@@ -66,7 +68,8 @@ const handleCancelLeave = () => {
       hasUnsavedChanges,
       setHasUnsavedChanges,
       checkBeforeNavigation,
-      setSaving: (saving: boolean) => { isSavingRef.current = saving; }
+      setSaving: (saving: boolean) => { isSavingRef.current = saving; },
+      markJustSaved: () => { lastSavedAtRef.current = Date.now(); setHasUnsavedChanges(false); }
     }}>
       {children}
       <UnsavedChangesDialog
