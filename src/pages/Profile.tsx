@@ -194,6 +194,11 @@ const Profile = () => {
 
   const checkForChanges = useCallback(() => {
     if (!originalValues.firstName) return false; // Not loaded yet
+
+    // Avoid toggling the unsaved flag while a save is in progress
+    if (loading) {
+      return hasUnsavedChanges;
+    }
     
     const currentValues = {
       firstName,
@@ -211,10 +216,10 @@ const Profile = () => {
       workingHours,
       availability,
       coverImageUrl,
-    };
+    } as any;
 
     const hasChanges = Object.keys(currentValues).some(
-      key => currentValues[key] !== originalValues[key]
+      key => currentValues[key] !== (originalValues as any)[key]
     );
 
     console.log('Checking for changes:', { 
@@ -222,12 +227,12 @@ const Profile = () => {
       originalValues, 
       hasChanges,
       userLocation,
-      originalLocation: originalValues.userLocation
+      originalLocation: (originalValues as any).userLocation
     });
     setHasUnsavedChanges(hasChanges);
     return hasChanges;
   }, [originalValues, firstName, lastName, bio, userLocation, postalCode, phone, birthDate, 
-      profileImageUrl, cvUrl, companyName, orgNumber, employmentStatus, workingHours, availability, coverImageUrl]);
+      profileImageUrl, cvUrl, companyName, orgNumber, employmentStatus, workingHours, availability, coverImageUrl, loading, hasUnsavedChanges]);
 
   // Check for changes whenever form values change
   useEffect(() => {
