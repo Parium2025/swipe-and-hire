@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 // @ts-ignore - import worker file as URL string for Vite
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-import { Button } from '@/components/ui/button';
 import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
 import { RotateCcw, X } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
@@ -244,58 +243,48 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
   return (
     <div className="w-full flex flex-col gap-3">
       <div className="flex items-center gap-1 flex-wrap">
-        <Button 
+        <button
           type="button"
-          variant="ghost" 
-          size="sm" 
           onClick={() => setZoomLevel(z => Math.max(0.5, z - 0.5))} 
-          className={`${isMobile ? 'h-7 w-7' : 'h-5 w-5'} min-h-0 min-w-0 aspect-square p-0 leading-none rounded-md border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
+          className={`${isMobile ? 'h-7 w-7' : 'h-5 w-5'} min-h-0 min-w-0 aspect-square p-0 leading-none rounded-md border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95 active:bg-white/20 active:duration-75 flex items-center justify-center`}
         >
           -
-        </Button>
+        </button>
         <span className="text-[10px] text-white min-w-[36px] text-center">
           {Math.round(zoomLevel * 100)}%
         </span>
-        <Button 
+        <button
           type="button"
-          variant="ghost" 
-          size="sm" 
           onClick={() => setZoomLevel(z => Math.min(3.0, z + 0.5))} 
-          className={`${isMobile ? 'h-7 w-7' : 'h-5 w-5'} min-h-0 min-w-0 aspect-square p-0 leading-none rounded-md border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
+          className={`${isMobile ? 'h-7 w-7' : 'h-5 w-5'} min-h-0 min-w-0 aspect-square p-0 leading-none rounded-md border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95 active:bg-white/20 active:duration-75 flex items-center justify-center`}
         >
           +
-        </Button>
-        <Button 
+        </button>
+        <button
           type="button"
-          variant="ghost" 
-          size="sm" 
           onClick={handleReset} 
-          className={`${isMobile ? 'h-7 w-7' : 'h-5 w-5'} min-h-0 min-w-0 aspect-square p-0 leading-none rounded-md border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
+          className={`${isMobile ? 'h-7 w-7' : 'h-5 w-5'} min-h-0 min-w-0 aspect-square p-0 leading-none rounded-md border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95 active:bg-white/20 active:duration-75 flex items-center justify-center`}
         >
           <RotateCcw className="h-3 w-3" />
-        </Button>
+        </button>
         <div className="ml-auto flex items-center gap-1">
           {onClose && (
-            <Button 
+            <button
               type="button"
-              variant="ghost" 
-              size="sm" 
               onClick={onClose}
-              className={`${isMobile ? 'h-7 w-7' : 'h-5 w-5'} min-h-0 min-w-0 aspect-square p-0 leading-none rounded-md border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
+              className={`${isMobile ? 'h-7 w-7' : 'h-5 w-5'} min-h-0 min-w-0 aspect-square p-0 leading-none rounded-md border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95 active:bg-white/20 active:duration-75 flex items-center justify-center`}
             >
               <X className="h-3 w-3" />
-            </Button>
+            </button>
           )}
           {resolvedUrl && (
             <a href={resolvedUrl} download={fileName}>
-              <Button 
+              <button
                 type="button"
-                variant="ghost" 
-                size="sm" 
-                className={`${isMobile ? 'text-[11px] px-2 h-7' : 'text-[10px] px-2 h-6'} rounded-md border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
+                className={`${isMobile ? 'text-[11px] px-2 h-7' : 'text-[10px] px-2 h-6'} rounded-md border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 active:scale-95 active:bg-white/20 active:duration-75`}
               >
                 Ladda ner
-              </Button>
+              </button>
             </a>
           )}
         </div>
