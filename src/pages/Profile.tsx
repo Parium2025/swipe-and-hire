@@ -36,7 +36,7 @@ const Profile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-const { hasUnsavedChanges, setHasUnsavedChanges, setSaving } = useUnsavedChanges();
+const { hasUnsavedChanges, setHasUnsavedChanges, setSaving, markJustSaved } = useUnsavedChanges();
   const [loading, setLoading] = useState(false);
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [uploadingMediaType, setUploadingMediaType] = useState<'image' | 'video' | null>(null);
@@ -983,6 +983,8 @@ const { hasUnsavedChanges, setHasUnsavedChanges, setSaving } = useUnsavedChanges
           description: "Dina ändringar har sparats",
           duration: 2000
         });
+        // Mark a just-saved window to avoid false unsaved prompts
+        markJustSaved();
       } else {
         // Restore unsaved flag if save failed
         setHasUnsavedChanges(true);
