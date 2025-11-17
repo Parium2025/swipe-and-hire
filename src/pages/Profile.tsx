@@ -935,6 +935,8 @@ const Profile = () => {
         updates.org_number = orgNumber.trim() || null;
       }
 
+      // Optimistically clear unsaved flag to avoid blocking navigation while saving
+      setHasUnsavedChanges(false);
       const result = await updateProfile(updates);
       
       if (!result.error) {
@@ -975,9 +977,14 @@ const Profile = () => {
           description: "Dina ändringar har sparats",
           duration: 2000
         });
+      } else {
+        // Restore unsaved flag if save failed
+        setHasUnsavedChanges(true);
       }
     } catch (error) {
       console.error('Profile update error:', error);
+      // Ensure flag is restored if an exception occurs
+      setHasUnsavedChanges(true);
       toast({
         title: "Fel vid uppdatering",
         description: "Kunde inte uppdatera profilen.",
