@@ -18,7 +18,7 @@ interface CvViewerProps {
   preferCanvas?: boolean; // if true, ignore image previews and force canvas
 }
 
-export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, renderMode = 'canvas', preferCanvas = true }: CvViewerProps) {
+export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, renderMode = 'canvas', preferCanvas = false }: CvViewerProps) {
   const device = useDevice();
   const isMobile = device === 'mobile';
   const isTablet = device === 'tablet';
@@ -176,8 +176,8 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
           // Prefer no additional smoothing; rely on high pixel density
           ctx.imageSmoothingEnabled = false;
 
-          // Render at DPR resolution (optionally oversample x2 for extra sharpness)
-          const oversample = 2;
+          // Render at DPR resolution with 4× oversampling for maximum sharpness
+          const oversample = 4;
           const scaleOut = outputScale * oversample;
           canvas.width = Math.floor(viewport.width * scaleOut);
           canvas.height = Math.floor(viewport.height * scaleOut);
