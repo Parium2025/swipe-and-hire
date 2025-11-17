@@ -703,6 +703,7 @@ const Profile = () => {
       
       // Clear ONLY profile media from local state, keep cover image
       setProfileImageUrl('');
+      setVideoUrl(''); // Clear video URL when deleting media
       setIsProfileVideo(false); // Reset video flag
       setProfileFileName(''); // Clear profile filename
       // Keep coverImageUrl and coverFileName - don't clear them
@@ -724,6 +725,7 @@ const Profile = () => {
       console.error('Error in deleteProfileMedia:', error);
       // Clear local state anyway (but keep cover)
       setProfileImageUrl('');
+      setVideoUrl(''); // Clear video URL even on error
       setIsProfileVideo(false);
       setProfileFileName('');
       // Keep cover image even on error
