@@ -648,6 +648,15 @@ export default function ProfilePreview() {
         });
       }
     };
+
+    const handleCvClick = async (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (!consentedData?.cv_url) {
+        toast({ title: 'CV ej tillgängligt', description: 'Inget CV har laddats upp', variant: 'destructive' });
+        return;
+      }
+      setCvOpen(true);
+    };
     
       return (
         <div className="max-w-full mx-auto space-y-3">
@@ -816,11 +825,16 @@ export default function ProfilePreview() {
             </CardHeader>
             <CardContent className="pb-2">
               {consentedData?.cv_url && signedCvUrl ? (
-                <CvViewer 
-                  src={signedCvUrl} 
-                  fileName="CV" 
-                  height="280px"
-                />
+                <div className="bg-white/5 p-3 rounded-lg border border-white/10">
+                  <button
+                    onClick={handleCvClick}
+                    className="flex items-center gap-2 text-white hover:text-white transition-colors w-full"
+                  >
+                    <FileText className="h-4 w-4 text-white flex-shrink-0" />
+                    <span className="text-sm">Visa CV</span>
+                    <ExternalLink className="h-4 w-4 text-white ml-auto flex-shrink-0" />
+                  </button>
+                </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-6 text-center">
                   <FileText className="h-8 w-8 text-white/30 mb-1.5" />
