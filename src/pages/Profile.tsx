@@ -36,7 +36,7 @@ const Profile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-const { hasUnsavedChanges, setHasUnsavedChanges, setSaving, markJustSaved } = useUnsavedChanges();
+  const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const [loading, setLoading] = useState(false);
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [uploadingMediaType, setUploadingMediaType] = useState<'image' | 'video' | null>(null);
@@ -194,11 +194,6 @@ const { hasUnsavedChanges, setHasUnsavedChanges, setSaving, markJustSaved } = us
 
   const checkForChanges = useCallback(() => {
     if (!originalValues.firstName) return false; // Not loaded yet
-
-    // Avoid toggling the unsaved flag while a save is in progress
-    if (loading) {
-      return hasUnsavedChanges;
-    }
     
     const currentValues = {
       firstName,
@@ -216,10 +211,10 @@ const { hasUnsavedChanges, setHasUnsavedChanges, setSaving, markJustSaved } = us
       workingHours,
       availability,
       coverImageUrl,
-    } as any;
+    };
 
     const hasChanges = Object.keys(currentValues).some(
-      key => currentValues[key] !== (originalValues as any)[key]
+      key => currentValues[key] !== originalValues[key]
     );
 
     console.log('Checking for changes:', { 
@@ -227,12 +222,12 @@ const { hasUnsavedChanges, setHasUnsavedChanges, setSaving, markJustSaved } = us
       originalValues, 
       hasChanges,
       userLocation,
-      originalLocation: (originalValues as any).userLocation
+      originalLocation: originalValues.userLocation
     });
     setHasUnsavedChanges(hasChanges);
     return hasChanges;
   }, [originalValues, firstName, lastName, bio, userLocation, postalCode, phone, birthDate, 
-      profileImageUrl, cvUrl, companyName, orgNumber, employmentStatus, workingHours, availability, coverImageUrl, loading, hasUnsavedChanges]);
+      profileImageUrl, cvUrl, companyName, orgNumber, employmentStatus, workingHours, availability, coverImageUrl]);
 
   // Check for changes whenever form values change
   useEffect(() => {
@@ -681,78 +676,65 @@ const { hasUnsavedChanges, setHasUnsavedChanges, setSaving, markJustSaved } = us
     }
   };
 
-const deleteProfileMedia = async () => {
-  try {
-    // Save current values for undo (only profile media, not cover)
-    setDeletedProfileMedia({
-      profileImageUrl,
-      coverImageUrl, // Save for restore, but don't delete
-      profileFileName,
-      coverFileName, // Save for restore, but don't delete
-      isProfileVideo
-    });
-    
-    // Delete the actual profile media file from storage if we have a filename
-    if (profileFileName) {
-      const { error: deleteError } = await supabase.storage
-        .from('job-applications')
-        .remove([profileFileName]);
-        
-      if (deleteError) {
-        console.error('Error deleting profile media file:', deleteError);
+  const deleteProfileMedia = async () => {
+    try {
+      // Save current values for undo (only profile media, not cover)
+      setDeletedProfileMedia({
+        profileImageUrl,
+        coverImageUrl, // Save for restore, but don't delete
+        profileFileName,
+        coverFileName, // Save for restore, but don't delete
+        isProfileVideo
+      });
+      
+      // Delete the actual profile media file from storage if we have a filename
+      if (profileFileName) {
+        const { error: deleteError } = await supabase.storage
+          .from('job-applications')
+          .remove([profileFileName]);
+          
+        if (deleteError) {
+          console.error('Error deleting profile media file:', deleteError);
+        }
       }
-    }
 
-    // DO NOT delete cover image file - keep it
-    // Cover image should only be deleted via deleteCoverImage function
-    
-    // Clear ONLY the active media type from local state
-    if (isProfileVideo) {
-      // If it's a video, only clear video-related state
-      setVideoUrl('');
-      setIsProfileVideo(false);
-      // Keep profileImageUrl in case it's used as cover or for other purposes
-    } else {
-      // If it's an image, only clear image-related state
+      // DO NOT delete cover image file - keep it
+      // Cover image should only be deleted via deleteCoverImage function
+      
+      // Clear ONLY profile media from local state, keep cover image
       setProfileImageUrl('');
-      // Keep videoUrl (though it should be empty anyway)
-    }
-    
-    setProfileFileName(''); // Clear profile filename regardless of type
-    // Keep coverImageUrl and coverFileName - don't clear them
-    
-    // Reset the file input to allow new uploads
-    const fileInput = document.getElementById('profile-image') as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = '';
-    }
-    
-    // Mark as having unsaved changes
-    setHasUnsavedChanges(true);
-    
-    toast({
-      title: isProfileVideo ? "Profilvideo borttagen" : "Profilbild borttagen",
-      description: "Tryck på \"Spara ändringar\" för att spara ändringen"
-    });
-  } catch (error) {
-    console.error('Error in deleteProfileMedia:', error);
-    // Clear local state anyway based on what was active
-    if (isProfileVideo) {
-      setVideoUrl('');
-      setIsProfileVideo(false);
-    } else {
+      setIsProfileVideo(false); // Reset video flag
+      setProfileFileName(''); // Clear profile filename
+      // Keep coverImageUrl and coverFileName - don't clear them
+      
+      // Reset the file input to allow new uploads
+      const fileInput = document.getElementById('profile-image') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+      
+      // Mark as having unsaved changes
+      setHasUnsavedChanges(true);
+      
+      toast({
+        title: "Profilbild/video borttagen",
+        description: "Tryck på \"Spara ändringar\" för att spara ändringen"
+      });
+    } catch (error) {
+      console.error('Error in deleteProfileMedia:', error);
+      // Clear local state anyway (but keep cover)
       setProfileImageUrl('');
+      setIsProfileVideo(false);
+      setProfileFileName('');
+      // Keep cover image even on error
+      setHasUnsavedChanges(true);
+      
+      toast({
+        title: "Profilbild/video borttagen",
+        description: "Tryck på \"Spara ändringar\" för att spara ändringen"
+      });
     }
-    setProfileFileName('');
-    // Keep cover image even on error
-    setHasUnsavedChanges(true);
-    
-    toast({
-      title: isProfileVideo ? "Profilvideo borttagen" : "Profilbild borttagen",
-      description: "Tryck på \"Spara ändringar\" för att spara ändringen"
-    });
-  }
-};
+  };
 
   const restoreProfileMedia = () => {
     if (!deletedProfileMedia) return;
@@ -892,7 +874,6 @@ const deleteProfileMedia = async () => {
     }
 
     setLoading(true);
-    setSaving(true);
 
     try {
       const updates: any = {
@@ -952,8 +933,6 @@ const deleteProfileMedia = async () => {
         updates.org_number = orgNumber.trim() || null;
       }
 
-      // Optimistically clear unsaved flag to avoid blocking navigation while saving
-      setHasUnsavedChanges(false);
       const result = await updateProfile(updates);
       
       if (!result.error) {
@@ -994,23 +973,15 @@ const deleteProfileMedia = async () => {
           description: "Dina ändringar har sparats",
           duration: 2000
         });
-        // Mark a just-saved window to avoid false unsaved prompts
-        markJustSaved();
-      } else {
-        // Restore unsaved flag if save failed
-        setHasUnsavedChanges(true);
       }
     } catch (error) {
       console.error('Profile update error:', error);
-      // Ensure flag is restored if an exception occurs
-      setHasUnsavedChanges(true);
       toast({
         title: "Fel vid uppdatering",
         description: "Kunde inte uppdatera profilen.",
         variant: "destructive"
       });
     } finally {
-      setSaving(false);
       setLoading(false);
     }
   };
