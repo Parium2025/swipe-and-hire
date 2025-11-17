@@ -2,11 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
+import { CvViewer } from '@/components/CvViewer';
 
 // Simple full-screen in-app PDF viewer ("CV-tunnel") to avoid popup blockers and CORS issues
 export default function CvTunnel() {
   const [searchParams] = useSearchParams();
-  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [openUrl, setOpenUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
