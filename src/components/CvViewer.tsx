@@ -14,9 +14,10 @@ interface CvViewerProps {
   fileName?: string;
   height?: number | string; // e.g. 600 or '70vh'
   onClose?: () => void;
+  renderMode?: 'canvas' | 'native'; // 'native' uses browser PDF viewer via iframe
 }
 
-export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }: CvViewerProps) {
+export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, renderMode = 'canvas' }: CvViewerProps) {
   const device = useDevice();
   const isMobile = device === 'mobile';
   const isTablet = device === 'tablet';
@@ -79,7 +80,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
 
   // Load and render PDF with pdfjs directly - Ultra HiDPI rendering without textLayer
   useEffect(() => {
-    if (!resolvedUrl) return;
+    if (!resolvedUrl || renderMode === 'native') return;
     let cancelled = false;
     async function render() {
       try {
@@ -162,7 +163,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
     }
     render();
     return () => { cancelled = true; };
-  }, [resolvedUrl, scale, zoomLevel]);
+  }, [resolvedUrl, scale, zoomLevel, renderMode]);
 
   // Track current page based on scroll position
   useEffect(() => {
@@ -349,16 +350,34 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           )}
           {!error && (
             <>
-              <div 
-                ref={containerRef} 
-                className={isMobile ? "p-2 min-h-[220px]" : "p-4 min-h-[220px]"}
-                style={{
-                  ...(panPosition.x !== 0 || panPosition.y !== 0
-                    ? { transform: `translate(${panPosition.x}px, ${panPosition.y}px)`, transformOrigin: 'center center' }
-                    : {}),
-                  transition: isPanning ? 'none' : 'transform 0.2s ease-out'
-                }}
-              />
+              {renderMode === 'native' ? (
+                <iframe
+                  src={resolvedUrl || undefined}
+                  title="CV"
+                  className={isMobile ? "p-2 min-h-[220px] w-full h-full" : "p-4 min-h-[220px] w-full h-full"}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    border: 'none',
+                    background: 'white',
+                    ...(panPosition.x !== 0 || panPosition.y !== 0
+                      ? { transform: `translate(${panPosition.x}px, ${panPosition.y}px)`, transformOrigin: 'center center' }
+                      : {}),
+                    transition: isPanning ? 'none' : 'transform 0.2s ease-out'
+                  }}
+                />
+              ) : (
+                <div 
+                  ref={containerRef} 
+                  className={isMobile ? "p-2 min-h-[220px]" : "p-4 min-h-[220px]"}
+                  style={{
+                    ...(panPosition.x !== 0 || panPosition.y !== 0
+                      ? { transform: `translate(${panPosition.x}px, ${panPosition.y}px)`, transformOrigin: 'center center' }
+                      : {}),
+                    transition: isPanning ? 'none' : 'transform 0.2s ease-out'
+                  }}
+                />
+              )}
               {loading && (
                 <div className="absolute inset-0 flex items-center justify-center p-6 text-sm pointer-events-none">
                   Laddar CV…
