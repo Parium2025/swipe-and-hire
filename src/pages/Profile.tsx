@@ -1605,7 +1605,7 @@ const Profile = () => {
             <DialogTitle className="text-white text-2xl">{cvFileName || 'CV'}</DialogTitle>
           </DialogHeader>
           {cvUrl && signedCvUrl && (
-            <CvViewer src={signedCvUrl} fileName={cvFileName || 'cv.pdf'} height="70vh" onClose={() => setCvOpen(false)} />
+            <CvViewer src={signedCvUrl} fileName={cvFileName || 'cv.pdf'} height="70vh" />
           )}
         </DialogContent>
       </Dialog>
