@@ -191,11 +191,12 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
           pageContainer.appendChild(canvas);
           canvasRefs.current.set(i, canvas);
           
-          await (page.render({
-            canvasContext: ctx as any,
+          await page.render({
+            canvas: canvas,
+            canvasContext: ctx,
             viewport: viewport,
-            transform: transform as any,
-          }) as any).promise;
+            transform: transform
+          }).promise;
 
           // NO textLayer injection - pure canvas rendering only
         }
