@@ -42,34 +42,15 @@ export async function openCvFile({ cvUrl, fileName = 'cv.pdf', onSuccess, onErro
     }
 
     if (isEmbedded) {
-      try {
-        const res = await fetch(finalUrl, { mode: 'cors', cache: 'no-store', credentials: 'omit', headers: { Accept: 'application/pdf' } });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const blob = await res.blob();
-        const pdfBlob = blob.type && blob.type.includes('pdf') ? blob : new Blob([blob], { type: 'application/pdf' });
-        const urlFactory = (placeholderWin && 'URL' in placeholderWin ? (placeholderWin as any).URL : URL);
-        const objectUrl = urlFactory.createObjectURL(pdfBlob);
-        if (placeholderWin) {
-          const viewerHtml = `<!doctype html><html><head><meta charset="utf-8"><title>${fileName}</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{height:100%;margin:0;background:#121212;color:#fff} .bar{position:fixed;top:0;left:0;right:0;height:44px;background:#1b1b1b;border-bottom:1px solid #2a2a2a;display:flex;align-items:center;gap:12px;padding:0 12px;font:14px system-ui} .bar a{color:#fff;text-decoration:none;padding:6px 10px;border:1px solid #3a3a3a;border-radius:6px} iframe,embed{position:fixed;inset:44px 0 0 0;width:100%;height:calc(100% - 44px);border:0;background:#121212}</style></head><body><div class="bar"><span>PDF</span><a href="${objectUrl}" download="${fileName}">Ladda ner</a><a href="${finalUrl}" target="_blank" rel="noopener">Öppna källa</a></div><embed id="pdf" type="application/pdf" src="${objectUrl}" /><script>window.addEventListener('beforeunload',()=>URL.revokeObjectURL('${objectUrl}'));</script></body></html>`;
-          placeholderWin.document.open();
-          placeholderWin.document.write(viewerHtml);
-          placeholderWin.document.close();
-        } else {
-          // Fallback: navigate current tab to blob URL
-          window.location.href = objectUrl;
-        }
-        onSuccess?.('CV öppnas som PDF');
-        return;
-      } catch (blobErr) {
-        // Fallback: direct URL if fetch was blocked by an extension
-        if (placeholderWin) {
-          placeholderWin.location.href = finalUrl;
-        } else {
-          window.location.href = finalUrl;
-        }
+      // Simple direct open - let browser handle PDF natively
+      const win = window.open(finalUrl, '_blank', 'noopener,noreferrer');
+      if (win) {
         onSuccess?.('CV öppnas i ny flik');
-        return;
+      } else {
+        window.location.href = finalUrl;
+        onSuccess?.('Öppnar CV…');
       }
+      return;
     }
 
     // Otherwise use in-app viewer (CV-tunnel)
