@@ -142,20 +142,19 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
         container.innerHTML = '';
         canvasRefs.current.clear();
 
-        // Ultra HiDPI rendering: aggressive scaling for crisp text
+        // Device pixel ratio aware rendering for crisp text
         const dpr = Math.max(1, window.devicePixelRatio || 1);
         const scrollEl = scrollContainerRef.current;
         const containerWidth = scrollEl ? scrollEl.clientWidth : window.innerWidth;
         const firstPage = await pdf.getPage(1);
         const unscaledViewport = firstPage.getViewport({ scale: 1 });
         const pageWidthPts = unscaledViewport.width;
-        // Fit-to-width baseline scale
+        // Fit-to-width baseline scale for perfect pixel mapping
         const fitScale = containerWidth / pageWidthPts;
         const baseScale = Math.min(fitScale, initialScale);
         const effectiveScale = Math.max(0.5, baseScale * zoomLevel);
-        // Ultra HiDPI: render at very high resolution (8x–16x)
-        const outputScale = 16; // Force ultra HiDPI for maximal text clarity
-
+        // Render at device pixel ratio for sharpness
+        const outputScale = Math.max(2, Math.ceil(dpr));
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = i === 1 ? firstPage : await pdf.getPage(i);
@@ -174,31 +173,29 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d', { alpha: false });
           if (!ctx) continue;
-          // Disable image smoothing for crisp rendering
-          ctx.imageSmoothingEnabled = false;
+          // Use default smoothing for vector text
+          ctx.imageSmoothingEnabled = true;
 
-          // Render at ultra high resolution
+          // Render at DPR resolution
           canvas.width = Math.floor(viewport.width * outputScale);
           canvas.height = Math.floor(viewport.height * outputScale);
-          // CSS size matches viewport exactly (1:1, no extra scaling)
+          // CSS size matches viewport exactly (no scaling by CSS)
           canvas.style.width = `${Math.floor(viewport.width)}px`;
           canvas.style.height = `${Math.floor(viewport.height)}px`;
           canvas.style.position = 'absolute';
           canvas.style.left = '0';
           canvas.style.top = '0';
-          ;(canvas.style as any).imageRendering = 'crisp-edges';
 
           const transform = [outputScale, 0, 0, outputScale, 0, 0];
           canvas.dataset.pageNumber = i.toString();
           pageContainer.appendChild(canvas);
           canvasRefs.current.set(i, canvas);
           
-          await page.render({
-            canvas: canvas,
-            canvasContext: ctx,
+          await (page.render({
+            canvasContext: ctx as any,
             viewport: viewport,
-            transform: transform
-          }).promise;
+            transform: transform as any,
+          }) as any).promise;
 
           // NO textLayer injection - pure canvas rendering only
         }
