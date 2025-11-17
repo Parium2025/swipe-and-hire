@@ -819,7 +819,7 @@ export default function ProfilePreview() {
                 <CvViewer 
                   src={signedCvUrl} 
                   fileName="CV" 
-                  height="280px"
+                  height="460px"
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center py-6 text-center">
