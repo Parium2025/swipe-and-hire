@@ -111,7 +111,8 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
         }
         setLoading(false);
         
-        // Always scroll to top after rendering
+        // Ensure default zoom at 150% and scroll to top after rendering
+        setZoomLevel(1.5);
         if (scrollContainerRef.current) {
           scrollContainerRef.current.scrollTop = 0;
         }
