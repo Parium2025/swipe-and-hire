@@ -110,6 +110,11 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           }).promise;
         }
         setLoading(false);
+        
+        // Always scroll to top after rendering
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTop = 0;
+        }
       } catch (e: any) {
         if (!cancelled) {
           setError(e?.message || 'Kunde inte rendera CV.');
@@ -163,10 +168,14 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
     }
   };
 
-  // Reset pan when zoom changes
+  // Reset pan when zoom changes and scroll to top
   useEffect(() => {
     if (zoomLevel === 1) {
       setPanPosition({ x: 0, y: 0 });
+    }
+    // Always scroll to top when zoom changes
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
     }
   }, [zoomLevel]);
   const handleMouseDown = (e: React.MouseEvent) => {
