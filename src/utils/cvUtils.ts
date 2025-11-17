@@ -35,17 +35,32 @@ export async function openCvFile({ cvUrl, fileName = 'cv.pdf', onSuccess, onErro
     }
 
     if (isEmbedded) {
-      // Open in a new tab immediately from the click gesture to avoid Chrome/incognito iframe blocks
-      const popup = window.open('', '_blank', 'noopener,noreferrer');
-      if (popup) {
-        popup.location.href = finalUrl;
-        onSuccess?.('CV öppnas i ny flik');
-      } else {
-        // Fallback: navigate this tab
-        window.location.href = finalUrl;
-        onSuccess?.('Öppnar CV…');
+      // Blob-based open to bypass Chrome/extension client blocking on third-party domains
+      try {
+        const res = await fetch(finalUrl, { mode: 'cors', cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const blob = await res.blob();
+        const pdfBlob = blob.type && blob.type.includes('pdf') ? blob : new Blob([blob], { type: 'application/pdf' });
+        const objectUrl = URL.createObjectURL(pdfBlob);
+        const popup = window.open(objectUrl, '_blank', 'noopener,noreferrer');
+        if (!popup) {
+          // Fallback: navigate current tab to blob URL
+          window.location.href = objectUrl;
+        }
+        onSuccess?.('CV öppnas som PDF');
+        return;
+      } catch (blobErr) {
+        // Final fallback: try direct URL open
+        const popup = window.open('', '_blank', 'noopener,noreferrer');
+        if (popup) {
+          popup.location.href = finalUrl;
+          onSuccess?.('CV öppnas i ny flik');
+        } else {
+          window.location.href = finalUrl;
+          onSuccess?.('Öppnar CV…');
+        }
+        return;
       }
-      return;
     }
 
     // Otherwise use in-app viewer (CV-tunnel)
