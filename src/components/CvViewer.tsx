@@ -236,7 +236,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           variant="ghost" 
           size="sm" 
           onClick={() => setZoomLevel(z => Math.max(0.5, z - 0.5))} 
-          className={`${isMobile ? 'h-8 w-8' : 'h-6 w-6'} p-0 text-[10px] border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
+          className={`${isMobile ? 'h-8 w-8 aspect-square' : 'h-6 w-6 aspect-square'} p-0 leading-none rounded-md border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
         >
           -
         </Button>
@@ -248,7 +248,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           variant="ghost" 
           size="sm" 
           onClick={() => setZoomLevel(z => Math.min(3.0, z + 0.5))} 
-          className={`${isMobile ? 'h-8 w-8' : 'h-6 w-6'} p-0 text-[10px] border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
+          className={`${isMobile ? 'h-8 w-8 aspect-square' : 'h-6 w-6 aspect-square'} p-0 leading-none rounded-md border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
         >
           +
         </Button>
@@ -257,7 +257,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
           variant="ghost" 
           size="sm" 
           onClick={handleReset} 
-          className={`${isMobile ? 'h-8 w-8' : 'h-6 w-6'} p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
+          className={`${isMobile ? 'h-8 w-8 aspect-square' : 'h-6 w-6 aspect-square'} p-0 leading-none rounded-md border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
         >
           <RotateCcw className="h-3 w-3" />
         </Button>
@@ -268,7 +268,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
               variant="ghost" 
               size="sm" 
               onClick={onClose}
-              className={`${isMobile ? 'h-8 w-8' : 'h-6 w-6'} p-0 border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
+              className={`${isMobile ? 'h-8 w-8 aspect-square' : 'h-6 w-6 aspect-square'} p-0 leading-none rounded-md border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
             >
               <X className="h-3 w-3" />
             </Button>
@@ -279,7 +279,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
                 type="button"
                 variant="ghost" 
                 size="sm" 
-                className={`${isMobile ? 'text-xs px-2.5 h-8' : 'text-[10px] px-2 h-6'} border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
+                className={`${isMobile ? 'text-xs px-2.5 h-8' : 'text-[10px] px-2 h-6 leading-none'} rounded-md border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
               >
                 Ladda ner
               </Button>
