@@ -335,7 +335,50 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
         >
           <RotateCcw className="h-3 w-3" />
         </Button>
+        
+        {/* Quick zoom presets */}
+        <div className="flex gap-0.5 ml-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setZoomLevel(1.0)}
+            className={`${isMobile ? 'text-[9px] px-1.5 h-7' : 'text-[9px] px-1.5 h-6'} rounded-md border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
+          >
+            100%
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setZoomLevel(1.5)}
+            className={`${isMobile ? 'text-[9px] px-1.5 h-7' : 'text-[9px] px-1.5 h-6'} rounded-md border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
+          >
+            150%
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setZoomLevel(2.0)}
+            className={`${isMobile ? 'text-[9px] px-1.5 h-7' : 'text-[9px] px-1.5 h-6'} rounded-md border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
+          >
+            200%
+          </Button>
+        </div>
+        
         <div className="ml-auto flex items-center gap-1">
+          {/* Fullscreen button */}
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={toggleFullscreen}
+            className={`${isMobile ? 'h-7 w-7' : 'h-5 w-5'} min-h-0 min-w-0 aspect-square p-0 leading-none rounded-md border border-white/30 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white active:scale-95 active:bg-white/20 active:duration-75`}
+          >
+            {isFullscreen ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
+          </Button>
+          
           {onClose && (
             <Button 
               type="button"
