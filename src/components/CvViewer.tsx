@@ -21,8 +21,8 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
   const isMobile = device === 'mobile';
   const isTablet = device === 'tablet';
   
-  // Higher base scale for crystal clear rendering at 100% zoom
-  const initialScale = 1.8;
+  // Same scale for all devices to maintain consistent rendering
+  const initialScale = 0.9;
   
   const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
@@ -79,8 +79,8 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
         container.innerHTML = '';
         canvasRefs.current.clear();
 
-        // Use 8x resolution for crystal clear rendering at all zoom levels
-        const outputScale = 8;
+        // Use 4x resolution for maximum clarity at 100% zoom
+        const outputScale = 4;
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
