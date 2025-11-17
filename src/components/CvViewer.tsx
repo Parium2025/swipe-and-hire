@@ -18,7 +18,7 @@ interface CvViewerProps {
   preferCanvas?: boolean; // if true, ignore image previews and force canvas
 }
 
-export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, renderMode = 'canvas', preferCanvas = true }: CvViewerProps) {
+export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, renderMode = 'native', preferCanvas = false }: CvViewerProps) {
   const device = useDevice();
   const isMobile = device === 'mobile';
   const isTablet = device === 'tablet';
