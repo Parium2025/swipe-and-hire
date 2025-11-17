@@ -36,7 +36,7 @@ const Profile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
+const { hasUnsavedChanges, setHasUnsavedChanges, setSaving } = useUnsavedChanges();
   const [loading, setLoading] = useState(false);
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [uploadingMediaType, setUploadingMediaType] = useState<'image' | 'video' | null>(null);
@@ -881,6 +881,7 @@ const Profile = () => {
     }
 
     setLoading(true);
+    setSaving(true);
 
     try {
       const updates: any = {
@@ -996,6 +997,7 @@ const Profile = () => {
         variant: "destructive"
       });
     } finally {
+      setSaving(false);
       setLoading(false);
     }
   };

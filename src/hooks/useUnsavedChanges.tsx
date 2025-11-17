@@ -6,6 +6,7 @@ interface UnsavedChangesContextType {
   hasUnsavedChanges: boolean;
   setHasUnsavedChanges: (value: boolean) => void;
   checkBeforeNavigation: (targetUrl: string) => boolean;
+  setSaving: (saving: boolean) => void;
 }
 
 const UnsavedChangesContext = createContext<UnsavedChangesContextType | undefined>(undefined);
@@ -16,7 +17,8 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const lastSafePathRef = useRef<string>(location.pathname);
+const lastSafePathRef = useRef<string>(location.pathname);
+const isSavingRef = useRef<boolean>(false);
 
   // Track the last safe path (where the user currently is) to return on cancel
   useEffect(() => {
@@ -25,15 +27,19 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
     }
   }, [location.pathname, showUnsavedDialog]);
 
-  const checkBeforeNavigation = (targetUrl: string): boolean => {
-    console.log('checkBeforeNavigation called, hasUnsavedChanges:', hasUnsavedChanges);
-    if (hasUnsavedChanges) {
-      setPendingNavigation(targetUrl);
-      setShowUnsavedDialog(true);
-      return false; // Block navigation initially
-    }
+const checkBeforeNavigation = (targetUrl: string): boolean => {
+  console.log('checkBeforeNavigation called, hasUnsavedChanges:', hasUnsavedChanges, 'isSaving:', isSavingRef.current);
+  // Allow navigation freely while a save is in progress
+  if (isSavingRef.current) {
     return true;
-  };
+  }
+  if (hasUnsavedChanges) {
+    setPendingNavigation(targetUrl);
+    setShowUnsavedDialog(true);
+    return false; // Block navigation initially
+  }
+  return true;
+};
 
   const handleConfirmLeave = () => {
     if (pendingNavigation) {
@@ -46,20 +52,21 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
     setPendingNavigation(null);
   };
 
-  const handleCancelLeave = () => {
-    console.log('Cancel button clicked - staying on current page');
-    setShowUnsavedDialog(false);
-    setPendingNavigation(null);
-    // Notify listeners (e.g., sidebar) to close on cancel
-    window.dispatchEvent(new CustomEvent('unsaved-cancel'));
-    // Don't navigate anywhere - just stay on the current page with unsaved changes
-  };
+const handleCancelLeave = () => {
+  console.log('Cancel button clicked - staying on current page');
+  setShowUnsavedDialog(false);
+  setPendingNavigation(null);
+  // Notify listeners (e.g., sidebar) to close on cancel
+  window.dispatchEvent(new CustomEvent('unsaved-cancel'));
+  // Don't navigate anywhere - just stay on the current page with unsaved changes
+};
 
   return (
-    <UnsavedChangesContext.Provider value={{
+  <UnsavedChangesContext.Provider value={{
       hasUnsavedChanges,
       setHasUnsavedChanges,
-      checkBeforeNavigation
+      checkBeforeNavigation,
+      setSaving: (saving: boolean) => { isSavingRef.current = saving; }
     }}>
       {children}
       <UnsavedChangesDialog
