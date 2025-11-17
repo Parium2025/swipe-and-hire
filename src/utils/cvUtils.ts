@@ -26,7 +26,14 @@ export async function openCvFile({ cvUrl, fileName = 'cv.pdf', onSuccess, onErro
     const isEmbedded = window.self !== window.top; // inside editor/iframe (incognito often blocks iframe PDF)
     const isStoragePath = !/^https?:\/\//i.test(cvUrl);
 
-    // Prepare a signed URL up-front so we can open directly on user gesture when embedded
+    // Open a placeholder tab immediately on user gesture to avoid popup blocking
+    const placeholderWin = isEmbedded ? window.open('', '_blank', 'noopener,noreferrer') : null;
+    if (placeholderWin) {
+      placeholderWin.document.write('<!doctype html><title>Öppnar PDF…</title><body style="margin:0;background:#121212;color:#fff;font:14px system-ui;display:grid;place-items:center;height:100vh">Öppnar PDF…</body>');
+      placeholderWin.document.close();
+    }
+
+    // Prepare a signed URL up-front
     let finalUrl = cvUrl;
     if (isStoragePath) {
       finalUrl = (await createSignedUrl('job-applications', cvUrl, 86400, fileName)) || cvUrl;
@@ -35,35 +42,27 @@ export async function openCvFile({ cvUrl, fileName = 'cv.pdf', onSuccess, onErro
     }
 
     if (isEmbedded) {
-      // Blob-based open to bypass Chrome/extension client blocking on third-party domains
       try {
-        const res = await fetch(finalUrl, { mode: 'cors', cache: 'no-store' });
+        const res = await fetch(finalUrl, { mode: 'cors', cache: 'no-store', credentials: 'omit', headers: { Accept: 'application/pdf' } });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const blob = await res.blob();
         const pdfBlob = blob.type && blob.type.includes('pdf') ? blob : new Blob([blob], { type: 'application/pdf' });
         const objectUrl = URL.createObjectURL(pdfBlob);
-        const win = window.open('', '_blank', 'noopener,noreferrer');
-        if (win) {
-          const viewerHtml = `<!doctype html><html><head><meta charset="utf-8"><title>${fileName}</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{height:100%;margin:0;background:#121212} iframe{border:0;position:fixed;inset:0;width:100%;height:100%;background:#121212}</style></head><body><iframe src="${objectUrl}" allow="fullscreen"></iframe></body></html>`;
-          win.document.open();
-          win.document.write(viewerHtml);
-          win.document.close();
+        if (placeholderWin) {
+          placeholderWin.location.href = objectUrl; // native viewer
         } else {
-          // Fallback: navigate current tab to blob URL
           window.location.href = objectUrl;
         }
         onSuccess?.('CV öppnas som PDF');
         return;
       } catch (blobErr) {
-        // Final fallback: try direct URL open
-        const popup = window.open('', '_blank', 'noopener,noreferrer');
-        if (popup) {
-          popup.location.href = finalUrl;
-          onSuccess?.('CV öppnas i ny flik');
+        // Fallback: direct URL if fetch was blocked by an extension
+        if (placeholderWin) {
+          placeholderWin.location.href = finalUrl;
         } else {
           window.location.href = finalUrl;
-          onSuccess?.('Öppnar CV…');
         }
+        onSuccess?.('CV öppnas i ny flik');
         return;
       }
     }
