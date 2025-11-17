@@ -234,8 +234,11 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
   }, [zoomLevel]);
 
   const handleReset = () => {
-    setZoomLevel(1.0);
+    setZoomLevel(1.5);
     setPanPosition({ x: 0, y: 0 });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
   };
 
   return (
