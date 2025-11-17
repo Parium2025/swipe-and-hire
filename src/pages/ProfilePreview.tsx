@@ -820,6 +820,7 @@ export default function ProfilePreview() {
                   src={signedCvUrl} 
                   fileName="CV" 
                   height="460px"
+                  preferCanvas={true}
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center py-6 text-center">
@@ -942,7 +943,7 @@ export default function ProfilePreview() {
             <DialogTitle className="text-white text-2xl">CV</DialogTitle>
           </DialogHeader>
           {consentedData?.cv_url && (
-            <CvViewer src={consentedData.cv_url} fileName="cv.pdf" height="70vh" />
+            <CvViewer src={consentedData.cv_url} fileName="cv.pdf" height="70vh" preferCanvas={true} />
           )}
         </DialogContent>
       </Dialog>
