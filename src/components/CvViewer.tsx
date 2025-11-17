@@ -96,13 +96,14 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
 
         // Use device pixel ratio for sharp rendering on all screens
         const devicePixelRatio = window.devicePixelRatio || 1;
-        // Aggressive supersampling (8-10x) for ultra-sharp text
-        const outputScale = Math.min(10, Math.max(2, devicePixelRatio) * 4);
+        // High quality supersampling with zoom-aware re-rendering
+        const outputScale = Math.min(8, Math.max(2, devicePixelRatio) * 3);
+        const renderedScale = scale * zoomLevel;
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           if (cancelled) return;
-          const viewport = page.getViewport({ scale });
+          const viewport = page.getViewport({ scale: renderedScale });
 
           // Page wrapper for canvas + text
           const pageContainer = document.createElement('div');
@@ -174,7 +175,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
     }
     render();
     return () => { cancelled = true; };
-  }, [resolvedUrl, scale]);
+  }, [resolvedUrl, scale, zoomLevel]);
 
   // Track current page based on scroll position
   useEffect(() => {
@@ -365,7 +366,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
                 ref={containerRef} 
                 className={isMobile ? "p-2 min-h-[220px]" : "p-4 min-h-[220px]"}
                 style={{
-                  transform: `scale(${zoomLevel}) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
+                  transform: `translate(${panPosition.x}px, ${panPosition.y}px)`,
                   transformOrigin: 'center center',
                   transition: isPanning ? 'none' : 'transform 0.2s ease-out'
                 }}
