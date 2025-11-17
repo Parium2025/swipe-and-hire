@@ -115,7 +115,8 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose, r
         const baseScale = Math.min(fitScale, initialScale);
         const effectiveScale = Math.max(0.5, baseScale * zoomLevel);
         // Ultra HiDPI: render at very high resolution (8x–16x)
-        const outputScale = Math.min(16, Math.max(8, dpr * 4));
+        const outputScale = 16; // Force ultra HiDPI for maximal text clarity
+
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = i === 1 ? firstPage : await pdf.getPage(i);
