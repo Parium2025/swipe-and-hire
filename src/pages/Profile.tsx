@@ -681,67 +681,78 @@ const { hasUnsavedChanges, setHasUnsavedChanges, setSaving, markJustSaved } = us
     }
   };
 
-  const deleteProfileMedia = async () => {
-    try {
-      // Save current values for undo (only profile media, not cover)
-      setDeletedProfileMedia({
-        profileImageUrl,
-        coverImageUrl, // Save for restore, but don't delete
-        profileFileName,
-        coverFileName, // Save for restore, but don't delete
-        isProfileVideo
-      });
-      
-      // Delete the actual profile media file from storage if we have a filename
-      if (profileFileName) {
-        const { error: deleteError } = await supabase.storage
-          .from('job-applications')
-          .remove([profileFileName]);
-          
-        if (deleteError) {
-          console.error('Error deleting profile media file:', deleteError);
-        }
+const deleteProfileMedia = async () => {
+  try {
+    // Save current values for undo (only profile media, not cover)
+    setDeletedProfileMedia({
+      profileImageUrl,
+      coverImageUrl, // Save for restore, but don't delete
+      profileFileName,
+      coverFileName, // Save for restore, but don't delete
+      isProfileVideo
+    });
+    
+    // Delete the actual profile media file from storage if we have a filename
+    if (profileFileName) {
+      const { error: deleteError } = await supabase.storage
+        .from('job-applications')
+        .remove([profileFileName]);
+        
+      if (deleteError) {
+        console.error('Error deleting profile media file:', deleteError);
       }
-
-      // DO NOT delete cover image file - keep it
-      // Cover image should only be deleted via deleteCoverImage function
-      
-      // Clear ONLY profile media from local state, keep cover image
-      setProfileImageUrl('');
-      setVideoUrl(''); // Clear video URL when deleting media
-      setIsProfileVideo(false); // Reset video flag
-      setProfileFileName(''); // Clear profile filename
-      // Keep coverImageUrl and coverFileName - don't clear them
-      
-      // Reset the file input to allow new uploads
-      const fileInput = document.getElementById('profile-image') as HTMLInputElement;
-      if (fileInput) {
-        fileInput.value = '';
-      }
-      
-      // Mark as having unsaved changes
-      setHasUnsavedChanges(true);
-      
-      toast({
-        title: "Profilbild/video borttagen",
-        description: "Tryck på \"Spara ändringar\" för att spara ändringen"
-      });
-    } catch (error) {
-      console.error('Error in deleteProfileMedia:', error);
-      // Clear local state anyway (but keep cover)
-      setProfileImageUrl('');
-      setVideoUrl(''); // Clear video URL even on error
-      setIsProfileVideo(false);
-      setProfileFileName('');
-      // Keep cover image even on error
-      setHasUnsavedChanges(true);
-      
-      toast({
-        title: "Profilbild/video borttagen",
-        description: "Tryck på \"Spara ändringar\" för att spara ändringen"
-      });
     }
-  };
+
+    // DO NOT delete cover image file - keep it
+    // Cover image should only be deleted via deleteCoverImage function
+    
+    // Clear ONLY the active media type from local state
+    if (isProfileVideo) {
+      // If it's a video, only clear video-related state
+      setVideoUrl('');
+      setIsProfileVideo(false);
+      // Keep profileImageUrl in case it's used as cover or for other purposes
+    } else {
+      // If it's an image, only clear image-related state
+      setProfileImageUrl('');
+      // Keep videoUrl (though it should be empty anyway)
+    }
+    
+    setProfileFileName(''); // Clear profile filename regardless of type
+    // Keep coverImageUrl and coverFileName - don't clear them
+    
+    // Reset the file input to allow new uploads
+    const fileInput = document.getElementById('profile-image') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    
+    // Mark as having unsaved changes
+    setHasUnsavedChanges(true);
+    
+    toast({
+      title: isProfileVideo ? "Profilvideo borttagen" : "Profilbild borttagen",
+      description: "Tryck på \"Spara ändringar\" för att spara ändringen"
+    });
+  } catch (error) {
+    console.error('Error in deleteProfileMedia:', error);
+    // Clear local state anyway based on what was active
+    if (isProfileVideo) {
+      setVideoUrl('');
+      setIsProfileVideo(false);
+    } else {
+      setProfileImageUrl('');
+    }
+    setProfileFileName('');
+    // Keep cover image even on error
+    setHasUnsavedChanges(true);
+    
+    toast({
+      title: isProfileVideo ? "Profilvideo borttagen" : "Profilbild borttagen",
+      description: "Tryck på \"Spara ändringar\" för att spara ändringen"
+    });
+  }
+};
 
   const restoreProfileMedia = () => {
     if (!deletedProfileMedia) return;
