@@ -712,7 +712,7 @@ export default function ProfilePreview() {
             <CardContent className="space-y-2 text-xs pb-2">
               {consentedData?.phone && (
                 <div className="flex flex-col items-start gap-0.5">
-                  <p className="text-xs text-white font-medium">Telefon, Svar:</p>
+                  <p className="text-xs text-white font-medium">Telefon:</p>
                   <p 
                     className="text-white/90 cursor-pointer transition-opacity hover:opacity-80 text-[10px]"
                     onClick={handlePhoneClick}
@@ -723,13 +723,13 @@ export default function ProfilePreview() {
               )}
               {consentedData?.location && (
                 <div className="flex flex-col items-start gap-0.5">
-                  <p className="text-xs text-white font-medium">Plats, Svar:</p>
+                  <p className="text-xs text-white font-medium">Plats:</p>
                   <p className="text-white/90 text-[10px]">{consentedData.location}</p>
                 </div>
               )}
               {user?.email && (
                 <div className="flex flex-col items-start gap-0.5">
-                  <p className="text-xs text-white font-medium">E-post, Svar:</p>
+                  <p className="text-xs text-white font-medium">E-post:</p>
                   <p 
                     className="text-white/90 cursor-pointer transition-opacity hover:opacity-80 text-[10px]"
                     onClick={handleEmailClick}
