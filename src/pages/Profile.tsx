@@ -14,7 +14,9 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { User, MapPin, Building, Camera, Mail, Phone, Calendar as CalendarIcon, Briefcase, Clock, FileText, Video, Play, Check, Trash2, ChevronDown, RotateCcw } from 'lucide-react';
+import { User, MapPin, Building, Camera, Mail, Phone, Calendar as CalendarIcon, Briefcase, Clock, FileText, Video, Play, Check, Trash2, ChevronDown, RotateCcw, ExternalLink } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { CvViewer } from '@/components/CvViewer';
 import FileUpload from '@/components/FileUpload';
 import ProfileVideo from '@/components/ProfileVideo';
 import ImageEditor from '@/components/ImageEditor';
@@ -51,6 +53,7 @@ const Profile = () => {
   const [coverFileName, setCoverFileName] = useState(''); // Track filename for deletion
   const [profileFileName, setProfileFileName] = useState(''); // Track profile media filename
   const [isProfileVideo, setIsProfileVideo] = useState(false);
+  const [cvOpen, setCvOpen] = useState(false);
   
   // Undo state - store deleted media for restore
   const [deletedProfileMedia, setDeletedProfileMedia] = useState<{
@@ -1491,23 +1494,37 @@ const Profile = () => {
                       <Label className="text-base font-medium text-white">CV</Label>
                     </div>
                     
-                    <div className="p-0">
-                      <FileUpload
-                        onFileUploaded={(url, fileName) => {
-                          console.log('CV uploaded, received:', { url, fileName });
-                          setCvUrl(url);
-                          setCvFileName(fileName); // Save original filename to DB
-                          setHasUnsavedChanges(true); // Mark as changed
-                        }}
-                        onFileRemoved={() => {
-                          setCvUrl('');
-                          setCvFileName('');
-                        }}
-                        currentFile={cvUrl ? { url: signedCvUrl || cvUrl, name: cvFileName || "Din valda fil" } : undefined}
-                        acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
-                        maxFileSize={5 * 1024 * 1024}
-                      />
-                    </div>
+                    {cvUrl ? (
+                      <div className="bg-white/5 p-3 rounded-lg border border-white/10">
+                        <button
+                          type="button"
+                          onClick={() => setCvOpen(true)}
+                          className="flex items-center gap-2 text-white hover:text-white transition-colors w-full"
+                        >
+                          <FileText className="h-4 w-4 text-white flex-shrink-0" />
+                          <span className="text-sm">Visa CV</span>
+                          <ExternalLink className="h-4 w-4 text-white ml-auto flex-shrink-0" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="p-0">
+                        <FileUpload
+                          onFileUploaded={(url, fileName) => {
+                            console.log('CV uploaded, received:', { url, fileName });
+                            setCvUrl(url);
+                            setCvFileName(fileName);
+                            setHasUnsavedChanges(true);
+                          }}
+                          onFileRemoved={() => {
+                            setCvUrl('');
+                            setCvFileName('');
+                          }}
+                          currentFile={undefined}
+                          acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
+                          maxFileSize={5 * 1024 * 1024}
+                        />
+                      </div>
+                    )}
                   </div>
                 </>
               )}
@@ -1580,6 +1597,18 @@ const Profile = () => {
         imageSrc={pendingCoverSrc}
         onSave={handleCoverImageSave}
       />
+
+      {/* CV Dialog */}
+      <Dialog open={cvOpen} onOpenChange={setCvOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden bg-transparent border-none shadow-none p-8">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-white text-2xl">{cvFileName || 'CV'}</DialogTitle>
+          </DialogHeader>
+          {cvUrl && signedCvUrl && (
+            <CvViewer src={signedCvUrl} fileName={cvFileName || 'cv.pdf'} height="70vh" onClose={() => setCvOpen(false)} />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
