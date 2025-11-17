@@ -320,7 +320,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
                 className={isMobile ? "p-2 min-h-[220px]" : "p-4 min-h-[220px]"}
                 style={{
                   transform: `scale(${zoomLevel}) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
-                  transformOrigin: 'center center',
+                  transformOrigin: 'top center',
                   transition: isPanning ? 'none' : 'transform 0.2s ease-out'
                 }}
               />
