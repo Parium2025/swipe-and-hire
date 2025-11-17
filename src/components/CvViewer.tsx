@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 // @ts-ignore - import worker file as URL string for Vite
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+// @ts-ignore - textLayer renderer for crisp selectable text
+import { renderTextLayer } from 'pdfjs-dist/web/pdf_viewer.mjs';
 import { Button } from '@/components/ui/button';
 import { createSignedUrl, convertToSignedUrl } from '@/utils/storageUtils';
 import { RotateCcw, X } from 'lucide-react';
@@ -37,6 +39,21 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
   const containerRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
+
+  // Inject minimal styles for pdf.js textLayer (once)
+  useEffect(() => {
+    const id = 'pdf-textlayer-styles';
+    if (!document.getElementById(id)) {
+      const style = document.createElement('style');
+      style.id = id;
+      style.textContent = `
+        .textLayer { position: absolute; inset: 0; color: transparent; }
+        .textLayer span { position: absolute; white-space: pre; transform-origin: 0% 0%; color: transparent; text-shadow: 0 0 0 #000; -webkit-font-smoothing: antialiased; font-smooth: always; }
+        .textLayer .endOfContent { display: none; }
+      `;
+      document.head.appendChild(style);
+    }
+  }, []);
 
   const isStoragePath = useMemo(() => !/^https?:\/\//i.test(src), [src]);
 
@@ -81,28 +98,39 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
 
         // Use device pixel ratio for sharp rendering on all screens
         const devicePixelRatio = window.devicePixelRatio || 1;
-        // Use high resolution multiplier for crystal clear text
-        const outputScale = devicePixelRatio * 3;
+        // Aggressive supersampling for ultra-sharp text
+        const outputScale = Math.min(10, Math.max(2, devicePixelRatio) * 4);
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           if (cancelled) return;
           const viewport = page.getViewport({ scale });
+
+          // Wrapper per page to host canvas + text layer
+          const pageContainer = document.createElement('div');
+          pageContainer.style.position = 'relative';
+          pageContainer.style.width = `${Math.floor(viewport.width)}px`;
+          pageContainer.style.height = `${Math.floor(viewport.height)}px`;
+          pageContainer.style.margin = '0 auto 16px auto';
+          pageContainer.style.background = 'white';
+          container.appendChild(pageContainer);
+
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
           if (!ctx) continue;
-          
+          ctx.imageSmoothingEnabled = false;
+
           canvas.width = Math.floor(viewport.width * outputScale);
           canvas.height = Math.floor(viewport.height * outputScale);
           canvas.style.width = `${Math.floor(viewport.width)}px`;
           canvas.style.height = `${Math.floor(viewport.height)}px`;
-          
+          canvas.style.position = 'absolute';
+          canvas.style.left = '0px';
+          canvas.style.top = '0px';
+
           const transform = [outputScale, 0, 0, outputScale, 0, 0];
-          canvas.style.display = 'block';
-          canvas.style.margin = '0 auto 16px auto';
-          canvas.style.background = 'white';
           canvas.dataset.pageNumber = i.toString();
-          container.appendChild(canvas);
+          pageContainer.appendChild(canvas);
           canvasRefs.current.set(i, canvas);
           await page.render({
             canvas: canvas,
@@ -110,6 +138,20 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
             viewport: viewport,
             transform: transform
           }).promise;
+
+          // Add crisp selectable text layer above canvas
+          const textLayerDiv = document.createElement('div');
+          textLayerDiv.className = 'textLayer';
+          textLayerDiv.style.pointerEvents = 'none';
+          pageContainer.appendChild(textLayerDiv);
+
+          const textContent = await page.getTextContent();
+          await (renderTextLayer as any)({
+            textContentSource: textContent,
+            container: textLayerDiv,
+            viewport,
+            textDivs: []
+          });
         }
         setLoading(false);
       } catch (e: any) {
