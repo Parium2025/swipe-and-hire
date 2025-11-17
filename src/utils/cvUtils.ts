@@ -23,30 +23,7 @@ export async function openCvFile({ cvUrl, fileName = 'cv.pdf', onSuccess, onErro
   }
 
   try {
-    const isEmbedded = window.self !== window.top; // inside editor/iframe (Lovable preview is sandboxed and blocks popups)
     const isStoragePath = !/^https?:\/\//i.test(cvUrl);
-
-    // If we're inside an embedded/sandboxed iframe, avoid popups entirely.
-    // Route to in-app viewer (CvTunnel) which resolves signed URL and renders inline.
-    if (isEmbedded) {
-      const params = new URLSearchParams();
-      if (isStoragePath) params.set('path', cvUrl);
-      else params.set('url', cvUrl);
-      if (fileName) params.set('name', fileName);
-      onSuccess?.('Öppnar CV…');
-      window.location.href = `/cv-tunnel?${params.toString()}`;
-      return;
-    }
-
-    // Non-embedded environments: open a real browser tab immediately on user gesture
-    // (prevents popup blocking), then resolve the signed URL and navigate that tab.
-    const popup = window.open('', '_blank', 'noopener,noreferrer');
-    if (popup) {
-      try {
-        popup.document.write('<!doctype html><title>Öppnar PDF…</title><body style="margin:0;background:#121212;color:#fff;font:14px system-ui;display:grid;place-items:center;height:100vh">Öppnar PDF…</body>');
-        popup.document.close();
-      } catch {}
-    }
 
     // Prepare a signed URL
     let finalUrl = cvUrl;
@@ -56,20 +33,15 @@ export async function openCvFile({ cvUrl, fileName = 'cv.pdf', onSuccess, onErro
       finalUrl = (await convertToSignedUrl(cvUrl, 'job-applications', 86400, fileName)) || cvUrl;
     }
 
-    if (popup) {
-      popup.location.href = finalUrl;
+    // Always open in new tab - browser will render PDF natively
+    const win = window.open(finalUrl, '_blank', 'noopener,noreferrer');
+    if (win) {
       onSuccess?.('CV öppnas i ny flik');
-      return;
+    } else {
+      // Popup blocked - try direct navigation as fallback
+      window.location.href = finalUrl;
+      onSuccess?.('Öppnar CV…');
     }
-
-    // Fallback: if popup was blocked, use in-app viewer in the current tab
-    const params = new URLSearchParams();
-    if (isStoragePath) params.set('path', cvUrl);
-    else params.set('url', cvUrl);
-    if (fileName) params.set('name', fileName);
-
-    onSuccess?.('Öppnar CV…');
-    window.location.href = `/cv-tunnel?${params.toString()}`;
   } catch (error) {
     console.error('Error opening CV:', error);
     onError?.(error instanceof Error ? error : new Error('Unknown error opening CV'));
