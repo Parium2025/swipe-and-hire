@@ -1538,9 +1538,7 @@ const Profile = () => {
                           onClick={() => setCvOpen(true)}
                           className="flex items-center gap-2 text-white transition-colors flex-1"
                         >
-                          <span className="bg-white/20 backdrop-blur-sm rounded-full p-2 shadow-lg">
-                            <FileText className="h-4 w-4 text-white flex-shrink-0" />
-                          </span>
+                          <FileText className="h-4 w-4 text-white flex-shrink-0" />
                           <span className="text-sm">Visa CV</span>
                           <span className="bg-white/20 backdrop-blur-sm rounded-full p-2 shadow-lg ml-auto">
                             <ExternalLink className="h-4 w-4 text-white flex-shrink-0" />
