@@ -677,6 +677,8 @@ const Profile = () => {
   };
 
   const deleteProfileMedia = async () => {
+    if (!user?.id) return;
+    
     try {
       // Save current values for undo (only profile media, not cover)
       setDeletedProfileMedia({
@@ -698,8 +700,17 @@ const Profile = () => {
         }
       }
 
-      // DO NOT delete cover image file - keep it
-      // Cover image should only be deleted via deleteCoverImage function
+      // Update database IMMEDIATELY (don't wait for save button)
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          profile_image_url: null,
+          video_url: null,
+          cover_image_url: coverImageUrl || null // Keep cover image
+        })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
       
       // Clear ONLY profile media from local state, keep cover image
       setProfileImageUrl('');
@@ -707,31 +718,33 @@ const Profile = () => {
       setProfileFileName(''); // Clear profile filename
       // Keep coverImageUrl and coverFileName - don't clear them
       
+      // Update original values so they match current state
+      setOriginalValues(prev => ({
+        ...prev,
+        profileImageUrl: '',
+        profileFileName: '',
+        isProfileVideo: false
+      }));
+      
       // Reset the file input to allow new uploads
       const fileInput = document.getElementById('profile-image') as HTMLInputElement;
       if (fileInput) {
         fileInput.value = '';
       }
       
-      // Mark as having unsaved changes
-      setHasUnsavedChanges(true);
+      // No unsaved changes since we just saved to DB
+      setHasUnsavedChanges(false);
       
       toast({
         title: "Profilbild/video borttagen",
-        description: "Tryck på \"Spara ändringar\" för att spara ändringen"
+        description: "Ändringen har sparats"
       });
     } catch (error) {
       console.error('Error in deleteProfileMedia:', error);
-      // Clear local state anyway (but keep cover)
-      setProfileImageUrl('');
-      setIsProfileVideo(false);
-      setProfileFileName('');
-      // Keep cover image even on error
-      setHasUnsavedChanges(true);
-      
       toast({
-        title: "Profilbild/video borttagen",
-        description: "Tryck på \"Spara ändringar\" för att spara ändringen"
+        title: "Fel",
+        description: "Kunde inte ta bort profilbild/video",
+        variant: "destructive"
       });
     }
   };
@@ -759,6 +772,8 @@ const Profile = () => {
   };
 
   const deleteCoverImage = async () => {
+    if (!user?.id) return;
+    
     try {
       // Save current cover image for undo
       setDeletedCoverImage({
@@ -774,31 +789,43 @@ const Profile = () => {
           
         if (deleteError) {
           console.error('Error deleting cover file:', deleteError);
-          // Continue anyway - clear the local state
         }
       }
+
+      // Update database IMMEDIATELY (don't wait for save button)
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          cover_image_url: null
+        })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
       
       // Clear local state
       setCoverImageUrl('');
       setCoverFileName('');
       
-      // Mark as having unsaved changes
-      setHasUnsavedChanges(true);
+      // Update original values so they match current state
+      setOriginalValues(prev => ({
+        ...prev,
+        coverImageUrl: '',
+        coverFileName: ''
+      }));
+      
+      // No unsaved changes since we just saved to DB
+      setHasUnsavedChanges(false);
       
       toast({
         title: "Cover-bild borttagen", 
-        description: "Tryck på \"Spara ändringar\" för att spara ändringen"
+        description: "Ändringen har sparats"
       });
     } catch (error) {
       console.error('Error in deleteCoverImage:', error);
-      // Clear local state anyway
-      setCoverImageUrl('');
-      setCoverFileName('');
-      setHasUnsavedChanges(true);
-      
       toast({
-        title: "Cover-bild borttagen", 
-        description: "Tryck på \"Spara ändringar\" för att spara ändringen"
+        title: "Fel",
+        description: "Kunde inte ta bort cover-bilden",
+        variant: "destructive"
       });
     }
   };
