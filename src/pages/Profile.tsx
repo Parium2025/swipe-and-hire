@@ -1536,11 +1536,15 @@ const Profile = () => {
                         <button
                           type="button"
                           onClick={() => setCvOpen(true)}
-                          className="flex items-center gap-2 text-white bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg transition-colors flex-1"
+                          className="flex items-center gap-2 text-white transition-colors flex-1"
                         >
-                          <FileText className="h-4 w-4 text-white flex-shrink-0" />
+                          <span className="bg-white/20 backdrop-blur-sm rounded-full p-2 shadow-lg">
+                            <FileText className="h-4 w-4 text-white flex-shrink-0" />
+                          </span>
                           <span className="text-sm">Visa CV</span>
-                          <ExternalLink className="h-4 w-4 text-white ml-auto flex-shrink-0" />
+                          <span className="bg-white/20 backdrop-blur-sm rounded-full p-2 shadow-lg ml-auto">
+                            <ExternalLink className="h-4 w-4 text-white flex-shrink-0" />
+                          </span>
                         </button>
                         <button
                           type="button"
