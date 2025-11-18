@@ -1545,10 +1545,10 @@ const Profile = () => {
                         <button
                           type="button"
                           onClick={handleDeleteCv}
-                          className="p-2 text-white/70 hover:text-destructive/70 rounded transition-all flex-shrink-0"
+                          className="p-2 flex-shrink-0"
                           title="Ta bort CV"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4 text-white/70 hover:text-destructive/70 transition-colors" />
                         </button>
                       </div>
                     ) : (
