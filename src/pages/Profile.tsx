@@ -867,7 +867,16 @@ const Profile = () => {
       // Update local state
       setCvUrl('');
       setCvFileName('');
-      setHasUnsavedChanges(false); // No need to save when we just updated DB directly
+
+      // Keep originalValues in sync so this counts as already saved
+      setOriginalValues(prev => ({
+        ...prev,
+        cvUrl: '',
+        cvFileName: ''
+      }));
+
+      // No unsaved changes since CV is already removed in DB
+      setHasUnsavedChanges(false);
 
       toast({
         title: "CV borttaget",
@@ -885,7 +894,6 @@ const Profile = () => {
       });
     }
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
