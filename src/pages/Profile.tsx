@@ -734,6 +734,9 @@ const Profile = () => {
       
       // No unsaved changes since we just saved to DB
       setHasUnsavedChanges(false);
+
+      // Refresh profile so sidebar and other views update immediately
+      await refreshProfile();
       
       toast({
         title: "Profilbild/video borttagen",
@@ -748,7 +751,6 @@ const Profile = () => {
       });
     }
   };
-
   const restoreProfileMedia = () => {
     if (!deletedProfileMedia) return;
     
