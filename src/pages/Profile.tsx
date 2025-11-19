@@ -686,14 +686,15 @@ const Profile = () => {
     if (!user?.id) return;
     
     try {
-      // Spara aktuella värden för ångra (inklusive video)
+      // Spara från originalValues så vi alltid har originalvärdet att återställa till
+      // Detta förhindrar problem om användaren delete -> restore -> delete igen
       setDeletedProfileMedia({
-        profileImageUrl,
-        coverImageUrl,
-        profileFileName,
-        coverFileName,
-        isProfileVideo,
-        videoUrl,
+        profileImageUrl: originalValues.profileImageUrl || profileImageUrl,
+        coverImageUrl: originalValues.coverImageUrl || coverImageUrl,
+        profileFileName: originalValues.profileFileName || profileFileName,
+        coverFileName: originalValues.coverFileName || coverFileName,
+        isProfileVideo: originalValues.isProfileVideo || isProfileVideo,
+        videoUrl: originalValues.videoUrl || videoUrl,
       });
       
       // Töm endast lokal state – databasen uppdateras först när användaren sparar profilen
@@ -739,8 +740,7 @@ const Profile = () => {
     // Rensa ångra-data
     setDeletedProfileMedia(null);
     
-    // Låt checkForChanges räkna ut rätt status, men markera temporärt som ändrad
-    setHasUnsavedChanges(true);
+    // checkForChanges körs automatiskt och räknar ut korrekt status
     
     toast({
       title: "Återställd!",
@@ -817,8 +817,7 @@ const Profile = () => {
     // Clear undo data
     setDeletedCoverImage(null);
     
-    // Mark as having unsaved changes
-    setHasUnsavedChanges(true);
+    // checkForChanges körs automatiskt och räknar ut korrekt status
     
     toast({
       title: "Återställd!",
