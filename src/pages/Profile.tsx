@@ -62,6 +62,7 @@ const Profile = () => {
     profileFileName: string;
     coverFileName: string;
     isProfileVideo: boolean;
+    videoUrl: string;
   } | null>(null);
   
   // Separate undo state for cover image only
@@ -204,6 +205,7 @@ const Profile = () => {
       phone,
       birthDate,
       profileImageUrl,
+      videoUrl,
       cvUrl,
       companyName,
       orgNumber,
@@ -211,10 +213,11 @@ const Profile = () => {
       workingHours,
       availability,
       coverImageUrl,
+      isProfileVideo,
     };
 
     const hasChanges = Object.keys(currentValues).some(
-      key => currentValues[key] !== originalValues[key]
+      key => currentValues[key as keyof typeof currentValues] !== originalValues[key as keyof typeof originalValues]
     );
 
     console.log('Checking for changes:', { 
@@ -227,7 +230,7 @@ const Profile = () => {
     setHasUnsavedChanges(hasChanges);
     return hasChanges;
   }, [originalValues, firstName, lastName, bio, userLocation, postalCode, phone, birthDate, 
-      profileImageUrl, cvUrl, companyName, orgNumber, employmentStatus, workingHours, availability, coverImageUrl]);
+      profileImageUrl, videoUrl, cvUrl, companyName, orgNumber, employmentStatus, workingHours, availability, coverImageUrl, isProfileVideo]);
 
   // Check for changes whenever form values change
   useEffect(() => {
@@ -279,6 +282,9 @@ const Profile = () => {
       setWorkingHours(originalValues.workingHours || '');
       setAvailability(originalValues.availability || '');
       setIsProfileVideo(originalValues.isProfileVideo || false);
+      setVideoUrl(originalValues.videoUrl || '');
+      setDeletedProfileMedia(null);
+      setDeletedCoverImage(null);
       setHasUnsavedChanges(false);
     };
     window.addEventListener('unsaved-confirm', onUnsavedConfirm as EventListener);
@@ -680,67 +686,35 @@ const Profile = () => {
     if (!user?.id) return;
     
     try {
-      // Save current values for undo (only profile media, not cover)
+      // Spara aktuella värden för ångra (inklusive video)
       setDeletedProfileMedia({
         profileImageUrl,
-        coverImageUrl, // Save for restore, but don't delete
+        coverImageUrl,
         profileFileName,
-        coverFileName, // Save for restore, but don't delete
-        isProfileVideo
+        coverFileName,
+        isProfileVideo,
+        videoUrl,
       });
       
-      // Delete the actual profile media file from storage if we have a filename
-      if (profileFileName) {
-        const { error: deleteError } = await supabase.storage
-          .from('job-applications')
-          .remove([profileFileName]);
-          
-        if (deleteError) {
-          console.error('Error deleting profile media file:', deleteError);
-        }
-      }
-
-      // Update database IMMEDIATELY (don't wait for save button)
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          profile_image_url: null,
-          video_url: null,
-          cover_image_url: coverImageUrl || null // Keep cover image
-        })
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-      
-      // Clear ONLY profile media from local state, keep cover image
+      // Töm endast lokal state – databasen uppdateras först när användaren sparar profilen
       setProfileImageUrl('');
-      setIsProfileVideo(false); // Reset video flag
-      setProfileFileName(''); // Clear profile filename
-      // Keep coverImageUrl and coverFileName - don't clear them
+      setVideoUrl('');
+      setIsProfileVideo(false);
+      setProfileFileName('');
+      // Behåll coverImageUrl/coverFileName orörda så omslagsbilden finns kvar
       
-      // Update original values so they match current state
-      setOriginalValues(prev => ({
-        ...prev,
-        profileImageUrl: '',
-        profileFileName: '',
-        isProfileVideo: false
-      }));
-      
-      // Reset the file input to allow new uploads
+      // Nollställ fil-input så ny media kan väljas direkt
       const fileInput = document.getElementById('profile-image') as HTMLInputElement;
       if (fileInput) {
         fileInput.value = '';
       }
       
-      // No unsaved changes since we just saved to DB
-      setHasUnsavedChanges(false);
-
-      // Refresh profile so sidebar and other views update immediately
-      await refreshProfile();
+      // Markera som osparade ändringar så varningen visas vid navigation
+      setHasUnsavedChanges(true);
       
       toast({
         title: "Profilbild/video borttagen",
-        description: "Ändringen har sparats"
+        description: "Tryck på \"Spara ändringar\" för att göra ändringen permanent.",
       });
     } catch (error) {
       console.error('Error in deleteProfileMedia:', error);
@@ -754,17 +728,18 @@ const Profile = () => {
   const restoreProfileMedia = () => {
     if (!deletedProfileMedia) return;
     
-    // Restore all values
+    // Återställ alla värden (inklusive video)
     setProfileImageUrl(deletedProfileMedia.profileImageUrl);
     setCoverImageUrl(deletedProfileMedia.coverImageUrl);
     setProfileFileName(deletedProfileMedia.profileFileName);
     setCoverFileName(deletedProfileMedia.coverFileName);
     setIsProfileVideo(deletedProfileMedia.isProfileVideo);
+    setVideoUrl(deletedProfileMedia.videoUrl);
     
-    // Clear undo data
+    // Rensa ångra-data
     setDeletedProfileMedia(null);
     
-    // Mark as having unsaved changes
+    // Låt checkForChanges räkna ut rätt status, men markera temporärt som ändrad
     setHasUnsavedChanges(true);
     
     toast({
@@ -986,6 +961,7 @@ const Profile = () => {
           phone: phone,
           birthDate: birthDate,
           profileImageUrl: profileImageUrl,
+          videoUrl: videoUrl,
           cvUrl: cvUrl,
           companyName: companyName,
           orgNumber: orgNumber,
