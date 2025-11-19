@@ -686,8 +686,7 @@ const Profile = () => {
     if (!user?.id) return;
     
     try {
-      // Spara från originalValues så vi alltid har originalvärdet att återställa till
-      // Detta förhindrar problem om användaren delete -> restore -> delete igen
+      // Save current media for undo
       setDeletedProfileMedia({
         profileImageUrl: originalValues.profileImageUrl || profileImageUrl,
         coverImageUrl: originalValues.coverImageUrl || coverImageUrl,
@@ -697,25 +696,66 @@ const Profile = () => {
         videoUrl: originalValues.videoUrl || videoUrl,
       });
       
-      // Töm endast lokal state – databasen uppdateras först när användaren sparar profilen
+      // Delete from storage if files exist
+      if (profileFileName) {
+        const { error: deleteError } = await supabase.storage
+          .from('job-applications')
+          .remove([profileFileName]);
+          
+        if (deleteError) {
+          console.error('Error deleting profile file:', deleteError);
+        }
+      }
+      
+      if (videoUrl) {
+        const { error: deleteError } = await supabase.storage
+          .from('job-applications')
+          .remove([videoUrl]);
+          
+        if (deleteError) {
+          console.error('Error deleting video:', deleteError);
+        }
+      }
+
+      // Update database IMMEDIATELY (don't wait for save button)
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          profile_image_url: null,
+          video_url: null,
+          is_profile_video: false
+        })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      
+      // Clear local state
       setProfileImageUrl('');
       setVideoUrl('');
       setIsProfileVideo(false);
       setProfileFileName('');
-      // Behåll coverImageUrl/coverFileName orörda så omslagsbilden finns kvar
       
-      // Nollställ fil-input så ny media kan väljas direkt
+      // Update original values so they match current state
+      setOriginalValues(prev => ({
+        ...prev,
+        profileImageUrl: '',
+        videoUrl: '',
+        isProfileVideo: false,
+        profileFileName: ''
+      }));
+      
+      // Reset file input
       const fileInput = document.getElementById('profile-image') as HTMLInputElement;
       if (fileInput) {
         fileInput.value = '';
       }
       
-      // Markera som osparade ändringar så varningen visas vid navigation
-      setHasUnsavedChanges(true);
+      // No unsaved changes since we just saved to DB
+      setHasUnsavedChanges(false);
       
       toast({
         title: "Profilbild/video borttagen",
-        description: "Tryck på \"Spara ändringar\" för att göra ändringen permanent.",
+        description: "Ändringen har sparats"
       });
     } catch (error) {
       console.error('Error in deleteProfileMedia:', error);
@@ -1626,7 +1666,7 @@ const Profile = () => {
               <div className="flex justify-center">
                 <Button 
                   type="submit" 
-                  className="bg-white/5 backdrop-blur-sm border border-white/10 !text-white disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm hover:bg-white/10 hover:!text-white md:hover:bg-white/10 md:hover:!text-white [&_svg]:text-white" 
+                  className="bg-white/5 backdrop-blur-sm border border-white/10 !text-white disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/30 md:hover:shadow-lg md:hover:shadow-white/10 md:hover:scale-[1.02] active:scale-95 active:bg-white/15 [&_svg]:text-white" 
                   disabled={loading || isUploadingMedia || isUploadingCover}
                 >
                   {loading ? 'Sparar...' : 'Spara ändringar'}
