@@ -941,138 +941,191 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       case 2:
         return (
           <div className="space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-semibold mb-4 text-white">Profilbild/Profilvideo</h2>
-              <p className="text-white mb-6">Ladda upp en kort profilvideo eller en bild och gör ditt första intryck minnesvärt</p>
-              
-              {/* Video and Camera Icons */}
-              <div className="flex items-center justify-center space-x-4 mb-4">
-                {/* Video option */}
-                <div className="relative">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-white/20 p-2 bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-sm">
-                    <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
-                      <Video className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
-                    </div>
-                  </div>
-                  <div className="absolute -top-1 -right-1 bg-white rounded-full p-1.5 shadow-lg">
-                    <Play className="h-3 w-3 text-primary animate-pulse" />
-                  </div>
-                </div>
-
-                {/* "eller" text */}
-                <div className="text-white/80 text-sm font-medium flex-shrink-0">
-                  eller
-                </div>
-
-                {/* Image option */}
-                <div className="relative">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-white/20 p-2 bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-sm">
-                    <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
-                      <Camera className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
-                    </div>
-                  </div>
-                  <div className="absolute -top-1 -right-1 bg-white rounded-full p-1.5 shadow-lg">
-                    <Camera className="h-2 w-2 text-primary" />
-                  </div>
-                </div>
-              </div>
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-semibold mb-2 text-white">Profilbild/Profilvideo</h2>
+              <p className="text-white/90 text-sm">Ladda upp en kort profilvideo eller en bild och gör ditt första intryck minnesvärt</p>
             </div>
 
-            <div className="flex flex-col items-center space-y-4">
-              <div className="relative">
-                {formData.profileImageUrl && formData.profileMediaType === 'video' ? (
-                  <ProfileVideo
-                    videoUrl={formData.profileImageUrl}
-                    coverImageUrl={formData.coverImageUrl}
-                    alt="Profile video"
-                    className="w-32 h-32 cursor-pointer border-4 border-white/20 hover:border-white/40 transition-all rounded-full overflow-hidden"
-                    userInitials={`${formData.firstName?.[0] || ''}${formData.lastName?.[0] || ''}`}
-                  />
-                ) : (
-                  <Avatar className="w-32 h-32 cursor-pointer border-4 border-white/20 hover:border-white/40 transition-all" onClick={() => document.getElementById('profileMedia')?.click()}>
-                    {formData.profileImageUrl ? (
-                      <AvatarImage src={getDisplayUrl(formData.profileImageUrl)} alt="Profile picture" />
-                    ) : (
-                      <AvatarFallback className="text-2xl bg-white/20 text-white">{formData.firstName?.[0]}{formData.lastName?.[0]}</AvatarFallback>
-                    )}
-                  </Avatar>
-                )}
+            {/* Profile Image/Video Card - matching structure from Profile.tsx */}
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
+              <div className="p-6 md:p-4 space-y-2">
+                <h3 className="text-base font-semibold text-white text-center">
+                  Profilbild/Profilvideo
+                </h3>
+                <p className="text-white text-center text-sm">
+                  Ladda upp en kort profilbild/profilvideo och gör ditt första intryck minnesvärt
+                </p>
                 
-                {/* Delete/Restore icon for profile media */}
-                {formData.profileImageUrl && (
-                  <button
-                    onClick={deleteProfileMedia}
-                    className="absolute -top-2 -right-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                )}
-                
-                {/* Undo button - shown when media was just deleted */}
-                {!formData.profileImageUrl && deletedProfileMedia && (
-                  <button
-                    onClick={restoreProfileMedia}
-                    className="absolute -top-2 -right-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
-                    title="Ångra borttagning"
-                  >
-                    <RotateCcw className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
+                {/* Video and Camera Icons */}
+                <div className="flex items-center justify-center space-x-4">
+                  {/* Video option */}
+                  <div className="relative">
+                    <div className="w-16 h-16 rounded-full border-4 border-white/10 p-2 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-sm">
+                      <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
+                        <Video className="h-5 w-5 text-white" />
+                      </div>
+                    </div>
+                    <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
+                      <Play className="h-2 w-2 text-primary animate-pulse" />
+                    </div>
+                  </div>
 
-              <div className="space-y-2 text-center">
-                <Label htmlFor="profileMedia" className="text-white cursor-pointer hover:text-white/90 transition-colors">
-                  Klicka för att välja en bild eller video (max 60 sekunder)
-                </Label>
-                <Input type="file" id="profileMedia" accept="image/*,video/*" className="hidden" onChange={handleMediaChange} disabled={isUploadingMedia} />
-                
-                {isUploadingMedia && (
-                  <Badge variant="outline" className="bg-white/10 text-white border-white/20 animate-pulse">
-                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
-                    Laddar upp {uploadingMediaType === 'video' ? 'video' : 'bild'}...
-                  </Badge>
-                )}
-                
-                {formData.profileImageUrl && !isUploadingMedia && (
-                  <Badge variant="outline" className="bg-white/20 text-white border-white/20 mt-12">
-                    {formData.profileMediaType === 'video' ? 'Video' : 'Bild'} uppladdad!
-                  </Badge>
-                )}
-              </div>
+                  {/* "eller" text */}
+                  <div className="text-white text-sm font-medium flex-shrink-0">
+                    eller
+                  </div>
 
-              {/* Cover image upload for videos */}
-              {formData.profileMediaType === 'video' && formData.profileImageUrl && (
-                <div className="space-y-2 text-center mt-4 p-4 bg-white/10 rounded-lg backdrop-blur-sm relative">
-                  <Label htmlFor="coverImage" className="text-white text-sm">
-                    Cover-bild för video (valfritt)
-                  </Label>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => document.getElementById('coverImage')?.click()}
-                    disabled={isUploadingCover}
-                    className="bg-white/5 border-white/10 !text-white hover:bg-white/10 hover:!text-white disabled:opacity-50"
-                  >
-                    {formData.coverImageUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
-                  </Button>
-                  <Input type="file" id="coverImage" accept="image/*" className="hidden" onChange={handleCoverChange} disabled={isUploadingCover} />
+                  {/* Image option */}
+                  <div className="relative">
+                    <div className="w-16 h-16 rounded-full border-4 border-white/10 p-2 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-sm">
+                      <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
+                        <Camera className="h-5 w-5 text-white" />
+                      </div>
+                    </div>
+                    <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
+                      <Camera className="h-2 w-2 text-primary" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 flex flex-col items-center space-y-4">
+                <div className="relative">
+                  {formData.profileImageUrl && formData.profileMediaType === 'video' ? (
+                    <ProfileVideo
+                      videoUrl={getDisplayUrl(formData.profileImageUrl)}
+                      coverImageUrl={getDisplayUrl(formData.coverImageUrl)}
+                      userInitials={`${formData.firstName?.[0] || ''}${formData.lastName?.[0] || ''}`}
+                      alt="Profile video"
+                      className="w-32 h-32 border-4 border-white/10 hover:border-white/20 transition-all rounded-full overflow-hidden"
+                    />
+                  ) : (
+                    <div 
+                      className="cursor-pointer" 
+                      onClick={() => document.getElementById('profileMedia')?.click()}
+                    >
+                      <Avatar className="h-32 w-32 border-4 border-white/10 hover:border-white/20 [transition:border-color_0.2s]">
+                        {formData.profileImageUrl ? (
+                          <AvatarImage 
+                            src={getDisplayUrl(formData.profileImageUrl)} 
+                            alt="Profilbild"
+                            className="object-cover"
+                            decoding="sync"
+                            loading="eager"
+                            fetchPriority="high"
+                            draggable={false}
+                          />
+                        ) : null}
+                        {!formData.profileImageUrl && (
+                          <AvatarFallback delayMs={300} className="text-4xl font-semibold bg-white/20 text-white">
+                            {((formData.firstName?.trim()?.[0]?.toUpperCase() || '') + (formData.lastName?.trim()?.[0]?.toUpperCase() || '')) || '?'}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+                    </div>
+                  )}
+
+                  {/* Delete/Restore icon for profile media */}
+                  {formData.profileImageUrl && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteProfileMedia();
+                      }}
+                      className="absolute -top-3 -right-3 bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
                   
-                  {isUploadingCover && (
-                    <Badge variant="outline" className="bg-white/10 text-white border-white/20 text-sm animate-pulse">
-                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
-                      Laddar upp cover-bild...
+                  {/* Undo button - shown when media was just deleted */}
+                  {!formData.profileImageUrl && deletedProfileMedia && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        restoreProfileMedia();
+                      }}
+                      className="absolute -top-2 -right-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                      title="Ångra borttagning"
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                    </button>
+                  )}
+
+                  <input
+                    id="profileMedia"
+                    type="file"
+                    accept="image/*,video/*"
+                    onChange={handleMediaChange}
+                    className="hidden"
+                    disabled={isUploadingMedia}
+                  />
+                </div>
+
+                <div className="space-y-2 text-center">
+                  <Label 
+                    htmlFor="profileMedia" 
+                    className="text-white cursor-pointer hover:text-white/90 transition-colors text-center text-sm"
+                  >
+                    Klicka för att välja en bild eller video (max 60 sekunder)
+                  </Label>
+                  
+                  {isUploadingMedia && (
+                    <Badge variant="outline" className="bg-white/10 text-white border-white/20 animate-pulse rounded-md px-3 py-1.5">
+                      {uploadingMediaType === 'video' ? 'Laddar upp video...' : 'Laddar upp bild...'}
                     </Badge>
                   )}
                   
-                  {formData.coverImageUrl && !isUploadingCover && (
-                    <div className="flex items-center justify-center">
-                       <Badge variant="outline" className="bg-white/20 text-white border-white/20 text-sm">
-                          Cover-bild uppladdad!
-                        </Badge>
-                    </div>
+                  {formData.profileImageUrl && !isUploadingMedia && (
+                    <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-md">
+                      {formData.profileMediaType === 'video' ? 'Video' : 'Bild'} uppladdad!
+                    </Badge>
                   )}
                 </div>
-              )}
+
+                {/* Cover image upload - show when video exists */}
+                {formData.profileMediaType === 'video' && formData.profileImageUrl && (
+                  <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => document.getElementById('coverImage')?.click()}
+                        disabled={isUploadingCover}
+                        className="bg-white/5 backdrop-blur-sm border-white/10 !text-white disabled:opacity-50 hover:bg-white/10 hover:!text-white md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/10"
+                      >
+                        {formData.coverImageUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
+                      </Button>
+                    </div>
+                    <Input 
+                      type="file" 
+                      id="coverImage" 
+                      accept="image/*" 
+                      className="hidden" 
+                      onChange={handleCoverChange} 
+                      disabled={isUploadingCover} 
+                    />
+                    
+                    {isUploadingCover && (
+                      <div className="flex flex-col items-center w-full">
+                        <Badge variant="outline" className="bg-white/10 text-white border-white/20 text-sm animate-pulse">
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                          Laddar upp cover-bild...
+                        </Badge>
+                      </div>
+                    )}
+                    
+                    {formData.coverImageUrl && !isUploadingCover && (
+                      <div className="flex flex-col items-center space-y-2 w-full">
+                         <div className="flex items-center justify-center">
+                           <Badge variant="outline" className="bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-md">
+                              Cover-bild uppladdad!
+                            </Badge>
+                         </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         );
