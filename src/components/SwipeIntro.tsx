@@ -121,10 +121,9 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
               {/* iPhone notch */}
               <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black border border-gray-800"></div>
 
-              {/* Innehåll med Parium bakgrund */}
+              {/* Innehåll utan bakgrund */}
               <div 
                 className="absolute inset-0 rounded-[1.4rem] overflow-hidden"
-                style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}
               >
                 <div className="h-full w-full flex items-center justify-center">
                   <JobAdCard
