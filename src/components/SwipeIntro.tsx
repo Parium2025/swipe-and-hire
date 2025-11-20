@@ -149,12 +149,12 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
                 
                 {/* Textinnehåll - centrerat */}
-                <div className="absolute inset-0 flex flex-col justify-center items-center p-2 text-white text-center">
-                  <h3 className="text-base font-extrabold leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)]">
+                <div className="absolute inset-0 flex flex-col justify-center items-center p-2 text-center">
+                  <h3 className="text-base font-extrabold leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
                     UX Designer
                   </h3>
-                  <div className="mt-1 text-white/95 text-sm drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">Techno AB</div>
-                  <div className="text-white/80 text-sm drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]">Stockholm • Hybrid</div>
+                  <div className="mt-1 text-white text-sm drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">Techno AB</div>
+                  <div className="text-white text-sm drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">Stockholm • Hybrid</div>
                 </div>
 
                 {/* Handlingsknappar */}
