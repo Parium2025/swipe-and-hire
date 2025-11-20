@@ -113,21 +113,21 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       title: "Jobbsök i ett swipe",
       subtitle: "Swipa, Matcha, Börja",
       content: (
-        <div className="flex flex-col items-center space-y-8">
-          {/* iPhone-stil telefonram - mindre storlek */}
-          <div className="relative w-[180px] h-[360px] rounded-[2.2rem] bg-black p-1.5 shadow-2xl">
+        <div className="flex flex-col items-center space-y-4">
+          {/* iPhone-stil telefonram - ännu mindre */}
+          <div className="relative w-[140px] h-[280px] rounded-[1.8rem] bg-black p-1 shadow-2xl">
             {/* Skärm */}
-            <div className="relative w-full h-full rounded-[1.8rem] overflow-hidden bg-black">
+            <div className="relative w-full h-full rounded-[1.4rem] overflow-hidden bg-black">
               {/* iPhone notch */}
-              <div className="absolute top-1 left-1/2 -translate-x-1/2 z-20 h-1 w-8 rounded-full bg-black border border-gray-800"></div>
+              <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black border border-gray-800"></div>
 
               {/* Innehåll med Parium bakgrund */}
               <div 
-                className="absolute inset-0 rounded-[1.8rem] overflow-y-auto"
+                className="absolute inset-0 rounded-[1.4rem] overflow-y-auto"
                 style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}
               >
-                <div className="h-full p-3 flex items-center justify-center">
-                  <div className="transform scale-90">
+                <div className="h-full p-2 flex items-center justify-center">
+                  <div className="transform scale-75">
                     <JobAdCard
                       imageUrl={officeBuilding}
                       title="UX Designer"
