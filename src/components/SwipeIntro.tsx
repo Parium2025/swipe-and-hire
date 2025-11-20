@@ -127,7 +127,8 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
               >
                 <div className="h-full w-full flex items-center justify-center bg-transparent">
                   <JobAdCard
-                    backgroundGradient="bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700"
+                    noBackground
+                    backgroundGradient="bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-black"
                     title="UX Designer"
                     company="Techno AB"
                     location="Stockholm • Hybrid"
