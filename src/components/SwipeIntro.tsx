@@ -38,7 +38,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
                   {/* Animerad swipe-gest */}
                   <div className="relative w-16 h-8 flex items-center">
                     {/* Hand-ikon som swiper */}
-                    <div className="absolute text-primary-foreground" style={{ animation: 'swipeLeft 2s ease-in-out infinite' }}>
+                    <div className="absolute text-primary-foreground animate-[swipeLeft_2s_ease-in-out_infinite]">
                     </div>
                     
                     {/* Swipe-spår */}
@@ -47,7 +47,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
                     </div>
                     
                     {/* Pil som följer */}
-                    <div className="absolute right-0" style={{ animation: 'arrowLeft 2s ease-in-out infinite 0.3s' }}>
+                    <div className="absolute right-0 animate-[arrowLeft_2s_ease-in-out_infinite_0.3s]">
                       <ArrowRight className="h-3 w-3 text-primary-foreground rotate-180" />
                     </div>
                   </div>
