@@ -657,11 +657,11 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               {/* Removed center icon for cleaner, minimal hero */}
               <div className="h-2" />
               
-              <div className="space-y-6">
-                <h1 className="text-2xl font-semibold text-white animate-fade-in leading-tight">Välkommen till Parium</h1>
+              <div className="space-y-4">
+                <h1 className="text-xl font-semibold text-white animate-fade-in leading-tight">Välkommen till Parium</h1>
                 
                 <div className="space-y-1">
-                  <p className="text-sm text-white animate-fade-in leading-relaxed drop-shadow-sm">Framtiden börjar med ett swipe</p>
+                  <p className="text-sm text-white/80 animate-fade-in leading-relaxed">Framtiden börjar med ett swipe</p>
                 </div>
               </div>
             </div>
@@ -1250,8 +1250,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
               <Check className="h-8 w-8 text-white" />
             </div>
-            <h2 className="text-2xl font-semibold text-white">Profil skapad!</h2>
-            <p className="text-sm text-white">
+            <h2 className="text-xl font-semibold text-white">Profil skapad!</h2>
+            <p className="text-sm text-white/80">
               Välkommen till Parium! Din profil är nu skapad och du kan börja söka jobb.
             </p>
             <img src={phoneWithPariumLogo} alt="Parium på en mobiltelefon" className="max-w-sm mx-auto rounded-xl shadow-lg" />
