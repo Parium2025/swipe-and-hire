@@ -11,7 +11,7 @@ import { Eye, Lock, Unlock, User, Phone, MapPin, Calendar, FileText, Video, Info
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getMediaUrl } from '@/lib/mediaManager';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { useDevice } from '@/hooks/use-device';
 import { openCvFile } from '@/utils/cvUtils';
 import ProfileVideo from '@/components/ProfileVideo';

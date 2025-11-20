@@ -21,7 +21,7 @@ import {
   ArrowLeft,
   Check
 } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 
 interface ProfileBuilderProps {
   onProfileCompleted: () => void;
