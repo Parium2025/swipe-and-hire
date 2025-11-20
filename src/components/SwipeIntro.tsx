@@ -384,7 +384,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
         </div>
 
           {/* Bottom footer (consistent across slides) */}
-          <div className="px-4 mt-auto">
+          <div className="px-4 mt-auto pb-4">
             <div className="flex flex-col items-center gap-3">
               {/* Dots */}
               <div className="flex justify-center space-x-3 py-2">
