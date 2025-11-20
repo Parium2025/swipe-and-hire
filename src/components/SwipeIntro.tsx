@@ -126,18 +126,16 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
                 className="absolute inset-0 rounded-[1.4rem] overflow-hidden"
                 style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}
               >
-                <div className="h-full w-full p-2 flex items-center justify-center">
-                  <div className="w-full h-full flex items-center justify-center">
-                    <JobAdCard
-                      imageUrl={officeBuilding}
-                      title="UX Designer"
-                      company="Techno AB"
-                      location="Stockholm • Hybrid"
-                      tags={["Figma", "Adobe XD", "Design System"]}
-                      salary="52,000 kr"
-                      matchScore={94}
-                    />
-                  </div>
+                <div className="h-full w-full flex items-center justify-center">
+                  <JobAdCard
+                    imageUrl={officeBuilding}
+                    title="UX Designer"
+                    company="Techno AB"
+                    location="Stockholm • Hybrid"
+                    tags={["Figma", "Adobe XD", "Design System"]}
+                    salary="52,000 kr"
+                    matchScore={94}
+                  />
                 </div>
               </div>
             </div>
