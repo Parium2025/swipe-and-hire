@@ -326,7 +326,7 @@ const EmployerProfile = () => {
               <Label htmlFor="role" className="text-sm text-white">Roll</Label>
               <Input
                 id="role"
-                value={userRole?.role === 'employer' ? 'Admin' : userRole?.role === 'recruiter' ? 'Rekryteringsadmin' : userRole?.role || 'Användare'}
+                value={userRole?.role === 'employer' ? 'Admin' : 'Jobbsökare'}
                 readOnly
                 className="bg-white/5 border-white/10 text-white/70 h-9 text-sm cursor-not-allowed"
               />

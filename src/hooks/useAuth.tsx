@@ -269,7 +269,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (roleError) {
         console.error('Error fetching user role:', roleError);
       } else {
-        setUserRole(roleData);
+        setUserRole(roleData as UserRoleData);
 
         // If profile didn't have org_id but role does, fetch organization
         if (!profileData?.organization_id && roleData?.organization_id) {
@@ -605,13 +605,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const updateProfile = async (updates: Partial<Profile>) => {
+  const updateProfile = async (updates: Partial<Profile>): Promise<{ error?: any }> => {
     if (!user) return { error: 'No user logged in' };
 
     try {
+      // Ensure interests is always an array when updating
+      const cleanedUpdates: any = { ...updates };
+      if (cleanedUpdates.interests) {
+        cleanedUpdates.interests = Array.isArray(cleanedUpdates.interests) 
+          ? cleanedUpdates.interests 
+          : [cleanedUpdates.interests];
+      }
+      
       const { error } = await supabase
         .from('profiles')
-        .update(updates)
+        .update(cleanedUpdates)
         .eq('user_id', user.id);
 
       if (error) {
@@ -744,28 +752,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const isSuperAdmin = (): boolean => {
-    return hasRole('super_admin');
+    return userRole?.role === 'employer' && user?.email === 'fredrikandits@hotmail.com';
   };
 
   const isCompanyUser = (): boolean => {
-    return hasRole('company_admin') || hasRole('recruiter') || hasRole('employer');
+    return hasRole('employer');
   };
 
   const getRedirectPath = (): string => {
     if (!userRole) return '/';
     
-    switch (userRole.role) {
-      case 'super_admin':
-        return '/admin';
-      case 'company_admin':
-      case 'recruiter':
-      case 'employer':
-        return '/employer';
-      case 'job_seeker':
-        return '/jobs';
-      default:
-        return '/';
+    if (userRole.role === 'employer') {
+      return '/dashboard';
+    } else if (userRole.role === 'job_seeker') {
+      return '/search-jobs';
     }
+    return '/';
   };
 
   const switchRole = async (newRole: UserRole): Promise<{ error?: any }> => {

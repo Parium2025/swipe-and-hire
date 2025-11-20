@@ -42,25 +42,17 @@ export const useJobsData = () => {
     queryFn: async () => {
       if (!user) return [];
       
-      // Build query with employer profile join
       const query = supabase
         .from('job_postings')
         .select(`
           *,
-          employer_profile:employer_id (
+          employer_profile:profiles!job_postings_employer_id_fkey (
             first_name,
             last_name
           )
         `)
+        .eq('employer_id', user.id)
         .order('created_at', { ascending: false });
-
-      // Prioritize organization_id, fallback to employer_id for legacy data
-      if (profile?.organization_id) {
-        query.eq('organization_id', profile.organization_id);
-      } else {
-        // Legacy fallback: show only own jobs if organization is missing
-        query.eq('employer_id', user.id);
-      }
 
       const { data, error } = await query;
       if (error) throw error;
