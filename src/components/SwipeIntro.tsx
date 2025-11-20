@@ -350,7 +350,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       </div>
 
       {/* Content Container */}
-      <div className="relative z-10 h-screen flex flex-col justify-start pt-20 pb-24 p-8 cursor-grab active:cursor-grabbing select-none"
+      <div className="relative z-10 h-screen flex flex-col justify-start pt-20 pb-6 p-8 cursor-grab active:cursor-grabbing select-none"
         ref={containerRef}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
