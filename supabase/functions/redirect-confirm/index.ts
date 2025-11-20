@@ -34,10 +34,11 @@ const handler = async (req: Request): Promise<Response> => {
     if (!confirmation) {
       console.log('Token not found in database, checking if user already confirmed');
       // Redirect till "redan aktiverat" istället för fel
+      const redirectUrl = Deno.env.get("REDIRECT_URL") || "https://swipe-and-hire.lovable.app";
       return new Response(null, {
         status: 302,
         headers: {
-        'Location': 'https://swipe-and-hire.lovable.app/auth?confirmed=already',
+          'Location': `${redirectUrl}/auth?confirmed=already`,
         },
       });
     }
@@ -45,10 +46,11 @@ const handler = async (req: Request): Promise<Response> => {
     if (confirmation.confirmed_at) {
       console.log('Token already confirmed:', token);
       // Omdirigera till React-appen för redan aktiverat konto
+      const redirectUrl = Deno.env.get("REDIRECT_URL") || "https://swipe-and-hire.lovable.app";
       return new Response(null, {
         status: 302,
         headers: {
-          'Location': 'https://swipe-and-hire.lovable.app/auth?confirmed=already',
+          'Location': `${redirectUrl}/auth?confirmed=already`,
         },
       });
     }
@@ -83,10 +85,11 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('Email confirmed successfully for token:', token);
     
     // Omdirigera till React-appen med bekräftelseparameter
+    const redirectUrl = Deno.env.get("REDIRECT_URL") || "https://swipe-and-hire.lovable.app";
     return new Response(null, {
       status: 302,
       headers: {
-        'Location': 'https://swipe-and-hire.lovable.app/auth?confirmed=success',
+        'Location': `${redirectUrl}/auth?confirmed=success`,
       },
     });
 
