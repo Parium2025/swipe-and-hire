@@ -350,7 +350,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       </div>
 
       {/* Content Container */}
-      <div className="relative z-10 h-screen flex flex-col justify-start pt-20 pb-6 p-8 cursor-grab active:cursor-grabbing select-none"
+      <div className="relative z-10 h-screen flex flex-col justify-between pt-20 pb-6 p-8 cursor-grab active:cursor-grabbing select-none"
         ref={containerRef}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -361,7 +361,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
         onMouseLeave={handleMouseLeave}
       >
         <div 
-          className="text-center max-w-sm mx-auto px-4 transition-transform duration-300"
+          className="text-center max-w-sm mx-auto px-4 transition-transform duration-300 flex-1 flex flex-col"
           style={{
             transform: `translateX(${dragOffset}px)`,
             transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -377,14 +377,14 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             {slides[currentSlide].subtitle}
           </p>
 
-          {/* Slide Content */}
-          <div className={`animate-scale-in ${currentSlide === 1 ? 'mt-16' : 'mt-0'}`}>
+          {/* Slide Content - flex-1 to push content up */}
+          <div className={`animate-scale-in flex-1 flex items-start justify-center ${currentSlide === 1 ? 'mt-16' : 'mt-0'}`}>
             {slides[currentSlide].content}
           </div>
         </div>
 
           {/* Bottom footer (consistent across slides) */}
-          <div className="absolute bottom-6 left-0 right-0 px-4">
+          <div className="px-4 mt-auto">
             <div className="flex flex-col items-center gap-3">
               {/* Dots */}
               <div className="flex justify-center space-x-3 py-2">
