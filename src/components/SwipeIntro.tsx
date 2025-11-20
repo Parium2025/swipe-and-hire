@@ -117,15 +117,15 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
           {/* iPhone-stil telefonram - kompakt storlek */}
           <div className="relative w-[140px] h-[280px] rounded-[1.8rem] bg-black p-1 shadow-2xl">
             {/* Skärm */}
-            <div className="relative w-full h-full rounded-[1.4rem] overflow-hidden bg-black">
+            <div className="relative w-full h-full rounded-[1.4rem] overflow-hidden bg-transparent">
               {/* iPhone notch */}
               <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black border border-gray-800"></div>
 
               {/* Innehåll utan bakgrund */}
               <div 
-                className="absolute inset-0 rounded-[1.4rem] overflow-hidden"
+                className="absolute inset-0 rounded-[1.4rem] overflow-hidden bg-transparent"
               >
-                <div className="h-full w-full flex items-center justify-center">
+                <div className="h-full w-full flex items-center justify-center bg-transparent">
                   <JobAdCard
                     imageUrl={officeBuilding}
                     title="UX Designer"
