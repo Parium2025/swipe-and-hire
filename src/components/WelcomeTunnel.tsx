@@ -702,7 +702,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
                 <User className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-2xl font-bold mb-2 text-white">Låt oss lära känna dig</h2>
+              <h2 className="text-2xl font-semibold mb-2 text-white">Låt oss lära känna dig</h2>
             </div>
             
             <div className="space-y-4 max-w-md mx-auto">
@@ -942,7 +942,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold mb-4 text-white">Profilbild/Profilvideo</h2>
+              <h2 className="text-2xl font-semibold mb-4 text-white">Profilbild/Profilvideo</h2>
               <p className="text-white mb-6">Ladda upp en kort profilvideo eller en bild och gör ditt första intryck minnesvärt</p>
               
               {/* Video and Camera Icons */}
@@ -1084,7 +1084,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
                 <FileText className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-2xl font-bold mb-2 text-white">CV</h2>
+              <h2 className="text-2xl font-semibold mb-2 text-white">CV</h2>
               <p className="text-white">Ladda upp ditt CV för att visa din erfarenhet</p>
             </div>
 
@@ -1118,7 +1118,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
                 <Briefcase className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-2xl font-bold mb-2 text-white">Din profil</h2>
+              <h2 className="text-2xl font-semibold mb-2 text-white">Din profil</h2>
               <p className="text-white">Ge en kortare beskrivning om dig själv?</p>
             </div>
 
@@ -1149,7 +1149,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
                 <Users className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-2xl font-bold mb-2 text-white">Dela din information</h2>
+              <h2 className="text-2xl font-semibold mb-2 text-white">Dela din information</h2>
               <p className="text-white/90">För att kunna matcha dig med rätt jobb behöver vi kunna dela viss information med arbetsgivare.</p>
             </div>
 
@@ -1202,8 +1202,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <Check className="h-12 w-12 text-white" />
             </div>
             <div className="space-y-4">
-              <h2 className="text-4xl font-bold text-white">Profilen är klar</h2>
-              <p className="text-xl text-white/90">Är du redo?</p>
+              <h2 className="text-2xl font-semibold text-white">Profilen är klar</h2>
+              <p className="text-sm text-white/80">Är du redo?</p>
             </div>
             <div className="space-y-4 pt-8">
               <Button
