@@ -16,6 +16,7 @@ interface JobAdCardProps {
   onSave?: () => void;
   onSuperLike?: () => void; // kept for API compatibility
   onRewind?: () => void; // kept for API compatibility
+  noBackground?: boolean;
 }
 
 const JobAdCard: React.FC<JobAdCardProps> = ({
@@ -27,34 +28,43 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
   onLike,
   onNope,
   onSave,
+  noBackground,
 }) => {
   return (
     <section aria-label="Jobbannonskort" className="relative w-[140px] h-[280px] mx-auto">
       {/* Telefonram */}
       <div className="relative w-full h-full rounded-[1.2rem] bg-slate-950 p-0.5 shadow-2xl ring-1 ring-black/30">
         {/* Skärm */}
-        <div className="relative w-full h-full rounded-[0.9rem] overflow-hidden bg-black">
+        <div
+          className={`relative w-full h-full rounded-[0.9rem] overflow-hidden ${
+            noBackground ? 'bg-transparent' : 'bg-black'
+          }`}
+        >
           {/* Notch/status */}
           <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black/60 border border-white/10"></div>
 
           {/* Bakgrundsbild */}
-          {imageUrl ? (
-            <img
-              loading="eager"
-              decoding="sync"
-              fetchPriority="high"
-              src={imageUrl}
-              alt={imageAlt || `${title} hos ${company}`}
-              className="absolute inset-0 w-full h-full object-cover will-change-transform"
-              draggable={false}
-              style={{ contentVisibility: 'auto' }}
-            />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800" />
+          {!noBackground && (
+            imageUrl ? (
+              <img
+                loading="eager"
+                decoding="sync"
+                fetchPriority="high"
+                src={imageUrl}
+                alt={imageAlt || `${title} hos ${company}`}
+                className="absolute inset-0 w-full h-full object-cover will-change-transform"
+                draggable={false}
+                style={{ contentVisibility: 'auto' }}
+              />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800" />
+            )
           )}
 
           {/* Nedre gradient för läsbarhet */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
+          {!noBackground && (
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
+          )}
 
           {/* Textinnehåll - centrerat */}
           <div className="absolute inset-0 flex flex-col justify-center items-center p-2 text-white text-center">
