@@ -114,28 +114,30 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       subtitle: "Swipa, Matcha, Börja",
       content: (
         <div className="flex flex-col items-center space-y-4">
-          {/* iPhone-stil telefonram - ännu mindre */}
-          <div className="relative w-[140px] h-[280px] rounded-[1.8rem] bg-black p-1 shadow-2xl">
+          {/* iPhone-stil telefonram - något större */}
+          <div className="relative w-[200px] h-[400px] rounded-[2.4rem] bg-black p-1.5 shadow-2xl scale-90 sm:scale-100">
             {/* Skärm */}
-            <div className="relative w-full h-full rounded-[1.4rem] overflow-hidden bg-black">
+            <div className="relative w-full h-full rounded-[2rem] overflow-hidden bg-black">
               {/* iPhone notch */}
-              <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black border border-gray-800"></div>
+              <div className="absolute top-1.5 left-1/2 -translate-x-1/2 z-20 h-1.5 w-10 rounded-full bg-black border border-gray-800"></div>
 
               {/* Innehåll med Parium bakgrund */}
               <div 
-                className="absolute inset-0 rounded-[1.4rem] overflow-hidden"
+                className="absolute inset-0 rounded-[2rem] overflow-y-auto custom-scrollbar"
                 style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}
               >
-                <div className="h-full w-full flex items-center justify-center">
-                  <JobAdCard
-                    imageUrl={officeBuilding}
-                    title="UX Designer"
-                    company="Techno AB"
-                    location="Stockholm • Hybrid"
-                    tags={["Figma", "Adobe XD", "Design System"]}
-                    salary="52,000 kr"
-                    matchScore={94}
-                  />
+                <div className="h-full p-0">
+                  <div className="h-full w-full flex items-center justify-center">
+                    <JobAdCard
+                      imageUrl={officeBuilding}
+                      title="UX Designer"
+                      company="Techno AB"
+                      location="Stockholm • Hybrid"
+                      tags={["Figma", "Adobe XD", "Design System"]}
+                      salary="52,000 kr"
+                      matchScore={94}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
