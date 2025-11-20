@@ -361,7 +361,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
         onMouseLeave={handleMouseLeave}
       >
         <div 
-          className="text-center max-w-sm mx-auto px-4 transition-transform duration-300 flex-1 flex flex-col"
+          className="text-center max-w-sm mx-auto px-4 transition-transform duration-300 flex flex-col h-full"
           style={{
             transform: `translateX(${dragOffset}px)`,
             transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -377,14 +377,14 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
             {slides[currentSlide].subtitle}
           </p>
 
-          {/* Slide Content - flex-1 to push content up */}
-          <div className={`animate-scale-in flex-1 flex items-start justify-center ${currentSlide === 1 ? 'mt-16' : 'mt-0'}`}>
+          {/* Slide Content */}
+          <div className={`animate-scale-in mb-auto ${currentSlide === 1 ? 'mt-16' : 'mt-0'}`}>
             {slides[currentSlide].content}
           </div>
         </div>
 
           {/* Bottom footer (consistent across slides) */}
-          <div className="px-4 mt-auto pb-4">
+          <div className="px-4 pb-4">
             <div className="flex flex-col items-center gap-3">
               {/* Dots */}
               <div className="flex justify-center space-x-3 py-2">
