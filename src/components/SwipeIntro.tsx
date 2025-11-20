@@ -114,8 +114,8 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       subtitle: "Swipa, Matcha, Börja",
       content: (
         <div className="flex flex-col items-center space-y-4">
-          {/* iPhone-stil telefonram - något större */}
-          <div className="relative w-[200px] h-[400px] rounded-[2.4rem] bg-black p-1.5 shadow-2xl scale-90 sm:scale-100">
+          {/* iPhone-stil telefonram - något större men nedskalad */}
+          <div className="relative w-[200px] h-[400px] rounded-[2.4rem] bg-black p-1.5 shadow-2xl scale-75 sm:scale-75">
             {/* Skärm */}
             <div className="relative w-full h-full rounded-[2rem] overflow-hidden bg-black">
               {/* iPhone notch */}
