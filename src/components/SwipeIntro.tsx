@@ -114,30 +114,28 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       subtitle: "Swipa, Matcha, Börja",
       content: (
         <div className="flex flex-col items-center space-y-4">
-          {/* iPhone-stil telefonram - något större men nedskalad */}
-          <div className="relative w-[200px] h-[400px] rounded-[2.4rem] bg-black p-1.5 shadow-2xl scale-75 sm:scale-75">
+          {/* iPhone-stil telefonram - kompakt storlek */}
+          <div className="relative w-[140px] h-[280px] rounded-[1.8rem] bg-black p-1 shadow-2xl">
             {/* Skärm */}
-            <div className="relative w-full h-full rounded-[2rem] overflow-hidden bg-black">
+            <div className="relative w-full h-full rounded-[1.4rem] overflow-hidden bg-black">
               {/* iPhone notch */}
-              <div className="absolute top-1.5 left-1/2 -translate-x-1/2 z-20 h-1.5 w-10 rounded-full bg-black border border-gray-800"></div>
+              <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black border border-gray-800"></div>
 
               {/* Innehåll med Parium bakgrund */}
               <div 
-                className="absolute inset-0 rounded-[2rem] overflow-y-auto custom-scrollbar"
+                className="absolute inset-0 rounded-[1.4rem] overflow-hidden"
                 style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}
               >
-                <div className="h-full p-0">
-                  <div className="h-full w-full flex items-center justify-center">
-                    <JobAdCard
-                      imageUrl=""
-                      title="UX Designer"
-                      company="Techno AB"
-                      location="Stockholm • Hybrid"
-                      tags={["Figma", "Adobe XD", "Design System"]}
-                      salary="52,000 kr"
-                      matchScore={94}
-                    />
-                  </div>
+                <div className="h-full w-full flex items-center justify-center">
+                  <JobAdCard
+                    imageUrl={officeBuilding}
+                    title="UX Designer"
+                    company="Techno AB"
+                    location="Stockholm • Hybrid"
+                    tags={["Figma", "Adobe XD", "Design System"]}
+                    salary="52,000 kr"
+                    matchScore={94}
+                  />
                 </div>
               </div>
             </div>
@@ -350,7 +348,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       </div>
 
       {/* Content Container */}
-      <div className="relative z-10 h-screen flex flex-col justify-between pt-20 pb-6 p-8 cursor-grab active:cursor-grabbing select-none"
+      <div className="relative z-10 h-screen flex flex-col justify-start pt-20 pb-24 p-8 cursor-grab active:cursor-grabbing select-none"
         ref={containerRef}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -361,7 +359,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
         onMouseLeave={handleMouseLeave}
       >
         <div 
-          className="text-center max-w-sm mx-auto px-4 transition-transform duration-300 flex flex-col h-full"
+          className="text-center max-w-sm mx-auto px-4 transition-transform duration-300"
           style={{
             transform: `translateX(${dragOffset}px)`,
             transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
@@ -378,13 +376,13 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
           </p>
 
           {/* Slide Content */}
-          <div className={`animate-scale-in mb-auto ${currentSlide === 1 ? 'mt-16' : 'mt-0'}`}>
+          <div className={`animate-scale-in ${currentSlide === 1 ? 'mt-16' : 'mt-0'}`}>
             {slides[currentSlide].content}
           </div>
         </div>
 
           {/* Bottom footer (consistent across slides) */}
-          <div className="px-4 pb-4">
+          <div className="absolute bottom-6 left-0 right-0 px-4">
             <div className="flex flex-col items-center gap-3">
               {/* Dots */}
               <div className="flex justify-center space-x-3 py-2">
