@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Heart, ArrowRight, Play, Camera, Video, Sparkles, Hand } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
-import JobAdCard from '@/components/JobAdCard';
 import officeBuilding from '@/assets/office-building.jpg';
 import industrialOffice from '@/assets/industrial-office-bg.jpg';
 
@@ -146,16 +145,38 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
                   backgroundPosition: 'center'
                 }}
               >
-                <div className="h-full w-full flex items-center justify-center">
-                  <JobAdCard
-                    noBackground
-                    title="UX Designer"
-                    company="Techno AB"
-                    location="Stockholm • Hybrid"
-                    tags={["Figma", "Adobe XD", "Design System"]}
-                    salary="52,000 kr"
-                    matchScore={94}
-                  />
+                {/* Nedre gradient för läsbarhet */}
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
+                
+                {/* Textinnehåll - centrerat */}
+                <div className="absolute inset-0 flex flex-col justify-center items-center p-2 text-white text-center">
+                  <h3 className="text-base font-extrabold leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)]">
+                    UX Designer
+                  </h3>
+                  <div className="mt-1 text-white/95 text-sm drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">Techno AB</div>
+                  <div className="text-white/80 text-sm drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]">Stockholm • Hybrid</div>
+                </div>
+
+                {/* Handlingsknappar */}
+                <div className="absolute bottom-1.5 left-0 right-0 flex items-center justify-center gap-2">
+                  <button
+                    aria-label="Nej tack"
+                    className="w-7 h-7 rounded-full bg-red-500 shadow-lg flex items-center justify-center"
+                  >
+                    <ArrowRight className="h-3.5 w-3.5 text-white rotate-180" />
+                  </button>
+                  <button
+                    aria-label="Spara jobb"
+                    className="w-7 h-7 rounded-full bg-blue-500 shadow-lg flex items-center justify-center"
+                  >
+                    <Play className="h-3.5 w-3.5 text-white" />
+                  </button>
+                  <button
+                    aria-label="Gilla jobbet"
+                    className="w-7 h-7 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center"
+                  >
+                    <Heart className="h-3.5 w-3.5 text-white fill-white" />
+                  </button>
                 </div>
               </div>
             </div>
