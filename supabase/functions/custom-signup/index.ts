@@ -110,14 +110,15 @@ const handler = async (req: Request): Promise<Response> => {
 
     // 2. Skapa bekräftelsetoken
     const confirmationToken = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
     
-    // 3. Spara token i databasen
+    // 3. Spara token i databasen (utan e-post, följer nuvarande schema)
     const { error: tokenError } = await supabase
       .from('email_confirmations')
       .insert({
         user_id: user.user.id,
-        email,
-        token: confirmationToken
+        token: confirmationToken,
+        expires_at: expiresAt,
       });
 
     if (tokenError) {
@@ -128,7 +129,8 @@ const handler = async (req: Request): Promise<Response> => {
     }
     
     // Använd Supabase Edge Function för omdirigering (undviker Lovable-proxy)
-    const confirmationUrl = `https://rvtsfnaqlnggfkoqygbm.supabase.co/functions/v1/redirect-confirm?token=${confirmationToken}`;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const confirmationUrl = `${supabaseUrl}/functions/v1/redirect-confirm?token=${confirmationToken}`;
     
     console.log(`Sending confirmation email to ${email} with redirect URL: ${confirmationUrl}`);
 
