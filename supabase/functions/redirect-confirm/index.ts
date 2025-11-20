@@ -9,98 +9,28 @@ const supabase = createClient(
 const handler = async (req: Request): Promise<Response> => {
   const url = new URL(req.url);
   const token = url.searchParams.get('token');
-  
-  console.log('Confirm page accessed with token:', token);
-  
+
+  console.log('Redirect-confirm accessed with token:', token);
+
+  const redirectBase = Deno.env.get('REDIRECT_URL') || 'https://swipe-and-hire.lovable.app';
+
+  // Om ingen token – skicka till en felvy i frontend
   if (!token) {
-    return new Response(getErrorPage('Ingen bekräftelsetoken hittades.'), { 
-      status: 400,
-      headers: { 
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'no-cache'
-      }
-    });
-  }
-
-  try {
-    // Först kolla om användarens e-postbekräftelse är klar
-    const { data: confirmation, error: confirmError } = await supabase
-      .from('email_confirmations')
-      .select('*')
-      .eq('token', token)
-      .maybeSingle();
-
-    // Om token inte finns i databasen, omdirigera till "redan aktiverat"
-    if (!confirmation) {
-      console.log('Token not found in database, user probably already confirmed');
-      return new Response(getSuccessPage('Ditt konto är redan aktiverat. Du kan logga in direkt.', true), {
-        status: 200,
-        headers: {
-          'Content-Type': 'text/html; charset=utf-8',
-          'Cache-Control': 'no-cache'
-        }
-      });
-    }
-
-    if (confirmation.confirmed_at) {
-      console.log('Token already confirmed:', token);
-      return new Response(getSuccessPage('Ditt konto är redan aktiverat. Du kan logga in direkt.', true), {
-        status: 200,
-        headers: {
-          'Content-Type': 'text/html; charset=utf-8',
-          'Cache-Control': 'no-cache'
-        }
-      });
-    }
-
-    // Bekräfta användaren
-    const { error: updateError } = await supabase
-      .from('email_confirmations')
-      .update({ confirmed_at: new Date().toISOString() })
-      .eq('token', token);
-
-    if (updateError) {
-      console.error('Error updating confirmation:', updateError);
-      return new Response(getErrorPage('Ett fel inträffade vid bekräftelse.'), { 
-        status: 500,
-        headers: { 
-          'Content-Type': 'text/html; charset=utf-8',
-          'Cache-Control': 'no-cache'
-        }
-      });
-    }
-
-    // Aktivera användaren i Supabase Auth
-    const { error: authError } = await supabase.auth.admin.updateUserById(
-      confirmation.user_id,
-      { email_confirm: true }
-    );
-
-    if (authError) {
-      console.error('Error confirming user:', authError);
-    }
-
-    console.log('Email confirmed successfully for token:', token);
-    
-    // Visa den fina bekräftelsesidan direkt
-    return new Response(getSuccessPage('Grattis! Ditt konto har nu aktiverats. Du kan nu logga in och börja använda Parium.'), {
-      status: 200,
+    return new Response(null, {
+      status: 302,
       headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'no-cache'
-      }
-    });
-
-  } catch (error) {
-    console.error('Confirmation error:', error);
-    return new Response(getErrorPage('Ett oväntat fel inträffade.'), { 
-      status: 500,
-      headers: { 
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'no-cache'
-      }
+        Location: `${redirectBase}/email-confirm?error=missing_token`,
+      },
     });
   }
+
+  // Enkel redirect till React-sidan som redan visar den snygga bekräftelsevyn
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: `${redirectBase}/email-confirm?confirm=${encodeURIComponent(token)}`,
+    },
+  });
 };
 
 serve(handler);
