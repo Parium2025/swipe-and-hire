@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { MapPin, Clock, Euro, Heart, X, Building2, Users, Mail, Info } from 'lucide-react';
 import JobApplicationDialog from './JobApplicationDialog';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { preloadImages } from '@/lib/serviceWorkerManager';
 
 interface JobPosting {
