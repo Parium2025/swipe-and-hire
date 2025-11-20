@@ -4,6 +4,7 @@ import { Heart, ArrowRight, Play, Camera, Video, Sparkles, Hand } from 'lucide-r
 import { useDevice } from '@/hooks/use-device';
 import JobAdCard from '@/components/JobAdCard';
 import officeBuilding from '@/assets/office-building.jpg';
+import industrialOffice from '@/assets/industrial-office-bg.jpg';
 
 const ARROW_ANIMATION_DURATION_MS = 2000;
 const ARROW_ANIMATION_START =
@@ -136,11 +137,16 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
               {/* iPhone notch */}
               <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black border border-gray-800"></div>
 
-              {/* Innehåll utan bakgrund */}
+              {/* Innehåll med industriell kontorsbakgrund */}
               <div 
-                className="absolute inset-0 rounded-[1.4rem] overflow-hidden bg-transparent"
+                className="absolute inset-0 rounded-[1.4rem] overflow-hidden"
+                style={{
+                  backgroundImage: `url(${industrialOffice})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
               >
-                <div className="h-full w-full flex items-center justify-center bg-transparent">
+                <div className="h-full w-full flex items-center justify-center">
                   <JobAdCard
                     noBackground
                     backgroundGradient="bg-gradient-to-br from-slate-800/90 via-slate-900/95 to-black"
