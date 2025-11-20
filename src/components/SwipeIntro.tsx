@@ -366,7 +366,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
           }}
         >
           {/* Title - Fixed top position */}
-          <h1 className="font-bold text-primary-foreground mb-4 animate-fade-in leading-tight text-4xl md:text-5xl">
+          <h1 className="font-bold text-primary-foreground mb-4 animate-fade-in leading-tight text-3xl md:text-4xl">
             {slides[currentSlide].title}
           </h1>
           
