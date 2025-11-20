@@ -76,29 +76,65 @@ export type Database = {
       }
       job_applications: {
         Row: {
+          age: number | null
           applicant_id: string
+          applied_at: string | null
+          availability: string | null
+          bio: string | null
           cover_letter: string | null
           created_at: string
+          custom_answers: Json | null
+          cv_url: string | null
+          email: string | null
+          employment_status: string | null
+          first_name: string | null
           id: string
           job_id: string
+          last_name: string | null
+          location: string | null
+          phone: string | null
           status: string
           updated_at: string
         }
         Insert: {
+          age?: number | null
           applicant_id: string
+          applied_at?: string | null
+          availability?: string | null
+          bio?: string | null
           cover_letter?: string | null
           created_at?: string
+          custom_answers?: Json | null
+          cv_url?: string | null
+          email?: string | null
+          employment_status?: string | null
+          first_name?: string | null
           id?: string
           job_id: string
+          last_name?: string | null
+          location?: string | null
+          phone?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
+          age?: number | null
           applicant_id?: string
+          applied_at?: string | null
+          availability?: string | null
+          bio?: string | null
           cover_letter?: string | null
           created_at?: string
+          custom_answers?: Json | null
+          cv_url?: string | null
+          email?: string | null
+          employment_status?: string | null
+          first_name?: string | null
           id?: string
           job_id?: string
+          last_name?: string | null
+          location?: string | null
+          phone?: string | null
           status?: string
           updated_at?: string
         }
@@ -165,7 +201,15 @@ export type Database = {
           views_count?: number | null
           work_schedule?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "job_postings_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       job_question_templates: {
         Row: {
@@ -361,6 +405,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           availability: string | null
           bio: string | null
           birth_date: string | null
@@ -372,6 +417,7 @@ export type Database = {
           created_at: string
           cv_url: string | null
           email: string | null
+          employee_count: string | null
           employment_type: string | null
           first_name: string | null
           home_location: string | null
@@ -383,6 +429,7 @@ export type Database = {
           location: string | null
           not_currently_looking: boolean | null
           occupation: string | null
+          onboarding_completed: boolean | null
           org_number: string | null
           organization_id: string | null
           phone: string | null
@@ -398,6 +445,7 @@ export type Database = {
           work_schedule: string | null
         }
         Insert: {
+          address?: string | null
           availability?: string | null
           bio?: string | null
           birth_date?: string | null
@@ -409,6 +457,7 @@ export type Database = {
           created_at?: string
           cv_url?: string | null
           email?: string | null
+          employee_count?: string | null
           employment_type?: string | null
           first_name?: string | null
           home_location?: string | null
@@ -420,6 +469,7 @@ export type Database = {
           location?: string | null
           not_currently_looking?: boolean | null
           occupation?: string | null
+          onboarding_completed?: boolean | null
           org_number?: string | null
           organization_id?: string | null
           phone?: string | null
@@ -435,6 +485,7 @@ export type Database = {
           work_schedule?: string | null
         }
         Update: {
+          address?: string | null
           availability?: string | null
           bio?: string | null
           birth_date?: string | null
@@ -446,6 +497,7 @@ export type Database = {
           created_at?: string
           cv_url?: string | null
           email?: string | null
+          employee_count?: string | null
           employment_type?: string | null
           first_name?: string | null
           home_location?: string | null
@@ -457,6 +509,7 @@ export type Database = {
           location?: string | null
           not_currently_looking?: boolean | null
           occupation?: string | null
+          onboarding_completed?: boolean | null
           org_number?: string | null
           organization_id?: string | null
           phone?: string | null
@@ -481,8 +534,44 @@ export type Database = {
           },
         ]
       }
+      support_messages: {
+        Row: {
+          created_at: string
+          id: string
+          is_admin_reply: boolean | null
+          message: string
+          ticket_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_admin_reply?: boolean | null
+          message: string
+          ticket_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_admin_reply?: boolean | null
+          message?: string
+          ticket_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_tickets: {
         Row: {
+          category: string | null
           created_at: string
           id: string
           message: string
@@ -492,6 +581,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          category?: string | null
           created_at?: string
           id?: string
           message: string
@@ -501,6 +591,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          category?: string | null
           created_at?: string
           id?: string
           message?: string

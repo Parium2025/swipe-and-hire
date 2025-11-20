@@ -1604,28 +1604,8 @@ const MobileJobWizard = ({
         }
       }
 
-      // If using default template, update it with the questions for future use
-      if (selectedTemplate?.is_default && customQuestions.length > 0) {
-        const { error: templateError } = await supabase
-          .from('job_templates')
-          .update({ 
-            questions: customQuestions.map(q => ({
-              question_text: q.question_text,
-              question_type: q.question_type,
-              options: q.options || [],
-              is_required: q.is_required,
-              order_index: q.order_index,
-              placeholder_text: q.placeholder_text || null,
-              min_value: q.min_value || null,
-              max_value: q.max_value || null
-            }))
-          })
-          .eq('id', selectedTemplate.id);
-
-        if (templateError) {
-          console.error('Error updating template questions:', templateError);
-        }
-      }
+      // Note: Template questions are now managed separately via job_question_templates table
+      // No need to store questions directly on job_templates
 
       toast({
         title: "Jobbannons skapad!",

@@ -74,13 +74,9 @@ const SearchJobs = () => {
   const { data: jobs = [], isLoading } = useQuery({
     queryKey: ['public-jobs', selectedCity, selectedCategory, selectedSubcategories, selectedEmploymentTypes],
     queryFn: async () => {
-      let query = supabase
+      let query: any = supabase
         .from('job_postings')
-        .select(`
-          *,
-          job_image_url,
-          profiles!job_postings_employer_id_fkey(company_name)
-        `)
+        .select('*')
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
@@ -141,9 +137,27 @@ const SearchJobs = () => {
       
       if (error) throw error;
       
-      return (data || []).map(job => ({
+      // Fetch company names separately to avoid deep type instantiation
+      const employerIds = [...new Set((data || []).map((job: any) => job.employer_id).filter(Boolean))] as string[];
+      let companyNames: Record<string, string> = {};
+      
+      if (employerIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('user_id, company_name')
+          .in('user_id', employerIds);
+        
+        if (profiles) {
+          companyNames = profiles.reduce((acc, p) => {
+            if (p.company_name) acc[p.user_id] = p.company_name;
+            return acc;
+          }, {} as Record<string, string>);
+        }
+      }
+      
+      return (data || []).map((job: any) => ({
         ...job,
-        company_name: job.profiles?.company_name || 'Okänt företag',
+        company_name: companyNames[job.employer_id] || 'Okänt företag',
         views_count: job.views_count || 0,
         applications_count: job.applications_count || 0,
       }));

@@ -31,8 +31,12 @@ export const useSecureProfileAccess = () => {
   const getJobSeekerProfile = async (jobSeekerId: string): Promise<MaskedProfile | null> => {
     setLoading(true);
     try {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) return null;
+      
       const { data, error } = await supabase.rpc('get_consented_profile_for_employer', {
-        job_seeker_uuid: jobSeekerId
+        p_employer_id: user.user.id,
+        p_profile_id: jobSeekerId
       });
 
       if (error) {
@@ -61,8 +65,19 @@ export const useSecureProfileAccess = () => {
         return null;
       }
 
-      // Return the first (and should be only) result
-      return data && data.length > 0 ? data[0] : null;
+      // Return the first (and should be only) result, mapping to MaskedProfile
+      if (data && data.length > 0) {
+        const profile = data[0];
+        return {
+          ...profile,
+          role: 'job_seeker',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          onboarding_completed: true,
+          interests: []
+        } as MaskedProfile;
+      }
+      return null;
     } catch (error) {
       console.error('Error accessing job seeker profile:', error);
       toast({
@@ -77,40 +92,15 @@ export const useSecureProfileAccess = () => {
   };
 
   const revokeProfileAccess = async (employerId: string): Promise<boolean> => {
-    try {
-      const { data, error } = await supabase.rpc('revoke_profile_access', {
-        target_employer_id: employerId
-      });
-
-      if (error) {
-        console.error('Failed to revoke profile access:', error);
-        toast({
-          title: "Fel uppstod",
-          description: "Kunde inte återkalla åtkomst.",
-          variant: "destructive"
-        });
-        return false;
-      }
-
-      if (data) {
-        toast({
-          title: "Åtkomst återkallad",
-          description: "Arbetsgivaren har inte längre åtkomst till din profil.",
-          variant: "default"
-        });
-        return true;
-      }
-
-      return false;
-    } catch (error) {
-      console.error('Error revoking profile access:', error);
-      toast({
-        title: "Fel uppstod",
-        description: "Kunde inte återkalla åtkomst.",
-        variant: "destructive"
-      });
-      return false;
-    }
+    // Note: This functionality requires a revoke_profile_access RPC function
+    // which is not yet implemented in the database
+    console.warn('revokeProfileAccess not yet implemented');
+    toast({
+      title: "Funktion inte tillgänglig",
+      description: "Denna funktion är inte tillgänglig än.",
+      variant: "default"
+    });
+    return false;
   };
 
   return {
