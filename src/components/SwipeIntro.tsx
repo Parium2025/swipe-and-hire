@@ -74,9 +74,9 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
           <div className="flex items-center justify-center space-x-4 min-w-full">
             {/* Video option */}
             <div className="relative">
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-primary-foreground/20 p-2 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-primary-foreground/20 p-2 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
                 <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
-                  <Video className="h-8 w-8 text-primary-foreground" />
+                  <Video className="h-7 w-7 text-primary-foreground" />
                 </div>
               </div>
               <div className="absolute -top-1 -right-1 bg-primary-foreground rounded-full p-1.5 shadow-lg">
@@ -91,9 +91,9 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
 
             {/* Image option */}
             <div className="relative">
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-primary-foreground/20 p-2 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-primary-foreground/20 p-2 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
               <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
-                <Camera className="h-8 w-8 text-primary-foreground" />
+                <Camera className="h-7 w-7 text-primary-foreground" />
               </div>
               </div>
               <div className="absolute -top-1 -right-1 bg-primary-foreground rounded-full p-1.5 shadow-lg">
