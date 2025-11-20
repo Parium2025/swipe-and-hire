@@ -555,8 +555,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             user_id: user?.id,
             consent_given: true,
             consent_date: new Date().toISOString(),
-            consent_version: '1.0',
-            data_types_consented: ['age', 'postal_code', 'phone', 'email', 'location']
           }, {
             onConflict: 'user_id'
           });
