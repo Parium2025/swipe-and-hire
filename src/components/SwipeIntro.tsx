@@ -5,6 +5,10 @@ import { useDevice } from '@/hooks/use-device';
 import JobAdCard from '@/components/JobAdCard';
 import officeBuilding from '@/assets/office-building.jpg';
 
+const ARROW_ANIMATION_DURATION_MS = 2000;
+const ARROW_ANIMATION_START =
+  typeof performance !== 'undefined' ? performance.now() : 0;
+
 interface SwipeIntroProps {
   onComplete: () => void;
 }
@@ -15,8 +19,19 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
   const [currentX, setCurrentX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
+  const [arrowAnimationStyle, setArrowAnimationStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const device = useDevice();
+
+  useEffect(() => {
+    if (typeof performance === 'undefined') return;
+    const elapsed = performance.now() - ARROW_ANIMATION_START;
+    const offset = elapsed % ARROW_ANIMATION_DURATION_MS;
+    setArrowAnimationStyle({
+      animation: 'arrowLeft 2s ease-in-out infinite',
+      animationDelay: `-${offset}ms`,
+    });
+  }, []);
 
   // Preload phone background image to avoid flicker/delay
   useEffect(() => {
@@ -47,7 +62,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
                     </div>
                     
                     {/* Pil som följer */}
-                    <div className="absolute right-0 animate-[arrowLeft_2s_ease-in-out_infinite_0.3s]">
+                    <div className="absolute right-0" style={arrowAnimationStyle}>
                       <ArrowRight className="h-3 w-3 text-primary-foreground rotate-180" />
                     </div>
                   </div>
