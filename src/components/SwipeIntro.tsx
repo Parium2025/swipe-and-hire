@@ -29,10 +29,10 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       title: "Välkommen till Parium",
       subtitle: "Framtiden börjar med ett swipe",
       content: (
-        <div className="flex flex-col items-center space-y-6">
-          <div className="relative">
-            <div className="w-32 h-52 rounded-[1.5rem] border-4 border-primary-foreground/60 p-3 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
-              <div className="relative w-full h-full rounded-[1rem] bg-gradient-to-b from-primary/20 to-primary/40 overflow-hidden flex items-center justify-center">
+          <div className="flex flex-col items-center space-y-6">
+            <div className="relative">
+              <div className="w-[140px] h-[280px] rounded-[1.8rem] border-4 border-primary-foreground/60 p-3 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
+                <div className="relative w-full h-full rounded-[1.4rem] bg-gradient-to-b from-primary/20 to-primary/40 overflow-hidden flex items-center justify-center">
                 {/* Ren animerad swipe-gest utan text */}
                 <div className="flex flex-col items-center space-y-3">
                   {/* Animerad swipe-gest */}
