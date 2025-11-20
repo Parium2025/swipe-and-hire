@@ -146,7 +146,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
                 }}
               >
                 {/* Nedre gradient för läsbarhet */}
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[70%] bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[70%] bg-gradient-to-t from-black/95 via-black/45 to-transparent" />
                 
                 {/* Textinnehåll - centrerat */}
                 <div className="absolute inset-0 flex flex-col justify-center items-center p-2 text-center">
