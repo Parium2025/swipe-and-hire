@@ -874,7 +874,7 @@ const Profile = () => {
         .from('profiles')
         .update({ 
           cv_url: null,
-          cv_filename: null 
+          profile_file_name: null 
         })
         .eq('user_id', user.id);
 
@@ -937,7 +937,7 @@ const Profile = () => {
         birth_date: birthDate || null,
         // Preserve existing CV unless explicitly changed/removed
         cv_url: cvUrl ? cvUrl : (originalValues?.cvUrl || null),
-        cv_filename: cvFileName ? cvFileName : ((profile as any)?.cv_filename || null),
+        profile_file_name: cvFileName ? cvFileName : ((profile as any)?.profile_file_name || null),
         employment_status: employmentStatus || null,
         working_hours: workingHours || null,
         availability: availability || null,

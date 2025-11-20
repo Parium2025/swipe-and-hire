@@ -612,9 +612,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Ensure interests is always an array when updating
       const cleanedUpdates: any = { ...updates };
       if (cleanedUpdates.interests) {
-        cleanedUpdates.interests = Array.isArray(cleanedUpdates.interests) 
-          ? cleanedUpdates.interests 
+        cleanedUpdates.interests = Array.isArray(cleanedUpdates.interests)
+          ? cleanedUpdates.interests
           : [cleanedUpdates.interests];
+      }
+
+      // Map frontend-only fields to actual database columns
+      if (Object.prototype.hasOwnProperty.call(cleanedUpdates, 'employment_status')) {
+        cleanedUpdates.employment_type = cleanedUpdates.employment_status;
+        delete cleanedUpdates.employment_status;
+      }
+
+      if (Object.prototype.hasOwnProperty.call(cleanedUpdates, 'working_hours')) {
+        cleanedUpdates.work_schedule = cleanedUpdates.working_hours;
+        delete cleanedUpdates.working_hours;
+      }
+
+      if (Object.prototype.hasOwnProperty.call(cleanedUpdates, 'cv_filename')) {
+        cleanedUpdates.profile_file_name = cleanedUpdates.cv_filename;
+        delete cleanedUpdates.cv_filename;
       }
       
       const { error } = await supabase

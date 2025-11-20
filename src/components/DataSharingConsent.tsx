@@ -54,8 +54,6 @@ export const DataSharingConsent = () => {
           user_id: user.id,
           consent_given: newConsentValue,
           consent_date: new Date().toISOString(),
-          consent_version: '1.0',
-          data_types_consented: ['name', 'age', 'postal_code', 'phone', 'email', 'location']
         }, {
           onConflict: 'user_id'
         });
