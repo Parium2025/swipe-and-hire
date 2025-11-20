@@ -1,1 +1,7 @@
 project_id = "jrjaegapuujushsiofoi"
+
+[functions.custom-signup]
+verify_jwt = false
+
+[functions.redirect-confirm]
+verify_jwt = false
