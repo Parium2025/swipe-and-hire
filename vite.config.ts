@@ -26,6 +26,7 @@ export default defineConfig(({ mode }) => ({
     ],
   },
   optimizeDeps: {
-    include: ['react', 'react-dom'],
+    // Avoid prebundling React multiple times which can cause Invalid Hook Call
+    exclude: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
   },
 }));
