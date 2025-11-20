@@ -17,6 +17,7 @@ interface JobAdCardProps {
   onSuperLike?: () => void; // kept for API compatibility
   onRewind?: () => void; // kept for API compatibility
   noBackground?: boolean;
+  backgroundGradient?: string;
 }
 
 const JobAdCard: React.FC<JobAdCardProps> = ({
@@ -29,6 +30,7 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
   onNope,
   onSave,
   noBackground,
+  backgroundGradient,
 }) => {
   return (
     <section aria-label="Jobbannonskort" className="relative w-[140px] h-[280px] mx-auto">
@@ -57,7 +59,7 @@ const JobAdCard: React.FC<JobAdCardProps> = ({
                 style={{ contentVisibility: 'auto' }}
               />
             ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800" />
+              <div className={`absolute inset-0 ${backgroundGradient || 'bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800'}`} />
             )
           )}
 
