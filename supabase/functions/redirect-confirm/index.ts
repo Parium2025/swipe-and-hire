@@ -23,35 +23,33 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    // Först kolla om användaren redan är bekräftad i Supabase Auth
+    // Först kolla om användarens e-postbekräftelse är klar
     const { data: confirmation, error: confirmError } = await supabase
       .from('email_confirmations')
       .select('*')
       .eq('token', token)
-      .maybeSingle(); // Använd maybeSingle för att undvika fel när ingen rad finns
+      .maybeSingle();
 
-    // Om token inte finns i databasen, kolla om användaren redan är bekräftad
+    // Om token inte finns i databasen, omdirigera till "redan aktiverat"
     if (!confirmation) {
-      console.log('Token not found in database, checking if user already confirmed');
-      // Redirect till "redan aktiverat" istället för fel
-      const redirectUrl = Deno.env.get("REDIRECT_URL") || "https://swipe-and-hire.lovable.app";
-      return new Response(null, {
-        status: 302,
+      console.log('Token not found in database, user probably already confirmed');
+      return new Response(getSuccessPage('Ditt konto är redan aktiverat. Du kan logga in direkt.', true), {
+        status: 200,
         headers: {
-          'Location': `${redirectUrl}/auth?confirmed=already`,
-        },
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-cache'
+        }
       });
     }
 
     if (confirmation.confirmed_at) {
       console.log('Token already confirmed:', token);
-      // Omdirigera till React-appen för redan aktiverat konto
-      const redirectUrl = Deno.env.get("REDIRECT_URL") || "https://swipe-and-hire.lovable.app";
-      return new Response(null, {
-        status: 302,
+      return new Response(getSuccessPage('Ditt konto är redan aktiverat. Du kan logga in direkt.', true), {
+        status: 200,
         headers: {
-          'Location': `${redirectUrl}/auth?confirmed=already`,
-        },
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-cache'
+        }
       });
     }
 
@@ -84,13 +82,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Email confirmed successfully for token:', token);
     
-    // Omdirigera till React-appen med bekräftelseparameter
-    const redirectUrl = Deno.env.get("REDIRECT_URL") || "https://swipe-and-hire.lovable.app";
-    return new Response(null, {
-      status: 302,
+    // Visa den fina bekräftelsesidan direkt
+    return new Response(getSuccessPage('Grattis! Ditt konto har nu aktiverats. Du kan nu logga in och börja använda Parium.'), {
+      status: 200,
       headers: {
-        'Location': `${redirectUrl}/auth?confirmed=success`,
-      },
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-cache'
+      }
     });
 
   } catch (error) {
