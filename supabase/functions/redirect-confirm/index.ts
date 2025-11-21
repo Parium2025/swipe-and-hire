@@ -12,7 +12,9 @@ const handler = async (req: Request): Promise<Response> => {
 
   console.log('Redirect-confirm accessed with token:', token);
 
-  const redirectBase = Deno.env.get('REDIRECT_URL') || 'https://swipe-and-hire.lovable.app';
+  const envRedirect = Deno.env.get('REDIRECT_URL') || '';
+  const defaultRedirect = 'https://swipe-and-hire.lovable.app';
+  const redirectBase = envRedirect.includes('supabase.co') ? defaultRedirect : (envRedirect || defaultRedirect);
 
   // Om ingen token – skicka till en felvy i frontend
   if (!token) {
