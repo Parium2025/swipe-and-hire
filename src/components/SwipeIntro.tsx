@@ -204,23 +204,51 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       title: "Ta steget - starta direkt!",
       subtitle: "",
       content: (
-        <div className="flex flex-col items-center space-y-8">
-          {/* Stiliserad nedåtpil */}
-          <div className="flex flex-col items-center space-y-2">
-            <div className="w-0.5 h-8 bg-gradient-to-b from-primary-foreground/40 to-primary-foreground/20"></div>
-            <div className="relative">
-              <div className="w-3 h-3 border-r-2 border-b-2 border-primary-foreground/60 rotate-45 animate-pulse"></div>
-              <div className="absolute inset-0 w-3 h-3 border-r-2 border-b-2 border-primary-foreground/30 rotate-45 scale-150"></div>
+        <div className="flex flex-col items-center justify-center space-y-12 py-8">
+          {/* Dekorativa ikoner runt knappen */}
+          <div className="relative">
+            {/* Övre dekorativa element */}
+            <div className="absolute -top-16 left-1/2 -translate-x-1/2 flex flex-col items-center space-y-2">
+              <div className="w-0.5 h-8 bg-gradient-to-b from-primary-foreground/40 to-primary-foreground/20"></div>
+              <div className="relative">
+                <div className="w-3 h-3 border-r-2 border-b-2 border-primary-foreground/60 rotate-45 animate-pulse"></div>
+                <div className="absolute inset-0 w-3 h-3 border-r-2 border-b-2 border-primary-foreground/30 rotate-45 scale-150"></div>
+              </div>
+            </div>
+
+            {/* Animerade ikoner runt knappen */}
+            <div className="absolute -left-16 top-1/2 -translate-y-1/2 animate-bounce" style={{ animationDuration: '2s', animationDelay: '0s' }}>
+              <Sparkles className="h-6 w-6 text-accent/60" />
+            </div>
+            <div className="absolute -right-16 top-1/2 -translate-y-1/2 animate-bounce" style={{ animationDuration: '2s', animationDelay: '0.5s' }}>
+              <Sparkles className="h-6 w-6 text-secondary/60" />
+            </div>
+            <div className="absolute -top-8 left-12 animate-pulse" style={{ animationDuration: '1.5s' }}>
+              <Heart className="h-5 w-5 text-accent/50" />
+            </div>
+            <div className="absolute -top-8 right-12 animate-pulse" style={{ animationDuration: '1.8s' }}>
+              <Heart className="h-5 w-5 text-secondary/50" />
+            </div>
+          
+            {/* Huvudknappen */}
+            <Button 
+              onClick={onComplete}
+              size="lg"
+              className="relative bg-primary text-white hover:bg-primary/90 font-bold text-lg px-10 py-5 rounded-full shadow-xl hover:scale-105 transition-all duration-200"
+            >
+              <span className="relative z-10">Skapa min profil</span>
+              <div className="absolute inset-0 rounded-full bg-primary-glow/20 blur-xl animate-pulse"></div>
+            </Button>
+
+            {/* Nedre dekorativa element */}
+            <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 flex flex-col items-center space-y-2">
+              <div className="flex space-x-2">
+                <div className="w-2 h-2 bg-accent/40 rounded-full animate-ping" style={{ animationDuration: '2s' }}></div>
+                <div className="w-2 h-2 bg-secondary/40 rounded-full animate-ping" style={{ animationDuration: '2s', animationDelay: '0.5s' }}></div>
+                <div className="w-2 h-2 bg-accent/40 rounded-full animate-ping" style={{ animationDuration: '2s', animationDelay: '1s' }}></div>
+              </div>
             </div>
           </div>
-          
-          <Button 
-            onClick={onComplete}
-            size="lg"
-            className="bg-primary text-white hover:bg-primary/90 font-bold text-lg px-10 py-5 rounded-full shadow-xl hover:scale-105 transition-all duration-200"
-          >
-            Skapa min profil
-          </Button>
         </div>
       )
     }
