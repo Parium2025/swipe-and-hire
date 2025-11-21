@@ -126,9 +126,16 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Failed to create confirmation token');
     }
 
-    // 4. Bygg bekräftelse-URL
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const confirmationUrl = `${supabaseUrl}/functions/v1/redirect-confirm?token=${confirmationToken}`;
+    // 4. Bygg bekräftelse-URL direkt mot frontend-appens email-confirm-sida
+    const redirectEnv = Deno.env.get("REDIRECT_URL") || "";
+    const defaultAppUrl = "https://swipe-and-hire.lovable.app";
+
+    // Om REDIRECT_URL av misstag pekar mot en Supabase-domän, fall back till app-URL
+    const appBase = redirectEnv.includes("supabase.co")
+      ? defaultAppUrl
+      : redirectEnv || defaultAppUrl;
+
+    const confirmationUrl = `${appBase}/email-confirm?confirm=${confirmationToken}`;
     
     console.log(`Sending confirmation email to ${email}`);
 
