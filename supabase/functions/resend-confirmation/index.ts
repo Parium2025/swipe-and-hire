@@ -261,7 +261,7 @@ const handler = async (req: Request): Promise<Response> => {
       appBase = redirectEnv.includes("supabase.co") ? defaultAppUrl : redirectEnv;
     }
 
-    const confirmationUrl = `${appBase}/email-confirm?confirm=${newToken}`;
+    const confirmationUrl = `${appBase}/auth?confirm=${newToken}`;
 
     console.log(`Resend confirmation URL for ${email}: ${confirmationUrl}`);
 

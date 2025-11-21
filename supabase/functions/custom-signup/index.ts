@@ -137,9 +137,10 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
 
-    const confirmationUrl = `${appBase}/email-confirm?confirm=${confirmationToken}`;
+    const confirmationUrl = `${appBase}/auth?confirm=${confirmationToken}`;
     
     console.log(`Sending confirmation email to ${email} with URL: ${confirmationUrl}`);
+
 
 
     // 5. Anropa send-confirmation-email Edge Function via backendens SUPABASE_URL
