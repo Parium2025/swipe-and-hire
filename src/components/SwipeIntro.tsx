@@ -79,11 +79,6 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
               <ArrowRight className="h-4 w-4 text-primary-foreground animate-pulse" />
             </div>
           </div>
-          <div className="text-center">
-            <p className="text-white text-sm mb-4">
-              {device === 'mobile' || device === 'tablet' ? 'Swipa vänster för att fortsätta' : 'Tryck på pilen eller använd piltangenterna'}
-            </p>
-          </div>
         </div>
       )
     },
