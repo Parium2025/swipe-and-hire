@@ -53,10 +53,172 @@ const handler = async (req: Request): Promise<Response> => {
 
     // 2. Kontrollera om användaren redan är bekräftad
     if (user.email_confirmed_at) {
-      return new Response(JSON.stringify({ 
-        error: "E-posten är redan bekräftad. Du kan logga in direkt." 
+      console.log('User already confirmed, sending welcome email instead of confirmation link');
+
+      // Fetch profile to personalize email
+      const { data: profile, error: profileErr } = await supabase
+        .from('profiles')
+        .select('first_name, role, company_name')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (profileErr) {
+        console.warn('Could not fetch profile for confirmed user in resend:', profileErr.message);
+      }
+
+      const firstName = (profile?.first_name || '').trim() || 'där';
+      const isEmployer = (profile?.role || '').toLowerCase() === 'employer';
+      const companyName = profile?.company_name || 'Ditt företag';
+
+      const appUrl = Deno.env.get("REDIRECT_URL") || "https://swipe-and-hire.lovable.app";
+      const loginUrl = `${appUrl}/auth`;
+
+      const subject = isEmployer
+        ? 'Välkommen till Parium – Ditt företagskonto är aktivt'
+        : 'Välkommen till Parium – Ditt konto är aktivt';
+
+      const html = isEmployer
+        ? `
+        <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+        <html xmlns="http://www.w3.org/1999/xhtml">
+        <head>
+          <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+          <title>Välkommen till Parium – Ditt företagskonto är aktivt</title>
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #F9FAFB; font-family: Arial, Helvetica, sans-serif;">
+          <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F9FAFB;">
+            <tr>
+              <td align="center" style="padding: 40px 20px;">
+                <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; max-width: 600px;">
+                  <tr>
+                    <td style="background-color: #1E3A8A; padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0;">
+                      <h1 style="margin: 0 0 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 28px; font-weight: bold; color: #ffffff;">Parium</h1>
+                       <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #ffffff;">Hitta nästa generations talang/talanger</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align="left" style="padding: 40px 30px; text-align: left;">
+                      <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">Hej ${firstName}!</p>
+                      <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">
+                         Välkommen till Parium – plattformen där <strong>${companyName}</strong> hittar nästa generations talang/talanger. Ditt konto är nu aktivt och du kan logga in direkt!
+                       </p>
+                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
+                        <tr>
+                          <td style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: left;">
+                             <p style="margin: 0 0 12px 0; text-align: left;">• En smidig rekryteringsprocess från start till mål</p>
+                             <p style="margin: 0 0 12px 0; text-align: left;">• Direktkontakt med kandidater</p>
+                             <p style="margin: 0; text-align: left;">• Ett modernt gränssnitt anpassat för era krav</p>
+                          </td>
+                        </tr>
+                      </table>
+                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 32px 0;">
+                        <tr>
+                          <td align="center" style="padding: 0;">
+                            <!--[if mso]>
+                            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" style="height:48px;v-text-anchor:middle;width:280px;" arcsize="21%" stroke="f" fillcolor="#1E3A8A">
+                            <w:anchorlock/>
+                            <center>
+                            <![endif]-->
+                            <a href="${loginUrl}" style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none; mso-hide: all;">Logga in nu</a>
+                            <!--[if mso]>
+                            </center>
+                            </v:roundrect>
+                            <![endif]-->
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="background-color: #F9FAFB; padding: 24px 30px; text-align: center; border-top: 1px solid #E5E7EB; border-radius: 0 0 12px 12px;">
+                       <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #6B7280;">Parium AB · Stockholm<br/>Du får detta mail för att du registrerat ett företagskonto i Parium-appen.</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+        `
+        : `
+        <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+        <html xmlns="http://www.w3.org/1999/xhtml">
+        <head>
+          <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+          <title>Välkommen till Parium – Ditt konto är aktivt</title>
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #F9FAFB; font-family: Arial, Helvetica, sans-serif;">
+          <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F9FAFB;">
+            <tr>
+              <td align="center" style="padding: 40px 20px;">
+                <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 12px; max-width: 600px;">
+                  <tr>
+                    <td style="background-color: #1E3A8A; padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0;">
+                      <h1 style="margin: 0 0 8px 0; font-family: Arial, Helvetica, sans-serif; font-size: 28px; font-weight: bold; color: #ffffff;">Parium</h1>
+                      <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #ffffff;">Framtiden börjar med ett swipe</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 40px 30px;">
+                      <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">Hej ${firstName}!</p>
+                      <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">Du har just klivit in i nästa generation av jobbsök. Ditt konto är nu aktivt och du kan logga in direkt!</p>
+                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
+                        <tr>
+                           <td style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: left;">
+                             <p style="margin: 0 0 12px 0; text-align: left;">• Matcha med jobb som passar dig</p>
+                             <p style="margin: 0 0 12px 0; text-align: left;">• Swipea, ansök och gå vidare på sekunder</p>
+                             <p style="margin: 0; text-align: left;">• Spara tid med smarta och effektiva verktyg</p>
+                          </td>
+                        </tr>
+                      </table>
+                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 32px 0;">
+                        <tr>
+                          <td align="center" style="padding: 0;">
+                            <!--[if mso]>
+                            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" style="height:48px;v-text-anchor:middle;width:280px;" arcsize="21%" stroke="f" fillcolor="#1E3A8A">
+                            <w:anchorlock/>
+                            <center>
+                            <![endif]-->
+                            <a href="${loginUrl}" style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none; mso-hide: all;">Logga in nu</a>
+                            <!--[if mso]>
+                            </center>
+                            </v:roundrect>
+                            <![endif]-->
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="background-color: #F9FAFB; padding: 24px 30px; text-align: center; border-top: 1px solid #E5E7EB; border-radius: 0 0 12px 12px;">
+                      <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #6B7280;">Parium AB · Stockholm<br/>Du får detta mail för att du registrerat ett konto i Parium-appen.</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+        `;
+
+      const emailResponse = await resend.emails.send({
+        from: "Parium <noreply@parium.se>",
+        to: [email],
+        subject,
+        html,
+      });
+
+      console.log('Welcome email re-sent for confirmed user:', emailResponse);
+
+      return new Response(JSON.stringify({
+        success: true,
+        message: "Ditt konto är redan aktivt. Vi har skickat ett välkomstmail med inloggningsknapp igen.",
       }), {
-        status: 400,
+        status: 200,
         headers: {
           "Content-Type": "application/json",
           ...corsHeaders,
