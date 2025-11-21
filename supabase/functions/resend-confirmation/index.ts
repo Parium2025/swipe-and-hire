@@ -87,7 +87,8 @@ const handler = async (req: Request): Promise<Response> => {
       throw upsertError;
     }
 
-    const confirmationUrl = `https://rvtsfnaqlnggfkoqygbm.supabase.co/functions/v1/redirect-confirm?token=${newToken}`;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const confirmationUrl = `${supabaseUrl}/functions/v1/redirect-confirm?token=${newToken}`;
 
     // Fetch profile to personalize and detect role
     const { data: profile, error: profileErr } = await supabase
