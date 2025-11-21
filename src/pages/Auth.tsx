@@ -424,6 +424,16 @@ const Auth = () => {
     handleAuthFlow();
   }, [user, profile, navigate, searchParams, confirmationStatus, recoveryStatus]);
 
+  // NYTT: Hantera email-confirm-länkar med ?confirm=TOKEN direkt på /auth
+  useEffect(() => {
+    const confirmToken = searchParams.get('confirm');
+
+    if (confirmToken && confirmationStatus === 'none') {
+      console.log('🔐 Auth: confirm token detected in URL, starting confirmation flow', confirmToken);
+      handleEmailConfirmation(confirmToken);
+    }
+  }, [searchParams, confirmationStatus]);
+
   
   // DIREKT EXPIRY-KONTROLL: Kolla OMEDELBART när isPasswordReset blir true
   useEffect(() => {
