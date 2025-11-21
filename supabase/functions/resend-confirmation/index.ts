@@ -263,6 +263,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     const confirmationUrl = `${appBase}/email-confirm?confirm=${newToken}`;
 
+    console.log(`Resend confirmation URL for ${email}: ${confirmationUrl}`);
+
     // Fetch profile to personalize and detect role
     const { data: profile, error: profileErr } = await supabase
       .from('profiles')
