@@ -254,7 +254,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // 5. Bygg bekräftelse-URL direkt mot frontend-appens email-confirm-sida
     const redirectEnv = Deno.env.get("REDIRECT_URL") || "";
-    const defaultAppUrl = "https://jrjaegapuujushsiofoi.lovable.app";
+    const defaultAppUrl = "https://swipe-and-hire.lovable.app";
 
     let appBase = defaultAppUrl;
     if (redirectEnv && redirectEnv.startsWith("http")) {
