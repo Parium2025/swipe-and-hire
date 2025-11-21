@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Heart, ArrowRight, Play, Camera, Video, Sparkles, Hand } from 'lucide-react';
 import { useDevice } from '@/hooks/use-device';
+import { useCachedImage } from '@/hooks/useCachedImage';
 import officeBuilding from '@/assets/office-building.jpg';
 import industrialOffice from '@/assets/industrial-office-bg.jpg';
 
@@ -22,6 +23,9 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
   const [arrowAnimationStyle, setArrowAnimationStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const device = useDevice();
+  
+  // Preload and cache the industrial office background image
+  const { cachedUrl: cachedIndustrialOffice, loading: loadingIndustrialOffice } = useCachedImage(industrialOffice);
 
   useEffect(() => {
     if (typeof performance === 'undefined') return;
@@ -33,10 +37,12 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
     });
   }, []);
 
-  // Preload phone background image to avoid flicker/delay
+  // Preload phone background images to avoid flicker/delay
   useEffect(() => {
-    const img = new Image();
-    img.src = officeBuilding;
+    const img1 = new Image();
+    img1.src = officeBuilding;
+    const img2 = new Image();
+    img2.src = industrialOffice;
   }, []);
 
   const slides = [
@@ -149,13 +155,15 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
               {/* iPhone notch */}
               <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-20 h-0.5 w-6 rounded-full bg-black border border-gray-800"></div>
 
-              {/* Innehåll med industriell kontorsbakgrund */}
+              {/* Innehåll med industriell kontorsbakgrund - preloaded och cachad */}
               <div 
                 className="absolute inset-0 rounded-[1.4rem] overflow-hidden"
                 style={{
-                  backgroundImage: `url(${industrialOffice})`,
+                  backgroundImage: `url(${cachedIndustrialOffice || industrialOffice})`,
                   backgroundSize: 'cover',
-                  backgroundPosition: 'center'
+                  backgroundPosition: 'center',
+                  opacity: loadingIndustrialOffice ? 0 : 1,
+                  transition: 'opacity 0.3s ease-in-out'
                 }}
               >
                 {/* Nedre gradient för läsbarhet */}
