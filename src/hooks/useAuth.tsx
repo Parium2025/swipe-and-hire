@@ -457,7 +457,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isSigningInRef.current = true;
       console.log('🔍 SignIn started for:', email);
 
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: signInData, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
@@ -481,6 +481,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           toast({ title: "Inloggningsfel", description: error.message, variant: "destructive" });
         }
         return { error };
+      }
+
+      // CRITICAL: Block login if email is not confirmed
+      if (signInData?.user && !signInData.user.email_confirmed_at) {
+        console.log('🚫 Login blocked: Email not confirmed for', email);
+        
+        // Sign out immediately
+        await supabase.auth.signOut();
+        
+        toast({
+          title: "Kontot är inte bekräftat",
+          description: "Du behöver bekräfta din e-post först genom att klicka på länken i bekräftelsemailet. Kolla din inkorg!",
+          variant: "default",
+          duration: 10000
+        });
+        
+        return { error: { code: 'email_not_confirmed', message: 'Email not confirmed' } };
       }
 
       // No toast on success - immediate navigation for best UX
