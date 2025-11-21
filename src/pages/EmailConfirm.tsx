@@ -114,7 +114,7 @@ const EmailConfirm = () => {
           {status === 'already-confirmed' && (
             <>
               <h2 className="text-2xl font-bold text-white mb-4">
-                Redan aktiverat
+                Redan aktiverat 🎉
               </h2>
               <p className="text-white mb-6">
                 Ditt konto är redan aktiverat och redo att användas.
