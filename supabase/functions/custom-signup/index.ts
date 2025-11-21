@@ -130,10 +130,12 @@ const handler = async (req: Request): Promise<Response> => {
     const redirectEnv = Deno.env.get("REDIRECT_URL") || "";
     const defaultAppUrl = "https://swipe-and-hire.lovable.app";
 
-    // Om REDIRECT_URL av misstag pekar mot en Supabase-domän, fall back till app-URL
-    const appBase = redirectEnv.includes("supabase.co")
-      ? defaultAppUrl
-      : redirectEnv || defaultAppUrl;
+    // Om REDIRECT_URL är satt till en full URL och inte är en Supabase-domän, använd den
+    let appBase = defaultAppUrl;
+    if (redirectEnv && redirectEnv.startsWith("http")) {
+      appBase = redirectEnv.includes("supabase.co") ? defaultAppUrl : redirectEnv;
+    }
+
 
     const confirmationUrl = `${appBase}/email-confirm?confirm=${confirmationToken}`;
     
