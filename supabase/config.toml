@@ -5,3 +5,21 @@ verify_jwt = false
 
 [functions.redirect-confirm]
 verify_jwt = false
+
+[functions.confirm-email]
+verify_jwt = false
+
+[functions.send-confirmation-email]
+verify_jwt = false
+
+[functions.resend-confirmation]
+verify_jwt = false
+
+[functions.send-reset-password]
+verify_jwt = false
+
+[functions.redirect-recovery]
+verify_jwt = false
+
+[functions.reset-redirect]
+verify_jwt = false
