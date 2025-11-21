@@ -256,9 +256,10 @@ const handler = async (req: Request): Promise<Response> => {
     const redirectEnv = Deno.env.get("REDIRECT_URL") || "";
     const defaultAppUrl = "https://swipe-and-hire.lovable.app";
 
-    const appBase = redirectEnv.includes("supabase.co")
-      ? defaultAppUrl
-      : redirectEnv || defaultAppUrl;
+    let appBase = defaultAppUrl;
+    if (redirectEnv && redirectEnv.startsWith("http")) {
+      appBase = redirectEnv.includes("supabase.co") ? defaultAppUrl : redirectEnv;
+    }
 
     const confirmationUrl = `${appBase}/email-confirm?confirm=${newToken}`;
 
