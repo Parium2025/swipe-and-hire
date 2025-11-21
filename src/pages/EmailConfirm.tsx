@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
@@ -8,7 +8,6 @@ import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 const EmailConfirm = () => {
   const [status, setStatus] = useState<'loading' | 'success' | 'already-confirmed' | 'error'>('loading');
   const [message, setMessage] = useState('');
-  const { confirmEmail } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -43,24 +42,68 @@ const EmailConfirm = () => {
   const handleEmailConfirmation = async (token: string) => {
     try {
       console.log('Starting email confirmation with token:', token);
-      const result = await confirmEmail(token);
-      console.log('Email confirmation successful:', result);
-      setStatus('success');
-      setMessage(result.message);
-    } catch (error: any) {
-      console.log('Email confirmation error:', error);
-      const errorMessage = error.message || 'Ett fel inträffade vid bekräftelse av e-post';
       
-      if (errorMessage.includes('redan bekräftad') || errorMessage.includes('already')) {
-        setStatus('already-confirmed');
-        setMessage('Ditt konto är redan aktiverat. Du kan logga in direkt.');
-      } else if (errorMessage.includes('utgången') || errorMessage.includes('expired')) {
-        setStatus('error');
-        setMessage('Bekräftelselänken har gått ut. Du kan registrera dig igen med samma e-postadress.');
-      } else {
+      // Hämta bekräftelsetoken från databasen
+      const { data: confirmationData, error: fetchError } = await supabase
+        .from('email_confirmations')
+        .select('*')
+        .eq('token', token)
+        .maybeSingle();
+
+      if (fetchError) {
+        console.error('Error fetching confirmation:', fetchError);
+        throw new Error('Kunde inte verifiera token');
+      }
+
+      if (!confirmationData) {
         setStatus('error');
         setMessage('Denna bekräftelselänk är inte längre giltig. Kontakta support om problemet kvarstår.');
+        return;
       }
+
+      // Kolla om token har gått ut
+      if (new Date(confirmationData.expires_at) < new Date()) {
+        setStatus('error');
+        setMessage('Bekräftelselänken har gått ut. Du kan registrera dig igen med samma e-postadress.');
+        return;
+      }
+
+      // Kolla om kontot redan är bekräftat
+      if (confirmationData.confirmed_at) {
+        console.log('Account already confirmed');
+        setStatus('already-confirmed');
+        setMessage('Ditt konto är redan aktiverat. Du kan logga in direkt.');
+        return;
+      }
+
+      // Bekräfta användaren i auth.users via admin API
+      const { error: updateError } = await supabase.auth.admin.updateUserById(
+        confirmationData.user_id,
+        { email_confirm: true }
+      );
+
+      if (updateError) {
+        console.error('Error confirming user:', updateError);
+        throw new Error('Kunde inte bekräfta konto');
+      }
+
+      // Uppdatera confirmed_at i email_confirmations
+      const { error: confirmError } = await supabase
+        .from('email_confirmations')
+        .update({ confirmed_at: new Date().toISOString() })
+        .eq('token', token);
+
+      if (confirmError) {
+        console.error('Error updating confirmation:', confirmError);
+      }
+
+      console.log('Email confirmation successful');
+      setStatus('success');
+      setMessage('Ditt konto har bekräftats framgångsrikt!');
+    } catch (error: any) {
+      console.log('Email confirmation error:', error);
+      setStatus('error');
+      setMessage('Ett oväntat fel inträffade. Kontakta support om problemet kvarstår.');
     }
   };
 
