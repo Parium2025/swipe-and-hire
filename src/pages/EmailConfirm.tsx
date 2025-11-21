@@ -14,11 +14,21 @@ const EmailConfirm = () => {
 
   useEffect(() => {
     const confirmToken = searchParams.get('confirm');
-    
+    const statusParam = searchParams.get('status');
+
     console.log('EmailConfirm - All URL params:', Object.fromEntries(searchParams.entries()));
     console.log('EmailConfirm - token:', confirmToken, 'Full URL:', window.location.href);
     console.log('EmailConfirm - User agent:', navigator.userAgent);
+
+    // 1) Nytt autokonfirmerat läge (ingen token, men status=success)
+    if (!confirmToken && statusParam === 'success') {
+      console.log('Auto-confirm success mode detected');
+      setStatus('success');
+      setMessage('Fantastiskt! Ditt konto har skapats och är redan aktiverat. Du kan logga in direkt.');
+      return;
+    }
     
+    // 2) Klassiskt token-baserat flöde
     if (!confirmToken) {
       console.log('No confirmation token found');
       setStatus('error');
