@@ -94,7 +94,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
                 Profilbild/Profilvideo
               </h3>
               <p className="text-white text-center text-base">
-                Ladda upp en kort profilbild/profilvideo och gör ditt första intryck minnesvärt
+                Ladda upp en profilbild/profilvideo och gör ditt första intryck minnesvärt
               </p>
               
               {/* Video and Camera Icons - larger */}
