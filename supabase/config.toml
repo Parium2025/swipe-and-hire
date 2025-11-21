@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.email-confirm]
 verify_jwt = false
+
+[functions.auth]
+verify_jwt = false
