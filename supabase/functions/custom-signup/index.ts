@@ -196,16 +196,27 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!emailSent) {
       console.error('Failed to send confirmation email after all retries:', lastError);
-      // Användaren är skapad men mejlet kunde inte skickas
-      // Vi returnerar ändå success men med varning
+      
+      // KRITISKT: Radera användaren om mejlet inte kunde skickas
+      // Annars blir användaren fast (kan inte logga in, kan inte registrera igen)
+      console.log(`Deleting user ${user.user.id} due to email send failure...`);
+      
+      try {
+        await supabase.from('email_confirmations').delete().eq('user_id', user.user.id);
+        await supabase.from('profiles').delete().eq('user_id', user.user.id);
+        await supabase.auth.admin.deleteUser(user.user.id);
+        console.log('User deleted successfully after email failure');
+      } catch (deleteError) {
+        console.error('Failed to cleanup user after email failure:', deleteError);
+      }
+      
+      // Returnera fel så användaren kan försöka igen senare
       return new Response(JSON.stringify({ 
-        success: true, 
-        warning: true,
-        message: "Konto skapat! E-postbekräftelsen kunde inte skickas just nu. Kontakta support om du inte får något mejl inom 10 minuter.",
-        user: user.user,
-        needsConfirmation: true
+        success: false,
+        error: "Vi kunde inte skicka bekräftelsemejlet just nu. Vänligen försök igen om en stund eller kontakta support om problemet kvarstår.",
+        retryable: true
       }), {
-        status: 200,
+        status: 500,
         headers: {
           "Content-Type": "application/json",
           ...corsHeaders,
