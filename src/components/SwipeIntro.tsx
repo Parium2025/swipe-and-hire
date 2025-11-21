@@ -85,41 +85,54 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       title: "Skapa en profil",
       subtitle: "Ladda upp en kort profilvideo eller en bild",
       content: (
-        <div className="flex flex-col items-center justify-center space-y-6 w-full">
-          <div className="flex items-center justify-center space-x-4 min-w-full">
-            {/* Video option */}
-            <div className="relative">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-primary-foreground/20 p-2 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
-                <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
-                  <Video className="h-7 w-7 text-primary-foreground" />
+        <div className="flex flex-col items-center justify-center w-full px-4">
+          {/* Profile Image/Video Card - matching structure from Profile.tsx */}
+          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg max-w-md w-full">
+            <div className="p-6 md:p-4 space-y-2">
+              <h3 className="text-base font-semibold text-white text-center">
+                Profilbild/Profilvideo
+              </h3>
+              <p className="text-white text-center text-sm">
+                Ladda upp en kort profilbild/profilvideo och gör ditt första intryck minnesvärt
+              </p>
+              
+              {/* Video and Camera Icons */}
+              <div className="flex items-center justify-center space-x-4">
+                {/* Video option */}
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-full border-4 border-white/10 p-2 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-sm">
+                    <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
+                      <Video className="h-5 w-5 text-white" />
+                    </div>
+                  </div>
+                  <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
+                    <Play className="h-2 w-2 text-primary animate-pulse" />
+                  </div>
+                </div>
+
+                {/* "eller" text */}
+                <div className="text-white text-sm font-medium flex-shrink-0">
+                  eller
+                </div>
+
+                {/* Image option */}
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-full border-4 border-white/10 p-2 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-sm">
+                    <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
+                      <Camera className="h-5 w-5 text-white" />
+                    </div>
+                  </div>
+                  <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
+                    <Camera className="h-2 w-2 text-primary" />
+                  </div>
                 </div>
               </div>
-              <div className="absolute -top-1 -right-1 bg-primary-foreground rounded-full p-1.5 shadow-lg">
-                <Play className="h-3 w-3 text-primary animate-pulse" />
-              </div>
             </div>
-
-            {/* "eller" text */}
-            <div className="text-white text-sm font-medium flex-shrink-0">
-              eller
+            <div className="p-4 flex flex-col items-center">
+              <p className="text-white text-center text-sm">
+                Din personlighet säger mer än ett CV
+              </p>
             </div>
-
-            {/* Image option */}
-            <div className="relative">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-primary-foreground/20 p-2 bg-gradient-to-b from-primary-foreground/10 to-primary-foreground/5 backdrop-blur-sm">
-              <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
-                <Camera className="h-7 w-7 text-primary-foreground" />
-              </div>
-              </div>
-              <div className="absolute -top-1 -right-1 bg-primary-foreground rounded-full p-1.5 shadow-lg">
-                <Camera className="h-3 w-3 text-primary animate-pulse" />
-              </div>
-            </div>
-          </div>
-          <div className="text-center max-w-xs">
-            <p className="text-white text-sm">
-              Din personlighet säger mer än ett CV
-            </p>
           </div>
         </div>
       )
