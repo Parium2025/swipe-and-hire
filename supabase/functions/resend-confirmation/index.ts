@@ -254,14 +254,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     // 5. Bygg bekräftelse-URL direkt mot frontend-appens email-confirm-sida
     const redirectEnv = Deno.env.get("REDIRECT_URL") || "";
-    const defaultAppUrl = "https://swipe-and-hire.lovable.app";
+    const defaultAppUrl = "https://jrjaegapuujushsiofoi.lovable.app";
 
     let appBase = defaultAppUrl;
     if (redirectEnv && redirectEnv.startsWith("http")) {
       appBase = redirectEnv.includes("supabase.co") ? defaultAppUrl : redirectEnv;
     }
 
-    const confirmationUrl = `${appBase}/auth?confirm=${newToken}`;
+    const confirmationUrl = `${appBase}/email-confirm?confirm=${newToken}`;
 
     console.log(`Resend confirmation URL for ${email}: ${confirmationUrl}`);
 
