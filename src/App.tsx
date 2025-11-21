@@ -53,6 +53,7 @@ const AnimatedRoutes = () => {
       <Route path="/verify" element={<EmailVerification />} />
       <Route path="/email-redirect" element={<EmailRedirect />} />
       <Route path="/confirm" element={<EmailConfirm />} />
+      <Route path="/email-confirm" element={<EmailConfirm />} />
       <Route path="/profile" element={<Index />} />
       <Route path="/profile-preview" element={<Index />} />
       <Route path="/search-jobs" element={<Index />} />
