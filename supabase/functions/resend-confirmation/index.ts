@@ -68,19 +68,22 @@ const handler = async (req: Request): Promise<Response> => {
 
     // 3. Skapa ny bekräftelsetoken
     const newToken = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(); // 24 timmar
     
-    // 4. Uppdatera eller skapa ny bekräftelsepost
+    // 4. Uppdatera eller skapa ny bekräftelsepost (utan e-post-kolumn, följer nuvarande schema)
     const { error: upsertError } = await supabase
       .from('email_confirmations')
-      .upsert({
-        user_id: user.id,
-        email: email,
-        token: newToken,
-        expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(), // 5 minuter
-        confirmed_at: null
-      }, {
-        onConflict: 'user_id'
-      });
+      .upsert(
+        {
+          user_id: user.id,
+          token: newToken,
+          expires_at: expiresAt,
+          confirmed_at: null,
+        },
+        {
+          onConflict: 'user_id',
+        },
+      );
 
     if (upsertError) {
       console.error('Error updating confirmation:', upsertError);
