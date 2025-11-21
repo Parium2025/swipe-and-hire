@@ -128,7 +128,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // 4. Bygg bekräftelse-URL direkt mot frontend-appens email-confirm-sida
     const redirectEnv = Deno.env.get("REDIRECT_URL") || "";
-    const defaultAppUrl = "https://jrjaegapuujushsiofoi.lovable.app";
+    const defaultAppUrl = "https://swipe-and-hire.lovable.app";
 
     // Om REDIRECT_URL är satt till en full URL och inte är en Supabase-domän, använd den
     let appBase = defaultAppUrl;
