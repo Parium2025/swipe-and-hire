@@ -252,8 +252,15 @@ const handler = async (req: Request): Promise<Response> => {
       throw upsertError;
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-    const confirmationUrl = `${supabaseUrl}/functions/v1/redirect-confirm?token=${newToken}`;
+    // 5. Bygg bekräftelse-URL direkt mot frontend-appens email-confirm-sida
+    const redirectEnv = Deno.env.get("REDIRECT_URL") || "";
+    const defaultAppUrl = "https://swipe-and-hire.lovable.app";
+
+    const appBase = redirectEnv.includes("supabase.co")
+      ? defaultAppUrl
+      : redirectEnv || defaultAppUrl;
+
+    const confirmationUrl = `${appBase}/email-confirm?confirm=${newToken}`;
 
     // Fetch profile to personalize and detect role
     const { data: profile, error: profileErr } = await supabase
