@@ -374,7 +374,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Registrering lyckades
       toast({
         title: "Registrering lyckad!",
-        description: "Kontrollera din e-post för att aktivera ditt konto",
+        description: "Ditt konto har skapats och är redan aktiverat. Du kan logga in direkt.",
         duration: 10000
       });
 
