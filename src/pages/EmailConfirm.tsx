@@ -88,10 +88,10 @@ const EmailConfirm = () => {
             <>
               <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-primary-foreground mb-4">
-                Konto aktiverat!
+                Nu är kontot bekräftat! 🎉
               </h2>
               <p className="text-primary-foreground/80 mb-6">
-                {message}
+                Ditt konto är nu aktiverat och redo att användas. Du kan logga in och börja använda Parium!
               </p>
               <Button 
                 onClick={handleGoToLogin}
