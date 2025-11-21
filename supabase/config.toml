@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.cleanup-all-users]
 verify_jwt = false
+
+[functions.delete-test-user]
+verify_jwt = false
