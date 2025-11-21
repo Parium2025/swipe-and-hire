@@ -58,9 +58,11 @@ const handler = async (req: Request): Promise<Response> => {
     // 2. Kontrollera om redan bekräftad
     if (confirmation.confirmed_at) {
       return new Response(JSON.stringify({ 
-        error: "E-posten är redan bekräftad" 
+        success: true,
+        alreadyConfirmed: true,
+        message: "Ditt konto är redan aktiverat. Du kan logga in direkt."
       }), {
-        status: 400,
+        status: 200,
         headers: {
           "Content-Type": "application/json",
           ...corsHeaders,
