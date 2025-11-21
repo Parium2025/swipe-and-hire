@@ -77,11 +77,11 @@ const handler = async (req: Request): Promise<Response> => {
       console.error('Cleanup error (continuing anyway):', cleanupError);
     }
 
-    // 2. Skapa användare utan bekräftelse
+    // 2. Skapa användare med automatisk bekräftelse
     const { data: user, error: signupError } = await supabase.auth.admin.createUser({
       email,
       password,
-      email_confirm: false, // Vi hanterar bekräftelse manuellt
+      email_confirm: true, // Auto-bekräfta så användaren kan logga in direkt
       user_metadata: data || {}
     });
 
@@ -108,60 +108,36 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(signupError.message);
     }
 
-    // 2. Skapa bekräftelsetoken
-    const confirmationToken = crypto.randomUUID();
-    const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString();
+    // Användaren är nu skapad och bekräftad - skicka välkomstmejl
+    const appUrl = Deno.env.get("REDIRECT_URL") || "https://swipe-and-hire.lovable.app";
+    const loginUrl = `${appUrl}/auth`;
     
-    // 3. Spara token i databasen (utan e-post, följer nuvarande schema)
-    const { error: tokenError } = await supabase
-      .from('email_confirmations')
-      .insert({
-        user_id: user.user.id,
-        token: confirmationToken,
-        expires_at: expiresAt,
-      });
+    console.log(`Sending welcome email to ${email}`);
 
-    if (tokenError) {
-      console.error('Error saving confirmation token:', tokenError);
-      // Ta bort användaren om token-sparandet misslyckades
-      await supabase.auth.admin.deleteUser(user.user.id);
-      throw new Error('Fel vid skapande av bekräftelsetoken');
-    }
-    
-    // Använd Supabase Edge Function för omdirigering (undviker Lovable-proxy)
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-    const confirmationUrl = `${supabaseUrl}/functions/v1/redirect-confirm?token=${confirmationToken}`;
-    
-    console.log(`Sending confirmation email to ${email} with redirect URL: ${confirmationUrl}`);
-
-    // 4. Skicka bekräftelsemejl via Resend
+    // 4. Skicka välkomstmejl via Resend
     const emailResponse = await resend.emails.send({
       from: "Parium <noreply@parium.se>",
       to: [email],
-      subject: isEmployer ? "Välkommen till Parium – Bekräfta ditt företagskonto" : "Bekräfta ditt konto – Parium",
+      subject: isEmployer ? "Välkommen till Parium – Ditt företagskonto är aktivt" : "Välkommen till Parium – Ditt konto är aktivt",
       text: isEmployer ? 
         `Hej ${firstName}!
 
 Välkommen till Parium - plattformen där ${companyName} hittar nästa generations talang/talanger.
 
-Bekräfta ditt företagskonto genom att klicka på länken:
-${confirmationUrl}
+Ditt konto är nu aktivt och du kan logga in direkt:
+${loginUrl}
 
 Med Parium får ni tillgång till:
 • Kvalificerade kandidater som matchar era behov
 • Smidiga rekryteringsverktyg
 • Direkt kontakt med potentiella medarbetare
 
-Om du inte skapade ett konto kan du ignorera detta meddelande.
-
 Parium Team` 
       :
         `Hej ${firstName}!
 
-Bekräfta ditt konto genom att klicka på länken:
-${confirmationUrl}
-
-Om du inte skapade ett konto kan du ignorera detta meddelande.
+Ditt konto är nu aktivt och du kan logga in direkt:
+${loginUrl}
 
 Parium Team`,
       html: isEmployer ? 
@@ -172,7 +148,7 @@ Parium Team`,
         <head>
           <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-          <title>Välkommen till Parium – Bekräfta ditt företagskonto</title>
+          <title>Välkommen till Parium – Ditt företagskonto är aktivt</title>
         </head>
         <body style="margin: 0; padding: 0; background-color: #F9FAFB; font-family: Arial, Helvetica, sans-serif;">
           
@@ -203,7 +179,7 @@ Parium Team`,
                           Hej ${firstName}!
                         </p>
                         <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">
-                           Välkommen till Parium - plattformen där <strong>${companyName}</strong> hittar nästa generations talang/talanger. Vi hjälper er att rekrytera enklare, snabbare och träffsäkrare.
+                           Välkommen till Parium - plattformen där <strong>${companyName}</strong> hittar nästa generations talang/talanger. Ditt konto är nu aktivt och du kan logga in direkt!
                          </p>
                         
                          <!-- Features list for employers -->
@@ -218,7 +194,7 @@ Parium Team`,
                        </table>
                        
                        <!-- Button with bulletproof mobile centering -->
-                       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
+                       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 32px 0;">
                          <tr>
                            <td align="center" style="padding: 0;">
                              <!--[if mso]>
@@ -226,28 +202,14 @@ Parium Team`,
                              <w:anchorlock/>
                              <center>
                              <![endif]-->
-                             <a href="${confirmationUrl}" 
+                             <a href="${loginUrl}" 
                                 style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none; mso-hide: all;">
-                               Bekräfta företagskonto
+                               Logga in nu
                              </a>
                              <!--[if mso]>
                              </center>
                              </v:roundrect>
                              <![endif]-->
-                           </td>
-                         </tr>
-                       </table>
-                       
-                       <!-- Alternative link -->
-                       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
-                         <tr>
-                           <td style="background-color: #F9FAFB; padding: 20px; border-radius: 8px;">
-                             <p style="margin: 0 0 12px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #6B7280; text-align: center;">
-                               Fungerar inte knappen? Kopiera länken nedan:
-                             </p>
-                             <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #1E3A8A; word-break: break-all; text-align: center;">
-                               ${confirmationUrl}
-                             </p>
                            </td>
                          </tr>
                        </table>
@@ -275,14 +237,14 @@ Parium Team`,
         </html>
         `
       :
-        // Job seeker email template (existing)
+        // Job seeker email template
         `
         <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
         <html xmlns="http://www.w3.org/1999/xhtml">
         <head>
           <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-          <title>Bekräfta ditt konto – Parium</title>
+          <title>Välkommen till Parium – Ditt konto är aktivt</title>
         </head>
         <body style="margin: 0; padding: 0; background-color: #F9FAFB; font-family: Arial, Helvetica, sans-serif;">
           
@@ -313,7 +275,7 @@ Parium Team`,
                           Hej ${firstName}!
                         </p>
                         <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">
-                          Du har just klivit in i nästa generation av jobbsök. Med Parium swipar du dig fram till möjligheter som faktiskt kan förändra din vardag.
+                          Du har just klivit in i nästa generation av jobbsök. Ditt konto är nu aktivt och du kan logga in direkt!
                         </p>
                       
                       <!-- Features list -->
@@ -328,7 +290,7 @@ Parium Team`,
                       </table>
                       
                       <!-- Button with bulletproof mobile centering -->
-                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
+                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 32px 0;">
                         <tr>
                           <td align="center" style="padding: 0;">
                             <!--[if mso]>
@@ -336,28 +298,14 @@ Parium Team`,
                             <w:anchorlock/>
                             <center>
                             <![endif]-->
-                            <a href="${confirmationUrl}" 
+                            <a href="${loginUrl}" 
                                style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none; mso-hide: all;">
-                              Bekräfta mitt konto
+                              Logga in nu
                             </a>
                             <!--[if mso]>
                             </center>
                             </v:roundrect>
                             <![endif]-->
-                          </td>
-                        </tr>
-                      </table>
-                      
-                      <!-- Alternative link -->
-                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
-                        <tr>
-                          <td style="background-color: #F9FAFB; padding: 20px; border-radius: 8px;">
-                            <p style="margin: 0 0 12px 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #6B7280; text-align: center;">
-                              Fungerar inte knappen? Kopiera länken nedan:
-                            </p>
-                            <p style="margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #1E3A8A; word-break: break-all; text-align: center;">
-                              ${confirmationUrl}
-                            </p>
                           </td>
                         </tr>
                       </table>
@@ -386,11 +334,11 @@ Parium Team`,
         `
     });
 
-    console.log("Custom signup email sent:", emailResponse);
+    console.log("Welcome email sent:", emailResponse);
 
     return new Response(JSON.stringify({ 
       success: true, 
-      message: "Användare skapad. Kolla din e-post för bekräftelse.",
+      message: "Konto skapat! Du kan logga in direkt.",
       user: user.user
     }), {
       status: 200,
