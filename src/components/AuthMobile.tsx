@@ -458,10 +458,8 @@ const AuthMobile = ({
             }, 3000);
           }
         } else {
-          // Nytt: Hoppa till snygg bekräftelsesida istället för "resend"-läge
-          setShowResend(false);
-          setHasRegistered(false);
-          navigate(`/email-confirm?status=success&auto=true&email=${encodeURIComponent(currentEmail)}`);
+          setShowResend(true);
+          setHasRegistered(true);
         }
       }
     } catch (error) {
