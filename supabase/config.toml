@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.auth]
 verify_jwt = false
+
+[functions.cleanup-all-users]
+verify_jwt = false
