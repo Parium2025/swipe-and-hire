@@ -139,7 +139,8 @@ const handler = async (req: Request): Promise<Response> => {
     
     console.log(`Sending confirmation email to ${email}`);
 
-    // 5. Anropa send-confirmation-email Edge Function
+    // 5. Anropa send-confirmation-email Edge Function via backendens SUPABASE_URL
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
     const emailResponse = await fetch(`${supabaseUrl}/functions/v1/send-confirmation-email`, {
       method: 'POST',
       headers: {
