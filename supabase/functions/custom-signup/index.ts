@@ -143,28 +143,75 @@ const handler = async (req: Request): Promise<Response> => {
 
 
     // 5. Anropa send-confirmation-email Edge Function via backendens SUPABASE_URL
+    // Med retry-logik för robusthet
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-    const emailResponse = await fetch(`${supabaseUrl}/functions/v1/send-confirmation-email`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`
-      },
-      body: JSON.stringify({
-        email,
-        role: data?.role || 'job_seeker',
-        first_name: firstName,
-        confirmation_url: confirmationUrl
-      })
-    });
+    const maxRetries = 3;
+    let emailSent = false;
+    let lastError = '';
 
-    if (!emailResponse.ok) {
-      const errorText = await emailResponse.text();
-      console.error('Error sending confirmation email:', errorText);
-      throw new Error('Failed to send confirmation email');
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Sending confirmation email (attempt ${attempt}/${maxRetries})...`);
+        
+        const emailResponse = await fetch(`${supabaseUrl}/functions/v1/send-confirmation-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`
+          },
+          body: JSON.stringify({
+            email,
+            role: data?.role || 'job_seeker',
+            first_name: firstName,
+            confirmation_url: confirmationUrl
+          })
+        });
+
+        if (emailResponse.ok) {
+          console.log("Confirmation email sent successfully");
+          emailSent = true;
+          break;
+        } else {
+          const errorText = await emailResponse.text();
+          lastError = errorText;
+          console.error(`Email send attempt ${attempt} failed:`, errorText);
+          
+          // Vänta lite innan nästa försök (exponential backoff)
+          if (attempt < maxRetries) {
+            const waitTime = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
+            console.log(`Waiting ${waitTime}ms before retry...`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+          }
+        }
+      } catch (fetchError: any) {
+        lastError = fetchError.message;
+        console.error(`Email send attempt ${attempt} error:`, fetchError);
+        
+        if (attempt < maxRetries) {
+          const waitTime = Math.pow(2, attempt) * 1000;
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+        }
+      }
     }
 
-    console.log("Confirmation email sent successfully");
+    if (!emailSent) {
+      console.error('Failed to send confirmation email after all retries:', lastError);
+      // Användaren är skapad men mejlet kunde inte skickas
+      // Vi returnerar ändå success men med varning
+      return new Response(JSON.stringify({ 
+        success: true, 
+        warning: true,
+        message: "Konto skapat! E-postbekräftelsen kunde inte skickas just nu. Kontakta support om du inte får något mejl inom 10 minuter.",
+        user: user.user,
+        needsConfirmation: true
+      }), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          ...corsHeaders,
+        },
+      });
+    }
 
     return new Response(JSON.stringify({ 
       success: true, 
