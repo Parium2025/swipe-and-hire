@@ -572,9 +572,9 @@ const AuthDesktop = ({
         </div>
       </div>
 
-      <div className="relative z-10 flex flex-col min-h-screen py-8 px-6 overflow-y-auto">
+      <div className="relative z-10 flex flex-col min-h-screen justify-center items-center py-8 px-6 overflow-y-auto">
         {/* Header med logo och text */}
-        <div className="flex flex-col items-center w-full max-w-2xl mx-auto">
+        <div className="flex flex-col items-center w-full max-w-2xl">
           <div className="text-center mb-4">
             <div className="mb-2">
               <div className="relative mx-auto w-fit flex items-center justify-center" style={{ height: '260px' }}>
