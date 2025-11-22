@@ -136,7 +136,7 @@ const getEmployerTemplate = (firstName: string, confirmationUrl: string, company
                 </tr>
                 <tr>
                   <td style="vertical-align: top; padding-right: 8px; color: #111827; font-size: 16px; line-height: 24px;">•</td>
-                  <td style="color: #111827; font-size: 16px; line-height: 24px; text-align: left;">Ett modernt gränssnitt anpassat för era krav</td>
+                  <td style="color: #111827; font-size: 16px; line-height: 24px; text-align: left;">Effektiva verktyg som stödjer er rekrytering</td>
                 </tr>
               </table>
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
