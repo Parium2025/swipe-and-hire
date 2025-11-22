@@ -163,7 +163,8 @@ const handler = async (req: Request): Promise<Response> => {
             email,
             role: data?.role || 'job_seeker',
             first_name: firstName,
-            confirmation_url: confirmationUrl
+            confirmation_url: confirmationUrl,
+            company_name: data?.company_name
           })
         });
 
