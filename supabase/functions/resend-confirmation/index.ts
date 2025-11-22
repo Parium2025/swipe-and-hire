@@ -317,8 +317,8 @@ const handler = async (req: Request): Promise<Response> => {
                  ${greet}
                </p>
                <p style="margin: 0 0 30px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
-                  Välkommen till Parium - plattformen där <strong>${companyName}</strong> hittar nästa generations talang/talanger. Vi hjälper er att rekrytera enklare, snabbare och träffsäkrare.
-                </p>
+                 Välkommen till Parium - plattformen där <strong>${companyName}</strong> möter framtida talanger. Vi hjälper er att rekrytera snabbare, mer effektivt och utan krångel.
+               </p>
                  <table border="0" cellpadding="0" cellspacing="0" style="margin: 10px auto 30px auto; max-width: 450px;">
                    <tr>
                      <td style="vertical-align: top; padding-right: 8px; color: #111827; font-size: 16px; line-height: 24px;">•</td>
