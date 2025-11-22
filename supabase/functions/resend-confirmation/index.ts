@@ -319,15 +319,14 @@ const handler = async (req: Request): Promise<Response> => {
                <p style="margin: 0 0 24px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">
                   Välkommen till Parium - plattformen där <strong>${companyName}</strong> hittar nästa generations talang/talanger. Vi hjälper er att rekrytera enklare, snabbare och träffsäkrare.
                 </p>
-                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
-                  <tr>
-                    <td style="font-size: 16px; color: #111827; text-align: left;">
-                       <p style="margin: 0 0 12px 0; text-align: left;">• En smidig rekryteringsprocess från start till mål</p>
-                       <p style="margin: 0 0 12px 0; text-align: left;">• Direktkontakt med kandidater</p>
-                       <p style="margin: 0; text-align: left;">• Ett modernt gränssnitt anpassat för era krav</p>
-                  </td>
-                </tr>
-              </table>
+                <div style="margin: 10px auto 30px auto; max-width: 450px;">
+                  <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">• En smidig rekryteringsprocess från start till mål</p>
+                  <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">• Direktkontakt med kandidater</p>
+                  <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">• Ett modernt gränssnitt anpassat för era krav</p>
+                </div>
+              <p style="margin: 20px 0 10px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+                Bekräfta ditt konto för att komma igång direkt.
+              </p>
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
                 <tr>
                   <td align="center" style="padding: 0;">
@@ -337,6 +336,10 @@ const handler = async (req: Request): Promise<Response> => {
                   </td>
                 </tr>
               </table>
+              <p style="margin: 30px 0 0 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+                Tack för att du väljer Parium för er rekrytering.<br>
+                Tillsammans skapar vi framtidens arbetsliv.
+              </p>
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
                 <tr>
                   <td style="background-color: #F9FAFB; padding: 20px; border-radius: 8px;">
@@ -389,15 +392,14 @@ const handler = async (req: Request): Promise<Response> => {
                <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px; font-weight: bold;">
                  Med Parium kan du:
                </p>
-              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 12px;">
-                 <tr>
-                   <td style="font-size: 16px; color: #111827; text-align: left;">
-                     <p style="margin: 0 0 12px 0; text-align: left;">• Hitta jobb som verkligen matchar din profil</p>
-                     <p style="margin: 0 0 12px 0; text-align: left;">• Swipea dig igenom alternativ och ansöka på några sekunder</p>
-                     <p style="margin: 0; text-align: left;">• Spara tid med verktyg som gör processen både enkel och effektiv</p>
-                  </td>
-                </tr>
-              </table>
+              <div style="margin: 10px auto 30px auto; max-width: 450px;">
+                <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">• Hitta jobb som verkligen matchar din profil</p>
+                <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">• Swipea dig igenom alternativ och ansöka på några sekunder</p>
+                <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">• Spara tid med verktyg som gör processen både enkel och effektiv</p>
+              </div>
+              <p style="margin: 20px 0 10px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+                Bekräfta ditt konto för att komma igång direkt.
+              </p>
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
                 <tr>
                   <td align="center" style="padding: 0;">
@@ -405,6 +407,10 @@ const handler = async (req: Request): Promise<Response> => {
                   </td>
                 </tr>
               </table>
+              <p style="margin: 30px 0 0 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+                Tack för ditt förtroende.<br>
+                Det här kan bli början på något riktigt bra.
+              </p>
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
                 <tr>
                   <td style="background-color: #F9FAFB; padding: 20px; border-radius: 8px;">

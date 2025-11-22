@@ -35,33 +35,34 @@ const getJobSeekerTemplate = (firstName: string, confirmationUrl: string) => `
     
      <!-- Content -->
     <div style="padding: 40px 30px;">
-       <p style="color: #333333; margin: 0 0 20px 0; font-size: 18px; line-height: 1.6; text-align: center;">
-         Hej ${firstName}!
-       </p>
-       <p style="color: #333333; margin: 0 0 20px 0; font-size: 18px; line-height: 1.6; text-align: center;">
-         Välkommen till Parium — nästa steg i ett smartare jobbsökande.<br>
-         Genom vår plattform får du tillgång till moderna verktyg som effektiviserar varje steg i din process.
-       </p>
-       
-       <p style="color: #333333; margin: 20px 0 10px 0; font-size: 16px; font-weight: bold; text-align: center;">
-         Med Parium kan du:
-       </p>
+      <p style="color: #333333; margin: 0 0 20px 0; font-size: 18px; line-height: 1.6; text-align: center;">
+        Hej ${firstName}!
+      </p>
+      <p style="color: #333333; margin: 0 0 20px 0; font-size: 18px; line-height: 1.6; text-align: center;">
+        Välkommen till Parium — nästa steg i ett smartare jobbsökande.<br>
+        Genom vår plattform får du tillgång till moderna verktyg som effektiviserar varje steg i din process.
+      </p>
       
-       <!-- Benefits list -->
-       <div style="margin: 10px 0 30px 0; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto;">
-         <div style="margin-bottom: 15px; text-align: left;">
-           <span style="color: #1a237e; font-size: 18px; margin-right: 10px; line-height: 1.4;">•</span>
-           <span style="color: #333333; font-size: 16px; line-height: 1.4;">Hitta jobb som verkligen matchar din profil</span>
-         </div>
-         <div style="margin-bottom: 15px; text-align: left;">
-           <span style="color: #1a237e; font-size: 18px; margin-right: 10px; line-height: 1.4;">•</span>
-           <span style="color: #333333; font-size: 16px; line-height: 1.4;">Swipea dig igenom alternativ och ansöka på några sekunder</span>
-         </div>
-         <div style="margin-bottom: 30px; text-align: left;">
-           <span style="color: #1a237e; font-size: 18px; margin-right: 10px; line-height: 1.4;">•</span>
-           <span style="color: #333333; font-size: 16px; line-height: 1.4;">Spara tid med verktyg som gör processen både enkel och effektiv</span>
-         </div>
-       </div>
+      <p style="color: #333333; margin: 20px 0 10px 0; font-size: 16px; font-weight: bold; text-align: center;">
+        Med Parium kan du:
+      </p>
+      
+      <!-- Benefits list -->
+      <div style="margin: 10px auto 30px auto; text-align: left; max-width: 450px;">
+        <div style="margin-bottom: 12px;">
+          <span style="color: #333333; font-size: 16px; line-height: 1.6;">• Hitta jobb som verkligen matchar din profil</span>
+        </div>
+        <div style="margin-bottom: 12px;">
+          <span style="color: #333333; font-size: 16px; line-height: 1.6;">• Swipea dig igenom alternativ och ansöka på några sekunder</span>
+        </div>
+        <div style="margin-bottom: 12px;">
+          <span style="color: #333333; font-size: 16px; line-height: 1.6;">• Spara tid med verktyg som gör processen både enkel och effektiv</span>
+        </div>
+      </div>
+      
+      <p style="color: #333333; margin: 20px 0 10px 0; font-size: 16px; line-height: 1.6; text-align: center;">
+        Bekräfta ditt konto för att komma igång direkt.
+      </p>
       
       <!-- Button -->
       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
@@ -75,7 +76,7 @@ const getJobSeekerTemplate = (firstName: string, confirmationUrl: string) => `
         </tr>
       </table>
       
-      <p style="color: #666666; margin: 20px 0 0 0; font-size: 16px; line-height: 1.6; text-align: center;">
+      <p style="color: #666666; margin: 30px 0 0 0; font-size: 16px; line-height: 1.6; text-align: center;">
         Tack för ditt förtroende.<br>
         Det här kan bli början på något riktigt bra.
       </p>
