@@ -66,7 +66,8 @@ const handler = async (req: Request): Promise<Response> => {
         
         if (token || tokenHash) {
           // Bygg vår egen länk som går via reset-redirect med issued timestamp
-          const redirectUrl = Deno.env.get("REDIRECT_URL") || "https://parium-ab.lovable.app";
+          // TEMPORARY FIX: Hardcode domain until REDIRECT_URL propagates
+          const redirectUrl = "https://parium.se";
           const tokenParam = token ? `token=${token}` : `token_hash=${tokenHash}`;
           resetUrl = `${redirectUrl}/reset-redirect?${tokenParam}&type=recovery&issued=${issued}`;
           console.log(`✅ CUSTOM RESET URL: ${resetUrl}`);
