@@ -56,7 +56,8 @@ const AuthMobile = ({
     phone: '',
     phoneError: '',
     email: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   });
   const [employerData, setEmployerData] = useState({
     firstName: '',
@@ -69,7 +70,8 @@ const AuthMobile = ({
     companyDescription: '',
     employeeCount: '',
     email: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   });
   const [role, setRole] = useState<'job_seeker' | 'employer'>(
     initialRole === 'employer' ? 'employer' : 'job_seeker'
@@ -251,7 +253,8 @@ const AuthMobile = ({
       phone: '',
       phoneError: '',
       email: '',
-      password: ''
+      password: '',
+      confirmPassword: ''
     });
     setEmployerData({
       firstName: '',
@@ -264,7 +267,8 @@ const AuthMobile = ({
       companyDescription: '',
       employeeCount: '',
       email: '',
-      password: ''
+      password: '',
+      confirmPassword: ''
     });
     setShowPassword(false);
     setPasswordStrength(0);
@@ -434,6 +438,29 @@ const AuthMobile = ({
           toast({
             title: "Lösenord krävs",
             description: "Vänligen ange ett lösenord",
+            variant: "destructive"
+          });
+          setLoading(false);
+          return;
+        }
+
+        // Validera lösenordslängd
+        if (currentPassword.length < 7) {
+          toast({
+            title: "För kort lösenord",
+            description: "Lösenordet måste vara minst 7 tecken",
+            variant: "destructive"
+          });
+          setLoading(false);
+          return;
+        }
+
+        // Validera att lösenorden matchar
+        const currentConfirmPassword = role === 'job_seeker' ? jobSeekerData.confirmPassword : employerData.confirmPassword;
+        if (currentPassword !== currentConfirmPassword) {
+          toast({
+            title: "Lösenorden matchar inte",
+            description: "Vänligen kontrollera att lösenorden är identiska",
             variant: "destructive"
           });
           setLoading(false);
@@ -1146,6 +1173,7 @@ const AuthMobile = ({
                             value={role === 'job_seeker' ? jobSeekerData.password : employerData.password}
                             onChange={(e) => handlePasswordChange(e.target.value)}
                             required
+                            minLength={7}
                             name={`new-password-${role}`}
                             autoComplete={`${role}-new-password`}
                             className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
@@ -1161,31 +1189,77 @@ const AuthMobile = ({
                           </button>
                         </div>
                         {(role === 'job_seeker' ? jobSeekerData.password : employerData.password) && (
-                          <div className="mt-2">
-                            <div className="flex items-center gap-1">
-                              {[...Array(5)].map((_, i) => (
-                                <div
-                                  key={i}
-                                  className={`h-1 flex-1 rounded ${
-                                    i < passwordStrength
-                                      ? passwordStrength < 3
-                                        ? 'bg-destructive'
-                                        : passwordStrength < 5
-                                        ? 'bg-yellow-500'
-                                        : 'bg-green-500'
-                                      : 'bg-muted'
-                                  }`}
-                                />
-                              ))}
+                          <>
+                            <div className="mt-2">
+                              <div className="flex items-center gap-1">
+                                {[...Array(5)].map((_, i) => (
+                                  <div
+                                    key={i}
+                                    className={`h-1 flex-1 rounded ${
+                                      i < passwordStrength
+                                        ? passwordStrength < 3
+                                          ? 'bg-destructive'
+                                          : passwordStrength < 5
+                                          ? 'bg-yellow-500'
+                                          : 'bg-green-500'
+                                        : 'bg-muted'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {passwordStrength < 3 && 'Svagt lösenord'}
+                                {passwordStrength >= 3 && passwordStrength < 5 && 'Medel lösenord'}
+                                {passwordStrength >= 5 && 'Starkt lösenord'}
+                              </p>
                             </div>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {passwordStrength < 3 && 'Svagt lösenord'}
-                              {passwordStrength >= 3 && passwordStrength < 5 && 'Medel lösenord'}
-                              {passwordStrength >= 5 && 'Starkt lösenord'}
+                            <p className="text-xs text-white/70 mt-2">
+                              Lösenordet måste vara minst 7 tecken (bokstäver, siffror eller tecken)
                             </p>
-                          </div>
+                          </>
                         )}
                       </div>
+
+                      {(role === 'job_seeker' ? jobSeekerData.password : employerData.password) && (
+                        <div>
+                          <Label htmlFor="confirmPassword" className="text-white">
+                            <Key className="h-4 w-4 inline mr-2" />
+                            Bekräfta lösenord *
+                          </Label>
+                          <div className="relative mt-1">
+                            <Input
+                              id="confirmPassword"
+                              type={showPassword ? 'text' : 'password'}
+                              value={role === 'job_seeker' ? jobSeekerData.confirmPassword : employerData.confirmPassword}
+                              onChange={(e) => {
+                                if (role === 'job_seeker') {
+                                  setJobSeekerData(prev => ({ ...prev, confirmPassword: e.target.value }));
+                                } else {
+                                  setEmployerData(prev => ({ ...prev, confirmPassword: e.target.value }));
+                                }
+                              }}
+                              required
+                              name={`confirm-password-${role}`}
+                              autoComplete={`${role}-new-password`}
+                              className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
+                            />
+                            <button
+                              type="button"
+                              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-white/70 hover:text-white transition-colors bg-transparent border-0 outline-none focus:outline-none active:bg-transparent"
+                              onClick={() => setShowPassword(!showPassword)}
+                              onTouchStart={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                              onTouchEnd={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                            >
+                              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                          </div>
+                          {(role === 'job_seeker' ? jobSeekerData.confirmPassword : employerData.confirmPassword) && 
+                           (role === 'job_seeker' ? jobSeekerData.password : employerData.password) !== 
+                           (role === 'job_seeker' ? jobSeekerData.confirmPassword : employerData.confirmPassword) && (
+                            <p className="text-sm text-destructive mt-1">Lösenorden matchar inte</p>
+                          )}
+                        </div>
+                      )}
                       
                        <Button 
                          type="submit" 

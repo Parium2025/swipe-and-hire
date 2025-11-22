@@ -55,7 +55,8 @@ const AuthDesktop = ({
     phone: '',
     phoneError: '',
     email: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   });
   const [employerData, setEmployerData] = useState({
     firstName: '',
@@ -68,7 +69,8 @@ const AuthDesktop = ({
     companyDescription: '',
     employeeCount: '',
     email: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   });
   const [role, setRole] = useState<'job_seeker' | 'employer'>(
     initialRole === 'employer' ? 'employer' : 'job_seeker'
@@ -206,7 +208,8 @@ const AuthDesktop = ({
       phone: '',
       phoneError: '',
       email: '',
-      password: ''
+      password: '',
+      confirmPassword: ''
     });
     setEmployerData({
       firstName: '',
@@ -219,7 +222,8 @@ const AuthDesktop = ({
       companyDescription: '',
       employeeCount: '',
       email: '',
-      password: ''
+      password: '',
+      confirmPassword: ''
     });
     setShowPassword(false);
     setPasswordStrength(0);
@@ -377,6 +381,29 @@ const AuthDesktop = ({
           toast({
             title: "Lösenord krävs",
             description: "Vänligen ange ett lösenord",
+            variant: "destructive"
+          });
+          setLoading(false);
+          return;
+        }
+
+        // Validera lösenordslängd
+        if (currentPassword.length < 7) {
+          toast({
+            title: "För kort lösenord",
+            description: "Lösenordet måste vara minst 7 tecken",
+            variant: "destructive"
+          });
+          setLoading(false);
+          return;
+        }
+
+        // Validera att lösenorden matchar
+        const currentConfirmPassword = role === 'job_seeker' ? jobSeekerData.confirmPassword : employerData.confirmPassword;
+        if (currentPassword !== currentConfirmPassword) {
+          toast({
+            title: "Lösenorden matchar inte",
+            description: "Vänligen kontrollera att lösenorden är identiska",
             variant: "destructive"
           });
           setLoading(false);
