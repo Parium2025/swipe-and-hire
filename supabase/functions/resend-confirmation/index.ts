@@ -347,7 +347,7 @@ const handler = async (req: Request): Promise<Response> => {
                </table>
                <p style="margin: 20px 0 0 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
                  Tack för att du väljer Parium för er rekrytering.<br>
-                 Tillsammans skapar vi framtidens arbetsliv.
+                 Tillsammans skapar vi framtidens arbetsliv!
                </p>
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
                 <tr>
