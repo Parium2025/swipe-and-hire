@@ -155,14 +155,14 @@ const getEmployerTemplate = (firstName: string, confirmationUrl: string, company
                 Tack för att du väljer Parium för er rekrytering.<br>
                 Tillsammans skapar vi framtidens arbetsliv.
               </p>
-              <div style="margin: 30px 0; padding: 20px; background-color: #f8f9fa; border-radius: 5px;">
-                <p style="color: #6B7280; font-size: 14px; margin: 0 0 10px 0;">
-                  Fungerar inte knappen? Kopiera länken nedan:
-                </p>
-                <p style="color: #1E3A8A; font-size: 14px; word-break: break-all; margin: 0;">
-                  ${confirmationUrl}
-                </p>
-              </div>
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
+                <tr>
+                  <td style="background-color: #F9FAFB; padding: 20px; border-radius: 8px;">
+                    <p style="margin: 0 0 12px 0; font-size: 14px; color: #6B7280; text-align: center;">Fungerar inte knappen? Kopiera länken nedan:</p>
+                    <p style="margin: 0; font-size: 12px; color: #1E3A8A; word-break: break-all; text-align: center;">${confirmationUrl}</p>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
           <tr>
