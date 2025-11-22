@@ -333,9 +333,9 @@ const handler = async (req: Request): Promise<Response> => {
                     <td style="color: #111827; font-size: 16px; line-height: 24px; text-align: left;">Ett modernt gränssnitt anpassat för era krav</td>
                   </tr>
                 </table
-              <p style="margin: 20px 0 10px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
-                Bekräfta ditt konto för att komma igång direkt.
-              </p>
+               <p style="margin: 20px 0 24px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+                 Bekräfta ditt konto för att komma igång direkt.
+               </p>
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
                 <tr>
                   <td align="center" style="padding: 0;">
