@@ -392,17 +392,20 @@ const handler = async (req: Request): Promise<Response> => {
                <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px; font-weight: bold;">
                  Med Parium kan du:
                </p>
-              <div style="margin: 10px auto 30px auto; max-width: 450px;">
-                <div style="margin-bottom: 12px; padding-left: 15px; text-indent: -15px;">
-                  <span style="font-size: 16px; color: #111827; line-height: 24px;">• Hitta jobb som verkligen matchar din profil</span>
-                </div>
-                <div style="margin-bottom: 12px; padding-left: 15px; text-indent: -15px;">
-                  <span style="font-size: 16px; color: #111827; line-height: 24px;">• Swipea dig igenom alternativ och ansöka på några sekunder</span>
-                </div>
-                <div style="margin-bottom: 12px; padding-left: 15px; text-indent: -15px;">
-                  <span style="font-size: 16px; color: #111827; line-height: 24px;">• Spara tid med verktyg som gör processen både enkel och effektiv</span>
-                </div>
-              </div>
+              <table border="0" cellpadding="0" cellspacing="0" style="margin: 10px auto 30px auto; max-width: 450px;">
+                <tr>
+                  <td style="vertical-align: top; padding-right: 8px; color: #111827; font-size: 16px; line-height: 24px;">•</td>
+                  <td style="color: #111827; font-size: 16px; line-height: 24px; padding-bottom: 12px;">Hitta jobb som verkligen matchar din profil</td>
+                </tr>
+                <tr>
+                  <td style="vertical-align: top; padding-right: 8px; color: #111827; font-size: 16px; line-height: 24px;">•</td>
+                  <td style="color: #111827; font-size: 16px; line-height: 24px; padding-bottom: 12px;">Swipea dig igenom alternativ och ansöka på några sekunder</td>
+                </tr>
+                <tr>
+                  <td style="vertical-align: top; padding-right: 8px; color: #111827; font-size: 16px; line-height: 24px;">•</td>
+                  <td style="color: #111827; font-size: 16px; line-height: 24px;">Spara tid med verktyg som gör processen både enkel och effektiv</td>
+                </tr>
+              </table>
               <p style="margin: 20px 0 10px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
                 Bekräfta ditt konto för att komma igång!
               </p>
