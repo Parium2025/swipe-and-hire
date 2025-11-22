@@ -483,7 +483,7 @@ const AuthDesktop = ({
   if (isPasswordReset) {
     return (
       <div 
-        className="flex items-center justify-center p-4 auth-dark" 
+        className="flex items-center justify-center min-h-screen p-4 auth-dark" 
       >
         <Card className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="text-center">
