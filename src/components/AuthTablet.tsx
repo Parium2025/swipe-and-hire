@@ -125,6 +125,13 @@ const AuthTablet = ({
 
   // Handle email input with suggestions
   const handleEmailChange = (value: string) => {
+    // VIKTIGT: Om användaren ändrar e-postadressen EFTER registrering,
+    // återställ formuläret så "Registrera"-knappen visas igen
+    if (hasRegistered) {
+      setHasRegistered(false);
+      setShowResend(false);
+    }
+    
     if (role === 'job_seeker') {
       setJobSeekerData(prev => ({ ...prev, email: value }));
     } else {
