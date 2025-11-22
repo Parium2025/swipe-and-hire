@@ -37,7 +37,7 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(null, {
         status: 302,
         headers: {
-          "Location": "https://swipe-and-hire.lovable.app/auth?reset=true&expired=true",
+          "Location": "https://parium.se/auth?reset=true&expired=true",
           ...corsHeaders,
         },
       });
@@ -57,7 +57,7 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(null, {
         status: 302,
         headers: {
-          "Location": "https://swipe-and-hire.lovable.app/auth?reset=true&expired=true",
+          "Location": "https://parium.se/auth?reset=true&expired=true",
           ...corsHeaders,
         },
       });
@@ -78,7 +78,7 @@ const handler = async (req: Request): Promise<Response> => {
         
         // Om token är giltig, redirect till auth med token
         if (!error && data) {
-          let redirectUrl = "https://swipe-and-hire.lovable.app/auth?reset=true";
+          let redirectUrl = "https://parium.se/auth?reset=true";
           const paramName = url.searchParams.get('token_hash') ? 'token_hash' : 'token';
           redirectUrl += `&${paramName}=${token}`;
           if (type) redirectUrl += `&type=${type}`;
@@ -98,7 +98,7 @@ const handler = async (req: Request): Promise<Response> => {
         return new Response(null, {
           status: 302,
           headers: {
-            "Location": "https://swipe-and-hire.lovable.app/auth?reset=true&token_used=true",
+            "Location": "https://parium.se/auth?reset=true&token_used=true",
             ...corsHeaders,
           },
         });
@@ -106,7 +106,7 @@ const handler = async (req: Request): Promise<Response> => {
       } catch (verifyError) {
         console.error('Token verification error:', verifyError);
         // Fallback - redirect med token och låt auth sidan hantera
-        let redirectUrl = "https://swipe-and-hire.lovable.app/auth?reset=true";
+        let redirectUrl = "https://parium.se/auth?reset=true";
         const paramName = url.searchParams.get('token_hash') ? 'token_hash' : 'token';
         redirectUrl += `&${paramName}=${token}`;
         if (type) redirectUrl += `&type=${type}`;
@@ -123,7 +123,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, {
       status: 302,
       headers: {
-        "Location": "https://swipe-and-hire.lovable.app/auth?reset=true",
+        "Location": "https://parium.se/auth?reset=true",
         ...corsHeaders,
       },
     });
@@ -135,7 +135,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, {
       status: 302,
       headers: {
-        "Location": "https://swipe-and-hire.lovable.app/auth?reset=true&expired=true",
+        "Location": "https://parium.se/auth?reset=true&expired=true",
         ...corsHeaders,
       },
     });
