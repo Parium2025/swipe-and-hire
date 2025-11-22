@@ -39,23 +39,27 @@ const getJobSeekerTemplate = (firstName: string, confirmationUrl: string) => `
          Hej ${firstName}!
        </p>
        <p style="color: #333333; margin: 0 0 20px 0; font-size: 18px; line-height: 1.6; text-align: center;">
-         Du har precis klivit in i nästa generation av jobbsök.<br>
-         Med Parium hittar du rätt möjligheter snabbare än någonsin – genom en upplevelse som känns både enkel, smart och personlig.
+         Välkommen till Parium — nästa steg i ett smartare jobbsökande.<br>
+         Genom vår plattform får du tillgång till moderna verktyg som effektiviserar varje steg i din process.
+       </p>
+       
+       <p style="color: #333333; margin: 20px 0 10px 0; font-size: 16px; font-weight: bold; text-align: center;">
+         Med Parium kan du:
        </p>
       
        <!-- Benefits list -->
-       <div style="margin: 30px 0; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto;">
+       <div style="margin: 10px 0 30px 0; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto;">
          <div style="margin-bottom: 15px; text-align: left;">
            <span style="color: #1a237e; font-size: 18px; margin-right: 10px; line-height: 1.4;">•</span>
-           <span style="color: #333333; font-size: 16px; line-height: 1.4;">Matcha med jobb som verkligen passar dig</span>
+           <span style="color: #333333; font-size: 16px; line-height: 1.4;">Hitta jobb som verkligen matchar din profil</span>
          </div>
          <div style="margin-bottom: 15px; text-align: left;">
            <span style="color: #1a237e; font-size: 18px; margin-right: 10px; line-height: 1.4;">•</span>
-           <span style="color: #333333; font-size: 16px; line-height: 1.4;">Swipea, ansök och gå vidare på sekunder</span>
+           <span style="color: #333333; font-size: 16px; line-height: 1.4;">Swipea dig igenom alternativ och ansöka på några sekunder</span>
          </div>
          <div style="margin-bottom: 30px; text-align: left;">
            <span style="color: #1a237e; font-size: 18px; margin-right: 10px; line-height: 1.4;">•</span>
-           <span style="color: #333333; font-size: 16px; line-height: 1.4;">Spara tid med moderna, effektiva verktyg</span>
+           <span style="color: #333333; font-size: 16px; line-height: 1.4;">Spara tid med verktyg som gör processen både enkel och effektiv</span>
          </div>
        </div>
       
@@ -72,8 +76,8 @@ const getJobSeekerTemplate = (firstName: string, confirmationUrl: string) => `
       </table>
       
       <p style="color: #666666; margin: 20px 0 0 0; font-size: 16px; line-height: 1.6; text-align: center;">
-        Tack för att du är med från början.<br>
-        Det här kan vara starten på något riktigt bra.
+        Tack för ditt förtroende.<br>
+        Det här kan bli början på något riktigt bra.
       </p>
       
       <!-- Alternative link -->
