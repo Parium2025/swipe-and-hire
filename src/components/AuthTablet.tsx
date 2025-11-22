@@ -514,6 +514,8 @@ const AuthTablet = ({
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
+                  onPaste={(e) => e.preventDefault()}
+                  onCopy={(e) => e.preventDefault()}
                   required
                   className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
                 />
@@ -1158,6 +1160,8 @@ const AuthTablet = ({
                               id="confirmPassword"
                               type={showPassword ? 'text' : 'password'}
                               value={role === 'job_seeker' ? jobSeekerData.confirmPassword : employerData.confirmPassword}
+                              onPaste={(e) => e.preventDefault()}
+                              onCopy={(e) => e.preventDefault()}
                               onChange={(e) => {
                                 if (role === 'job_seeker') {
                                   setJobSeekerData(prev => ({ ...prev, confirmPassword: e.target.value }));
