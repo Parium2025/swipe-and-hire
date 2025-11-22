@@ -98,19 +98,19 @@ export function Combobox({
             {filteredOptions.length === 0 && allowCustomValue && searchValue.trim() ? (
               <CommandEmpty>
                 <div className="flex flex-col items-center gap-2 p-2">
-                  <span>{emptyMessage}</span>
+                  <span className="text-white">{emptyMessage}</span>
                   <Button 
                     variant="ghost" 
                     size="sm"
                     onClick={() => handleSelect(searchValue.trim())}
-                    className="text-primary hover:text-primary/80"
+                    className="text-white hover:text-white/80"
                   >
                     Använd "{searchValue.trim()}"
                   </Button>
                 </div>
               </CommandEmpty>
             ) : (
-              <CommandEmpty>{emptyMessage}</CommandEmpty>
+              <CommandEmpty className="text-white">{emptyMessage}</CommandEmpty>
             )}
             <CommandGroup>
               {filteredOptions.map((option) => (
