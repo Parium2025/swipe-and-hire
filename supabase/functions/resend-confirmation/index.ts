@@ -165,15 +165,18 @@ const handler = async (req: Request): Promise<Response> => {
                     <td style="padding: 40px 30px;">
                       <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">Hej ${firstName}!</p>
                       <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
-                        Du har precis klivit in i nästa generation av jobbsök.<br>
-                        Med Parium hittar du rätt möjligheter snabbare än någonsin – genom en upplevelse som känns både enkel, smart och personlig.
+                        Välkommen till Parium — nästa steg i ett smartare jobbsökande.<br>
+                        Genom vår plattform får du tillgång till moderna verktyg som effektiviserar varje steg i din process.
                       </p>
-                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
+                      <p style="margin: 0 0 12px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center; line-height: 24px; font-weight: bold;">
+                        Med Parium kan du:
+                      </p>
+                      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 12px;">
                         <tr>
                            <td style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: left;">
-                             <p style="margin: 0 0 12px 0; text-align: left;">• Matcha med jobb som verkligen passar dig</p>
-                             <p style="margin: 0 0 12px 0; text-align: left;">• Swipea, ansök och gå vidare på sekunder</p>
-                             <p style="margin: 0; text-align: left;">• Spara tid med moderna, effektiva verktyg</p>
+                             <p style="margin: 0 0 12px 0; text-align: left;">• Hitta jobb som verkligen matchar din profil</p>
+                             <p style="margin: 0 0 12px 0; text-align: left;">• Swipea dig igenom alternativ och ansöka på några sekunder</p>
+                             <p style="margin: 0; text-align: left;">• Spara tid med verktyg som gör processen både enkel och effektiv</p>
                           </td>
                         </tr>
                       </table>
@@ -380,15 +383,18 @@ const handler = async (req: Request): Promise<Response> => {
                  ${greet}
                </p>
                <p style="margin: 0 0 24px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
-                 Du har precis klivit in i nästa generation av jobbsök.<br>
-                 Med Parium hittar du rätt möjligheter snabbare än någonsin – genom en upplevelse som känns både enkel, smart och personlig.
+                 Välkommen till Parium — nästa steg i ett smartare jobbsökande.<br>
+                 Genom vår plattform får du tillgång till moderna verktyg som effektiviserar varje steg i din process.
                </p>
-              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
+               <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px; font-weight: bold;">
+                 Med Parium kan du:
+               </p>
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 12px;">
                  <tr>
                    <td style="font-size: 16px; color: #111827; text-align: left;">
-                     <p style="margin: 0 0 12px 0; text-align: left;">• Matcha med jobb som verkligen passar dig</p>
-                     <p style="margin: 0 0 12px 0; text-align: left;">• Swipea, ansök och gå vidare på sekunder</p>
-                     <p style="margin: 0; text-align: left;">• Spara tid med moderna, effektiva verktyg</p>
+                     <p style="margin: 0 0 12px 0; text-align: left;">• Hitta jobb som verkligen matchar din profil</p>
+                     <p style="margin: 0 0 12px 0; text-align: left;">• Swipea dig igenom alternativ och ansöka på några sekunder</p>
+                     <p style="margin: 0; text-align: left;">• Spara tid med verktyg som gör processen både enkel och effektiv</p>
                   </td>
                 </tr>
               </table>
