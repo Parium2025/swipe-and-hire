@@ -716,7 +716,7 @@ const AuthMobile = ({
                   <div className="relative">
                     {/* Login form - always in DOM, overlay swap */}
                     <div className={isLogin ? 'relative opacity-100 pointer-events-auto transition-none' : 'absolute inset-0 opacity-0 pointer-events-none transition-none'}>
-                    <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
+                    <form key="login-form" onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
                   <div className="relative overflow-anchor-none">
                         <Label htmlFor="email" className="text-white">
                           <Mail className="h-4 w-4 inline mr-2" />
@@ -833,7 +833,7 @@ const AuthMobile = ({
 
                    {/* Register form - always in DOM, overlay swap */}
                     <div className={isLogin ? 'absolute inset-0 opacity-0 pointer-events-none transition-none' : 'relative opacity-100 pointer-events-auto transition-none'}>
-                       <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
+                       <form key="register-form" onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
                        {/* User Role Selection - First */}
                        <div>
                          <Label className="text-white">Jag är:</Label>
@@ -1127,6 +1127,7 @@ const AuthMobile = ({
                                    onChange={(e) => setEmployerData(prev => ({ ...prev, address: e.target.value }))}
                                    placeholder="Ange din adress"
                                    className="mt-1 bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60 h-11 sm:h-9"
+                                   autoComplete="off"
                                    required
                                  />
                               </div>
