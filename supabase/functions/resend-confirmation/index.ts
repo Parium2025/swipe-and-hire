@@ -393,9 +393,15 @@ const handler = async (req: Request): Promise<Response> => {
                  Med Parium kan du:
                </p>
               <div style="margin: 10px auto 30px auto; max-width: 450px;">
-                <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">• Hitta jobb som verkligen matchar din profil</p>
-                <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">• Swipea dig igenom alternativ och ansöka på några sekunder</p>
-                <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">• Spara tid med verktyg som gör processen både enkel och&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;effektiv</p>
+                <div style="margin-bottom: 12px; padding-left: 15px; text-indent: -15px;">
+                  <span style="font-size: 16px; color: #111827; line-height: 24px;">• Hitta jobb som verkligen matchar din profil</span>
+                </div>
+                <div style="margin-bottom: 12px; padding-left: 15px; text-indent: -15px;">
+                  <span style="font-size: 16px; color: #111827; line-height: 24px;">• Swipea dig igenom alternativ och ansöka på några sekunder</span>
+                </div>
+                <div style="margin-bottom: 12px; padding-left: 15px; text-indent: -15px;">
+                  <span style="font-size: 16px; color: #111827; line-height: 24px;">• Spara tid med verktyg som gör processen både enkel och effektiv</span>
+                </div>
               </div>
               <p style="margin: 20px 0 10px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
                 Bekräfta ditt konto för att komma igång!
