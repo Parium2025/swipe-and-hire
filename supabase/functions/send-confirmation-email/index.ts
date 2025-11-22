@@ -136,25 +136,25 @@ const getEmployerTemplate = (firstName: string, confirmationUrl: string, company
     </div>
     
      <!-- Content -->
-     <div style="padding: 40px 30px; text-align: left;">
+     <div style="padding: 40px 30px;">
        <p style="color: #333333; margin: 0 0 20px 0; font-size: 18px; line-height: 1.6; text-align: center;">
          Hej ${firstName}!
        </p>
-       <p style="color: #333333; margin: 0 0 20px 0; font-size: 18px; line-height: 1.6; text-align: left;">
+       <p style="color: #333333; margin: 0 0 30px 0; font-size: 18px; line-height: 1.6; text-align: center;">
           Välkommen till Parium - plattformen där <strong>${companyName}</strong> hittar nästa generations talang/talanger. Vi hjälper er att rekrytera enklare, snabbare och träffsäkrare.
         </p>
         
         <!-- Benefits list for employers -->
-        <div style="margin: 30px 0; text-align: left; max-width: 450px; margin-left: auto; margin-right: auto;">
-           <div style="margin-bottom: 15px; text-align: left;">
+        <div style="margin: 30px 0; text-align: center; max-width: 450px; margin-left: auto; margin-right: auto;">
+           <div style="margin-bottom: 15px; text-align: center;">
              <span style="color: #1a237e; font-size: 18px; margin-right: 10px; line-height: 1.4;">•</span>
              <span style="color: #333333; font-size: 16px; line-height: 1.4;">En smidig rekryteringsprocess från start till mål</span>
            </div>
-           <div style="margin-bottom: 15px; text-align: left;">
+           <div style="margin-bottom: 15px; text-align: center;">
              <span style="color: #1a237e; font-size: 18px; margin-right: 10px; line-height: 1.4;">•</span>
              <span style="color: #333333; font-size: 16px; line-height: 1.4;">Direktkontakt med kandidater</span>
            </div>
-           <div style="margin-bottom: 30px; text-align: left;">
+           <div style="margin-bottom: 30px; text-align: center;">
              <span style="color: #1a237e; font-size: 18px; margin-right: 10px; line-height: 1.4;">•</span>
              <span style="color: #333333; font-size: 16px; line-height: 1.4;">Ett modernt gränssnitt anpassat för era krav</span>
            </div>
