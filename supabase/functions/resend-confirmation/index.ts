@@ -382,31 +382,31 @@ const handler = async (req: Request): Promise<Response> => {
           </tr>
           <tr>
             <td style="padding: 40px 30px;">
-               <p style="margin: 0 0 24px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+               <p style="margin: 0 0 24px 0; font-size: 16px; color: #333333; text-align: center; line-height: 1.6;">
                  ${greet}
                </p>
-               <p style="margin: 0 0 24px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+               <p style="margin: 0 0 24px 0; font-size: 16px; color: #333333; text-align: center; line-height: 1.6;">
                  Välkommen till Parium — nästa steg i ett smartare jobbsökande.<br>
                  Genom vår plattform får du tillgång till moderna verktyg som effektiviserar varje steg i din process.
                </p>
-               <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px; font-weight: bold;">
+               <p style="margin: 0 0 12px 0; font-size: 16px; color: #333333; text-align: center; line-height: 1.6; font-weight: bold;">
                  Med Parium kan du:
                </p>
               <table border="0" cellpadding="0" cellspacing="0" style="margin: 10px auto 30px auto; max-width: 450px;">
                 <tr>
-                  <td style="vertical-align: top; padding-right: 8px; color: #111827; font-size: 16px; line-height: 24px;">•</td>
-                  <td style="color: #111827; font-size: 16px; line-height: 24px; padding-bottom: 12px;">Hitta jobb som verkligen matchar din profil</td>
+                  <td style="vertical-align: top; padding-right: 8px; color: #333333; font-size: 16px; line-height: 1.6;">•</td>
+                  <td style="color: #333333; font-size: 16px; line-height: 1.6; padding-bottom: 12px;">Hitta jobb som verkligen matchar din profil</td>
                 </tr>
                 <tr>
-                  <td style="vertical-align: top; padding-right: 8px; color: #111827; font-size: 16px; line-height: 24px;">•</td>
-                  <td style="color: #111827; font-size: 16px; line-height: 24px; padding-bottom: 12px;">Swipea dig igenom alternativ och ansöka på några sekunder</td>
+                  <td style="vertical-align: top; padding-right: 8px; color: #333333; font-size: 16px; line-height: 1.6;">•</td>
+                  <td style="color: #333333; font-size: 16px; line-height: 1.6; padding-bottom: 12px;">Swipea dig igenom alternativ och ansöka på några sekunder</td>
                 </tr>
                 <tr>
-                  <td style="vertical-align: top; padding-right: 8px; color: #111827; font-size: 16px; line-height: 24px;">•</td>
-                  <td style="color: #111827; font-size: 16px; line-height: 24px;">Spara tid med verktyg som gör processen både enkel och effektiv</td>
+                  <td style="vertical-align: top; padding-right: 8px; color: #333333; font-size: 16px; line-height: 1.6;">•</td>
+                  <td style="color: #333333; font-size: 16px; line-height: 1.6;">Spara tid med verktyg som gör processen både enkel och effektiv</td>
                 </tr>
               </table>
-              <p style="margin: 20px 0 10px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+              <p style="margin: 20px 0 10px 0; font-size: 16px; color: #333333; text-align: center; line-height: 1.6;">
                 Bekräfta ditt konto för att komma igång!
               </p>
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
@@ -416,7 +416,7 @@ const handler = async (req: Request): Promise<Response> => {
                   </td>
                 </tr>
               </table>
-              <p style="margin: 30px 0 0 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+              <p style="margin: 30px 0 0 0; font-size: 16px; color: #333333; text-align: center; line-height: 1.6;">
                 Tack för ditt förtroende.<br>
                 Det här kan bli början på något riktigt bra!
               </p>
