@@ -482,54 +482,54 @@ const AuthDesktop = ({
 
   if (isPasswordReset) {
     return (
-      <div 
-        className="flex items-center justify-center min-h-screen p-4 auth-dark" 
-      >
-        <Card className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20">
-          <CardHeader className="text-center">
-            <CardTitle className="text-white">Nytt lösenord</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handlePasswordReset} className="space-y-4">
-              <div>
-                <Label htmlFor="newPassword" className="text-white">Nytt lösenord</Label>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  required
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                />
-              </div>
-              <div>
-                <Label htmlFor="confirmPassword" className="text-white">Bekräfta lösenord</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  onPaste={(e) => e.preventDefault()}
-                  onCopy={(e) => e.preventDefault()}
-                  required
-                  className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
-                />
-              </div>
-              <Button type="submit" className="w-full text-white transition-all duration-300 md:hover:bg-primary/90 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white" disabled={loading}>
-                {loading ? "Sparar..." : "Spara nytt lösenord"}
-              </Button>
-              <div className="text-center">
-                <button
-                  type="button"
-                  onClick={() => (onBackToLogin ? onBackToLogin() : handleBackToLogin())}
-                  className="text-sm text-white hover:underline"
-                >
-                  Tillbaka till inloggning
-                </button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+      <div className="relative min-h-screen auth-dark">
+        <div className="absolute inset-0 flex items-center justify-center p-4">
+          <Card className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20">
+            <CardHeader className="text-center">
+              <CardTitle className="text-white">Nytt lösenord</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handlePasswordReset} className="space-y-4">
+                <div>
+                  <Label htmlFor="newPassword" className="text-white">Nytt lösenord</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                    className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="confirmPassword" className="text-white">Bekräfta lösenord</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onPaste={(e) => e.preventDefault()}
+                    onCopy={(e) => e.preventDefault()}
+                    required
+                    className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                  />
+                </div>
+                <Button type="submit" className="w-full text-white transition-all duration-300 md:hover:bg-primary/90 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white" disabled={loading}>
+                  {loading ? "Sparar..." : "Spara nytt lösenord"}
+                </Button>
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => (onBackToLogin ? onBackToLogin() : handleBackToLogin())}
+                    className="text-sm text-white hover:underline"
+                  >
+                    Tillbaka till inloggning
+                  </button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
