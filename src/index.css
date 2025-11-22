@@ -29,9 +29,9 @@ body {
   overscroll-behavior: none;
   overscroll-behavior-y: none;
   -webkit-overflow-scrolling: touch;
-  /* Mobilversion - ljusare bakgrund som matchar korten */
-  background: rgba(255, 255, 255, 0.05);
-  background-color: hsl(215 100% 15%);
+  /* Statisk bakgrund - samma mörka färg som html-elementet */
+  background: var(--gradient-parium);
+  background-color: hsl(215 100% 12%);
   min-height: 100dvh;
 }
 
@@ -56,13 +56,6 @@ body {
 [data-sidebar="sidebar"] :is(button, a)::-moz-focus-inner { border: 0 !important; }
 [data-sidebar="sidebar"] :is(button, a)::-webkit-focus-inner { border: 0 !important; padding: 0 !important; }
 
-@media (min-width: 768px) {
-  body {
-    /* Desktop - återgå till original mörk bakgrund */
-    background: var(--gradient-parium);
-    background-color: hsl(215 100% 12%);
-  }
-}
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
