@@ -332,7 +332,19 @@ const handler = async (req: Request): Promise<Response> => {
                     <td style="vertical-align: top; padding-right: 8px; color: #111827; font-size: 16px; line-height: 24px;">•</td>
                     <td style="color: #111827; font-size: 16px; line-height: 24px; text-align: left;">Ett modernt gränssnitt anpassat för era krav</td>
                   </tr>
-                </table
+                 </table
+               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
+                 <tr>
+                   <td align="center" style="padding: 0;">
+                     <p style="margin: 0 0 16px 0; font-size: 16px; color: #111827; line-height: 24px; text-align: center; max-width: 280px;">
+                       Bekräfta ditt konto för att komma igång direkt.
+                     </p>
+                     <a href="${confirmationUrl}" style="background-color: #1E3A8A; border-radius: 10px; color: #ffffff; display: inline-block; font-size: 16px; font-weight: bold; line-height: 48px; text-align: center; text-decoration: none; width: 280px; -webkit-text-size-adjust: none;">
+                       Bekräfta företagskonto
+                     </a>
+                   </td>
+                 </tr>
+               </table
                <p style="margin: 20px 0 24px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
                  Bekräfta ditt konto för att komma igång direkt.
                </p>
