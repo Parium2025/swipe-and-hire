@@ -13,6 +13,7 @@ interface ConfirmationEmailRequest {
   role: 'job_seeker' | 'employer';
   first_name: string;
   confirmation_url: string;
+  company_name?: string;
 }
 
 const getJobSeekerTemplate = (firstName: string, confirmationUrl: string) => `
@@ -116,7 +117,7 @@ const getJobSeekerTemplate = (firstName: string, confirmationUrl: string) => `
 </html>
 `;
 
-const getEmployerTemplate = (firstName: string, confirmationUrl: string) => `
+const getEmployerTemplate = (firstName: string, confirmationUrl: string, companyName: string = 'ert företag') => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -140,7 +141,7 @@ const getEmployerTemplate = (firstName: string, confirmationUrl: string) => `
          Hej ${firstName}!
        </p>
        <p style="color: #333333; margin: 0 0 20px 0; font-size: 18px; line-height: 1.6; text-align: left;">
-          Välkommen till Parium - plattformen där <strong>RS6</strong> hittar nästa generations talang/talanger. Vi hjälper er att rekrytera enklare, snabbare och träffsäkrare.
+          Välkommen till Parium - plattformen där <strong>${companyName}</strong> hittar nästa generations talang/talanger. Vi hjälper er att rekrytera enklare, snabbare och träffsäkrare.
         </p>
         
         <!-- Benefits list for employers -->
@@ -216,13 +217,13 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, role, first_name, confirmation_url }: ConfirmationEmailRequest = await req.json();
+    const { email, role, first_name, confirmation_url, company_name }: ConfirmationEmailRequest = await req.json();
 
     console.log(`Sending confirmation email to ${email} with role ${role}`);
 
     // Choose the correct template based on role
     const emailHtml = role === 'employer' 
-      ? getEmployerTemplate(first_name, confirmation_url)
+      ? getEmployerTemplate(first_name, confirmation_url, company_name || 'ert företag')
       : getJobSeekerTemplate(first_name, confirmation_url);
 
     const subject = role === 'employer' 
