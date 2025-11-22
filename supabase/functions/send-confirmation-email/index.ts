@@ -48,17 +48,20 @@ const getJobSeekerTemplate = (firstName: string, confirmationUrl: string) => `
       </p>
       
       <!-- Benefits list -->
-      <div style="margin: 10px auto 30px auto; text-align: left; max-width: 450px;">
-        <div style="margin-bottom: 12px; padding-left: 15px; text-indent: -15px;">
-          <span style="color: #333333; font-size: 16px; line-height: 1.6;">• Hitta jobb som verkligen matchar din profil</span>
-        </div>
-        <div style="margin-bottom: 12px; padding-left: 15px; text-indent: -15px;">
-          <span style="color: #333333; font-size: 16px; line-height: 1.6;">• Swipea dig igenom alternativ och ansöka på några sekunder</span>
-        </div>
-        <div style="margin-bottom: 12px; padding-left: 15px; text-indent: -15px;">
-          <span style="color: #333333; font-size: 16px; line-height: 1.6;">• Spara tid med verktyg som gör processen både enkel och effektiv</span>
-        </div>
-      </div>
+      <table border="0" cellpadding="0" cellspacing="0" style="margin: 10px auto 30px auto; max-width: 450px;">
+        <tr>
+          <td style="vertical-align: top; padding-right: 8px; color: #333333; font-size: 16px; line-height: 1.6;">•</td>
+          <td style="color: #333333; font-size: 16px; line-height: 1.6; padding-bottom: 12px;">Hitta jobb som verkligen matchar din profil</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; padding-right: 8px; color: #333333; font-size: 16px; line-height: 1.6;">•</td>
+          <td style="color: #333333; font-size: 16px; line-height: 1.6; padding-bottom: 12px;">Swipea dig igenom alternativ och ansöka på några sekunder</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; padding-right: 8px; color: #333333; font-size: 16px; line-height: 1.6;">•</td>
+          <td style="color: #333333; font-size: 16px; line-height: 1.6;">Spara tid med verktyg som gör processen både enkel och effektiv</td>
+        </tr>
+      </table>
       
       <p style="color: #333333; margin: 20px 0 10px 0; font-size: 16px; line-height: 1.6; text-align: center;">
         Bekräfta ditt konto för att komma igång!
