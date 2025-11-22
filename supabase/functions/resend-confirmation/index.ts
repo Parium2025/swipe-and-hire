@@ -319,11 +319,20 @@ const handler = async (req: Request): Promise<Response> => {
                <p style="margin: 0 0 30px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
                   Välkommen till Parium - plattformen där <strong>${companyName}</strong> hittar nästa generations talang/talanger. Vi hjälper er att rekrytera enklare, snabbare och träffsäkrare.
                 </p>
-                <div style="margin: 30px auto; max-width: 450px; text-align: center;">
-                  <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">• En smidig rekryteringsprocess från start till mål</p>
-                  <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">• Direktkontakt med kandidater</p>
-                  <p style="margin: 0 0 30px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">• Ett modernt gränssnitt anpassat för era krav</p>
-                </div>
+                <table border="0" cellpadding="0" cellspacing="0" style="margin: 10px auto 30px auto; max-width: 450px;">
+                  <tr>
+                    <td style="vertical-align: top; padding-right: 8px; color: #111827; font-size: 16px; line-height: 24px;">•</td>
+                    <td style="color: #111827; font-size: 16px; line-height: 24px; padding-bottom: 12px; text-align: left;">En smidig rekryteringsprocess från start till mål</td>
+                  </tr>
+                  <tr>
+                    <td style="vertical-align: top; padding-right: 8px; color: #111827; font-size: 16px; line-height: 24px;">•</td>
+                    <td style="color: #111827; font-size: 16px; line-height: 24px; padding-bottom: 12px; text-align: left;">Direktkontakt med kandidater</td>
+                  </tr>
+                  <tr>
+                    <td style="vertical-align: top; padding-right: 8px; color: #111827; font-size: 16px; line-height: 24px;">•</td>
+                    <td style="color: #111827; font-size: 16px; line-height: 24px; text-align: left;">Ett modernt gränssnitt anpassat för era krav</td>
+                  </tr>
+                </table
               <p style="margin: 20px 0 10px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
                 Bekräfta ditt konto för att komma igång direkt.
               </p>
