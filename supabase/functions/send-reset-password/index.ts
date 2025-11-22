@@ -66,10 +66,13 @@ const handler = async (req: Request): Promise<Response> => {
         
         if (token || tokenHash) {
           // Bygg vår egen länk som går via reset-redirect med issued timestamp
-          const redirectUrl = Deno.env.get("REDIRECT_URL") || "https://parium.se";
+          const redirectUrl = Deno.env.get("REDIRECT_URL") || "https://parium-ab.lovable.app";
           const tokenParam = token ? `token=${token}` : `token_hash=${tokenHash}`;
           resetUrl = `${redirectUrl}/reset-redirect?${tokenParam}&type=recovery&issued=${issued}`;
           console.log(`✅ CUSTOM RESET URL: ${resetUrl}`);
+          console.log(`📍 Using REDIRECT_URL: ${redirectUrl}`);
+        } else {
+          console.error('❌ No token or token_hash found in Supabase link');
         }
       }
     } catch (linkError) {
