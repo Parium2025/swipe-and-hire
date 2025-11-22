@@ -483,12 +483,7 @@ const AuthDesktop = ({
   if (isPasswordReset) {
     return (
       <div 
-        className="flex items-center justify-center p-4 auth-dark smooth-scroll touch-pan" 
-        style={{ 
-          WebkitOverflowScrolling: 'touch',
-          minHeight: 'calc(100dvh + env(safe-area-inset-bottom, 0px))',
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)'
-        }}
+        className="flex items-center justify-center p-4 auth-dark" 
       >
         <Card className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader className="text-center">
@@ -541,12 +536,7 @@ const AuthDesktop = ({
 
   return (
     <div 
-      className="flex flex-col relative auth-dark smooth-scroll touch-pan" 
-      style={{ 
-        WebkitOverflowScrolling: 'touch',
-        minHeight: 'calc(100dvh + env(safe-area-inset-bottom, 0px))',
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)'
-      }}
+      className="flex flex-col relative auth-dark" 
     >
       {/* Static animated background - won't re-render */}
       <div className="fixed inset-0 pointer-events-none z-0" style={{ paddingTop: 'var(--pwa-top-offset, 0px)' }}>
