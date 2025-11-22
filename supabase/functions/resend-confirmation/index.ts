@@ -164,13 +164,16 @@ const handler = async (req: Request): Promise<Response> => {
                   <tr>
                     <td style="padding: 40px 30px;">
                       <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">Hej ${firstName}!</p>
-                      <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">Du har just klivit in i nästa generation av jobbsök. Ditt konto är nu aktivt och du kan logga in direkt!</p>
+                      <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+                        Du har precis klivit in i nästa generation av jobbsök.<br>
+                        Med Parium hittar du rätt möjligheter snabbare än någonsin – genom en upplevelse som känns både enkel, smart och personlig.
+                      </p>
                       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
                         <tr>
                            <td style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: left;">
-                             <p style="margin: 0 0 12px 0; text-align: left;">• Matcha med jobb som passar dig</p>
+                             <p style="margin: 0 0 12px 0; text-align: left;">• Matcha med jobb som verkligen passar dig</p>
                              <p style="margin: 0 0 12px 0; text-align: left;">• Swipea, ansök och gå vidare på sekunder</p>
-                             <p style="margin: 0; text-align: left;">• Spara tid med smarta och effektiva verktyg</p>
+                             <p style="margin: 0; text-align: left;">• Spara tid med moderna, effektiva verktyg</p>
                           </td>
                         </tr>
                       </table>
@@ -376,15 +379,16 @@ const handler = async (req: Request): Promise<Response> => {
                <p style="margin: 0 0 24px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
                  ${greet}
                </p>
-               <p style="margin: 0 0 24px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">
-                 Du har just klivit in i nästa generation av jobbsök. Med Parium swipar du dig fram till möjligheter som faktiskt kan förändra din vardag.
+               <p style="margin: 0 0 24px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
+                 Du har precis klivit in i nästa generation av jobbsök.<br>
+                 Med Parium hittar du rätt möjligheter snabbare än någonsin – genom en upplevelse som känns både enkel, smart och personlig.
                </p>
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
                  <tr>
                    <td style="font-size: 16px; color: #111827; text-align: left;">
-                     <p style="margin: 0 0 12px 0; text-align: left;">• Matcha med jobb som passar dig</p>
+                     <p style="margin: 0 0 12px 0; text-align: left;">• Matcha med jobb som verkligen passar dig</p>
                      <p style="margin: 0 0 12px 0; text-align: left;">• Swipea, ansök och gå vidare på sekunder</p>
-                     <p style="margin: 0; text-align: left;">• Spara tid med smarta och effektiva verktyg</p>
+                     <p style="margin: 0; text-align: left;">• Spara tid med moderna, effektiva verktyg</p>
                   </td>
                 </tr>
               </table>
