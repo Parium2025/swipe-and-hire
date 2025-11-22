@@ -45,7 +45,6 @@ const handler = async (req: Request): Promise<Response> => {
     // Generera issued timestamp
     const issued = Date.now();
     
-    // Använd Supabase's direkt länk för bättre kompatibilitet
     // SECURITY: Always return success to prevent user enumeration
     // Don't reveal if the user exists or not
     let resetUrl = null;
@@ -54,14 +53,24 @@ const handler = async (req: Request): Promise<Response> => {
       const { data, error } = await supabase.auth.admin.generateLink({
         type: 'recovery',
         email: email,
-        options: {
-          redirectTo: `https://swipe-and-hire.lovable.app/reset-redirect?issued=${issued}`
-        }
       });
 
       if (!error && data.properties?.action_link) {
-        resetUrl = data.properties.action_link;
-        console.log(`🔍 SUPABASE GENERATED LINK: ${resetUrl}`);
+        const supabaseLink = data.properties.action_link;
+        console.log(`🔍 SUPABASE GENERATED LINK: ${supabaseLink}`);
+        
+        // Extrahera token från Supabase-länken
+        const url = new URL(supabaseLink);
+        const token = url.searchParams.get('token');
+        const tokenHash = url.searchParams.get('token_hash');
+        
+        if (token || tokenHash) {
+          // Bygg vår egen länk som går via reset-redirect med issued timestamp
+          const redirectUrl = Deno.env.get("REDIRECT_URL") || "https://parium.se";
+          const tokenParam = token ? `token=${token}` : `token_hash=${tokenHash}`;
+          resetUrl = `${redirectUrl}/reset-redirect?${tokenParam}&type=recovery&issued=${issued}`;
+          console.log(`✅ CUSTOM RESET URL: ${resetUrl}`);
+        }
       }
     } catch (linkError) {
       // Don't log errors that might reveal user existence
