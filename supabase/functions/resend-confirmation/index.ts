@@ -98,17 +98,17 @@ const handler = async (req: Request): Promise<Response> => {
                     </td>
                   </tr>
                   <tr>
-                    <td align="left" style="padding: 40px 30px; text-align: left;">
+                    <td style="padding: 40px 30px;">
                       <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">Hej ${firstName}!</p>
-                      <p style="margin: 0 0 24px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">
+                      <p style="margin: 0 0 30px 0; font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
                          Välkommen till Parium – plattformen där <strong>${companyName}</strong> hittar nästa generations talang/talanger. Ditt konto är nu aktivt och du kan logga in direkt!
                        </p>
                       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
                         <tr>
-                          <td style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: left;">
-                             <p style="margin: 0 0 12px 0; text-align: left;">• En smidig rekryteringsprocess från start till mål</p>
-                             <p style="margin: 0 0 12px 0; text-align: left;">• Direktkontakt med kandidater</p>
-                             <p style="margin: 0; text-align: left;">• Ett modernt gränssnitt anpassat för era krav</p>
+                          <td style="font-family: Arial, Helvetica, sans-serif; font-size: 16px; color: #111827; text-align: center;">
+                             <p style="margin: 0 0 12px 0; text-align: center;">• En smidig rekryteringsprocess från start till mål</p>
+                             <p style="margin: 0 0 12px 0; text-align: center;">• Direktkontakt med kandidater</p>
+                             <p style="margin: 0 0 30px 0; text-align: center;">• Ett modernt gränssnitt anpassat för era krav</p>
                           </td>
                         </tr>
                       </table>
@@ -312,17 +312,17 @@ const handler = async (req: Request): Promise<Response> => {
             </td>
           </tr>
            <tr>
-             <td align="left" style="padding: 40px 30px; text-align: left;">
+             <td style="padding: 40px 30px;">
                <p style="margin: 0 0 24px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
                  ${greet}
                </p>
-               <p style="margin: 0 0 24px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">
+               <p style="margin: 0 0 30px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
                   Välkommen till Parium - plattformen där <strong>${companyName}</strong> hittar nästa generations talang/talanger. Vi hjälper er att rekrytera enklare, snabbare och träffsäkrare.
                 </p>
-                <div style="margin: 10px auto 30px auto; max-width: 450px;">
-                  <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">• En smidig rekryteringsprocess från start till mål</p>
-                  <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">• Direktkontakt med kandidater</p>
-                  <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">• Ett modernt gränssnitt anpassat för era krav</p>
+                <div style="margin: 30px auto; max-width: 450px; text-align: center;">
+                  <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">• En smidig rekryteringsprocess från start till mål</p>
+                  <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">• Direktkontakt med kandidater</p>
+                  <p style="margin: 0 0 30px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">• Ett modernt gränssnitt anpassat för era krav</p>
                 </div>
               <p style="margin: 20px 0 10px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
                 Bekräfta ditt konto för att komma igång direkt.
