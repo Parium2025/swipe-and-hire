@@ -56,12 +56,12 @@ const getJobSeekerTemplate = (firstName: string, confirmationUrl: string) => `
           <span style="color: #333333; font-size: 16px; line-height: 1.6;">• Swipea dig igenom alternativ och ansöka på några sekunder</span>
         </div>
         <div style="margin-bottom: 12px;">
-          <span style="color: #333333; font-size: 16px; line-height: 1.6;">• Spara tid med verktyg som gör processen både enkel och effektiv</span>
+          <span style="color: #333333; font-size: 16px; line-height: 1.6;">• Spara tid med verktyg som gör processen både enkel och&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;effektiv</span>
         </div>
       </div>
       
       <p style="color: #333333; margin: 20px 0 10px 0; font-size: 16px; line-height: 1.6; text-align: center;">
-        Bekräfta ditt konto för att komma igång direkt.
+        Bekräfta ditt konto för att komma igång!
       </p>
       
       <!-- Button -->
@@ -78,7 +78,7 @@ const getJobSeekerTemplate = (firstName: string, confirmationUrl: string) => `
       
       <p style="color: #666666; margin: 30px 0 0 0; font-size: 16px; line-height: 1.6; text-align: center;">
         Tack för ditt förtroende.<br>
-        Det här kan bli början på något riktigt bra.
+        Det här kan bli början på något riktigt bra!
       </p>
       
       <!-- Alternative link -->

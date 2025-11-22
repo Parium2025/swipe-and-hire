@@ -395,10 +395,10 @@ const handler = async (req: Request): Promise<Response> => {
               <div style="margin: 10px auto 30px auto; max-width: 450px;">
                 <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">• Hitta jobb som verkligen matchar din profil</p>
                 <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">• Swipea dig igenom alternativ och ansöka på några sekunder</p>
-                <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">• Spara tid med verktyg som gör processen både enkel och effektiv</p>
+                <p style="margin: 0 0 12px 0; font-size: 16px; color: #111827; text-align: left; line-height: 24px;">• Spara tid med verktyg som gör processen både enkel och&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;effektiv</p>
               </div>
               <p style="margin: 20px 0 10px 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
-                Bekräfta ditt konto för att komma igång direkt.
+                Bekräfta ditt konto för att komma igång!
               </p>
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
                 <tr>
@@ -409,7 +409,7 @@ const handler = async (req: Request): Promise<Response> => {
               </table>
               <p style="margin: 30px 0 0 0; font-size: 16px; color: #111827; text-align: center; line-height: 24px;">
                 Tack för ditt förtroende.<br>
-                Det här kan bli början på något riktigt bra.
+                Det här kan bli början på något riktigt bra!
               </p>
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 32px;">
                 <tr>
