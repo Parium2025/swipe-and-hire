@@ -982,15 +982,15 @@ const AuthTablet = ({
                                          </DropdownMenuItem>
                                        )}
                                        
-                                       {/* Show message if no results */}
-                                       {searchTerm.trim().length >= 3 && 
-                                        SWEDISH_INDUSTRIES.filter(industryOption => 
-                                          industryOption.toLowerCase().includes(searchTerm.toLowerCase())
-                                        ).length === 0 && (
-                                         <div className="py-4 px-3 text-center text-white/60 italic">
-                                           Inga resultat hittades för "{searchTerm}"
-                                         </div>
-                                       )}
+                                        {/* Show message if no results */}
+                                        {searchTerm.trim().length >= 3 && 
+                                         SWEDISH_INDUSTRIES.filter(industryOption => 
+                                           industryOption.toLowerCase().includes(searchTerm.toLowerCase())
+                                         ).length === 0 && (
+                                          <div className="py-4 px-3 text-center text-white/60">
+                                            Inga resultat hittades för "{searchTerm}"
+                                          </div>
+                                        )}
                                      </div>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
