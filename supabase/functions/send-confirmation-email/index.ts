@@ -49,14 +49,14 @@ const getJobSeekerTemplate = (firstName: string, confirmationUrl: string) => `
       
       <!-- Benefits list -->
       <div style="margin: 10px auto 30px auto; text-align: left; max-width: 450px;">
-        <div style="margin-bottom: 12px;">
+        <div style="margin-bottom: 12px; padding-left: 15px; text-indent: -15px;">
           <span style="color: #333333; font-size: 16px; line-height: 1.6;">• Hitta jobb som verkligen matchar din profil</span>
         </div>
-        <div style="margin-bottom: 12px;">
+        <div style="margin-bottom: 12px; padding-left: 15px; text-indent: -15px;">
           <span style="color: #333333; font-size: 16px; line-height: 1.6;">• Swipea dig igenom alternativ och ansöka på några sekunder</span>
         </div>
-        <div style="margin-bottom: 12px;">
-          <span style="color: #333333; font-size: 16px; line-height: 1.6;">• Spara tid med verktyg som gör processen både enkel och&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;effektiv</span>
+        <div style="margin-bottom: 12px; padding-left: 15px; text-indent: -15px;">
+          <span style="color: #333333; font-size: 16px; line-height: 1.6;">• Spara tid med verktyg som gör processen både enkel och effektiv</span>
         </div>
       </div>
       
