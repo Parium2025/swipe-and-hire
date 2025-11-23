@@ -286,7 +286,7 @@ const SearchJobs = () => {
                   placeholder="Sök efter jobbtitel, företag, plats..."
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                  className="pl-10 pr-10 bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40"
                 />
                 {searchInput && (
                   <button
