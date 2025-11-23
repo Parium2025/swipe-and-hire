@@ -56,8 +56,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     location: profile?.location || '',
     phone: profile?.phone || '',
     birthDate: '',
-    employmentStatus: (profile as any)?.employment_status || '',
-    workingHours: (profile as any)?.working_hours || '', // Arbetstid/Omfattning
+    employmentStatus: (profile as any)?.employment_type || '', // Fixed: employment_type not employment_status
+    workingHours: (profile as any)?.work_schedule || '', // Fixed: work_schedule not working_hours
     availability: (profile as any)?.availability || '', // Tillgänglighet
     profileImageUrl: profile?.profile_image_url || '',
     profileMediaType: 'image', // 'image' or 'video'
@@ -536,8 +536,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         postal_code: postalCode,
         phone: formData.phone,
         birth_date: formData.birthDate || null,
-        employment_status: formData.employmentStatus,
-        working_hours: formData.workingHours,
+        employment_type: formData.employmentStatus, // Fixed: employment_type
+        work_schedule: formData.workingHours, // Fixed: work_schedule
         availability: formData.availability,
         cv_url: formData.cvUrl,
         cv_filename: formData.cvFileName,
@@ -573,8 +573,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         postal_code: postalCode,
         phone: formData.phone,
         birth_date: formData.birthDate || null,
-        employment_status: formData.employmentStatus,
-        working_hours: formData.workingHours,
+        employment_type: formData.employmentStatus, // Fixed: employment_type
+        work_schedule: formData.workingHours, // Fixed: work_schedule
         availability: formData.availability,
         cv_url: formData.cvUrl,
         cv_filename: formData.cvFileName,

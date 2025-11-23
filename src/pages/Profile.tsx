@@ -94,9 +94,9 @@ const Profile = () => {
   const { cachedUrl: cachedProfileImageUrl } = useCachedImage(signedProfileImageUrl);
   const { cachedUrl: cachedCoverUrl } = useCachedImage(signedCoverUrl);
   
-  // Extended profile fields that we'll need to add to database
-  const [employmentStatus, setEmploymentStatus] = useState('');
-  const [workingHours, setWorkingHours] = useState('');
+  // Extended profile fields - using correct database field names
+  const [employmentStatus, setEmploymentStatus] = useState(''); // Maps to employment_type
+  const [workingHours, setWorkingHours] = useState(''); // Maps to work_schedule
   const [availability, setAvailability] = useState('');
   const [hasValidLocation, setHasValidLocation] = useState(false);
 
@@ -131,8 +131,8 @@ const Profile = () => {
         cvUrl: (profile as any)?.cv_url || '',
         companyName: profile.company_name || '',
         orgNumber: profile.org_number || '',
-        employmentStatus: (profile as any)?.employment_status || '',
-        workingHours: (profile as any)?.working_hours || '',
+        employmentStatus: (profile as any)?.employment_type || '', // Fixed: employment_type
+        workingHours: (profile as any)?.work_schedule || '', // Fixed: work_schedule
         availability: (profile as any)?.availability || '',
         coverImageUrl: (profile as any)?.cover_image_url || '',
         isProfileVideo: false, // Will be updated below if video exists
@@ -938,8 +938,8 @@ const Profile = () => {
         // Preserve existing CV unless explicitly changed/removed
         cv_url: cvUrl ? cvUrl : (originalValues?.cvUrl || null),
         profile_file_name: cvFileName ? cvFileName : ((profile as any)?.profile_file_name || null),
-        employment_status: employmentStatus || null,
-        working_hours: workingHours || null,
+        employment_type: employmentStatus || null, // Fixed: employment_type not employment_status
+        work_schedule: workingHours || null, // Fixed: work_schedule not working_hours
         availability: availability || null,
       };
 
