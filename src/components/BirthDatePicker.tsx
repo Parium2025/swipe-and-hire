@@ -155,7 +155,7 @@ export function BirthDatePicker({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
-                className="w-32 max-h-60 overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
+                className="w-32 max-h-60 overflow-y-auto bg-white/5 backdrop-blur-md border-white/20 shadow-xl z-50 rounded-lg text-white"
                 side="bottom"
                 align="center"
                 sideOffset={6}
@@ -186,7 +186,7 @@ export function BirthDatePicker({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
-                className="w-40 max-h-60 overflow-y-auto bg-slate-700/95 backdrop-blur-md border-slate-500/30 shadow-xl z-50 rounded-lg text-white"
+                className="w-40 max-h-60 overflow-y-auto bg-white/5 backdrop-blur-md border-white/20 shadow-xl z-50 rounded-lg text-white"
                 side="bottom"
                 align="center"
                 sideOffset={6}
@@ -219,7 +219,7 @@ export function BirthDatePicker({
             className="p-0 pointer-events-auto text-white [&_.rdp-caption]:text-white [&_.rdp-nav_button]:text-white [&_.rdp-nav_button]:border-white/20 [&_.rdp-nav_button]:hover:bg-white/20"
             classNames={{
               day: "h-9 w-9 p-0 font-normal text-white hover:bg-white/20",
-              day_selected: "bg-white !text-slate-900 font-semibold hover:bg-white focus:bg-white",
+              day_selected: "bg-white/30 !text-white font-semibold hover:bg-white/40 focus:bg-white/30",
               day_today: "bg-transparent text-white font-normal",
             }}
           />
