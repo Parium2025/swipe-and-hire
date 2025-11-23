@@ -809,28 +809,28 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                       sideOffset={6}
                       avoidCollisions={false}
                     >
-                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'tillsvidareanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'tillsvidareanställning')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                         Fast anställning
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'visstidsanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'visstidsanställning')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                         Visstidsanställning
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'provanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'provanställning')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                         Provanställning
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'interim')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'interim')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                         Interim anställning
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'bemanningsanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'bemanningsanställning')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                         Bemanningsanställning
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'egenforetagare')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'egenforetagare')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                         Egenföretagare / Frilans
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'arbetssokande')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'arbetssokande')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                         Arbetssökande
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'annat')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                      <DropdownMenuItem onClick={() => handleInputChange('employmentStatus', 'annat')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                         Annat
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -866,15 +866,15 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                        sideOffset={6}
                        avoidCollisions={false}
                      >
-                       <DropdownMenuItem onClick={() => handleInputChange('workingHours', 'heltid')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                         Heltid
-                       </DropdownMenuItem>
-                       <DropdownMenuItem onClick={() => handleInputChange('workingHours', 'deltid')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                         Deltid
-                       </DropdownMenuItem>
-                       <DropdownMenuItem onClick={() => handleInputChange('workingHours', 'varierande')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                         Varierande / Flexibelt
-                       </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleInputChange('workingHours', 'heltid')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
+                          Heltid
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleInputChange('workingHours', 'deltid')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
+                          Deltid
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleInputChange('workingHours', 'varierande')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
+                          Varierande / Flexibelt
+                        </DropdownMenuItem>
                      </DropdownMenuContent>
                    </DropdownMenu>
                  </div>
@@ -912,24 +912,24 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                        sideOffset={6}
                        avoidCollisions={false}
                      >
-                       <DropdownMenuItem onClick={() => handleInputChange('availability', 'omgaende')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                         Omgående
-                       </DropdownMenuItem>
-                       <DropdownMenuItem onClick={() => handleInputChange('availability', 'inom-1-manad')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                         Inom 1 månad
-                       </DropdownMenuItem>
-                       <DropdownMenuItem onClick={() => handleInputChange('availability', 'inom-3-manader')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                         Inom 3 månader
-                       </DropdownMenuItem>
-                       <DropdownMenuItem onClick={() => handleInputChange('availability', 'inom-6-manader')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                         Inom 6 månader
-                       </DropdownMenuItem>
-                       <DropdownMenuItem onClick={() => handleInputChange('availability', 'ej-aktuellt')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                         Inte aktuellt just nu
-                       </DropdownMenuItem>
-                       <DropdownMenuItem onClick={() => handleInputChange('availability', 'osaker')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
-                         Osäker
-                       </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleInputChange('availability', 'omgaende')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
+                          Omgående
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleInputChange('availability', 'inom-1-manad')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
+                          Inom 1 månad
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleInputChange('availability', 'inom-3-manader')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
+                          Inom 3 månader
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleInputChange('availability', 'inom-6-manader')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
+                          Inom 6 månader
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleInputChange('availability', 'ej-aktuellt')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
+                          Inte aktuellt just nu
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleInputChange('availability', 'osaker')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
+                          Osäker
+                        </DropdownMenuItem>
                      </DropdownMenuContent>
                    </DropdownMenu>
                  </div>

@@ -566,7 +566,7 @@ const CompanyProfile = () => {
                               setSearchTerm('');
                               setIndustryMenuOpen(false);
                             }}
-                            className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 px-3 text-white flex items-center justify-between transition-colors touch-manipulation"
+                            className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-2 px-3 text-white flex items-center justify-between transition-colors touch-manipulation"
                           >
                             <span className="flex-1 pr-2">{industryOption}</span>
                             {formData.industry === industryOption && (
@@ -586,7 +586,7 @@ const CompanyProfile = () => {
                             setSearchTerm('');
                             setIndustryMenuOpen(false);
                           }}
-                          className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 px-3 text-white border-t border-slate-600/30 transition-colors touch-manipulation"
+                          className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-2 px-3 text-white border-t border-slate-600/30 transition-colors touch-manipulation"
                         >
                           <span className="flex-1">Använd "{searchTerm}"</span>
                         </DropdownMenuItem>
@@ -745,7 +745,7 @@ const CompanyProfile = () => {
                                 setNewSocialLink(prev => ({ ...prev, platform: platform.value as SocialMediaLink['platform'] }));
                                 setPlatformMenuOpen(false);
                               }}
-                              className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 px-3 text-white flex items-center gap-3 transition-colors touch-manipulation rounded-md"
+                              className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-2 px-3 text-white flex items-center gap-3 transition-colors touch-manipulation rounded-md"
                             >
                               <Icon className="h-4 w-4 flex-shrink-0" />
                               <span className="flex-1">{platform.label}</span>

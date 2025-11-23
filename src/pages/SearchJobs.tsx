@@ -356,7 +356,7 @@ const SearchJobs = () => {
                       setSelectedCategory('all-categories');
                       setSelectedSubcategories([]);
                     }}
-                    className="cursor-pointer hover:bg-slate-700/70 text-white font-medium"
+                    className="cursor-pointer hover:bg-white/10 text-white font-medium"
                   >
                     Alla yrkesområden
                   </DropdownMenuItem>
@@ -368,7 +368,7 @@ const SearchJobs = () => {
                           setSelectedCategory(category.value);
                           setSelectedSubcategories([]);
                         }}
-                        className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
+                        className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
                       >
                         <span>{category.label}</span>
                         {selectedCategory === category.value && (
@@ -412,7 +412,7 @@ const SearchJobs = () => {
                 <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-80 bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white max-h-80 overflow-y-auto">
                   <DropdownMenuItem
                     onClick={() => setSelectedSubcategories([])}
-                    className="cursor-pointer hover:bg-slate-700/70 text-white font-medium"
+                    className="cursor-pointer hover:bg-white/10 text-white font-medium"
                   >
                     Alla roller
                   </DropdownMenuItem>
@@ -427,7 +427,7 @@ const SearchJobs = () => {
                               : [...prev, subcat]
                           );
                         }}
-                        className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
+                        className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
                       >
                         <span>{subcat}</span>
                         {selectedSubcategories.includes(subcat) && (
@@ -494,7 +494,7 @@ const SearchJobs = () => {
                     <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-72 bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white max-h-80 overflow-y-auto">
                       <DropdownMenuItem
                         onClick={() => setSelectedEmploymentTypes([])}
-                        className="cursor-pointer hover:bg-slate-700/70 text-white font-medium"
+                        className="cursor-pointer hover:bg-white/10 text-white font-medium"
                       >
                         Alla typer
                       </DropdownMenuItem>
@@ -510,7 +510,7 @@ const SearchJobs = () => {
                                 setSelectedEmploymentTypes(prev => [...prev, type.value]);
                               }
                             }}
-                            className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
+                            className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
                           >
                             <span>{type.label}</span>
                             {selectedEmploymentTypes.includes(type.value) && (
@@ -545,7 +545,7 @@ const SearchJobs = () => {
                     <DropdownMenuContent align="start" side="bottom" avoidCollisions={false} className="w-[200px] z-[10000] bg-slate-700/95 backdrop-blur-md border-slate-500/30 text-white">
                       <DropdownMenuItem 
                         onClick={() => setSortBy('newest')}
-                        className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
+                        className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
                       >
                         <span>{sortLabels.newest}</span>
                         {sortBy === 'newest' && <Check className="h-4 w-4 text-white" />}
@@ -553,7 +553,7 @@ const SearchJobs = () => {
                       <DropdownMenuSeparator className="bg-white/20" />
                       <DropdownMenuItem 
                         onClick={() => setSortBy('oldest')}
-                        className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
+                        className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
                       >
                         <span>{sortLabels.oldest}</span>
                         {sortBy === 'oldest' && <Check className="h-4 w-4 text-white" />}
@@ -561,7 +561,7 @@ const SearchJobs = () => {
                       <DropdownMenuSeparator className="bg-white/20" />
                       <DropdownMenuItem 
                         onClick={() => setSortBy('most-views')}
-                        className="cursor-pointer hover:bg-slate-700/70 text-white flex items-center justify-between"
+                        className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
                       >
                         <span>{sortLabels['most-views']}</span>
                         {sortBy === 'most-views' && <Check className="h-4 w-4 text-white" />}
