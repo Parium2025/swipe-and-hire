@@ -31,15 +31,15 @@ const ResetRedirect = () => {
     setIsInAppBrowser(inApp);
     setIsMobile(mobile);
 
-    // Kontrollera om länken har gått ut (10 minuter)
+    // Kontrollera om länken har gått ut (1,5 minuter)
     const checkLinkExpiry = () => {
       const issued = searchParams.get('issued');
       if (issued) {
         const issuedTime = parseInt(issued);
         const currentTime = Date.now();
-        const tenMinutesInMs = 10 * 60 * 1000; // 10 minuter i millisekunder
+        const expirationMs = 90 * 1000; // 1,5 minuter i millisekunder
         
-        if (currentTime - issuedTime > tenMinutesInMs) {
+        if (currentTime - issuedTime > expirationMs) {
           // Länken har gått ut, redirecta till expired-sidan
           const origin = window.location.origin;
           window.location.replace(`${origin}/auth?reset=true&expired=true`);
@@ -72,13 +72,13 @@ const ResetRedirect = () => {
     const origin = window.location.origin;
     const hash = window.location.hash || '';
     
-    // Kontrollera om länken har gått ut
+    // Kontrollera om länken har gått ut (1,5 minuter)
     if (issued) {
       const issuedTime = parseInt(issued);
       const currentTime = Date.now();
-      const tenMinutesInMs = 10 * 60 * 1000;
+      const expirationMs = 90 * 1000; // 1,5 minuter i millisekunder
       
-      if (currentTime - issuedTime > tenMinutesInMs) {
+      if (currentTime - issuedTime > expirationMs) {
         return `${origin}/auth?reset=true&expired=true`;
       }
     }
