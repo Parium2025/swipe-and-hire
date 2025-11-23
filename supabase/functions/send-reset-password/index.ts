@@ -97,7 +97,7 @@ Vi har fått en begäran om att återställa lösenordet för ditt Parium-konto.
 Klicka på länken nedan för att skapa ett nytt lösenord:
 ${resetUrl}
 
-Denna länk är giltig i 10 minuter. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.
+Denna länk är giltig i 1,5 minuter. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.
 
 Med vänliga hälsningar,
 Parium Team
@@ -137,7 +137,7 @@ Parium AB, Stockholm`,
                 Säkerhetsmeddelande
               </p>
               <p style="color: #718096; font-size: 14px; margin: 0;">
-                Denna länk är giltig i 10 minuter. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.
+                Denna länk är giltig i 1,5 minuter. Om du inte begärde en lösenordsåterställning kan du ignorera detta meddelande.
               </p>
             </div>
             
