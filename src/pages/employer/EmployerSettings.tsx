@@ -53,7 +53,7 @@ const EmployerSettings = () => {
         <h1 className="text-xl md:text-2xl font-semibold text-white mb-1">Inställningar</h1>
       </div>
 
-      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
+      <div className="bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg p-6 md:p-4">
         <div className="space-y-5 md:space-y-3">
           <div className="space-y-1.5">
             <Label htmlFor="email" className="text-sm text-white">E-postadress</Label>
@@ -67,7 +67,7 @@ const EmployerSettings = () => {
         </div>
       </div>
 
-      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
+      <div className="bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg p-6 md:p-4">
         <div className="space-y-5 md:space-y-3">
           <div className="space-y-1.5">
             <Label htmlFor="current-password" className="text-sm text-white">Nuvarande lösenord</Label>
@@ -107,7 +107,7 @@ const EmployerSettings = () => {
         </div>
       </div>
 
-      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
+      <div className="bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg p-6 md:p-4">
         <div className="space-y-5 md:space-y-3">
           <div className="flex items-center justify-between">
             <div>

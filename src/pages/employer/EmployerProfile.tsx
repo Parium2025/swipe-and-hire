@@ -289,7 +289,7 @@ const EmployerProfile = () => {
         <h1 className="text-xl md:text-2xl font-semibold text-white mb-1">Min Profil</h1>
       </div>
 
-      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-6 md:p-4">
+      <div className="bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg p-6 md:p-4">
         <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-5 md:space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
               <div className="space-y-1.5">
@@ -384,7 +384,7 @@ const EmployerProfile = () => {
                   {formData.social_media_links.map((link, index) => {
                     const Icon = getPlatformIcon(link.platform);
                     return (
-                      <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-2 gap-2">
+                      <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg p-2 gap-2">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <Icon className="h-4 w-4 text-white flex-shrink-0" />
                           <div className="min-w-0 flex-1">

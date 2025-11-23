@@ -88,7 +88,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       content: (
         <div className="flex flex-col items-center justify-center w-full px-4">
           {/* Profile Image/Video Card - enlarged and centered */}
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg max-w-xl w-full">
+          <div className="bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg max-w-xl w-full">
             <div className="p-8 space-y-4">
               <h3 className="text-lg font-semibold text-white text-center">
                 Profilbild/Profilvideo
