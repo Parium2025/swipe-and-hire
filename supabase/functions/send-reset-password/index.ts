@@ -55,26 +55,36 @@ const handler = async (req: Request): Promise<Response> => {
         email: email,
       });
 
-      if (!error && data.properties?.action_link) {
+    if (!error && data.properties) {
+      console.log('🔍 generateLink properties:', data.properties);
+
+      // För recovery ska vi använda hashed_token enligt Supabase-dokumentationen
+      const hashedToken = (data as any).properties?.hashed_token as string | undefined;
+
+      if (hashedToken) {
+        const redirectUrl = "https://parium.se";
+        resetUrl = `${redirectUrl}/auth?reset=true&token_hash=${hashedToken}&type=recovery`;
+        console.log(`✅ CUSTOM RESET URL (hashed_token): ${resetUrl}`);
+        console.log(`📍 Using parium.se domain med token_hash`);
+      } else if (data.properties.action_link) {
+        // Fallback om hashed_token av någon anledning saknas
         const supabaseLink = data.properties.action_link;
-        console.log(`🔍 SUPABASE GENERATED LINK: ${supabaseLink}`);
-        
-        // Extrahera token från Supabase-länken
+        console.log(`🔍 SUPABASE GENERATED LINK (fallback): ${supabaseLink}`);
+
         const url = new URL(supabaseLink);
         const token = url.searchParams.get('token');
         const tokenHash = url.searchParams.get('token_hash');
-        
-        if (token || tokenHash) {
-          // Bygg direkt länk till parium.se
+
+        if (tokenHash || token) {
           const redirectUrl = "https://parium.se";
-          const tokenParam = token ? `token=${token}` : `token_hash=${tokenHash}`;
+          const tokenParam = tokenHash ? `token_hash=${tokenHash}` : `token=${token}`;
           resetUrl = `${redirectUrl}/auth?reset=true&${tokenParam}&type=recovery`;
-          console.log(`✅ CUSTOM RESET URL: ${resetUrl}`);
-          console.log(`📍 Using parium.se domain`);
+          console.log(`✅ CUSTOM RESET URL (fallback): ${resetUrl}`);
         } else {
           console.error('❌ No token or token_hash found in Supabase link');
         }
       }
+    }
     } catch (linkError) {
       // Don't log errors that might reveal user existence
       console.log('Password reset attempted for:', email.substring(0, 3) + '***');
