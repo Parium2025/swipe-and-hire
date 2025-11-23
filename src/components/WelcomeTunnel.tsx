@@ -1124,11 +1124,22 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => document.getElementById('coverImage')?.click()}
+                        onClick={async () => {
+                          if (formData.coverImageUrl) {
+                            // Om cover-bild finns, öppna ImageEditor för att anpassa den
+                            if (signedCoverUrl) {
+                              setPendingCoverSrc(signedCoverUrl);
+                              setCoverEditorOpen(true);
+                            }
+                          } else {
+                            // Om ingen cover-bild finns, ladda upp ny
+                            document.getElementById('coverImage')?.click();
+                          }
+                        }}
                         disabled={isUploadingCover}
                         className="bg-white/5 backdrop-blur-sm border-white/10 !text-white disabled:opacity-50 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
                       >
-                        {formData.coverImageUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
+                        {formData.coverImageUrl ? 'Anpassa cover-bild' : 'Lägg till cover-bild'}
                       </Button>
                       
                       {formData.coverImageUrl && (
