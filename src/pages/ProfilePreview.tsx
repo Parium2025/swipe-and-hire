@@ -872,7 +872,7 @@ export default function ProfilePreview() {
               className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white"
             >
               <Smartphone className="h-3.5 w-3.5" />
-              Mobil vy
+              Mobilvy
             </button>
             <button
               onClick={() => setViewMode('desktop')}

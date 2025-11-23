@@ -161,7 +161,7 @@ const Subscription = () => {
                       e.stopPropagation();
                       if (plan.id === 'premium' && !isCurrent) {
                         if (isMobile) {
-                          // App-version (mobil vy): visa dialog med parium.se
+                          // App-version (mobilvy): visa dialog med parium.se
                           setShowUpgradeDialog(true);
                         } else {
                           // Webb: Direkt till Stripe (placeholder tills vi kopplar Stripe)
