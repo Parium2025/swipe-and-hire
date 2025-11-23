@@ -653,7 +653,9 @@ const Auth = () => {
               </Button>
             </form>
             {resendMessage && (
-              <p className="text-sm text-primary-foreground/80 whitespace-pre-line">{resendMessage}</p>
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
+                <p className="text-sm text-white whitespace-pre-line">{resendMessage}</p>
+              </div>
             )}
             <Button onClick={handleBackToLogin} className="w-full transition-all duration-300 md:hover:bg-primary/90">
               Tillbaka till inloggning
