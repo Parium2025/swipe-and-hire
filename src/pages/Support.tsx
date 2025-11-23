@@ -215,14 +215,14 @@ const Support = () => {
 
             <div className="space-y-1.5">
               <Label htmlFor="message" className="text-sm text-white">Meddelande</Label>
-              <Textarea
+            <Textarea
                 id="message"
                 placeholder="Beskriv ditt problem eller din fråga detaljerat..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 rows={4}
                 required
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 resize-none text-sm"
+                className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 resize-none text-sm"
               />
             </div>
 
