@@ -313,7 +313,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               size="sm"
               onClick={zoomOut}
               disabled={scale <= minScale}
-              className="bg-white/5 border-white/10 !text-white hover:bg-white/10 hover:!text-white md:hover:bg-white/10 md:hover:!text-white disabled:opacity-50 disabled:hover:bg-white/5"
+              className="bg-white/5 border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 disabled:opacity-50 disabled:hover:bg-white/5"
             >
               <ZoomOut className="h-4 w-4" />
             </Button>
@@ -322,7 +322,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               variant="outline"
               size="sm"
               onClick={resetPosition}
-              className="bg-white/5 border-white/10 !text-white hover:bg-white/10 hover:!text-white md:hover:bg-white/10 md:hover:!text-white"
+              className="bg-white/5 border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
             >
               <RotateCcw className="h-4 w-4" />
             </Button>
@@ -332,7 +332,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               size="sm"
               onClick={zoomIn}
               disabled={scale >= MAX_SCALE}
-              className="bg-white/5 border-white/10 !text-white hover:bg-white/10 hover:!text-white md:hover:bg-white/10 md:hover:!text-white disabled:opacity-50 disabled:hover:bg-white/5"
+              className="bg-white/5 border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 disabled:opacity-50 disabled:hover:bg-white/5"
             >
               <ZoomIn className="h-4 w-4" />
             </Button>
@@ -349,7 +349,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               className={`flex-1 transition-all duration-200 !text-white ${
                 activeButton === 'cancel'
                   ? 'bg-white/10 border-white/20' 
-                  : 'bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white md:hover:bg-white/10 md:hover:!text-white'
+                  : 'bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50'
               }`}
               variant="outline"
             >
@@ -360,7 +360,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               className={`flex-1 transition-all duration-200 !text-white ${
                 activeButton === 'save'
                   ? 'bg-white/15 border-white/20' 
-                  : 'bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white md:hover:bg-white/10 md:hover:!text-white'
+                  : 'bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50'
               }`}
               variant="outline"
             >

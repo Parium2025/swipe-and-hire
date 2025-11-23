@@ -782,7 +782,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="outlineNeutral"
-                          className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white md:hover:bg-white/10 md:hover:text-white transition-colors justify-between"
+                          className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
                         >
                         <span className="truncate">
                           {formData.employmentStatus ? (
@@ -1091,7 +1091,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         size="sm"
                         onClick={() => document.getElementById('coverImage')?.click()}
                         disabled={isUploadingCover}
-                        className="bg-white/5 backdrop-blur-sm border-white/10 !text-white disabled:opacity-50 hover:bg-white/10 hover:!text-white md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/10"
+                        className="bg-white/5 backdrop-blur-sm border-white/10 !text-white disabled:opacity-50 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
                       >
                         {formData.coverImageUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
                       </Button>
