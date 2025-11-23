@@ -156,7 +156,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     loadExistingMedia();
   }, [profile]);
 
-  const totalSteps = 8; // Introduktion + 5 profil steg + samtycke + submit + slutskärm
+  const totalSteps = 9; // Introduktion + 6 profil steg + samtycke + submit + slutskärm
   const progress = currentStep / (totalSteps - 1) * 100;
 
   const countWords = (text: string) => {
@@ -1276,7 +1276,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Users className="h-8 w-8 text-white" />
               </div>
               <h2 className="text-2xl font-semibold mb-2 text-white">Dela din information</h2>
-              <p className="text-white/90">För att kunna matcha dig med rätt jobb behöver vi kunna dela viss information med arbetsgivare.</p>
             </div>
 
             <div className="max-w-md mx-auto space-y-6">
@@ -1329,7 +1328,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             </div>
             <div className="space-y-4">
               <h2 className="text-2xl font-semibold text-white">Profilen är klar</h2>
-              <p className="text-sm text-white/80">Är du redo?</p>
+              <p className="text-sm text-white">Är du redo?</p>
             </div>
             <div className="space-y-4 pt-8">
               <Button
@@ -1361,7 +1360,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     await signOut();
                     window.location.href = '/auth';
                   }}
-                  className="px-8 py-3 bg-red-500/80 border-red-400/50 text-white hover:bg-red-500 hover:scale-105 transition-transform duration-200 text-sm"
+                  className="px-8 py-3 bg-red-500/80 border-red-400/50 text-white hover:bg-red-500/90 hover:border-red-400/70 hover:scale-105 transition-all duration-300 text-sm"
                 >
                   Logga ut
                 </Button>
