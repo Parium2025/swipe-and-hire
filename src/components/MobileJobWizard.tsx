@@ -2878,7 +2878,7 @@ const MobileJobWizard = ({
                   
                   {!jobImageDisplayUrl && (
                     <FileUpload
-                      bucketName="job-images"
+                      mediaType="job-image"
                       onFileUploaded={(url, fileName) => {
                         handleInputChange('job_image_url', url);
                         setOriginalImageUrl(url); // Spara originalbilden

@@ -2347,7 +2347,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                         
                           {!jobImageDisplayUrl && (
                             <FileUpload
-                              bucketName="job-images"
+                              mediaType="job-image"
                               onFileUploaded={async (storagePath, fileName) => {
                                 handleInputChange('job_image_url', storagePath);
                                 setOriginalImageUrl(storagePath);

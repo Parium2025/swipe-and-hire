@@ -334,7 +334,7 @@ const ProfileSetup = () => {
                 <div className="space-y-2">
                   <Label className="text-foreground">Företagslogotyp</Label>
                   <FileUpload
-                    bucketName="company-logos"
+                    mediaType="company-logo"
                     onFileUploaded={(url) => setCompanyLogoUrl(url)}
                     onFileRemoved={() => setCompanyLogoUrl('')}
                     currentFile={companyLogoUrl ? { url: companyLogoUrl, name: "Företagslogotyp" } : undefined}
