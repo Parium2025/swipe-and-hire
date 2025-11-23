@@ -419,6 +419,29 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     setCoverEditorOpen(true);
   };
 
+  const handleEditExistingCover = async () => {
+    if (!formData.coverImageUrl) return;
+    
+    try {
+      setIsUploadingCover(true);
+      // Hämta den signerade URL:en för den befintliga cover-bilden
+      const signedUrl = await getMediaUrl(formData.coverImageUrl, 'cover-image', 86400);
+      if (signedUrl) {
+        setPendingCoverSrc(signedUrl);
+        setCoverEditorOpen(true);
+      }
+    } catch (error) {
+      console.error('Error loading existing cover:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte ladda cover-bilden för redigering.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploadingCover(false);
+    }
+  };
+
   const handleProfileImageSave = async (editedBlob: Blob) => {
     try {
       setIsUploadingMedia(true);
@@ -1124,11 +1147,17 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => document.getElementById('coverImage')?.click()}
+                        onClick={() => {
+                          if (formData.coverImageUrl) {
+                            handleEditExistingCover();
+                          } else {
+                            document.getElementById('coverImage')?.click();
+                          }
+                        }}
                         disabled={isUploadingCover}
                         className="bg-white/5 backdrop-blur-sm border-white/10 !text-white disabled:opacity-50 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
                       >
-                        {formData.coverImageUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
+                        {formData.coverImageUrl ? 'Anpassa din bild' : 'Lägg till cover-bild'}
                       </Button>
                       
                       {formData.coverImageUrl && (
