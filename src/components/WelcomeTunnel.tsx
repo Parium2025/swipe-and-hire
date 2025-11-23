@@ -20,6 +20,8 @@ import ProfileVideo from '@/components/ProfileVideo';
 import SwipeIntro from '@/components/SwipeIntro';
 import PostalCodeSelector from '@/components/PostalCodeSelector';
 import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
+import { uploadMedia, getMediaUrl, deleteMedia } from '@/lib/mediaManager';
+import { useMediaUrl } from '@/hooks/useMediaUrl';
 
 interface WelcomeTunnelProps {
   onComplete: () => void;
@@ -32,6 +34,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [uploadingMediaType, setUploadingMediaType] = useState<'image' | 'video' | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   
   // Undo state - store deleted media for restore
@@ -72,13 +75,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const [postalCode, setPostalCode] = useState((profile as any)?.postal_code || '');
   const [hasValidLocation, setHasValidLocation] = useState(false);
 
-  // Helper to build display URL from storage path or URL
-  const getDisplayUrl = (pathOrUrl: string) => {
-    if (!pathOrUrl) return '';
-    if (pathOrUrl.startsWith('http')) return pathOrUrl;
-    // Build public URL from storage path
-    return supabase.storage.from('profile-media').getPublicUrl(pathOrUrl).data.publicUrl;
-  };
+  // Use mediaUrl hooks for signed URLs
+  const signedProfileImageUrl = useMediaUrl(
+    formData.profileImageUrl, 
+    formData.profileMediaType === 'video' ? 'profile-video' : 'profile-image'
+  );
+  const signedCoverUrl = useMediaUrl(formData.coverImageUrl, 'cover-image');
 
   // Use centralized phone validation
   const validatePhoneNumber = (phoneNumber: string) => {
@@ -242,29 +244,23 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     setIsUploadingCover(true);
     
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}/${Date.now()}-cover-image.${fileExt}`;
+      if (!user?.id) throw new Error('User not found');
       
-      const { error: uploadError } = await supabase.storage
-        .from('profile-media')
-        .upload(fileName, file);
-      
+      // Använd mediaManager för cover-bild
+      const { storagePath, error: uploadError } = await uploadMedia(
+        file,
+        'cover-image',
+        user.id
+      );
+
       if (uploadError) throw uploadError;
       
-      // CRITICAL FIX: Store only the storage path for cover image too
-      const storagePath = fileName;
-      
-      // Build public URL for preview
-      const { data: { publicUrl } } = supabase.storage
-        .from('profile-media')
-        .getPublicUrl(fileName);
-      
-      // Preload cover image
-      import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
-        preloadSingleFile(publicUrl).catch(err => console.log('Preload error:', err));
-      });
-      
       handleInputChange('coverImageUrl', storagePath);
+      
+      toast({
+        title: "Cover-bild uppladdad!",
+        description: "Din cover-bild har laddats upp."
+      });
     } catch (error) {
       console.error('Cover upload error:', error);
       toast({
@@ -992,21 +988,21 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <div className="relative">
                   {formData.profileImageUrl && formData.profileMediaType === 'video' ? (
                     <ProfileVideo
-                      videoUrl={getDisplayUrl(formData.profileImageUrl)}
-                      coverImageUrl={getDisplayUrl(formData.coverImageUrl)}
+                      videoUrl={signedProfileImageUrl || ''}
+                      coverImageUrl={signedCoverUrl || ''}
                       userInitials={`${formData.firstName?.[0] || ''}${formData.lastName?.[0] || ''}`}
                       alt="Profile video"
-                      className="w-32 h-32 border-4 border-white/10 hover:border-white/20 transition-all rounded-full overflow-hidden"
+                      className="w-32 h-32 border-4 border-white/10 transition-all rounded-full overflow-hidden"
                     />
                   ) : (
                     <div 
                       className="cursor-pointer" 
                       onClick={() => document.getElementById('profileMedia')?.click()}
                     >
-                      <Avatar className="h-32 w-32 border-4 border-white/10 hover:border-white/20 [transition:border-color_0.2s]">
+                      <Avatar className="h-32 w-32 border-4 border-white/10 [transition:border-color_0.2s]">
                         {formData.profileImageUrl ? (
                           <AvatarImage 
-                            src={getDisplayUrl(formData.profileImageUrl)} 
+                            src={signedProfileImageUrl || ''} 
                             alt="Profilbild"
                             className="object-cover"
                             decoding="sync"
@@ -1061,7 +1057,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   />
                 </div>
 
-                <div className="space-y-2 text-center">
+                <div className="space-y-2 text-center w-full px-4">
                   <Label 
                     htmlFor="profileMedia" 
                     className="text-white cursor-pointer hover:text-white/90 transition-colors text-center text-sm"
@@ -1070,9 +1066,17 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   </Label>
                   
                   {isUploadingMedia && (
-                    <Badge variant="outline" className="bg-white/10 text-white border-white/20 animate-pulse rounded-md px-3 py-1.5">
-                      {uploadingMediaType === 'video' ? 'Laddar upp video...' : 'Laddar upp bild...'}
-                    </Badge>
+                    <div className="space-y-2">
+                      <Badge variant="outline" className="bg-white/10 text-white border-white/20 animate-pulse rounded-md px-3 py-1.5">
+                        {uploadingMediaType === 'video' ? 'Laddar upp video...' : 'Laddar upp bild...'}
+                      </Badge>
+                      {uploadProgress > 0 && (
+                        <div className="space-y-1">
+                          <Progress value={uploadProgress} className="h-2 bg-white/10" />
+                          <span className="text-xs text-white/80">{uploadProgress}%</span>
+                        </div>
+                      )}
+                    </div>
                   )}
                   
                   {formData.profileImageUrl && !isUploadingMedia && (
