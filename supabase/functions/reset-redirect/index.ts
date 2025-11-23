@@ -43,15 +43,15 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Kontrollera om länken är över 10 minuter gammal (600000 ms)
+    // Kontrollera om länken är över 1.5 minuter gammal (90 000 ms)
     const issuedTime = parseInt(issued);
     const currentTime = Date.now();
     const timeDiff = currentTime - issuedTime;
-    const tenMinutesInMs = 10 * 60 * 1000; // 10 minuter
+    const expirationMs = 90 * 1000; // 1.5 minuter (temporärt för test)
     
-    console.log('Time check:', { issuedTime, currentTime, timeDiff, tenMinutesInMs });
+    console.log('Time check:', { issuedTime, currentTime, timeDiff, expirationMs });
     
-    if (timeDiff > tenMinutesInMs) {
+    if (timeDiff > expirationMs) {
       console.log('❌ RESET LINK EXPIRED - Redirecting to expired page');
       // Redirect till expired sida
       return new Response(null, {
