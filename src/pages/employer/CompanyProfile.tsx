@@ -480,7 +480,7 @@ const CompanyProfile = () => {
                   id="company_name"
                   value={formData.company_name}
                   onChange={(e) => setFormData({...formData, company_name: e.target.value})}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9"
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 h-9"
                 />
               </div>
 

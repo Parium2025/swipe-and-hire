@@ -121,7 +121,7 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
                   value={formData.firstName}
                   onChange={(e) => handleInputChange('firstName', e.target.value)}
                   placeholder="Ditt förnamn"
-                  className="py-2 md:py-3 text-base md:text-lg"
+                  className="py-2 md:py-3 text-base md:text-lg hover:border-white/50"
                 />
               </div>
               <div>
@@ -131,7 +131,7 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
                   value={formData.lastName}
                   onChange={(e) => handleInputChange('lastName', e.target.value)}
                   placeholder="Ditt efternamn"
-                  className="py-2 md:py-3 text-base md:text-lg"
+                  className="py-2 md:py-3 text-base md:text-lg hover:border-white/50"
                 />
               </div>
               <div>
@@ -141,7 +141,7 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
                   value={formData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
                   placeholder="+46 70 123 45 67"
-                  className="py-2 md:py-3 text-base md:text-lg"
+                  className="py-2 md:py-3 text-base md:text-lg hover:border-white/50"
                 />
               </div>
             </div>
@@ -281,7 +281,7 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
                   value={formData.location}
                   onChange={(e) => handleInputChange('location', e.target.value)}
                   placeholder="t.ex. Stockholm, Göteborg"
-                  className="py-2 md:py-3 text-base md:text-lg"
+                  className="py-2 md:py-3 text-base md:text-lg hover:border-white/50"
                 />
               </div>
               
@@ -292,7 +292,7 @@ const ProfileBuilder = ({ onProfileCompleted }: ProfileBuilderProps) => {
                   value={formData.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
                   placeholder="Beskriv dig själv, dina intressen och vad du söker för jobb..."
-                  className="min-h-24 md:min-h-32 text-sm md:text-base"
+                  className="min-h-24 md:min-h-32 text-sm md:text-base hover:border-white/50"
                   rows={4}
                 />
                 <p className="text-sm text-muted-foreground mt-1">

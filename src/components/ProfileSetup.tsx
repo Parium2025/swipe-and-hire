@@ -186,14 +186,14 @@ const ProfileSetup = () => {
               
               <div className="space-y-2">
                 <Label htmlFor="bio" className="text-foreground">Kort presentation</Label>
-                <Textarea
-                  id="bio"
-                  placeholder={isEmployer ? "Berätta om ditt företag..." : "Berätta kort om dig själv..."}
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  rows={3}
-                  className="bg-background/50 border-white/10 focus:border-primary/50"
-                />
+                  <Textarea
+                    id="bio"
+                    placeholder={isEmployer ? "Berätta om ditt företag..." : "Berätta kort om dig själv..."}
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    rows={3}
+                    className="bg-background/50 border-white/10 hover:border-white/50 focus:border-primary/50"
+                  />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -206,21 +206,21 @@ const ProfileSetup = () => {
                       placeholder="Stockholm, Sverige"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
-                      className="pl-10 bg-background/50 border-white/10 focus:border-primary/50"
+                      className="pl-10 bg-background/50 border-white/10 hover:border-white/50 focus:border-primary/50"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="phone" className="text-foreground">Telefon</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="+46 70 123 45 67"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="bg-background/50 border-white/10 focus:border-primary/50"
-                  />
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="+46 70 123 45 67"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="bg-background/50 border-white/10 hover:border-white/50 focus:border-primary/50"
+                    />
                 </div>
               </div>
             </div>
@@ -242,7 +242,7 @@ const ProfileSetup = () => {
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
                       required
-                      className="bg-background/50 border-white/10 focus:border-primary/50"
+                      className="bg-background/50 border-white/10 hover:border-white/50 focus:border-primary/50"
                     />
                   </div>
 
@@ -253,7 +253,7 @@ const ProfileSetup = () => {
                       placeholder="556123-4567"
                       value={orgNumber}
                       onChange={(e) => setOrgNumber(e.target.value)}
-                      className="bg-background/50 border-white/10 focus:border-primary/50"
+                      className="bg-background/50 border-white/10 hover:border-white/50 focus:border-primary/50"
                     />
                   </div>
 
