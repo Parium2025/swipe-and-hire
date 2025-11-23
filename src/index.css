@@ -905,7 +905,7 @@ All colors MUST be HSL.
   [role="gridcell"] button[aria-selected="true"] {
     background-color: transparent !important;
     background: transparent !important;
-    border: none !important;
+    border: 1px solid white !important;
     outline: none !important;
     box-shadow: none !important;
     color: white !important;
@@ -914,8 +914,8 @@ All colors MUST be HSL.
 
   .rdp-day_button[aria-selected="true"]:hover,
   button[aria-selected="true"].rdp-day_button:hover {
-    background-color: transparent !important;
-    background: transparent !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
   }
 }
 
