@@ -47,13 +47,12 @@ const handler = async (req: Request): Promise<Response> => {
     const issuedTime = parseInt(issued);
     const currentTime = Date.now();
     const timeDiff = currentTime - issuedTime;
-    const expirationMs = 90 * 1000; // 1.5 minuter (temporärt för test)
+    const expirationMs = 90 * 1000; // 1.5 minuter
     
     console.log('Time check:', { issuedTime, currentTime, timeDiff, expirationMs });
     
     if (timeDiff > expirationMs) {
-      console.log('❌ RESET LINK EXPIRED - Redirecting to expired page');
-      // Redirect till expired sida
+      console.log('❌ RESET LINK EXPIRED (över 1.5 minuter) - Redirecting to expired page');
       return new Response(null, {
         status: 302,
         headers: {
@@ -63,63 +62,21 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Om länken är giltig enligt tid, testa först om token fortfarande är giltig
+    // Om länken är YNGRE än 1.5 minuter → Redirect till auth med token
+    // Token-användning kontrolleras INTE här - det sker först när användaren faktiskt 
+    // försöker uppdatera lösenordet i Auth.tsx handlePasswordReset
     if (token) {
-      console.log('🔍 TESTING TOKEN VALIDITY');
+      let redirectUrl = "https://parium.se/auth?reset=true";
+      const paramName = url.searchParams.get('token_hash') ? 'token_hash' : 'token';
+      redirectUrl += `&${paramName}=${token}`;
+      if (type) redirectUrl += `&type=${type}`;
+      if (issued) redirectUrl += `&issued=${issued}`;
       
-      try {
-        // Försök verifiera token med Supabase
-        const { data, error } = await supabase.auth.verifyOtp({
-          token_hash: token,
-          type: 'recovery'
-        });
-        
-        console.log('Token verification result:', { data: !!data, error: error?.message });
-        
-        // Om token är giltig, redirect till auth med token
-        if (!error && data) {
-          let redirectUrl = "https://parium.se/auth?reset=true";
-          const paramName = url.searchParams.get('token_hash') ? 'token_hash' : 'token';
-          redirectUrl += `&${paramName}=${token}`;
-          if (type) redirectUrl += `&type=${type}`;
-          if (issued) redirectUrl += `&issued=${issued}`;
-          
-          console.log(`✅ VALID TOKEN - Redirecting to: ${redirectUrl}`);
-          return new Response(null, {
-            status: 302,
-            headers: { "Location": redirectUrl, ...corsHeaders },
-          });
-        }
-        
-        // Om token är ogiltig men inom tidsgränsen, skicka nytt mail automatiskt
-        console.log('❌ TOKEN ALREADY USED - Generating new reset link');
-        
-        // Extrahera emailen från ursprungliga mailet (om möjligt)
-        // För nu redirect till auth med en special parameter för att visa meddelande om nytt mail
-        let redirectUrl = "https://parium.se/auth?reset=true&token_used=true";
-        if (issued) redirectUrl += `&issued=${issued}`;
-        return new Response(null, {
-          status: 302,
-          headers: {
-            "Location": redirectUrl,
-            ...corsHeaders,
-          },
-        });
-        
-      } catch (verifyError) {
-        console.error('Token verification error:', verifyError);
-        // Fallback - redirect med token och låt auth sidan hantera
-        let redirectUrl = "https://parium.se/auth?reset=true";
-        const paramName = url.searchParams.get('token_hash') ? 'token_hash' : 'token';
-        redirectUrl += `&${paramName}=${token}`;
-        if (type) redirectUrl += `&type=${type}`;
-        if (issued) redirectUrl += `&issued=${issued}`;
-        
-        return new Response(null, {
-          status: 302,
-          headers: { "Location": redirectUrl, ...corsHeaders },
-        });
-      }
+      console.log(`✅ LÄNK GILTIG (under 1.5 min) - Redirecting to: ${redirectUrl}`);
+      return new Response(null, {
+        status: 302,
+        headers: { "Location": redirectUrl, ...corsHeaders },
+      });
     }
     
     // Om ingen token, redirect till auth
