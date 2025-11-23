@@ -199,7 +199,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                     variant="outline" 
                     onClick={() => document.getElementById('logo-upload')?.click()}
                     disabled={isUploadingLogo}
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:scale-105 transition-transform duration-200"
+                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/50 hover:scale-105 transition-transform duration-200"
                   >
                     Byt logga
                   </Button>
@@ -254,7 +254,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
             </div>
 
             <div className="space-y-4 max-w-md mx-auto">
-              <div className="flex items-start space-x-4 p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 transition-all duration-300 hover:bg-white/15 hover:scale-105">
+              <div className="flex items-start space-x-4 p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 hover:border-white/50 transition-all duration-300 hover:bg-white/15 hover:scale-105">
                 <div className="text-2xl font-bold text-white">
                   1
                 </div>
@@ -266,7 +266,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 </div>
               </div>
 
-              <div className="flex items-start space-x-4 p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 transition-all duration-300 hover:bg-white/15 hover:scale-105">
+              <div className="flex items-start space-x-4 p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 hover:border-white/50 transition-all duration-300 hover:bg-white/15 hover:scale-105">
                 <div className="text-2xl font-bold text-white">
                   2
                 </div>
@@ -278,7 +278,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 </div>
               </div>
 
-              <div className="flex items-start space-x-4 p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 transition-all duration-300 hover:bg-white/15 hover:scale-105">
+              <div className="flex items-start space-x-4 p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 hover:border-white/50 transition-all duration-300 hover:bg-white/15 hover:scale-105">
                 <div className="text-2xl font-bold text-white">
                   3
                 </div>
@@ -309,7 +309,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               </div>
             </div>
             
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20 transition-all duration-300 hover:bg-white/15 hover:scale-105 max-w-md mx-auto">
+            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20 hover:border-white/50 transition-all duration-300 hover:bg-white/15 hover:scale-105 max-w-md mx-auto">
               <p className="text-sm text-white/90">
                 <strong className="text-white">Tips:</strong> Börja med att skapa din första jobbannons för att locka kvalificerade kandidater till ditt företag.
               </p>

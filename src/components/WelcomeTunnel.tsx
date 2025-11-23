@@ -713,7 +713,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                    value={formData.firstName} 
                    onChange={(e) => handleInputChange('firstName', e.target.value)} 
                    placeholder="Ditt förnamn" 
-                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60" 
+                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white/60"
                  />
                </div>
                <div>
@@ -723,7 +723,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                    value={formData.lastName} 
                    onChange={(e) => handleInputChange('lastName', e.target.value)} 
                    placeholder="Ditt efternamn" 
-                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60" 
+                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white/60"
                  />
                </div>
                <div>
@@ -734,7 +734,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                    value={formData.email} 
                    onChange={(e) => handleInputChange('email', e.target.value)} 
                    placeholder="Din e-postadress" 
-                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60" 
+                   className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white/60"
                  />
                </div>
                  <div>
@@ -765,7 +765,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     required
                     value={formData.phone} 
                     onChange={(e) => handlePhoneChange(e.target.value)} 
-                    className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60" 
+                    className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white/60"
                     placeholder="Skriv in ditt telefonnummer" 
                   />
                  
@@ -1180,7 +1180,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Label htmlFor="bio" className="text-white">Frivilligt</Label>
                 <Textarea
                   id="bio"
-                  className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60" 
+                  className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white/60" 
                   value={formData.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
                   placeholder="Berätta kort om dig själv..."
@@ -1277,7 +1277,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Button
                   variant="outline"
                   onClick={handlePrevious}
-                  className="px-8 py-3 bg-white/10 border-white/20 text-white hover:bg-white/20 hover:scale-105 transition-transform duration-200 text-sm"
+                  className="px-8 py-3 bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/50 hover:scale-105 transition-transform duration-200 text-sm"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Tillbaka
