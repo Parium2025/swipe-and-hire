@@ -145,8 +145,8 @@ export function BirthDatePicker({
               <DropdownMenuTrigger asChild>
                 <Button
                   ref={yearRef}
-                  variant="outline"
-                  className="flex-1 h-9 bg-white/10 border-white/30 text-white text-sm hover:bg-white/10 justify-between"
+                  variant="outlineNeutral"
+                  className="flex-1 h-9 bg-white/5 border-white/10 text-white text-sm md:hover:bg-white/10 justify-between transition-colors"
                 >
                   <span>
                     {selectedDate ? selectedDate.getFullYear() : "År"}
@@ -176,8 +176,8 @@ export function BirthDatePicker({
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
                 <Button
-                  variant="outline"
-                  className="flex-1 h-9 bg-white/10 border-white/30 text-white text-sm hover:bg-white/10 justify-between"
+                  variant="outlineNeutral"
+                  className="flex-1 h-9 bg-white/5 border-white/10 text-white text-sm md:hover:bg-white/10 justify-between transition-colors"
                 >
                   <span>
                     {selectedDate ? months[selectedDate.getMonth()].label : "Månad"}
