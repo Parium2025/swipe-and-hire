@@ -62,7 +62,7 @@ export const ScrollTransition = () => {
             ease: "easeInOut"
           }}
         >
-          <div className="w-12 h-12 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 flex items-center justify-center group-hover:bg-white/10 group-hover:border-secondary/30 transition-all">
+          <div className="w-12 h-12 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 flex items-center justify-center group-hover:bg-white/10 group-hover:border-secondary/30 transition-all">
             <ChevronDown className="w-6 h-6 text-white/70 group-hover:text-secondary transition-colors" />
           </div>
           
