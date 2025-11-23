@@ -646,14 +646,14 @@ const Auth = () => {
                 onChange={(e) => setEmailForReset(e.target.value)}
                 required
                 disabled={resending}
-                className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 placeholder:text-white/60"
+                className="bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white/60"
               />
               <Button type="submit" className="w-full transition-all duration-300 md:hover:bg-primary/90" disabled={resending}>
                 {resending ? 'Skickar...' : 'Skicka ny länk'}
               </Button>
             </form>
             {resendMessage && (
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-4">
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg p-4">
                 <p className="text-sm text-white whitespace-pre-line">{resendMessage}</p>
               </div>
             )}

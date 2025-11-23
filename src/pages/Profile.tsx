@@ -1049,7 +1049,7 @@ const Profile = () => {
 
       <div className="space-y-6">
         {/* Profile Image/Video Card */}
-        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg">
           <div className="p-6 md:p-4 space-y-2">
             <h3 className="text-base font-semibold text-white text-center">
               Profilbild/Profilvideo
