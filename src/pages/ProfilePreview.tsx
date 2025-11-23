@@ -438,7 +438,7 @@ export default function ProfilePreview() {
             {/* PRESENTATION / OM MIG */}
             {data.bio && (
               <div className="space-y-1">
-                <h3 className="text-xs font-semibold text-white tracking-wide px-1">Presentation/Om mig</h3>
+                <h3 className="text-xs font-semibold text-white tracking-wide px-1">Presentation/Ommig</h3>
                 <div className="bg-white/5 p-2 rounded-lg border border-white/10">
                   <p className="text-xs text-white whitespace-pre-wrap leading-relaxed">
                     {data.bio}
