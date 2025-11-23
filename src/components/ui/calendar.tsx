@@ -2,6 +2,7 @@ import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import { sv } from "date-fns/locale";
+import { format } from "date-fns";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -14,12 +15,20 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
+  const formatCaption = React.useCallback((month: Date) => {
+    const monthName = format(month, "MMMM yyyy", { locale: sv });
+    return monthName.charAt(0).toUpperCase() + monthName.slice(1);
+  }, []);
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
       locale={sv}
       weekStartsOn={1}
       className={cn("p-3", className)}
+      formatters={{
+        formatCaption,
+      }}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
