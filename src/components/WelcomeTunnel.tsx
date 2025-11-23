@@ -193,50 +193,58 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     const isVideo = file.type.startsWith('video/');
     setIsUploadingMedia(true);
     setUploadingMediaType(isVideo ? 'video' : 'image');
+    setUploadProgress(0);
     
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}/${Date.now()}-profile-media.${fileExt}`;
+      if (!user?.id) throw new Error('User not found');
       
-      const { error: uploadError } = await supabase.storage
-        .from('profile-media')
-        .upload(fileName, file);
+      // Simulate progress for videos
+      let progressInterval: number | null = null;
+      if (isVideo) {
+        progressInterval = window.setInterval(() => {
+          setUploadProgress(prev => {
+            if (prev >= 90) return prev;
+            return prev + 10;
+          });
+        }, 200);
+      }
+      
+      // Använd mediaManager för konsistent bucket-hantering
+      const { storagePath, error: uploadError } = await uploadMedia(
+        file,
+        isVideo ? 'profile-video' : 'profile-image',
+        user.id
+      );
+      
+      if (progressInterval) clearInterval(progressInterval);
+      setUploadProgress(100);
       
       if (uploadError) throw uploadError;
       
-      // CRITICAL FIX: Store only the storage path, not the public URL
-      // This ensures videos never "disappear" due to URL issues
-      const storagePath = fileName;
-      const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
-      
-      // Build public URL for immediate preview (but don't store it)
-      const { data: { publicUrl } } = supabase.storage
-        .from('profile-media')
-        .getPublicUrl(fileName);
-      
-      // Preload in background for offline access
-      import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
-        preloadSingleFile(publicUrl).catch(err => console.log('Preload error:', err));
-      });
+      // Preserve current profile image as cover if none set yet and uploading video
+      if (isVideo && !formData.coverImageUrl && formData.profileImageUrl && formData.profileMediaType === 'image') {
+        handleInputChange('coverImageUrl', formData.profileImageUrl);
+      }
       
       // Store the storage path (not the URL) so it never expires
       handleInputChange('profileImageUrl', storagePath);
-      handleInputChange('profileMediaType', mediaType);
+      handleInputChange('profileMediaType', isVideo ? 'video' : 'image');
       
       toast({
-        title: `Profil${mediaType === 'video' ? 'video' : 'bild'} uppladdad!`,
-        description: `Din profil${mediaType === 'video' ? 'video' : 'bild'} har uppdaterats.`
+        title: `${isVideo ? 'Video' : 'Bild'} uppladdad!`,
+        description: `Din profil${isVideo ? 'video' : 'bild'} har laddats upp.`
       });
     } catch (error) {
       console.error('Upload error:', error);
       toast({
         title: "Fel vid uppladdning",
-        description: "Kunde inte ladda upp filen.",
+        description: error instanceof Error ? error.message : "Kunde inte ladda upp filen.",
         variant: "destructive"
       });
     } finally {
       setIsUploadingMedia(false);
       setUploadingMediaType(null);
+      setUploadProgress(0);
     }
   };
 
