@@ -479,7 +479,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                   e.preventDefault();
                                 }
                               }}
-                              className="px-4 py-2 text-white hover:bg-slate-700/80 focus:bg-slate-700/80 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20"
+                              className="px-4 py-2 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20"
                             >
                               <div className="flex flex-col">
                                 <span className="font-medium text-white">+ Skapa en ny mall</span>
@@ -497,7 +497,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                     e.preventDefault();
                                   }
                                 }}
-                                className="px-4 py-2 text-white hover:bg-slate-700/80 focus:bg-slate-700/80 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20 last:border-b-0"
+                                className="px-4 py-2 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20 last:border-b-0"
                               >
                                 <div className="flex items-center justify-between w-full gap-3">
                                   <button

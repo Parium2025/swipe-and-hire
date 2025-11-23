@@ -292,7 +292,7 @@ const LocationSearchInput = ({
           </button>
         </PopoverTrigger>
         <PopoverContent 
-          className="z-50 w-[var(--radix-popover-trigger-width)] p-0 bg-slate-700/95 backdrop-blur-md border-slate-500/30 pointer-events-auto" 
+          className="z-50 w-[var(--radix-popover-trigger-width)] p-0 bg-white/5 backdrop-blur-md border-white/20 pointer-events-auto" 
           align="start"
           side="bottom"
           sideOffset={4}
