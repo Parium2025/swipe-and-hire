@@ -65,12 +65,12 @@ const handler = async (req: Request): Promise<Response> => {
         const tokenHash = url.searchParams.get('token_hash');
         
         if (token || tokenHash) {
-          // Bygg vår egen länk som går via reset-redirect med issued timestamp
-          const projectUrl = Deno.env.get("SUPABASE_URL") ?? "";
+          // Bygg direkt länk till parium.se
+          const redirectUrl = "https://parium.se";
           const tokenParam = token ? `token=${token}` : `token_hash=${tokenHash}`;
-          resetUrl = `${projectUrl}/functions/v1/reset-redirect?${tokenParam}&type=recovery&issued=${issued}`;
+          resetUrl = `${redirectUrl}/auth?reset=true&${tokenParam}&type=recovery`;
           console.log(`✅ CUSTOM RESET URL: ${resetUrl}`);
-          console.log(`📍 Using SUPABASE_URL: ${projectUrl}`);
+          console.log(`📍 Using parium.se domain`);
         } else {
           console.error('❌ No token or token_hash found in Supabase link');
         }
