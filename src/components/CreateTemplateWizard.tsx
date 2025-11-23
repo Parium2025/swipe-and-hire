@@ -133,7 +133,7 @@ const SortableQuestionItem = ({
             onClick={() => onEdit(question)}
             variant="ghost"
             size="sm"
-            className="text-white/70 hover:text-white hover:bg-white/10 h-6 w-6 p-0"
+            className="text-white/70 hover:text-white hover:bg-white/10 hover:border-white/50 h-6 w-6 p-0"
           >
             <Pencil className="h-3 w-3 text-[hsl(var(--pure-white))]" />
           </Button>
@@ -1061,7 +1061,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                 variant="ghost"
                 size="icon"
                 onClick={handleClose}
-                className="absolute right-4 top-4 h-8 w-8 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                className="absolute right-4 top-4 h-8 w-8 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10 md:hover:border-white/50"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -1074,7 +1074,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                   setShowQuestionForm(false);
                   setEditingQuestion(null);
                 }}
-                className="absolute right-4 top-4 h-8 w-8 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                className="absolute right-4 top-4 h-8 w-8 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10 md:hover:border-white/50"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -1590,7 +1590,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                         }}
                         variant="ghost"
                         size="sm"
-                        className="text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                        className="text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10 md:hover:border-white/50"
                       >
                         <X className="h-4 w-4 text-[hsl(var(--pure-white))]" />
                       </Button>

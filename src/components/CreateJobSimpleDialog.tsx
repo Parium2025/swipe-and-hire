@@ -340,7 +340,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                   variant="ghost"
                   size="icon"
                   onClick={handleClose}
-                  className="absolute right-2 top-2 h-8 w-8 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                  className="absolute right-2 top-2 h-8 w-8 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10 md:hover:border-white/50"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -397,7 +397,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                       <Button
                         variant="outline"
                         size="sm"
-                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-auto min-h-[44px] py-2 whitespace-normal pr-10"
+                        className="w-full bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between mt-1 text-left h-auto min-h-[44px] py-2 whitespace-normal pr-10"
                         title={selectedTemplate?.name || 'Ingen mall (valfritt)'}
                       >
                         <span className="text-left flex-1 px-1 text-sm whitespace-normal break-words">
@@ -439,7 +439,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                 onKeyDown={(e) => {
                                   e.stopPropagation();
                                 }}
-                                className="pl-10 pr-10 h-10 bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 rounded-lg"
+                                className="pl-10 pr-10 h-10 bg-white/5 border-white/20 text-white placeholder:text-white/60 hover:border-white/50 focus:border-white/40 rounded-lg"
                                 autoComplete="off"
                                 autoFocus
                               />
@@ -574,7 +574,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                 }
                               }, 0);
                             }}
-                            className="h-8 w-8 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10"
+                            className="h-8 w-8 text-white/70 transition-all duration-300 md:hover:text-white md:hover:bg-white/10 md:hover:border-white/50"
                           >
                             <X className="h-4 w-4" />
                           </Button>

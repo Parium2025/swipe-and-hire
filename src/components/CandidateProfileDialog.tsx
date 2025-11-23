@@ -170,7 +170,7 @@ export const CandidateProfileDialog = ({
                     }
                   });
                 }}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors text-foreground cursor-pointer"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 hover:border-white/50 border border-white/10 rounded-lg transition-colors text-foreground cursor-pointer"
               >
                 <FileText className="h-4 w-4" />
                 Visa CV
