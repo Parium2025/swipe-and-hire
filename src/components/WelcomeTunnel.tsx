@@ -782,7 +782,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="outlineNeutral"
-                          className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white md:hover:bg-white/10 transition-colors justify-between"
+                          className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white md:hover:bg-white/10 md:hover:text-white transition-colors justify-between"
                         >
                         <span className="truncate">
                           {formData.employmentStatus ? (
