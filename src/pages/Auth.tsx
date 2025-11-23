@@ -185,6 +185,10 @@ const Auth = () => {
       const isReset = searchParams.get('reset') === 'true';
       const confirmed = searchParams.get('confirmed');
       
+      // Parsa hash tidigt så vi kan använda det för token-verifiering
+      const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
+      const hashParams = new URLSearchParams(hash);
+      
       console.log('🔍 AUTH FLOW DEBUG:', {
         isReset,
         url: window.location.href,
@@ -198,7 +202,6 @@ const Auth = () => {
       // FÖRSTA KONTROLLEN: Är det en reset-länk?
       if (isReset) {
         console.log('✅ Reset-länk detekterad');
-        setIsPasswordReset(true);
         
         // ANDRA KONTROLLEN: Kontrollera expired/used parameter från redirect-funktionen
         const isExpired = searchParams.get('expired') === 'true';
@@ -221,10 +224,56 @@ const Auth = () => {
           return;
         }
         
-        console.log('✅ Reset-länk verkar vara ok - fortsätter till formulär');
+        // TREDJE KONTROLLEN: Testa om token faktiskt fungerar innan vi visar formuläret
+        const tokenHashParam = searchParams.get('token_hash') || hashParams.get('token_hash');
+        const tokenParam = searchParams.get('token') || hashParams.get('token');
+        
+        if (tokenHashParam || tokenParam) {
+          console.log('🔍 Verifierar om reset-token är giltig...');
+          
+          try {
+            const verifyOptions: any = { type: 'recovery' };
+            if (tokenHashParam) {
+              verifyOptions.token_hash = tokenHashParam;
+            } else if (tokenParam) {
+              verifyOptions.token = tokenParam;
+            }
+            
+            // Försök verifiera token - om den är redan använd eller ogiltig får vi ett fel
+            const { error: verifyError } = await supabase.auth.verifyOtp(verifyOptions);
+            
+            if (verifyError) {
+              const errorMsg = verifyError.message.toLowerCase();
+              console.log('❌ Token-verifiering misslyckades:', errorMsg);
+              
+              // Token redan använd eller ogiltig
+              if (errorMsg.includes('expired') || errorMsg.includes('invalid') || 
+                  errorMsg.includes('already') || errorMsg.includes('used')) {
+                console.log('❌ Token redan använd - visar consumed-sida');
+                setRecoveryStatus('consumed');
+                return;
+              }
+              
+              // Annat fel
+              console.log('❌ Token-verifiering fel - visar invalid-sida');
+              setRecoveryStatus('invalid');
+              return;
+            }
+            
+            console.log('✅ Token är giltig - visar formulär');
+            setIsPasswordReset(true);
+          } catch (err) {
+            console.error('❌ Token-verifiering exception:', err);
+            setRecoveryStatus('invalid');
+            return;
+          }
+        } else {
+          console.log('✅ Reset utan token - visar formulär');
+          setIsPasswordReset(true);
+        }
       }
       
-      // Hantera recovery tokens från Supabase auth (olika format) + URL-hash
+      // Hantera recovery tokens från Supabase auth (olika format)
       const accessTokenQP = searchParams.get('access_token');
       const refreshTokenQP = searchParams.get('refresh_token');
       const tokenTypeQP = searchParams.get('type');
@@ -234,8 +283,7 @@ const Auth = () => {
       const errorDescQP = searchParams.get('error_description') || searchParams.get('error_message');
       const issuedQP = searchParams.get('issued');
 
-      const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
-      const hashParams = new URLSearchParams(hash);
+      // hashParams redan skapad tidigare för token-verifiering
       const accessTokenHash = hashParams.get('access_token');
       const refreshTokenHash = hashParams.get('refresh_token');
       const tokenTypeHash = hashParams.get('type');
@@ -527,10 +575,14 @@ const Auth = () => {
       
       toast({
         title: "Lösenord uppdaterat",
-        description: "Ditt lösenord har ändrats och du är nu inloggad.",
+        description: "Ditt lösenord har ändrats. Du omdirigeras nu...",
       });
       
-      navigate('/');
+      // Låt auth state change hantera navigationen naturligt istället för manuell navigate
+      // Detta förhindrar "blinkandet" från multiple redirects
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1500);
     } catch (err: any) {
       console.error('Återställning misslyckades:', err);
       const msg = (err?.message || '').toLowerCase();
