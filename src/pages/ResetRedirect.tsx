@@ -42,7 +42,7 @@ const ResetRedirect = () => {
         if (currentTime - issuedTime > tenMinutesInMs) {
           // Länken har gått ut, redirecta till expired-sidan
           const origin = window.location.origin;
-          window.location.replace(`${origin}/auth?recovery_status=expired`);
+          window.location.replace(`${origin}/auth?reset=true&expired=true`);
           return true;
         }
       }
@@ -79,7 +79,7 @@ const ResetRedirect = () => {
       const tenMinutesInMs = 10 * 60 * 1000;
       
       if (currentTime - issuedTime > tenMinutesInMs) {
-        return `${origin}/auth?recovery_status=expired`;
+        return `${origin}/auth?reset=true&expired=true`;
       }
     }
     
