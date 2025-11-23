@@ -31,8 +31,8 @@ interface ProfileViewData {
   location: string;
   phone?: string;
   postal_code?: string;
-  employment_status: string;
-  working_hours: string;
+  employment_type: string;
+  work_schedule: string;
   availability: string;
   cv_url?: string;
   profile_image_url?: string;
@@ -73,8 +73,8 @@ export default function ProfilePreview() {
           location: profile.location || profile.home_location || '',
           phone: profile.phone || '',
           postal_code: (profile as any).postal_code || '',
-          employment_status: profile.employment_status || '',
-          working_hours: profile.working_hours || '',
+          employment_type: (profile as any).employment_type || '',
+          work_schedule: (profile as any).work_schedule || '',
           availability: profile.availability || '',
           cv_url: profile.cv_url || '',
           profile_image_url: profile.profile_image_url || '',
@@ -93,8 +93,8 @@ export default function ProfilePreview() {
           location: profile.location ? profile.location.split(',')[0] : profile.home_location?.split(',')[0] || '', // Bara stad
           // Ingen phone
           // Ingen postal_code
-          employment_status: profile.employment_status || '',
-          working_hours: profile.working_hours || '',
+          employment_type: (profile as any).employment_type || '',
+          work_schedule: (profile as any).work_schedule || '',
           availability: profile.availability || '',
           cv_url: profile.cv_url || '',
           profile_image_url: profile.profile_image_url || '',
@@ -451,7 +451,7 @@ export default function ProfilePreview() {
             )}
 
             {/* ANSTÄLLNINGSINFORMATION */}
-            {(data.employment_status || data.working_hours || data.availability) && (
+            {(data.employment_type || data.work_schedule || data.availability) && (
               <div className="space-y-1">
                 <h3 className="text-xs font-semibold text-white tracking-wide px-1 flex items-center gap-1">
                   <Briefcase className="h-3 w-3 text-white" />
@@ -461,14 +461,14 @@ export default function ProfilePreview() {
                   {/* Anställningsstatus */}
                   <div className="space-y-0.5">
                     <p className="text-xs text-white font-medium tracking-wide leading-relaxed">Anställningsstatus?</p>
-                    <p className="text-[11px] text-white leading-relaxed">Svar: {getEmploymentStatusLabel(data.employment_status)}</p>
+                    <p className="text-[11px] text-white leading-relaxed">Svar: {getEmploymentStatusLabel(data.employment_type)}</p>
                   </div>
 
                   {/* Arbetstid - visa bara om inte arbetssökande */}
-                  {data.employment_status !== 'arbetssokande' && data.working_hours && (
+                  {data.employment_type !== 'arbetssokande' && data.work_schedule && (
                     <div className="space-y-0.5">
                       <p className="text-xs text-white font-medium tracking-wide leading-relaxed">Hur mycket jobbar du idag?</p>
-                      <p className="text-[11px] text-white leading-relaxed">Svar: {getWorkingHoursLabel(data.working_hours)}</p>
+                      <p className="text-[11px] text-white leading-relaxed">Svar: {getWorkingHoursLabel(data.work_schedule)}</p>
                     </div>
                   )}
 
@@ -746,7 +746,7 @@ export default function ProfilePreview() {
           </Card>
 
           {/* Anställningsinformation */}
-          {(consentedData?.employment_status || consentedData?.working_hours || consentedData?.availability) && (
+          {(consentedData?.employment_type || consentedData?.work_schedule || consentedData?.availability) && (
             <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
               <CardHeader className="pb-1.5 pt-2">
                 <div className="flex items-center gap-1.5">
@@ -757,18 +757,18 @@ export default function ProfilePreview() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-2 text-xs pb-2">
-                {consentedData?.employment_status && (
+                {consentedData?.employment_type && (
                   <div className="flex flex-col items-start gap-0.5">
                     <p className="text-xs text-white font-medium">Anställningsstatus?</p>
                     <p className="text-white/90 text-[10px]">
-                      Svar: {getEmploymentStatusLabel(consentedData.employment_status)}
+                      Svar: {getEmploymentStatusLabel(consentedData.employment_type)}
                     </p>
                   </div>
                 )}
-                {consentedData?.working_hours && (
+                {consentedData?.work_schedule && (
                   <div className="flex flex-col items-start gap-0.5">
                     <p className="text-xs text-white font-medium">Arbetstid?</p>
-                    <p className="text-white/90 text-[10px]">Svar: {getWorkingHoursLabel(consentedData.working_hours)}</p>
+                    <p className="text-white/90 text-[10px]">Svar: {getWorkingHoursLabel(consentedData.work_schedule)}</p>
                   </div>
                 )}
                 {consentedData?.availability && (
