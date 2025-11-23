@@ -61,7 +61,7 @@ const EmployerSettings = () => {
               id="email"
               value={user?.email || ''} 
               disabled 
-              className="bg-white/5 border-white/10 text-white/70 h-9 text-sm cursor-not-allowed"
+              className="bg-white/5 border-white/10 text-white/70 h-9 text-sm cursor-not-allowed hover:border-white/50"
             />
           </div>
         </div>
@@ -76,7 +76,7 @@ const EmployerSettings = () => {
               type="password"
               value={passwordData.currentPassword}
               onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm hover:border-white/50"
             />
           </div>
           <div className="space-y-1.5">
@@ -86,7 +86,7 @@ const EmployerSettings = () => {
               type="password"
               value={passwordData.newPassword}
               onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm hover:border-white/50"
             />
           </div>
           <div className="space-y-1.5">
@@ -96,7 +96,7 @@ const EmployerSettings = () => {
               type="password"
               value={passwordData.confirmPassword}
               onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm hover:border-white/50"
             />
           </div>
           <div className="flex justify-center pt-1">
