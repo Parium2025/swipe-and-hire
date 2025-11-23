@@ -31,36 +31,8 @@ const handler = async (req: Request): Promise<Response> => {
       allParams: Object.fromEntries(url.searchParams.entries())
     });
 
-    // För GAMLA länkar utan issued parameter - betrakta som expired
-    if (!issued) {
-      console.log('❌ GAMMAL RESET LINK utan issued timestamp - Redirecting to expired page');
-      return new Response(null, {
-        status: 302,
-        headers: {
-          "Location": "https://parium.se/auth?reset=true&expired=true",
-          ...corsHeaders,
-        },
-      });
-    }
-
-    // Kontrollera om länken är över 1.5 minuter gammal (90 000 ms)
-    const issuedTime = parseInt(issued);
-    const currentTime = Date.now();
-    const timeDiff = currentTime - issuedTime;
-    const expirationMs = 90 * 1000; // 1.5 minuter
-    
-    console.log('Time check:', { issuedTime, currentTime, timeDiff, expirationMs });
-    
-    if (timeDiff > expirationMs) {
-      console.log('❌ RESET LINK EXPIRED (över 1.5 minuter) - Redirecting to expired page');
-      return new Response(null, {
-        status: 302,
-        headers: {
-          "Location": "https://parium.se/auth?reset=true&expired=true",
-          ...corsHeaders,
-        },
-      });
-    }
+    // Ingen extra tidskontroll längre - vi förlitar oss på backend-tokenens egen expiration
+    console.log('Reset-redirect utan extra tidskontroll - token expiration hanteras av backend.');
 
     // Om länken är YNGRE än 1.5 minuter → Redirect till auth med token
     // Token-användning kontrolleras INTE här - det sker först när användaren faktiskt 
