@@ -253,8 +253,9 @@ const Auth = () => {
                          searchParams.get('token_hash') || 
                          searchParams.get('access_token');
         
-        if (!hasTokens && !issuedParam) {
-          console.log('❌ GAMMAL RESET-LÄNK utan tokens och utan issued - Visar expired');
+        // Alla reset-länkar utan issued betraktas som utgångna, oavsett tokens
+        if (!issuedParam) {
+          console.log('❌ RESET-LÄNK UTAN ISSUED - Visar expired');
           setRecoveryStatus('expired');
           return;
         }
