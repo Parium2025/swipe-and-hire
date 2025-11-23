@@ -451,7 +451,7 @@ export default function ProfilePreview() {
             )}
 
             {/* ANSTÄLLNINGSINFORMATION */}
-            {data.employment_status && (
+            {(data.employment_status || data.working_hours || data.availability) && (
               <div className="space-y-1">
                 <h3 className="text-xs font-semibold text-white tracking-wide px-1 flex items-center gap-1">
                   <Briefcase className="h-3 w-3 text-white" />
