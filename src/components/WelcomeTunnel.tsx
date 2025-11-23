@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import FileUpload from '@/components/FileUpload';
@@ -249,20 +248,30 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   };
 
   const uploadCoverImage = async (file: File) => {
+    if (!user?.id) {
+      toast({
+        title: "Fel vid uppladdning",
+        description: "Användare saknas.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsUploadingCover(true);
     
     try {
-      if (!user?.id) throw new Error('User not found');
-      
-      // Använd mediaManager för cover-bild
+      // Använd mediaManager för cover-bild uppladdning
       const { storagePath, error: uploadError } = await uploadMedia(
         file,
         'cover-image',
         user.id
       );
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        throw uploadError;
+      }
       
+      // Store the storage path directly
       handleInputChange('coverImageUrl', storagePath);
       
       toast({
@@ -273,7 +282,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       console.error('Cover upload error:', error);
       toast({
         title: "Fel vid uppladdning",
-        description: "Kunde inte ladda upp cover-bilden.",
+        description: error instanceof Error ? error.message : "Kunde inte ladda upp cover-bilden.",
         variant: "destructive"
       });
     } finally {
@@ -1074,17 +1083,9 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   </Label>
                   
                   {isUploadingMedia && (
-                    <div className="space-y-2">
-                      <Badge variant="outline" className="bg-white/10 text-white border-white/20 animate-pulse rounded-md px-3 py-1.5">
-                        {uploadingMediaType === 'video' ? 'Laddar upp video...' : 'Laddar upp bild...'}
-                      </Badge>
-                      {uploadProgress > 0 && (
-                        <div className="space-y-1">
-                          <Progress value={uploadProgress} className="h-2 bg-white/10" />
-                          <span className="text-xs text-white/80">{uploadProgress}%</span>
-                        </div>
-                      )}
-                    </div>
+                    <Badge variant="outline" className="bg-white/10 text-white border-white/20 animate-pulse rounded-md px-3 py-1.5">
+                      {uploadingMediaType === 'video' ? `${uploadProgress}%` : `Laddar upp bild...`}
+                    </Badge>
                   )}
                   
                   {formData.profileImageUrl && !isUploadingMedia && (
@@ -1097,7 +1098,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 {/* Cover image upload - show when video exists */}
                 {formData.profileMediaType === 'video' && formData.profileImageUrl && (
                   <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 w-full justify-center">
                       <Button 
                         variant="outline" 
                         size="sm"
