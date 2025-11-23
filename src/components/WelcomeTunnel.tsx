@@ -1108,6 +1108,18 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                       >
                         {formData.coverImageUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
                       </Button>
+                      
+                      {formData.coverImageUrl && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteCoverImage();
+                          }}
+                          className="bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
                     <Input 
                       type="file" 
