@@ -74,7 +74,7 @@ export function CandidatesTable({
       <div className="rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="border-white/10 hover:bg-white/5">
+            <TableRow className="border-white/10 hover:bg-white/5 hover:border-white/50">
               <TableHead className="text-foreground">Kandidat</TableHead>
               <TableHead className="text-foreground">Tjänst</TableHead>
               <TableHead className="text-foreground">Status</TableHead>
@@ -90,7 +90,7 @@ export function CandidatesTable({
               return (
                 <TableRow
                   key={application.id}
-                  className="border-white/10 hover:bg-white/5 cursor-pointer transition-all duration-150 active:bg-white/10 active:scale-[0.99]"
+                  className="border-white/10 hover:bg-white/5 hover:border-white/50 cursor-pointer transition-all duration-150 active:bg-white/10 active:scale-[0.99]"
                   onClick={() => handleRowClick(application)}
                 >
                   <TableCell>

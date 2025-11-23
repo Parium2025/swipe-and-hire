@@ -76,7 +76,7 @@ const Dashboard = memo(() => {
           <div className="hidden md:block overflow-x-auto -mx-2">
             <Table>
               <TableHeader>
-                <TableRow className="border-white/20 hover:bg-white/5">
+                <TableRow className="border-white/20 hover:bg-white/5 hover:border-white/50">
                   <TableHead className="text-white font-semibold text-sm px-2">Titel</TableHead>
                   <TableHead className="text-white font-semibold text-sm px-2">Status</TableHead>
                   <TableHead className="text-white font-semibold text-sm text-center px-2">Visningar</TableHead>
@@ -103,7 +103,7 @@ const Dashboard = memo(() => {
                   filteredAndSortedJobs.map((job) => (
                     <TableRow 
                       key={job.id}
-                      className="border-white/10 hover:bg-white/5 cursor-pointer transition-colors"
+                      className="border-white/10 hover:bg-white/5 hover:border-white/50 cursor-pointer transition-colors"
                       onClick={() => navigate(`/job-details/${job.id}`)}
                     >
                       <TableCell className="font-medium text-white px-2 py-2">

@@ -276,7 +276,7 @@ const SupportAdmin = () => {
                 {tickets.map((ticket) => (
                   <div
                     key={ticket.id}
-                    className={`p-4 border-b border-white/10 cursor-pointer hover:bg-white/5 transition-colors ${
+                    className={`p-4 border-b border-white/10 cursor-pointer hover:bg-white/5 hover:border-white/50 transition-colors ${
                       selectedTicket?.id === ticket.id ? 'bg-white/10' : ''
                     }`}
                     onClick={() => setSelectedTicket(ticket)}
