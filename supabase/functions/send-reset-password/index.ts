@@ -66,12 +66,11 @@ const handler = async (req: Request): Promise<Response> => {
         
         if (token || tokenHash) {
           // Bygg vår egen länk som går via reset-redirect med issued timestamp
-          // TEMPORARY FIX: Hardcode domain until REDIRECT_URL propagates
-          const redirectUrl = "https://parium.se";
+          const projectUrl = Deno.env.get("SUPABASE_URL") ?? "";
           const tokenParam = token ? `token=${token}` : `token_hash=${tokenHash}`;
-          resetUrl = `${redirectUrl}/reset-redirect?${tokenParam}&type=recovery&issued=${issued}`;
+          resetUrl = `${projectUrl}/functions/v1/reset-redirect?${tokenParam}&type=recovery&issued=${issued}`;
           console.log(`✅ CUSTOM RESET URL: ${resetUrl}`);
-          console.log(`📍 Using REDIRECT_URL: ${redirectUrl}`);
+          console.log(`📍 Using SUPABASE_URL: ${projectUrl}`);
         } else {
           console.error('❌ No token or token_hash found in Supabase link');
         }
