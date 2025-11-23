@@ -1417,8 +1417,8 @@ const Profile = () => {
                         <DropdownMenu modal={false}>
                           <DropdownMenuTrigger asChild>
                           <Button
-                            variant="outline"
-                            className="w-full h-9 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
+                            variant="outlineNeutral"
+                            className="w-full h-9 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
                           >
                               <span className="truncate">
                                 {employmentStatus ? (
