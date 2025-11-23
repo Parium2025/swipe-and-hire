@@ -423,7 +423,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     if (!formData.coverImageUrl) return;
     
     try {
-      setIsUploadingCover(true);
       // Hämta den signerade URL:en för den befintliga cover-bilden
       const signedUrl = await getMediaUrl(formData.coverImageUrl, 'cover-image', 86400);
       if (signedUrl) {
@@ -437,8 +436,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         description: "Kunde inte ladda cover-bilden för redigering.",
         variant: "destructive"
       });
-    } finally {
-      setIsUploadingCover(false);
     }
   };
 
