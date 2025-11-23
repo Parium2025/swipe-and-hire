@@ -492,9 +492,13 @@ const Auth = () => {
           hasSession = true;
         } else if (urlTokenHashParam || urlTokenParam) {
           console.log('✅ Using token/token_hash from URL');
+          // VIKTIGT: Använd ANTINGEN token_hash ELLER token, aldrig båda samtidigt
           const verifyOptions: any = { type: 'recovery' };
-          if (urlTokenHashParam) verifyOptions.token_hash = urlTokenHashParam;
-          if (urlTokenParam) verifyOptions.token = urlTokenParam;
+          if (urlTokenHashParam) {
+            verifyOptions.token_hash = urlTokenHashParam;
+          } else if (urlTokenParam) {
+            verifyOptions.token = urlTokenParam;
+          }
           
           const { error } = await supabase.auth.verifyOtp(verifyOptions);
           if (error) throw error;
