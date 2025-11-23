@@ -165,7 +165,7 @@ export function BirthDatePicker({
                   <DropdownMenuItem 
                     key={year} 
                     onClick={() => handleYearChange(year.toString())} 
-                    className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white"
+                    className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-2 text-white"
                   >
                     {year}
                   </DropdownMenuItem>
@@ -196,7 +196,7 @@ export function BirthDatePicker({
                   <DropdownMenuItem 
                     key={month.value} 
                     onClick={() => handleMonthChange(month.value.toString())} 
-                    className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 text-white"
+                    className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-2 text-white"
                   >
                     {month.label}
                   </DropdownMenuItem>

@@ -1445,28 +1445,28 @@ const Profile = () => {
                             sideOffset={6}
                             avoidCollisions={true}
                           >
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('tillsvidareanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                            <DropdownMenuItem onClick={() => setEmploymentStatus('tillsvidareanställning')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                               Fast anställning
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('visstidsanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                            <DropdownMenuItem onClick={() => setEmploymentStatus('visstidsanställning')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                               Visstidsanställning
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('provanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                            <DropdownMenuItem onClick={() => setEmploymentStatus('provanställning')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                               Provanställning
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('interim')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                            <DropdownMenuItem onClick={() => setEmploymentStatus('interim')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                               Interim anställning
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('bemanningsanställning')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                            <DropdownMenuItem onClick={() => setEmploymentStatus('bemanningsanställning')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                               Bemanningsanställning
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('egenforetagare')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                            <DropdownMenuItem onClick={() => setEmploymentStatus('egenforetagare')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                               Egenföretagare / Frilans
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('arbetssokande')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                            <DropdownMenuItem onClick={() => setEmploymentStatus('arbetssokande')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                               Arbetssökande
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setEmploymentStatus('annat')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                            <DropdownMenuItem onClick={() => setEmploymentStatus('annat')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                               Annat
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -1504,13 +1504,13 @@ const Profile = () => {
                               sideOffset={6}
                               avoidCollisions={true}
                             >
-                              <DropdownMenuItem onClick={() => setWorkingHours('heltid')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                              <DropdownMenuItem onClick={() => setWorkingHours('heltid')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                                 Heltid
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setWorkingHours('deltid')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                              <DropdownMenuItem onClick={() => setWorkingHours('deltid')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                                 Deltid
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setWorkingHours('varierande')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                              <DropdownMenuItem onClick={() => setWorkingHours('varierande')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                                 Varierande / Flexibelt
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -1554,22 +1554,22 @@ const Profile = () => {
                             sideOffset={6}
                             avoidCollisions={true}
                           >
-                            <DropdownMenuItem onClick={() => setAvailability('omgaende')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                            <DropdownMenuItem onClick={() => setAvailability('omgaende')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                               Omgående
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAvailability('inom-1-manad')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                            <DropdownMenuItem onClick={() => setAvailability('inom-1-manad')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                               Inom 1 månad
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAvailability('inom-3-manader')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                            <DropdownMenuItem onClick={() => setAvailability('inom-3-manader')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                               Inom 3 månader
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAvailability('inom-6-manader')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                            <DropdownMenuItem onClick={() => setAvailability('inom-6-manader')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                               Inom 6 månader
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAvailability('ej-aktuellt')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                            <DropdownMenuItem onClick={() => setAvailability('ej-aktuellt')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                               Inte aktuellt just nu
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setAvailability('osaker')} className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-3 text-white">
+                            <DropdownMenuItem onClick={() => setAvailability('osaker')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                               Osäker
                             </DropdownMenuItem>
                           </DropdownMenuContent>

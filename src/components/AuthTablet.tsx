@@ -957,7 +957,7 @@ const AuthTablet = ({
                                                  setSearchTerm('');
                                                  setIndustryMenuOpen(false);
                                                }}
-                                             className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 px-3 text-white flex items-center justify-between transition-colors touch-manipulation"
+                                              className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-2 px-3 text-white flex items-center justify-between transition-colors touch-manipulation"
                                            >
                                              <span className="flex-1 pr-2">{industryOption}</span>
                                              {employerData.industry === industryOption && (
@@ -978,7 +978,7 @@ const AuthTablet = ({
                                                setSearchTerm('');
                                                setIndustryMenuOpen(false);
                                              }}
-                                           className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 px-3 text-white border-t border-slate-600/30 transition-colors touch-manipulation"
+                                           className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-2 px-3 text-white border-t border-slate-600/30 transition-colors touch-manipulation"
                                          >
                                            <span className="flex-1">Använd "{searchTerm}"</span>
                                          </DropdownMenuItem>
@@ -1032,7 +1032,7 @@ const AuthTablet = ({
                                              setEmployerData(prev => ({ ...prev, employeeCount: count }));
                                              setEmployeeMenuOpen(false);
                                            }}
-                                          className="cursor-pointer hover:bg-slate-700/70 focus:bg-slate-700/70 py-2 px-3 text-white flex items-center justify-between transition-colors touch-manipulation"
+                                          className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-2 px-3 text-white flex items-center justify-between transition-colors touch-manipulation"
                                         >
                                           <span className="flex-1 pr-2">{count}</span>
                                           {employerData.employeeCount === count && (
