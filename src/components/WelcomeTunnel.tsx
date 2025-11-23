@@ -179,6 +179,28 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       setCurrentStep(currentStep + 1);
     }
   };
+  
+  // Preload next step content when on previous step
+  useEffect(() => {
+    // Preload avatar/initials for step 2 when on step 1
+    if (currentStep === 1 && formData.firstName && formData.lastName) {
+      // Force browser to calculate and cache the avatar component
+      const initials = `${formData.firstName?.[0]?.toUpperCase() || ''}${formData.lastName?.[0]?.toUpperCase() || ''}`;
+      // This triggers the browser to pre-render/cache the text
+      const tempDiv = document.createElement('div');
+      tempDiv.style.cssText = 'position:absolute;opacity:0;pointer-events:none;font-size:36px;font-weight:600;';
+      tempDiv.textContent = initials;
+      document.body.appendChild(tempDiv);
+      // Force reflow to ensure rendering
+      tempDiv.offsetHeight;
+      // Cleanup after a tick
+      requestAnimationFrame(() => {
+        if (document.body.contains(tempDiv)) {
+          document.body.removeChild(tempDiv);
+        }
+      });
+    }
+  }, [currentStep, formData.firstName, formData.lastName]);
 
   const handlePrevious = () => {
     if (currentStep > 1) {
@@ -1029,7 +1051,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                           />
                         ) : null}
                         {!formData.profileImageUrl && (
-                          <AvatarFallback delayMs={300} className="text-4xl font-semibold bg-white/20 text-white">
+                          <AvatarFallback delayMs={0} className="text-4xl font-semibold bg-white/20 text-white">
                             {((formData.firstName?.trim()?.[0]?.toUpperCase() || '') + (formData.lastName?.trim()?.[0]?.toUpperCase() || '')) || '?'}
                           </AvatarFallback>
                         )}
