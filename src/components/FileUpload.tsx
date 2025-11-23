@@ -9,6 +9,7 @@ import { preloadSingleFile } from '@/lib/serviceWorkerManager';
 import { Progress } from '@/components/ui/progress';
 import { openCvFile } from '@/utils/cvUtils';
 import { CvViewer } from '@/components/CvViewer';
+import { uploadMedia, getMediaUrl, deleteMedia, type MediaType } from '@/lib/mediaManager';
 
 interface FileUploadProps {
   onFileUploaded: (url: string, fileName: string) => void;
@@ -17,8 +18,7 @@ interface FileUploadProps {
   acceptedFileTypes?: string[];
   maxFileSize?: number;
   questionType?: string;
-  bucketName?: string; // default: 'job-applications'
-  isProfileMedia?: boolean; // Use public profile-media bucket
+  mediaType?: MediaType; // Används för att bestämma bucket via mediaManager
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({
@@ -28,15 +28,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
   acceptedFileTypes = ['image/*', 'video/*', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
   maxFileSize = 10 * 1024 * 1024, // 10MB default
   questionType,
-  bucketName = 'job-applications',
-  isProfileMedia = false
+  mediaType = 'cv' // Default till CV för job-applications bucket
 }) => {
-  // Determine if bucket is public (profile-media, company-logos, job-images)
-  const isPublicBucket = isProfileMedia || 
-                         bucketName === 'profile-media' || 
-                         bucketName === 'company-logos' || 
-                         bucketName === 'job-images';
-  const actualBucket = isProfileMedia ? 'profile-media' : bucketName;
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [previewFile, setPreviewFile] = useState<{ file: File; url: string } | null>(null);
@@ -57,13 +50,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
     setUploading(true);
     setUploadProgress(0);
     try {
-      const user = await supabase.auth.getUser();
-      if (!user.data.user) {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) {
         throw new Error('Du måste vara inloggad för att ladda upp filer');
       }
-
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.data.user.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
       // Simulate progress for better UX
       const progressInterval = setInterval(() => {
@@ -73,26 +63,29 @@ const FileUpload: React.FC<FileUploadProps> = ({
         });
       }, 200);
 
-      const { error: uploadError } = await supabase.storage
-        .from(actualBucket)
-        .upload(fileName, file);
+      // Använd mediaManager för konsekvent uppladdning (sparar endast storage path)
+      const { storagePath, error: uploadError } = await uploadMedia(
+        file,
+        mediaType,
+        data.user.id
+      );
 
       clearInterval(progressInterval);
       setUploadProgress(100);
 
-      if (uploadError) throw uploadError;
+      if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
 
       // ALWAYS store storage path, never URLs (signed or public)
       // This ensures permanent access - URLs are generated on-demand when needed
-      onFileUploaded(fileName, file.name);
+      onFileUploaded(storagePath, file.name);
       
-      // For public buckets, preload for offline access
-      if (isPublicBucket) {
-        const { data: { publicUrl } } = supabase.storage
-          .from(actualBucket)
-          .getPublicUrl(fileName);
-        await preloadSingleFile(publicUrl);
-      }
+      // Förladdda den signerade URL:en i bakgrunden (utan att blockera UI)
+      import('@/lib/serviceWorkerManager').then(async ({ preloadSingleFile }) => {
+        const signed = await getMediaUrl(storagePath, mediaType, 86400);
+        if (signed) {
+          preloadSingleFile(signed).catch(err => console.log('Preload error:', err));
+        }
+      });
       
       toast({
         title: "Fil uppladdad!",
@@ -184,11 +177,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   if (currentFile) {
-    const isPublicUrl = currentFile.url.includes('/storage/v1/object/public/');
-    const isSignedUrl = currentFile.url.includes('/storage/v1/object/sign/');
-    const isStoragePath = !currentFile.url.startsWith('http');
     const isPdf = /\.pdf($|\?)/i.test(currentFile.url) || /\.pdf($|\?)/i.test(currentFile.name || '');
-    const displayUrl = (isPublicUrl || isStoragePath) ? '#' : currentFile.url;
 
     return (
       <div className="border border-white/10 rounded-md p-4 bg-white/5 backdrop-blur-sm space-y-3">
@@ -196,57 +185,24 @@ const FileUpload: React.FC<FileUploadProps> = ({
           <div className="flex items-center gap-2">
             {getFileIcon(currentFile.name)}
             <a
-              href={displayUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              href="#"
               className="text-sm font-medium truncate max-w-[200px] text-white hover:text-primary underline cursor-pointer"
               onClick={async (e) => {
                 e.preventDefault();
                 if (isPdf) return; // Inline viewer below
                 
-                if (actualBucket === 'job-applications') {
-                  await openCvFile({
-                    cvUrl: currentFile.url,
-                    onError: (error) => {
-                      toast({
-                        title: "Fel vid öppning",
-                        description: error.message,
-                        variant: "destructive"
-                      });
-                    }
-                  });
-                  return;
-                }
-                
-                const popup = window.open('', '_blank');
-                const openUrl = (url?: string | null) => {
-                  if (!url) { popup?.close(); return; }
-                  if (popup) popup.location.href = url;
-                  else window.open(url, '_blank');
-                };
-                
-                try {
-                  if (isPublicBucket || 
-                      currentFile.url.includes('/profile-media/') ||
-                      currentFile.url.includes('/company-logos/') ||
-                      currentFile.url.includes('/job-images/')) {
-                    openUrl(currentFile.url);
-                  } else if (isStoragePath) {
-                    const signedUrl = await createSignedUrl(actualBucket, currentFile.url, 86400, currentFile.name);
-                    openUrl(signedUrl);
-                  } else {
-                    const signedUrl = await convertToSignedUrl(currentFile.url, actualBucket, 86400, currentFile.name);
-                    openUrl(signedUrl);
+                // Använd openCvFile för robust öppning av alla filer via mediaManager
+                await openCvFile({
+                  cvUrl: currentFile.url,
+                  fileName: currentFile.name,
+                  onError: (error) => {
+                    toast({
+                      title: "Fel vid öppning",
+                      description: error.message,
+                      variant: "destructive"
+                    });
                   }
-                } catch (err) {
-                  console.error('Error opening file:', err);
-                  popup?.close();
-                  toast({
-                    title: "Fel vid öppning",
-                    description: "Kunde inte öppna filen",
-                    variant: "destructive"
-                  });
-                }
+                });
               }}
             >
               {currentFile.name}
