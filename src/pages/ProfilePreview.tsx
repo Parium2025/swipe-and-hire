@@ -745,9 +745,25 @@ export default function ProfilePreview() {
             </CardContent>
           </Card>
 
+          {/* Presentation - tar upp en kolumn istället för full bredd för grid-layout */}
+          {consentedData?.bio && (
+            <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
+              <CardHeader className="pb-1.5 pt-2">
+                <h3 className="text-xs font-semibold leading-none tracking-tight text-white">
+                  Presentation/Om mig
+                </h3>
+              </CardHeader>
+              <CardContent className="pb-2">
+                <p className="text-white/90 whitespace-pre-wrap leading-relaxed text-[10px]">
+                  {consentedData.bio}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Anställningsinformation */}
           {(consentedData?.employment_status || consentedData?.working_hours || consentedData?.availability) && (
-            <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
+            <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl col-span-2">
               <CardHeader className="pb-1.5 pt-2">
                 <div className="flex items-center gap-1.5">
                   <Briefcase className="h-3.5 w-3.5 text-white flex-shrink-0" />
@@ -765,15 +781,15 @@ export default function ProfilePreview() {
                     </p>
                   </div>
                 )}
-                {consentedData?.working_hours && (
+                {consentedData?.employment_status !== 'arbetssokande' && consentedData?.working_hours && (
                   <div className="flex flex-col items-start gap-0.5">
-                    <p className="text-xs text-white font-medium">Arbetstid?</p>
+                    <p className="text-xs text-white font-medium">Hur mycket jobbar du idag?</p>
                     <p className="text-white/90 text-[10px]">Svar: {getWorkingHoursLabel(consentedData.working_hours)}</p>
                   </div>
                 )}
                 {consentedData?.availability && (
                   <div className="flex flex-col items-start gap-0.5">
-                    <p className="text-xs text-white font-medium">Tillgänglighet?</p>
+                    <p className="text-xs text-white font-medium">När kan du börja nytt jobb?</p>
                     <p className="text-white/90 text-[10px]">Svar: {getAvailabilityLabel(consentedData.availability)}</p>
                   </div>
                 )}
@@ -781,39 +797,18 @@ export default function ProfilePreview() {
             </Card>
           )}
 
-          {/* Presentation - tar upp full bredd */}
-          {consentedData?.bio && (
-            <div className="col-span-2 space-y-0.5">
-              <Card className="bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
-                <CardHeader className="pb-1.5 pt-2">
+          {/* CV - tar upp full bredd - visa bara om cv finns */}
+          {consentedData?.cv_url && signedCvUrl && (
+            <Card className="col-span-2 bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
+              <CardHeader className="pb-1.5 pt-2">
+                <div className="flex items-center gap-1.5">
+                  <FileText className="h-3.5 w-3.5 text-white flex-shrink-0" />
                   <h3 className="text-xs font-semibold leading-none tracking-tight text-white">
-                    Presentation/Om mig
+                    CV
                   </h3>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  <p className="text-white/90 whitespace-pre-wrap leading-relaxed text-[10px]">
-                    {consentedData.bio}
-                  </p>
-                </CardContent>
-              </Card>
-              <div className="flex justify-end px-1">
-                <span className="text-[10px] text-white">{countWords(consentedData.bio)}/150 ord</span>
-              </div>
-            </div>
-          )}
-
-          {/* CV - tar upp full bredd - visas alltid */}
-          <Card className="col-span-2 bg-white/5 backdrop-blur-md border-white/10 shadow-xl">
-            <CardHeader className="pb-1.5 pt-2">
-              <div className="flex items-center gap-1.5">
-                <FileText className="h-3.5 w-3.5 text-white flex-shrink-0" />
-                <h3 className="text-xs font-semibold leading-none tracking-tight text-white">
-                  CV
-                </h3>
-              </div>
-            </CardHeader>
-            <CardContent className="pb-2">
-              {consentedData?.cv_url && signedCvUrl ? (
+                </div>
+              </CardHeader>
+              <CardContent className="pb-2">
                 <div className="bg-white/5 p-3 rounded-lg border border-white/10">
                   <button
                     onClick={handleCvClick}
@@ -824,14 +819,9 @@ export default function ProfilePreview() {
                     <ExternalLink className="h-4 w-4 text-white ml-auto flex-shrink-0" />
                   </button>
                 </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-6 text-center">
-                  <FileText className="h-8 w-8 text-white/30 mb-1.5" />
-                  <p className="text-xs text-white/60">Inget CV uppladdat</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     );
