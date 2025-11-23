@@ -182,7 +182,7 @@ const Billing = () => {
                 
                 {/* Månadsrubrik - klickbar för att expandera */}
                 <div 
-                  className="p-3 cursor-pointer hover:bg-white/5 transition-colors rounded-lg"
+                  className="p-3 cursor-pointer hover:bg-white/5 hover:border-white/50 transition-colors rounded-lg"
                   onClick={() => toggleMonth(monthData.month)}
                 >
                   <div className="flex items-center justify-between">
@@ -217,7 +217,7 @@ const Billing = () => {
                     {monthData.payments.map((payment, index) => (
                       <div key={payment.id}>
                         {index > 0 && <Separator className="bg-white/10" />}
-                        <div className="p-3 hover:bg-white/5 transition-colors">
+                        <div className="p-3 hover:bg-white/5 hover:border-white/50 transition-colors">
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div className="flex items-center gap-2.5 min-w-0">
                               {getStatusIcon(payment.status)}

@@ -265,7 +265,7 @@ export function AppSidebar() {
                         mx-2 rounded-lg transition-all duration-200 active:!bg-transparent
                         ${isActiveUrl(item.url) 
                           ? 'bg-white/20 text-white [&_svg]:text-white' 
-                          : 'text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white'
+                          : 'text-white md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white'
                         }
                       `}
                    >
@@ -301,7 +301,7 @@ export function AppSidebar() {
                         mx-2 rounded-lg transition-all duration-200 active:!bg-transparent
                         ${isActiveUrl(item.url) 
                           ? 'bg-white/20 text-white [&_svg]:text-white' 
-                          : 'text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white'
+                          : 'text-white md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white'
                         }
                       `}
                    >
@@ -336,7 +336,7 @@ export function AppSidebar() {
                         mx-2 rounded-lg transition-all duration-200 active:!bg-transparent
                         ${isActiveUrl(item.url) 
                           ? 'bg-white/20 text-white [&_svg]:text-white' 
-                          : 'text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white'
+                          : 'text-white md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white'
                         }
                       `}
                    >
@@ -371,7 +371,7 @@ export function AppSidebar() {
                         mx-2 rounded-lg transition-all duration-200 active:!bg-transparent
                         ${isActiveUrl(item.url) 
                           ? 'bg-white/20 text-white [&_svg]:text-white' 
-                          : 'text-white md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white'
+                          : 'text-white md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white'
                         }
                       `}
                    >
