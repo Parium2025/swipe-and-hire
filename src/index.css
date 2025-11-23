@@ -898,5 +898,21 @@ All colors MUST be HSL.
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
+
+  /* Force transparent background on selected calendar days - override all defaults */
+  .rdp-day_button[aria-selected="true"],
+  button[aria-selected="true"].rdp-day_button,
+  [role="gridcell"] button[aria-selected="true"] {
+    background-color: transparent !important;
+    background: transparent !important;
+    border: 2px solid white !important;
+    color: white !important;
+  }
+
+  .rdp-day_button[aria-selected="true"]:hover,
+  button[aria-selected="true"].rdp-day_button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
 }
 
