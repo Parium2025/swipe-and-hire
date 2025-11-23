@@ -1413,7 +1413,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <Button
                 onClick={handleNext}
                 disabled={!isStepValid()}
-                className="flex-1 py-4 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-lg focus:outline-none focus:ring-0"
+                className="flex-1 py-4 bg-primary border border-white/10 hover:bg-primary/90 hover:border-white/50 hover:scale-105 transition-all duration-200 text-white font-semibold text-lg rounded-lg focus:outline-none focus:ring-0"
               >
                 Nästa
                 <ArrowRight className="h-4 w-4 ml-2" />
@@ -1422,7 +1422,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <Button
                 onClick={handleNext}
                 disabled={!isStepValid()}
-                className="flex-1 py-4 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform duration-200 text-white font-semibold text-lg rounded-lg focus:outline-none focus:ring-0"
+                className="flex-1 py-4 bg-primary border border-white/10 hover:bg-primary/90 hover:border-white/50 hover:scale-105 transition-all duration-200 text-white font-semibold text-lg rounded-lg focus:outline-none focus:ring-0"
               >
                 {currentStep === 0 ? 'Kom igång' : 'Nästa'}
                 <ArrowRight className="h-4 w-4 ml-2" />
