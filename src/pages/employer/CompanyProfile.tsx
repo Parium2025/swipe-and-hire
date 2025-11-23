@@ -655,7 +655,7 @@ const CompanyProfile = () => {
                 onChange={(e) => setFormData({...formData, company_description: e.target.value})}
                 placeholder="Vi säljer bilar"
                 rows={4}
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/40 resize-none"
+                className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 resize-none"
               />
             </div>
 
@@ -763,7 +763,7 @@ const CompanyProfile = () => {
                     placeholder="Klistra in din sociala medier länk här"
                     value={newSocialLink.url}
                     onChange={(e) => setNewSocialLink(prev => ({ ...prev, url: e.target.value }))}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 text-sm"
+                    className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 h-9 text-sm"
                   />
 
                   <Button
