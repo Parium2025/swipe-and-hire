@@ -151,7 +151,7 @@ export function BirthDatePicker({
                   <span>
                     {selectedDate ? selectedDate.getFullYear() : "År"}
                   </span>
-                  <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                  <ChevronDown className="h-4 w-4 flex-shrink-0 text-white/60" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
@@ -182,7 +182,7 @@ export function BirthDatePicker({
                   <span>
                     {selectedDate ? months[selectedDate.getMonth()].label : "Månad"}
                   </span>
-                  <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                  <ChevronDown className="h-4 w-4 flex-shrink-0 text-white/60" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
@@ -216,7 +216,7 @@ export function BirthDatePicker({
             month={selectedDate}
             onMonthChange={setSelectedDate}
             initialFocus
-            className="p-0 pointer-events-auto text-white [&_.rdp-caption]:text-white [&_.rdp-nav_button]:text-white [&_.rdp-nav_button]:border-white/20 [&_.rdp-nav_button]:hover:bg-white/20"
+            className="p-0 pointer-events-auto text-white [&_.rdp-caption]:text-white [&_.rdp-nav_button]:text-white/60 [&_.rdp-nav_button]:border-white/20 [&_.rdp-nav_button]:hover:bg-white/20 [&_.rdp-nav_button:hover]:text-white"
             classNames={{
               day: "h-9 w-9 p-0 font-normal text-white hover:bg-white/20",
               day_selected: "!bg-transparent !border !border-white !outline-none !shadow-none !text-white font-semibold hover:!bg-white/10",
