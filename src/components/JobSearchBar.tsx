@@ -70,7 +70,7 @@ export const JobSearchBar = ({
             placeholder={placeholder}
             value={searchInput}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10 min-h-[44px] bg-white/5 border-white/20 text-white placeholder:text-white/60"
+            className="pl-10 min-h-[44px] bg-white/5 border-white/20 text-white placeholder:text-white/60 hover:border-white/50"
           />
         </div>
         
@@ -80,7 +80,7 @@ export const JobSearchBar = ({
             <DropdownMenuTrigger asChild>
               <Button 
                 variant="outline" 
-                className="w-auto min-w-[180px] bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white"
+                className="w-auto min-w-[180px] bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white"
               >
                 <UserCheck className="mr-2 h-4 w-4" />
                 {selectedRecruiterId 
@@ -112,7 +112,7 @@ export const JobSearchBar = ({
           <DropdownMenuTrigger asChild>
             <Button 
               variant="outline" 
-              className="w-auto min-w-[180px] bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white"
+              className="w-auto min-w-[180px] bg-white/5 backdrop-blur-sm border-white/20 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white"
             >
               <ArrowUpDown className="mr-2 h-4 w-4" />
               {sortLabels[sortBy]}
@@ -255,7 +255,7 @@ export const JobSearchBar = ({
                     setSearchExpanded(false);
                   }
                 }}
-                className="pl-10 pr-8 bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:outline-none focus-visible:outline-none focus:ring-0"
+                className="pl-10 pr-8 bg-white/10 border-white/20 text-white placeholder:text-white/60 hover:border-white/50 focus:outline-none focus-visible:outline-none focus:ring-0"
               />
               {searchInput && (
                 <Button
