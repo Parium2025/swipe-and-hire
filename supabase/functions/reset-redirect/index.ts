@@ -82,6 +82,7 @@ const handler = async (req: Request): Promise<Response> => {
           const paramName = url.searchParams.get('token_hash') ? 'token_hash' : 'token';
           redirectUrl += `&${paramName}=${token}`;
           if (type) redirectUrl += `&type=${type}`;
+          if (issued) redirectUrl += `&issued=${issued}`;
           
           console.log(`✅ VALID TOKEN - Redirecting to: ${redirectUrl}`);
           return new Response(null, {
@@ -95,10 +96,12 @@ const handler = async (req: Request): Promise<Response> => {
         
         // Extrahera emailen från ursprungliga mailet (om möjligt)
         // För nu redirect till auth med en special parameter för att visa meddelande om nytt mail
+        let redirectUrl = "https://parium.se/auth?reset=true&token_used=true";
+        if (issued) redirectUrl += `&issued=${issued}`;
         return new Response(null, {
           status: 302,
           headers: {
-            "Location": "https://parium.se/auth?reset=true&token_used=true",
+            "Location": redirectUrl,
             ...corsHeaders,
           },
         });
@@ -110,6 +113,7 @@ const handler = async (req: Request): Promise<Response> => {
         const paramName = url.searchParams.get('token_hash') ? 'token_hash' : 'token';
         redirectUrl += `&${paramName}=${token}`;
         if (type) redirectUrl += `&type=${type}`;
+        if (issued) redirectUrl += `&issued=${issued}`;
         
         return new Response(null, {
           status: 302,
@@ -120,10 +124,12 @@ const handler = async (req: Request): Promise<Response> => {
     
     // Om ingen token, redirect till auth
     console.log(`✅ NO TOKEN - Redirecting to auth page`);
+    let redirectUrl = "https://parium.se/auth?reset=true";
+    if (issued) redirectUrl += `&issued=${issued}`;
     return new Response(null, {
       status: 302,
       headers: {
-        "Location": "https://parium.se/auth?reset=true",
+        "Location": redirectUrl,
         ...corsHeaders,
       },
     });
