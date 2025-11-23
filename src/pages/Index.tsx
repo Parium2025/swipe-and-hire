@@ -93,7 +93,7 @@ const CandidatesContent = () => {
             Något gick fel vid hämtning av kandidater
           </div>
         ) : safeApplications.length === 0 && isLoading ? (
-          <Card className="bg-white/5 border-white/10">
+          <Card className="bg-white/5 border-white/10 hover:border-white/50">
             <CardContent className="p-6">
               <div className="space-y-4">
                 <Skeleton className="h-8 w-full bg-white/10" />

@@ -325,7 +325,7 @@ const SupportAdmin = () => {
                       value={selectedTicket.status}
                       onValueChange={(value) => updateTicketStatus(selectedTicket.id, value)}
                     >
-                      <SelectTrigger className="w-32 h-8 text-sm bg-white/10 border-white/20 text-white">
+                      <SelectTrigger className="w-32 h-8 text-sm bg-white/10 border-white/20 hover:border-white/50 text-white">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-background border-border">
@@ -408,7 +408,7 @@ const SupportAdmin = () => {
                       value={replyMessage}
                       onChange={(e) => setReplyMessage(e.target.value)}
                       placeholder="Skriv ditt svar här..."
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50 min-h-24"
+                      className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/50 min-h-24"
                       rows={4}
                     />
                     <div className="flex gap-2">

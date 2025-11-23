@@ -1234,7 +1234,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                           value={formData.title}
                           onChange={(e) => handleInputChange('title', e.target.value)}
                           placeholder="t.ex. Lagerarbetare"
-                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                          className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                         />
                       </div>
 
@@ -1246,7 +1246,7 @@ const EditJobDialog = ({ job, open, onOpenChange, onJobUpdated }: EditJobDialogP
                             onChange={(e) => handleOccupationSearch(e.target.value)}
                             onFocus={() => setShowOccupationDropdown(occupationSearchTerm.length > 0)}
                             placeholder="t.ex. Mjukvaru- och systemutvecklare"
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 focus:border-white/40"
+                            className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 h-9 text-sm pr-10 focus:border-white/40"
                           />
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
                           

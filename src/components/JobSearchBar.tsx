@@ -70,7 +70,7 @@ export const JobSearchBar = ({
             placeholder={placeholder}
             value={searchInput}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10 min-h-[44px] bg-white/5 border-white/20 text-white placeholder:text-white/60 hover:border-white/50"
+            className="pl-10 min-h-[44px] bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white/60"
           />
         </div>
         
@@ -255,7 +255,7 @@ export const JobSearchBar = ({
                     setSearchExpanded(false);
                   }
                 }}
-                className="pl-10 pr-8 bg-white/10 border-white/20 text-white placeholder:text-white/60 hover:border-white/50 focus:outline-none focus-visible:outline-none focus:ring-0"
+                className="pl-10 pr-8 bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 focus:outline-none focus-visible:outline-none focus:ring-0"
               />
               {searchInput && (
                 <Button
