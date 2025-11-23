@@ -55,11 +55,14 @@ export function BirthDatePicker({
     (_, i) => currentYear - i
   )
 
-  // Generate months
-  const months = Array.from({ length: 12 }, (_, i) => ({
-    value: i,
-    label: format(new Date(2000, i, 1), "MMMM", { locale: sv })
-  }))
+  // Generate months with capitalized first letter
+  const months = Array.from({ length: 12 }, (_, i) => {
+    const monthName = format(new Date(2000, i, 1), "MMMM", { locale: sv });
+    return {
+      value: i,
+      label: monthName.charAt(0).toUpperCase() + monthName.slice(1)
+    };
+  })
 
   const handleYearChange = (year: string) => {
     const currentDate = selectedDate || new Date()
