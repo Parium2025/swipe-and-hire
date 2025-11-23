@@ -274,6 +274,9 @@ export default function ProfilePreview() {
                 
                 {/* Info på separata rader */}
                 <div className="space-y-0.5 text-xs text-white">
+                  {isConsented && data.age && (
+                    <p>{data.age} år</p>
+                  )}
                   {data.location && (
                     <p>Bor i {data.location}, Stockholms län</p>
                   )}
@@ -679,11 +682,14 @@ export default function ProfilePreview() {
                 </p>
               )}
               
-              {/* Namn */}
+              {/* Namn och ålder */}
               <div className="text-center">
                 <h2 className="text-lg font-bold text-white drop-shadow-lg">
                   {consentedData?.first_name} {consentedData?.last_name}
                 </h2>
+                {consentedData?.age && (
+                  <p className="text-white/90 text-xs mt-0.5 drop-shadow">{consentedData.age} år</p>
+                )}
               </div>
             </div>
           </div>
