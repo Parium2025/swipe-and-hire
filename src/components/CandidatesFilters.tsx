@@ -45,7 +45,7 @@ export const CandidatesFilters = ({ stats, selectedFilter, onFilterChange }: Can
             </div>
             <Badge 
               variant="outline" 
-              className={isSelected ? 'bg-primary/30 text-primary border-primary/50' : 'bg-white/5 text-muted-foreground border-white/10'}
+              className={isSelected ? 'bg-primary/30 text-primary border-primary/50' : 'bg-white/5 text-muted-foreground border-white/10 hover:border-white/50'}
             >
               {filter.count}
             </Badge>

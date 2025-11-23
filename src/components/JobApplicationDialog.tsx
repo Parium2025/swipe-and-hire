@@ -174,7 +174,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
               placeholder={`Ange ${question.label.toLowerCase()}...`}
               value={answers[question.id] || ''}
               onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-              className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
+              className="bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white/40"
               disabled={question.id === 'email'}
             />
           )}
@@ -193,7 +193,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
               <Button
                 variant={answers[question.id] === 'no' ? "default" : "outline"}
                 onClick={() => handleAnswerChange(question.id, 'no')}
-                className="flex-1 bg-white/5 border-white/20 hover:bg-white/10"
+                className="flex-1 bg-white/5 border-white/20 hover:bg-white/10 hover:border-white/50"
                 size="sm"
               >
                 Nej
@@ -207,7 +207,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
               placeholder="Skriv ditt svar..."
               value={answers[question.id] || ''}
               onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-              className="min-h-[80px] bg-white/5 border-white/20 text-white placeholder:text-white/40"
+              className="min-h-[80px] bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white/40"
             />
           )}
 
@@ -252,7 +252,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
                         
                         handleAnswerChange(question.id, newSelected);
                       }}
-                      className="bg-white/5 border-white/20 hover:bg-white/10"
+                      className="bg-white/5 border-white/20 hover:bg-white/10 hover:border-white/50"
                       size="sm"
                     >
                       {option}
@@ -271,7 +271,7 @@ const JobApplicationDialog = ({ open, onOpenChange, job, questions, onSubmit }: 
                 placeholder="Videolänk (YouTube, Vimeo, etc.)"
                 value={answers[question.id] || ''}
                 onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
+                className="bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white/40"
               />
             </div>
           )}

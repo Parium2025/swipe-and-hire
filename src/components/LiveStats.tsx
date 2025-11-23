@@ -95,7 +95,7 @@ const StatCard = ({
       transition={{ delay: index * 0.1, duration: 0.5 }}
       className="relative group"
     >
-      <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-300">
+      <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/10 hover:border-white/50 transition-all duration-300">
         {/* Icon with glow */}
         <div className="relative mb-4">
           <div className="w-12 h-12 rounded-xl bg-secondary/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
