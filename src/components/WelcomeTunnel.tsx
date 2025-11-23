@@ -402,37 +402,37 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       setIsUploadingMedia(true);
       setUploadingMediaType('image');
       
-      const user = await supabase.auth.getUser();
-      if (!user.data.user) throw new Error('User not authenticated');
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) throw new Error('User not authenticated');
 
-      const fileExt = 'png';
-      const fileName = `${user.data.user.id}/${Date.now()}-profile.${fileExt}`;
+      // Skapa File från Blob så vi kan återanvända mediaManager-logiken
+      const editedFile = new File([editedBlob], 'profile-image.jpg', { type: 'image/jpeg' });
 
-      const { error: uploadError } = await supabase.storage
-        .from('profile-media')
-        .upload(fileName, editedBlob);
+      // Ladda upp till privata bucketen via mediaManager (sparar endast storage path)
+      const { storagePath, error: uploadError } = await uploadMedia(
+        editedFile,
+        'profile-image',
+        data.user.id
+      );
 
-      if (uploadError) throw uploadError;
+      if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
 
-      // Use public URL for profile media (no expiration)
-      const { data: { publicUrl } } = supabase.storage
-        .from('profile-media')
-        .getPublicUrl(fileName);
-
-      const imageUrl = `${publicUrl}?t=${Date.now()}`;
-      
-      // Förladdda bilden i bakgrunden (utan att blockera UI)
-      import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
-        preloadSingleFile(imageUrl).catch(err => console.log('Preload error:', err));
+      // Förladda den signerade URL:en i bakgrunden (utan att blockera UI)
+      import('@/lib/serviceWorkerManager').then(async ({ preloadSingleFile }) => {
+        const signed = await getMediaUrl(storagePath, 'profile-image', 86400);
+        if (signed) {
+          preloadSingleFile(signed).catch(err => console.log('Preload error:', err));
+        }
       });
       
-      handleInputChange('profileImageUrl', imageUrl);
+      // Uppdatera lokalt state i tunneln (sparas vid handleSubmit)
+      handleInputChange('profileImageUrl', storagePath);
       handleInputChange('profileMediaType', 'image');
       
       setImageEditorOpen(false);
       setPendingImageSrc('');
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('Profile image upload error:', error);
       toast({
         title: "Fel vid uppladdning",
         description: "Kunde inte ladda upp bilden.",
@@ -448,31 +448,31 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     try {
       setIsUploadingCover(true);
       
-      const user = await supabase.auth.getUser();
-      if (!user.data.user) throw new Error('User not authenticated');
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) throw new Error('User not authenticated');
 
-      const fileExt = 'png';
-      const fileName = `${user.data.user.id}/${Date.now()}-cover.${fileExt}`;
+      // Skapa File från Blob så vi kan återanvända mediaManager-logiken
+      const editedFile = new File([editedBlob], 'cover-image.jpg', { type: 'image/jpeg' });
 
-      const { error: uploadError } = await supabase.storage
-        .from('profile-media')
-        .upload(fileName, editedBlob);
+      // Ladda upp till privata bucketen via mediaManager (sparar endast storage path)
+      const { storagePath, error: uploadError } = await uploadMedia(
+        editedFile,
+        'cover-image',
+        data.user.id
+      );
 
-      if (uploadError) throw uploadError;
+      if (uploadError || !storagePath) throw uploadError || new Error('Upload failed');
 
-      // Use public URL for profile media (no expiration)
-      const { data: { publicUrl } } = supabase.storage
-        .from('profile-media')
-        .getPublicUrl(fileName);
-
-      const coverUrl = `${publicUrl}?t=${Date.now()}`;
-      
-      // Förladdda bilden i bakgrunden (utan att blockera UI)
-      import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
-        preloadSingleFile(coverUrl).catch(err => console.log('Preload error:', err));
+      // Förladda den signerade URL:en i bakgrunden (utan att blockera UI)
+      import('@/lib/serviceWorkerManager').then(async ({ preloadSingleFile }) => {
+        const signed = await getMediaUrl(storagePath, 'cover-image', 86400);
+        if (signed) {
+          preloadSingleFile(signed).catch(err => console.log('Preload error:', err));
+        }
       });
       
-      handleInputChange('coverImageUrl', coverUrl);
+      // Uppdatera lokalt state i tunneln (sparas vid handleSubmit)
+      handleInputChange('coverImageUrl', storagePath);
       
       setCoverEditorOpen(false);
       setPendingCoverSrc('');
