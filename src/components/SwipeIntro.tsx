@@ -169,7 +169,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
                   <h3 className="text-base font-extrabold leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
                     UX Designer
                   </h3>
-                  <div className="mt-1 text-white text-sm drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">Techno AB</div>
+                  <div className="mt-1 text-white text-sm drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">Parium AB</div>
                   <div className="text-white text-sm drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">Stockholm • Hybrid</div>
                 </div>
 
