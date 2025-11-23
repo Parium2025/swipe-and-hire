@@ -1098,14 +1098,14 @@ const Profile = () => {
                   coverImageUrl={signedCoverUrl}
                   userInitials={`${firstName.charAt(0)}${lastName.charAt(0)}`}
                   alt="Profile video"
-                  className="w-32 h-32 border-4 border-white/10 hover:border-white/20 transition-all rounded-full overflow-hidden"
+                  className="w-32 h-32 border-4 border-white/10 rounded-full overflow-hidden"
                 />
               ) : (
                 <div 
                   className="cursor-pointer" 
                   onClick={() => document.getElementById('profile-image')?.click()}
                 >
-                  <Avatar className="h-32 w-32 border-4 border-white/10 hover:border-white/20 [transition:border-color_0.2s]">
+                  <Avatar className="h-32 w-32 border-4 border-white/10">
                     {(cachedProfileImageUrl || cachedCoverUrl || signedProfileImageUrl || signedCoverUrl) ? (
                       <AvatarImage 
                         src={cachedProfileImageUrl || cachedCoverUrl || signedProfileImageUrl || signedCoverUrl || undefined} 
