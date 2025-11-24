@@ -224,49 +224,13 @@ const Auth = () => {
           return;
         }
         
-        // TREDJE KONTROLLEN: Testa om token faktiskt fungerar innan vi visar formuläret
+        // TREDJE KONTROLLEN: Visa formuläret direkt - verifiera token först vid password submission
         const tokenHashParam = searchParams.get('token_hash') || hashParams.get('token_hash');
         const tokenParam = searchParams.get('token') || hashParams.get('token');
         
         if (tokenHashParam || tokenParam) {
-          console.log('🔍 Verifierar om reset-token är giltig...');
-          
-          try {
-            const verifyOptions: any = { type: 'recovery' };
-            if (tokenHashParam) {
-              verifyOptions.token_hash = tokenHashParam;
-            } else if (tokenParam) {
-              verifyOptions.token = tokenParam;
-            }
-            
-            // Försök verifiera token - om den är redan använd eller ogiltig får vi ett fel
-            const { error: verifyError } = await supabase.auth.verifyOtp(verifyOptions);
-            
-            if (verifyError) {
-              const errorMsg = verifyError.message.toLowerCase();
-              console.log('❌ Token-verifiering misslyckades:', errorMsg);
-              
-              // Token redan använd eller ogiltig
-              if (errorMsg.includes('expired') || errorMsg.includes('invalid') || 
-                  errorMsg.includes('already') || errorMsg.includes('used')) {
-                console.log('❌ Token redan använd - visar consumed-sida');
-                setRecoveryStatus('consumed');
-                return;
-              }
-              
-              // Annat fel
-              console.log('❌ Token-verifiering fel - visar invalid-sida');
-              setRecoveryStatus('invalid');
-              return;
-            }
-            
-            console.log('✅ Token är giltig - visar formulär');
-            setIsPasswordReset(true);
-          } catch (err) {
-            console.error('❌ Token-verifiering exception:', err);
-            setRecoveryStatus('invalid');
-            return;
-          }
+          console.log('✅ Reset-token detekterad - visar formulär (verifiering sker vid password submission)');
+          setIsPasswordReset(true);
         } else {
           console.log('✅ Reset utan token - visar formulär');
           setIsPasswordReset(true);
