@@ -212,17 +212,12 @@ const WorkplacePostalCodeSelector = ({
       {/* Om postnummer är giltigt men inte hittat */}
       {isValid && !foundLocation && !isLoading && postalCodeValue && postalCodeValue.replace(/\D/g, '').length === 5 && (
         <Card className="bg-white/5 backdrop-blur-sm border border-white/10 p-3 col-span-2">
-          <div className="flex items-center space-x-2">
-            <div className="flex-shrink-0">
-              <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                <MapPin className="w-3 h-3 text-white/60" />
-              </div>
-            </div>
+          <div className="flex items-center">
             <div className="flex-1">
               <p className="text-sm text-white font-medium">
                 Postnummer {postalCodeValue} hittades inte
               </p>
-              <p className="text-sm text-white/70 mt-0.5">
+              <p className="text-sm text-white mt-0.5">
                 Du kan ange orten manuellt ovan
               </p>
             </div>
