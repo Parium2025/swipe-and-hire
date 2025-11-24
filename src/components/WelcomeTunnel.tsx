@@ -1078,9 +1078,9 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                       onClick={() => document.getElementById('profileMedia')?.click()}
                     >
                       <Avatar className="h-32 w-32 border-4 border-white/10 [transition:border-color_0.2s]">
-                        {formData.profileImageUrl ? (
+                        {formData.profileImageUrl && signedProfileImageUrl ? (
                           <AvatarImage 
-                            src={signedProfileImageUrl || ''} 
+                            src={signedProfileImageUrl} 
                             alt="Profilbild"
                             className="object-cover"
                             decoding="sync"
@@ -1088,8 +1088,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                             fetchPriority="high"
                             draggable={false}
                           />
-                        ) : null}
-                        {!formData.profileImageUrl && (
+                        ) : (
                           <AvatarFallback delayMs={0} className="text-4xl font-semibold bg-white/20 text-white">
                             {((formData.firstName?.trim()?.[0]?.toUpperCase() || '') + (formData.lastName?.trim()?.[0]?.toUpperCase() || '')) || '?'}
                           </AvatarFallback>
