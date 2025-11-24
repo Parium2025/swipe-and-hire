@@ -29,19 +29,26 @@ const WorkplacePostalCodeSelector = ({
   const [isValid, setIsValid] = useState(false);
   const [lastSuccessfulPostalCode, setLastSuccessfulPostalCode] = useState<string>('');
 
+  // Helper to validate city name (only letters, spaces, and hyphens)
+  const isValidCityName = useCallback((city: string) => {
+    if (!city || city.trim().length === 0) return false;
+    // Allow only letters (including Swedish åäöÅÄÖ), spaces, and hyphens
+    return /^[a-zA-ZåäöÅÄÖ\s-]+$/.test(city.trim());
+  }, []);
+
   // Memoized validation status
-  // Valid if: (1) postal code found automatically, OR (2) postal code valid format + city manually entered
+  // Valid if: (1) postal code found automatically, OR (2) postal code valid format + city manually entered with only letters
   const hasValidLocation = useMemo(() => {
     // Scenario 1: Postal code found automatically
     if (foundLocation !== null && isValid) return true;
     
-    // Scenario 2: Valid postal code format + manually entered city
-    if (isValid && postalCodeValue.replace(/\D/g, '').length === 5 && cityValue.trim().length > 0) {
+    // Scenario 2: Valid postal code format + manually entered city (with only letters)
+    if (isValid && postalCodeValue.replace(/\D/g, '').length === 5 && isValidCityName(cityValue)) {
       return true;
     }
     
     return false;
-  }, [foundLocation, isValid, postalCodeValue, cityValue]);
+  }, [foundLocation, isValid, postalCodeValue, cityValue, isValidCityName]);
 
   // Report validation status to parent
   useEffect(() => {
@@ -141,6 +148,13 @@ const WorkplacePostalCodeSelector = ({
     }
   }, [onPostalCodeChange]);
 
+  const handleCityChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Only allow letters (including Swedish åäöÅÄÖ), spaces, and hyphens - filter out numbers
+    const filtered = value.replace(/[^a-zA-ZåäöÅÄÖ\s-]/g, '');
+    onLocationChange(filtered);
+  }, [onLocationChange]);
+
   return (
     <div className={`grid grid-cols-2 gap-3 ${className}`}>
       {/* Postnummer input */}
@@ -182,7 +196,7 @@ const WorkplacePostalCodeSelector = ({
         <Label className="text-white text-sm">Ort *</Label>
         <Input
           value={cityValue}
-          onChange={(e) => onLocationChange(e.target.value)}
+          onChange={handleCityChange}
           placeholder={
             isValid && !foundLocation && !isLoading && postalCodeValue.replace(/\D/g, '').length === 5
               ? "Ange ort manuellt"
