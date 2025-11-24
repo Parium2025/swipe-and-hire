@@ -139,12 +139,11 @@ const WorkplacePostalCodeSelector = ({
       <div className="space-y-2 md:space-y-1.5">
         <Label className="text-white text-sm">Postnummer *</Label>
         <div className="relative">
-          <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white z-10" />
           <Input
             value={postalCodeValue}
             onChange={handlePostalCodeChange}
             placeholder="XXX XX"
-            className="bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white/40 h-9 text-sm pl-10 transition-all duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50"
+            className="bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white/40 h-9 text-sm transition-all duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50"
             maxLength={6}
             autoComplete="off"
             autoCorrect="off"
@@ -180,7 +179,11 @@ const WorkplacePostalCodeSelector = ({
               ? "Ange ort manuellt"
               : "Fylls i automatiskt"
           }
-          className="bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white/40 h-9 text-sm transition-all duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50"
+          className={`bg-white/5 backdrop-blur-sm border-white/10 text-white h-9 text-sm transition-all duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50 ${
+            isValid && !foundLocation && !isLoading && postalCodeValue.replace(/\D/g, '').length === 5
+              ? "placeholder:text-white"
+              : "placeholder:text-white/40"
+          }`}
           readOnly={foundLocation !== null}
           autoComplete="off"
           autoCorrect="off"
