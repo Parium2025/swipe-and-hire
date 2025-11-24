@@ -175,7 +175,11 @@ const WorkplacePostalCodeSelector = ({
         <Input
           value={cityValue}
           onChange={(e) => onLocationChange(e.target.value)}
-          placeholder="Fylls i automatiskt"
+          placeholder={
+            isValid && !foundLocation && !isLoading && postalCodeValue.replace(/\D/g, '').length === 5
+              ? "Ange ort manuellt"
+              : "Fylls i automatiskt"
+          }
           className="bg-white/5 backdrop-blur-sm border-white/10 text-white placeholder:text-white/40 h-9 text-sm transition-all duration-150 hover:bg-white/10 hover:border-white/50 md:hover:border-white/50"
           readOnly={foundLocation !== null}
           autoComplete="off"
