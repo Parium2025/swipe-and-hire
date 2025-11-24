@@ -204,7 +204,7 @@ const SwipeIntro: React.FC<SwipeIntroProps> = ({ onComplete }) => {
       title: "Ta steget - starta direkt!",
       subtitle: "",
       content: (
-        <div className="flex flex-col items-center space-y-16 mt-24">
+        <div className="flex flex-col items-center space-y-12 mt-12">
           {/* Stiliserad nedåtpil */}
           <div className="flex flex-col items-center space-y-2">
             <div className="w-0.5 h-8 bg-gradient-to-b from-primary-foreground/40 to-primary-foreground/20"></div>
