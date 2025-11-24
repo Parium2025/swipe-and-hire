@@ -17,7 +17,7 @@ import phoneWithPariumLogo from '@/assets/phone-with-parium-logo.jpg';
 import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone, Play, Video, Trash2, ChevronDown, RotateCcw } from 'lucide-react';
 import ProfileVideo from '@/components/ProfileVideo';
 import SwipeIntro from '@/components/SwipeIntro';
-import PostalCodeSelector from '@/components/PostalCodeSelector';
+import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
 import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
 import { uploadMedia, getMediaUrl, deleteMedia } from '@/lib/mediaManager';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
@@ -72,6 +72,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const [inputType, setInputType] = useState('text');
   const [phoneError, setPhoneError] = useState('');
   const [postalCode, setPostalCode] = useState((profile as any)?.postal_code || '');
+  const [userLocation, setUserLocation] = useState((profile as any)?.city || '');
   const [hasValidLocation, setHasValidLocation] = useState(false);
 
   // Use mediaUrl hooks for signed URLs
@@ -825,10 +826,14 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   />
                  
                 </div>
-               <PostalCodeSelector
+               <WorkplacePostalCodeSelector
                  postalCodeValue={postalCode}
+                 cityValue={userLocation}
                  onPostalCodeChange={setPostalCode}
-                 onLocationChange={(location) => handleInputChange('location', location)}
+                 onLocationChange={(city, postalCode, municipality, county) => {
+                   setUserLocation(city);
+                   handleInputChange('location', city);
+                 }}
                  onValidationChange={setHasValidLocation}
                />
                  <div>
