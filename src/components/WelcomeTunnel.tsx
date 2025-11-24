@@ -1078,9 +1078,9 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                       onClick={() => document.getElementById('profileMedia')?.click()}
                     >
                       <Avatar className="h-32 w-32 border-4 border-white/10 [transition:border-color_0.2s]">
-                        {formData.profileImageUrl && signedProfileImageUrl ? (
+                        {formData.profileImageUrl ? (
                           <AvatarImage 
-                            src={signedProfileImageUrl} 
+                            src={signedProfileImageUrl || ''} 
                             alt="Profilbild"
                             className="object-cover"
                             decoding="sync"
