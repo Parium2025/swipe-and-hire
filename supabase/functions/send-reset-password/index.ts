@@ -58,31 +58,15 @@ const handler = async (req: Request): Promise<Response> => {
     if (!error && data.properties) {
       console.log('🔍 generateLink properties:', data.properties);
 
-      // För recovery ska vi använda hashed_token enligt Supabase-dokumentationen
-      const hashedToken = (data as any).properties?.hashed_token as string | undefined;
-
-      if (hashedToken) {
-        const redirectUrl = "https://parium.se";
-        resetUrl = `${redirectUrl}/auth?reset=true&token_hash=${hashedToken}&type=recovery`;
-        console.log(`✅ CUSTOM RESET URL (hashed_token): ${resetUrl}`);
-        console.log(`📍 Using parium.se domain med token_hash`);
-      } else if (data.properties.action_link) {
-        // Fallback om hashed_token av någon anledning saknas
-        const supabaseLink = data.properties.action_link;
-        console.log(`🔍 SUPABASE GENERATED LINK (fallback): ${supabaseLink}`);
-
-        const url = new URL(supabaseLink);
-        const token = url.searchParams.get('token');
-        const tokenHash = url.searchParams.get('token_hash');
-
-        if (tokenHash || token) {
-          const redirectUrl = "https://parium.se";
-          const tokenParam = tokenHash ? `token_hash=${tokenHash}` : `token=${token}`;
-          resetUrl = `${redirectUrl}/auth?reset=true&${tokenParam}&type=recovery`;
-          console.log(`✅ CUSTOM RESET URL (fallback): ${resetUrl}`);
-        } else {
-          console.error('❌ No token or token_hash found in Supabase link');
-        }
+      // KRITISKT: Använd Supabase's action_link direkt för att undvika för tidigt konsumering av token
+      // När vi bygger vår egen URL med token_hash konsumeras token för tidigt av Supabase
+      if (data.properties.action_link) {
+        // Supabase action_link innehåller redan rätt token och redirectar korrekt
+        resetUrl = data.properties.action_link;
+        console.log(`✅ USING SUPABASE ACTION LINK: ${resetUrl}`);
+        console.log(`📍 This prevents premature token consumption`);
+      } else {
+        console.error('❌ No action_link found in Supabase response');
       }
     }
     } catch (linkError) {
