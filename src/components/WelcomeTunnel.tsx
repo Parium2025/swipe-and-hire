@@ -72,7 +72,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const [inputType, setInputType] = useState('text');
   const [phoneError, setPhoneError] = useState('');
   const [postalCode, setPostalCode] = useState((profile as any)?.postal_code || '');
-  const [userLocation, setUserLocation] = useState((profile as any)?.city || '');
+  const [userLocation, setUserLocation] = useState((profile as any)?.location || '');
   const [hasValidLocation, setHasValidLocation] = useState(false);
 
   // Use mediaUrl hooks for signed URLs
@@ -626,6 +626,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         last_name: formData.lastName,
         bio: formData.bio,
         location: formData.location,
+        city: userLocation, // Save city separately for consistency
         postal_code: postalCode,
         phone: formData.phone,
         birth_date: formData.birthDate || null,

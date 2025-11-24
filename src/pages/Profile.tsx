@@ -932,6 +932,7 @@ const Profile = () => {
         last_name: lastName.trim() || null,
         bio: bio.trim() || null,
         location: userLocation.trim() || null,
+        city: userLocation.trim() || null, // Save city separately for consistency
         postal_code: postalCode.trim() || null,
         phone: phone.trim() || null,
         birth_date: birthDate || null,
