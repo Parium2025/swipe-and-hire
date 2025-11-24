@@ -539,20 +539,33 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       profileMediaType: formData.profileMediaType
     });
     
-    handleInputChange('profileImageUrl', '');
-    handleInputChange('profileMediaType', 'image');
-    handleInputChange('coverImageUrl', ''); // Also clear cover image
+    // If deleting a video and cover image exists, promote cover to profile image
+    if (formData.profileMediaType === 'video' && formData.coverImageUrl) {
+      handleInputChange('profileImageUrl', formData.coverImageUrl);
+      handleInputChange('profileMediaType', 'image');
+      handleInputChange('coverImageUrl', ''); // Cover is now the profile image
+      
+      toast({
+        title: "Video borttagen",
+        description: "Din cover-bild är nu din profilbild"
+      });
+    } else {
+      // No cover image exists, clear everything
+      handleInputChange('profileImageUrl', '');
+      handleInputChange('profileMediaType', 'image');
+      handleInputChange('coverImageUrl', '');
+      
+      toast({
+        title: "Media borttagen",
+        description: "Din profilbild/video har tagits bort"
+      });
+    }
     
     // Reset the file input to allow new uploads
     const fileInput = document.getElementById('profileMedia') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';
     }
-    
-    toast({
-      title: "Media borttagen",
-      description: "Din profilbild/video har tagits bort"
-    });
   };
 
   const restoreProfileMedia = () => {
