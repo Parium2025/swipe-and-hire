@@ -30,10 +30,18 @@ const WorkplacePostalCodeSelector = ({
   const [lastSuccessfulPostalCode, setLastSuccessfulPostalCode] = useState<string>('');
 
   // Memoized validation status
-  const hasValidLocation = useMemo(
-    () => foundLocation !== null && isValid,
-    [foundLocation, isValid]
-  );
+  // Valid if: (1) postal code found automatically, OR (2) postal code valid format + city manually entered
+  const hasValidLocation = useMemo(() => {
+    // Scenario 1: Postal code found automatically
+    if (foundLocation !== null && isValid) return true;
+    
+    // Scenario 2: Valid postal code format + manually entered city
+    if (isValid && postalCodeValue.replace(/\D/g, '').length === 5 && cityValue.trim().length > 0) {
+      return true;
+    }
+    
+    return false;
+  }, [foundLocation, isValid, postalCodeValue, cityValue]);
 
   // Report validation status to parent
   useEffect(() => {
