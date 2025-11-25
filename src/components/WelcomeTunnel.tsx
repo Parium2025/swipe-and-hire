@@ -131,8 +131,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   };
 
   const handlePhoneChange = (value: string) => {
-    handleInputChange('phone', value);
-    const validation = validatePhoneNumber(value);
+    // Filter out non-numeric characters except + (for +46)
+    const filteredValue = value.replace(/[^0-9+]/g, '');
+    handleInputChange('phone', filteredValue);
+    const validation = validatePhoneNumber(filteredValue);
     setPhoneError(validation.error);
   };
 
