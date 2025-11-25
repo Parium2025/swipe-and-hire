@@ -1140,9 +1140,16 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   </Label>
                   
                   {isUploadingMedia && (
-                    <Badge variant="outline" className="bg-white/10 text-white border-white/20 animate-pulse rounded-md px-3 py-1.5">
-                      {uploadingMediaType === 'video' ? `${uploadProgress}%` : `Laddar upp bild...`}
-                    </Badge>
+                    <div className="flex flex-col items-center gap-2">
+                      <Badge variant="outline" className="bg-white/10 text-white border-white/20 animate-pulse rounded-md px-3 py-1.5">
+                        {uploadingMediaType === 'video' ? `${uploadProgress}%` : `Laddar upp bild...`}
+                      </Badge>
+                      {uploadingMediaType === 'video' && (
+                        <p className="text-white/70 text-xs">
+                          (Obs, det kan ta uppemot mellan 20 till 30 sekunder att ladda upp en minuts video)
+                        </p>
+                      )}
+                    </div>
                   )}
                   
                   {formData.profileImageUrl && !isUploadingMedia && (
