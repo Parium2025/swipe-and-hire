@@ -217,10 +217,12 @@ const AuthMobile = ({
   };
 
   const handlePhoneChange = (value: string) => {
-    const validation = validatePhoneNumber(value);
+    // Filter out non-numeric characters except + (for +46)
+    const filteredValue = value.replace(/[^0-9+]/g, '');
+    const validation = validatePhoneNumber(filteredValue);
     setJobSeekerData(prev => ({
       ...prev,
-      phone: value,
+      phone: filteredValue,
       phoneError: validation.error
     }));
   };
