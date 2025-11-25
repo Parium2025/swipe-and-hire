@@ -69,11 +69,41 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     interests: [] as string[],
     consentGiven: false // New field for data sharing consent
   });
+  
+  // Update form data when profile/user loads (for pre-filled registration data)
+  useEffect(() => {
+    if (profile || user) {
+      setFormData(prev => ({
+        ...prev,
+        firstName: profile?.first_name || prev.firstName,
+        lastName: profile?.last_name || prev.lastName,
+        email: user?.email || prev.email,
+        phone: profile?.phone || prev.phone,
+        bio: profile?.bio || prev.bio,
+        location: profile?.location || prev.location,
+        employmentStatus: (profile as any)?.employment_type || prev.employmentStatus,
+        workingHours: (profile as any)?.work_schedule || prev.workingHours,
+        availability: (profile as any)?.availability || prev.availability,
+      }));
+    }
+  }, [profile, user]);
   const [inputType, setInputType] = useState('text');
   const [phoneError, setPhoneError] = useState('');
   const [postalCode, setPostalCode] = useState((profile as any)?.postal_code || '');
   const [userLocation, setUserLocation] = useState((profile as any)?.location || '');
   const [hasValidLocation, setHasValidLocation] = useState(false);
+  
+  // Update postal code and location when profile loads
+  useEffect(() => {
+    if (profile) {
+      if ((profile as any)?.postal_code) {
+        setPostalCode((profile as any).postal_code);
+      }
+      if ((profile as any)?.location) {
+        setUserLocation((profile as any).location);
+      }
+    }
+  }, [profile]);
 
   // Use mediaUrl hooks for signed URLs
   const signedProfileImageUrl = useMediaUrl(
