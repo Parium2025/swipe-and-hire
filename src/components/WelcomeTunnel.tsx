@@ -1087,7 +1087,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                           fetchPriority="high"
                           draggable={false}
                         />
-                        <AvatarFallback delayMs={0} className={`text-4xl font-semibold bg-white/20 text-white ${formData.profileImageUrl ? 'hidden' : ''}`}
+                        <AvatarFallback delayMs={0} className={`text-4xl font-semibold bg-white/20 text-white ${formData.profileImageUrl ? 'hidden' : ''}`}>
                           {((formData.firstName?.trim()?.[0]?.toUpperCase() || '') + (formData.lastName?.trim()?.[0]?.toUpperCase() || '')) || '?'}
                         </AvatarFallback>
                       </Avatar>
