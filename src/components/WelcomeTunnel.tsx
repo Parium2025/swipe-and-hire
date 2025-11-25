@@ -1102,7 +1102,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     <ProfileVideo
                       videoUrl={signedProfileImageUrl || ''}
                       coverImageUrl={signedCoverUrl || ''}
-                      userInitials={`${formData.firstName?.[0] || ''}${formData.lastName?.[0] || ''}`}
+                      userInitials=""
                       alt="Profile video"
                       className="w-32 h-32 border-4 border-white/10 transition-all rounded-full overflow-hidden"
                     />
@@ -1135,7 +1135,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         e.stopPropagation();
                         deleteProfileMedia();
                       }}
-                      className="absolute -top-3 -right-3 bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                      className="absolute -top-3 -right-3 bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -1148,7 +1148,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         e.stopPropagation();
                         restoreProfileMedia();
                       }}
-                      className="absolute -top-3 -right-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2.5 shadow-lg transition-colors"
+                      className="absolute -top-3 -right-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2.5 shadow-lg"
                       title="Ångra borttagning"
                     >
                       <RotateCcw className="h-4 w-4" />
