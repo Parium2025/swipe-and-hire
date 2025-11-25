@@ -857,7 +857,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                <div>
                  <Label htmlFor="phone" className="text-white">
                    <Phone className="h-4 w-4 inline mr-2" />
-                   Telefonnummer
+                   Telefonnummer *
                  </Label>
                   <Input 
                     id="phone" 
@@ -866,11 +866,11 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     value={formData.phone} 
                     onChange={(e) => handlePhoneChange(e.target.value)} 
                     className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white/60"
-                    placeholder="Skriv in ditt telefonnummer" 
+                    placeholder="070-123 45 67" 
                   />
-                  <p className="text-white/70 text-xs mt-1">
-                    Telefonnumret måste börja med +46 eller 07
-                  </p>
+                  {phoneError && (
+                    <p className="text-destructive text-sm mt-1">{phoneError}</p>
+                  )}
                 </div>
                <WorkplacePostalCodeSelector
                  postalCodeValue={postalCode}
