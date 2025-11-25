@@ -838,7 +838,9 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     className="text-base bg-white/5 backdrop-blur-sm border-white/20 text-white hover:bg-white/10 hover:border-white/50 placeholder:text-white/60"
                     placeholder="Skriv in ditt telefonnummer" 
                   />
-                 
+                  <p className="text-white/70 text-xs mt-1">
+                    Telefonnumret måste börja med +46 eller 07
+                  </p>
                 </div>
                <WorkplacePostalCodeSelector
                  postalCodeValue={postalCode}
