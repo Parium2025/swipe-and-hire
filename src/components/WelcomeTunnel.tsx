@@ -1145,8 +1145,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         {uploadingMediaType === 'video' ? `${uploadProgress}%` : `Laddar upp bild...`}
                       </Badge>
                       {uploadingMediaType === 'video' && (
-                        <p className="text-white/70 text-xs">
-                          (Obs, det kan ta uppemot mellan 20 till 30 sekunder att ladda upp en minuts video)
+                        <p className="text-white text-xs">
+                          (Obs, det kan ta uppemot mer än 20-30 sekunder att ladda upp en minuts video)
                         </p>
                       )}
                     </div>
