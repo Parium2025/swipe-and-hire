@@ -567,35 +567,48 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   };
 
   const deleteProfileMedia = () => {
-    // Save current values for undo
+    // Save current values for undo so we can restore exakt samma läge
     setDeletedProfileMedia({
       profileImageUrl: formData.profileImageUrl,
       coverImageUrl: formData.coverImageUrl,
       profileMediaType: formData.profileMediaType
     });
-    
-    // If deleting a video and cover image exists, promote cover to profile image
-    if (formData.profileMediaType === 'video' && formData.coverImageUrl) {
-      handleInputChange('profileImageUrl', formData.coverImageUrl);
-      handleInputChange('profileMediaType', 'image');
-      handleInputChange('coverImageUrl', ''); // Cover is now the profile image
-      
+
+    const isVideoWithCover = formData.profileMediaType === 'video' && !!formData.coverImageUrl;
+
+    // Uppdatera all media i ett enda state-anrop för att undvika visuella "blixtrar"
+    setFormData(prev => {
+      if (isVideoWithCover) {
+        // Video tas bort, cover-bilden blir ny profilbild
+        return {
+          ...prev,
+          profileImageUrl: prev.coverImageUrl,
+          profileMediaType: 'image',
+          coverImageUrl: ''
+        };
+      }
+
+      // Ingen cover-bild – rensa allt
+      return {
+        ...prev,
+        profileImageUrl: '',
+        profileMediaType: 'image',
+        coverImageUrl: ''
+      };
+    });
+
+    if (isVideoWithCover) {
       toast({
         title: "Video borttagen",
         description: "Din cover-bild är nu din profilbild"
       });
     } else {
-      // No cover image exists, clear everything
-      handleInputChange('profileImageUrl', '');
-      handleInputChange('profileMediaType', 'image');
-      handleInputChange('coverImageUrl', '');
-      
       toast({
         title: "Media borttagen",
         description: "Din profilbild/video har tagits bort"
       });
     }
-    
+
     // Reset the file input to allow new uploads
     const fileInput = document.getElementById('profileMedia') as HTMLInputElement;
     if (fileInput) {
@@ -605,15 +618,18 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
   const restoreProfileMedia = () => {
     if (!deletedProfileMedia) return;
-    
-    // Restore all values
-    handleInputChange('profileImageUrl', deletedProfileMedia.profileImageUrl);
-    handleInputChange('coverImageUrl', deletedProfileMedia.coverImageUrl);
-    handleInputChange('profileMediaType', deletedProfileMedia.profileMediaType);
-    
+
+    // Återställ alla värden i ett enda state-anrop för mjukare övergång
+    setFormData(prev => ({
+      ...prev,
+      profileImageUrl: deletedProfileMedia.profileImageUrl,
+      coverImageUrl: deletedProfileMedia.coverImageUrl,
+      profileMediaType: deletedProfileMedia.profileMediaType,
+    }));
+
     // Clear undo data
     setDeletedProfileMedia(null);
-    
+
     toast({
       title: "Återställd!",
       description: "Din profilbild/video har återställts"
@@ -623,9 +639,9 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const deleteCoverImage = () => {
     // Save current cover image for undo
     setDeletedCoverImage(formData.coverImageUrl);
-    
+
     handleInputChange('coverImageUrl', '');
-    
+
     toast({
       title: "Cover-bild borttagen", 
       description: "Din cover-bild har tagits bort"
@@ -634,13 +650,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
   const restoreCoverImage = () => {
     if (!deletedCoverImage) return;
-    
+
     // Restore cover image
     handleInputChange('coverImageUrl', deletedCoverImage);
-    
+
     // Clear undo data
     setDeletedCoverImage(null);
-    
+
     toast({
       title: "Återställd!",
       description: "Din cover-bild har återställts"
