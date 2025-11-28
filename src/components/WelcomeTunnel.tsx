@@ -480,6 +480,27 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     }
   };
 
+  const handleEditExistingProfile = async () => {
+    // Kan endast redigera bilder, inte videor
+    if (!formData.profileImageUrl || formData.profileMediaType === 'video') return;
+    
+    try {
+      // Hämta den signerade URL:en för den befintliga profilbilden
+      const signedUrl = await getMediaUrl(formData.profileImageUrl, 'profile-image', 86400);
+      if (signedUrl) {
+        setPendingImageSrc(signedUrl);
+        setImageEditorOpen(true);
+      }
+    } catch (error) {
+      console.error('Error loading profile image for editing:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte ladda bilden för redigering",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleProfileImageSave = async (editedBlob: Blob) => {
     try {
       setIsUploadingMedia(true);
@@ -1229,9 +1250,23 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   )}
                   
                   {formData.profileImageUrl && !isUploadingMedia && (
-                    <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-md">
-                      {formData.profileMediaType === 'video' ? 'Video' : 'Bild'} uppladdad!
-                    </Badge>
+                    <div className="flex flex-col items-center gap-2">
+                      <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-md">
+                        {formData.profileMediaType === 'video' ? 'Video' : 'Bild'} uppladdad!
+                      </Badge>
+                      
+                      {/* Anpassa knapp - endast för bilder */}
+                      {formData.profileMediaType === 'image' && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={handleEditExistingProfile}
+                          className="bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
+                        >
+                          Anpassa din bild
+                        </Button>
+                      )}
+                    </div>
                   )}
                 </div>
 
