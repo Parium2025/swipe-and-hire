@@ -645,6 +645,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const restoreProfileMedia = () => {
     if (!deletedProfileMedia) return;
 
+    console.log('Restoring profile media', deletedProfileMedia);
+
     // Återställ alla värden i ett enda state-anrop för mjukare övergång
     setFormData(prev => ({
       ...prev,
@@ -661,7 +663,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       description: "Din profilmedia har återställts"
     });
   };
-
   const deleteCoverImage = () => {
     // Save current cover image for undo
     setDeletedCoverImage(formData.coverImageUrl);
