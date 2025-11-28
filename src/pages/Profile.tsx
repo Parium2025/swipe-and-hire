@@ -754,8 +754,8 @@ const Profile = () => {
       setHasUnsavedChanges(false);
       
       toast({
-        title: "Profilbild/video borttagen",
-        description: "Ändringen har sparats"
+        title: "Media borttagen",
+        description: "Din profilvideo har tagits bort"
       });
     } catch (error) {
       console.error('Error in deleteProfileMedia:', error);
@@ -784,7 +784,7 @@ const Profile = () => {
     
     toast({
       title: "Återställd!",
-      description: "Din profilbild/video har återställts"
+      description: "Din profilvideo har återställts"
     });
   };
 
