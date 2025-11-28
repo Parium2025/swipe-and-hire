@@ -43,6 +43,9 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     profileMediaType: string;
   } | null>(null);
   
+  // Undo state for deleted cover image
+  const [deletedCoverImage, setDeletedCoverImage] = useState<string | null>(null);
+  
   // Image editor states
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
   const [coverEditorOpen, setCoverEditorOpen] = useState(false);
@@ -618,11 +621,29 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   };
 
   const deleteCoverImage = () => {
+    // Save current cover image for undo
+    setDeletedCoverImage(formData.coverImageUrl);
+    
     handleInputChange('coverImageUrl', '');
     
     toast({
       title: "Cover-bild borttagen", 
       description: "Din cover-bild har tagits bort"
+    });
+  };
+
+  const restoreCoverImage = () => {
+    if (!deletedCoverImage) return;
+    
+    // Restore cover image
+    handleInputChange('coverImageUrl', deletedCoverImage);
+    
+    // Clear undo data
+    setDeletedCoverImage(null);
+    
+    toast({
+      title: "Återställd!",
+      description: "Din cover-bild har återställts"
     });
   };
 
@@ -1219,9 +1240,22 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                             e.stopPropagation();
                             deleteCoverImage();
                           }}
-                          className="bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                          className="bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg"
                         >
                           <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                      
+                      {deletedCoverImage && !formData.coverImageUrl && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            restoreCoverImage();
+                          }}
+                          className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg"
+                          title="Ångra borttagning"
+                        >
+                          <RotateCcw className="h-4 w-4" />
                         </button>
                       )}
                     </div>
