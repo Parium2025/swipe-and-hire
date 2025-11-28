@@ -533,9 +533,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       handleInputChange('profileImageUrl', storagePath);
       handleInputChange('profileMediaType', 'image');
       
-      // Nollställ deleted-state eftersom användaren har en ny bild nu
-      setDeletedProfileMedia(null);
-      
       setImageEditorOpen(false);
       setPendingImageSrc('');
     } catch (error) {
