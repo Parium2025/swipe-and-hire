@@ -648,9 +648,9 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     // Återställ alla värden i ett enda state-anrop för mjukare övergång
     setFormData(prev => ({
       ...prev,
-      profileImageUrl: deletedProfileMedia.profileImageUrl,
-      coverImageUrl: deletedProfileMedia.coverImageUrl,
-      profileMediaType: deletedProfileMedia.profileMediaType,
+      profileImageUrl: deletedProfileMedia.profileImageUrl || '',
+      coverImageUrl: deletedProfileMedia.coverImageUrl || '',
+      profileMediaType: deletedProfileMedia.profileMediaType || 'image',
     }));
 
     // Clear undo data
@@ -658,7 +658,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
     toast({
       title: "Återställd!",
-      description: "Din profilvideo har återställts"
+      description: "Din profilmedia har återställts"
     });
   };
 
@@ -1255,8 +1255,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         {formData.profileMediaType === 'video' ? 'Video' : 'Bild'} uppladdad!
                       </Badge>
                       
-                      {/* Anpassa knapp - endast för bilder */}
-                      {formData.profileMediaType === 'image' && (
+                      {/* Anpassa knapp - visas för bilder (inte videor) */}
+                      {formData.profileImageUrl && formData.profileMediaType !== 'video' && (
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -1635,7 +1635,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         }}
         imageSrc={pendingImageSrc}
         onSave={handleProfileImageSave}
-        isCircular={true}
+        isCircular={false}
       />
       
       <ImageEditor
