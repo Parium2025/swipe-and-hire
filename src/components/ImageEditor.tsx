@@ -60,7 +60,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           const initialScale = Math.min(scaleX, scaleY);
           
           // minScale är samma som initialScale - användaren kan inte zooma mindre än att visa hela bilden
-          setMinScale(initialScale * 0.5); // Tillåt lite mindre zoom om användaren vill
+          setMinScale(initialScale);
           
           setScale(initialScale);
           setPosition({ x: 0, y: 0 });
@@ -91,7 +91,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           const initialScale = Math.min(scaleX, scaleY);
           
           // minScale är samma som initialScale - användaren kan inte zooma mindre än att visa hela bilden
-          setMinScale(initialScale * 0.5);
+          setMinScale(initialScale);
           
           setScale(initialScale);
           setPosition({ x: 0, y: 0 });
