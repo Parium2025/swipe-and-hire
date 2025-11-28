@@ -653,7 +653,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       profileMediaType: deletedProfileMedia.profileMediaType,
     }));
 
-    // Clear undo data omedelbart så "Anpassa din bild"-knappen blir synlig direkt
+    // Clear undo data
     setDeletedProfileMedia(null);
 
     toast({
@@ -1249,13 +1249,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     </div>
                   )}
                   
-                  {formData.profileImageUrl && !isUploadingMedia && !deletedProfileMedia && (
+                  {formData.profileImageUrl && !isUploadingMedia && (
                     <div className="flex flex-col items-center gap-2">
                       <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-md">
                         {formData.profileMediaType === 'video' ? 'Video' : 'Bild'} uppladdad!
                       </Badge>
                       
-                      {/* Anpassa knapp - endast för bilder och när inte raderad */}
+                      {/* Anpassa knapp - endast för bilder */}
                       {formData.profileMediaType === 'image' && (
                         <Button 
                           variant="outline" 

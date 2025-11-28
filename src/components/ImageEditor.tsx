@@ -50,19 +50,20 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
         img.onload = () => {
           imageRef.current = img;
           
-          // Calculate initial scale to show entire image (contain)
+          // Calculate initial scale to cover the container completely
           const containerWidth = CANVAS_WIDTH;
           const containerHeight = CANVAS_HEIGHT;
           
-          // Scale för att visa hela bilden (contain)
+          // Scale to cover the container (like CSS background-size: cover)
           const scaleX = containerWidth / img.width;
           const scaleY = containerHeight / img.height;
+          const initialScale = Math.max(scaleX, scaleY);
+          
+          // Beräkna minScale för att visa hela bilden (contain)
           const containScale = Math.min(scaleX, scaleY);
+          setMinScale(containScale);
           
-          // Använd contain som initial scale så hela bilden syns
-          setMinScale(containScale * 0.5); // Tillåt zoom ut till 50%
-          
-          setScale(containScale);
+          setScale(initialScale);
           setPosition({ x: 0, y: 0 });
           setImageLoaded(true);
           
@@ -88,12 +89,13 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           const containerHeight = CANVAS_HEIGHT;
           const scaleX = containerWidth / img.width;
           const scaleY = containerHeight / img.height;
+          const initialScale = Math.max(scaleX, scaleY);
+          
+          // Beräkna minScale för att visa hela bilden (contain)
           const containScale = Math.min(scaleX, scaleY);
+          setMinScale(containScale);
           
-          // Använd contain som initial scale så hela bilden syns
-          setMinScale(containScale * 0.5);
-          
-          setScale(containScale);
+          setScale(initialScale);
           setPosition({ x: 0, y: 0 });
           setImageLoaded(true);
         };
@@ -239,11 +241,11 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       const containerWidth = CANVAS_WIDTH;
       const containerHeight = CANVAS_HEIGHT;
       
-      // Återställ till contain (visa hela bilden)
+      // Scale to cover the container (like CSS background-size: cover)
       const scaleX = containerWidth / img.width;
       const scaleY = containerHeight / img.height;
-      const containScale = Math.min(scaleX, scaleY);
-      setScale(containScale);
+      const initialScale = Math.max(scaleX, scaleY);
+      setScale(initialScale);
     }
   };
 
