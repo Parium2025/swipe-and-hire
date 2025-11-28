@@ -46,6 +46,11 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   // Undo state for deleted cover image
   const [deletedCoverImage, setDeletedCoverImage] = useState<string | null>(null);
   
+  // Track dropdown open states for arrow rotation animation
+  const [employmentStatusOpen, setEmploymentStatusOpen] = useState(false);
+  const [workingHoursOpen, setWorkingHoursOpen] = useState(false);
+  const [availabilityOpen, setAvailabilityOpen] = useState(false);
+  
   // Image editor states
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
   const [coverEditorOpen, setCoverEditorOpen] = useState(false);
@@ -921,31 +926,31 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                  }}
                  onValidationChange={setHasValidLocation}
                />
-                 <div>
-                  <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget? <span className="text-white">*</span></Label>
-                  <DropdownMenu modal={false}>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outlineNeutral"
-                          className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
-                        >
-                        <span className="truncate">
-                          {formData.employmentStatus ? (
-                            ({
-                              tillsvidareanställning: 'Fast anställning',
-                              visstidsanställning: 'Visstidsanställning',
-                              provanställning: 'Provanställning',
-                              interim: 'Interim anställning',
-                              bemanningsanställning: 'Bemanningsanställning',
-                              egenforetagare: 'Egenföretagare / Frilans',
-                              arbetssokande: 'Arbetssökande',
-                              annat: 'Annat',
-                            } as Record<string, string>)[formData.employmentStatus]
-                          ) : 'Välj din nuvarande situation'}
-                        </span>
-                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                      </Button>
-                    </DropdownMenuTrigger>
+                  <div>
+                   <Label htmlFor="employmentStatus" className="text-white text-sm font-medium">Vad gör du i dagsläget? <span className="text-white">*</span></Label>
+                   <DropdownMenu modal={false} open={employmentStatusOpen} onOpenChange={setEmploymentStatusOpen}>
+                       <DropdownMenuTrigger asChild>
+                         <Button
+                           variant="outlineNeutral"
+                           className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
+                         >
+                         <span className="truncate">
+                           {formData.employmentStatus ? (
+                             ({
+                               tillsvidareanställning: 'Fast anställning',
+                               visstidsanställning: 'Visstidsanställning',
+                               provanställning: 'Provanställning',
+                               interim: 'Interim anställning',
+                               bemanningsanställning: 'Bemanningsanställning',
+                               egenforetagare: 'Egenföretagare / Frilans',
+                               arbetssokande: 'Arbetssökande',
+                               annat: 'Annat',
+                             } as Record<string, string>)[formData.employmentStatus]
+                           ) : 'Välj din nuvarande situation'}
+                         </span>
+                         <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-300 ${employmentStatusOpen ? 'rotate-180' : ''}`} />
+                       </Button>
+                     </DropdownMenuTrigger>
                     <DropdownMenuContent 
                       className="w-72 max-h-80 overflow-y-auto bg-white/5 backdrop-blur-md border-white/20 shadow-xl z-50 rounded-lg text-white"
                       side="top"
@@ -983,26 +988,26 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 </div>
               {/* Visa arbetstid-frågan endast om användaren har valt något OCH det inte är arbetssökande */}
               {formData.employmentStatus && formData.employmentStatus !== 'arbetssokande' && (
-                 <div>
-                   <Label htmlFor="workingHours" className="text-white text-sm font-medium">Hur mycket jobbar du idag? <span className="text-white">*</span></Label>
-                   <DropdownMenu modal={false}>
-                       <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
-                        >
-                         <span className="truncate">
-                           {formData.workingHours ? (
-                             ({
-                               heltid: 'Heltid',
-                               deltid: 'Deltid',
-                               varierande: 'Varierande / Flexibelt',
-                             } as Record<string, string>)[formData.workingHours]
-                           ) : 'Välj arbetstid/omfattning'}
-                         </span>
-                         <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                       </Button>
-                     </DropdownMenuTrigger>
+                  <div>
+                    <Label htmlFor="workingHours" className="text-white text-sm font-medium">Hur mycket jobbar du idag? <span className="text-white">*</span></Label>
+                    <DropdownMenu modal={false} open={workingHoursOpen} onOpenChange={setWorkingHoursOpen}>
+                        <DropdownMenuTrigger asChild>
+                         <Button
+                           variant="outline"
+                           className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
+                         >
+                          <span className="truncate">
+                            {formData.workingHours ? (
+                              ({
+                                heltid: 'Heltid',
+                                deltid: 'Deltid',
+                                varierande: 'Varierande / Flexibelt',
+                              } as Record<string, string>)[formData.workingHours]
+                            ) : 'Välj arbetstid/omfattning'}
+                          </span>
+                          <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-300 ${workingHoursOpen ? 'rotate-180' : ''}`} />
+                        </Button>
+                      </DropdownMenuTrigger>
                       <DropdownMenuContent 
                         className="w-72 max-h-80 overflow-y-auto bg-white/5 backdrop-blur-md border-white/20 shadow-xl z-50 rounded-lg text-white"
                        side="top"
@@ -1026,29 +1031,29 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               )}
               {/* Visa tillgänglighet-frågan endast om användaren har valt något i employment status */}
               {formData.employmentStatus && (
-                 <div>
-                   <Label htmlFor="availability" className="text-white text-sm font-medium">När kan du börja nytt jobb? <span className="text-white">*</span></Label>
-                   <DropdownMenu modal={false}>
-                       <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
-                        >
-                         <span className="truncate">
-                           {formData.availability ? (
-                             ({
-                               omgaende: 'Omgående',
-                               'inom-1-manad': 'Inom 1 månad',
-                               'inom-3-manader': 'Inom 3 månader',
-                               'inom-6-manader': 'Inom 6 månader',
-                               'ej-aktuellt': 'Inte aktuellt just nu',
-                               osaker: 'Osäker',
-                             } as Record<string, string>)[formData.availability]
-                           ) : 'Välj din tillgänglighet'}
-                         </span>
-                         <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                       </Button>
-                     </DropdownMenuTrigger>
+                  <div>
+                    <Label htmlFor="availability" className="text-white text-sm font-medium">När kan du börja nytt jobb? <span className="text-white">*</span></Label>
+                    <DropdownMenu modal={false} open={availabilityOpen} onOpenChange={setAvailabilityOpen}>
+                        <DropdownMenuTrigger asChild>
+                         <Button
+                           variant="outline"
+                           className="w-full h-10 bg-white/5 backdrop-blur-sm border-white/10 text-white text-sm transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white md:hover:[&_svg]:text-white justify-between"
+                         >
+                          <span className="truncate">
+                            {formData.availability ? (
+                              ({
+                                omgaende: 'Omgående',
+                                'inom-1-manad': 'Inom 1 månad',
+                                'inom-3-manader': 'Inom 3 månader',
+                                'inom-6-manader': 'Inom 6 månader',
+                                'ej-aktuellt': 'Inte aktuellt just nu',
+                                osaker: 'Osäker',
+                              } as Record<string, string>)[formData.availability]
+                            ) : 'Välj din tillgänglighet'}
+                          </span>
+                          <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-300 ${availabilityOpen ? 'rotate-180' : ''}`} />
+                        </Button>
+                      </DropdownMenuTrigger>
                       <DropdownMenuContent 
                         className="w-72 max-h-[240px] overflow-y-auto bg-white/5 backdrop-blur-md border-white/20 shadow-xl z-50 rounded-lg text-white"
                        side="top"
