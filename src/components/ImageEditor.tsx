@@ -30,6 +30,9 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const [minScale, setMinScale] = useState(0.1);
   const [activeButton, setActiveButton] = useState<'cancel' | 'save' | null>(null);
 
+  const initialScaleRef = useRef<number | null>(null);
+  const initialPositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
   const BASE_CANVAS_HEIGHT = 400; // Output canvas height in px
   const CANVAS_HEIGHT = BASE_CANVAS_HEIGHT;
   const CANVAS_WIDTH = Math.round(BASE_CANVAS_HEIGHT * aspectRatio);
@@ -94,6 +97,10 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           // Beräkna minScale för att visa hela bilden (contain)
           const containScale = Math.min(scaleX, scaleY);
           setMinScale(containScale);
+
+          // Spara ursprungligt läge när editorn öppnas
+          initialScaleRef.current = initialScale;
+          initialPositionRef.current = { x: 0, y: 0 };
           
           setScale(initialScale);
           setPosition({ x: 0, y: 0 });
@@ -126,6 +133,10 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           // Beräkna minScale för att visa hela bilden (contain)
           const containScale = Math.min(scaleX, scaleY);
           setMinScale(containScale);
+
+          // Spara ursprungligt läge när editorn öppnas (fallback)
+          initialScaleRef.current = initialScale;
+          initialPositionRef.current = { x: 0, y: 0 };
           
           setScale(initialScale);
           setPosition({ x: 0, y: 0 });

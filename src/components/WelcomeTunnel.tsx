@@ -1179,7 +1179,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         <AvatarImage 
                           src={formData.profileImageUrl ? (signedProfileImageUrl || '') : ''}
                           alt="Profilbild"
-                          className="object-cover"
+                          className="object-contain"
                           decoding="sync"
                           loading="eager"
                           fetchPriority="high"
