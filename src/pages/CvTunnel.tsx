@@ -95,7 +95,7 @@ export default function CvTunnel() {
       <main className="flex-1">
         {loading && (
           <div className="h-full flex items-center justify-center">
-            <p className="text-sm">Laddar CV…</p>
+            <p className="text-sm text-white">Laddar CV…</p>
           </div>
         )}
         {!loading && error && (
