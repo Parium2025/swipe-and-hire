@@ -610,7 +610,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     } else {
       toast({
         title: "Media borttagen",
-        description: "Din profilbild/video har tagits bort"
+        description: "Din profilvideo har tagits bort"
       });
     }
 
@@ -637,7 +637,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
     toast({
       title: "Återställd!",
-      description: "Din profilbild/video har återställts"
+      description: "Din profilvideo har återställts"
     });
   };
 
