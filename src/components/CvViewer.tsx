@@ -309,7 +309,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
                 }}
               />
               {loading && (
-                <div className="absolute inset-0 flex items-center justify-center p-6 text-sm pointer-events-none">
+                <div className="absolute inset-0 flex items-center justify-center p-6 text-sm text-white pointer-events-none">
                   Laddar CV…
                 </div>
               )}
