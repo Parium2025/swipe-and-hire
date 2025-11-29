@@ -21,7 +21,7 @@ import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelecto
 import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
 import { uploadMedia, getMediaUrl, deleteMedia } from '@/lib/mediaManager';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
-
+import KeepAlive from '@/components/KeepAlive';
 interface WelcomeTunnelProps {
   onComplete: () => void;
 }
@@ -39,8 +39,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   // Track if CV has been preloaded to avoid redundant preloading
   const [cvPreloaded, setCvPreloaded] = useState(false);
   
-  // Cache CV signed URL permanently to avoid reloading on step changes
+  // Cache CV signed URL permanently to avoid re-resolving when revisiting CV-steget
   const [cachedCvUrl, setCachedCvUrl] = useState<string | null>(null);
+  
+  
   
   // Undo state - store deleted media for restore
   const [deletedProfileMedia, setDeletedProfileMedia] = useState<{
@@ -1659,7 +1661,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       {/* Main content */}
       <div className="flex-1 flex items-center justify-center px-6 py-8 relative z-10">
         <div className="w-full max-w-2xl">
-          {renderStep()}
+          <KeepAlive
+            activeKey={String(currentStep)}
+            render={() => renderStep()}
+          />
         </div>
       </div>
 
