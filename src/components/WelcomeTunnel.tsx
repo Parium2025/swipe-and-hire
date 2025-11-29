@@ -39,6 +39,9 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   // Track if CV has been preloaded to avoid redundant preloading
   const [cvPreloaded, setCvPreloaded] = useState(false);
   
+  // Cache CV signed URL permanently to avoid reloading on step changes
+  const [cachedCvUrl, setCachedCvUrl] = useState<string | null>(null);
+  
   // Undo state - store deleted media for restore
   const [deletedProfileMedia, setDeletedProfileMedia] = useState<{
     profileImageUrl: string;
@@ -125,31 +128,31 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   );
   const signedCoverUrl = useMediaUrl(formData.coverImageUrl, 'cover-image');
 
-  // Intelligent CV preloading: när CV är uppladdat och användaren närmar sig CV-steget,
-  // förladdda CV:et i bakgrunden så det är redo direkt när användaren kommer dit
+  // Intelligent CV caching: Generera signed URL EN GÅNG och cacha permanent
+  // så CV:et laddas aldrig om när användaren navigerar mellan steg
   useEffect(() => {
-    if (formData.cvUrl && !cvPreloaded && currentStep >= 2) {
-      // Preloadea CV:et i bakgrunden när användaren är nära CV-steget (steg 2 eller senare)
-      const preloadCv = async () => {
+    if (formData.cvUrl && !cachedCvUrl && currentStep >= 2) {
+      const cacheCv = async () => {
         try {
           const signedUrl = await getMediaUrl(formData.cvUrl, 'cv', 86400);
           if (signedUrl) {
-            // Dynamisk import för att inte blockera huvudtråden
+            // Cacha URL:en permanent - används direkt av CvViewer för instant visning
+            setCachedCvUrl(signedUrl);
+            
+            // Preloadea också i service worker för offline-tillgänglighet
             const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
             await preloadSingleFile(signedUrl);
-            setCvPreloaded(true); // Markera som förladdat
-            console.log('CV preloaded successfully in background');
+            setCvPreloaded(true);
+            
+            console.log('CV cached and preloaded - instant loading on all step changes ✓');
           }
         } catch (error) {
-          console.log('CV preload skipped:', error);
-          // Tyst fel - preload är en optimering, inte kritisk funktionalitet
+          console.log('CV caching skipped:', error);
         }
       };
-      
-      // Kör preload i bakgrunden utan att blockera UI
-      preloadCv();
+      cacheCv();
     }
-  }, [formData.cvUrl, cvPreloaded, currentStep]);
+  }, [formData.cvUrl, cachedCvUrl, currentStep]);
 
   // Use centralized phone validation
   const validatePhoneNumber = (phoneNumber: string) => {
@@ -1432,14 +1435,20 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 onFileUploaded={(url, fileName) => {
                   handleInputChange('cvUrl', url);
                   handleInputChange('cvFileName', fileName);
+                  // Clear cached URL så den regenereras vid nästa visning
+                  setCachedCvUrl(null);
                 }} 
                 onFileRemoved={() => {
                   handleInputChange('cvUrl', '');
                   handleInputChange('cvFileName', '');
+                  setCachedCvUrl(null); // Clear cache när CV tas bort
                 }} 
                 acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']} 
                 maxFileSize={10 * 1024 * 1024} 
-                currentFile={formData.cvUrl ? { url: formData.cvUrl, name: "Din valda fil" } : undefined} 
+                currentFile={formData.cvUrl ? { 
+                  url: cachedCvUrl || formData.cvUrl, // Use cached URL for instant loading
+                  name: "Din valda fil" 
+                } : undefined} 
               />
               {formData.cvUrl && (
                 <Badge variant="secondary" className="bg-white/20 text-white">
