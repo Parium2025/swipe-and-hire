@@ -56,6 +56,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const [coverEditorOpen, setCoverEditorOpen] = useState(false);
   const [pendingImageSrc, setPendingImageSrc] = useState<string>('');
   const [pendingCoverSrc, setPendingCoverSrc] = useState<string>('');
+  const [originalProfileImageFile, setOriginalProfileImageFile] = useState<File | null>(null);
+  const [originalCoverImageFile, setOriginalCoverImageFile] = useState<File | null>(null);
 
   // Form data
   const [formData, setFormData] = useState({
@@ -445,6 +447,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       }
     } else if (file.type.startsWith('image/')) {
       // Handle image - open editor
+      // Spara originalfilen för framtida redigeringar
+      setOriginalProfileImageFile(file);
       const imageUrl = URL.createObjectURL(file);
       setPendingImageSrc(imageUrl);
       setImageEditorOpen(true);
@@ -455,6 +459,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     const file = e.target.files?.[0];
     if (!file || !file.type.startsWith('image/')) return;
 
+    // Spara originalfilen för framtida redigeringar
+    setOriginalCoverImageFile(file);
     const imageUrl = URL.createObjectURL(file);
     setPendingCoverSrc(imageUrl);
     setCoverEditorOpen(true);
@@ -463,20 +469,27 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const handleEditExistingCover = async () => {
     if (!formData.coverImageUrl) return;
     
-    try {
-      // Hämta den signerade URL:en för den befintliga cover-bilden
-      const signedUrl = await getMediaUrl(formData.coverImageUrl, 'cover-image', 86400);
-      if (signedUrl) {
-        setPendingCoverSrc(signedUrl);
-        setCoverEditorOpen(true);
+    // Visa alltid originalbilden i editorn (om den finns)
+    if (originalCoverImageFile) {
+      const imageUrl = URL.createObjectURL(originalCoverImageFile);
+      setPendingCoverSrc(imageUrl);
+      setCoverEditorOpen(true);
+    } else {
+      // Fallback: Hämta den signerade URL:en för den befintliga cover-bilden
+      try {
+        const signedUrl = await getMediaUrl(formData.coverImageUrl, 'cover-image', 86400);
+        if (signedUrl) {
+          setPendingCoverSrc(signedUrl);
+          setCoverEditorOpen(true);
+        }
+      } catch (error) {
+        console.error('Error loading existing cover:', error);
+        toast({
+          title: "Fel",
+          description: "Kunde inte ladda cover-bilden för redigering.",
+          variant: "destructive"
+        });
       }
-    } catch (error) {
-      console.error('Error loading existing cover:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte ladda cover-bilden för redigering.",
-        variant: "destructive"
-      });
     }
   };
 
@@ -484,20 +497,27 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     // Kan endast redigera bilder, inte videor
     if (!formData.profileImageUrl || formData.profileMediaType === 'video') return;
     
-    try {
-      // Hämta den signerade URL:en för den befintliga profilbilden
-      const signedUrl = await getMediaUrl(formData.profileImageUrl, 'profile-image', 86400);
-      if (signedUrl) {
-        setPendingImageSrc(signedUrl);
-        setImageEditorOpen(true);
+    // Visa alltid originalbilden i editorn (om den finns)
+    if (originalProfileImageFile) {
+      const imageUrl = URL.createObjectURL(originalProfileImageFile);
+      setPendingImageSrc(imageUrl);
+      setImageEditorOpen(true);
+    } else {
+      // Fallback: Hämta den signerade URL:en för den befintliga profilbilden
+      try {
+        const signedUrl = await getMediaUrl(formData.profileImageUrl, 'profile-image', 86400);
+        if (signedUrl) {
+          setPendingImageSrc(signedUrl);
+          setImageEditorOpen(true);
+        }
+      } catch (error) {
+        console.error('Error loading profile image for editing:', error);
+        toast({
+          title: "Fel",
+          description: "Kunde inte ladda bilden för redigering",
+          variant: "destructive"
+        });
       }
-    } catch (error) {
-      console.error('Error loading profile image for editing:', error);
-      toast({
-        title: "Fel",
-        description: "Kunde inte ladda bilden för redigering",
-        variant: "destructive"
-      });
     }
   };
 
