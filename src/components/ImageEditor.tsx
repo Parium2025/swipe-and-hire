@@ -30,45 +30,10 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const [minScale, setMinScale] = useState(0.1);
   const [activeButton, setActiveButton] = useState<'cancel' | 'save' | null>(null);
 
-  const initialScaleRef = useRef<number | null>(null);
-  const initialPositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-
   const BASE_CANVAS_HEIGHT = 400; // Output canvas height in px
   const CANVAS_HEIGHT = BASE_CANVAS_HEIGHT;
   const CANVAS_WIDTH = Math.round(BASE_CANVAS_HEIGHT * aspectRatio);
   const MAX_SCALE = 3;
-  const clampPosition = useCallback(
-    (pos: { x: number; y: number }, scaleValue: number) => {
-      const img = imageRef.current;
-      if (!img) return pos;
-
-      const scaledWidth = img.width * scaleValue;
-      const scaledHeight = img.height * scaleValue;
-
-      let x = pos.x;
-      let y = pos.y;
-
-      // Håll alltid bilden så att den täcker hela canvasen (cover) utan att visa tomma kanter
-      if (scaledWidth <= CANVAS_WIDTH) {
-        x = 0;
-      } else {
-        const halfDiffX = (scaledWidth - CANVAS_WIDTH) / 2;
-        if (x > halfDiffX) x = halfDiffX;
-        if (x < -halfDiffX) x = -halfDiffX;
-      }
-
-      if (scaledHeight <= CANVAS_HEIGHT) {
-        y = 0;
-      } else {
-        const halfDiffY = (scaledHeight - CANVAS_HEIGHT) / 2;
-        if (y > halfDiffY) y = halfDiffY;
-        if (y < -halfDiffY) y = -halfDiffY;
-      }
-
-      return { x, y };
-    },
-    [CANVAS_WIDTH, CANVAS_HEIGHT]
-  );
 
   // Load and setup image
   useEffect(() => {
@@ -97,10 +62,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           // Beräkna minScale för att visa hela bilden (contain)
           const containScale = Math.min(scaleX, scaleY);
           setMinScale(containScale);
-
-          // Spara ursprungligt läge när editorn öppnas
-          initialScaleRef.current = initialScale;
-          initialPositionRef.current = { x: 0, y: 0 };
           
           setScale(initialScale);
           setPosition({ x: 0, y: 0 });
@@ -133,10 +94,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           // Beräkna minScale för att visa hela bilden (contain)
           const containScale = Math.min(scaleX, scaleY);
           setMinScale(containScale);
-
-          // Spara ursprungligt läge när editorn öppnas (fallback)
-          initialScaleRef.current = initialScale;
-          initialPositionRef.current = { x: 0, y: 0 };
           
           setScale(initialScale);
           setPosition({ x: 0, y: 0 });
@@ -230,7 +187,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     const newX = e.clientX - rect.left - dragStart.x;
     const newY = e.clientY - rect.top - dragStart.y;
     
-    setPosition(clampPosition({ x: newX, y: newY }, scale));
+    setPosition({ x: newX, y: newY });
   };
 
   const handleMouseUp = () => {
@@ -260,7 +217,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     const newX = touch.clientX - rect.left - dragStart.x;
     const newY = touch.clientY - rect.top - dragStart.y;
     
-    setPosition(clampPosition({ x: newX, y: newY }, scale));
+    setPosition({ x: newX, y: newY });
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
@@ -270,22 +227,15 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
 
   // Zoom functions
   const zoomIn = () => {
-    setScale(prev => {
-      const next = Math.min(prev + 0.2, MAX_SCALE);
-      setPosition(current => clampPosition(current, next));
-      return next;
-    });
+    setScale(prev => Math.min(prev + 0.2, MAX_SCALE));
   };
 
   const zoomOut = () => {
-    setScale(prev => {
-      const next = Math.max(prev - 0.2, minScale);
-      setPosition(current => clampPosition(current, next));
-      return next;
-    });
+    setScale(prev => Math.max(prev - 0.2, minScale));
   };
 
   const resetPosition = () => {
+    setPosition({ x: 0, y: 0 });
     if (imageRef.current) {
       const img = imageRef.current;
       const containerWidth = CANVAS_WIDTH;
@@ -296,9 +246,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       const scaleY = containerHeight / img.height;
       const initialScale = Math.max(scaleX, scaleY);
       setScale(initialScale);
-      setPosition(clampPosition({ x: 0, y: 0 }, initialScale));
-    } else {
-      setPosition({ x: 0, y: 0 });
     }
   };
 

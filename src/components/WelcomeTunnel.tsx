@@ -645,14 +645,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const restoreProfileMedia = () => {
     if (!deletedProfileMedia) return;
 
-    console.log('Restoring profile media', deletedProfileMedia);
-
     // Återställ alla värden i ett enda state-anrop för mjukare övergång
     setFormData(prev => ({
       ...prev,
-      profileImageUrl: deletedProfileMedia.profileImageUrl || '',
-      coverImageUrl: deletedProfileMedia.coverImageUrl || '',
-      profileMediaType: deletedProfileMedia.profileMediaType || 'image',
+      profileImageUrl: deletedProfileMedia.profileImageUrl,
+      coverImageUrl: deletedProfileMedia.coverImageUrl,
+      profileMediaType: deletedProfileMedia.profileMediaType,
     }));
 
     // Clear undo data
@@ -660,9 +658,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
     toast({
       title: "Återställd!",
-      description: "Din profilmedia har återställts"
+      description: "Din profilvideo har återställts"
     });
   };
+
   const deleteCoverImage = () => {
     // Save current cover image for undo
     setDeletedCoverImage(formData.coverImageUrl);
@@ -1179,7 +1178,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         <AvatarImage 
                           src={formData.profileImageUrl ? (signedProfileImageUrl || '') : ''}
                           alt="Profilbild"
-                          className="object-contain"
+                          className="object-cover"
                           decoding="sync"
                           loading="eager"
                           fetchPriority="high"
@@ -1256,8 +1255,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         {formData.profileMediaType === 'video' ? 'Video' : 'Bild'} uppladdad!
                       </Badge>
                       
-                      {/* Anpassa knapp - visas för bilder (inte videor) */}
-                      {formData.profileImageUrl && formData.profileMediaType !== 'video' && (
+                      {/* Anpassa knapp - endast för bilder */}
+                      {formData.profileMediaType === 'image' && (
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -1636,7 +1635,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         }}
         imageSrc={pendingImageSrc}
         onSave={handleProfileImageSave}
-        isCircular={false}
+        isCircular={true}
       />
       
       <ImageEditor
