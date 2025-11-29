@@ -459,6 +459,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     const file = e.target.files?.[0];
     if (!file || !file.type.startsWith('image/')) return;
 
+    console.log('[WelcomeTunnel] handleCoverChange - original cover file set', {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+    });
+
     // Spara originalfilen för framtida redigeringar
     setOriginalCoverImageFile(file);
     const imageUrl = URL.createObjectURL(file);
@@ -468,6 +474,11 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
   const handleEditExistingCover = async () => {
     if (!formData.coverImageUrl) return;
+    
+    console.log('[WelcomeTunnel] handleEditExistingCover called', {
+      hasOriginalFile: !!originalCoverImageFile,
+      coverImageUrl: formData.coverImageUrl,
+    });
     
     // Visa alltid originalbilden i editorn (om den finns)
     if (originalCoverImageFile) {
@@ -574,6 +585,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       
       const { data } = await supabase.auth.getUser();
       if (!data.user) throw new Error('User not authenticated');
+
+      console.log('[WelcomeTunnel] handleCoverImageSave - saving edited cover', {
+        hasOriginalFile: !!originalCoverImageFile,
+      });
 
       // Skapa File från Blob så vi kan återanvända mediaManager-logiken
       const editedFile = new File([editedBlob], 'cover-image.jpg', { type: 'image/jpeg' });
