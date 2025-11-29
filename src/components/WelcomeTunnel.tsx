@@ -133,7 +133,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   // Intelligent CV caching: Generera signed URL EN GÅNG och cacha permanent
   // så CV:et laddas aldrig om när användaren navigerar mellan steg
   useEffect(() => {
-    if (formData.cvUrl && !cachedCvUrl && currentStep >= 2) {
+    // Start preloading IMMEDIATELY when CV exists, regardless of step - background loading
+    if (formData.cvUrl && !cachedCvUrl) {
       const cacheCv = async () => {
         try {
           const signedUrl = await getMediaUrl(formData.cvUrl, 'cv', 86400);
@@ -146,7 +147,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             await preloadSingleFile(signedUrl);
             setCvPreloaded(true);
             
-            console.log('CV cached and preloaded - instant loading on all step changes ✓');
+            console.log('CV cached and preloaded in background - ready before step 3 ✓');
           }
         } catch (error) {
           console.log('CV caching skipped:', error);
@@ -154,7 +155,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       };
       cacheCv();
     }
-  }, [formData.cvUrl, cachedCvUrl, currentStep]);
+  }, [formData.cvUrl, cachedCvUrl]);
 
   // Use centralized phone validation
   const validatePhoneNumber = (phoneNumber: string) => {
