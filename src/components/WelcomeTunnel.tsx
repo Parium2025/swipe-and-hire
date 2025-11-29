@@ -36,6 +36,9 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   
+  // Track if CV has been preloaded to avoid redundant preloading
+  const [cvPreloaded, setCvPreloaded] = useState(false);
+  
   // Undo state - store deleted media for restore
   const [deletedProfileMedia, setDeletedProfileMedia] = useState<{
     profileImageUrl: string;
@@ -121,6 +124,32 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     formData.profileMediaType === 'video' ? 'profile-video' : 'profile-image'
   );
   const signedCoverUrl = useMediaUrl(formData.coverImageUrl, 'cover-image');
+
+  // Intelligent CV preloading: när CV är uppladdat och användaren närmar sig CV-steget,
+  // förladdda CV:et i bakgrunden så det är redo direkt när användaren kommer dit
+  useEffect(() => {
+    if (formData.cvUrl && !cvPreloaded && currentStep >= 2) {
+      // Preloadea CV:et i bakgrunden när användaren är nära CV-steget (steg 2 eller senare)
+      const preloadCv = async () => {
+        try {
+          const signedUrl = await getMediaUrl(formData.cvUrl, 'cv', 86400);
+          if (signedUrl) {
+            // Dynamisk import för att inte blockera huvudtråden
+            const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
+            await preloadSingleFile(signedUrl);
+            setCvPreloaded(true); // Markera som förladdat
+            console.log('CV preloaded successfully in background');
+          }
+        } catch (error) {
+          console.log('CV preload skipped:', error);
+          // Tyst fel - preload är en optimering, inte kritisk funktionalitet
+        }
+      };
+      
+      // Kör preload i bakgrunden utan att blockera UI
+      preloadCv();
+    }
+  }, [formData.cvUrl, cvPreloaded, currentStep]);
 
   // Use centralized phone validation
   const validatePhoneNumber = (phoneNumber: string) => {
