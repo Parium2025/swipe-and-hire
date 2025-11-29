@@ -348,7 +348,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               className={`flex-1 transition-all duration-200 !text-white ${
                 activeButton === 'cancel'
                   ? 'bg-white/10 border-white/20' 
-                  : 'bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50'
+                  : 'bg-white/5 border-white/10'
               }`}
               variant="outline"
             >
@@ -359,7 +359,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
               className={`flex-1 transition-all duration-200 !text-white ${
                 activeButton === 'save'
                   ? 'bg-white/10 border-white/20' 
-                  : 'bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50'
+                  : 'bg-white/5 border-white/10'
               }`}
               variant="outline"
             >
