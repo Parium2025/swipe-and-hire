@@ -477,30 +477,42 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     
     console.log('[WelcomeTunnel] handleEditExistingCover called', {
       hasOriginalFile: !!originalCoverImageFile,
+      hasOriginalProfileFile: !!originalProfileImageFile,
+      profileMediaType: formData.profileMediaType,
       coverImageUrl: formData.coverImageUrl,
     });
     
-    // Visa alltid originalbilden i editorn (om den finns)
+    // 1) Om vi har en explicit uppladdad cover-bild, använd den ursprungliga filen
     if (originalCoverImageFile) {
       const imageUrl = URL.createObjectURL(originalCoverImageFile);
       setPendingCoverSrc(imageUrl);
       setCoverEditorOpen(true);
-    } else {
-      // Fallback: Hämta den signerade URL:en för den befintliga cover-bilden
-      try {
-        const signedUrl = await getMediaUrl(formData.coverImageUrl, 'cover-image', 86400);
-        if (signedUrl) {
-          setPendingCoverSrc(signedUrl);
-          setCoverEditorOpen(true);
-        }
-      } catch (error) {
-        console.error('Error loading existing cover:', error);
-        toast({
-          title: "Fel",
-          description: "Kunde inte ladda cover-bilden för redigering.",
-          variant: "destructive"
-        });
+      return;
+    }
+
+    // 2) Om cover-bilden kommer från en tidigare profilbild (video + auto-cover),
+    //    använd den ursprungliga profilbildsfilen som "original" för covern
+    if (formData.profileMediaType === 'video' && originalProfileImageFile) {
+      const imageUrl = URL.createObjectURL(originalProfileImageFile);
+      setPendingCoverSrc(imageUrl);
+      setCoverEditorOpen(true);
+      return;
+    }
+
+    // 3) Fallback: hämta signerad URL för befintlig cover-bild från lagring
+    try {
+      const signedUrl = await getMediaUrl(formData.coverImageUrl, 'cover-image', 86400);
+      if (signedUrl) {
+        setPendingCoverSrc(signedUrl);
+        setCoverEditorOpen(true);
       }
+    } catch (error) {
+      console.error('Error loading existing cover:', error);
+      toast({
+        title: "Fel",
+        description: "Kunde inte ladda cover-bilden för redigering.",
+        variant: "destructive"
+      });
     }
   };
 
