@@ -50,7 +50,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
         img.onload = () => {
           imageRef.current = img;
           
-          // Calculate initial scale - IDENTISKT för alla bilder
+          // Calculate initial scale - IDENTISKT för alla bilder (cover)
           const containerWidth = CANVAS_WIDTH;
           const containerHeight = CANVAS_HEIGHT;
           
@@ -58,10 +58,10 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           const scaleX = containerWidth / img.width;
           const scaleY = containerHeight / img.height;
           
-          // ALLTID använd "contain" som initial scale (visar hela bilden)
+          // ALLTID använd "cover" som initial scale (fyller hela området utan luckor)
           // Detta ger identiskt zoom-beteende för både cirkulär och rektangulär
-          const initialScale = Math.min(scaleX, scaleY);
-          setMinScale(initialScale * 0.5); // minScale är 50% av contain-scale
+          const initialScale = Math.max(scaleX, scaleY);
+          setMinScale(Math.min(scaleX, scaleY) * 0.5); // minScale baserat på contain
           
           setScale(initialScale);
           setPosition({ x: 0, y: 0 });
@@ -90,9 +90,9 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           const scaleX = containerWidth / img.width;
           const scaleY = containerHeight / img.height;
           
-          // ALLTID använd "contain" som initial scale
-          const initialScale = Math.min(scaleX, scaleY);
-          setMinScale(initialScale * 0.5);
+          // ALLTID använd "cover" som initial scale
+          const initialScale = Math.max(scaleX, scaleY);
+          setMinScale(Math.min(scaleX, scaleY) * 0.5);
           
           setScale(initialScale);
           setPosition({ x: 0, y: 0 });
@@ -240,10 +240,10 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
       const containerWidth = CANVAS_WIDTH;
       const containerHeight = CANVAS_HEIGHT;
       
-      // ALLTID återställ till "contain" scale (identiskt för alla bilder)
+      // ALLTID återställ till "cover" scale (identiskt för alla bilder)
       const scaleX = containerWidth / img.width;
       const scaleY = containerHeight / img.height;
-      const initialScale = Math.min(scaleX, scaleY);
+      const initialScale = Math.max(scaleX, scaleY);
       setScale(initialScale);
     }
   };
