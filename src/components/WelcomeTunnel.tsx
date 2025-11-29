@@ -1455,7 +1455,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 } : undefined} 
               />
               {formData.cvUrl && (
-                <Badge variant="secondary" className="bg-white/20 text-white">
+                <Badge variant="secondary" className="bg-white/20 text-white hover:bg-white/20">
                   CV uppladdat!
                 </Badge>
               )}
