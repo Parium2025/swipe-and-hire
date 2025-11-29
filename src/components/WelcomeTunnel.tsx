@@ -459,12 +459,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     const file = e.target.files?.[0];
     if (!file || !file.type.startsWith('image/')) return;
 
-    console.log('[WelcomeTunnel] handleCoverChange - original cover file set', {
-      name: file.name,
-      type: file.type,
-      size: file.size,
-    });
-
     // Spara originalfilen för framtida redigeringar
     setOriginalCoverImageFile(file);
     const imageUrl = URL.createObjectURL(file);
@@ -474,13 +468,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
   const handleEditExistingCover = async () => {
     if (!formData.coverImageUrl) return;
-    
-    console.log('[WelcomeTunnel] handleEditExistingCover called', {
-      hasOriginalFile: !!originalCoverImageFile,
-      hasOriginalProfileFile: !!originalProfileImageFile,
-      profileMediaType: formData.profileMediaType,
-      coverImageUrl: formData.coverImageUrl,
-    });
     
     // 1) Om vi har en explicit uppladdad cover-bild, använd den ursprungliga filen
     if (originalCoverImageFile) {
@@ -577,6 +564,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       handleInputChange('profileMediaType', 'image');
       
       setImageEditorOpen(false);
+      // Cleanup blob URL
+      if (pendingImageSrc) {
+        URL.revokeObjectURL(pendingImageSrc);
+      }
       setPendingImageSrc('');
     } catch (error) {
       console.error('Profile image upload error:', error);
@@ -597,10 +588,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       
       const { data } = await supabase.auth.getUser();
       if (!data.user) throw new Error('User not authenticated');
-
-      console.log('[WelcomeTunnel] handleCoverImageSave - saving edited cover', {
-        hasOriginalFile: !!originalCoverImageFile,
-      });
 
       // Skapa File från Blob så vi kan återanvända mediaManager-logiken
       const editedFile = new File([editedBlob], 'cover-image.jpg', { type: 'image/jpeg' });
@@ -626,6 +613,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       handleInputChange('coverImageUrl', storagePath);
       
       setCoverEditorOpen(false);
+      // Cleanup blob URL
+      if (pendingCoverSrc) {
+        URL.revokeObjectURL(pendingCoverSrc);
+      }
       setPendingCoverSrc('');
     } catch (error) {
       console.error('Cover upload error:', error);
