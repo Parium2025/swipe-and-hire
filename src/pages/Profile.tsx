@@ -54,6 +54,8 @@ const Profile = () => {
   const [profileFileName, setProfileFileName] = useState(''); // Track profile media filename
   const [isProfileVideo, setIsProfileVideo] = useState(false);
   const [cvOpen, setCvOpen] = useState(false);
+  const [originalProfileImageFile, setOriginalProfileImageFile] = useState<File | null>(null);
+  const [originalCoverImageFile, setOriginalCoverImageFile] = useState<File | null>(null);
   
   // Undo state - store deleted media for restore
   const [deletedProfileMedia, setDeletedProfileMedia] = useState<{
@@ -543,6 +545,8 @@ const Profile = () => {
         );
       }
     } else if (file.type.startsWith('image/')) {
+      // Spara originalfilen för framtida redigeringar
+      setOriginalProfileImageFile(file);
       const imageUrl = URL.createObjectURL(file);
       setPendingImageSrc(imageUrl);
       setImageEditorOpen(true);
@@ -554,6 +558,8 @@ const Profile = () => {
     if (!file) return;
 
     if (file.type.startsWith('image/')) {
+      // Spara originalfilen för framtida redigeringar
+      setOriginalCoverImageFile(file);
       const imageUrl = URL.createObjectURL(file);
       setPendingCoverSrc(imageUrl);
       setCoverEditorOpen(true);
@@ -599,6 +605,9 @@ const Profile = () => {
       
       // Clear undo state since we have a new profile image
       setDeletedProfileMedia(null);
+      
+      // Spara den redigerade filen som originalfil för framtida redigeringar
+      setOriginalProfileImageFile(editedFile);
       
       setImageEditorOpen(false);
       setPendingImageSrc('');
@@ -659,6 +668,9 @@ const Profile = () => {
       
       // Clear undo state since we have a new cover image
       setDeletedCoverImage(null);
+      
+      // Spara den redigerade filen som originalfil för framtida redigeringar
+      setOriginalCoverImageFile(editedFile);
       
       setCoverEditorOpen(false);
       setPendingCoverSrc('');
@@ -863,6 +875,61 @@ const Profile = () => {
       title: "Återställd!",
       description: "Din cover-bild har återställts"
     });
+  };
+
+  const handleEditExistingProfile = async () => {
+    // Kan endast redigera bilder, inte videor
+    if (!profileImageUrl || isProfileVideo) return;
+    
+    // Visa alltid originalbilden i editorn (om den finns)
+    if (originalProfileImageFile) {
+      const imageUrl = URL.createObjectURL(originalProfileImageFile);
+      setPendingImageSrc(imageUrl);
+      setImageEditorOpen(true);
+    } else {
+      // Fallback: Hämta den signerade URL:en för den befintliga profilbilden
+      try {
+        const signedUrl = await getMediaUrl(profileImageUrl, 'profile-image', 86400);
+        if (signedUrl) {
+          setPendingImageSrc(signedUrl);
+          setImageEditorOpen(true);
+        }
+      } catch (error) {
+        console.error('Error loading profile image for editing:', error);
+        toast({
+          title: "Fel",
+          description: "Kunde inte ladda bilden för redigering",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
+  const handleEditExistingCover = async () => {
+    if (!coverImageUrl) return;
+    
+    // Visa alltid originalbilden i editorn (om den finns)
+    if (originalCoverImageFile) {
+      const imageUrl = URL.createObjectURL(originalCoverImageFile);
+      setPendingCoverSrc(imageUrl);
+      setCoverEditorOpen(true);
+    } else {
+      // Fallback: Hämta den signerade URL:en för den befintliga cover-bilden
+      try {
+        const signedUrl = await getMediaUrl(coverImageUrl, 'cover-image', 86400);
+        if (signedUrl) {
+          setPendingCoverSrc(signedUrl);
+          setCoverEditorOpen(true);
+        }
+      } catch (error) {
+        console.error('Error loading existing cover:', error);
+        toast({
+          title: "Fel",
+          description: "Kunde inte ladda cover-bilden för redigering.",
+          variant: "destructive"
+        });
+      }
+    }
   };
 
   const handleDeleteCv = async () => {
@@ -1183,6 +1250,23 @@ const Profile = () => {
                   {isProfileVideo ? 'Video' : 'Bild'} uppladdad!
                 </Badge>
               )}
+              
+              {/* Anpassa din bild button - only show for images, not videos */}
+              {(!isProfileVideo && !!profileImageUrl) && !isUploadingMedia && (
+                <div className="flex flex-col items-center space-y-2">
+                  <Badge variant="outline" className="bg-white/20 text-white border-white/20 px-3 py-1 rounded-md">
+                    Bild uppladdad!
+                  </Badge>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleEditExistingProfile}
+                    className="bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
+                  >
+                    Anpassa din bild
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Cover image upload - show when video exists OR when cover image exists without video */}
@@ -1238,11 +1322,19 @@ const Profile = () => {
                 
                 {coverImageUrl && !isUploadingCover && (
                   <div className="flex flex-col items-center space-y-2 w-full">
-                     <div className="flex items-center justify-center">
+                     <div className="flex items-center justify-center gap-2">
                        <Badge variant="outline" className="bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-md">
                           Cover-bild uppladdad!
                         </Badge>
                      </div>
+                     <Button 
+                       variant="outline" 
+                       size="sm"
+                       onClick={handleEditExistingCover}
+                       className="bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
+                     >
+                       Anpassa din bild
+                     </Button>
                   </div>
                 )}
               </div>
