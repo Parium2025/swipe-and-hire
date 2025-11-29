@@ -28,7 +28,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
   const [minScale, setMinScale] = useState(0.1);
-  const [activeButton, setActiveButton] = useState<'cancel' | 'save' | null>(null);
+  
 
   const BASE_CANVAS_HEIGHT = 400; // Output canvas height in px
   const CANVAS_HEIGHT = BASE_CANVAS_HEIGHT;
@@ -260,19 +260,11 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   };
 
   const handleCancelClick = () => {
-    setActiveButton('cancel');
-    setTimeout(() => {
-      onClose();
-      setActiveButton(null);
-    }, 150);
+    onClose();
   };
 
   const handleSaveClick = () => {
-    setActiveButton('save');
-    setTimeout(() => {
-      handleSave();
-      setActiveButton(null);
-    }, 150);
+    handleSave();
   };
 
   return (
@@ -345,22 +337,14 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           <div className="flex space-x-2">
             <Button 
               onClick={handleCancelClick}
-              className={`flex-1 transition-all duration-200 !text-white ${
-                activeButton === 'cancel'
-                  ? 'bg-white/10 border-white/20' 
-                  : 'bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50'
-              }`}
+              className="flex-1 transition-all duration-200 !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
               variant="outline"
             >
               Avbryt
             </Button>
             <Button 
               onClick={handleSaveClick}
-              className={`flex-1 transition-all duration-200 !text-white ${
-                activeButton === 'save'
-                  ? 'bg-white/10 border-white/20' 
-                  : 'bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50'
-              }`}
+              className="flex-1 transition-all duration-200 !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
               variant="outline"
             >
               Spara
