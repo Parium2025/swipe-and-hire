@@ -21,7 +21,6 @@ import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelecto
 import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
 import { uploadMedia, getMediaUrl, deleteMedia } from '@/lib/mediaManager';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
-import KeepAlive from '@/components/KeepAlive';
 
 interface WelcomeTunnelProps {
   onComplete: () => void;
@@ -1664,10 +1663,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       {/* Main content */}
       <div className="flex-1 flex items-center justify-center px-6 py-8 relative z-10">
         <div className="w-full max-w-2xl">
-          <KeepAlive
-            activeKey={String(currentStep)}
-            render={() => renderStep()}
-          />
+          {renderStep()}
         </div>
       </div>
 
