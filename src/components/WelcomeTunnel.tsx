@@ -1684,8 +1684,8 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         }}
         imageSrc={pendingCoverSrc}
         onSave={handleCoverImageSave}
-        isCircular={false}
-        aspectRatio={16/9}
+        isCircular={true}
+        aspectRatio={1}
       />
     </div>
   );
