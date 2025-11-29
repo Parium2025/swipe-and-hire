@@ -606,9 +606,6 @@ const Profile = () => {
       // Clear undo state since we have a new profile image
       setDeletedProfileMedia(null);
       
-      // Spara den redigerade filen som originalfil för framtida redigeringar
-      setOriginalProfileImageFile(editedFile);
-      
       setImageEditorOpen(false);
       setPendingImageSrc('');
       
@@ -668,9 +665,6 @@ const Profile = () => {
       
       // Clear undo state since we have a new cover image
       setDeletedCoverImage(null);
-      
-      // Spara den redigerade filen som originalfil för framtida redigeringar
-      setOriginalCoverImageFile(editedFile);
       
       setCoverEditorOpen(false);
       setPendingCoverSrc('');
