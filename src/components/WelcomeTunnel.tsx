@@ -598,6 +598,9 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       // Uppdatera lokalt state i tunneln (sparas vid handleSubmit)
       handleInputChange('coverImageUrl', storagePath);
       
+      // Spara den redigerade filen som originalfil för framtida redigeringar
+      setOriginalCoverImageFile(editedFile);
+      
       setCoverEditorOpen(false);
       setPendingCoverSrc('');
     } catch (error) {
