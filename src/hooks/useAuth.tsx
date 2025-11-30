@@ -593,22 +593,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUserRole(null);
     setOrganization(null);
     
-    // 2) Rensa sessionStorage
+    // 2) Rensa sessionStorage och localStorage cached profile
     try { 
-      sessionStorage.clear(); 
+      sessionStorage.clear();
+      localStorage.removeItem(CACHED_PROFILE_KEY);
     } catch (e) {
-      console.warn('Could not clear sessionStorage:', e);
+      console.warn('Could not clear storage:', e);
     }
 
     // 3) Signera ut från Supabase i bakgrunden (icke-blockerande)
-    // Detta låter UI kännas responsiv
     supabase.auth.signOut({ scope: 'global' }).catch(error => {
       console.error('Error signing out from Supabase:', error);
     });
 
-    // 4) Notify och redirect omedelbart utan att vänta
+    // 4) Kort fade för premium-känsla innan redirect
+    try {
+      document.body.style.opacity = '0.95';
+      document.body.style.transition = 'opacity 150ms ease-out';
+    } catch {}
+
+    // 5) Premium smooth redirect efter kort delay
     toast({ title: 'Utloggad', description: 'Du har loggats ut', duration: 2000 });
-    window.location.replace('/auth');
+    
+    setTimeout(() => {
+      try {
+        document.body.style.opacity = '1';
+        document.body.style.transition = '';
+      } catch {}
+      window.location.href = '/auth';
+    }, 150);
   };
 
   const refreshProfile = async () => {
