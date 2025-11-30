@@ -28,7 +28,6 @@ import { useDevice } from "@/hooks/use-device";
 import { useGlobalImagePreloader } from "@/hooks/useGlobalImagePreloader";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { supabase } from "@/integrations/supabase/client";
-import { AuthLogoBackground } from "@/components/AuthLogoBackground";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -80,7 +79,7 @@ const AnimatedRoutes = () => {
   );
 };
 
-const AppShell = () => {
+const App = () => {
   const showHeader = false; // Header removed for cleaner UI
 
   // Förladdda alla kritiska bilder globalt vid app-start
@@ -94,40 +93,38 @@ const AppShell = () => {
     return () => window.removeEventListener('load', start as any);
   }, []);
 
-  const location = useLocation();
-  const isAuthRoute = location.pathname.startsWith('/auth');
-
   return (
-    <UnsavedChangesProvider>
-      <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full relative">
-        {/* Persistent auth-logo i bakgrunden. Tas aldrig bort, vi växlar bara opacity. */}
-        <AuthLogoBackground visible={isAuthRoute} />
-
-        <div className="relative z-10">
-          {showHeader && <Header />}
-          <main className={showHeader ? 'pt-16' : ''}>
-            <AuthTokenBridge />
-            <AnimatedRoutes />
-          </main>
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      <TooltipProvider delayDuration={0}>
+      <Toaster />
+      <OfflineIndicator />
+      <BrowserRouter>
+        <UnsavedChangesProvider>
+          <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
+            {/* Dold logo som håller bilden "varm" i minnet permanent */}
+            <img 
+              src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png"
+              alt=""
+              aria-hidden="true"
+              className="fixed opacity-0 pointer-events-none w-0 h-0"
+              loading="eager"
+              decoding="sync"
+            />
+            
+            <div className="relative z-10">
+              {showHeader && <Header />}
+              <main className={showHeader ? "pt-16" : ""}>
+                <AuthTokenBridge />
+                <AnimatedRoutes />
+            </main>
+          </div>
         </div>
-      </div>
-    </UnsavedChangesProvider>
-  );
-};
-
-const App = () => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider delayDuration={0}>
-          <Toaster />
-          <OfflineIndicator />
-          <BrowserRouter>
-            <AppShell />
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+      </UnsavedChangesProvider>
+    </BrowserRouter>
+    </TooltipProvider>
+  </AuthProvider>
+</QueryClientProvider>
   );
 };
 
