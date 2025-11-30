@@ -28,6 +28,7 @@ import { useDevice } from "@/hooks/use-device";
 import { useGlobalImagePreloader } from "@/hooks/useGlobalImagePreloader";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { supabase } from "@/integrations/supabase/client";
+import { AuthLogoOverlay } from "@/components/AuthLogoOverlay";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -101,6 +102,7 @@ const App = () => {
       <OfflineIndicator />
       <BrowserRouter>
         <UnsavedChangesProvider>
+          <AuthLogoOverlay />
           <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
             {/* Dold logo som håller bilden "varm" i minnet permanent */}
             <img 
