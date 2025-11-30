@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useDevice } from '@/hooks/use-device';
@@ -344,20 +344,9 @@ const Auth = () => {
       
       setIsPasswordReset(isReset);
       
-      // CRITICAL: Only redirect when BOTH user AND profile are fully loaded AND loading is complete (media ready)
-      const hasRecoveryParamsNow = isReset || !!accessToken || !!refreshToken || !!tokenParam || !!tokenHashParam || tokenType === 'recovery';
-      if (user && profile && !loading && !hasRecoveryParamsNow && confirmationStatus === 'none' && recoveryStatus === 'none' && !confirmed) {
-        const role = (profile as any)?.role;
-        const onboardingCompleted = (profile as any)?.onboarding_completed;
-        
-        if (role) {
-          const target = role === 'employer' ? '/dashboard' : '/search-jobs';
-          console.log('✅ Auth: Redirecting to', target);
-          
-          // Omedelbar navigation utan delays
-          navigate(target, { replace: true });
-        }
-      }
+      // Notera: Själva redirecten vid lyckad inloggning hanteras nu deklarativt
+      // längre ner i render-funktionen via <Navigate>, för att undvika en
+      // extra frame där formuläret blinkar till innan routing hinner ske.
     };
 
     handleAuthFlow();
@@ -724,6 +713,15 @@ const Auth = () => {
         </div>
       </div>
     );
+  }
+
+  // 🔁 Direkt redirect efter lyckad inloggning utan extra frame
+  if (user && profile && !loading && confirmationStatus === 'none' && recoveryStatus === 'none' && !isPasswordReset) {
+    const role = (profile as any)?.role;
+    if (role) {
+      const target = role === 'employer' ? '/dashboard' : '/search-jobs';
+      return <Navigate to={target} replace />;
+    }
   }
 
   // Använd rätt komponent baserat på skärmstorlek
