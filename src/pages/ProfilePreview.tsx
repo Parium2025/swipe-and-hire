@@ -820,7 +820,7 @@ export default function ProfilePreview() {
                     className="flex items-center gap-2 text-white hover:text-white transition-colors w-full"
                   >
                     <FileText className="h-4 w-4 text-white flex-shrink-0" />
-                    <span className="text-sm">Visa CV</span>
+                    <span className="text-xs">Visa CV</span>
                     <ExternalLink className="h-4 w-4 text-white ml-auto flex-shrink-0" />
                   </button>
                 </div>
