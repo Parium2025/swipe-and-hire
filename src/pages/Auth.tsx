@@ -727,7 +727,7 @@ const Auth = () => {
   // Använd rätt komponent baserat på skärmstorlek
   if (device === 'mobile') {
     return (
-      <div className="min-h-screen w-full overflow-x-hidden relative">
+      <div className="min-h-screen w-full overflow-x-hidden relative animate-fade-in">
         {/* Pull-to-refresh spinner */}
         <div 
           className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
@@ -770,7 +770,7 @@ const Auth = () => {
 
   if (device === 'tablet') {
     return (
-      <div className="min-h-screen w-full overflow-x-hidden relative">
+      <div className="min-h-screen w-full overflow-x-hidden relative animate-fade-in">
         {/* Pull-to-refresh spinner */}
         <div 
           className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
@@ -804,7 +804,7 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden relative">
+    <div className="min-h-screen w-full overflow-x-hidden relative animate-fade-in">
       {/* Pull-to-refresh spinner */}
       <div 
         className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
