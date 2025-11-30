@@ -301,6 +301,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               }
             }
             
+            // Spara preloaded URLs för sidebar/header direkt
+            const avatarForSidebar = avatarUrl || coverUrl || null;
+            setPreloadedAvatarUrl(avatarForSidebar);
+            setPreloadedCoverUrl(coverUrl || null);
+            
             // Profilvideo – hämta URL men ladda i bakgrunden
             if (processedProfile.video_url) {
               videoUrl = await getMediaUrl(processedProfile.video_url, 'profile-video', 86400);
@@ -338,6 +343,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           } catch (error) {
             console.error('Failed to preload user media:', error);
             // Släpp ändå användaren in vid fel
+            setPreloadedAvatarUrl(null);
+            setPreloadedCoverUrl(null);
             mediaPreloadCompleteRef.current = true;
             setMediaPreloadComplete(true);
           }
