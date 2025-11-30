@@ -578,42 +578,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    try {
-      // Markera att detta är en manuell utloggning
-      isManualSignOutRef.current = true;
+    // Markera att detta är en manuell utloggning
+    isManualSignOutRef.current = true;
 
-      // 1) Rensa applikationsstate först
-      setUser(null);
-      setSession(null);
-      setProfile(null);
-      setUserRole(null);
-      setOrganization(null);
-      
-      // 2) Rensa bara sessionStorage, inte localStorage
-      // Låt Supabase hantera sina egna tokens i localStorage
-      try { 
-        sessionStorage.clear(); 
-      } catch (e) {
-        console.warn('Could not clear sessionStorage:', e);
-      }
-
-      // 3) Signera ut från Supabase (global scope)
-      // Detta rensar Supabase's tokens på rätt sätt
-      await supabase.auth.signOut({ scope: 'global' });
-
-      // 4) Notify och redirect
-      toast({ title: 'Utloggad', description: 'Du har loggats ut', duration: 2000 });
-      window.location.replace('/auth');
-    } catch (error) {
-      console.error('Error signing out:', error);
-      // Säkerställ att vi ändå rensar och redirectar även vid API-fel
-      setUser(null);
-      setSession(null);
-      setProfile(null);
-      setUserRole(null);
-      setOrganization(null);
-      window.location.replace('/auth');
+    // 1) Rensa applikationsstate omedelbart för snabb feedback
+    setUser(null);
+    setSession(null);
+    setProfile(null);
+    setUserRole(null);
+    setOrganization(null);
+    
+    // 2) Rensa sessionStorage
+    try { 
+      sessionStorage.clear(); 
+    } catch (e) {
+      console.warn('Could not clear sessionStorage:', e);
     }
+
+    // 3) Signera ut från Supabase i bakgrunden (icke-blockerande)
+    // Detta låter UI kännas responsiv
+    supabase.auth.signOut({ scope: 'global' }).catch(error => {
+      console.error('Error signing out from Supabase:', error);
+    });
+
+    // 4) Notify och redirect omedelbart utan att vänta
+    toast({ title: 'Utloggad', description: 'Du har loggats ut', duration: 2000 });
+    window.location.replace('/auth');
   };
 
   const refreshProfile = async () => {
