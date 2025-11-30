@@ -25,6 +25,20 @@ export const AuthLogoOverlay = () => {
     loading && (authAction === "login" || (!!user && authAction !== "logout"));
 
   const [rect, setRect] = useState<AnchorRect | null>(null);
+  const [hasEnteredAuth, setHasEnteredAuth] = useState(false);
+
+  // Spåra när vi kommer in på /auth för första gången eller efter logout
+  useEffect(() => {
+    if (isAuthRoute && !hideForAuthLoading) {
+      // Kort delay för smooth fade-in efter logout
+      const timer = setTimeout(() => {
+        setHasEnteredAuth(true);
+      }, 50);
+      return () => clearTimeout(timer);
+    } else {
+      setHasEnteredAuth(false);
+    }
+  }, [isAuthRoute, hideForAuthLoading]);
 
   // Följ ankar-elementet på auth-sidan för exakt position
   useEffect(() => {
@@ -85,8 +99,10 @@ export const AuthLogoOverlay = () => {
   return (
     <div className="pointer-events-none fixed inset-0 z-[15]" aria-hidden="true">
       <div
-        className={`transition-opacity duration-200 ${
-          isAuthRoute && !hideForAuthLoading ? "opacity-100" : "opacity-0"
+        className={`transition-all duration-500 ease-out ${
+          isAuthRoute && !hideForAuthLoading && hasEnteredAuth
+            ? "opacity-100 scale-100"
+            : "opacity-0 scale-95"
         }`}
       >
         <div className="absolute" style={style}>
