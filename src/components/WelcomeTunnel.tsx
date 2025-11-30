@@ -1511,7 +1511,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             <div className="max-w-md mx-auto space-y-6">
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 space-y-4">
                 <h3 className="text-white font-semibold mb-3">Detta kommer att delas med arbetsgivare:</h3>
-                <div className="space-y-2 text-sm text-white/90">
+                <div className="space-y-2 text-sm text-white">
                   <div className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-400" />
                     <span>Din ålder</span>
@@ -1542,7 +1542,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                   />
                   <div className="text-sm text-white">
                     <p className="font-medium mb-1">Jag godkänner att mina uppgifter delas</p>
-                    <p className="text-white/80">Genom att kryssa i denna ruta godkänner jag att Parium delar ovanstående information med arbetsgivare när jag ansöker om jobb. Du kan när som helst återkalla detta samtycke från din profil.</p>
+                    <p className="text-white">Genom att kryssa i denna ruta godkänner jag att Parium delar ovanstående information med arbetsgivare när jag ansöker om jobb. Du kan när som helst återkalla detta samtycke från din profil.</p>
                   </div>
                 </label>
               </div>
