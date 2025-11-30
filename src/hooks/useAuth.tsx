@@ -774,9 +774,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Sätt loading state för smooth utloggning
       setLoading(true);
 
-      // Visa toast direkt
-      toast({ title: 'Loggar ut...', description: 'Ett ögonblick', duration: 1500 });
-
       // Vänta 1.1 sekund (identiskt med login-skärmen) för smooth känsla
       await new Promise(resolve => setTimeout(resolve, 550));
       
