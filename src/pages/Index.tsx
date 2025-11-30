@@ -202,7 +202,7 @@ const Index = () => {
       <div className="min-h-screen bg-gradient-parium flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-white" />
-          <p className="text-white text-sm">Loggar ut...</p>
+          <p className="text-white text-sm">Loggar in...</p>
         </div>
       </div>
     );
