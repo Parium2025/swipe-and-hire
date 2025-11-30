@@ -119,7 +119,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isManualSignOutRef = useRef(false);
   const isInitializingRef = useRef(true);
   const isSigningInRef = useRef(false);
-
+  const mediaPreloadCompleteRef = useRef(false);
+ 
+  // Håll en ref i synk med state så att async login kan läsa korrekt värde
+  useEffect(() => {
+    mediaPreloadCompleteRef.current = mediaPreloadComplete;
+  }, [mediaPreloadComplete]);
+ 
   useEffect(() => {
     let mounted = true;
     let sessionInitialized = false;
@@ -147,26 +153,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setTimeout(() => {
               if (!mounted) return;
               fetchUserData(session.user!.id).then(() => {
-                // 🎯 Vänta på att media är klar innan vi släpper loading
-                const checkMediaReady = setInterval(() => {
-                  if (mediaPreloadComplete) {
+                // Om vi inte är i en aktiv email-inloggning hanterar vi loading här
+                if (!isSigningInRef.current) {
+                  // 🎯 Vänta på att media är klar innan vi släpper loading
+                  const checkMediaReady = setInterval(() => {
+                    if (mediaPreloadCompleteRef.current) {
+                      clearInterval(checkMediaReady);
+                      if (mounted) {
+                        setLoading(false);
+                        setAuthAction(null);
+                      }
+                    }
+                  }, 50);
+                  
+                  // Timeout efter max ~2 sekunder (fallback om media är seg)
+                  setTimeout(() => {
                     clearInterval(checkMediaReady);
-                    // 🔥 Endast släpp loading om vi inte är i en aktiv login-process
-                    if (mounted && !isSigningInRef.current) {
+                    if (mounted) {
                       setLoading(false);
                       setAuthAction(null);
                     }
-                  }
-                }, 50);
-                
-                // Timeout efter max ~2 sekunder (fallback om media är seg)
-                setTimeout(() => {
-                  clearInterval(checkMediaReady);
-                  if (mounted && !isSigningInRef.current) {
-                    setLoading(false);
-                    setAuthAction(null);
-                  }
-                }, 2000);
+                  }, 2000);
+                }
               });
             }, 0);
           }
@@ -256,43 +264,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
         setProfile(processedProfile);
         
-        // 🔥 KRITISKT: Förladdda profilbilden INNAN vi släpper loading-state
-        // Detta håller användaren kvar på auth-sidan tills bilden är redo
+        // 🔥 KRITISKT: Förladdda all kritisk profilmedia INNAN vi släpper loading-state
+        // Detta håller användaren kvar på auth-sidan tills allt är redo
         setTimeout(async () => {
           try {
             setMediaPreloadComplete(false); // Reset state för ny inloggning
             
-            // Prioritera profilbilden - den MÅSTE vara klar innan vi släpper loading
+            const criticalMedia: string[] = [];
+            
+            // Profilbild
             if (processedProfile.profile_image_url) {
               const avatarUrl = await getMediaUrl(processedProfile.profile_image_url, 'profile-image', 86400);
               if (avatarUrl) {
-                console.log('🚀 Preloading sidebar avatar BEFORE redirect...');
-                await preloadImages([avatarUrl]);
-                console.log('✅ Sidebar avatar cached and ready!');
+                criticalMedia.push(avatarUrl);
               }
             }
             
-            // Markera att avatar är klar - detta släpper loading-state
-            setMediaPreloadComplete(true);
-            
-            // Ladda cover + video i bakgrunden EFTER att vi släppt användaren in
-            const backgroundMedia: string[] = [];
-            
+            // Cover-bild
             if (processedProfile.cover_image_url) {
-              const url = await getMediaUrl(processedProfile.cover_image_url, 'cover-image', 86400);
-              if (url) backgroundMedia.push(url);
+              const coverUrl = await getMediaUrl(processedProfile.cover_image_url, 'cover-image', 86400);
+              if (coverUrl) {
+                criticalMedia.push(coverUrl);
+              }
             }
             
+            // Profilvideo
             if (processedProfile.video_url) {
-              const url = await getMediaUrl(processedProfile.video_url, 'profile-video', 86400);
-              if (url) backgroundMedia.push(url);
+              const videoUrl = await getMediaUrl(processedProfile.video_url, 'profile-video', 86400);
+              if (videoUrl) {
+                criticalMedia.push(videoUrl);
+              }
             }
             
-            if (backgroundMedia.length > 0) {
-              console.log(`🎬 Preloading background media (${backgroundMedia.length} items)...`);
-              await preloadImages(backgroundMedia);
-              console.log('✅ Background media cached!');
+            if (criticalMedia.length > 0) {
+              console.log(`🚀 Preloading user media BEFORE redirect... (${criticalMedia.length} items)`);
+              await preloadImages(criticalMedia);
+              console.log('✅ User media cached and ready!');
             }
+            
+            // Markera att all kritisk media är klar - detta släpper loading-state
+            setMediaPreloadComplete(true);
           } catch (error) {
             console.error('Failed to preload user media:', error);
             // Släpp ändå användaren in vid fel
@@ -546,19 +557,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true); // 🔥 Håll loading true under hela inloggningen
       isSigningInRef.current = true;
       console.log('🔍 SignIn started for:', email);
-
+ 
       // Starta timer för minimum delay (~0.8–0.9 sekunder)
       const minDelayPromise = new Promise(resolve => setTimeout(resolve, 900));
-
+ 
       // Starta auth-anropet
       const authPromise = supabase.auth.signInWithPassword({
         email,
         password
       });
-
-      // Vänta på resultat men returnera omedelbart om det lyckas
+ 
+      // Vänta på resultat
       const { data: signInData, error } = await authPromise;
-
+ 
       if (error) {
         if (error.message === 'Invalid login credentials') {
           toast({
@@ -573,13 +584,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             variant: "default",
             duration: 8000
           });
+          // Släpp loading vid obekräftat konto
+          setLoading(false);
+          setAuthAction(null);
           return { error: { ...error, code: 'email_not_confirmed', message: 'Email not confirmed' } };
         } else {
           toast({ title: "Inloggningsfel", description: error.message, variant: "destructive" });
         }
+        // Släpp loading direkt vid fel
+        setLoading(false);
+        setAuthAction(null);
         return { error };
       }
-
+ 
       // CRITICAL: Block login if email is not confirmed
       if (signInData?.user && !signInData.user.email_confirmed_at) {
         console.log('🚫 Login blocked: Email not confirmed for', email);
@@ -594,16 +611,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           duration: 10000
         });
         
+        setLoading(false);
+        setAuthAction(null);
         return { error: { code: 'email_not_confirmed', message: 'Email not confirmed' } };
       }
-
-      // Lyckad inloggning - vänta på minimum delay innan vi släpper loading
+ 
+      // Lyckad inloggning - vänta på minimum delay + media preload innan vi släpper in användaren
       console.log('✅ Login successful, waiting for minimum delay + media preload...');
-      
-      // Vänta på minimum delay (så användaren ser "Loggar in...")
-      await minDelayPromise;
-      
-      console.log('⏱️ Minimum delay completed, profile and media will load via onAuthStateChange');
+ 
+      const mediaPromise = new Promise<void>((resolve) => {
+        const checkMedia = setInterval(() => {
+          if (mediaPreloadCompleteRef.current) {
+            clearInterval(checkMedia);
+            resolve();
+          }
+        }, 50);
+ 
+        // Fallback om något strular med media-preloaden
+        setTimeout(() => {
+          clearInterval(checkMedia);
+          console.log('⚠️ Media preload timeout after ~2s, continuing login');
+          resolve();
+        }, 2000);
+      });
+ 
+      // Vänta tills både minsta delay OCH media-preload är klara
+      await Promise.all([minDelayPromise, mediaPromise]);
+ 
+      console.log('✅ Minimum delay + media preload complete, entering app');
+      setLoading(false);
+      setAuthAction(null);
+ 
       return {};
     } catch (error: any) {
       setLoading(false);
@@ -614,7 +652,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isSigningInRef.current = false;
     }
   };
-
   const signInWithPhone = async (phone: string) => {
     try {
       const { data, error } = await supabase.auth.signInWithOtp({
