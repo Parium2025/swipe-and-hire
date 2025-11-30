@@ -64,7 +64,8 @@ interface AuthContextType {
   userRole: UserRoleData | null;
   organization: Organization | null;
   loading: boolean;
-  signUp: (email: string, password: string, userData: { 
+  authAction: 'login' | 'logout' | null;
+  signUp: (email: string, password: string, userData: {
     role: UserRole; 
     first_name: string; 
     last_name: string; 
@@ -113,6 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<UserRoleData | null>(null);
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authAction, setAuthAction] = useState<'login' | 'logout' | null>(null);
   const [mediaPreloadComplete, setMediaPreloadComplete] = useState(false); // 🎯 Ny state för att tracka media-laddning
   const isManualSignOutRef = useRef(false);
   const isInitializingRef = useRef(true);
@@ -527,6 +529,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
+      setAuthAction('login');
       isSigningInRef.current = true;
       console.log('🔍 SignIn started for:', email);
 
@@ -656,16 +659,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    // Markera att detta är en manuell utloggning
-    isManualSignOutRef.current = true;
-
-    // Sätt loading state för smooth utloggning
-    setLoading(true);
-
-    // Visa toast direkt
-    toast({ title: 'Loggar ut...', description: 'Ett ögonblick', duration: 1500 });
-
     try {
+      console.log('🚪 Attempting to sign out...');
+      setAuthAction('logout');
+      
+      // Markera att detta är en manuell utloggning
+      isManualSignOutRef.current = true;
+
+      // Sätt loading state för smooth utloggning
+      setLoading(true);
+
+      // Visa toast direkt
+      toast({ title: 'Loggar ut...', description: 'Ett ögonblick', duration: 1500 });
+
       // Vänta en sekund för smooth känsla innan vi loggar ut
       await new Promise(resolve => setTimeout(resolve, 800));
       
@@ -674,11 +680,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Vänta lite till för smooth övergång
       await new Promise(resolve => setTimeout(resolve, 400));
-    } catch (error) {
-      console.error('Error signing out from Supabase:', error);
+      
+      console.log('✅ User signed out successfully');
+    } catch (error: any) {
+      console.error('❌ Sign out error:', error);
+      toast({
+        variant: "destructive",
+        title: "Fel",
+        description: "Kunde inte logga ut. Försök igen.",
+      });
+    } finally {
+      setLoading(false);
+      isManualSignOutRef.current = false;
+      setAuthAction(null);
     }
-
-    setLoading(false);
   };
 
   const refreshProfile = async () => {
@@ -962,13 +977,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
 
-  const value = {
+  const value: AuthContextType = {
     user,
     session,
     profile,
     userRole,
     organization,
     loading,
+    authAction,
     signUp,
     signIn,
     signInWithPhone,
