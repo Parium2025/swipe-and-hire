@@ -59,7 +59,7 @@ const Auth = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoginMode, setIsLoginMode] = useState(true); // Track if user is on login or register
 
-  const { user, profile, updatePassword, confirmEmail } = useAuth();
+  const { user, profile, loading, updatePassword, confirmEmail } = useAuth();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -711,6 +711,18 @@ const Auth = () => {
     isPasswordReset,
     currentUrl: window.location.href
   });
+
+  // 🎯 Visa "Loggar in..."-sida när användaren är inloggad men media fortfarande laddas
+  if (user && loading) {
+    return (
+      <div className="min-h-screen bg-gradient-parium flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-white" />
+          <p className="text-white text-sm">Loggar in...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Använd rätt komponent baserat på skärmstorlek
   if (device === 'mobile') {
