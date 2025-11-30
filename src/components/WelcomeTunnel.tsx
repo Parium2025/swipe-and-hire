@@ -1577,20 +1577,20 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               </Button>
               <div className="pt-4 flex gap-4 justify-center">
                 <Button
-                  variant="outline"
+                  variant="outlineNeutral"
                   onClick={handlePrevious}
-                  className="px-8 py-3 bg-white/10 border-white/20 text-white text-sm"
+                  className="px-8 py-3 bg-white/10 border border-white/20 text-white text-sm md:hover:bg-white/10 md:hover:border-white/30 md:hover:text-white transition-all duration-300"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Tillbaka
                 </Button>
                 <Button
-                  variant="outline"
+                  variant="outlineNeutral"
                   onClick={async () => {
                     await signOut();
                     window.location.href = '/auth';
                   }}
-                  className="px-8 py-3 bg-red-500/80 border-red-400/50 text-white text-sm"
+                  className="px-8 py-3 bg-red-500/80 border border-red-400/50 text-white text-sm md:hover:bg-red-500/90 md:hover:border-red-400/70 md:hover:text-white transition-all duration-300"
                 >
                   Logga ut
                 </Button>
