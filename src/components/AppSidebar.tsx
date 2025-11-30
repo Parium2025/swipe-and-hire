@@ -192,22 +192,26 @@ export function AppSidebar() {
               />
             ) : (
               <Avatar className="h-10 w-10 ring-2 ring-white/20 transform-gpu" style={{ contain: 'paint' }}>
-                <AvatarImage 
-                  src={avatarUrl || undefined} 
-                  alt="Profilbild" 
-                  onError={() => {
-                    setAvatarError(true);
-                    setAvatarUrl(null);
-                  }}
-                  onLoad={() => setAvatarLoaded(true)}
-                  loading="eager"
-                  decoding="async"
-                  fetchPriority="high"
-                  draggable={false}
-                />
-                <AvatarFallback className="bg-white/20 text-white font-semibold">
-                  {profile?.first_name?.[0]}{profile?.last_name?.[0]}
-                </AvatarFallback>
+                {avatarUrl && (
+                  <AvatarImage 
+                    src={avatarUrl} 
+                    alt="Profilbild" 
+                    onError={() => {
+                      setAvatarError(true);
+                      setAvatarUrl(null);
+                    }}
+                    onLoad={() => setAvatarLoaded(true)}
+                    loading="eager"
+                    decoding="async"
+                    fetchPriority="high"
+                    draggable={false}
+                  />
+                )}
+                {!avatarUrl && (
+                  <AvatarFallback className="bg-white/20 text-white font-semibold">
+                    {profile?.first_name?.[0]}{profile?.last_name?.[0]}
+                  </AvatarFallback>
+                )}
               </Avatar>
             )}
             <div className="flex-1 min-w-0">
