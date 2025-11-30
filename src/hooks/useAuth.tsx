@@ -457,10 +457,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isSigningInRef.current = true;
       console.log('🔍 SignIn started for:', email);
 
-      const { data: signInData, error } = await supabase.auth.signInWithPassword({
+      // Starta auth-anropet men blockera inte UI:t
+      const authPromise = supabase.auth.signInWithPassword({
         email,
         password
       });
+
+      // Vänta på resultat men returnera omedelbart om det lyckas
+      const { data: signInData, error } = await authPromise;
 
       if (error) {
         if (error.message === 'Invalid login credentials') {
@@ -487,8 +491,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (signInData?.user && !signInData.user.email_confirmed_at) {
         console.log('🚫 Login blocked: Email not confirmed for', email);
         
-        // Sign out immediately
-        await supabase.auth.signOut();
+        // Sign out i bakgrunden utan att vänta
+        supabase.auth.signOut();
         
         toast({
           title: "Kontot är inte bekräftat",
@@ -500,7 +504,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: { code: 'email_not_confirmed', message: 'Email not confirmed' } };
       }
 
-      // No toast on success - immediate navigation for best UX
+      // Lyckad inloggning - returnera omedelbart, låt onAuthStateChange hantera resten
+      console.log('Login successful, waiting for profile to load before redirect');
       return {};
     } catch (error: any) {
       toast({ title: "Inloggningsfel", description: "Ett oväntat fel inträffade. Försök igen.", variant: "destructive" });
