@@ -335,6 +335,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               videoUrl = await getMediaUrl(processedProfile.video_url, 'profile-video', 86400);
             }
             
+            // 🔥 VÄNTA EXTRA 1 SEKUND så att sidebaren hinner mounta OCH rendera bilderna
+            // Denna extra tid säkerställer att övergången från mörk cirkel → bild sker UNDER täckmanteln
+            console.log('⏳ Waiting extra 1 second for sidebar to mount and render images...');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            console.log('✅ Extra wait complete - releasing login screen!');
+            
             // Markera att kritiska media är klara – detta släpper inloggningen
             mediaPreloadCompleteRef.current = true;
             setMediaPreloadComplete(true);
