@@ -629,11 +629,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: { code: 'email_not_confirmed', message: 'Email not confirmed' } };
       }
  
-      // Lyckad inloggning - vänta ENDAST på minimum delay
-      console.log('✅ Login successful, waiting for minimum delay while media laddas i bakgrunden...');
-      await minDelayPromise;
+      // Lyckad inloggning – nollställ media-preload och vänta tills kritiska bilder hunnit laddas klart
+      setMediaPreloadComplete(false);
+      mediaPreloadCompleteRef.current = false;
+
+      const mediaPromise = new Promise<void>((resolve) => {
+        const start = Date.now();
+        const checkMedia = setInterval(() => {
+          if (mediaPreloadCompleteRef.current) {
+            clearInterval(checkMedia);
+            resolve();
+          } else if (Date.now() - start > 1500) {
+            // Fallback: max ~1.5 sekunder extra väntan även om media inte rapporterar klart
+            clearInterval(checkMedia);
+            console.log('⏱️ Media preload timeout (~1.5s), fortsätter login ändå');
+            resolve();
+          }
+        }, 50);
+      });
  
-      console.log('✅ Minimum delay klar, släpper in användaren');
+      console.log('✅ Login successful, waiting for minimum delay + media preload...');
+      await Promise.all([minDelayPromise, mediaPromise]);
+ 
+      console.log('✅ Minimum delay + media preload klar, släpper in användaren');
       setLoading(false);
       setAuthAction(null);
  
