@@ -1579,7 +1579,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 <Button
                   variant="outline"
                   onClick={handlePrevious}
-                  className="px-8 py-3 bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/50 hover:scale-105 transition-transform duration-200 text-sm"
+                  className="px-8 py-3 bg-white/10 border-white/20 text-white text-sm"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Tillbaka
@@ -1590,7 +1590,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                     await signOut();
                     window.location.href = '/auth';
                   }}
-                  className="px-8 py-3 bg-red-500/80 border-red-400/50 text-white hover:bg-red-500/90 hover:border-red-400/70 hover:scale-105 transition-all duration-300 text-sm"
+                  className="px-8 py-3 bg-red-500/80 border-red-400/50 text-white text-sm"
                 >
                   Logga ut
                 </Button>
@@ -1682,7 +1682,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <Button
                 variant="outlineNeutral"
                 onClick={handlePrevious}
-                className="py-3 bg-white/5 border border-white/10 hover:border-white/50 !text-white hover:bg-white/10 transition-all duration-300 text-sm px-4"
+                className="py-3 bg-white/5 border border-white/10 !text-white text-sm px-4"
               >
                 <ArrowLeft className="h-4 w-4 mr-2 text-white" />
                 Tillbaka
