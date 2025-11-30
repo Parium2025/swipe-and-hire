@@ -583,13 +583,23 @@ const AuthDesktop = ({
                   <div className="w-72 h-52 bg-primary-glow/25 rounded-full blur-[40px]"></div>
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
+                  <div className="w-52 h-36 bg-primary-glow/22 rounded-full blur-[35px]"></div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-44 h-28 bg-primary-glow/20 rounded-full blur-[30px]"></div>
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
                   <div className="w-36 h-20 bg-primary-glow/18 rounded-full blur-[25px]"></div>
                 </div>
-                {/* Själva loggan renderas nu globalt via AuthLogoBackground. Vi behåller bara höjden för layout. */}
-                <div className="min-h-[224px] lg:min-h-[256px]" />
+                <img 
+                  src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
+                  alt="Parium" 
+                  className="relative h-56 w-auto lg:h-64"
+                  width="400"
+                  height="160"
+                  loading="eager"
+                  decoding="sync"
+                />
               </div>
             </div>
             
