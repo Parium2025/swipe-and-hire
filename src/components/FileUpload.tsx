@@ -281,7 +281,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
           isDragActive
             ? 'border-primary bg-primary/5'
             : 'border-border hover:border-muted-foreground bg-white/5 backdrop-blur-sm'
-        } ${uploading ? 'pointer-events-none opacity-50' : ''}`}
+        } ${uploading ? 'pointer-events-none' : ''}`}
         onClick={(e) => {
           e.preventDefault();
           open(); // Explicitly open file dialog
