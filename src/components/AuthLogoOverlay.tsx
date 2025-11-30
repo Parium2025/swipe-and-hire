@@ -18,7 +18,9 @@ export const AuthLogoOverlay = () => {
   const isAuthRoute = location.pathname === "/auth";
 
   const [rect, setRect] = useState<AnchorRect | null>(null);
+  const [hideForAuthLoading, setHideForAuthLoading] = useState(false);
 
+  // Följ ankar-elementet på auth-sidan för exakt position
   useEffect(() => {
     if (!isAuthRoute || typeof window === "undefined") return;
 
@@ -62,6 +64,24 @@ export const AuthLogoOverlay = () => {
     };
   }, [isAuthRoute]);
 
+  // Lyssna på global klass från Auth.tsx för att dölja loggan under "Loggar in..."-overlay
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const root = document.documentElement;
+
+    const update = () => {
+      setHideForAuthLoading(root.classList.contains("auth-loading-active"));
+    };
+
+    update();
+
+    const observer = new MutationObserver(update);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+
+    return () => observer.disconnect();
+  }, []);
+
   const style: CSSProperties = rect
     ? {
         top: rect.top + rect.height / 2,
@@ -78,7 +98,7 @@ export const AuthLogoOverlay = () => {
     <div className="pointer-events-none fixed inset-0 z-[15]" aria-hidden="true">
       <div
         className={`transition-opacity duration-200 ${
-          isAuthRoute ? "opacity-100" : "opacity-0"
+          isAuthRoute && !hideForAuthLoading ? "opacity-100" : "opacity-0"
         }`}
       >
         <div className="absolute" style={style}>
