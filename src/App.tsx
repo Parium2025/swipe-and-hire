@@ -28,7 +28,6 @@ import { useDevice } from "@/hooks/use-device";
 import { useGlobalImagePreloader } from "@/hooks/useGlobalImagePreloader";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { supabase } from "@/integrations/supabase/client";
-import { AuthLogoOverlay } from "@/components/AuthLogoOverlay";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -102,18 +101,7 @@ const App = () => {
       <OfflineIndicator />
       <BrowserRouter>
         <UnsavedChangesProvider>
-          <AuthLogoOverlay />
           <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
-            {/* Dold logo som håller bilden "varm" i minnet permanent */}
-            <img 
-              src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png"
-              alt=""
-              aria-hidden="true"
-              className="fixed opacity-0 pointer-events-none w-0 h-0"
-              loading="eager"
-              decoding="sync"
-            />
-            
             <div className="relative z-10">
               {showHeader && <Header />}
               <main className={showHeader ? "pt-16" : ""}>

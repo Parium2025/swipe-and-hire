@@ -701,9 +701,19 @@ const Auth = () => {
     currentUrl: window.location.href
   });
 
-  // 🎯 Visa "Loggar in..." / "Loggar ut..."-overlay ovanpå auth-layouten medan vi fortfarande hanterar sessionen
-  const showAuthLoadingOverlay = !!user && loading;
-  const authLoadingLabel = authAction === 'logout' ? 'Loggar ut...' : 'Loggar in...';
+  // 🎯 Visa "Loggar in..."-sida när användaren är inloggad men media fortfarande laddas
+  if (user && loading) {
+    return (
+      <div className="min-h-screen bg-gradient-parium flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-white" />
+          <p className="text-white text-sm">
+            {authAction === 'logout' ? 'Loggar ut...' : 'Loggar in...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // 🔁 Direkt redirect efter lyckad inloggning utan extra frame
   if (user && profile && !loading && confirmationStatus === 'none' && recoveryStatus === 'none' && !isPasswordReset) {
@@ -718,19 +728,9 @@ const Auth = () => {
   if (device === 'mobile') {
     return (
       <div className="min-h-screen w-full overflow-x-hidden relative">
-        {/* Loading overlay ovanpå auth-layouten */}
-        {showAuthLoadingOverlay && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-parium">
-            <div className="flex flex-col items-center gap-4">
-              <Loader2 className="h-8 w-8 animate-spin text-white" />
-              <p className="text-white text-sm">{authLoadingLabel}</p>
-            </div>
-          </div>
-        )}
-
         {/* Pull-to-refresh spinner */}
         <div 
-          className="fixed top-8 left-1/2 -translate-x-1/2 z-40 transition-opacity duration-200"
+          className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
           style={{ 
             opacity: pullProgress,
             pointerEvents: 'none'
@@ -771,19 +771,9 @@ const Auth = () => {
   if (device === 'tablet') {
     return (
       <div className="min-h-screen w-full overflow-x-hidden relative">
-        {/* Loading overlay ovanpå auth-layouten */}
-        {showAuthLoadingOverlay && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-parium">
-            <div className="flex flex-col items-center gap-4">
-              <Loader2 className="h-8 w-8 animate-spin text-white" />
-              <p className="text-white text-sm">{authLoadingLabel}</p>
-            </div>
-          </div>
-        )}
-
         {/* Pull-to-refresh spinner */}
         <div 
-          className="fixed top-8 left-1/2 -translate-x-1/2 z-40 transition-opacity duration-200"
+          className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
           style={{ 
             opacity: pullProgress,
             pointerEvents: 'none'
@@ -815,19 +805,9 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden relative">
-      {/* Loading overlay ovanpå auth-layouten */}
-      {showAuthLoadingOverlay && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-parium">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-8 w-8 animate-spin text-white" />
-            <p className="text-white text-sm">{authLoadingLabel}</p>
-          </div>
-        </div>
-      )}
-
       {/* Pull-to-refresh spinner */}
       <div 
-        className="fixed top-8 left-1/2 -translate-x-1/2 z-40 transition-opacity duration-200"
+        className="fixed top-8 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-200"
         style={{ 
           opacity: pullProgress,
           pointerEvents: 'none'

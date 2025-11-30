@@ -577,11 +577,31 @@ const AuthDesktop = ({
         <div className="flex flex-col items-center w-full max-w-2xl mx-auto">
           <div className="text-center mb-4">
             <div className="mb-2">
-              <div
-                className="relative mx-auto w-fit flex items-center justify-center"
-                style={{ height: "260px" }}
-                data-auth-logo-anchor="true"
-              />
+              <div className="relative mx-auto w-fit flex items-center justify-center" style={{ height: '260px' }}>
+                {/* Glow effect bakom loggan - subtle och täcker hela loggan */}
+                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
+                  <div className="w-72 h-52 bg-primary-glow/25 rounded-full blur-[40px]"></div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
+                  <div className="w-52 h-36 bg-primary-glow/22 rounded-full blur-[35px]"></div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
+                  <div className="w-44 h-28 bg-primary-glow/20 rounded-full blur-[30px]"></div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center -translate-y-2">
+                  <div className="w-36 h-20 bg-primary-glow/18 rounded-full blur-[25px]"></div>
+                </div>
+                <img 
+                  src="/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png" 
+                  alt="Parium" 
+                  className="relative h-56 w-auto lg:h-64"
+                  width="400"
+                  height="160"
+                  loading="eager"
+                  decoding="sync"
+                  
+                />
+              </div>
             </div>
             
             <h1 className="text-xl lg:text-2xl font-semibold text-white mb-3 relative z-10 [color:rgb(255,255,255)] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
