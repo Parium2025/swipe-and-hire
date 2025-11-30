@@ -887,6 +887,47 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     return <SwipeIntro onComplete={() => setCurrentStep(1)} />;
   }
 
+  function renderCvStep() {
+    return (
+      <div className="space-y-6">
+        <div className="text-center mb-8">
+          <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
+            <FileText className="h-8 w-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-semibold mb-2 text-white">CV</h2>
+          <p className="text-white">Ladda upp ditt CV för att visa din erfarenhet</p>
+        </div>
+
+        <div className="flex flex-col items-center space-y-4">
+          <FileUpload 
+            onFileUploaded={(url, fileName) => {
+              handleInputChange('cvUrl', url);
+              handleInputChange('cvFileName', fileName);
+              // Clear cached URL så den regenereras vid nästa visning
+              setCachedCvUrl(null);
+            }} 
+            onFileRemoved={() => {
+              handleInputChange('cvUrl', '');
+              handleInputChange('cvFileName', '');
+              setCachedCvUrl(null); // Clear cache när CV tas bort
+            }} 
+            acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']} 
+            maxFileSize={10 * 1024 * 1024} 
+            currentFile={formData.cvUrl ? { 
+              url: cachedCvUrl || formData.cvUrl, // Use cached URL for instant loading
+              name: 'Din valda fil' 
+            } : undefined} 
+          />
+          {formData.cvUrl && (
+            <Badge variant="secondary" className="bg-white/20 text-white hover:bg-white/20">
+              CV uppladdat!
+            </Badge>
+          )}
+        </div>
+      </div>
+    );
+  }
+  
   const renderStep = () => {
     switch (currentStep) {
       case 0:
@@ -1424,44 +1465,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         );
 
       case 3:
-        return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
-                <FileText className="h-8 w-8 text-white" />
-              </div>
-              <h2 className="text-2xl font-semibold mb-2 text-white">CV</h2>
-              <p className="text-white">Ladda upp ditt CV för att visa din erfarenhet</p>
-            </div>
-
-            <div className="flex flex-col items-center space-y-4">
-              <FileUpload 
-                onFileUploaded={(url, fileName) => {
-                  handleInputChange('cvUrl', url);
-                  handleInputChange('cvFileName', fileName);
-                  // Clear cached URL så den regenereras vid nästa visning
-                  setCachedCvUrl(null);
-                }} 
-                onFileRemoved={() => {
-                  handleInputChange('cvUrl', '');
-                  handleInputChange('cvFileName', '');
-                  setCachedCvUrl(null); // Clear cache när CV tas bort
-                }} 
-                acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']} 
-                maxFileSize={10 * 1024 * 1024} 
-                currentFile={formData.cvUrl ? { 
-                  url: cachedCvUrl || formData.cvUrl, // Use cached URL for instant loading
-                  name: "Din valda fil" 
-                } : undefined} 
-              />
-              {formData.cvUrl && (
-                <Badge variant="secondary" className="bg-white/20 text-white hover:bg-white/20">
-                  CV uppladdat!
-                </Badge>
-              )}
-            </div>
-          </div>
-        );
+        return renderCvStep();
 
       case 4:
         return (
@@ -1663,7 +1667,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       {/* Main content */}
       <div className="flex-1 flex items-center justify-center px-6 py-8 relative z-10">
         <div className="w-full max-w-2xl">
-          {renderStep()}
+          <div className={currentStep === 3 ? 'block' : 'hidden'}>
+            {renderCvStep()}
+          </div>
+          {currentStep !== 3 && renderStep()}
         </div>
       </div>
 
