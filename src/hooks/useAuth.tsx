@@ -586,15 +586,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Markera att detta är en manuell utloggning
     isManualSignOutRef.current = true;
 
+    // Sätt loading state för smooth utloggning
+    setLoading(true);
+
+    // Visa toast direkt
+    toast({ title: 'Loggar ut...', description: 'Ett ögonblick', duration: 1500 });
+
     try {
-      // Låt backend sköta sessionen – vi väntar lugnt på SIGNED_OUT-eventet
+      // Vänta en sekund för smooth känsla innan vi loggar ut
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Låt backend sköta sessionen
       await supabase.auth.signOut({ scope: 'global' });
+      
+      // Vänta lite till för smooth övergång
+      await new Promise(resolve => setTimeout(resolve, 400));
     } catch (error) {
       console.error('Error signing out from Supabase:', error);
     }
 
-    // Visa bara en lugn bekräftelse – själva redirecten sker centralt
-    toast({ title: 'Utloggad', description: 'Du har loggats ut', duration: 2000 });
+    setLoading(false);
   };
 
   const refreshProfile = async () => {

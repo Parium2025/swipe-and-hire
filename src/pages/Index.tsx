@@ -31,7 +31,7 @@ import CompanyProfile from '@/pages/employer/CompanyProfile';
 import EmployerSettings from '@/pages/employer/EmployerSettings';
 import DeveloperControls from '@/components/DeveloperControls';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowRightLeft, Search } from 'lucide-react';
+import { ArrowRightLeft, Search, Loader2 } from 'lucide-react';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import KeepAlive from '@/components/KeepAlive';
 import { useApplicationsData } from '@/hooks/useApplicationsData';
@@ -144,11 +144,14 @@ const Index = () => {
     // Wait for auth to finish loading
     if (loading) return;
 
-    // No user -> omedelbar redirect till auth
+    // No user -> smooth redirect till auth med kort delay
     if (!user) {
-      navigate('/auth', { replace: true });
-      setIsInitializing(false);
-      return;
+      // Kort väntan för att låta eventuell loading-animation synas
+      const timer = setTimeout(() => {
+        navigate('/auth', { replace: true });
+        setIsInitializing(false);
+      }, 200);
+      return () => clearTimeout(timer);
     }
 
     // User exists but profile not loaded yet -> keep waiting with gradient background
@@ -196,7 +199,12 @@ const Index = () => {
 
   if (loading || isInitializing) {
     return (
-      <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />
+      <div className="min-h-screen bg-gradient-parium flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-white" />
+          <p className="text-white text-sm">Loggar ut...</p>
+        </div>
+      </div>
     );
   }
 
