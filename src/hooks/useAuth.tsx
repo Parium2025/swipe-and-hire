@@ -777,14 +777,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Visa toast direkt
       toast({ title: 'Loggar ut...', description: 'Ett ögonblick', duration: 1500 });
 
-      // Vänta en sekund för smooth känsla innan vi loggar ut
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Vänta 1.1 sekund (identiskt med login-skärmen) för smooth känsla
+      await new Promise(resolve => setTimeout(resolve, 550));
       
       // Låt backend sköta sessionen
       await supabase.auth.signOut({ scope: 'global' });
       
-      // Vänta lite till för smooth övergång
-      await new Promise(resolve => setTimeout(resolve, 400));
+      // Vänta resterande tid för smooth övergång
+      await new Promise(resolve => setTimeout(resolve, 550));
       
       console.log('✅ User signed out successfully');
     } catch (error: any) {
