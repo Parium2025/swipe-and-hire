@@ -213,38 +213,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   : [])
             : []
         };
-        setProfile(processedProfile);
+        // 🔥 KRITISKT: Förladdda och VÄNTA på användarens media INNAN vi visar appen
+        // Detta garanterar att profilbilden är 100% cachad och redo när sidebaren visas
+        const userMedia: string[] = [];
         
-        // 🔥 KRITISKT: Förladdda användarens media OMEDELBART efter profilen laddats
-        // Detta garanterar att profilbilden är cachad innan sidebaren visas
-        setTimeout(async () => {
-          try {
-            const userMedia: string[] = [];
-            
-            if (processedProfile.profile_image_url) {
-              const url = await getMediaUrl(processedProfile.profile_image_url, 'profile-image', 86400);
-              if (url) userMedia.push(url);
-            }
-            
-            if (processedProfile.cover_image_url) {
-              const url = await getMediaUrl(processedProfile.cover_image_url, 'cover-image', 86400);
-              if (url) userMedia.push(url);
-            }
-            
-            if (processedProfile.video_url) {
-              const url = await getMediaUrl(processedProfile.video_url, 'profile-video', 86400);
-              if (url) userMedia.push(url);
-            }
-            
-            if (userMedia.length > 0) {
-              console.log(`🚀 PRIORITY: Preloading user media immediately (${userMedia.length} items)...`);
-              await preloadImages(userMedia);
-              console.log('✅ User media cached and ready for instant sidebar display!');
-            }
-          } catch (error) {
-            console.error('Failed to preload user media:', error);
+        try {
+          if (processedProfile.profile_image_url) {
+            const url = await getMediaUrl(processedProfile.profile_image_url, 'profile-image', 86400);
+            if (url) userMedia.push(url);
           }
-        }, 0);
+          
+          if (processedProfile.cover_image_url) {
+            const url = await getMediaUrl(processedProfile.cover_image_url, 'cover-image', 86400);
+            if (url) userMedia.push(url);
+          }
+          
+          if (processedProfile.video_url) {
+            const url = await getMediaUrl(processedProfile.video_url, 'profile-video', 86400);
+            if (url) userMedia.push(url);
+          }
+          
+          if (userMedia.length > 0) {
+            console.log(`🚀 PRIORITY: Preloading user media BEFORE showing app (${userMedia.length} items)...`);
+            await preloadImages(userMedia);
+            console.log('✅ User media 100% cached and ready!');
+          }
+        } catch (error) {
+          console.error('Failed to preload user media:', error);
+          // Fortsätt ändå - bättre att visa appen än att blocka på ett bildfel
+        }
+        
+        setProfile(processedProfile);
         
         try {
           if (typeof window !== 'undefined') {
