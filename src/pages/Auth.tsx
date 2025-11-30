@@ -705,18 +705,6 @@ const Auth = () => {
   const showAuthLoadingOverlay = !!user && loading;
   const authLoadingLabel = authAction === 'logout' ? 'Loggar ut...' : 'Loggar in...';
 
-  // Håll global klass på <html> så loggan kan döljas under inloggning
-  useEffect(() => {
-    try {
-      const html = document.documentElement;
-      if (showAuthLoadingOverlay) {
-        html.classList.add('auth-loading-active');
-      } else {
-        html.classList.remove('auth-loading-active');
-      }
-    } catch {}
-  }, [showAuthLoadingOverlay]);
-
   // 🔁 Direkt redirect efter lyckad inloggning utan extra frame
   if (user && profile && !loading && confirmationStatus === 'none' && recoveryStatus === 'none' && !isPasswordReset) {
     const role = (profile as any)?.role;

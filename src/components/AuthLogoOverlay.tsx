@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { useLocation } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 interface AnchorRect {
   top: number;
@@ -17,8 +18,13 @@ export const AuthLogoOverlay = () => {
   const location = useLocation();
   const isAuthRoute = location.pathname === "/auth";
 
+  const { user, loading, authAction } = useAuth();
+
+  // Dölj loggan exakt samtidigt som auth-loading-overlay visas
+  const hideForAuthLoading =
+    loading && (authAction === "login" || (!!user && authAction !== "logout"));
+
   const [rect, setRect] = useState<AnchorRect | null>(null);
-  const [hideForAuthLoading, setHideForAuthLoading] = useState(false);
 
   // Följ ankar-elementet på auth-sidan för exakt position
   useEffect(() => {
@@ -63,24 +69,6 @@ export const AuthLogoOverlay = () => {
       }
     };
   }, [isAuthRoute]);
-
-  // Lyssna på global klass från Auth.tsx för att dölja loggan under "Loggar in..."-overlay
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const root = document.documentElement;
-
-    const update = () => {
-      setHideForAuthLoading(root.classList.contains("auth-loading-active"));
-    };
-
-    update();
-
-    const observer = new MutationObserver(update);
-    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
-
-    return () => observer.disconnect();
-  }, []);
 
   const style: CSSProperties = rect
     ? {
