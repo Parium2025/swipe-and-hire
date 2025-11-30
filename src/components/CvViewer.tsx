@@ -27,7 +27,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [scale, setScale] = useState(initialScale);
-  const [zoomLevel, setZoomLevel] = useState(1.5);
+  const [zoomLevel, setZoomLevel] = useState(1.0);
   const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const [startPanPosition, setStartPanPosition] = useState({ x: 0, y: 0 });
@@ -110,8 +110,8 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
         }
         setLoading(false);
         
-        // Ensure default zoom at 150% and scroll to top after rendering
-        setZoomLevel(1.5);
+        // Ensure default zoom at 100% and scroll to top after rendering
+        setZoomLevel(1.0);
         if (scrollContainerRef.current) {
           scrollContainerRef.current.scrollTop = 0;
         }
@@ -233,7 +233,7 @@ export function CvViewer({ src, fileName = 'cv.pdf', height = '70vh', onClose }:
   }, [zoomLevel]);
 
   const handleReset = () => {
-    setZoomLevel(1.5);
+    setZoomLevel(1.0);
     setPanPosition({ x: 0, y: 0 });
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;
