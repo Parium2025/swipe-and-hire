@@ -284,6 +284,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             let avatarUrl: string | null = null;
             let coverUrl: string | null = null;
             let videoUrl: string | null = null;
+            let cachedAvatarUrl: string | null = null;
+            let cachedCoverUrl: string | null = null;
             
             // Profilbild
             if (processedProfile.profile_image_url) {
@@ -301,26 +303,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               }
             }
             
-            // Spara preloaded URLs för sidebar/header direkt
-            const avatarForSidebar = avatarUrl || coverUrl || null;
-            setPreloadedAvatarUrl(avatarForSidebar);
-            setPreloadedCoverUrl(coverUrl || null);
-            
-            // Profilvideo – hämta URL men ladda i bakgrunden
-            if (processedProfile.video_url) {
-              videoUrl = await getMediaUrl(processedProfile.video_url, 'profile-video', 86400);
-            }
-            
-            // Vänta på att avatar/cover faktiskt har laddats in i browsercachen
+            // Vänta på att avatar/cover faktiskt har laddats in i vår ImageCache
             if (criticalImages.length > 0) {
               console.log(`🚀 Preloading critical user images via ImageCache (${criticalImages.length} items) BEFORE entering app...`);
               try {
                 const { imageCache } = await import('@/lib/imageCache');
                 await imageCache.preloadImages(criticalImages);
                 console.log('✅ Critical avatar/cover images cached in memory!');
+
+                // Hämta de faktiska blob-URLs från cachen så att sidebaren kan använda dem direkt
+                if (avatarUrl) {
+                  cachedAvatarUrl = imageCache.getCachedUrl(avatarUrl) ?? null;
+                }
+                if (coverUrl) {
+                  cachedCoverUrl = imageCache.getCachedUrl(coverUrl) ?? null;
+                }
               } catch (cacheError) {
                 console.warn('Failed to preload images via ImageCache, falling back without blocking:', cacheError);
               }
+            }
+            
+            // Välj vilken URL sidebaren ska använda: föredra cachade blob-URLs
+            const avatarForSidebar = (cachedAvatarUrl || avatarUrl) || (cachedCoverUrl || coverUrl) || null;
+            const coverForSidebar = (cachedCoverUrl || coverUrl) || null;
+
+            setPreloadedAvatarUrl(avatarForSidebar);
+            setPreloadedCoverUrl(coverForSidebar);
+            
+            // Profilvideo – hämta URL men ladda i bakgrunden (blockerar inte inloggning)
+            if (processedProfile.video_url) {
+              videoUrl = await getMediaUrl(processedProfile.video_url, 'profile-video', 86400);
             }
             
             // Markera att kritiska media är klara – detta släpper inloggningen
