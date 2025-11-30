@@ -65,6 +65,9 @@ interface AuthContextType {
   organization: Organization | null;
   loading: boolean;
   authAction: 'login' | 'logout' | null;
+  /** Förladdade signed URLs för snabb sidebar-rendering */
+  preloadedAvatarUrl: string | null;
+  preloadedCoverUrl: string | null;
   signUp: (email: string, password: string, userData: {
     role: UserRole; 
     first_name: string; 
@@ -96,9 +99,9 @@ interface AuthContextType {
   confirmEmail: (token: string) => Promise<{ success: boolean; message: string; email: string }>;
   cleanupExpiredConfirmations: () => Promise<void>;
 }
-
+ 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
+ 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -116,6 +119,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [authAction, setAuthAction] = useState<'login' | 'logout' | null>(null);
   const [mediaPreloadComplete, setMediaPreloadComplete] = useState(false); // 🎯 Ny state för att tracka media-laddning
+  const [preloadedAvatarUrl, setPreloadedAvatarUrl] = useState<string | null>(null);
+  const [preloadedCoverUrl, setPreloadedCoverUrl] = useState<string | null>(null);
   const isManualSignOutRef = useRef(false);
   const isInitializingRef = useRef(true);
   const isSigningInRef = useRef(false);
@@ -183,6 +188,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUserRole(null);
           setOrganization(null);
           setMediaPreloadComplete(false);
+          setPreloadedAvatarUrl(null);
+          setPreloadedCoverUrl(null);
           try { if (typeof window !== 'undefined') localStorage.removeItem(CACHED_PROFILE_KEY); } catch {}
           if (event !== 'INITIAL_SESSION') {
             setLoading(false);
@@ -1068,6 +1075,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     organization,
     loading,
     authAction,
+    preloadedAvatarUrl,
+    preloadedCoverUrl,
     signUp,
     signIn,
     signInWithPhone,
