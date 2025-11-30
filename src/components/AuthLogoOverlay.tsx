@@ -53,8 +53,8 @@ export const AuthLogoOverlay = () => {
     const updatePosition = () => {
       const r = anchor.getBoundingClientRect();
       setRect({
-        top: r.top + window.scrollY,
-        left: r.left + window.scrollX,
+        top: r.top,
+        left: r.left,
         width: r.width,
         height: r.height,
       });
@@ -71,13 +71,9 @@ export const AuthLogoOverlay = () => {
     window.addEventListener("resize", updatePosition, {
       passive: true,
     } as any);
-    window.addEventListener("scroll", updatePosition, {
-      passive: true,
-    } as any);
 
     return () => {
       window.removeEventListener("resize", updatePosition);
-      window.removeEventListener("scroll", updatePosition);
       if (resizeObserver) {
         resizeObserver.disconnect();
       }
