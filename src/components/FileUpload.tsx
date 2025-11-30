@@ -19,7 +19,6 @@ interface FileUploadProps {
   maxFileSize?: number;
   questionType?: string;
   mediaType?: MediaType; // Används för att bestämma bucket via mediaManager
-  disableInlineViewer?: boolean; // Stäng av inline PDF-viewer (används när extern viewer finns)
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({
@@ -29,8 +28,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   acceptedFileTypes = ['image/*', 'video/*', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
   maxFileSize = 10 * 1024 * 1024, // 10MB default
   questionType,
-  mediaType = 'cv', // Default till CV för job-applications bucket
-  disableInlineViewer = false
+  mediaType = 'cv' // Default till CV för job-applications bucket
 }) => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -220,7 +218,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
           </Button>
         </div>
 
-        {isPdf && !disableInlineViewer && (
+        {isPdf && (
           <div className="pt-1">
             <CvViewer src={currentFile.url} fileName={currentFile.name} height="70vh" />
           </div>
