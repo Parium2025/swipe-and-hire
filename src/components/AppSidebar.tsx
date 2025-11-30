@@ -61,6 +61,18 @@ export function AppSidebar() {
   const [avatarLoaded, setAvatarLoaded] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
   
+  // Håll avatar/cover i synk med preloadern även om de uppdateras efter mount
+  useEffect(() => {
+    if (preloadedAvatarUrl) {
+      setAvatarUrl(preloadedAvatarUrl);
+    }
+  }, [preloadedAvatarUrl]);
+
+  useEffect(() => {
+    if (preloadedCoverUrl) {
+      setCoverUrl(preloadedCoverUrl);
+    }
+  }, [preloadedCoverUrl]);
   const hasVideo = !!profile?.video_url;
 
   const isAdmin = user?.email === 'fredrikandits@hotmail.com';
