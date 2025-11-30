@@ -1560,7 +1560,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <h2 className="text-2xl font-semibold text-white">Profilen är klar</h2>
               <p className="text-sm text-white">Är du redo?</p>
             </div>
-            <div className="space-y-4 pt-8">
+            <div className="flex flex-col items-center gap-4 pt-8">
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
@@ -1578,7 +1578,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <Button
                 variant="outlineNeutral"
                 onClick={handlePrevious}
-                className="mt-4 px-8 py-3 bg-white/10 border border-white/20 text-white text-sm hover:scale-105 transition-all duration-300"
+                className="px-8 py-3 bg-white/10 border border-white/20 text-white text-sm hover:scale-105 transition-all duration-300"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Tillbaka
