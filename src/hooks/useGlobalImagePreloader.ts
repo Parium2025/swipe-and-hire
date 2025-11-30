@@ -12,6 +12,12 @@ export const useGlobalImagePreloader = () => {
   useEffect(() => {
     const preloadCriticalImages = async () => {
       try {
+        // 🔥 HÖGSTA PRIORITET: Parium-loggan (syns alltid vid utloggning/login)
+        const pariumLogo = '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
+        console.log('🚀 PRIORITY #1: Preloading Parium logo...');
+        await preloadImages([pariumLogo]);
+        console.log('✅ Parium logo cached and ready!');
+        
         // Vänta på service worker endast i produktion
         if (import.meta.env.PROD) {
           await waitForServiceWorker();
@@ -19,7 +25,7 @@ export const useGlobalImagePreloader = () => {
 
         const imagesToPreload: string[] = [];
         
-        // 🔥 PRIORITET 1: Ladda inloggad användares profilmedia FÖRST
+        // 🔥 PRIORITET 2: Ladda inloggad användares profilmedia
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           const { data: currentProfile } = await supabase
