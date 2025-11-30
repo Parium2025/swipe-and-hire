@@ -21,6 +21,7 @@ import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelecto
 import { validateSwedishPhoneNumber } from '@/lib/phoneValidation';
 import { uploadMedia, getMediaUrl, deleteMedia } from '@/lib/mediaManager';
 import { useMediaUrl } from '@/hooks/useMediaUrl';
+import { CvViewer } from '@/components/CvViewer';
 
 interface WelcomeTunnelProps {
   onComplete: () => void;
@@ -1436,11 +1437,14 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
             <div className="flex flex-col items-center space-y-4">
               <FileUpload 
-                onFileUploaded={(url, fileName) => {
+                onFileUploaded={async (url, fileName) => {
                   handleInputChange('cvUrl', url);
                   handleInputChange('cvFileName', fileName);
-                  // Clear cached URL så den regenereras vid nästa visning
-                  setCachedCvUrl(null);
+                  // Generate signed URL immediately and cache it
+                  const signedUrl = await getMediaUrl(url, 'cv', 86400);
+                  if (signedUrl) {
+                    setCachedCvUrl(signedUrl);
+                  }
                 }} 
                 onFileRemoved={() => {
                   handleInputChange('cvUrl', '');
@@ -1450,9 +1454,10 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                 acceptedFileTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']} 
                 maxFileSize={10 * 1024 * 1024} 
                 currentFile={formData.cvUrl ? { 
-                  url: cachedCvUrl || formData.cvUrl, // Use cached URL for instant loading
-                  name: "Din valda fil" 
-                } : undefined} 
+                  url: cachedCvUrl || formData.cvUrl,
+                  name: formData.cvFileName || "Din valda fil"
+                } : undefined}
+                disableInlineViewer={true}
               />
               {formData.cvUrl && (
                 <Badge variant="secondary" className="bg-white/20 text-white hover:bg-white/20">
@@ -1616,6 +1621,23 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
   return (
     <div className="min-h-screen bg-gradient-parium flex flex-col relative overflow-x-hidden">
+      {/* Permanent CvViewer - always mounted, shown/hidden with CSS */}
+      {formData.cvUrl && cachedCvUrl && (
+        <div 
+          className={`fixed inset-0 z-[100] bg-black/95 transition-all duration-300 ${
+            currentStep === 3 ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
+          }`}
+        >
+          <div className="w-full h-full">
+            <CvViewer 
+              src={cachedCvUrl} 
+              fileName={formData.cvFileName || "Din valda fil"} 
+              height="100vh" 
+            />
+          </div>
+        </div>
+      )}
+      
       {/* Static animated background - identical to AuthMobile */}
       <div className="fixed inset-0 pointer-events-none z-0">
         
