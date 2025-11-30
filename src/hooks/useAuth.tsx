@@ -284,8 +284,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             let avatarUrl: string | null = null;
             let coverUrl: string | null = null;
             let videoUrl: string | null = null;
-            let cachedAvatarUrl: string | null = null;
-            let cachedCoverUrl: string | null = null;
             
             // Profilbild
             if (processedProfile.profile_image_url) {
@@ -303,29 +301,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               }
             }
             
-            // Vänta på att avatar/cover faktiskt har laddats in i vår ImageCache
+            // Vänta på att avatar/cover faktiskt har laddats ner via DOM-baserad preloader (new Image)
             if (criticalImages.length > 0) {
-              console.log(`🚀 Preloading critical user images via ImageCache (${criticalImages.length} items) BEFORE entering app...`);
+              console.log(`🚀 Preloading critical user images via DOM Image preloader (${criticalImages.length} items) BEFORE entering app...`);
               try {
-                const { imageCache } = await import('@/lib/imageCache');
-                await imageCache.preloadImages(criticalImages);
-                console.log('✅ Critical avatar/cover images cached in memory!');
-
-                // Hämta de faktiska blob-URLs från cachen så att sidebaren kan använda dem direkt
-                if (avatarUrl) {
-                  cachedAvatarUrl = imageCache.getCachedUrl(avatarUrl) ?? null;
-                }
-                if (coverUrl) {
-                  cachedCoverUrl = imageCache.getCachedUrl(coverUrl) ?? null;
-                }
-              } catch (cacheError) {
-                console.warn('Failed to preload images via ImageCache, falling back without blocking:', cacheError);
+                const { preloadImages } = await import('@/hooks/useImagePreloader');
+                await preloadImages(criticalImages, 'high');
+                console.log('✅ Critical avatar/cover images fetched via DOM preloader!');
+              } catch (preloadError) {
+                console.warn('Failed to preload images via DOM preloader, continuing anyway:', preloadError);
               }
             }
             
-            // Välj vilken URL sidebaren ska använda: föredra cachade blob-URLs
-            const avatarForSidebar = (cachedAvatarUrl || avatarUrl) || (cachedCoverUrl || coverUrl) || null;
-            const coverForSidebar = (cachedCoverUrl || coverUrl) || null;
+            // Välj vilken URL sidebaren ska använda
+            const avatarForSidebar = avatarUrl || coverUrl || null;
+            const coverForSidebar = coverUrl || null;
 
             setPreloadedAvatarUrl(avatarForSidebar);
             setPreloadedCoverUrl(coverForSidebar);
