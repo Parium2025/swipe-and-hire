@@ -102,44 +102,21 @@ export function AppSidebar() {
     return () => window.removeEventListener('unsaved-cancel', handleUnsavedCancel);
   }, [isMobile, setOpenMobile, setOpen]);
 
-  // Generate signed URLs for all media using mediaManager
-  // OPTIMERAD: Använd Promise.all för parallell laddning och snabbare visning
+  // Hämta endast videons signed URL här – avatar/cover kommer från Auth-preloadern
   useEffect(() => {
-    const loadMedia = async () => {
-      if (!profile) return;
-      
+    const loadVideo = async () => {
+      if (!profile?.video_url) return;
+
       try {
-        // Ladda alla media parallellt för maximal snabbhet
-        const [videoResult, coverResult, avatarResult] = await Promise.all([
-          // Video URL (private bucket)
-          profile.video_url 
-            ? getMediaUrl(profile.video_url, 'profile-video', 86400).catch(() => null)
-            : Promise.resolve(null),
-          
-          // Cover image URL (public bucket)
-          profile.cover_image_url 
-            ? getMediaUrl(profile.cover_image_url, 'cover-image', 86400).catch(() => null)
-            : Promise.resolve(null),
-          
-          // Profile image URL - ALWAYS prefer profile image for avatar
-          profile.profile_image_url 
-            ? getMediaUrl(profile.profile_image_url, 'profile-image', 86400).catch(() => null)
-            : Promise.resolve(null)
-        ]);
-        
-        // Sätt alla URLs samtidigt för att undvika multipla re-renders
+        const videoResult = await getMediaUrl(profile.video_url, 'profile-video', 86400);
         setVideoUrl(videoResult);
-        setCoverUrl(coverResult);
-        
-        // Använd profile image, fallback till cover image
-        setAvatarUrl(avatarResult || coverResult);
       } catch (error) {
-        console.error('Failed to load media:', error);
+        console.error('Failed to load sidebar profile video:', error);
       }
     };
 
-    loadMedia();
-  }, [profile?.profile_image_url, profile?.cover_image_url, profile?.video_url]);
+    loadVideo();
+  }, [profile?.video_url]);
 
   const handleNavigation = (href: string) => {
     if (checkBeforeNavigation(href)) {
