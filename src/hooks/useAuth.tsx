@@ -240,15 +240,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .select('*')
         .eq('user_id', userId)
         .maybeSingle();
-
+ 
       if (profileError) {
         console.error('Error fetching profile:', profileError);
-        // Don't auto-logout on profile errors, just set profile to null
+        // Vid fel: nollställ profil men markera media som klar så att login inte fastnar
         setProfile(null);
+        setMediaPreloadComplete(true);
         return;
       } else if (!profileData) {
-        // Don't auto-logout, just set profile to null and let app handle it
+        // Ingen profil än: låt onboarding hantera resten men blockera inte login
         setProfile(null);
+        setMediaPreloadComplete(true);
         return;
       } else {
         // Convert JSONB interests to string array
@@ -627,12 +629,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         }, 50);
  
-        // Fallback om något strular med media-preloaden
+        // Säkerhetsfallback om något strular helt (väldigt generös timeout)
         setTimeout(() => {
           clearInterval(checkMedia);
-          console.log('⚠️ Media preload timeout after ~2s, continuing login');
+          console.log('⚠️ Media preload safety timeout (~15s), continuing login');
           resolve();
-        }, 2000);
+        }, 15000);
       });
  
       // Vänta tills både minsta delay OCH media-preload är klara
