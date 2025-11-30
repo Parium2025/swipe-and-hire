@@ -353,16 +353,10 @@ const Auth = () => {
         if (role) {
           const target = role === 'employer' ? '/dashboard' : '/search-jobs';
           console.log('✅ Auth: Redirecting IMMEDIATELY to', target, 'for role:', role, 'onboarding:', onboardingCompleted);
+          
+          // Navigera omedelbart utan väntan för smooth UX
           navigate(target, { replace: true });
         }
-      } else if (user && !profile && !hasRecoveryParamsNow) {
-        // Fallback: if profile hasn't loaded within 1500ms after login, go to home
-        setTimeout(() => {
-          if (!profile && !hasRecoveryParamsNow) {
-            console.log('⚠️ Fallback redirect from Auth: profile still not loaded, going to /');
-            navigate('/', { replace: true });
-          }
-        }, 1500);
       }
     };
 

@@ -250,18 +250,26 @@ const AuthTablet = ({
       const currentPassword = currentData.password;
       
       if (isLogin) {
-        const result = await signIn(currentEmail, currentPassword);
-        
-        if (result.error) {
-          if (result.error.code === 'email_not_confirmed') {
-            setShowResend(true);
-          } else if (result.error.showResetPassword) {
-            setShowResetPassword(true);
+        // Starta inloggning i bakgrunden - låt inte UI vänta
+        signIn(currentEmail, currentPassword).then(result => {
+          if (result?.error) {
+            setLoading(false);
+            if (result.error.code === 'email_not_confirmed') {
+              setShowResend(true);
+            } else if (result.error.showResetPassword) {
+              setShowResetPassword(true);
+            }
           }
-        } else {
-          // Defer navigation to Auth page once profile is loaded to avoid white flicker
-          console.log('Login successful, waiting for profile to load before redirect');
-        }
+          // Vid lyckad inloggning navigerar Auth.tsx automatiskt baserat på onAuthStateChange
+        }).catch(error => {
+          setLoading(false);
+          console.error('Inloggningsfel:', error);
+        });
+        
+        // Navigera omedelbart för smooth UX - Auth context hanterar resten
+        setTimeout(() => {
+          navigate('/', { replace: true });
+        }, 100);
       } else {
         // Validate all required fields
         if (role === 'job_seeker') {

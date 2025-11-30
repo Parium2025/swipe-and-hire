@@ -295,30 +295,26 @@ const AuthMobile = ({
       const currentPassword = currentData.password;
       
       if (isLogin) {
-        // Network-safe sign in with timeout fallback
-        const signInPromise = signIn(currentEmail, currentPassword);
-        const timeoutPromise = (new Promise((resolve) =>
-          setTimeout(() => resolve({ error: { code: 'timeout', message: 'timeout' } }), 5000)
-        )) as Promise<{ error?: any }>;
-
-        const result = await Promise.race([signInPromise, timeoutPromise]);
-        
-        if (result?.error) {
-          if (result.error.code === 'timeout') {
-            toast({
-              title: 'Nätverksproblem',
-              description: 'Inloggningen tog för lång tid. Kontrollera uppkopplingen och försök igen.',
-              variant: 'default'
-            });
-          } else if (result.error.code === 'email_not_confirmed') {
-            setShowResend(true);
-          } else if (result.error.showResetPassword) {
-            setShowResetPassword(true);
+        // Starta inloggning i bakgrunden - låt inte UI vänta
+        signIn(currentEmail, currentPassword).then(result => {
+          if (result?.error) {
+            setLoading(false);
+            if (result.error.code === 'email_not_confirmed') {
+              setShowResend(true);
+            } else if (result.error.showResetPassword) {
+              setShowResetPassword(true);
+            }
           }
-        } else {
-          // Lyckad inloggning – navigera direkt så Index hanterar resten
+          // Vid lyckad inloggning navigerar Auth.tsx automatiskt baserat på onAuthStateChange
+        }).catch(error => {
+          setLoading(false);
+          console.error('Inloggningsfel:', error);
+        });
+        
+        // Navigera omedelbart för smooth UX - Auth context hanterar resten
+        setTimeout(() => {
           navigate('/', { replace: true });
-        }
+        }, 100);
       } else {
         // Validate all required fields
         if (role === 'job_seeker') {
