@@ -586,30 +586,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Markera att detta är en manuell utloggning
     isManualSignOutRef.current = true;
 
-    // 1) Rensa applikationsstate omedelbart
-    setUser(null);
-    setSession(null);
-    setProfile(null);
-    setUserRole(null);
-    setOrganization(null);
-    
-    // 2) Rensa endast auth-relaterad cached data (BEHÅLL parium-intro-seen)
-    try { 
-      localStorage.removeItem(CACHED_PROFILE_KEY);
-      localStorage.removeItem('org_id');
-      // Rensa INTE sessionStorage för att behålla intro-seen status
-    } catch (e) {
-      console.warn('Could not clear storage:', e);
+    try {
+      // Låt backend sköta sessionen – vi väntar lugnt på SIGNED_OUT-eventet
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch (error) {
+      console.error('Error signing out from Supabase:', error);
     }
 
-    // 3) Signera ut från Supabase i bakgrunden
-    supabase.auth.signOut({ scope: 'global' }).catch(error => {
-      console.error('Error signing out from Supabase:', error);
-    });
-
-    // 4) Omedelbar redirect utan delays - premium smooth navigation
+    // Visa bara en lugn bekräftelse – själva redirecten sker centralt
     toast({ title: 'Utloggad', description: 'Du har loggats ut', duration: 2000 });
-    window.location.href = '/auth';
   };
 
   const refreshProfile = async () => {
