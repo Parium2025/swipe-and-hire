@@ -71,9 +71,13 @@ export const AuthLogoOverlay = () => {
     window.addEventListener("resize", updatePosition, {
       passive: true,
     } as any);
+    window.addEventListener("scroll", updatePosition, {
+      passive: true,
+    } as any);
 
     return () => {
       window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition);
       if (resizeObserver) {
         resizeObserver.disconnect();
       }
