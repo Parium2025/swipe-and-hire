@@ -14,7 +14,7 @@ import { BirthDatePicker } from '@/components/BirthDatePicker';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import phoneWithPariumLogo from '@/assets/phone-with-parium-logo.jpg';
-import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone, Play, Video, Trash2, ChevronDown, RotateCcw } from 'lucide-react';
+import { Heart, Users, Briefcase, Star, User, Camera, FileText, MapPin, ArrowRight, ArrowLeft, Check, Sparkles, Target, Phone, Play, Video, Trash2, ChevronDown, RotateCcw, X } from 'lucide-react';
 import ProfileVideo from '@/components/ProfileVideo';
 import SwipeIntro from '@/components/SwipeIntro';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
@@ -1628,6 +1628,15 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             currentStep === 3 ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
           }`}
         >
+          {/* Stäng-knapp */}
+          <button
+            onClick={handlePrevious}
+            className="absolute top-4 right-4 z-[110] bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-full p-3 shadow-lg transition-all duration-300"
+            aria-label="Stäng CV"
+          >
+            <X className="h-6 w-6" />
+          </button>
+          
           <div className="w-full h-full">
             <CvViewer 
               src={cachedCvUrl} 
