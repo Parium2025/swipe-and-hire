@@ -344,9 +344,9 @@ const Auth = () => {
       
       setIsPasswordReset(isReset);
       
-      // CRITICAL: Only redirect when BOTH user AND profile are fully loaded
+      // CRITICAL: Only redirect when BOTH user AND profile are fully loaded AND loading is complete (media ready)
       const hasRecoveryParamsNow = isReset || !!accessToken || !!refreshToken || !!tokenParam || !!tokenHashParam || tokenType === 'recovery';
-      if (user && profile && !hasRecoveryParamsNow && confirmationStatus === 'none' && recoveryStatus === 'none' && !confirmed) {
+      if (user && profile && !loading && !hasRecoveryParamsNow && confirmationStatus === 'none' && recoveryStatus === 'none' && !confirmed) {
         const role = (profile as any)?.role;
         const onboardingCompleted = (profile as any)?.onboarding_completed;
         
@@ -361,7 +361,7 @@ const Auth = () => {
     };
 
     handleAuthFlow();
-  }, [user, profile, navigate, searchParams, confirmationStatus, recoveryStatus]);
+  }, [user, profile, loading, navigate, searchParams, confirmationStatus, recoveryStatus]);
 
   // NYTT: Hantera email-confirm-länkar med ?confirm=TOKEN direkt på /auth
   useEffect(() => {
