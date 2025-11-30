@@ -159,14 +159,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   }
                 }, 50);
                 
-                // Timeout efter max 3 sekunder (längre för att ge media tid)
+                // Timeout efter max ~2 sekunder (fallback om media är seg)
                 setTimeout(() => {
                   clearInterval(checkMediaReady);
                   if (mounted && !isSigningInRef.current) {
                     setLoading(false);
                     setAuthAction(null);
                   }
-                }, 3000);
+                }, 2000);
               });
             }, 0);
           }
@@ -204,14 +204,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
           }, 50);
           
-          // Timeout efter max 3 sekunder för initial load
+          // Timeout efter max ~2 sekunder för initial load (fallback om media är seg)
           setTimeout(() => {
             clearInterval(checkMediaReady);
             if (mounted) {
               setLoading(false);
               setAuthAction(null);
             }
-          }, 3000);
+          }, 2000);
         });
       } else {
         setLoading(false);
@@ -547,8 +547,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isSigningInRef.current = true;
       console.log('🔍 SignIn started for:', email);
 
-      // Starta timer för minimum delay (1.5 sekunder)
-      const minDelayPromise = new Promise(resolve => setTimeout(resolve, 1500));
+      // Starta timer för minimum delay (~0.8–0.9 sekunder)
+      const minDelayPromise = new Promise(resolve => setTimeout(resolve, 900));
 
       // Starta auth-anropet
       const authPromise = supabase.auth.signInWithPassword({
