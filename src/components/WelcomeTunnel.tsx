@@ -1578,9 +1578,9 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
               <Button
                 variant="outlineNeutral"
                 onClick={handlePrevious}
-                className="px-8 py-3 bg-white/10 border border-white/20 text-white text-sm hover:scale-105 transition-all duration-300"
+                className="px-8 py-3 bg-white/10 border border-white/20 text-[#FFFFFF] text-sm transition-all duration-300"
               >
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <ArrowLeft className="h-4 w-4 mr-2 text-[#FFFFFF]" />
                 Tillbaka
               </Button>
             </div>

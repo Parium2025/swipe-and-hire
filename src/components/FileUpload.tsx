@@ -258,7 +258,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
         {uploading && uploadProgress > 0 && (
           <div className="space-y-2">
             <Progress value={uploadProgress} className="h-2" />
-            <p className="text-xs text-center text-white">{uploadProgress}%</p>
+            <p className="text-xs text-center text-[#FFFFFF] font-medium">{uploadProgress}%</p>
           </div>
         )}
       </div>
@@ -288,14 +288,14 @@ const FileUpload: React.FC<FileUploadProps> = ({
         }}
       >
         <div className="space-y-1.5 sm:space-y-2">
-          <Upload className="h-6 w-6 sm:h-8 sm:w-8 mx-auto text-white" />
+          <Upload className="h-6 w-6 sm:h-8 sm:w-8 mx-auto text-[#FFFFFF]" />
           {uploading ? (
             <>
-              <p className="text-xs sm:text-sm text-white">Laddar upp...</p>
+              <p className="text-xs sm:text-sm text-[#FFFFFF]">Laddar upp...</p>
               {uploadProgress > 0 && (
                 <div className="max-w-xs mx-auto space-y-1">
                   <Progress value={uploadProgress} className="h-2" />
-                  <p className="text-xs text-white">{uploadProgress}%</p>
+                  <p className="text-xs text-[#FFFFFF] font-medium">{uploadProgress}%</p>
                 </div>
               )}
             </>
