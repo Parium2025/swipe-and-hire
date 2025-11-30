@@ -681,8 +681,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
  
       console.log('✅ Login successful, waiting for minimum delay + media preload...');
       await Promise.all([minDelayPromise, mediaPromise]);
- 
-      console.log('✅ Minimum delay + media preload klar, släpper in användaren');
+
+      // Extra väntetid för att ge sidebar tid att rendera preloadade bilder
+      console.log('✅ Media preload klar, väntar 400ms för sidebar rendering...');
+      await new Promise(resolve => setTimeout(resolve, 400));
+
+      console.log('✅ Allt klart, släpper in användaren');
       setLoading(false);
       setAuthAction(null);
  
