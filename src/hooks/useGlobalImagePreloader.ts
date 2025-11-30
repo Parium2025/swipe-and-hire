@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { preloadImages, waitForServiceWorker } from '@/lib/serviceWorkerManager';
+import { preloadImages as preloadImagesViaSW, waitForServiceWorker } from '@/lib/serviceWorkerManager';
+import { preloadImages as preloadImagesDirect } from '@/hooks/useImagePreloader';
 import { getMediaUrl } from '@/lib/mediaManager';
 
 /**
@@ -14,13 +15,21 @@ export const useGlobalImagePreloader = () => {
       try {
         // 🔥 HÖGSTA PRIORITET: Parium-loggan (syns alltid vid utloggning/login)
         const pariumLogo = '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
-        console.log('🚀 PRIORITY #1: Preloading Parium logo...');
-        await preloadImages([pariumLogo]);
-        console.log('✅ Parium logo cached and ready!');
-        
-        // Vänta på service worker endast i produktion
+
+        // Säkerställ att service workern är aktiv i produktion innan vi ber den cacha loggan
         if (import.meta.env.PROD) {
-          await waitForServiceWorker();
+          try {
+            await waitForServiceWorker();
+            console.log('🚀 PRIORITY #1: Preloading Parium logo via Service Worker...');
+            await preloadImagesViaSW([pariumLogo]);
+            console.log('✅ Parium logo cached in Service Worker!');
+          } catch (error) {
+            console.warn('SW preload for Parium logo failed, falling back to direct preload', error);
+            await preloadImagesDirect([pariumLogo], 'high');
+          }
+        } else {
+          // I utvecklingsmiljö: använd direkt bildpreload så loggan alltid känns "redan på plats"
+          await preloadImagesDirect([pariumLogo], 'high');
         }
 
         const imagesToPreload: string[] = [];
@@ -54,11 +63,11 @@ export const useGlobalImagePreloader = () => {
             }
             
             // Förladdda användarens media FÖRST med högsta prioritet
-            if (userMedia.length > 0) {
-              console.log(`🚀 PRIORITY: Preloading current user's media (${userMedia.length} items)...`);
-              await preloadImages(userMedia);
-              console.log('✅ User media preloaded and ready!');
-            }
+             if (userMedia.length > 0) {
+               console.log(`🚀 PRIORITY: Preloading current user's media (${userMedia.length} items)...`);
+               await preloadImagesViaSW(userMedia);
+               console.log('✅ User media preloaded and ready!');
+             }
           }
         }
 
@@ -136,19 +145,19 @@ export const useGlobalImagePreloader = () => {
         }
 
         // 3. Starta förladdning av ÖVRIG media i bakgrunden (lägre prioritet)
-        if (imagesToPreload.length > 0) {
-          console.log(`🚀 Preloading ${imagesToPreload.length} additional assets (jobs, other profiles) in background...`);
-          // Använd requestIdleCallback för att inte blockera huvudtråden
-          if ('requestIdleCallback' in window) {
-            requestIdleCallback(() => {
-              preloadImages(imagesToPreload);
-            });
-          } else {
-            setTimeout(() => {
-              preloadImages(imagesToPreload);
-            }, 100);
-          }
-        }
+         if (imagesToPreload.length > 0) {
+           console.log(`🚀 Preloading ${imagesToPreload.length} additional assets (jobs, other profiles) in background...`);
+           // Använd requestIdleCallback för att inte blockera huvudtråden
+           if ('requestIdleCallback' in window) {
+             requestIdleCallback(() => {
+               preloadImagesViaSW(imagesToPreload);
+             });
+           } else {
+             setTimeout(() => {
+               preloadImagesViaSW(imagesToPreload);
+             }, 100);
+           }
+         }
       } catch (error) {
         console.error('Failed to preload assets:', error);
       }
