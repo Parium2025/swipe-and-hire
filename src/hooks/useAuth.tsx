@@ -271,6 +271,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setTimeout(async () => {
           try {
             setMediaPreloadComplete(false); // Reset state för ny inloggning
+            mediaPreloadCompleteRef.current = false;
             
             const criticalImages: string[] = [];
             let avatarUrl: string | null = null;
@@ -298,22 +299,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               videoUrl = await getMediaUrl(processedProfile.video_url, 'profile-video', 86400);
             }
             
-            // Vänta bara på att avatar/cover är cachade – små filer, snabb preload
+            // Vänta på att avatar/cover faktiskt har laddats in i browsercachen
             if (criticalImages.length > 0) {
-              console.log(`🚀 Preloading critical user images BEFORE redirect... (${criticalImages.length} items)`);
-              await preloadImages(criticalImages);
-              console.log('✅ Critical images cached and ready!');
+              console.log(`🚀 Preloading critical user images via ImageCache (${criticalImages.length} items) BEFORE entering app...`);
+              try {
+                const { imageCache } = await import('@/lib/imageCache');
+                await imageCache.preloadImages(criticalImages);
+                console.log('✅ Critical avatar/cover images cached in memory!');
+              } catch (cacheError) {
+                console.warn('Failed to preload images via ImageCache, falling back without blocking:', cacheError);
+              }
             }
             
             // Markera att kritiska media är klara – detta släpper inloggningen
+            mediaPreloadCompleteRef.current = true;
             setMediaPreloadComplete(true);
             
             // Starta videocache i bakgrunden utan att blockera inloggning
             if (videoUrl) {
               (async () => {
                 try {
-                  console.log('🎬 Preloading profile video in background...');
-                  await preloadImages([videoUrl]);
+                  console.log('🎬 Preloading profile video in background via ImageCache...');
+                  const { imageCache } = await import('@/lib/imageCache');
+                  await imageCache.preloadImages([videoUrl]);
                   console.log('✅ Profile video cached!');
                 } catch (err) {
                   console.warn('Failed to preload profile video:', err);
@@ -323,6 +331,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           } catch (error) {
             console.error('Failed to preload user media:', error);
             // Släpp ändå användaren in vid fel
+            mediaPreloadCompleteRef.current = true;
             setMediaPreloadComplete(true);
           }
         }, 0);
