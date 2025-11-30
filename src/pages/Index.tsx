@@ -144,21 +144,10 @@ const Index = () => {
     // Wait for auth to finish loading
     if (loading) return;
 
-    // No user -> smooth redirect to auth
+    // No user -> omedelbar redirect till auth
     if (!user) {
-      // Kort fade för premium-känsla
-      try {
-        document.body.style.opacity = '0.98';
-        document.body.style.transition = 'opacity 100ms ease-out';
-      } catch {}
-      
-      setTimeout(() => {
-        try {
-          document.body.style.opacity = '1';
-        } catch {}
-        navigate('/auth', { replace: true });
-        setIsInitializing(false);
-      }, 100);
+      navigate('/auth', { replace: true });
+      setIsInitializing(false);
       return;
     }
 
