@@ -113,6 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<UserRoleData | null>(null);
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mediaPreloadComplete, setMediaPreloadComplete] = useState(false); // 🎯 Ny state för att tracka media-laddning
   const isManualSignOutRef = useRef(false);
   const isInitializingRef = useRef(true);
   const isSigningInRef = useRef(false);
@@ -144,7 +145,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setTimeout(() => {
               if (!mounted) return;
               fetchUserData(session.user!.id).then(() => {
-                if (mounted) setLoading(false);
+                // 🎯 Vänta också på att media är klar innan vi släpper loading
+                const checkMediaReady = setInterval(() => {
+                  if (mediaPreloadComplete) {
+                    clearInterval(checkMediaReady);
+                    if (mounted) setLoading(false);
+                  }
+                }, 50);
+                
+                // Timeout efter max 2 sekunder för att inte blockera för länge
+                setTimeout(() => {
+                  clearInterval(checkMediaReady);
+                  if (mounted) setLoading(false);
+                }, 2000);
               });
             }, 0);
           }
@@ -152,6 +165,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setProfile(null);
           setUserRole(null);
           setOrganization(null);
+          setMediaPreloadComplete(false);
           try { if (typeof window !== 'undefined') localStorage.removeItem(CACHED_PROFILE_KEY); } catch {}
           if (event !== 'INITIAL_SESSION') {
             setLoading(false);
@@ -170,7 +184,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (session?.user) {
         fetchUserData(session.user.id).then(() => {
-          if (mounted) setLoading(false);
+          // 🎯 Vänta på media innan vi släpper initial loading
+          const checkMediaReady = setInterval(() => {
+            if (mediaPreloadComplete) {
+              clearInterval(checkMediaReady);
+              if (mounted) setLoading(false);
+            }
+          }, 50);
+          
+          // Timeout efter max 2 sekunder
+          setTimeout(() => {
+            clearInterval(checkMediaReady);
+            if (mounted) setLoading(false);
+          }, 2000);
         });
       } else {
         setLoading(false);
@@ -215,34 +241,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
         setProfile(processedProfile);
         
-        // 🔥 KRITISKT: Förladdda användarens media i BAKGRUNDEN efter profilen satts
-        // Detta garanterar att inloggningen inte blockeras och att bilden är cachad när sidebaren renderas
+        // 🔥 KRITISKT: Förladdda profilbilden INNAN vi släpper loading-state
+        // Detta håller användaren kvar på auth-sidan tills bilden är redo
         setTimeout(async () => {
           try {
-            const userMedia: string[] = [];
+            setMediaPreloadComplete(false); // Reset state för ny inloggning
             
+            // Prioritera profilbilden - den MÅSTE vara klar innan vi släpper loading
             if (processedProfile.profile_image_url) {
-              const url = await getMediaUrl(processedProfile.profile_image_url, 'profile-image', 86400);
-              if (url) userMedia.push(url);
+              const avatarUrl = await getMediaUrl(processedProfile.profile_image_url, 'profile-image', 86400);
+              if (avatarUrl) {
+                console.log('🚀 Preloading sidebar avatar BEFORE redirect...');
+                await preloadImages([avatarUrl]);
+                console.log('✅ Sidebar avatar cached and ready!');
+              }
             }
+            
+            // Markera att avatar är klar - detta släpper loading-state
+            setMediaPreloadComplete(true);
+            
+            // Ladda cover + video i bakgrunden EFTER att vi släppt användaren in
+            const backgroundMedia: string[] = [];
             
             if (processedProfile.cover_image_url) {
               const url = await getMediaUrl(processedProfile.cover_image_url, 'cover-image', 86400);
-              if (url) userMedia.push(url);
+              if (url) backgroundMedia.push(url);
             }
             
             if (processedProfile.video_url) {
               const url = await getMediaUrl(processedProfile.video_url, 'profile-video', 86400);
-              if (url) userMedia.push(url);
+              if (url) backgroundMedia.push(url);
             }
             
-            if (userMedia.length > 0) {
-              console.log(`🚀 PRIORITY: Preloading user media in background (${userMedia.length} items)...`);
-              await preloadImages(userMedia);
-              console.log('✅ User media cached and ready!');
+            if (backgroundMedia.length > 0) {
+              console.log(`🎬 Preloading background media (${backgroundMedia.length} items)...`);
+              await preloadImages(backgroundMedia);
+              console.log('✅ Background media cached!');
             }
           } catch (error) {
             console.error('Failed to preload user media:', error);
+            // Släpp ändå användaren in vid fel
+            setMediaPreloadComplete(true);
           }
         }, 0);
         
