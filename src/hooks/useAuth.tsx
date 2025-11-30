@@ -266,46 +266,60 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
         setProfile(processedProfile);
         
-        // 🔥 KRITISKT: Förladdda all kritisk profilmedia INNAN vi släpper loading-state
-        // Detta håller användaren kvar på auth-sidan tills allt är redo
+        // 🔥 KRITISKT: Förladdda kritiska bilder (avatar + cover) INNAN vi släpper loading-state
+        // Video är tung – den cachas i bakgrunden men blockerar inte inloggning
         setTimeout(async () => {
           try {
             setMediaPreloadComplete(false); // Reset state för ny inloggning
             
-            const criticalMedia: string[] = [];
+            const criticalImages: string[] = [];
+            let avatarUrl: string | null = null;
+            let coverUrl: string | null = null;
+            let videoUrl: string | null = null;
             
             // Profilbild
             if (processedProfile.profile_image_url) {
-              const avatarUrl = await getMediaUrl(processedProfile.profile_image_url, 'profile-image', 86400);
+              avatarUrl = await getMediaUrl(processedProfile.profile_image_url, 'profile-image', 86400);
               if (avatarUrl) {
-                criticalMedia.push(avatarUrl);
+                criticalImages.push(avatarUrl);
               }
             }
             
             // Cover-bild
             if (processedProfile.cover_image_url) {
-              const coverUrl = await getMediaUrl(processedProfile.cover_image_url, 'cover-image', 86400);
+              coverUrl = await getMediaUrl(processedProfile.cover_image_url, 'cover-image', 86400);
               if (coverUrl) {
-                criticalMedia.push(coverUrl);
+                criticalImages.push(coverUrl);
               }
             }
             
-            // Profilvideo
+            // Profilvideo – hämta URL men ladda i bakgrunden
             if (processedProfile.video_url) {
-              const videoUrl = await getMediaUrl(processedProfile.video_url, 'profile-video', 86400);
-              if (videoUrl) {
-                criticalMedia.push(videoUrl);
-              }
+              videoUrl = await getMediaUrl(processedProfile.video_url, 'profile-video', 86400);
             }
             
-            if (criticalMedia.length > 0) {
-              console.log(`🚀 Preloading user media BEFORE redirect... (${criticalMedia.length} items)`);
-              await preloadImages(criticalMedia);
-              console.log('✅ User media cached and ready!');
+            // Vänta bara på att avatar/cover är cachade – små filer, snabb preload
+            if (criticalImages.length > 0) {
+              console.log(`🚀 Preloading critical user images BEFORE redirect... (${criticalImages.length} items)`);
+              await preloadImages(criticalImages);
+              console.log('✅ Critical images cached and ready!');
             }
             
-            // Markera att all kritisk media är klar - detta släpper loading-state
+            // Markera att kritiska media är klara – detta släpper inloggningen
             setMediaPreloadComplete(true);
+            
+            // Starta videocache i bakgrunden utan att blockera inloggning
+            if (videoUrl) {
+              (async () => {
+                try {
+                  console.log('🎬 Preloading profile video in background...');
+                  await preloadImages([videoUrl]);
+                  console.log('✅ Profile video cached!');
+                } catch (err) {
+                  console.warn('Failed to preload profile video:', err);
+                }
+              })();
+            }
           } catch (error) {
             console.error('Failed to preload user media:', error);
             // Släpp ändå användaren in vid fel
