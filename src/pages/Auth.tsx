@@ -352,15 +352,9 @@ const Auth = () => {
         
         if (role) {
           const target = role === 'employer' ? '/dashboard' : '/search-jobs';
-          console.log('✅ Auth: Redirecting smoothly to', target, 'for role:', role);
+          console.log('✅ Auth: Redirecting to', target);
           
-          // Kort fade-in för premium-känsla
-          try {
-            document.body.style.opacity = '1';
-            document.body.style.transition = 'opacity 200ms ease-in';
-          } catch {}
-          
-          // Navigera smooth med replace
+          // Omedelbar navigation utan delays
           navigate(target, { replace: true });
         }
       }
