@@ -575,7 +575,7 @@ const AuthDesktop = ({
         </div>
       </div>
 
-      <div className="relative z-10 flex flex-col min-h-screen py-8 px-6 overflow-y-auto">
+      <div className="relative z-10 flex flex-col min-h-screen py-8 px-6 overflow-y-auto animate-fade-in">
         {/* Header med logo och text */}
         <div className="flex flex-col items-center w-full max-w-2xl mx-auto">
           <div className="text-center mb-4">
