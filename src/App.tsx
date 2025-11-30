@@ -28,6 +28,7 @@ import { useDevice } from "@/hooks/use-device";
 import { useGlobalImagePreloader } from "@/hooks/useGlobalImagePreloader";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { supabase } from "@/integrations/supabase/client";
+import { AuthLogoBackground } from "@/components/AuthLogoBackground";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -79,7 +80,7 @@ const AnimatedRoutes = () => {
   );
 };
 
-const App = () => {
+const AppShell = () => {
   const showHeader = false; // Header removed for cleaner UI
 
   // Förladdda alla kritiska bilder globalt vid app-start
@@ -93,28 +94,40 @@ const App = () => {
     return () => window.removeEventListener('load', start as any);
   }, []);
 
+  const location = useLocation();
+  const isAuthRoute = location.pathname.startsWith('/auth');
+
   return (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider delayDuration={0}>
-      <Toaster />
-      <OfflineIndicator />
-      <BrowserRouter>
-        <UnsavedChangesProvider>
-          <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full">
-            <div className="relative z-10">
-              {showHeader && <Header />}
-              <main className={showHeader ? "pt-16" : ""}>
-                <AuthTokenBridge />
-                <AnimatedRoutes />
-            </main>
-          </div>
+    <UnsavedChangesProvider>
+      <div className="min-h-screen safe-area-content overflow-x-hidden w-full max-w-full relative">
+        {/* Persistent auth-logo i bakgrunden. Tas aldrig bort, vi växlar bara opacity. */}
+        <AuthLogoBackground visible={isAuthRoute} />
+
+        <div className="relative z-10">
+          {showHeader && <Header />}
+          <main className={showHeader ? 'pt-16' : ''}>
+            <AuthTokenBridge />
+            <AnimatedRoutes />
+          </main>
         </div>
-      </UnsavedChangesProvider>
-    </BrowserRouter>
-    </TooltipProvider>
-  </AuthProvider>
-</QueryClientProvider>
+      </div>
+    </UnsavedChangesProvider>
+  );
+};
+
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider delayDuration={0}>
+          <Toaster />
+          <OfflineIndicator />
+          <BrowserRouter>
+            <AppShell />
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 };
 
