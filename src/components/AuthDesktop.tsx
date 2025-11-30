@@ -249,28 +249,18 @@ const AuthDesktop = ({
       const currentEmail = currentData.email;
       const currentPassword = currentData.password;
       
-      if (isLogin) {
-        // Starta inloggning i bakgrunden - låt inte UI vänta
-        signIn(currentEmail, currentPassword).then(result => {
-          if (result?.error) {
-            setLoading(false);
-            if (result.error.code === 'email_not_confirmed') {
-              setShowResend(true);
-            } else if (result.error.showResetPassword) {
-              setShowResetPassword(true);
-            }
-          }
-          // Vid lyckad inloggning navigerar Auth.tsx automatiskt baserat på onAuthStateChange
-        }).catch(error => {
-          setLoading(false);
-          console.error('Inloggningsfel:', error);
-        });
-        
-        // Navigera omedelbart för smooth UX - Auth context hanterar resten
-        setTimeout(() => {
-          navigate('/', { replace: true });
-        }, 100);
-      } else {
+       if (isLogin) {
+         const result = await signIn(currentEmail, currentPassword);
+
+         if (result?.error) {
+           if (result.error.code === 'email_not_confirmed') {
+             setShowResend(true);
+           } else if (result.error.showResetPassword) {
+             setShowResetPassword(true);
+           }
+         }
+         // Vid lyckad inloggning navigerar Auth.tsx automatiskt baserat på onAuthStateChange
+       } else {
         // Validate all required fields
         if (role === 'job_seeker') {
           if (!jobSeekerData.firstName.trim()) {
