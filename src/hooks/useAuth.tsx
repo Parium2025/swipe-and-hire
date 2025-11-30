@@ -147,19 +147,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setTimeout(() => {
               if (!mounted) return;
               fetchUserData(session.user!.id).then(() => {
-                // 🎯 Vänta också på att media är klar innan vi släpper loading
+                // 🎯 Vänta på att media är klar innan vi släpper loading
                 const checkMediaReady = setInterval(() => {
                   if (mediaPreloadComplete) {
                     clearInterval(checkMediaReady);
-                    if (mounted) setLoading(false);
+                    // 🔥 Endast släpp loading om vi inte är i en aktiv login-process
+                    if (mounted && !isSigningInRef.current) {
+                      setLoading(false);
+                      setAuthAction(null);
+                    }
                   }
                 }, 50);
                 
-                // Timeout efter max 2 sekunder för att inte blockera för länge
+                // Timeout efter max 3 sekunder (längre för att ge media tid)
                 setTimeout(() => {
                   clearInterval(checkMediaReady);
-                  if (mounted) setLoading(false);
-                }, 2000);
+                  if (mounted && !isSigningInRef.current) {
+                    setLoading(false);
+                    setAuthAction(null);
+                  }
+                }, 3000);
               });
             }, 0);
           }
@@ -190,15 +197,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const checkMediaReady = setInterval(() => {
             if (mediaPreloadComplete) {
               clearInterval(checkMediaReady);
-              if (mounted) setLoading(false);
+              if (mounted) {
+                setLoading(false);
+                setAuthAction(null);
+              }
             }
           }, 50);
           
-          // Timeout efter max 2 sekunder
+          // Timeout efter max 3 sekunder för initial load
           setTimeout(() => {
             clearInterval(checkMediaReady);
-            if (mounted) setLoading(false);
-          }, 2000);
+            if (mounted) {
+              setLoading(false);
+              setAuthAction(null);
+            }
+          }, 3000);
         });
       } else {
         setLoading(false);
@@ -530,10 +543,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = async (email: string, password: string) => {
     try {
       setAuthAction('login');
+      setLoading(true); // 🔥 Håll loading true under hela inloggningen
       isSigningInRef.current = true;
       console.log('🔍 SignIn started for:', email);
 
-      // Starta auth-anropet men blockera inte UI:t
+      // Starta timer för minimum delay (1.5 sekunder)
+      const minDelayPromise = new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Starta auth-anropet
       const authPromise = supabase.auth.signInWithPassword({
         email,
         password
@@ -580,10 +597,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: { code: 'email_not_confirmed', message: 'Email not confirmed' } };
       }
 
-      // Lyckad inloggning - returnera omedelbart, låt onAuthStateChange hantera resten
-      console.log('Login successful, waiting for profile to load before redirect');
+      // Lyckad inloggning - vänta på minimum delay innan vi släpper loading
+      console.log('✅ Login successful, waiting for minimum delay + media preload...');
+      
+      // Vänta på minimum delay (så användaren ser "Loggar in...")
+      await minDelayPromise;
+      
+      console.log('⏱️ Minimum delay completed, profile and media will load via onAuthStateChange');
       return {};
     } catch (error: any) {
+      setLoading(false);
+      setAuthAction(null);
       toast({ title: "Inloggningsfel", description: "Ett oväntat fel inträffade. Försök igen.", variant: "destructive" });
       return { error };
     } finally {
