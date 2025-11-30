@@ -574,17 +574,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isSigningInRef.current = true;
       console.log('🔍 SignIn started for:', email);
  
-      // Starta timer för minimum delay (~0.8–0.9 sekunder)
-      const minDelayPromise = new Promise(resolve => setTimeout(resolve, 900));
+      // Minsta visningstid för "Loggar in..." (ca 1–1.1 sekund)
+      const minDelayPromise = new Promise(resolve => setTimeout(resolve, 1100));
  
       // Starta auth-anropet
-      const authPromise = supabase.auth.signInWithPassword({
+      const { data: signInData, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
- 
-      // Vänta på resultat
-      const { data: signInData, error } = await authPromise;
  
       if (error) {
         if (error.message === 'Invalid login credentials') {
@@ -632,29 +629,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: { code: 'email_not_confirmed', message: 'Email not confirmed' } };
       }
  
-      // Lyckad inloggning - vänta på minimum delay + media preload innan vi släpper in användaren
-      console.log('✅ Login successful, waiting for minimum delay + media preload...');
+      // Lyckad inloggning - vänta ENDAST på minimum delay
+      console.log('✅ Login successful, waiting for minimum delay while media laddas i bakgrunden...');
+      await minDelayPromise;
  
-      const mediaPromise = new Promise<void>((resolve) => {
-        const checkMedia = setInterval(() => {
-          if (mediaPreloadCompleteRef.current) {
-            clearInterval(checkMedia);
-            resolve();
-          }
-        }, 50);
- 
-        // Säkerhetsfallback om något strular helt (väldigt generös timeout)
-        setTimeout(() => {
-          clearInterval(checkMedia);
-          console.log('⚠️ Media preload safety timeout (~15s), continuing login');
-          resolve();
-        }, 15000);
-      });
- 
-      // Vänta tills både minsta delay OCH media-preload är klara
-      await Promise.all([minDelayPromise, mediaPromise]);
- 
-      console.log('✅ Minimum delay + media preload complete, entering app');
+      console.log('✅ Minimum delay klar, släpper in användaren');
       setLoading(false);
       setAuthAction(null);
  
