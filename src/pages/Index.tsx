@@ -130,7 +130,7 @@ const Index = () => {
   const [showProfileSelector, setShowProfileSelector] = useState(false);
   const [developerView, setDeveloperView] = useState<string>('dashboard');
   const [showIntroTutorial, setShowIntroTutorial] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(true);
+  const [isInitializing, setIsInitializing] = useState(false);
   const [uiReady, setUiReady] = useState(false);
   const [showAuthCTA, setShowAuthCTA] = useState(false);
   const navigate = useNavigate();
@@ -144,24 +144,14 @@ const Index = () => {
     // Wait for auth to finish loading
     if (loading) return;
 
-    // No user -> smooth redirect till auth med kort delay
-    if (!user) {
-      // Kort väntan för att låta eventuell loading-animation synas
-      const timer = setTimeout(() => {
-        navigate('/auth', { replace: true });
-        setIsInitializing(false);
-      }, 200);
-      return () => clearTimeout(timer);
-    }
-
     // User exists but profile not loaded yet -> keep waiting with gradient background
-    if (!profile) {
+    if (user && !profile) {
       return;
     }
 
-    // Both user AND profile loaded -> redirect based on role
-    const role = (profile as any)?.role;
-    if (location.pathname === '/') {
+    // Both user AND profile loaded -> redirect based on role when on root path
+    if (user && profile && location.pathname === '/') {
+      const role = (profile as any)?.role;
       if (role === 'employer') {
         navigate('/dashboard', { replace: true });
       } else {
@@ -172,7 +162,8 @@ const Index = () => {
     }
 
     // Show profile selector only for admin
-    if (!location.pathname.startsWith('/profile') && 
+    if (user && profile &&
+        !location.pathname.startsWith('/profile') && 
         !location.pathname.startsWith('/search-jobs') && 
         !location.pathname.startsWith('/dashboard') && 
         !location.pathname.startsWith('/company-profile') && 
@@ -197,7 +188,7 @@ const Index = () => {
     };
   }, []);
 
-  if (loading || isInitializing) {
+  if ((loading && !user) || (authAction === 'logout' && loading)) {
     return (
       <div className="min-h-screen bg-gradient-parium flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
