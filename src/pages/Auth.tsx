@@ -720,7 +720,7 @@ const Auth = () => {
       <div className="min-h-screen w-full overflow-x-hidden relative">
         {/* Loading overlay ovanpå auth-layouten */}
         {showAuthLoadingOverlay && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center bg-gradient-parium">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-parium">
             <div className="flex flex-col items-center gap-4">
               <Loader2 className="h-8 w-8 animate-spin text-white" />
               <p className="text-white text-sm">{authLoadingLabel}</p>
@@ -773,7 +773,7 @@ const Auth = () => {
       <div className="min-h-screen w-full overflow-x-hidden relative">
         {/* Loading overlay ovanpå auth-layouten */}
         {showAuthLoadingOverlay && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center bg-gradient-parium">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-parium">
             <div className="flex flex-col items-center gap-4">
               <Loader2 className="h-8 w-8 animate-spin text-white" />
               <p className="text-white text-sm">{authLoadingLabel}</p>
@@ -817,7 +817,7 @@ const Auth = () => {
     <div className="min-h-screen w-full overflow-x-hidden relative">
       {/* Loading overlay ovanpå auth-layouten */}
       {showAuthLoadingOverlay && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-gradient-parium">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-parium">
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-8 w-8 animate-spin text-white" />
             <p className="text-white text-sm">{authLoadingLabel}</p>
