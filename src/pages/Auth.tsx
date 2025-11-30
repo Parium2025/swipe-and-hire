@@ -59,7 +59,7 @@ const Auth = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoginMode, setIsLoginMode] = useState(true); // Track if user is on login or register
 
-  const { user, profile, loading, updatePassword, confirmEmail } = useAuth();
+  const { user, profile, loading, authAction, updatePassword, confirmEmail } = useAuth();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -718,7 +718,9 @@ const Auth = () => {
       <div className="min-h-screen bg-gradient-parium flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-white" />
-          <p className="text-white text-sm">Loggar in...</p>
+          <p className="text-white text-sm">
+            {authAction === 'logout' ? 'Loggar ut...' : 'Loggar in...'}
+          </p>
         </div>
       </div>
     );
