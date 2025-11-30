@@ -91,54 +91,38 @@ export function AppSidebar() {
   }, [isMobile, setOpenMobile, setOpen]);
 
   // Generate signed URLs for all media using mediaManager
+  // OPTIMERAD: Använd Promise.all för parallell laddning och snabbare visning
   useEffect(() => {
     const loadMedia = async () => {
-      // Video URL (private bucket)
-      if (profile?.video_url) {
-        try {
-          const url = await getMediaUrl(profile.video_url, 'profile-video', 86400);
-          if (url) setVideoUrl(url);
-        } catch (error) {
-          console.error('Failed to load video URL:', error);
-          setVideoUrl(null);
-        }
-      } else {
-        setVideoUrl(null);
-      }
-
-      // Cover image URL (public bucket)
-      if (profile?.cover_image_url) {
-        try {
-          const url = await getMediaUrl(profile.cover_image_url, 'cover-image', 86400);
-          if (url) setCoverUrl(url);
-        } catch (error) {
-          console.error('Failed to load cover URL:', error);
-          setCoverUrl(null);
-        }
-      } else {
-        setCoverUrl(null);
-      }
-
-      // Profile image URL - ALWAYS prefer profile image for avatar, regardless of video presence
-      if (profile?.profile_image_url) {
-        try {
-          const url = await getMediaUrl(profile.profile_image_url, 'profile-image', 86400);
-          if (url) setAvatarUrl(url);
-        } catch (error) {
-          console.error('Failed to load avatar URL:', error);
-          setAvatarUrl(null);
-        }
-      } else if (profile?.cover_image_url) {
-        // Use cover as fallback if no profile image
-        try {
-          const url = await getMediaUrl(profile.cover_image_url, 'cover-image', 86400);
-          if (url) setAvatarUrl(url);
-        } catch (error) {
-          console.error('Failed to load cover as avatar:', error);
-          setAvatarUrl(null);
-        }
-      } else {
-        setAvatarUrl(null);
+      if (!profile) return;
+      
+      try {
+        // Ladda alla media parallellt för maximal snabbhet
+        const [videoResult, coverResult, avatarResult] = await Promise.all([
+          // Video URL (private bucket)
+          profile.video_url 
+            ? getMediaUrl(profile.video_url, 'profile-video', 86400).catch(() => null)
+            : Promise.resolve(null),
+          
+          // Cover image URL (public bucket)
+          profile.cover_image_url 
+            ? getMediaUrl(profile.cover_image_url, 'cover-image', 86400).catch(() => null)
+            : Promise.resolve(null),
+          
+          // Profile image URL - ALWAYS prefer profile image for avatar
+          profile.profile_image_url 
+            ? getMediaUrl(profile.profile_image_url, 'profile-image', 86400).catch(() => null)
+            : Promise.resolve(null)
+        ]);
+        
+        // Sätt alla URLs samtidigt för att undvika multipla re-renders
+        setVideoUrl(videoResult);
+        setCoverUrl(coverResult);
+        
+        // Använd profile image, fallback till cover image
+        setAvatarUrl(avatarResult || coverResult);
+      } catch (error) {
+        console.error('Failed to load media:', error);
       }
     };
 

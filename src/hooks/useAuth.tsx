@@ -3,6 +3,8 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Database } from '@/integrations/supabase/types';
+import { getMediaUrl } from '@/lib/mediaManager';
+import { preloadImages } from '@/lib/serviceWorkerManager';
 
 export type UserRole = Database['public']['Enums']['user_role'];
 
@@ -212,6 +214,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             : []
         };
         setProfile(processedProfile);
+        
+        // 🔥 KRITISKT: Förladdda användarens media OMEDELBART efter profilen laddats
+        // Detta garanterar att profilbilden är cachad innan sidebaren visas
+        setTimeout(async () => {
+          try {
+            const userMedia: string[] = [];
+            
+            if (processedProfile.profile_image_url) {
+              const url = await getMediaUrl(processedProfile.profile_image_url, 'profile-image', 86400);
+              if (url) userMedia.push(url);
+            }
+            
+            if (processedProfile.cover_image_url) {
+              const url = await getMediaUrl(processedProfile.cover_image_url, 'cover-image', 86400);
+              if (url) userMedia.push(url);
+            }
+            
+            if (processedProfile.video_url) {
+              const url = await getMediaUrl(processedProfile.video_url, 'profile-video', 86400);
+              if (url) userMedia.push(url);
+            }
+            
+            if (userMedia.length > 0) {
+              console.log(`🚀 PRIORITY: Preloading user media immediately (${userMedia.length} items)...`);
+              await preloadImages(userMedia);
+              console.log('✅ User media cached and ready for instant sidebar display!');
+            }
+          } catch (error) {
+            console.error('Failed to preload user media:', error);
+          }
+        }, 0);
+        
         try {
           if (typeof window !== 'undefined') {
             localStorage.setItem(CACHED_PROFILE_KEY, JSON.stringify({

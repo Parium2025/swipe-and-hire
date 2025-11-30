@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { preloadImages, waitForServiceWorker } from '@/lib/serviceWorkerManager';
+import { getMediaUrl } from '@/lib/mediaManager';
 
 /**
  * Global hook som förladddar alla kritiska bilder vid app-start
  * Körs en gång när appen startar
+ * PRIORITERAR inloggad användares media FÖRST för omedelbar sidebar-visning
  */
 export const useGlobalImagePreloader = () => {
   useEffect(() => {
@@ -16,6 +18,43 @@ export const useGlobalImagePreloader = () => {
         }
 
         const imagesToPreload: string[] = [];
+        
+        // 🔥 PRIORITET 1: Ladda inloggad användares profilmedia FÖRST
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: currentProfile } = await supabase
+            .from('profiles')
+            .select('profile_image_url, cover_image_url, video_url')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (currentProfile) {
+            // Generera signed URLs för användarens media och förladdda OMEDELBART
+            const userMedia: string[] = [];
+            
+            if (currentProfile.profile_image_url) {
+              const url = await getMediaUrl(currentProfile.profile_image_url, 'profile-image', 86400);
+              if (url) userMedia.push(url);
+            }
+            
+            if (currentProfile.cover_image_url) {
+              const url = await getMediaUrl(currentProfile.cover_image_url, 'cover-image', 86400);
+              if (url) userMedia.push(url);
+            }
+            
+            if (currentProfile.video_url) {
+              const url = await getMediaUrl(currentProfile.video_url, 'profile-video', 86400);
+              if (url) userMedia.push(url);
+            }
+            
+            // Förladdda användarens media FÖRST med högsta prioritet
+            if (userMedia.length > 0) {
+              console.log(`🚀 PRIORITY: Preloading current user's media (${userMedia.length} items)...`);
+              await preloadImages(userMedia);
+              console.log('✅ User media preloaded and ready!');
+            }
+          }
+        }
 
         // 1. Hämta ALLA jobbbilder
         const { data: jobs } = await supabase
@@ -90,11 +129,19 @@ export const useGlobalImagePreloader = () => {
           });
         }
 
-        // 3. Starta förladdning via Service Worker
+        // 3. Starta förladdning av ÖVRIG media i bakgrunden (lägre prioritet)
         if (imagesToPreload.length > 0) {
-          console.log(`🚀 Preloading ${imagesToPreload.length} assets (ALL jobs, profiles, logos) in background...`);
-          await preloadImages(imagesToPreload);
-          console.log('✅ All assets preloaded and ready for offline use!');
+          console.log(`🚀 Preloading ${imagesToPreload.length} additional assets (jobs, other profiles) in background...`);
+          // Använd requestIdleCallback för att inte blockera huvudtråden
+          if ('requestIdleCallback' in window) {
+            requestIdleCallback(() => {
+              preloadImages(imagesToPreload);
+            });
+          } else {
+            setTimeout(() => {
+              preloadImages(imagesToPreload);
+            }, 100);
+          }
         }
       } catch (error) {
         console.error('Failed to preload assets:', error);
