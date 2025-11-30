@@ -50,14 +50,14 @@ const businessItems = [
 export function AppSidebar() {
   const { state, setOpenMobile, isMobile, setOpen } = useSidebar();
   const collapsed = state === 'collapsed';
-  const { profile, userRole, signOut, user } = useAuth();
+  const { profile, userRole, signOut, user, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { checkBeforeNavigation } = useUnsavedChanges();
 
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(preloadedAvatarUrl ?? null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [coverUrl, setCoverUrl] = useState<string | null>(null);
+  const [coverUrl, setCoverUrl] = useState<string | null>(preloadedCoverUrl ?? null);
   const [avatarLoaded, setAvatarLoaded] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
   
