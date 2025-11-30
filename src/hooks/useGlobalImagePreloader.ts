@@ -19,6 +19,12 @@ export const useGlobalImagePreloader = () => {
 
         const imagesToPreload: string[] = [];
         
+        // 🔥 PRIORITET 0: Ladda Parium-logotypen FÖRST (för auth-sidan)
+        const logoUrl = '/lovable-uploads/79c2f9ec-4fa4-43c9-9177-5f0ce8b19f57.png';
+        console.log('🚀 HIGHEST PRIORITY: Preloading Parium logo...');
+        await preloadImages([logoUrl]);
+        console.log('✅ Parium logo preloaded and ready!');
+        
         // 🔥 PRIORITET 1: Ladda inloggad användares profilmedia FÖRST
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
