@@ -1191,7 +1191,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent 
-                        className="w-72 max-h-[240px] overflow-y-auto bg-white/5 backdrop-blur-md border-white/20 shadow-xl z-50 rounded-lg text-white"
+                        className="w-72 bg-white/5 backdrop-blur-md border-white/20 shadow-xl z-50 rounded-lg text-white overflow-visible"
                        side="top"
                        align="center"
                        alignOffset={0}

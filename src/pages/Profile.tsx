@@ -1651,13 +1651,13 @@ const Profile = () => {
                               <ChevronDown className="h-4 w-4 flex-shrink-0" />
                             </Button>
                           </DropdownMenuTrigger>
-                           <DropdownMenuContent 
-                             className="w-72 max-h-80 overflow-y-auto bg-white/5 backdrop-blur-md border-white/20 shadow-xl z-50 rounded-lg text-white"
-                            side="bottom"
-                            align="center"
-                            alignOffset={0}
-                            sideOffset={6}
-                            avoidCollisions={true}
+                          <DropdownMenuContent 
+                            className="w-72 bg-white/5 backdrop-blur-md border-white/20 shadow-xl z-50 rounded-lg text-white overflow-visible"
+                           side="bottom"
+                           align="center"
+                           alignOffset={0}
+                           sideOffset={6}
+                           avoidCollisions={true}
                           >
                             <DropdownMenuItem onClick={() => setAvailability('omgaende')} className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-3 text-white">
                               Omgående
