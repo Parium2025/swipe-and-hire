@@ -773,13 +773,8 @@ const Profile = () => {
       setProfileFileName('');
       setCoverFileName('');
       
-      // Force profile object update to prevent fallbacks
-      if (profile) {
-        (profile as any).profile_image_url = null;
-        (profile as any).video_url = null;
-        (profile as any).cover_image_url = null;
-        (profile as any).is_profile_video = false;
-      }
+      // Sync auth/profile-context (preloaded avatar/cover + sidebar) med nya värden
+      await refreshProfile();
       
       // Update original values so they match current state
       setOriginalValues(prev => ({
@@ -871,10 +866,8 @@ const Profile = () => {
       setCoverImageUrl('');
       setCoverFileName('');
       
-      // Force profile object update to prevent fallback usage
-      if (profile) {
-        (profile as any).cover_image_url = null;
-      }
+      // Sync auth/profile-context med nya värden (nollställa preloaded cover/avatar vid behov)
+      await refreshProfile();
       
       // Update original values so they match current state
       setOriginalValues(prev => ({
