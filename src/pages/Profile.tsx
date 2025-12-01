@@ -758,6 +758,7 @@ const Profile = () => {
         .update({
           profile_image_url: null,
           video_url: null,
+          cover_image_url: null,
           is_profile_video: false
         })
         .eq('user_id', user.id);
@@ -767,16 +768,28 @@ const Profile = () => {
       // Clear local state
       setProfileImageUrl('');
       setVideoUrl('');
+      setCoverImageUrl('');
       setIsProfileVideo(false);
       setProfileFileName('');
+      setCoverFileName('');
+      
+      // Force profile object update to prevent fallbacks
+      if (profile) {
+        (profile as any).profile_image_url = null;
+        (profile as any).video_url = null;
+        (profile as any).cover_image_url = null;
+        (profile as any).is_profile_video = false;
+      }
       
       // Update original values so they match current state
       setOriginalValues(prev => ({
         ...prev,
         profileImageUrl: '',
         videoUrl: '',
+        coverImageUrl: '',
         isProfileVideo: false,
-        profileFileName: ''
+        profileFileName: '',
+        coverFileName: ''
       }));
       
       // Reset file input
