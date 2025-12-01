@@ -1302,7 +1302,21 @@ const Profile = () => {
             {(isProfileVideo && !!videoUrl) && (
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
                 <div className="flex flex-col items-center gap-2">
-                  {/* First row: Change cover button and trash */}
+                  {/* First row: Edit existing cover button - same width as second button */}
+                  {coverImageUrl && (
+                    <div className="w-[180px]">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleEditExistingCover}
+                        className="w-full bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
+                      >
+                        Anpassa din bild
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {/* Second row: Change cover button and trash */}
                   <div className="relative flex items-center justify-center w-[180px]">
                     <Button 
                       variant="outline" 
@@ -1333,20 +1347,6 @@ const Profile = () => {
                       </button>
                     )}
                   </div>
-                  
-                  {/* Second row: Edit existing cover button - same width as first button */}
-                  {coverImageUrl && (
-                    <div className="w-[180px]">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={handleEditExistingCover}
-                        className="w-full bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
-                      >
-                        Anpassa din bild
-                      </Button>
-                    </div>
-                  )}
                 </div>
                 <Input 
                   type="file" 
