@@ -1301,7 +1301,7 @@ const Profile = () => {
             {/* Cover image upload - show when video exists OR when cover image exists without video */}
             {(isProfileVideo && !!videoUrl) && (
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2">
                   <Button 
                     variant="outline" 
                     size="sm"
@@ -1312,13 +1312,23 @@ const Profile = () => {
                     {coverImageUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
                   </Button>
                   {coverImageUrl && (
-                    <button
-                      onClick={deleteCoverImage}
-                      disabled={isUploadingCover}
-                      className="bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors disabled:opacity-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <>
+                      <button
+                        onClick={deleteCoverImage}
+                        disabled={isUploadingCover}
+                        className="bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors disabled:opacity-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleEditExistingCover}
+                        className="bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
+                      >
+                        Anpassa din bild
+                      </Button>
+                    </>
                   )}
                   {!coverImageUrl && deletedCoverImage && (
                     <button
@@ -1350,20 +1360,10 @@ const Profile = () => {
                 )}
                 
                 {coverImageUrl && !isUploadingCover && (
-                  <div className="flex flex-col items-center space-y-2 w-full">
-                     <div className="flex items-center justify-center gap-2">
-                       <Badge variant="outline" className="bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-md">
-                          Cover-bild uppladdad!
-                        </Badge>
-                     </div>
-                     <Button 
-                       variant="outline" 
-                       size="sm"
-                       onClick={handleEditExistingCover}
-                       className="bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
-                     >
-                       Anpassa din bild
-                     </Button>
+                  <div className="flex items-center justify-center">
+                    <Badge variant="outline" className="bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-md">
+                      Cover-bild uppladdad!
+                    </Badge>
                   </div>
                 )}
               </div>
