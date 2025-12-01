@@ -91,16 +91,15 @@ const Profile = () => {
   const effectiveProfileImagePath = profileImageUrl || (deletedProfileMedia ? null : (profile as any)?.profile_image_url);
   const fallbackProfileImageUrl = useMediaUrl(effectiveProfileImagePath, 'profile-image');
   const signedVideoUrl = useMediaUrl(videoUrl || (profile as any)?.video_url, 'profile-video');
+  
   // För cover image: använd inte fallback från profile om coverImageUrl explicit är tom (har raderats)
-  const fallbackCoverUrl = useMediaUrl(
-    coverImageUrl ? coverImageUrl : (deletedCoverImage ? null : (profile as any)?.cover_image_url), 
-    'cover-image'
-  );
+  const effectiveCoverImagePath = coverImageUrl || ((deletedCoverImage || deletedProfileMedia) ? null : (profile as any)?.cover_image_url);
+  const fallbackCoverUrl = useMediaUrl(effectiveCoverImagePath, 'cover-image');
   const signedCvUrl = useMediaUrl(cvUrl || (profile as any)?.cv_url, 'cv');
   
-  // Använd förladdade URLs från useAuth om tillgängliga, annars fallback
-  const signedProfileImageUrl = preloadedAvatarUrl || fallbackProfileImageUrl;
-  const signedCoverUrl = preloadedCoverUrl || fallbackCoverUrl;
+  // Använd förladdade URLs från useAuth om tillgängliga, men respektera lokala borttagningar
+  const signedProfileImageUrl = effectiveProfileImagePath ? (preloadedAvatarUrl || fallbackProfileImageUrl) : null;
+  const signedCoverUrl = effectiveCoverImagePath ? (preloadedCoverUrl || fallbackCoverUrl) : null;
   
   // Cache images to prevent blinking during re-renders
   const { cachedUrl: cachedProfileImageUrl } = useCachedImage(signedProfileImageUrl);

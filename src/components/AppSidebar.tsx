@@ -63,15 +63,11 @@ export function AppSidebar() {
   
   // Håll avatar/cover i synk med preloadern även om de uppdateras efter mount
   useEffect(() => {
-    if (preloadedAvatarUrl) {
-      setAvatarUrl(preloadedAvatarUrl);
-    }
+    setAvatarUrl(preloadedAvatarUrl ?? null);
   }, [preloadedAvatarUrl]);
 
   useEffect(() => {
-    if (preloadedCoverUrl) {
-      setCoverUrl(preloadedCoverUrl);
-    }
+    setCoverUrl(preloadedCoverUrl ?? null);
   }, [preloadedCoverUrl]);
   const hasVideo = !!profile?.video_url;
 
