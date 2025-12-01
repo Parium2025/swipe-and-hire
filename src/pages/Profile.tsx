@@ -1303,7 +1303,7 @@ const Profile = () => {
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
                 <div className="flex flex-col items-center gap-2">
                   {/* First row: Change cover button and trash */}
-                  <div className="relative flex items-center justify-center w-[200px]">
+                  <div className="relative flex items-center justify-center w-[180px]">
                     <Button 
                       variant="outline" 
                       size="sm"
@@ -1336,7 +1336,7 @@ const Profile = () => {
                   
                   {/* Second row: Edit existing cover button - same width as first button */}
                   {coverImageUrl && (
-                    <div className="w-[200px]">
+                    <div className="w-[180px]">
                       <Button 
                         variant="outline" 
                         size="sm"
@@ -1368,7 +1368,7 @@ const Profile = () => {
                 
                 {coverImageUrl && !isUploadingCover && (
                   <div className="flex items-center justify-center">
-                    <Badge variant="outline" className="w-[200px] bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-md text-center">
+                    <Badge variant="outline" className="w-[180px] bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-md text-center">
                       Cover-bild uppladdad!
                     </Badge>
                   </div>
