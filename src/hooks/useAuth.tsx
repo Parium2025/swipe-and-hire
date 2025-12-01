@@ -844,11 +844,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Refresh profile
       await fetchUserData(user.id);
       
-      toast({
-        title: "Profil uppdaterad",
-        description: "Dina ändringar har sparats",
-        duration: 2000
-      });
+      // Don't show toast here - let the calling component handle UI feedback
+      // This prevents duplicate notifications
 
       return {};
     } catch (error) {
