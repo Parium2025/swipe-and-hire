@@ -1264,7 +1264,7 @@ const Profile = () => {
                 htmlFor="profile-image" 
                 className="text-white cursor-pointer hover:text-white/90 transition-colors text-center text-sm"
               >
-                Klicka för att välja en bild eller video (max 60 sekunder)
+                Klicka här för att välja en bild eller video (max 60 sekunder)
               </Label>
               
               {isUploadingMedia && (
