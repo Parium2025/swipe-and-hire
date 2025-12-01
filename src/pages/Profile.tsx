@@ -1368,7 +1368,7 @@ const Profile = () => {
                 
                 {coverImageUrl && !isUploadingCover && (
                   <div className="flex items-center justify-center">
-                    <Badge variant="outline" className="w-[180px] bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-md text-center">
+                    <Badge variant="outline" className="w-[180px] bg-white/20 text-white border-white/20 text-sm font-normal whitespace-nowrap px-3 py-1 rounded-md flex items-center justify-center">
                       Cover-bild uppladdad!
                     </Badge>
                   </div>
