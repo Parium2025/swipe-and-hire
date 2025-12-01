@@ -1301,9 +1301,9 @@ const Profile = () => {
             {/* Cover image upload - show when video exists OR when cover image exists without video */}
             {(isProfileVideo && !!videoUrl) && (
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
-                <div className="flex flex-col items-center gap-2">
+                <div className="flex flex-col items-start gap-2 w-full">
                   {/* First row: Change cover button and trash */}
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="flex items-center gap-2 mx-auto">
                     <Button 
                       variant="outline" 
                       size="sm"
@@ -1336,7 +1336,7 @@ const Profile = () => {
                   
                   {/* Second row: Edit existing cover button */}
                   {coverImageUrl && (
-                    <div className="flex items-center justify-center">
+                    <div className="flex items-center mx-auto">
                       <Button 
                         variant="outline" 
                         size="sm"
