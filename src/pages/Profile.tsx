@@ -1785,15 +1785,17 @@ const Profile = () => {
                 </div>
               )}
 
-              <div className="flex justify-center">
-                <Button 
-                  type="submit" 
-                  className="bg-white/5 backdrop-blur-sm border border-white/10 !text-white disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/30 md:hover:shadow-lg md:hover:shadow-white/10 md:hover:scale-[1.02] active:scale-95 active:bg-white/15 [&_svg]:text-white" 
-                  disabled={loading || isUploadingMedia || isUploadingCover}
-                >
-                  {loading ? 'Sparar...' : 'Spara ändringar'}
-                </Button>
-              </div>
+              {hasUnsavedChanges && (
+                <div className="flex justify-center">
+                  <Button 
+                    type="submit" 
+                    className="bg-white/5 backdrop-blur-sm border border-white/10 !text-white disabled:opacity-50 disabled:cursor-not-allowed font-medium h-9 px-6 text-sm transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/30 md:hover:shadow-lg md:hover:shadow-white/10 md:hover:scale-[1.02] active:scale-95 active:bg-white/15 [&_svg]:text-white" 
+                    disabled={loading || isUploadingMedia || isUploadingCover}
+                  >
+                    {loading ? 'Sparar...' : 'Spara ändringar'}
+                  </Button>
+                </div>
+              )}
             </form>
           </div>
         </div>
