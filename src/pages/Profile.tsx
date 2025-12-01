@@ -32,7 +32,7 @@ import { useMediaUrl } from '@/hooks/useMediaUrl';
 import { useCachedImage } from '@/hooks/useCachedImage';
 
 const Profile = () => {
-  const { profile, userRole, updateProfile, refreshProfile, user } = useAuth();
+  const { profile, userRole, updateProfile, refreshProfile, user, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -85,11 +85,14 @@ const Profile = () => {
   const [videoUrl, setVideoUrl] = useState(profile?.video_url || '');
   const [cvUrl, setCvUrl] = useState((profile as any)?.cv_url || '');
   const [cvFileName, setCvFileName] = useState((profile as any)?.cv_filename || '');
-  const signedProfileImageUrl = useMediaUrl(profileImageUrl || (profile as any)?.profile_image_url, 'profile-image');
+  
+  // 🎯 Använd FÖRLADDADE URLs från useAuth (samma som sidebaren) för omedelbar visning
+  // Fallback till useMediaUrl om preloadade inte finns tillgängliga
+  const signedProfileImageUrl = preloadedAvatarUrl || useMediaUrl(profileImageUrl || (profile as any)?.profile_image_url, 'profile-image');
   
   // Signed URLs for displaying private media
   const signedVideoUrl = useMediaUrl(videoUrl || (profile as any)?.video_url, 'profile-video');
-  const signedCoverUrl = useMediaUrl(coverImageUrl || (profile as any)?.cover_image_url, 'cover-image');
+  const signedCoverUrl = preloadedCoverUrl || useMediaUrl(coverImageUrl || (profile as any)?.cover_image_url, 'cover-image');
   const signedCvUrl = useMediaUrl(cvUrl || (profile as any)?.cv_url, 'cv');
   
   // Cache images to prevent blinking during re-renders
@@ -194,6 +197,19 @@ const Profile = () => {
     }
   }, [profile]);
 
+  // 🎯 Synkronisera med förladdade URLs från useAuth (precis som sidebaren)
+  // Detta säkerställer att Profile.tsx alltid visar de redan cachade bilderna
+  useEffect(() => {
+    if (preloadedAvatarUrl && profile?.profile_image_url) {
+      console.log('✅ Using preloaded avatar URL in Profile.tsx');
+    }
+  }, [preloadedAvatarUrl, profile?.profile_image_url]);
+
+  useEffect(() => {
+    if (preloadedCoverUrl && profile?.cover_image_url) {
+      console.log('✅ Using preloaded cover URL in Profile.tsx');
+    }
+  }, [preloadedCoverUrl, profile?.cover_image_url]);
 
   const checkForChanges = useCallback(() => {
     if (!originalValues.firstName) return false; // Not loaded yet
