@@ -1309,7 +1309,7 @@ const Profile = () => {
                       size="sm"
                       onClick={() => document.getElementById('cover-image')?.click()}
                       disabled={isUploadingCover}
-                      className="w-full bg-white/5 backdrop-blur-sm border-white/10 !text-white disabled:opacity-50 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
+                      className="w-full bg-white/20 text-white border-white/20 text-xs font-normal px-3 py-1 rounded-md disabled:opacity-50 hover:bg-white/30 md:hover:bg-white/30"
                     >
                       {coverImageUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
                     </Button>
@@ -1341,7 +1341,7 @@ const Profile = () => {
                         variant="outline" 
                         size="sm"
                         onClick={handleEditExistingCover}
-                        className="w-full bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
+                        className="w-full bg-white/20 text-white border-white/20 text-xs font-normal px-3 py-1 rounded-md hover:bg-white/30 md:hover:bg-white/30"
                       >
                         Anpassa din bild
                       </Button>
