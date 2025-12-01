@@ -1205,7 +1205,19 @@ const Profile = () => {
               )}
 
               {/* Delete/Restore icon for profile media */}
-              {!!(videoUrl || profileImageUrl) && (
+              {/* Om video just raderats (deletedProfileMedia finns), visa restore istället för soptunna */}
+              {deletedProfileMedia && !videoUrl ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    restoreProfileMedia();
+                  }}
+                  className="absolute -top-3 -right-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                  title="Återställ video"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </button>
+              ) : !!(videoUrl || profileImageUrl) ? (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1215,21 +1227,7 @@ const Profile = () => {
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
-              )}
-              
-              {/* Undo button - shown when media was just deleted */}
-              {!(videoUrl || profileImageUrl) && deletedProfileMedia && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    restoreProfileMedia();
-                  }}
-                  className="absolute -top-2 -right-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
-                  title="Ångra borttagning"
-                >
-                  <RotateCcw className="h-4 w-4" />
-                </button>
-              )}
+              ) : null}
 
               <input
                 id="profile-image"
