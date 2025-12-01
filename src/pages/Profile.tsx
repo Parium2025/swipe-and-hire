@@ -731,41 +731,7 @@ const Profile = () => {
         videoUrl: originalValues.videoUrl || videoUrl,
       });
       
-      // Delete from storage if files exist
-      if (profileFileName) {
-        const { error: deleteError } = await supabase.storage
-          .from('job-applications')
-          .remove([profileFileName]);
-          
-        if (deleteError) {
-          console.error('Error deleting profile file:', deleteError);
-        }
-      }
-      
-      if (videoUrl) {
-        const { error: deleteError } = await supabase.storage
-          .from('job-applications')
-          .remove([videoUrl]);
-          
-        if (deleteError) {
-          console.error('Error deleting video:', deleteError);
-        }
-      }
-
-      // Update database IMMEDIATELY (don't wait for save button)
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          profile_image_url: null,
-          video_url: null,
-          cover_image_url: null,
-          is_profile_video: false
-        })
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-      
-      // Clear local state
+      // Clear local state (don't save to DB yet - wait for "Spara ändringar")
       setProfileImageUrl('');
       setVideoUrl('');
       setCoverImageUrl('');
@@ -773,38 +739,24 @@ const Profile = () => {
       setProfileFileName('');
       setCoverFileName('');
       
-      // Sync auth/profile-context (preloaded avatar/cover + sidebar) med nya värden
-      await refreshProfile();
-      
-      // Update original values so they match current state
-      setOriginalValues(prev => ({
-        ...prev,
-        profileImageUrl: '',
-        videoUrl: '',
-        coverImageUrl: '',
-        isProfileVideo: false,
-        profileFileName: '',
-        coverFileName: ''
-      }));
-      
       // Reset file input
       const fileInput = document.getElementById('profile-image') as HTMLInputElement;
       if (fileInput) {
         fileInput.value = '';
       }
       
-      // No unsaved changes since we just saved to DB
-      setHasUnsavedChanges(false);
+      // Mark as unsaved changes - user must click "Spara ändringar"
+      setHasUnsavedChanges(true);
       
       toast({
-        title: "Media borttagen",
-        description: "Din profilvideo har tagits bort"
+        title: "Media markerad för borttagning",
+        description: "Tryck på 'Spara ändringar' för att slutföra"
       });
     } catch (error) {
       console.error('Error in deleteProfileMedia:', error);
       toast({
         title: "Fel",
-        description: "Kunde inte ta bort profilbild/video",
+        description: "Kunde inte förbereda borttagning",
         variant: "destructive"
       });
     }
@@ -841,53 +793,22 @@ const Profile = () => {
         coverFileName
       });
       
-      // Delete the actual file from storage if we have a filename
-      if (coverFileName) {
-        const { error: deleteError } = await supabase.storage
-          .from('job-applications')
-          .remove([coverFileName]);
-          
-        if (deleteError) {
-          console.error('Error deleting cover file:', deleteError);
-        }
-      }
-
-      // Update database IMMEDIATELY (don't wait for save button)
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          cover_image_url: null
-        })
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-      
-      // Clear local state - use empty string to trigger re-render
+      // Clear local state (don't save to DB yet - wait for "Spara ändringar")
       setCoverImageUrl('');
       setCoverFileName('');
       
-      // Sync auth/profile-context med nya värden (nollställa preloaded cover/avatar vid behov)
-      await refreshProfile();
-      
-      // Update original values so they match current state
-      setOriginalValues(prev => ({
-        ...prev,
-        coverImageUrl: '',
-        coverFileName: ''
-      }));
-      
-      // No unsaved changes since we just saved to DB
-      setHasUnsavedChanges(false);
+      // Mark as unsaved changes - user must click "Spara ändringar"
+      setHasUnsavedChanges(true);
       
       toast({
-        title: "Cover-bild borttagen", 
-        description: "Ändringen har sparats"
+        title: "Cover-bild markerad för borttagning",
+        description: "Tryck på 'Spara ändringar' för att slutföra"
       });
     } catch (error) {
       console.error('Error in deleteCoverImage:', error);
       toast({
         title: "Fel",
-        description: "Kunde inte ta bort cover-bilden",
+        description: "Kunde inte förbereda borttagning",
         variant: "destructive"
       });
     }
@@ -1038,6 +959,38 @@ const Profile = () => {
     setLoading(true);
 
     try {
+      // 🔥 Hantera media-borttagning från storage innan vi uppdaterar DB
+      // Om media har raderats (state är tom men originalValues hade värde), radera från storage
+      if (originalValues.profileFileName && !profileImageUrl && !videoUrl) {
+        try {
+          await supabase.storage
+            .from('job-applications')
+            .remove([originalValues.profileFileName]);
+        } catch (error) {
+          console.error('Failed to delete profile file from storage:', error);
+        }
+      }
+      
+      if (originalValues.videoUrl && !videoUrl) {
+        try {
+          await supabase.storage
+            .from('job-applications')
+            .remove([originalValues.videoUrl]);
+        } catch (error) {
+          console.error('Failed to delete video from storage:', error);
+        }
+      }
+      
+      if (originalValues.coverFileName && !coverImageUrl) {
+        try {
+          await supabase.storage
+            .from('job-applications')
+            .remove([originalValues.coverFileName]);
+        } catch (error) {
+          console.error('Failed to delete cover image from storage:', error);
+        }
+      }
+
       const updates: any = {
         first_name: firstName.trim() || null,
         last_name: lastName.trim() || null,
@@ -1071,11 +1024,13 @@ const Profile = () => {
         }
         
         updates.profile_image_url = null; // Clear profile image when using video
+        updates.is_profile_video = true;
       } else if (!profileImageUrl && coverImageUrl) {
         // No video/image but has cover - make cover the profile image (but keep cover as cover)
         updates.profile_image_url = coverImageUrl;
         updates.video_url = null;
         updates.cover_image_url = coverImageUrl; // Preserve cover image so it remains available when adding video again
+        updates.is_profile_video = false;
         
         // Update local state to reflect this change
         setProfileImageUrl(coverImageUrl);
@@ -1089,6 +1044,7 @@ const Profile = () => {
         updates.profile_image_url = profileImageUrl || null;
         updates.video_url = null;
         updates.cover_image_url = coverImageUrl || null;
+        updates.is_profile_video = false;
       }
 
       if (isEmployer) {
