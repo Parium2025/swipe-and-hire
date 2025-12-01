@@ -219,14 +219,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
           }, 50);
           
-          // Timeout efter max ~2 sekunder för initial load (fallback om media är seg)
+          // Timeout efter max 1.1 sekunder för initial load (matchar "Loggar in..." screen)
           setTimeout(() => {
             clearInterval(checkMediaReady);
             if (mounted) {
               setLoading(false);
               setAuthAction(null);
             }
-          }, 2000);
+          }, 1100);
         });
       } else {
         setLoading(false);
@@ -275,82 +275,90 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         // 🔥 KRITISKT: Förladdda kritiska bilder (avatar + cover) INNAN vi släpper loading-state
         // Video är tung – den cachas i bakgrunden men blockerar inte inloggning
-        setTimeout(async () => {
+        (async () => {
           try {
-            setMediaPreloadComplete(false); // Reset state för ny inloggning
+            setMediaPreloadComplete(false);
             mediaPreloadCompleteRef.current = false;
             
             const criticalImages: string[] = [];
             let avatarUrl: string | null = null;
             let coverUrl: string | null = null;
-            let videoUrl: string | null = null;
             
-            // Profilbild
+            // Parallell fetch av avatar + cover med timeout per request
+            const fetchWithTimeout = async (promise: Promise<string | null>, timeoutMs: number): Promise<string | null> => {
+              const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs));
+              return Promise.race([promise, timeoutPromise]);
+            };
+            
+            // Profilbild (max 800ms)
             if (processedProfile.profile_image_url) {
-              avatarUrl = await getMediaUrl(processedProfile.profile_image_url, 'profile-image', 86400);
-              if (avatarUrl) {
-                criticalImages.push(avatarUrl);
+              try {
+                avatarUrl = await fetchWithTimeout(
+                  getMediaUrl(processedProfile.profile_image_url, 'profile-image', 86400),
+                  800
+                );
+                if (avatarUrl) criticalImages.push(avatarUrl);
+              } catch (err) {
+                console.warn('Avatar URL generation failed, continuing:', err);
               }
             }
             
-            // Cover-bild
+            // Cover-bild (max 800ms)
             if (processedProfile.cover_image_url) {
-              coverUrl = await getMediaUrl(processedProfile.cover_image_url, 'cover-image', 86400);
-              if (coverUrl) {
-                criticalImages.push(coverUrl);
+              try {
+                coverUrl = await fetchWithTimeout(
+                  getMediaUrl(processedProfile.cover_image_url, 'cover-image', 86400),
+                  800
+                );
+                if (coverUrl) criticalImages.push(coverUrl);
+              } catch (err) {
+                console.warn('Cover URL generation failed, continuing:', err);
               }
             }
             
-            // Vänta på att avatar/cover faktiskt har laddats ner via DOM-baserad preloader (new Image)
+            // DOM-preload med timeout (max 500ms totalt)
             if (criticalImages.length > 0) {
-              console.log(`🚀 Preloading critical user images via DOM Image preloader (${criticalImages.length} items) BEFORE entering app...`);
               try {
                 const { preloadImages } = await import('@/hooks/useImagePreloader');
-                await preloadImages(criticalImages, 'high');
-                console.log('✅ Critical avatar/cover images fetched via DOM preloader!');
+                await Promise.race([
+                  preloadImages(criticalImages, 'high'),
+                  new Promise((resolve) => setTimeout(resolve, 500))
+                ]);
               } catch (preloadError) {
-                console.warn('Failed to preload images via DOM preloader, continuing anyway:', preloadError);
+                console.warn('DOM preload timeout, continuing:', preloadError);
               }
             }
             
-            // Välj vilken URL sidebaren ska använda
-            const avatarForSidebar = avatarUrl || coverUrl || null;
-            const coverForSidebar = coverUrl || null;
-
-            setPreloadedAvatarUrl(avatarForSidebar);
-            setPreloadedCoverUrl(coverForSidebar);
+            // Sätt URLs för sidebar
+            setPreloadedAvatarUrl(avatarUrl || coverUrl || null);
+            setPreloadedCoverUrl(coverUrl || null);
             
-            // Profilvideo – hämta URL men ladda i bakgrunden (blockerar inte inloggning)
-            if (processedProfile.video_url) {
-              videoUrl = await getMediaUrl(processedProfile.video_url, 'profile-video', 86400);
-            }
-            
-            // Markera att kritiska media är klara – detta släpper inloggningen
+            // Markera som klar (släpp inloggning)
             mediaPreloadCompleteRef.current = true;
             setMediaPreloadComplete(true);
             
-            // Starta videocache i bakgrunden utan att blockera inloggning
-            if (videoUrl) {
+            // Video i bakgrunden (blockerar INTE)
+            if (processedProfile.video_url) {
               (async () => {
                 try {
-                  console.log('🎬 Preloading profile video in background via ImageCache...');
-                  const { imageCache } = await import('@/lib/imageCache');
-                  await imageCache.preloadImages([videoUrl]);
-                  console.log('✅ Profile video cached!');
+                  const videoUrl = await getMediaUrl(processedProfile.video_url, 'profile-video', 86400);
+                  if (videoUrl) {
+                    const { imageCache } = await import('@/lib/imageCache');
+                    await imageCache.preloadImages([videoUrl]);
+                  }
                 } catch (err) {
-                  console.warn('Failed to preload profile video:', err);
+                  console.warn('Background video preload failed:', err);
                 }
               })();
             }
           } catch (error) {
-            console.error('Failed to preload user media:', error);
-            // Släpp ändå användaren in vid fel
+            console.error('Media preload error:', error);
             setPreloadedAvatarUrl(null);
             setPreloadedCoverUrl(null);
             mediaPreloadCompleteRef.current = true;
             setMediaPreloadComplete(true);
           }
-        }, 0);
+        })();
         
         try {
           if (typeof window !== 'undefined') {
