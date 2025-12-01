@@ -89,7 +89,11 @@ const Profile = () => {
   // 🎯 Generera signed URLs (hooks måste alltid anropas, inte villkorligt)
   const fallbackProfileImageUrl = useMediaUrl(profileImageUrl || (profile as any)?.profile_image_url, 'profile-image');
   const signedVideoUrl = useMediaUrl(videoUrl || (profile as any)?.video_url, 'profile-video');
-  const fallbackCoverUrl = useMediaUrl(coverImageUrl || (profile as any)?.cover_image_url, 'cover-image');
+  // För cover image: använd inte fallback från profile om coverImageUrl explicit är tom (har raderats)
+  const fallbackCoverUrl = useMediaUrl(
+    coverImageUrl ? coverImageUrl : (deletedCoverImage ? null : (profile as any)?.cover_image_url), 
+    'cover-image'
+  );
   const signedCvUrl = useMediaUrl(cvUrl || (profile as any)?.cv_url, 'cv');
   
   // Använd förladdade URLs från useAuth om tillgängliga, annars fallback
@@ -850,9 +854,14 @@ const Profile = () => {
 
       if (error) throw error;
       
-      // Clear local state
+      // Clear local state - use empty string to trigger re-render
       setCoverImageUrl('');
       setCoverFileName('');
+      
+      // Force profile object update to prevent fallback usage
+      if (profile) {
+        (profile as any).cover_image_url = null;
+      }
       
       // Update original values so they match current state
       setOriginalValues(prev => ({
