@@ -41,7 +41,7 @@ interface ProfileViewData {
 }
 
 export default function ProfilePreview() {
-  const { profile, user } = useAuth();
+  const { profile, user, preloadedAvatarUrl, preloadedCoverUrl } = useAuth();
   const [consentedData, setConsentedData] = useState<ProfileViewData | null>(null);
   const [maskedData, setMaskedData] = useState<ProfileViewData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -49,10 +49,11 @@ export default function ProfilePreview() {
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
   const [cvOpen, setCvOpen] = useState(false);
   
-  // Use hooks to generate signed URLs automatically
-  const profileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image');
+  // 🎯 Använd FÖRLADDADE URLs från useAuth (samma som sidebaren) för omedelbar visning
+  // Fallback till useMediaUrl om preloadade inte finns tillgängliga
+  const profileImageUrl = preloadedAvatarUrl || useMediaUrl(profile?.profile_image_url, 'profile-image');
   const signedVideoUrl = useMediaUrl(profile?.video_url, 'profile-video');
-  const signedCoverUrl = useMediaUrl(profile?.cover_image_url, 'cover-image');
+  const signedCoverUrl = preloadedCoverUrl || useMediaUrl(profile?.cover_image_url, 'cover-image');
   const signedCvUrl = useMediaUrl(profile?.cv_url, 'cv');
 
   useEffect(() => {
@@ -115,6 +116,18 @@ export default function ProfilePreview() {
     loadPreviewData();
   }, [user?.id, profile]);
 
+  // 🎯 Synkronisera med förladdade URLs från useAuth (precis som sidebaren)
+  useEffect(() => {
+    if (preloadedAvatarUrl && profile?.profile_image_url) {
+      console.log('✅ Using preloaded avatar URL in ProfilePreview');
+    }
+  }, [preloadedAvatarUrl, profile?.profile_image_url]);
+
+  useEffect(() => {
+    if (preloadedCoverUrl && profile?.cover_image_url) {
+      console.log('✅ Using preloaded cover URL in ProfilePreview');
+    }
+  }, [preloadedCoverUrl, profile?.cover_image_url]);
 
   const ProfileView = ({ data, isConsented }: { data: ProfileViewData | null; isConsented: boolean }) => {
     if (!data) return <div className="text-white">Ingen data tillgänglig</div>;
