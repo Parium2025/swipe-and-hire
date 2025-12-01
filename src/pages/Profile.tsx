@@ -1303,13 +1303,13 @@ const Profile = () => {
               <div className="flex flex-col items-center space-y-3 mt-4 p-4 rounded-lg bg-white/5 w-full">
                 <div className="flex flex-col items-center gap-2">
                   {/* First row: Change cover button and trash */}
-                  <div className="flex items-center gap-2">
+                  <div className="relative flex items-center justify-center w-[200px]">
                     <Button 
                       variant="outline" 
                       size="sm"
                       onClick={() => document.getElementById('cover-image')?.click()}
                       disabled={isUploadingCover}
-                      className="w-[200px] bg-white/5 backdrop-blur-sm border-white/10 !text-white disabled:opacity-50 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
+                      className="w-full bg-white/5 backdrop-blur-sm border-white/10 !text-white disabled:opacity-50 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
                     >
                       {coverImageUrl ? 'Ändra cover-bild' : 'Lägg till cover-bild'}
                     </Button>
@@ -1317,7 +1317,7 @@ const Profile = () => {
                       <button
                         onClick={deleteCoverImage}
                         disabled={isUploadingCover}
-                        className="bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors disabled:opacity-50"
+                        className="absolute -right-10 bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors disabled:opacity-50"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -1326,7 +1326,7 @@ const Profile = () => {
                       <button
                         onClick={restoreCoverImage}
                         disabled={isUploadingCover}
-                        className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors disabled:opacity-50"
+                        className="absolute -right-10 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors disabled:opacity-50"
                         title="Ångra borttagning"
                       >
                         <RotateCcw className="h-4 w-4" />
@@ -1334,14 +1334,14 @@ const Profile = () => {
                     )}
                   </div>
                   
-                  {/* Second row: Edit existing cover button - aligned with first button */}
+                  {/* Second row: Edit existing cover button - same width as first button */}
                   {coverImageUrl && (
-                    <div className="flex items-center self-start" style={{ marginLeft: 'calc(50% - 85px)' }}>
+                    <div className="w-[200px]">
                       <Button 
                         variant="outline" 
                         size="sm"
                         onClick={handleEditExistingCover}
-                        className="w-[200px] bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
+                        className="w-full bg-white/5 backdrop-blur-sm border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
                       >
                         Anpassa din bild
                       </Button>
