@@ -732,13 +732,22 @@ const Profile = () => {
         videoUrl: originalValues.videoUrl || videoUrl,
       });
       
-      // Clear local state (don't save to DB yet - wait for "Spara ändringar")
-      setProfileImageUrl('');
-      setVideoUrl('');
-      setCoverImageUrl('');
-      setIsProfileVideo(false);
-      setProfileFileName('');
-      setCoverFileName('');
+      // När vi raderar video med en cover-bild, gör cover-bilden till profilbilden
+      if (isProfileVideo && coverImageUrl) {
+        setProfileImageUrl(coverImageUrl);
+        setProfileFileName(coverFileName);
+        setVideoUrl('');
+        setIsProfileVideo(false);
+        // Behåll cover-bilden intakt
+      } else {
+        // Ingen cover-bild - rensa allt
+        setProfileImageUrl('');
+        setVideoUrl('');
+        setCoverImageUrl('');
+        setIsProfileVideo(false);
+        setProfileFileName('');
+        setCoverFileName('');
+      }
       
       // Reset file input
       const fileInput = document.getElementById('profile-image') as HTMLInputElement;
