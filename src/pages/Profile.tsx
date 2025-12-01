@@ -86,14 +86,15 @@ const Profile = () => {
   const [cvUrl, setCvUrl] = useState((profile as any)?.cv_url || '');
   const [cvFileName, setCvFileName] = useState((profile as any)?.cv_filename || '');
   
-  // 🎯 Använd FÖRLADDADE URLs från useAuth (samma som sidebaren) för omedelbar visning
-  // Fallback till useMediaUrl om preloadade inte finns tillgängliga
-  const signedProfileImageUrl = preloadedAvatarUrl || useMediaUrl(profileImageUrl || (profile as any)?.profile_image_url, 'profile-image');
-  
-  // Signed URLs for displaying private media
+  // 🎯 Generera signed URLs (hooks måste alltid anropas, inte villkorligt)
+  const fallbackProfileImageUrl = useMediaUrl(profileImageUrl || (profile as any)?.profile_image_url, 'profile-image');
   const signedVideoUrl = useMediaUrl(videoUrl || (profile as any)?.video_url, 'profile-video');
-  const signedCoverUrl = preloadedCoverUrl || useMediaUrl(coverImageUrl || (profile as any)?.cover_image_url, 'cover-image');
+  const fallbackCoverUrl = useMediaUrl(coverImageUrl || (profile as any)?.cover_image_url, 'cover-image');
   const signedCvUrl = useMediaUrl(cvUrl || (profile as any)?.cv_url, 'cv');
+  
+  // Använd förladdade URLs från useAuth om tillgängliga, annars fallback
+  const signedProfileImageUrl = preloadedAvatarUrl || fallbackProfileImageUrl;
+  const signedCoverUrl = preloadedCoverUrl || fallbackCoverUrl;
   
   // Cache images to prevent blinking during re-renders
   const { cachedUrl: cachedProfileImageUrl } = useCachedImage(signedProfileImageUrl);

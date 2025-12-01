@@ -49,12 +49,15 @@ export default function ProfilePreview() {
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
   const [cvOpen, setCvOpen] = useState(false);
   
-  // 🎯 Använd FÖRLADDADE URLs från useAuth (samma som sidebaren) för omedelbar visning
-  // Fallback till useMediaUrl om preloadade inte finns tillgängliga
-  const profileImageUrl = preloadedAvatarUrl || useMediaUrl(profile?.profile_image_url, 'profile-image');
+  // 🎯 Generera signed URLs (hooks måste alltid anropas, inte villkorligt)
+  const fallbackProfileImageUrl = useMediaUrl(profile?.profile_image_url, 'profile-image');
   const signedVideoUrl = useMediaUrl(profile?.video_url, 'profile-video');
-  const signedCoverUrl = preloadedCoverUrl || useMediaUrl(profile?.cover_image_url, 'cover-image');
+  const fallbackCoverUrl = useMediaUrl(profile?.cover_image_url, 'cover-image');
   const signedCvUrl = useMediaUrl(profile?.cv_url, 'cv');
+  
+  // Använd förladdade URLs från useAuth om tillgängliga, annars fallback
+  const profileImageUrl = preloadedAvatarUrl || fallbackProfileImageUrl;
+  const signedCoverUrl = preloadedCoverUrl || fallbackCoverUrl;
 
   useEffect(() => {
     const loadPreviewData = async () => {
