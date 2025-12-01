@@ -87,7 +87,9 @@ const Profile = () => {
   const [cvFileName, setCvFileName] = useState((profile as any)?.cv_filename || '');
   
   // 🎯 Generera signed URLs (hooks måste alltid anropas, inte villkorligt)
-  const fallbackProfileImageUrl = useMediaUrl(profileImageUrl || (profile as any)?.profile_image_url, 'profile-image');
+  // Om profilbilden har markerats för borttagning ska vi INTE falla tillbaka till värdet från databasen
+  const effectiveProfileImagePath = profileImageUrl || (!deletedProfileMedia ? (profile as any)?.profile_image_url : null);
+  const fallbackProfileImageUrl = useMediaUrl(effectiveProfileImagePath, 'profile-image');
   const signedVideoUrl = useMediaUrl(videoUrl || (profile as any)?.video_url, 'profile-video');
   // För cover image: använd inte fallback från profile om coverImageUrl explicit är tom (har raderats)
   const fallbackCoverUrl = useMediaUrl(
@@ -97,7 +99,12 @@ const Profile = () => {
   const signedCvUrl = useMediaUrl(cvUrl || (profile as any)?.cv_url, 'cv');
   
   // Använd förladdade URLs från useAuth om tillgängliga, annars fallback
-  const signedProfileImageUrl = preloadedAvatarUrl || fallbackProfileImageUrl;
+  // När vi har en lokalt ändrad profilbild (uppladdad eller raderad) ska den alltid vinna över förladdad avatar
+  const signedProfileImageUrl = profileImageUrl
+    ? fallbackProfileImageUrl
+    : deletedProfileMedia
+      ? ''
+      : (preloadedAvatarUrl || fallbackProfileImageUrl);
   const signedCoverUrl = preloadedCoverUrl || fallbackCoverUrl;
   
   // Cache images to prevent blinking during re-renders
@@ -1174,7 +1181,7 @@ const Profile = () => {
                   onClick={() => document.getElementById('profile-image')?.click()}
                 >
                   <Avatar className="h-32 w-32 border-4 border-white/10">
-                    {(cachedProfileImageUrl || cachedCoverUrl || signedProfileImageUrl || signedCoverUrl) ? (
+                    {(cachedProfileImageUrl || cachedCoverUrl || signedProfileImageUrl || signedCoverUrl) && !deletedProfileMedia ? (
                       <AvatarImage 
                         src={cachedProfileImageUrl || cachedCoverUrl || signedProfileImageUrl || signedCoverUrl || undefined} 
                         alt="Profilbild"
@@ -1185,7 +1192,7 @@ const Profile = () => {
                         draggable={false}
                       />
                     ) : null}
-                    {!(cachedProfileImageUrl || cachedCoverUrl || signedProfileImageUrl || signedCoverUrl) && (
+                    {((!(cachedProfileImageUrl || cachedCoverUrl || signedProfileImageUrl || signedCoverUrl)) || !!deletedProfileMedia) && (
                       <AvatarFallback delayMs={300} className="text-4xl font-semibold bg-white/20 text-white">
                         {((firstName?.trim()?.[0]?.toUpperCase() || '') + (lastName?.trim()?.[0]?.toUpperCase() || '')) || '?'}
                       </AvatarFallback>
