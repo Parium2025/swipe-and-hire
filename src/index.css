@@ -110,6 +110,13 @@ All colors MUST be HSL.
       hsl(var(--primary-glow) / 0.15) 50%,
       hsl(var(--primary-glow) / 0) 80%
     ), linear-gradient(180deg, hsl(215 100% 12%), hsl(215 100% 12%));
+    /* Desktop: ljusare variant med mer glow för bättre andrum på stora skärmar */
+    --gradient-parium-desktop: radial-gradient(
+      circle at 50% 40%,
+      hsl(var(--primary-glow) / 0.55) 0%,
+      hsl(var(--primary-glow) / 0.25) 50%,
+      hsl(var(--primary-glow) / 0.05) 80%
+    ), linear-gradient(180deg, hsl(215 100% 15%), hsl(215 100% 14%));
     --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(200 100% 98%));
     --gradient-glass: linear-gradient(135deg, hsla(0 0% 100% / 0.1), hsla(0 0% 100% / 0.05));
     --gradient-glass-strong: linear-gradient(135deg, hsla(0 0% 100% / 0.22), hsla(0 0% 100% / 0.14));
@@ -324,7 +331,7 @@ All colors MUST be HSL.
       left: -20px;
       right: -20px;
       bottom: -20px;
-      background: var(--gradient-parium);
+      background: var(--gradient-parium-desktop);
       background-size: cover;
       background-repeat: no-repeat;
       pointer-events: none;
@@ -334,6 +341,11 @@ All colors MUST be HSL.
     /* Ensure page containers don't repaint another gradient on top on desktop */
     .bg-gradient-parium { background: transparent !important; }
     #root { position: relative; z-index: 1; }
+    
+    /* Apply desktop gradient to html/body as well */
+    html, body {
+      background: var(--gradient-parium-desktop);
+    }
   }
 
   /* iOS Safari: force full-bleed gradient on html/body so status area isn't white */
