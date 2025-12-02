@@ -61,6 +61,7 @@ const SearchJobs = () => {
   const [selectedCategory, setSelectedCategory] = useState('all-categories');
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
   const [selectedEmploymentTypes, setSelectedEmploymentTypes] = useState<string[]>([]);
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
   
   // Lazy loading state
   const [displayCount, setDisplayCount] = useState(10);
@@ -273,344 +274,357 @@ const SearchJobs = () => {
       {/* Filters Card */}
       <Card className="bg-white/5 backdrop-blur-sm border-white/20">
         <CardContent className="p-4 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Search Field */}
-            <div className="space-y-2 md:col-span-2">
-              <Label className="text-sm font-medium text-white flex items-center gap-2">
-                <Search className="h-3 w-3" />
-                Sök jobb
-              </Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
-                <Input
-                  placeholder="Sök efter jobbtitel, företag, plats..."
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  className="pl-10 pr-10 bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40"
+          {/* Search Field - Always visible */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium text-white flex items-center gap-2">
+              <Search className="h-3 w-3" />
+              Sök jobb
+            </Label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+              <Input
+                placeholder="Sök efter jobbtitel, företag, plats..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="pl-10 pr-10 bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40"
+              />
+              {searchInput && (
+                <button
+                  onClick={() => setSearchInput('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/10 rounded p-1 transition-colors"
+                  aria-label="Rensa sökning"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Expand/Collapse Filters Button */}
+          <button
+            onClick={() => setFiltersExpanded(!filtersExpanded)}
+            className="w-full flex items-center justify-center gap-2 py-2 text-sm text-white/80 hover:text-white transition-colors"
+          >
+            <span>{filtersExpanded ? 'Dölj filter' : 'Visa filter'}</span>
+            <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${filtersExpanded ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Collapsible Filter Section */}
+          <div className={`space-y-4 overflow-hidden transition-all duration-300 ${filtersExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Location Filter - Postal Code OR City */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-white flex items-center gap-2">
+                  <MapPin className="h-3 w-3" />
+                  Plats
+                </Label>
+                <LocationSearchInput
+                  value={selectedPostalCode || selectedCity}
+                  onLocationChange={handleLocationChange}
+                  onPostalCodeChange={setSelectedPostalCode}
                 />
-                {searchInput && (
-                  <button
-                    onClick={() => setSearchInput('')}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/10 rounded p-1 transition-colors"
-                    aria-label="Rensa sökning"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
+              </div>
+
+              {/* Yrkesområde Filter */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-white flex items-center gap-2">
+                  <Briefcase className="h-3 w-3" />
+                  Yrkesområde
+                </Label>
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
+                    >
+                      <span className="truncate">
+                        {selectedCategory === 'all-categories'
+                          ? 'Alla yrkesområden'
+                          : OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.label || 'Välj område'
+                        }
+                      </span>
+                      {selectedCategory !== 'all-categories' ? (
+                        <span
+                          role="button"
+                          aria-label="Rensa yrkesområde"
+                          tabIndex={0}
+                          onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedCategory('all-categories');
+                            setSelectedSubcategories([]);
+                          }}
+                          className="ml-2 inline-flex items-center justify-center rounded p-1 md:hover:bg-white/10"
+                        >
+                          <X className="h-4 w-4 text-white" />
+                        </span>
+                      ) : (
+                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-80 bg-white/5 backdrop-blur-md border-white/20 text-white max-h-80 overflow-y-auto">
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSelectedCategory('all-categories');
+                        setSelectedSubcategories([]);
+                      }}
+                      className="cursor-pointer hover:bg-white/10 text-white font-medium"
+                    >
+                      Alla yrkesområden
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-white/20" />
+                    {OCCUPATION_CATEGORIES.map((category, index) => (
+                      <React.Fragment key={category.value}>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedCategory(category.value);
+                            setSelectedSubcategories([]);
+                          }}
+                          className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
+                        >
+                          <span>{category.label}</span>
+                          {selectedCategory === category.value && (
+                            <Check className="h-4 w-4 text-white" />
+                          )}
+                        </DropdownMenuItem>
+                        {index < OCCUPATION_CATEGORIES.length - 1 && (
+                          <DropdownMenuSeparator className="bg-white/20" />
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            {/* Subcategories Dropdown - shown only when category is selected */}
+            {selectedCategory && selectedCategory !== 'all-categories' && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-white flex items-center gap-2">
+                  <Users className="h-3 w-3" />
+                  Specifik roll inom {OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.label}
+                </Label>
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
+                    >
+                      <span className="truncate">
+                        {selectedSubcategories.length === 0
+                          ? 'Alla roller'
+                          : selectedSubcategories.length === 1
+                          ? selectedSubcategories[0]
+                          : `${selectedSubcategories.length} roller valda`
+                        }
+                      </span>
+                      <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-80 bg-white/5 backdrop-blur-md border-white/20 text-white max-h-80 overflow-y-auto">
+                    <DropdownMenuItem
+                      onClick={() => setSelectedSubcategories([])}
+                      className="cursor-pointer hover:bg-white/10 text-white font-medium"
+                    >
+                      Alla roller
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-white/20" />
+                    {OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.subcategories.map((subcat, index, array) => (
+                      <React.Fragment key={subcat}>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedSubcategories(prev => 
+                              prev.includes(subcat) 
+                                ? prev.filter(s => s !== subcat)
+                                : [...prev, subcat]
+                            );
+                          }}
+                          className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
+                        >
+                          <span>{subcat}</span>
+                          {selectedSubcategories.includes(subcat) && (
+                            <Check className="h-4 w-4 text-white" />
+                          )}
+                        </DropdownMenuItem>
+                        {index < array.length - 1 && (
+                          <DropdownMenuSeparator className="bg-white/20" />
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* Show selected roles as badges */}
+                {selectedSubcategories.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {selectedSubcategories.map((subcat) => (
+                      <Badge 
+                        key={subcat}
+                        variant="secondary"
+                        className="bg-white/10 text-white flex items-center gap-1 cursor-pointer transition-all duration-300 md:hover:bg-white/20 md:hover:text-white"
+                      >
+                        {subcat}
+                        <X 
+                          className="h-3 w-3" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedSubcategories(prev => prev.filter(s => s !== subcat));
+                          }}
+                        />
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Employment Type Filter and Sort */}
+              <div className="space-y-2 md:col-span-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Employment Type */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-white flex items-center gap-2">
+                      <Clock className="h-3 w-3" />
+                      Anställning
+                    </Label>
+                    <DropdownMenu modal={false}>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
+                        >
+                          <span className="truncate">
+                            {selectedEmploymentTypes.length === 0 
+                              ? 'Alla typer' 
+                              : `${selectedEmploymentTypes.length} valda`
+                            }
+                          </span>
+                          <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-72 bg-white/5 backdrop-blur-md border-white/20 text-white max-h-80 overflow-y-auto">
+                        <DropdownMenuItem
+                          onClick={() => setSelectedEmploymentTypes([])}
+                          className="cursor-pointer hover:bg-white/10 text-white font-medium"
+                        >
+                          Alla typer
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="bg-white/20" />
+                        {employmentTypes.map((type, index) => (
+                          <React.Fragment key={type.value}>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                const isSelected = selectedEmploymentTypes.includes(type.value);
+                                if (isSelected) {
+                                  setSelectedEmploymentTypes(prev => prev.filter(t => t !== type.value));
+                                } else {
+                                  setSelectedEmploymentTypes(prev => [...prev, type.value]);
+                                }
+                              }}
+                              className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
+                            >
+                              <span>{type.label}</span>
+                              {selectedEmploymentTypes.includes(type.value) && (
+                                <Check className="h-4 w-4 text-white" />
+                              )}
+                            </DropdownMenuItem>
+                            {index < employmentTypes.length - 1 && (
+                              <DropdownMenuSeparator className="bg-white/20" />
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  {/* Sort Dropdown */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-white flex items-center gap-2">
+                      <ArrowUpDown className="h-3 w-3" />
+                      Sortering
+                    </Label>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
+                        >
+                          <span className="truncate">{sortLabels[sortBy]}</span>
+                          <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" side="bottom" avoidCollisions={false} className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20 text-white">
+                        <DropdownMenuItem 
+                          onClick={() => setSortBy('newest')}
+                          className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
+                        >
+                          <span>{sortLabels.newest}</span>
+                          {sortBy === 'newest' && <Check className="h-4 w-4 text-white" />}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="bg-white/20" />
+                        <DropdownMenuItem 
+                          onClick={() => setSortBy('oldest')}
+                          className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
+                        >
+                          <span>{sortLabels.oldest}</span>
+                          {sortBy === 'oldest' && <Check className="h-4 w-4 text-white" />}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="bg-white/20" />
+                        <DropdownMenuItem 
+                          onClick={() => setSortBy('most-views')}
+                          className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
+                        >
+                          <span>{sortLabels['most-views']}</span>
+                          {sortBy === 'most-views' && <Check className="h-4 w-4 text-white" />}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+
+                {/* Show selected employment types as badges */}
+                {selectedEmploymentTypes.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {selectedEmploymentTypes.map((type) => (
+                      <Badge 
+                        key={type}
+                        variant="secondary"
+                        className="bg-white/10 text-white flex items-center gap-1 cursor-pointer transition-all duration-300 md:hover:bg-white/20 md:hover:text-white"
+                      >
+                        {employmentTypes.find(t => t.value === type)?.label}
+                        <X 
+                          className="h-3 w-3" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedEmploymentTypes(prev => prev.filter(t => t !== type));
+                          }}
+                        />
+                      </Badge>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
-            {/* Location Filter - Postal Code OR City */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-white flex items-center gap-2">
-                <MapPin className="h-3 w-3" />
-                Plats
-              </Label>
-              <LocationSearchInput
-                value={selectedPostalCode || selectedCity}
-                onLocationChange={handleLocationChange}
-                onPostalCodeChange={setSelectedPostalCode}
-              />
+
+            {/* Clear all filters button */}
+            <div className="pt-2">
+              <Button 
+                variant="outline" 
+                className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white"
+                onClick={() => {
+                  setSelectedPostalCode('');
+                  setSelectedCity('');
+                  setSelectedEmploymentTypes([]);
+                  setSelectedCategory('all-categories');
+                  setSelectedSubcategories([]);
+                  setSearchInput('');
+                }}
+              >
+                Rensa alla filter
+              </Button>
             </div>
-
-            {/* Yrkesområde Filter */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-white flex items-center gap-2">
-                <Briefcase className="h-3 w-3" />
-                Yrkesområde
-              </Label>
-              <DropdownMenu modal={false}>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
-                  >
-                    <span className="truncate">
-                      {selectedCategory === 'all-categories'
-                        ? 'Alla yrkesområden'
-                        : OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.label || 'Välj område'
-                      }
-                    </span>
-                    {selectedCategory !== 'all-categories' ? (
-                      <span
-                        role="button"
-                        aria-label="Rensa yrkesområde"
-                        tabIndex={0}
-                        onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedCategory('all-categories');
-                          setSelectedSubcategories([]);
-                        }}
-                        className="ml-2 inline-flex items-center justify-center rounded p-1 md:hover:bg-white/10"
-                      >
-                        <X className="h-4 w-4 text-white" />
-                      </span>
-                    ) : (
-                      <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-80 bg-white/5 backdrop-blur-md border-white/20 text-white max-h-80 overflow-y-auto">
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setSelectedCategory('all-categories');
-                      setSelectedSubcategories([]);
-                    }}
-                    className="cursor-pointer hover:bg-white/10 text-white font-medium"
-                  >
-                    Alla yrkesområden
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-white/20" />
-                  {OCCUPATION_CATEGORIES.map((category, index) => (
-                    <React.Fragment key={category.value}>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setSelectedCategory(category.value);
-                          setSelectedSubcategories([]);
-                        }}
-                        className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
-                      >
-                        <span>{category.label}</span>
-                        {selectedCategory === category.value && (
-                          <Check className="h-4 w-4 text-white" />
-                        )}
-                      </DropdownMenuItem>
-                      {index < OCCUPATION_CATEGORIES.length - 1 && (
-                        <DropdownMenuSeparator className="bg-white/20" />
-                      )}
-                    </React.Fragment>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-
-          {/* Subcategories Dropdown - shown only when category is selected */}
-          {selectedCategory && selectedCategory !== 'all-categories' && (
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-white flex items-center gap-2">
-                <Users className="h-3 w-3" />
-                Specifik roll inom {OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.label}
-              </Label>
-              <DropdownMenu modal={false}>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
-                  >
-                    <span className="truncate">
-                      {selectedSubcategories.length === 0
-                        ? 'Alla roller'
-                        : selectedSubcategories.length === 1
-                        ? selectedSubcategories[0]
-                        : `${selectedSubcategories.length} roller valda`
-                      }
-                    </span>
-                    <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-80 bg-white/5 backdrop-blur-md border-white/20 text-white max-h-80 overflow-y-auto">
-                  <DropdownMenuItem
-                    onClick={() => setSelectedSubcategories([])}
-                    className="cursor-pointer hover:bg-white/10 text-white font-medium"
-                  >
-                    Alla roller
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-white/20" />
-                  {OCCUPATION_CATEGORIES.find(c => c.value === selectedCategory)?.subcategories.map((subcat, index, array) => (
-                    <React.Fragment key={subcat}>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setSelectedSubcategories(prev => 
-                            prev.includes(subcat) 
-                              ? prev.filter(s => s !== subcat)
-                              : [...prev, subcat]
-                          );
-                        }}
-                        className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
-                      >
-                        <span>{subcat}</span>
-                        {selectedSubcategories.includes(subcat) && (
-                          <Check className="h-4 w-4 text-white" />
-                        )}
-                      </DropdownMenuItem>
-                      {index < array.length - 1 && (
-                        <DropdownMenuSeparator className="bg-white/20" />
-                      )}
-                    </React.Fragment>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {/* Show selected roles as badges */}
-              {selectedSubcategories.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {selectedSubcategories.map((subcat) => (
-                    <Badge 
-                      key={subcat}
-                      variant="secondary"
-                      className="bg-white/10 text-white flex items-center gap-1 cursor-pointer transition-all duration-300 md:hover:bg-white/20 md:hover:text-white"
-                    >
-                      {subcat}
-                      <X 
-                        className="h-3 w-3" 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedSubcategories(prev => prev.filter(s => s !== subcat));
-                        }}
-                      />
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Employment Type Filter and Sort */}
-            <div className="space-y-2 md:col-span-2">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Employment Type */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-white flex items-center gap-2">
-                    <Clock className="h-3 w-3" />
-                    Anställning
-                  </Label>
-                  <DropdownMenu modal={false}>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
-                      >
-                        <span className="truncate">
-                          {selectedEmploymentTypes.length === 0 
-                            ? 'Alla typer' 
-                            : `${selectedEmploymentTypes.length} valda`
-                          }
-                        </span>
-                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent side="bottom" avoidCollisions={false} className="w-72 bg-white/5 backdrop-blur-md border-white/20 text-white max-h-80 overflow-y-auto">
-                      <DropdownMenuItem
-                        onClick={() => setSelectedEmploymentTypes([])}
-                        className="cursor-pointer hover:bg-white/10 text-white font-medium"
-                      >
-                        Alla typer
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator className="bg-white/20" />
-                      {employmentTypes.map((type, index) => (
-                        <React.Fragment key={type.value}>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              const isSelected = selectedEmploymentTypes.includes(type.value);
-                              if (isSelected) {
-                                setSelectedEmploymentTypes(prev => prev.filter(t => t !== type.value));
-                              } else {
-                                setSelectedEmploymentTypes(prev => [...prev, type.value]);
-                              }
-                            }}
-                            className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
-                          >
-                            <span>{type.label}</span>
-                            {selectedEmploymentTypes.includes(type.value) && (
-                              <Check className="h-4 w-4 text-white" />
-                            )}
-                          </DropdownMenuItem>
-                          {index < employmentTypes.length - 1 && (
-                            <DropdownMenuSeparator className="bg-white/20" />
-                          )}
-                        </React.Fragment>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-
-                {/* Sort Dropdown */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-white flex items-center gap-2">
-                    <ArrowUpDown className="h-3 w-3" />
-                    Sortering
-                  </Label>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white justify-between text-sm"
-                      >
-                        <span className="truncate">{sortLabels[sortBy]}</span>
-                        <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" side="bottom" avoidCollisions={false} className="w-[200px] z-[10000] bg-white/5 backdrop-blur-md border-white/20 text-white">
-                      <DropdownMenuItem 
-                        onClick={() => setSortBy('newest')}
-                        className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
-                      >
-                        <span>{sortLabels.newest}</span>
-                        {sortBy === 'newest' && <Check className="h-4 w-4 text-white" />}
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator className="bg-white/20" />
-                      <DropdownMenuItem 
-                        onClick={() => setSortBy('oldest')}
-                        className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
-                      >
-                        <span>{sortLabels.oldest}</span>
-                        {sortBy === 'oldest' && <Check className="h-4 w-4 text-white" />}
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator className="bg-white/20" />
-                      <DropdownMenuItem 
-                        onClick={() => setSortBy('most-views')}
-                        className="cursor-pointer hover:bg-white/10 text-white flex items-center justify-between"
-                      >
-                        <span>{sortLabels['most-views']}</span>
-                        {sortBy === 'most-views' && <Check className="h-4 w-4 text-white" />}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-
-              {/* Show selected employment types as badges */}
-              {selectedEmploymentTypes.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {selectedEmploymentTypes.map((type) => (
-                    <Badge 
-                      key={type}
-                      variant="secondary"
-                      className="bg-white/10 text-white flex items-center gap-1 cursor-pointer transition-all duration-300 md:hover:bg-white/20 md:hover:text-white"
-                    >
-                      {employmentTypes.find(t => t.value === type)?.label}
-                      <X 
-                        className="h-3 w-3" 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedEmploymentTypes(prev => prev.filter(t => t !== type));
-                        }}
-                      />
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Clear all filters button */}
-          <div className="pt-2">
-            <Button 
-              variant="outline" 
-              className="w-full bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50 [&_svg]:text-white md:hover:[&_svg]:text-white"
-              onClick={() => {
-                setSelectedPostalCode('');
-                setSelectedCity('');
-                setSelectedEmploymentTypes([]);
-                setSelectedCategory('all-categories');
-                setSelectedSubcategories([]);
-                setSearchInput('');
-              }}
-            >
-              Rensa alla filter
-            </Button>
           </div>
         </CardContent>
       </Card>
