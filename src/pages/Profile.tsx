@@ -1692,7 +1692,7 @@ const Profile = () => {
                     </div>
                     
                     {cvUrl ? (
-                      <div className="bg-white/5 p-3 rounded-lg border border-white/10 flex items-center gap-2">
+                      <div className="w-full h-9 bg-white/5 backdrop-blur-sm border border-white/10 rounded-md flex items-center px-3 gap-2">
                         <button
                           type="button"
                           onClick={() => setCvOpen(true)}
@@ -1700,19 +1700,23 @@ const Profile = () => {
                         >
                           <FileText className="h-4 w-4 text-white flex-shrink-0" />
                           <span className="text-sm">Visa CV</span>
-                          <span className="bg-white/20 backdrop-blur-sm rounded-full p-2 shadow-lg ml-auto">
-                            <ExternalLink className="h-4 w-4 text-white flex-shrink-0" />
-                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCvOpen(true)}
+                          className="text-white hover:text-white/80 transition-colors"
+                          title="Öppna CV"
+                        >
+                          <ExternalLink className="h-4 w-4" />
                         </button>
                         <button
                           type="button"
                           onClick={handleDeleteCv}
-                          className="bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
+                          className="text-white hover:text-destructive transition-colors"
                           title="Ta bort CV"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
-                        
                       </div>
                     ) : (
                       <div className="p-0">
