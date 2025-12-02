@@ -303,7 +303,7 @@ const SearchJobs = () => {
           {/* Expand/Collapse Filters Button */}
           <button
             onClick={() => setFiltersExpanded(!filtersExpanded)}
-            className="w-full flex items-center justify-center gap-2 py-2 text-sm text-white hover:text-white/80 transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-2 text-sm text-white"
           >
             <span>{filtersExpanded ? 'Dölj filter' : 'Visa filter'}</span>
             <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${filtersExpanded ? 'rotate-180' : ''}`} />
