@@ -646,7 +646,7 @@ const SearchJobs = () => {
             </div>
           ) : filteredAndSortedJobs.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-white/70">Inga jobb hittades</p>
+              <p className="text-white">Inga jobb hittades</p>
             </div>
           ) : (
             <>
