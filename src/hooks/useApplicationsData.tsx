@@ -93,7 +93,7 @@ export const useApplicationsData = (searchQuery: string = '') => {
       const from = pageParam * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
       
-      // Build query with job title and profile image included via joins
+      // Build query with job title - profile image fetched via RPC for security
       let query = supabase
         .from('job_applications')
         .select(`
@@ -106,11 +106,15 @@ export const useApplicationsData = (searchQuery: string = '') => {
           phone,
           location,
           bio,
+          cv_url,
+          age,
+          employment_status,
+          availability,
+          custom_answers,
           status,
           applied_at,
           updated_at,
-          job_postings!inner(title),
-          profiles(profile_image_url)
+          job_postings!inner(title)
         `);
 
       // Apply powerful global search across all relevant fields including job title
@@ -133,26 +137,28 @@ export const useApplicationsData = (searchQuery: string = '') => {
         return { items: [], hasMore: false };
       }
 
-      // Transform data to flatten job_postings and normalize profile images
+      // Fetch profile images via secure RPC function for each applicant
+      const applicantIds = [...new Set(baseData.map((item: any) => item.applicant_id))];
+      const profileImageMap: Record<string, string | null> = {};
+      
+      // Batch fetch profile images via RPC (security definer function)
+      await Promise.all(
+        applicantIds.map(async (applicantId) => {
+          const { data: profileImageUrl } = await supabase.rpc('get_applicant_profile_image', {
+            p_applicant_id: applicantId,
+            p_employer_id: user.id
+          });
+          profileImageMap[applicantId] = profileImageUrl;
+        })
+      );
+
+      // Transform data to flatten job_postings and add profile images
       const items = baseData.map((item: any) => {
-        let profileImageUrl = item.profiles?.profile_image_url;
-        
-        // Normalisera till publik URL från profile-media bucket
-        if (profileImageUrl && typeof profileImageUrl === 'string') {
-          if (!profileImageUrl.includes('/storage/v1/object/public/')) {
-            const publicUrl = supabase.storage
-              .from('profile-media')
-              .getPublicUrl(profileImageUrl).data.publicUrl;
-            profileImageUrl = publicUrl;
-          }
-        }
-        
         return {
           ...item,
           job_title: item.job_postings?.title || 'Okänt jobb',
-          profile_image_url: profileImageUrl,
-          job_postings: undefined,
-          profiles: undefined
+          profile_image_url: profileImageMap[item.applicant_id] || null,
+          job_postings: undefined
         };
       }) as ApplicationData[];
       
