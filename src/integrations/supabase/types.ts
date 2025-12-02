@@ -672,6 +672,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_applicant_profile_image: {
+        Args: { p_applicant_id: string; p_employer_id: string }
+        Returns: string
+      }
       get_consented_profile_for_employer: {
         Args: { p_employer_id: string; p_profile_id: string }
         Returns: {
