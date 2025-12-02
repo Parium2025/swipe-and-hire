@@ -62,17 +62,24 @@ const Landing = () => {
       
       {/* Hero Section */}
       <section className="relative pt-24 sm:pt-28 md:pt-32 pb-16 sm:pb-20 px-4 sm:px-6 md:px-12 lg:px-24 min-h-screen flex items-center">
-        {/* Background Image */}
-        <img
-          src={HERO_URL}
-          alt="Parium hero – kvinna håller telefonen i vänster hand"
-          className="absolute inset-0 w-full h-full object-cover object-center md:object-[60%_center] lg:object-[45%_center] will-change-transform select-none"
-          loading="eager"
-          decoding="sync"
-          fetchPriority="high"
+        {/* Background Video */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover will-change-transform select-none"
           style={{ backfaceVisibility: 'hidden', transform: 'translateZ(0)' }}
-        />
-        {/* Overlay for better text readability */}
+        >
+          <source src="/assets/hero-video.mp4" type="video/mp4" />
+          {/* Fallback image om video inte laddar */}
+          <img
+            src={HERO_URL}
+            alt="Parium hero"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        </video>
+        {/* Overlay för bättre textläsbarhet */}
         <div className="absolute inset-0 bg-gradient-to-r from-primary/80 via-primary/40 to-transparent md:from-primary/70 md:via-primary/20" />
         
         <div className="max-w-7xl mx-auto relative z-10 w-full">
