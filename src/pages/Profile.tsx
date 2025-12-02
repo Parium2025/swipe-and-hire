@@ -1358,7 +1358,7 @@ const Profile = () => {
         </div>
 
         {/* Profile Information */}
-        <div className="rounded-lg">
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
           <div className="p-6 md:p-4 border-b border-white/10">
             <h3 className="flex items-center gap-2 text-base font-semibold text-white">
               <User className="h-4 w-4" />
