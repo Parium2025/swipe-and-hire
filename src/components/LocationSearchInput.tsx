@@ -270,7 +270,7 @@ const LocationSearchInput = ({
             aria-label="Välj plats"
           >
             <MapPin className="h-4 w-4 text-white flex-shrink-0" />
-            <span className="text-sm text-white/90 flex-1 truncate">
+            <span className="text-sm text-white flex-1 truncate">
               {searchInput || "Sök på län eller stad/postnummer"}
             </span>
             {isLoading ? (
