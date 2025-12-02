@@ -1692,7 +1692,7 @@ const Profile = () => {
                     </div>
                     
                     {cvUrl ? (
-                      <div className="w-full h-10 bg-white/5 backdrop-blur-sm border border-white/10 rounded-md flex items-center px-3 gap-2">
+                      <div className="w-full h-9 bg-white/5 backdrop-blur-sm border border-white/10 rounded-md flex items-center px-3 gap-2">
                         <button
                           type="button"
                           onClick={() => setCvOpen(true)}
