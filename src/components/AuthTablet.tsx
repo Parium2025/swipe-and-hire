@@ -889,7 +889,7 @@ const AuthTablet = ({
                                     </Button>
                                   </DropdownMenuTrigger>
                                     <DropdownMenuContent 
-                                     className="w-80 bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-96"
+                                     className="w-80 bg-white/10 backdrop-blur-xl border-white/20 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-96"
                                      side="bottom"
                                      align="center"
                                      alignOffset={0}
@@ -898,7 +898,7 @@ const AuthTablet = ({
                                      onCloseAutoFocus={(e) => e.preventDefault()}
                                    >
                                      {/* Search input */}
-                                     <div className="p-3 border-b border-slate-600/30 sticky top-0 bg-white/5 backdrop-blur-md">
+                                     <div className="p-3 border-b border-white/20 sticky top-0 bg-white/5 backdrop-blur-md">
                                        <div className="relative">
                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
                                            <Input
@@ -951,7 +951,7 @@ const AuthTablet = ({
                                                setSearchTerm('');
                                                setIndustryMenuOpen(false);
                                              }}
-                                           className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-2 px-3 text-white border-t border-slate-600/30 transition-colors touch-manipulation"
+                                           className="cursor-pointer hover:bg-white/10 focus:bg-white/10 py-2 px-3 text-white border-t border-white/20 transition-colors touch-manipulation"
                                          >
                                            <span className="flex-1">Använd "{searchTerm}"</span>
                                          </DropdownMenuItem>
@@ -987,7 +987,7 @@ const AuthTablet = ({
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent 
-                                    className="w-80 bg-slate-800/95 backdrop-blur-md border-slate-600/30 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-96"
+                                    className="w-80 bg-white/10 backdrop-blur-xl border-white/20 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-96"
                                     side="bottom"
                                     align="center"
                                     alignOffset={0}
