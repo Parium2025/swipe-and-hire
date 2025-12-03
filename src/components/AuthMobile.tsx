@@ -951,7 +951,7 @@ const AuthMobile = ({
                                     </Button>
                                   </DropdownMenuTrigger>
                                     <DropdownMenuContent 
-                                     className={`w-80 bg-white/10 backdrop-blur-xl border-white/20 shadow-xl z-50 rounded-lg text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
+                                     className={`w-80 bg-white/10 backdrop-blur-xl border-white/20 shadow-lg z-[9999] rounded-md text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
                                      side="bottom"
                                      align="center"
                                      alignOffset={0}
@@ -992,7 +992,7 @@ const AuthMobile = ({
                                                  setSearchTerm('');
                                                  setIndustryMenuOpen(false);
                                                }}
-                                              className={`cursor-pointer hover:bg-white/10 focus:bg-white/10 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white flex items-center justify-between transition-colors touch-manipulation`}
+                                              className={`cursor-pointer hover:bg-white/20 focus:bg-white/20 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white flex items-center justify-between transition-colors touch-manipulation`}
                                            >
                                              <span className="flex-1 pr-2">{industryOption}</span>
                                              {employerData.industry === industryOption && (
@@ -1013,7 +1013,7 @@ const AuthMobile = ({
                                                setSearchTerm('');
                                                setIndustryMenuOpen(false);
                                              }}
-                                           className={`cursor-pointer hover:bg-white/10 focus:bg-white/10 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white border-t border-white/20 transition-colors touch-manipulation`}
+                                           className={`cursor-pointer hover:bg-white/20 focus:bg-white/20 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white border-t border-white/20 transition-colors touch-manipulation`}
                                          >
                                            <span className="flex-1">Använd "{searchTerm}"</span>
                                          </DropdownMenuItem>
@@ -1049,7 +1049,7 @@ const AuthMobile = ({
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent 
-                                    className={`w-80 bg-white/10 backdrop-blur-xl border-white/20 shadow-xl z-50 rounded-lg text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
+                                    className={`w-80 bg-white/10 backdrop-blur-xl border-white/20 shadow-lg z-[9999] rounded-md text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
                                     side="bottom"
                                     align="center"
                                     alignOffset={0}
@@ -1067,7 +1067,7 @@ const AuthMobile = ({
                                              setEmployerData(prev => ({ ...prev, employeeCount: count }));
                                              setEmployeeMenuOpen(false);
                                            }}
-                                          className={`cursor-pointer hover:bg-white/10 focus:bg-white/10 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white flex items-center justify-between transition-colors touch-manipulation`}
+                                          className={`cursor-pointer hover:bg-white/20 focus:bg-white/20 ${isMobile ? 'py-2 px-4 text-sm' : 'py-2 px-3'} text-white flex items-center justify-between transition-colors touch-manipulation`}
                                         >
                                           <span className="flex-1 pr-2">{count}</span>
                                           {employerData.employeeCount === count && (
