@@ -10,6 +10,7 @@ import ImageEditor from '@/components/ImageEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Building2, Upload, CheckCircle, ArrowRight, ArrowLeft, Briefcase, Users, Target, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { createSignedUrl } from '@/utils/storageUtils';
 
 interface EmployerWelcomeTunnelProps {
@@ -147,26 +148,41 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
             </div>
 
             <div className="grid grid-cols-1 gap-6 max-w-2xl mx-auto">
-              <div className="space-y-3 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white/5 hover:border-white/50 p-4 rounded-xl cursor-pointer" style={{animationDelay: '0.2s'}}>
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
+                className="space-y-3 transition-all duration-300 hover:scale-105 hover:bg-white/5 hover:border-white/50 p-4 rounded-xl cursor-pointer"
+              >
                 <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
                   <Briefcase className="h-8 w-8 text-white transition-transform duration-300 hover:rotate-12" />
                 </div>
                 <h3 className="text-white text-center font-semibold">Skapa och hantera jobbannonser</h3>
-              </div>
+              </motion.div>
 
-              <div className="space-y-3 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white/5 hover:border-white/50 p-4 rounded-xl cursor-pointer" style={{animationDelay: '0.4s'}}>
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
+                className="space-y-3 transition-all duration-300 hover:scale-105 hover:bg-white/5 hover:border-white/50 p-4 rounded-xl cursor-pointer"
+              >
                 <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
                   <Users className="h-8 w-8 text-white transition-transform duration-300 hover:rotate-12" />
                 </div>
                 <h3 className="text-white text-center font-semibold">Få ansökningar från kvalificerade kandidater</h3>
-              </div>
+              </motion.div>
 
-              <div className="space-y-3 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white/5 hover:border-white/50 p-4 rounded-xl cursor-pointer" style={{animationDelay: '0.6s'}}>
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.6, ease: "easeOut" }}
+                className="space-y-3 transition-all duration-300 hover:scale-105 hover:bg-white/5 hover:border-white/50 p-4 rounded-xl cursor-pointer"
+              >
                 <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
                   <Target className="h-8 w-8 text-white transition-transform duration-300 hover:rotate-12" />
                 </div>
                 <h3 className="text-white text-center font-semibold">Hitta rätt talang snabbt och enkelt</h3>
-              </div>
+              </motion.div>
             </div>
           </div>
         );
