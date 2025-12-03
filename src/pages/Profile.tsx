@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { Button } from '@/components/ui/button';
@@ -44,8 +44,29 @@ const Profile = () => {
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [originalValues, setOriginalValues] = useState<any>({});
   
-  // Ref to track if we have local media changes that should NOT be overwritten by DB sync
-  const hasLocalMediaChanges = useRef(false);
+  // 🔒 CRITICAL: Track local media changes with sessionStorage to survive component remounts
+  // This prevents DB sync from overwriting local changes when screenshot tools or tab switches cause remounts
+  const LOCAL_MEDIA_CHANGES_KEY = 'parium_local_media_changes';
+  
+  const getHasLocalMediaChanges = (): boolean => {
+    try {
+      return sessionStorage.getItem(LOCAL_MEDIA_CHANGES_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  };
+  
+  const setHasLocalMediaChangesFlag = (value: boolean) => {
+    try {
+      if (value) {
+        sessionStorage.setItem(LOCAL_MEDIA_CHANGES_KEY, 'true');
+      } else {
+        sessionStorage.removeItem(LOCAL_MEDIA_CHANGES_KEY);
+      }
+    } catch (e) {
+      console.warn('SessionStorage not available:', e);
+    }
+  };
   
   // Image editor states
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
@@ -164,7 +185,7 @@ const Profile = () => {
       
       // 🔒 CRITICAL: Don't overwrite local media changes when switching tabs
       // Only sync media from database if we DON'T have local unsaved media changes
-      if (!hasLocalMediaChanges.current) {
+      if (!getHasLocalMediaChanges()) {
         // Handle video/image loading from database
         if ((profile as any)?.video_url) {
           setVideoUrl((profile as any).video_url);
@@ -205,7 +226,7 @@ const Profile = () => {
       setOriginalValues(values);
       
       // Only reset unsaved changes flag if we don't have local media changes
-      if (!hasLocalMediaChanges.current) {
+      if (!getHasLocalMediaChanges()) {
         setHasUnsavedChanges(false);
       }
     }
@@ -428,7 +449,7 @@ const Profile = () => {
       setProfileFileName(storagePath);
       setDeletedProfileMedia(null);
       setHasUnsavedChanges(true);
-      hasLocalMediaChanges.current = true; // 🔒 Prevent DB sync from overwriting this
+      setHasLocalMediaChangesFlag(true); // 🔒 Prevent DB sync from overwriting this
       
       toast({
         title: `${isVideo ? 'Video' : 'Bild'} uppladdad!`,
@@ -471,7 +492,7 @@ const Profile = () => {
       
       // Mark as having unsaved changes
       setHasUnsavedChanges(true);
-      hasLocalMediaChanges.current = true; // 🔒 Prevent DB sync from overwriting this
+      setHasLocalMediaChangesFlag(true); // 🔒 Prevent DB sync from overwriting this
       
       toast({
         title: "Cover-bild uppladdad!",
@@ -647,7 +668,7 @@ const Profile = () => {
       
       // Mark as having unsaved changes
       setHasUnsavedChanges(true);
-      hasLocalMediaChanges.current = true; // 🔒 Prevent DB sync from overwriting this
+      setHasLocalMediaChangesFlag(true); // 🔒 Prevent DB sync from overwriting this
       
       toast({
         title: "Profilbild uppladdad!",
@@ -712,7 +733,7 @@ const Profile = () => {
       
       // Mark as having unsaved changes
       setHasUnsavedChanges(true);
-      hasLocalMediaChanges.current = true; // 🔒 Prevent DB sync from overwriting this
+      setHasLocalMediaChangesFlag(true); // 🔒 Prevent DB sync from overwriting this
       
       toast({
         title: "Cover-bild uppladdad!",
@@ -1105,7 +1126,7 @@ const Profile = () => {
         
         setOriginalValues(newOriginalValues);
         setHasUnsavedChanges(false);
-        hasLocalMediaChanges.current = false; // 🔒 Reset after successful save
+        setHasLocalMediaChangesFlag(false); // 🔒 Reset after successful save
         
         // Clear undo states after successful save
         setDeletedProfileMedia(null);

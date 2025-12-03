@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,8 +39,28 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   // Track if CV has been preloaded to avoid redundant preloading
   const [cvPreloaded, setCvPreloaded] = useState(false);
   
-  // 🔒 CRITICAL: Track if we have local media changes that should NOT be overwritten by DB sync
-  const hasLocalMediaChanges = useRef(false);
+  // 🔒 CRITICAL: Track local media changes with sessionStorage to survive component remounts
+  const WELCOME_LOCAL_MEDIA_KEY = 'parium_welcome_local_media_changes';
+  
+  const getHasLocalMediaChanges = (): boolean => {
+    try {
+      return sessionStorage.getItem(WELCOME_LOCAL_MEDIA_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  };
+  
+  const setHasLocalMediaChangesFlag = (value: boolean) => {
+    try {
+      if (value) {
+        sessionStorage.setItem(WELCOME_LOCAL_MEDIA_KEY, 'true');
+      } else {
+        sessionStorage.removeItem(WELCOME_LOCAL_MEDIA_KEY);
+      }
+    } catch (e) {
+      console.warn('SessionStorage not available:', e);
+    }
+  };
   
   // Cache CV signed URL permanently to avoid re-resolving when revisiting CV-steget
   const [cachedCvUrl, setCachedCvUrl] = useState<string | null>(null);
@@ -190,7 +210,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   // Load existing media as storage paths (not URLs) when component mounts
   useEffect(() => {
     // 🔒 CRITICAL: Don't overwrite local media changes when switching tabs
-    if (hasLocalMediaChanges.current) {
+    if (getHasLocalMediaChanges()) {
       console.log('Skipping media sync from DB - local changes exist');
       return;
     }
@@ -338,7 +358,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       // Store the storage path (not the URL) so it never expires
       handleInputChange('profileImageUrl', storagePath);
       handleInputChange('profileMediaType', isVideo ? 'video' : 'image');
-      hasLocalMediaChanges.current = true; // 🔒 Prevent DB sync from overwriting this
+      setHasLocalMediaChangesFlag(true); // 🔒 Prevent DB sync from overwriting this
       
       toast({
         title: `${isVideo ? 'Video' : 'Bild'} uppladdad!`,
@@ -384,7 +404,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       
       // Store the storage path directly
       handleInputChange('coverImageUrl', storagePath);
-      hasLocalMediaChanges.current = true; // 🔒 Prevent DB sync from overwriting this
+      setHasLocalMediaChangesFlag(true); // 🔒 Prevent DB sync from overwriting this
       
       toast({
         title: "Cover-bild uppladdad!",
@@ -609,7 +629,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       // Uppdatera lokalt state i tunneln (sparas vid handleSubmit)
       handleInputChange('profileImageUrl', storagePath);
       handleInputChange('profileMediaType', 'image');
-      hasLocalMediaChanges.current = true; // 🔒 Prevent DB sync from overwriting this
+      setHasLocalMediaChangesFlag(true); // 🔒 Prevent DB sync from overwriting this
       
       setImageEditorOpen(false);
       // Cleanup blob URL
@@ -659,7 +679,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       
       // Uppdatera lokalt state i tunneln (sparas vid handleSubmit)
       handleInputChange('coverImageUrl', storagePath);
-      hasLocalMediaChanges.current = true; // 🔒 Prevent DB sync from overwriting this
+      setHasLocalMediaChangesFlag(true); // 🔒 Prevent DB sync from overwriting this
       
       setCoverEditorOpen(false);
       // Cleanup blob URL
@@ -845,7 +865,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       }
       
       setCurrentStep(totalSteps - 1); // Go to completion step
-      hasLocalMediaChanges.current = false; // 🔒 Reset after successful save
+      setHasLocalMediaChangesFlag(false); // 🔒 Reset after successful save
 
       setTimeout(() => {
         toast({
