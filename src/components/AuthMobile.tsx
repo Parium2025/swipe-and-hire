@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { SlidingTabs } from '@/components/ui/sliding-tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Eye, EyeOff, User, Building2, Mail, Key, Phone, Globe, MapPin, Users, ChevronDown, Search, Check } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -661,20 +662,7 @@ const AuthMobile = ({
             >
               <CardContent className={cn("p-4 md:p-6", isLogin && (showResetPassword || resetPasswordSent) && "pb-24")}>
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
-                  <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0 p-0 h-auto gap-2">
-                    <TabsTrigger 
-                      value="login" 
-                      className="text-white data-[state=active]:bg-parium-navy data-[state=active]:text-white rounded-md font-medium"
-                    >
-                      Logga in
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="signup"
-                      className="text-white data-[state=active]:bg-parium-navy data-[state=active]:text-white rounded-md font-medium"
-                    >
-                      Registrera
-                    </TabsTrigger>
-                  </TabsList>
+                  <SlidingTabs isLogin={isLogin} onTabChange={handleTabChange} />
 
                   {/* Forms wrapper for instant swap */}
                   <div className="relative">
