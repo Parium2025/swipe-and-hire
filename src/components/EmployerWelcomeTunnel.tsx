@@ -68,7 +68,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
 
       const { error: uploadError } = await supabase.storage
         .from('company-logos')
-        .upload(fileName, editedBlob);
+        .upload(fileName, editedBlob, { upsert: true });
 
       if (uploadError) throw uploadError;
 
