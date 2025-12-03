@@ -889,7 +889,7 @@ const AuthTablet = ({
                                     </Button>
                                   </DropdownMenuTrigger>
                                     <DropdownMenuContent 
-                                     className="w-80 bg-sky-950/60 backdrop-blur-xl border-white/20 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-96"
+                                     className="w-80 bg-white/10 backdrop-blur-xl border-white/20 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-96"
                                      side="bottom"
                                      align="center"
                                      alignOffset={0}
@@ -987,7 +987,7 @@ const AuthTablet = ({
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent 
-                                    className="w-80 bg-sky-950/60 backdrop-blur-xl border-white/20 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-96"
+                                    className="w-80 bg-white/10 backdrop-blur-xl border-white/20 shadow-xl z-50 rounded-lg text-white overflow-hidden max-h-96"
                                     side="bottom"
                                     align="center"
                                     alignOffset={0}
