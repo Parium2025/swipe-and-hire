@@ -541,7 +541,7 @@ const AuthMobile = ({
         }}
       >
         <Card 
-          className="w-full max-w-sm bg-white/10 backdrop-blur-sm border-white/20 my-auto mx-auto overflow-y-auto" 
+          className="w-full max-w-sm bg-white/5 backdrop-blur-sm border-white/20 my-auto mx-auto overflow-y-auto" 
           style={{ 
             maxHeight: '85svh',
             WebkitOverflowScrolling: 'touch',
@@ -656,7 +656,7 @@ const AuthMobile = ({
           {/* Auth form */}
           <div className="w-full max-w-sm overscroll-contain">
             <Card 
-              className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden"
+              className="bg-white/5 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden"
               style={{ WebkitOverflowScrolling: 'touch' }}
             >
               <CardContent className={cn("p-4 md:p-6", isLogin && (showResetPassword || resetPasswordSent) && "pb-24")}>
@@ -951,7 +951,7 @@ const AuthMobile = ({
                                     </Button>
                                   </DropdownMenuTrigger>
                                     <DropdownMenuContent 
-                                     className={`w-80 bg-white/5 backdrop-blur-xl border-white/20 shadow-lg z-[9999] rounded-md text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
+                                     className={`w-80 border-white/20 shadow-lg z-[9999] rounded-md text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
                                      side="bottom"
                                      align="center"
                                      alignOffset={0}
@@ -967,7 +967,7 @@ const AuthMobile = ({
                                             placeholder="Sök bransch..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
-                                            className={`pl-10 pr-4 h-10 text-base bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 hover:border-white/50 md:hover:border-white/50 rounded-lg`}
+                                            className={`pl-10 pr-4 h-10 text-base bg-transparent border-white/20 text-white placeholder:text-white/60 focus:border-white/40 hover:border-white/50 md:hover:border-white/50 rounded-lg`}
                                             autoComplete="off"
                                             autoCapitalize="none"
                                             autoCorrect="off"
@@ -1049,7 +1049,7 @@ const AuthMobile = ({
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent 
-                                    className={`w-80 bg-white/5 backdrop-blur-xl border-white/20 shadow-lg z-[9999] rounded-md text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
+                                    className={`w-80 border-white/20 shadow-lg z-[9999] rounded-md text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
                                     side="bottom"
                                     align="center"
                                     alignOffset={0}
