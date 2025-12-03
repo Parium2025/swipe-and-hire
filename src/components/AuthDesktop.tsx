@@ -584,7 +584,7 @@ const AuthDesktop = ({
 
           {/* Auth form */}
           <div className="w-full max-w-md">
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden">
+            <Card className="bg-white/5 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden">
               <CardContent className="p-6">
                  <Tabs value={isLogin ? 'login' : 'signup'} onValueChange={handleTabChange}>
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent border-0 p-0 h-auto gap-2">
@@ -879,7 +879,7 @@ const AuthDesktop = ({
                                     </Button>
                                   </DropdownMenuTrigger>
                                     <DropdownMenuContent 
-                                     className="w-80 bg-white/5 backdrop-blur-xl border-white/20 shadow-lg z-[9999] rounded-md text-white overflow-hidden max-h-96"
+                                     className="w-80 border-white/20 shadow-lg z-[9999] rounded-md text-white overflow-hidden max-h-96"
                                      side="bottom"
                                      align="center"
                                      alignOffset={0}
@@ -895,7 +895,7 @@ const AuthDesktop = ({
                                             placeholder="Sök bransch..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
-                                            className="pl-10 pr-4 h-10 text-base bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 hover:border-white/50 md:hover:border-white/50 rounded-lg"
+                                            className="pl-10 pr-4 h-10 text-base bg-transparent border-white/20 text-white placeholder:text-white/60 focus:border-white/40 hover:border-white/50 md:hover:border-white/50 rounded-lg"
                                             autoComplete="off"
                                             autoCapitalize="none"
                                             autoCorrect="off"
@@ -977,7 +977,7 @@ const AuthDesktop = ({
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent 
-                                    className="w-80 bg-white/5 backdrop-blur-xl border-white/20 shadow-lg z-[9999] rounded-md text-white overflow-hidden max-h-96"
+                                    className="w-80 border-white/20 shadow-lg z-[9999] rounded-md text-white overflow-hidden max-h-96"
                                     side="bottom"
                                     align="center"
                                     alignOffset={0}
