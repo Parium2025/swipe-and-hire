@@ -541,7 +541,7 @@ const AuthMobile = ({
         }}
       >
         <Card 
-          className="w-full max-w-sm bg-white/5 backdrop-blur-sm border-white/20 my-auto mx-auto overflow-y-auto" 
+          className="w-full max-w-sm bg-white/[0.02] backdrop-blur-sm border-white/20 my-auto mx-auto overflow-y-auto" 
           style={{ 
             maxHeight: '85svh',
             WebkitOverflowScrolling: 'touch',
@@ -656,7 +656,7 @@ const AuthMobile = ({
           {/* Auth form */}
           <div className="w-full max-w-sm overscroll-contain">
             <Card 
-              className="bg-white/5 backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden"
+              className="bg-white/[0.02] backdrop-blur-sm border-white/20 shadow-2xl rounded-2xl overflow-hidden"
               style={{ WebkitOverflowScrolling: 'touch' }}
             >
               <CardContent className={cn("p-4 md:p-6", isLogin && (showResetPassword || resetPasswordSent) && "pb-24")}>
