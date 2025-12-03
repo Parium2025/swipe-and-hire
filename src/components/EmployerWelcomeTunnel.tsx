@@ -210,7 +210,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, companyLogoUrl: '' }))}
-                      className="absolute -top-2 -right-2 z-10 p-2 rounded-full bg-white/10 border border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/50"
+                      className="absolute -top-2 -right-2 z-10 p-2 rounded-full bg-destructive text-white transition-all duration-300 md:hover:bg-destructive/80"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -223,14 +223,6 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                     </div>
                   </div>
                   <p className="text-sm text-white">Logga uppladdad!</p>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => document.getElementById('logo-upload')?.click()}
-                    disabled={isUploadingLogo}
-                    className="bg-white/5 border-white/10 text-white transition-all duration-300 md:hover:bg-white/10 md:hover:text-white md:hover:border-white/50"
-                  >
-                    Byt logga
-                  </Button>
                 </div>
               ) : (
                 <div className="space-y-4">
