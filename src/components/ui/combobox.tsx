@@ -80,7 +80,7 @@ export function Combobox({
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-full p-0 bg-popover text-popover-foreground shadow-md border rounded-md z-50" 
+        className="w-full p-0 bg-white/10 backdrop-blur-xl text-white shadow-lg border border-white/20 rounded-md z-50" 
         side="bottom"
         align="start"
         sideOffset={4}
@@ -118,7 +118,7 @@ export function Combobox({
                   key={option}
                   value={option}
                   onSelect={() => handleSelect(option)}
-                  className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                  className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-8 text-sm outline-none text-white focus:bg-white/20 focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
                 >
                   <Check
                     className={cn(
