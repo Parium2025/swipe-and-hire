@@ -210,7 +210,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, companyLogoUrl: '' }))}
-                      className="absolute -top-2 -right-2 z-10 p-2 rounded-full bg-white/20 hover:bg-destructive backdrop-blur-sm text-white shadow-lg transition-colors"
+                      className="absolute -top-2 -right-2 z-10 p-2 rounded-full bg-white/20 md:hover:bg-destructive backdrop-blur-sm text-white shadow-lg transition-colors"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
