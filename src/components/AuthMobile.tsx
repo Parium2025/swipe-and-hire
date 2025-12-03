@@ -951,7 +951,7 @@ const AuthMobile = ({
                                     </Button>
                                   </DropdownMenuTrigger>
                                     <DropdownMenuContent 
-                                     className={`w-80 bg-[hsl(215,100%,12%)]/80 backdrop-blur-xl border-white/20 shadow-lg z-[9999] rounded-md text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
+                                     className={`w-80 bg-white/10 backdrop-blur-xl border-white/20 shadow-lg z-[9999] rounded-md text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
                                      side="bottom"
                                      align="center"
                                      alignOffset={0}
@@ -1049,7 +1049,7 @@ const AuthMobile = ({
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent 
-                                    className={`w-80 bg-[hsl(215,100%,12%)]/80 backdrop-blur-xl border-white/20 shadow-lg z-[9999] rounded-md text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
+                                    className={`w-80 bg-white/10 backdrop-blur-xl border-white/20 shadow-lg z-[9999] rounded-md text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
                                     side="bottom"
                                     align="center"
                                     alignOffset={0}
