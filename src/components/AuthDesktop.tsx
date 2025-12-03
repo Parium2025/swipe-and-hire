@@ -888,14 +888,14 @@ const AuthDesktop = ({
                                      onCloseAutoFocus={(e) => e.preventDefault()}
                                    >
                                      {/* Search input */}
-                                     <div className="p-3 border-b border-white/20 sticky top-0 bg-white/5 backdrop-blur-md">
+                                     <div className="p-3 border-b border-white/20 sticky top-0 bg-transparent">
                                        <div className="relative">
                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
                                            <Input
                                             placeholder="Sök bransch..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
-                                            className="pl-10 pr-4 h-10 text-base bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 hover:border-white/50 md:hover:border-white/50 rounded-lg"
+                                            className="pl-10 pr-4 h-10 text-base bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 hover:border-white/50 md:hover:border-white/50 rounded-lg"
                                             autoComplete="off"
                                             autoCapitalize="none"
                                             autoCorrect="off"
