@@ -44,28 +44,55 @@ const Profile = () => {
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [originalValues, setOriginalValues] = useState<any>({});
   
-  // 🔒 CRITICAL: Track local media changes with sessionStorage to survive component remounts
+  // 🔒 CRITICAL: Store local media values in sessionStorage to survive component remounts
   // This prevents DB sync from overwriting local changes when screenshot tools or tab switches cause remounts
-  const LOCAL_MEDIA_CHANGES_KEY = 'parium_local_media_changes';
+  const LOCAL_MEDIA_KEY = 'parium_local_media_state';
   
-  const getHasLocalMediaChanges = (): boolean => {
+  interface LocalMediaState {
+    profileImageUrl: string;
+    videoUrl: string;
+    coverImageUrl: string;
+    isProfileVideo: boolean;
+    profileFileName: string;
+    coverFileName: string;
+    cvUrl: string;
+  }
+  
+  const getLocalMediaState = (): LocalMediaState | null => {
     try {
-      return sessionStorage.getItem(LOCAL_MEDIA_CHANGES_KEY) === 'true';
+      const stored = sessionStorage.getItem(LOCAL_MEDIA_KEY);
+      return stored ? JSON.parse(stored) : null;
     } catch {
-      return false;
+      return null;
     }
   };
   
-  const setHasLocalMediaChangesFlag = (value: boolean) => {
+  const setLocalMediaState = (state: LocalMediaState | null) => {
     try {
-      if (value) {
-        sessionStorage.setItem(LOCAL_MEDIA_CHANGES_KEY, 'true');
+      if (state) {
+        sessionStorage.setItem(LOCAL_MEDIA_KEY, JSON.stringify(state));
       } else {
-        sessionStorage.removeItem(LOCAL_MEDIA_CHANGES_KEY);
+        sessionStorage.removeItem(LOCAL_MEDIA_KEY);
       }
     } catch (e) {
       console.warn('SessionStorage not available:', e);
     }
+  };
+  
+  const getHasLocalMediaChanges = (): boolean => {
+    return getLocalMediaState() !== null;
+  };
+  
+  const saveCurrentMediaToSession = () => {
+    setLocalMediaState({
+      profileImageUrl,
+      videoUrl,
+      coverImageUrl,
+      isProfileVideo,
+      profileFileName,
+      coverFileName,
+      cvUrl
+    });
   };
   
   // Image editor states
@@ -166,13 +193,13 @@ const Profile = () => {
         cvUrl: (profile as any)?.cv_url || '',
         companyName: profile.company_name || '',
         orgNumber: profile.org_number || '',
-        employmentStatus: (profile as any)?.employment_type || '', // Fixed: employment_type
-        workingHours: (profile as any)?.work_schedule || '', // Fixed: work_schedule
+        employmentStatus: (profile as any)?.employment_type || '',
+        workingHours: (profile as any)?.work_schedule || '',
         availability: (profile as any)?.availability || '',
         coverImageUrl: (profile as any)?.cover_image_url || '',
-        isProfileVideo: false, // Will be updated below if video exists
-        profileFileName: '', // Will be extracted from URL
-        coverFileName: '', // Will be extracted from URL
+        isProfileVideo: false,
+        profileFileName: '',
+        coverFileName: '',
       };
 
       setFirstName(values.firstName);
@@ -183,13 +210,24 @@ const Profile = () => {
       setPhone(values.phone);
       setBirthDate(values.birthDate);
       
-      // 🔒 CRITICAL: Don't overwrite local media changes when switching tabs
-      // Only sync media from database if we DON'T have local unsaved media changes
-      if (!getHasLocalMediaChanges()) {
-        // Handle video/image loading from database
+      // 🔒 CRITICAL: Restore local media state from sessionStorage if it exists
+      // This survives component remounts from tab switches or screenshot tools
+      const localMedia = getLocalMediaState();
+      if (localMedia) {
+        // Restore local unsaved media values instead of DB values
+        setProfileImageUrl(localMedia.profileImageUrl);
+        setVideoUrl(localMedia.videoUrl);
+        setCoverImageUrl(localMedia.coverImageUrl);
+        setIsProfileVideo(localMedia.isProfileVideo);
+        setProfileFileName(localMedia.profileFileName);
+        setCoverFileName(localMedia.coverFileName);
+        setCvUrl(localMedia.cvUrl);
+        console.log('🔒 Restored local media state from sessionStorage');
+      } else {
+        // No local changes - sync from database
         if ((profile as any)?.video_url) {
           setVideoUrl((profile as any).video_url);
-          setProfileImageUrl(''); // Clear regular profile image when video exists
+          setProfileImageUrl('');
           setIsProfileVideo(true);
           values.videoUrl = (profile as any).video_url;
           values.profileImageUrl = '';
@@ -202,7 +240,6 @@ const Profile = () => {
           values.isProfileVideo = false;
         }
         
-        // Always load current cover image from DB - use dedicated field if available
         const dbCoverImage = (profile as any)?.cover_image_url || '';
         setCoverImageUrl(dbCoverImage);
         values.coverImageUrl = dbCoverImage;
@@ -449,7 +486,18 @@ const Profile = () => {
       setProfileFileName(storagePath);
       setDeletedProfileMedia(null);
       setHasUnsavedChanges(true);
-      setHasLocalMediaChangesFlag(true); // 🔒 Prevent DB sync from overwriting this
+      // 🔒 Save to sessionStorage to survive remounts
+      setLocalMediaState({
+        profileImageUrl: isVideo ? '' : storagePath,
+        videoUrl: isVideo ? storagePath : '',
+        coverImageUrl: isVideo && !coverImageUrl && (profileImageUrl || originalValues?.profileImageUrl) 
+          ? (profileImageUrl || originalValues?.profileImageUrl || '') 
+          : coverImageUrl,
+        isProfileVideo: isVideo,
+        profileFileName: storagePath,
+        coverFileName,
+        cvUrl
+      });
       
       toast({
         title: `${isVideo ? 'Video' : 'Bild'} uppladdad!`,
@@ -492,7 +540,16 @@ const Profile = () => {
       
       // Mark as having unsaved changes
       setHasUnsavedChanges(true);
-      setHasLocalMediaChangesFlag(true); // 🔒 Prevent DB sync from overwriting this
+      // 🔒 Save to sessionStorage to survive remounts
+      setLocalMediaState({
+        profileImageUrl,
+        videoUrl,
+        coverImageUrl: storagePath,
+        isProfileVideo,
+        profileFileName,
+        coverFileName: storagePath,
+        cvUrl
+      });
       
       toast({
         title: "Cover-bild uppladdad!",
@@ -668,7 +725,16 @@ const Profile = () => {
       
       // Mark as having unsaved changes
       setHasUnsavedChanges(true);
-      setHasLocalMediaChangesFlag(true); // 🔒 Prevent DB sync from overwriting this
+      // 🔒 Save to sessionStorage to survive remounts
+      setLocalMediaState({
+        profileImageUrl: storagePath,
+        videoUrl: '',
+        coverImageUrl,
+        isProfileVideo: false,
+        profileFileName: storagePath,
+        coverFileName,
+        cvUrl
+      });
       
       toast({
         title: "Profilbild uppladdad!",
@@ -733,7 +799,16 @@ const Profile = () => {
       
       // Mark as having unsaved changes
       setHasUnsavedChanges(true);
-      setHasLocalMediaChangesFlag(true); // 🔒 Prevent DB sync from overwriting this
+      // 🔒 Save to sessionStorage to survive remounts
+      setLocalMediaState({
+        profileImageUrl,
+        videoUrl,
+        coverImageUrl: storagePath,
+        isProfileVideo,
+        profileFileName,
+        coverFileName: storagePath,
+        cvUrl
+      });
       
       toast({
         title: "Cover-bild uppladdad!",
@@ -1126,7 +1201,7 @@ const Profile = () => {
         
         setOriginalValues(newOriginalValues);
         setHasUnsavedChanges(false);
-        setHasLocalMediaChangesFlag(false); // 🔒 Reset after successful save
+        setLocalMediaState(null); // 🔒 Clear sessionStorage after successful save
         
         // Clear undo states after successful save
         setDeletedProfileMedia(null);
