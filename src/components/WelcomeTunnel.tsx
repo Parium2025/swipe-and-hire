@@ -39,27 +39,39 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   // Track if CV has been preloaded to avoid redundant preloading
   const [cvPreloaded, setCvPreloaded] = useState(false);
   
-  // 🔒 CRITICAL: Track local media changes with sessionStorage to survive component remounts
-  const WELCOME_LOCAL_MEDIA_KEY = 'parium_welcome_local_media_changes';
+  // 🔒 CRITICAL: Store local media values in sessionStorage to survive component remounts
+  const WELCOME_LOCAL_MEDIA_KEY = 'parium_welcome_local_media';
   
-  const getHasLocalMediaChanges = (): boolean => {
+  interface WelcomeLocalMediaState {
+    profileImageUrl: string;
+    profileMediaType: string;
+    coverImageUrl: string;
+    cvUrl: string;
+  }
+  
+  const getLocalMediaState = (): WelcomeLocalMediaState | null => {
     try {
-      return sessionStorage.getItem(WELCOME_LOCAL_MEDIA_KEY) === 'true';
+      const stored = sessionStorage.getItem(WELCOME_LOCAL_MEDIA_KEY);
+      return stored ? JSON.parse(stored) : null;
     } catch {
-      return false;
+      return null;
     }
   };
   
-  const setHasLocalMediaChangesFlag = (value: boolean) => {
+  const setLocalMediaState = (state: WelcomeLocalMediaState | null) => {
     try {
-      if (value) {
-        sessionStorage.setItem(WELCOME_LOCAL_MEDIA_KEY, 'true');
+      if (state) {
+        sessionStorage.setItem(WELCOME_LOCAL_MEDIA_KEY, JSON.stringify(state));
       } else {
         sessionStorage.removeItem(WELCOME_LOCAL_MEDIA_KEY);
       }
     } catch (e) {
       console.warn('SessionStorage not available:', e);
     }
+  };
+  
+  const getHasLocalMediaChanges = (): boolean => {
+    return getLocalMediaState() !== null;
   };
   
   // Cache CV signed URL permanently to avoid re-resolving when revisiting CV-steget
@@ -209,9 +221,17 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
   // Load existing media as storage paths (not URLs) when component mounts
   useEffect(() => {
-    // 🔒 CRITICAL: Don't overwrite local media changes when switching tabs
-    if (getHasLocalMediaChanges()) {
-      console.log('Skipping media sync from DB - local changes exist');
+    // 🔒 CRITICAL: Restore local media state from sessionStorage if it exists
+    const localMedia = getLocalMediaState();
+    if (localMedia) {
+      console.log('🔒 Restoring local media state from sessionStorage');
+      setFormData(prev => ({
+        ...prev,
+        profileImageUrl: localMedia.profileImageUrl,
+        profileMediaType: localMedia.profileMediaType,
+        coverImageUrl: localMedia.coverImageUrl,
+        cvUrl: localMedia.cvUrl
+      }));
       return;
     }
     
@@ -221,7 +241,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
         
         // Handle profile image/video - store as path
         if (profile.video_url) {
-          // Extract storage path from URL if it's a full URL (backwards compatibility)
           let videoPath = profile.video_url;
           if (videoPath.includes('/profile-media/')) {
             const match = videoPath.match(/\/profile-media\/(.+?)(\?|$)/);
@@ -230,7 +249,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
           updates.profileImageUrl = videoPath;
           updates.profileMediaType = 'video';
           
-          // Load cover image if exists
           if (profile.cover_image_url) {
             let coverPath = profile.cover_image_url;
             if (coverPath.includes('/profile-media/')) {
@@ -240,7 +258,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
             updates.coverImageUrl = coverPath;
           }
         } else if (profile.profile_image_url) {
-          // Extract storage path from URL if it's a full URL (backwards compatibility)
           let imagePath = profile.profile_image_url;
           if (imagePath.includes('/profile-media/')) {
             const match = imagePath.match(/\/profile-media\/(.+?)(\?|$)/);
@@ -250,7 +267,6 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
           updates.profileMediaType = 'image';
         }
         
-        // Handle CV - keep as storage path (private bucket)
         if (profile.cv_url) {
           updates.cvUrl = profile.cv_url;
         }
@@ -358,7 +374,16 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       // Store the storage path (not the URL) so it never expires
       handleInputChange('profileImageUrl', storagePath);
       handleInputChange('profileMediaType', isVideo ? 'video' : 'image');
-      setHasLocalMediaChangesFlag(true); // 🔒 Prevent DB sync from overwriting this
+      // 🔒 Save to sessionStorage to survive remounts
+      const newCoverUrl = isVideo && !formData.coverImageUrl && formData.profileImageUrl && formData.profileMediaType === 'image' 
+        ? formData.profileImageUrl 
+        : formData.coverImageUrl;
+      setLocalMediaState({
+        profileImageUrl: storagePath,
+        profileMediaType: isVideo ? 'video' : 'image',
+        coverImageUrl: newCoverUrl,
+        cvUrl: formData.cvUrl
+      });
       
       toast({
         title: `${isVideo ? 'Video' : 'Bild'} uppladdad!`,
@@ -404,7 +429,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       
       // Store the storage path directly
       handleInputChange('coverImageUrl', storagePath);
-      setHasLocalMediaChangesFlag(true); // 🔒 Prevent DB sync from overwriting this
+      // 🔒 Save to sessionStorage to survive remounts
+      setLocalMediaState({
+        profileImageUrl: formData.profileImageUrl,
+        profileMediaType: formData.profileMediaType,
+        coverImageUrl: storagePath,
+        cvUrl: formData.cvUrl
+      });
       
       toast({
         title: "Cover-bild uppladdad!",
@@ -629,7 +660,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       // Uppdatera lokalt state i tunneln (sparas vid handleSubmit)
       handleInputChange('profileImageUrl', storagePath);
       handleInputChange('profileMediaType', 'image');
-      setHasLocalMediaChangesFlag(true); // 🔒 Prevent DB sync from overwriting this
+      // 🔒 Save to sessionStorage to survive remounts
+      setLocalMediaState({
+        profileImageUrl: storagePath,
+        profileMediaType: 'image',
+        coverImageUrl: formData.coverImageUrl,
+        cvUrl: formData.cvUrl
+      });
       
       setImageEditorOpen(false);
       // Cleanup blob URL
@@ -679,7 +716,13 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       
       // Uppdatera lokalt state i tunneln (sparas vid handleSubmit)
       handleInputChange('coverImageUrl', storagePath);
-      setHasLocalMediaChangesFlag(true); // 🔒 Prevent DB sync from overwriting this
+      // 🔒 Save to sessionStorage to survive remounts
+      setLocalMediaState({
+        profileImageUrl: formData.profileImageUrl,
+        profileMediaType: formData.profileMediaType,
+        coverImageUrl: storagePath,
+        cvUrl: formData.cvUrl
+      });
       
       setCoverEditorOpen(false);
       // Cleanup blob URL
@@ -865,7 +908,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       }
       
       setCurrentStep(totalSteps - 1); // Go to completion step
-      setHasLocalMediaChangesFlag(false); // 🔒 Reset after successful save
+      setLocalMediaState(null); // 🔒 Clear sessionStorage after successful save
 
       setTimeout(() => {
         toast({
