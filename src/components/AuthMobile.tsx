@@ -951,7 +951,7 @@ const AuthMobile = ({
                                     </Button>
                                   </DropdownMenuTrigger>
                                     <DropdownMenuContent 
-                                     className={`w-80 bg-white/10 backdrop-blur-xl border-white/20 shadow-lg z-[9999] rounded-md text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
+                                     className={`w-80 bg-white/5 backdrop-blur-xl border-white/20 shadow-lg z-[9999] rounded-md text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
                                      side="bottom"
                                      align="center"
                                      alignOffset={0}
@@ -967,7 +967,7 @@ const AuthMobile = ({
                                             placeholder="Sök bransch..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
-                                            className={`pl-10 pr-4 h-10 text-base bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 hover:border-white/50 md:hover:border-white/50 rounded-lg`}
+                                            className={`pl-10 pr-4 h-10 text-base bg-white/5 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 hover:border-white/50 md:hover:border-white/50 rounded-lg`}
                                             autoComplete="off"
                                             autoCapitalize="none"
                                             autoCorrect="off"
@@ -1049,7 +1049,7 @@ const AuthMobile = ({
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent 
-                                    className={`w-80 bg-white/10 backdrop-blur-xl border-white/20 shadow-lg z-[9999] rounded-md text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
+                                    className={`w-80 bg-white/5 backdrop-blur-xl border-white/20 shadow-lg z-[9999] rounded-md text-white overflow-hidden ${isMobile ? 'max-h-[50vh]' : 'max-h-96'}`}
                                     side="bottom"
                                     align="center"
                                     alignOffset={0}
