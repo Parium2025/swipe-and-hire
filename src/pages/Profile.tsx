@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { Button } from '@/components/ui/button';
@@ -43,6 +43,9 @@ const Profile = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [originalValues, setOriginalValues] = useState<any>({});
+  
+  // Ref to track if we have local media changes that should NOT be overwritten by DB sync
+  const hasLocalMediaChanges = useRef(false);
   
   // Image editor states
   const [imageEditorOpen, setImageEditorOpen] = useState(false);
@@ -159,32 +162,33 @@ const Profile = () => {
       setPhone(values.phone);
       setBirthDate(values.birthDate);
       
-      // Handle video/image loading from database
-      if ((profile as any)?.video_url) {
-        setVideoUrl((profile as any).video_url);
-        setProfileImageUrl(''); // Clear regular profile image when video exists
-        setIsProfileVideo(true);
-        values.videoUrl = (profile as any).video_url;
-        values.profileImageUrl = '';
-        values.isProfileVideo = true;
+      // 🔒 CRITICAL: Don't overwrite local media changes when switching tabs
+      // Only sync media from database if we DON'T have local unsaved media changes
+      if (!hasLocalMediaChanges.current) {
+        // Handle video/image loading from database
+        if ((profile as any)?.video_url) {
+          setVideoUrl((profile as any).video_url);
+          setProfileImageUrl(''); // Clear regular profile image when video exists
+          setIsProfileVideo(true);
+          values.videoUrl = (profile as any).video_url;
+          values.profileImageUrl = '';
+          values.isProfileVideo = true;
+        } else {
+          setVideoUrl('');
+          setProfileImageUrl(values.profileImageUrl);
+          setIsProfileVideo(false);
+          values.videoUrl = '';
+          values.isProfileVideo = false;
+        }
         
-          // Signed URL handled by useMediaUrl hook
-      } else {
-        setVideoUrl('');
-        setProfileImageUrl(values.profileImageUrl);
-        setIsProfileVideo(false);
-        values.videoUrl = '';
-        values.isProfileVideo = false;
+        // Always load current cover image from DB - use dedicated field if available
+        const dbCoverImage = (profile as any)?.cover_image_url || '';
+        setCoverImageUrl(dbCoverImage);
+        values.coverImageUrl = dbCoverImage;
+        
+        setCvUrl(values.cvUrl);
       }
       
-      // Always load current cover image from DB - use dedicated field if available
-      const dbCoverImage = (profile as any)?.cover_image_url || '';
-      setCoverImageUrl(dbCoverImage);
-      values.coverImageUrl = dbCoverImage;
-      
-      // Signed URL handled by useMediaUrl hook
-      
-      setCvUrl(values.cvUrl);
       // Only extract from URL if no filename in DB (for old records)
       if ((profile as any)?.cv_filename) {
         setCvFileName((profile as any).cv_filename);
@@ -199,7 +203,11 @@ const Profile = () => {
 
       // Store original values for comparison
       setOriginalValues(values);
-      setHasUnsavedChanges(false);
+      
+      // Only reset unsaved changes flag if we don't have local media changes
+      if (!hasLocalMediaChanges.current) {
+        setHasUnsavedChanges(false);
+      }
     }
   }, [profile]);
 
@@ -420,6 +428,7 @@ const Profile = () => {
       setProfileFileName(storagePath);
       setDeletedProfileMedia(null);
       setHasUnsavedChanges(true);
+      hasLocalMediaChanges.current = true; // 🔒 Prevent DB sync from overwriting this
       
       toast({
         title: `${isVideo ? 'Video' : 'Bild'} uppladdad!`,
@@ -462,6 +471,7 @@ const Profile = () => {
       
       // Mark as having unsaved changes
       setHasUnsavedChanges(true);
+      hasLocalMediaChanges.current = true; // 🔒 Prevent DB sync from overwriting this
       
       toast({
         title: "Cover-bild uppladdad!",
@@ -637,6 +647,7 @@ const Profile = () => {
       
       // Mark as having unsaved changes
       setHasUnsavedChanges(true);
+      hasLocalMediaChanges.current = true; // 🔒 Prevent DB sync from overwriting this
       
       toast({
         title: "Profilbild uppladdad!",
@@ -701,6 +712,7 @@ const Profile = () => {
       
       // Mark as having unsaved changes
       setHasUnsavedChanges(true);
+      hasLocalMediaChanges.current = true; // 🔒 Prevent DB sync from overwriting this
       
       toast({
         title: "Cover-bild uppladdad!",
@@ -1093,6 +1105,7 @@ const Profile = () => {
         
         setOriginalValues(newOriginalValues);
         setHasUnsavedChanges(false);
+        hasLocalMediaChanges.current = false; // 🔒 Reset after successful save
         
         // Clear undo states after successful save
         setDeletedProfileMedia(null);
