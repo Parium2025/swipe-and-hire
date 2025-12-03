@@ -205,11 +205,11 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
             <div className="space-y-4 max-w-md mx-auto">
               {formData.companyLogoUrl ? (
                 <div className="text-center space-y-4">
-                  <div className="w-32 h-32 mx-auto bg-white/20 backdrop-blur-sm rounded-lg border-2 border-white/20 flex items-center justify-center overflow-hidden">
+                  <div className="w-40 h-40 mx-auto bg-white/20 backdrop-blur-sm rounded-full border-2 border-white/20 flex items-center justify-center overflow-hidden">
                     <img 
                       src={formData.companyLogoUrl} 
                       alt="Företagslogga" 
-                      className="max-w-full max-h-full object-contain"
+                      className="w-full h-full object-cover"
                     />
                   </div>
                   <p className="text-sm text-white">Logga uppladdad!</p>
