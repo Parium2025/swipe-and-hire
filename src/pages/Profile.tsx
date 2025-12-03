@@ -841,12 +841,22 @@ const Profile = () => {
       });
       
       // När vi raderar video med en cover-bild, gör cover-bilden till profilbilden
+      let newProfileImageUrl = '';
+      let newVideoUrl = '';
+      let newCoverImageUrl = '';
+      let newIsProfileVideo = false;
+      let newProfileFileName = '';
+      let newCoverFileName = '';
+      
       if (isProfileVideo && coverImageUrl) {
+        newProfileImageUrl = coverImageUrl;
+        newProfileFileName = coverFileName;
+        newCoverImageUrl = coverImageUrl; // Keep cover intact
+        newCoverFileName = coverFileName;
         setProfileImageUrl(coverImageUrl);
         setProfileFileName(coverFileName);
         setVideoUrl('');
         setIsProfileVideo(false);
-        // Behåll cover-bilden intakt
       } else {
         // Ingen cover-bild - rensa allt
         setProfileImageUrl('');
@@ -856,6 +866,17 @@ const Profile = () => {
         setProfileFileName('');
         setCoverFileName('');
       }
+      
+      // 🔒 Save deleted state to sessionStorage to survive remounts
+      setLocalMediaState({
+        profileImageUrl: newProfileImageUrl,
+        videoUrl: newVideoUrl,
+        coverImageUrl: newCoverImageUrl,
+        isProfileVideo: newIsProfileVideo,
+        profileFileName: newProfileFileName,
+        coverFileName: newCoverFileName,
+        cvUrl
+      });
       
       // Reset file input
       const fileInput = document.getElementById('profile-image') as HTMLInputElement;
@@ -890,6 +911,17 @@ const Profile = () => {
     setIsProfileVideo(deletedProfileMedia.isProfileVideo);
     setVideoUrl(deletedProfileMedia.videoUrl);
     
+    // 🔒 Update sessionStorage with restored values
+    setLocalMediaState({
+      profileImageUrl: deletedProfileMedia.profileImageUrl,
+      videoUrl: deletedProfileMedia.videoUrl,
+      coverImageUrl: deletedProfileMedia.coverImageUrl,
+      isProfileVideo: deletedProfileMedia.isProfileVideo,
+      profileFileName: deletedProfileMedia.profileFileName,
+      coverFileName: deletedProfileMedia.coverFileName,
+      cvUrl
+    });
+    
     // Rensa ångra-data
     setDeletedProfileMedia(null);
     
@@ -915,6 +947,17 @@ const Profile = () => {
       setCoverImageUrl('');
       setCoverFileName('');
       
+      // 🔒 Save deleted state to sessionStorage to survive remounts
+      setLocalMediaState({
+        profileImageUrl,
+        videoUrl,
+        coverImageUrl: '',
+        isProfileVideo,
+        profileFileName,
+        coverFileName: '',
+        cvUrl
+      });
+      
       // Mark as unsaved changes - user must click "Spara ändringar"
       setHasUnsavedChanges(true);
       
@@ -938,6 +981,17 @@ const Profile = () => {
     // Restore cover image values
     setCoverImageUrl(deletedCoverImage.coverImageUrl);
     setCoverFileName(deletedCoverImage.coverFileName);
+    
+    // 🔒 Update sessionStorage with restored values
+    setLocalMediaState({
+      profileImageUrl,
+      videoUrl,
+      coverImageUrl: deletedCoverImage.coverImageUrl,
+      isProfileVideo,
+      profileFileName,
+      coverFileName: deletedCoverImage.coverFileName,
+      cvUrl
+    });
     
     // Clear undo data
     setDeletedCoverImage(null);

@@ -753,24 +753,30 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
     const isVideoWithCover = formData.profileMediaType === 'video' && !!formData.coverImageUrl;
 
     // Uppdatera all media i ett enda state-anrop för att undvika visuella "blixtrar"
-    setFormData(prev => {
-      if (isVideoWithCover) {
-        // Video tas bort, cover-bilden blir ny profilbild
-        return {
-          ...prev,
-          profileImageUrl: prev.coverImageUrl,
-          profileMediaType: 'image',
-          coverImageUrl: ''
-        };
-      }
+    let newProfileImageUrl = '';
+    let newProfileMediaType = 'image';
+    let newCoverImageUrl = '';
+    
+    if (isVideoWithCover) {
+      // Video tas bort, cover-bilden blir ny profilbild
+      newProfileImageUrl = formData.coverImageUrl;
+      newProfileMediaType = 'image';
+      newCoverImageUrl = '';
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      profileImageUrl: newProfileImageUrl,
+      profileMediaType: newProfileMediaType,
+      coverImageUrl: newCoverImageUrl
+    }));
 
-      // Ingen cover-bild – rensa allt
-      return {
-        ...prev,
-        profileImageUrl: '',
-        profileMediaType: 'image',
-        coverImageUrl: ''
-      };
+    // 🔒 Save deleted state to sessionStorage to survive remounts
+    setLocalMediaState({
+      profileImageUrl: newProfileImageUrl,
+      profileMediaType: newProfileMediaType,
+      coverImageUrl: newCoverImageUrl,
+      cvUrl: formData.cvUrl
     });
 
     if (isVideoWithCover) {
@@ -803,6 +809,14 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       profileMediaType: deletedProfileMedia.profileMediaType,
     }));
 
+    // 🔒 Update sessionStorage with restored values
+    setLocalMediaState({
+      profileImageUrl: deletedProfileMedia.profileImageUrl,
+      profileMediaType: deletedProfileMedia.profileMediaType,
+      coverImageUrl: deletedProfileMedia.coverImageUrl,
+      cvUrl: formData.cvUrl
+    });
+
     // Clear undo data
     setDeletedProfileMedia(null);
 
@@ -818,6 +832,14 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
     handleInputChange('coverImageUrl', '');
 
+    // 🔒 Save deleted state to sessionStorage to survive remounts
+    setLocalMediaState({
+      profileImageUrl: formData.profileImageUrl,
+      profileMediaType: formData.profileMediaType,
+      coverImageUrl: '',
+      cvUrl: formData.cvUrl
+    });
+
     toast({
       title: "Cover-bild borttagen", 
       description: "Din cover-bild har tagits bort"
@@ -829,6 +851,14 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
     // Restore cover image
     handleInputChange('coverImageUrl', deletedCoverImage);
+
+    // 🔒 Update sessionStorage with restored values
+    setLocalMediaState({
+      profileImageUrl: formData.profileImageUrl,
+      profileMediaType: formData.profileMediaType,
+      coverImageUrl: deletedCoverImage,
+      cvUrl: formData.cvUrl
+    });
 
     // Clear undo data
     setDeletedCoverImage(null);
