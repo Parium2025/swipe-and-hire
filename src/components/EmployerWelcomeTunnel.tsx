@@ -217,7 +217,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                     variant="outline" 
                     onClick={() => document.getElementById('logo-upload')?.click()}
                     disabled={isUploadingLogo}
-                    className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/50 hover:scale-105 transition-transform duration-200"
+                    className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20 transition-all duration-300"
                   >
                     Byt logga
                   </Button>
@@ -429,7 +429,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                 <Button
                   variant="outline"
                   onClick={handlePrevious}
-                  className="py-3 bg-white/10 touch-border-white text-white hover:bg-white/20 hover:scale-105 transition-transform duration-200 text-sm px-4"
+                  className="py-3 bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20 transition-all duration-300 text-sm px-4"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Tillbaka
