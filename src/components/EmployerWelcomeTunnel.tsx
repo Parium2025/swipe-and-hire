@@ -58,9 +58,12 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
   };
 
   const handleLogoSave = async (editedBlob: Blob) => {
+    // Stäng dialogen direkt så användaren ser loading-state
+    setImageEditorOpen(false);
+    setPendingImageSrc('');
+    setIsUploadingLogo(true);
+    
     try {
-      setIsUploadingLogo(true);
-      
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('User not authenticated');
 
@@ -85,8 +88,6 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
       await preloadSingleFile(logoUrl);
       
       setFormData(prev => ({ ...prev, companyLogoUrl: logoUrl }));
-      setImageEditorOpen(false);
-      setPendingImageSrc('');
       
       toast({
         title: "Logga uppladdad!",
