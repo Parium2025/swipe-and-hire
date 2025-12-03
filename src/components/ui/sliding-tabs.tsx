@@ -18,8 +18,9 @@ export function SlidingTabs({ isLogin, onTabChange }: SlidingTabsProps) {
         }}
         transition={{
           type: "spring",
-          stiffness: 500,
-          damping: 30,
+          stiffness: 300,
+          damping: 35,
+          mass: 0.8,
         }}
       />
       
