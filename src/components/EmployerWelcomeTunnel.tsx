@@ -151,11 +151,11 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
-                className="space-y-3 transition-all duration-300 hover:scale-105 hover:bg-white/5 hover:border-white/50 p-4 rounded-xl cursor-pointer"
+                transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.2 }}
+                className="space-y-3 p-4 rounded-xl cursor-pointer hover:bg-white/5"
               >
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
-                  <Briefcase className="h-8 w-8 text-white transition-transform duration-300 hover:rotate-12" />
+                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
+                  <Briefcase className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-white text-center font-semibold">Skapa och hantera jobbannonser</h3>
               </motion.div>
@@ -163,11 +163,11 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
-                className="space-y-3 transition-all duration-300 hover:scale-105 hover:bg-white/5 hover:border-white/50 p-4 rounded-xl cursor-pointer"
+                transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.4 }}
+                className="space-y-3 p-4 rounded-xl cursor-pointer hover:bg-white/5"
               >
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
-                  <Users className="h-8 w-8 text-white transition-transform duration-300 hover:rotate-12" />
+                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
+                  <Users className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-white text-center font-semibold">Få ansökningar från kvalificerade kandidater</h3>
               </motion.div>
@@ -175,11 +175,11 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.6, ease: "easeOut" }}
-                className="space-y-3 transition-all duration-300 hover:scale-105 hover:bg-white/5 hover:border-white/50 p-4 rounded-xl cursor-pointer"
+                transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.6 }}
+                className="space-y-3 p-4 rounded-xl cursor-pointer hover:bg-white/5"
               >
-                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
-                  <Target className="h-8 w-8 text-white transition-transform duration-300 hover:rotate-12" />
+                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
+                  <Target className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-white text-center font-semibold">Hitta rätt talang snabbt och enkelt</h3>
               </motion.div>
