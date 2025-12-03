@@ -9,7 +9,7 @@ import FileUpload from '@/components/FileUpload';
 import ImageEditor from '@/components/ImageEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Building2, Upload, CheckCircle, ArrowRight, ArrowLeft, Briefcase, Users, Target, Sparkles } from 'lucide-react';
+import { Building2, Upload, CheckCircle, ArrowRight, ArrowLeft, Briefcase, Users, Target, Sparkles, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { createSignedUrl } from '@/utils/storageUtils';
 
@@ -205,12 +205,22 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
             <div className="space-y-4 max-w-md mx-auto">
               {formData.companyLogoUrl ? (
                 <div className="text-center space-y-4">
-                  <div className="w-40 h-40 mx-auto bg-white/20 backdrop-blur-sm rounded-full border-2 border-white/20 flex items-center justify-center overflow-hidden">
-                    <img 
-                      src={formData.companyLogoUrl} 
-                      alt="Företagslogga" 
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="relative w-fit mx-auto">
+                    {/* Delete button */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, companyLogoUrl: '' }))}
+                      className="absolute -top-2 -right-2 z-10 p-2 rounded-full bg-white/10 border border-white/20 text-white transition-all duration-300 md:hover:bg-white/20 md:hover:border-white/50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                    <div className="w-40 h-40 bg-white/20 backdrop-blur-sm rounded-full border-2 border-white/20 flex items-center justify-center overflow-hidden">
+                      <img 
+                        src={formData.companyLogoUrl} 
+                        alt="Företagslogga" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
                   <p className="text-sm text-white">Logga uppladdad!</p>
                   <Button 
