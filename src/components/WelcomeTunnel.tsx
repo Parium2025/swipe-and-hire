@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,6 +38,9 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
   
   // Track if CV has been preloaded to avoid redundant preloading
   const [cvPreloaded, setCvPreloaded] = useState(false);
+  
+  // 🔒 CRITICAL: Track if we have local media changes that should NOT be overwritten by DB sync
+  const hasLocalMediaChanges = useRef(false);
   
   // Cache CV signed URL permanently to avoid re-resolving when revisiting CV-steget
   const [cachedCvUrl, setCachedCvUrl] = useState<string | null>(null);
@@ -186,6 +189,12 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
 
   // Load existing media as storage paths (not URLs) when component mounts
   useEffect(() => {
+    // 🔒 CRITICAL: Don't overwrite local media changes when switching tabs
+    if (hasLocalMediaChanges.current) {
+      console.log('Skipping media sync from DB - local changes exist');
+      return;
+    }
+    
     const loadExistingMedia = async () => {
       if (profile?.profile_image_url || profile?.video_url || profile?.cv_url) {
         const updates: any = {};
@@ -329,6 +338,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       // Store the storage path (not the URL) so it never expires
       handleInputChange('profileImageUrl', storagePath);
       handleInputChange('profileMediaType', isVideo ? 'video' : 'image');
+      hasLocalMediaChanges.current = true; // 🔒 Prevent DB sync from overwriting this
       
       toast({
         title: `${isVideo ? 'Video' : 'Bild'} uppladdad!`,
@@ -374,6 +384,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       
       // Store the storage path directly
       handleInputChange('coverImageUrl', storagePath);
+      hasLocalMediaChanges.current = true; // 🔒 Prevent DB sync from overwriting this
       
       toast({
         title: "Cover-bild uppladdad!",
@@ -598,6 +609,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       // Uppdatera lokalt state i tunneln (sparas vid handleSubmit)
       handleInputChange('profileImageUrl', storagePath);
       handleInputChange('profileMediaType', 'image');
+      hasLocalMediaChanges.current = true; // 🔒 Prevent DB sync from overwriting this
       
       setImageEditorOpen(false);
       // Cleanup blob URL
@@ -647,6 +659,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       
       // Uppdatera lokalt state i tunneln (sparas vid handleSubmit)
       handleInputChange('coverImageUrl', storagePath);
+      hasLocalMediaChanges.current = true; // 🔒 Prevent DB sync from overwriting this
       
       setCoverEditorOpen(false);
       // Cleanup blob URL
@@ -832,6 +845,7 @@ const WelcomeTunnel = ({ onComplete }: WelcomeTunnelProps) => {
       }
       
       setCurrentStep(totalSteps - 1); // Go to completion step
+      hasLocalMediaChanges.current = false; // 🔒 Reset after successful save
 
       setTimeout(() => {
         toast({
