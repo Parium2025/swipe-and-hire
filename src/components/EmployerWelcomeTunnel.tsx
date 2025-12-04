@@ -191,68 +191,61 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
 
       case 1:
         return (
-          <div className="max-w-md mx-auto space-y-6">
-            {/* Logo Upload Card - samma stil som profilbild i jobbsökarsidan */}
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg">
-              <div className="p-6 space-y-2">
-                <h3 className="text-base font-semibold text-white text-center">
-                  Företagslogga
-                </h3>
-                <p className="text-white text-center text-sm">
-                  En logga hjälper kandidater att känna igen ditt företag och bygger förtroende
-                </p>
-                
-                {/* Logo Icon */}
-                <div className="flex items-center justify-center">
-                  <div className="relative">
-                    <div className="w-16 h-16 rounded-full border-4 border-white/10 p-2 bg-gradient-to-b from-white/5 to-white/5 backdrop-blur-sm">
-                      <div className="relative w-full h-full rounded-full bg-gradient-to-b from-primary/30 to-primary/50 overflow-hidden flex items-center justify-center">
-                        <Building2 className="h-5 w-5 text-white" />
-                      </div>
-                    </div>
-                    <div className="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-lg">
-                      <Upload className="h-2 w-2 text-primary" />
+          <div className="space-y-6">
+            <div className="text-center mb-8">
+              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
+                <Upload className="h-8 w-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2 text-white">Lägg till din företagslogga</h2>
+              <p className="text-white">
+                En logga hjälper kandidater att känna igen ditt företag och bygger förtroende.
+              </p>
+            </div>
+
+            <div className="space-y-4 max-w-md mx-auto">
+              {formData.companyLogoUrl ? (
+                <div className="text-center space-y-4">
+                  <div className="relative w-fit mx-auto">
+                    {/* Delete button */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, companyLogoUrl: '' }))}
+                      className="absolute -top-2 -right-2 z-10 p-2 rounded-full bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white shadow-lg transition-colors"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                    <div className="w-40 h-40 bg-white/20 backdrop-blur-sm rounded-full border-2 border-white/20 flex items-center justify-center overflow-hidden">
+                      <img 
+                        src={formData.companyLogoUrl} 
+                        alt="Företagslogga" 
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                   </div>
+                  <p className="text-sm text-white">Logga uppladdad!</p>
                 </div>
-              </div>
-              
-              <div className="p-4 flex flex-col items-center space-y-4">
-                <div className="relative">
-                  {formData.companyLogoUrl ? (
-                    <>
-                      <div 
-                        className="cursor-pointer" 
-                        onClick={() => document.getElementById('logo-upload')?.click()}
-                      >
-                        <div className="h-32 w-32 border-4 border-white/10 rounded-full overflow-hidden">
-                          <img 
-                            src={formData.companyLogoUrl} 
-                            alt="Företagslogga" 
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
+              ) : (
+                <div className="space-y-4">
+                  <Label htmlFor="logo-upload" className="block text-sm font-medium text-white">
+                    Företagslogga (valfritt)
+                  </Label>
+                  <div 
+                    className="w-full h-32 border-2 border-dashed border-white/20 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-white/40 hover:border-white/50 hover:bg-white/5 transition-all duration-300"
+                    onClick={() => document.getElementById('logo-upload')?.click()}
+                  >
+                    {isUploadingLogo ? (
+                      <div className="text-center">
+                        <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full mx-auto mb-2"></div>
+                        <p className="text-sm text-white">Laddar upp...</p>
                       </div>
-                      {/* Delete button */}
-                      <button
-                        type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, companyLogoUrl: '' }))}
-                        className="absolute -top-3 -right-3 bg-white/20 hover:bg-destructive/30 backdrop-blur-sm text-white rounded-full p-2 shadow-lg transition-colors"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </>
-                  ) : (
-                    <div 
-                      className="cursor-pointer" 
-                      onClick={() => document.getElementById('logo-upload')?.click()}
-                    >
-                      <div className="h-32 w-32 border-4 border-white/10 rounded-full flex items-center justify-center bg-white/20">
-                        <Building2 className="h-12 w-12 text-white/60" />
-                      </div>
-                    </div>
-                  )}
-                  
+                    ) : (
+                      <>
+                        <Upload className="w-8 h-8 text-white mb-2" />
+                        <p className="text-sm text-white">Klicka för att ladda upp logga</p>
+                        <p className="text-sm text-white mt-1">PNG, JPG eller GIF (max 10MB)</p>
+                      </>
+                    )}
+                  </div>
                   <input
                     id="logo-upload"
                     type="file"
@@ -262,28 +255,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                     disabled={isUploadingLogo}
                   />
                 </div>
-
-                <div className="space-y-2 text-center">
-                  <Label 
-                    htmlFor="logo-upload" 
-                    className="text-white cursor-pointer hover:text-white/90 transition-colors text-center text-sm"
-                  >
-                    Klicka här för att välja en bild (valfritt)
-                  </Label>
-                  
-                  {isUploadingLogo && (
-                    <div className="bg-white/10 text-white border border-white/20 animate-pulse rounded-md px-3 py-1.5 text-sm">
-                      Laddar upp...
-                    </div>
-                  )}
-                  
-                  {formData.companyLogoUrl && !isUploadingLogo && (
-                    <div className="bg-white/20 text-white border border-white/20 px-3 py-1 rounded-md text-sm">
-                      Logga uppladdad!
-                    </div>
-                  )}
-                </div>
-              </div>
+              )}
             </div>
           </div>
         );
