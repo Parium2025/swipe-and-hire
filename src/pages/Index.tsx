@@ -13,7 +13,7 @@ import JobSeekerLayout from "@/components/JobSeekerLayout";
 import Dashboard from '@/components/Dashboard';
 import EmployerDashboard from '@/components/EmployerDashboard';
 import JobSwipe from '@/components/JobSwipe';
-import ProfileSetup from '@/components/ProfileSetup';
+// ProfileSetup removed - employers use EmployerWelcomeTunnel only
 import ProfileSelector from '@/components/ProfileSelector';
 import WelcomeTunnel from '@/components/WelcomeTunnel';
 import ProfilePreview from '@/pages/ProfilePreview';
@@ -230,15 +230,12 @@ const Index = () => {
   const needsOnboarding = !profile?.onboarding_completed;
   
   // Developer overrides for admin user
-  if (user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com') {
+  if (user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab@hotmail.com') {
     if (developerView === 'welcome_tunnel') {
       return <WelcomeTunnel onComplete={() => setDeveloperView('dashboard')} />;
     }
     if (developerView === 'employer_welcome_tunnel') {
       return <EmployerWelcomeTunnel onComplete={() => setDeveloperView('dashboard')} />;
-    }
-    if (developerView === 'profile_setup') {
-      return <ProfileSetup />;
     }
     if (developerView === 'intro_tutorial') {
       setShowIntroTutorial(true);
@@ -285,12 +282,8 @@ const Index = () => {
     return <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />;
   }
   
-  // For employers, check if profile needs setup (basic info missing) - except for admin emails
-  const needsProfileSetup = !profile.bio && !profile.location && !profile.profile_image_url;
-  const isAdminEmail = user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab2025@hotmail.com';
-  if (needsProfileSetup && role === 'employer' && !isAdminEmail) {
-    return <ProfileSetup />;
-  }
+  // Admin emails for developer controls (not for ProfileSetup gating)
+  const isAdminEmail = user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab@hotmail.com';
 
   // Render sidebar layout for profile pages and employer routes
   const sidebarRoutes = ['/profile', '/profile-preview', '/search-jobs', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/consent', '/templates'];
@@ -418,7 +411,7 @@ const Index = () => {
             >
               Min Profil
             </Button>
-            {(user.email === 'fredrik.andits@icloud.com' || user.email === 'fredrikandits@hotmail.com') && (
+            {(user.email === 'fredrikandits@hotmail.com' || user.email === 'pariumab@hotmail.com') && (
               <DeveloperControls 
                 onViewChange={setDeveloperView}
                 currentView={developerView}
