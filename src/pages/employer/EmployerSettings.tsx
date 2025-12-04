@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/hooks/useAuth';
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
+import TeamManagement from '@/components/TeamManagement';
 
 const EmployerSettings = () => {
   const { user, updatePassword } = useAuth();
@@ -154,6 +155,9 @@ const EmployerSettings = () => {
           </div>
         </div>
       </div>
+
+      {/* Team Management - Only visible for admins */}
+      <TeamManagement />
     </div>
   );
 };
