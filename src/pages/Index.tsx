@@ -4,6 +4,7 @@ import JobDetails from '@/pages/JobDetails';
 import JobTemplatesOverview from '@/components/JobTemplatesOverview';
 import CompanyReviews from '@/components/CompanyReviews';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsOrgAdmin } from '@/hooks/useIsOrgAdmin';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
@@ -126,6 +127,7 @@ const CandidatesContent = () => {
 
 const Index = () => {
   const { user, profile, userRole, signOut, loading, authAction, switchRole } = useAuth();
+  const { isAdmin, loading: adminLoading } = useIsOrgAdmin();
   const [switching, setSwitching] = useState(false);
   const [showProfileSelector, setShowProfileSelector] = useState(false);
   const [developerView, setDeveloperView] = useState<string>('dashboard');
@@ -222,15 +224,16 @@ const Index = () => {
   }
 
   // Show profile selector first (admin only)
-  if (showProfileSelector && user.email === 'fredrikandits@hotmail.com') {
+  // Show profile selector for admins (database-based check)
+  if (showProfileSelector && isAdmin) {
     return <ProfileSelector onProfileSelected={() => setShowProfileSelector(false)} />;
   }
 
   // Check if user needs to complete onboarding
   const needsOnboarding = !profile?.onboarding_completed;
   
-  // Developer overrides for admin user
-  if (user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab@hotmail.com') {
+  // Developer overrides for admin users (database-based check)
+  if (isAdmin) {
     if (developerView === 'welcome_tunnel') {
       return <WelcomeTunnel onComplete={() => setDeveloperView('dashboard')} />;
     }
@@ -282,8 +285,7 @@ const Index = () => {
     return <div className="min-h-screen bg-gradient-parium smooth-scroll touch-pan" style={{ WebkitOverflowScrolling: 'touch' }} />;
   }
   
-  // Admin emails for developer controls (not for ProfileSetup gating)
-  const isAdminEmail = user?.email === 'fredrikandits@hotmail.com' || user?.email === 'pariumab@hotmail.com';
+  // isAdmin is now from database via useIsOrgAdmin hook
 
   // Render sidebar layout for profile pages and employer routes
   const sidebarRoutes = ['/profile', '/profile-preview', '/search-jobs', '/subscription', '/billing', '/payment', '/support', '/settings', '/admin', '/consent', '/templates'];
@@ -411,7 +413,7 @@ const Index = () => {
             >
               Min Profil
             </Button>
-            {(user.email === 'fredrikandits@hotmail.com' || user.email === 'pariumab@hotmail.com') && (
+            {isAdmin && (
               <DeveloperControls 
                 onViewChange={setDeveloperView}
                 currentView={developerView}

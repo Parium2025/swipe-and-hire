@@ -691,6 +691,8 @@ export type Database = {
           video_url: string
         }[]
       }
+      get_user_organization_id: { Args: { p_user_id: string }; Returns: string }
+      is_org_admin: { Args: { p_user_id: string }; Returns: boolean }
     }
     Enums: {
       user_role: "job_seeker" | "employer"
