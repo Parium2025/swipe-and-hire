@@ -286,7 +286,6 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                   <Briefcase className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-white text-center font-semibold">Skapa jobbannonser</h3>
-                <p className="text-sm text-white/80 text-center">Använd vårt enkla formulär för att skapa attraktiva jobbannonser som når rätt kandidater.</p>
               </motion.div>
 
               <motion.div 
@@ -299,7 +298,6 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                   <Users className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-white text-center font-semibold">Ta emot ansökningar</h3>
-                <p className="text-sm text-white/80 text-center">Kandidater kan enkelt ansöka till dina jobb. Du får alla ansökningar samlat på ett ställe.</p>
               </motion.div>
 
               <motion.div 
@@ -312,7 +310,6 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
                   <Target className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-white text-center font-semibold">Hitta rätt talang</h3>
-                <p className="text-sm text-white/80 text-center">Granska kandidatprofiler, CV:n och videoansökningar för att hitta den perfekta matchen.</p>
               </motion.div>
             </div>
           </div>
