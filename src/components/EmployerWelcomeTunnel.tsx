@@ -325,7 +325,7 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
               
               <div className="space-y-4">
                 <h2 className="text-3xl font-bold text-white animate-fade-in">Allt är klart!</h2>
-                <p className="text-xl text-white/90 max-w-md mx-auto leading-relaxed">
+                <p className="text-xl text-white max-w-md mx-auto leading-relaxed">
                   Din arbetsgivarprofil är nu komplett. Du kan nu börja skapa jobbannonser och hitta fantastiska kandidater.
                 </p>
               </div>
