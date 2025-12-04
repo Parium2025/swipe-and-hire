@@ -262,53 +262,58 @@ const EmployerWelcomeTunnel = ({ onComplete }: EmployerWelcomeTunnelProps) => {
 
       case 2:
         return (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <div className="bg-white/20 backdrop-blur-sm p-4 rounded-full w-fit mx-auto mb-4">
-                <Sparkles className="h-8 w-8 text-white" />
+          <div className="text-center space-y-8 py-8">
+            <div className="space-y-6">
+              <div className="h-2" />
+              
+              <div className="space-y-6">
+                <h1 className="text-4xl font-bold text-white animate-fade-in leading-tight">Så här fungerar Parium</h1>
+                
+                <div className="space-y-1">
+                  <p className="text-xl md:text-2xl text-white animate-fade-in leading-relaxed drop-shadow-sm font-semibold">Här är en snabb guide för att komma igång</p>
+                </div>
               </div>
-              <h2 className="text-2xl font-bold mb-2 text-white">Så här fungerar Parium</h2>
-              <p className="text-white">
-                Här är en snabb guide för att komma igång:
-              </p>
             </div>
 
-            <div className="space-y-4 max-w-md mx-auto">
-              <div className="flex items-start space-x-4 p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 hover:border-white/50 transition-all duration-300 hover:bg-white/15 hover:scale-105">
-                <div className="text-2xl font-bold text-white">
-                  1
+            <div className="grid grid-cols-1 gap-6 max-w-2xl mx-auto">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.2 }}
+                className="space-y-3 p-4 rounded-xl cursor-pointer hover:bg-white/5"
+              >
+                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
+                  <Briefcase className="h-8 w-8 text-white" />
                 </div>
-                <div>
-                  <h3 className="font-semibold text-white">Skapa jobbannonser</h3>
-                  <p className="text-sm text-white/80">
-                    Använd vårt enkla formulär för att skapa attraktiva jobbannonser som når rätt kandidater.
-                  </p>
-                </div>
-              </div>
+                <h3 className="text-white text-center font-semibold">Skapa jobbannonser</h3>
+                <p className="text-sm text-white/80 text-center">Använd vårt enkla formulär för att skapa attraktiva jobbannonser som når rätt kandidater.</p>
+              </motion.div>
 
-              <div className="flex items-start space-x-4 p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 hover:border-white/50 transition-all duration-300 hover:bg-white/15 hover:scale-105">
-                <div className="text-2xl font-bold text-white">
-                  2
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.4 }}
+                className="space-y-3 p-4 rounded-xl cursor-pointer hover:bg-white/5"
+              >
+                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
+                  <Users className="h-8 w-8 text-white" />
                 </div>
-                <div>
-                  <h3 className="font-semibold text-white">Ta emot ansökningar</h3>
-                  <p className="text-sm text-white/80">
-                    Kandidater kan enkelt ansöka till dina jobb. Du får alla ansökningar samlat på ett ställe.
-                  </p>
-                </div>
-              </div>
+                <h3 className="text-white text-center font-semibold">Ta emot ansökningar</h3>
+                <p className="text-sm text-white/80 text-center">Kandidater kan enkelt ansöka till dina jobb. Du får alla ansökningar samlat på ett ställe.</p>
+              </motion.div>
 
-              <div className="flex items-start space-x-4 p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 hover:border-white/50 transition-all duration-300 hover:bg-white/15 hover:scale-105">
-                <div className="text-2xl font-bold text-white">
-                  3
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.6 }}
+                className="space-y-3 p-4 rounded-xl cursor-pointer hover:bg-white/5"
+              >
+                <div className="p-4 rounded-full w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-sm">
+                  <Target className="h-8 w-8 text-white" />
                 </div>
-                <div>
-                  <h3 className="font-semibold text-white">Hitta rätt talang</h3>
-                  <p className="text-sm text-white/80">
-                    Granska kandidatprofiler, CV:n och videoansökningar för att hitta den perfekta matchen.
-                  </p>
-                </div>
-              </div>
+                <h3 className="text-white text-center font-semibold">Hitta rätt talang</h3>
+                <p className="text-sm text-white/80 text-center">Granska kandidatprofiler, CV:n och videoansökningar för att hitta den perfekta matchen.</p>
+              </motion.div>
             </div>
           </div>
         );
