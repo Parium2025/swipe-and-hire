@@ -424,7 +424,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                           onTouchMove={(e) => e.stopPropagation()}
                           onCloseAutoFocus={(e) => e.preventDefault()}
                         >
-                          <div className="p-3 border-b border-slate-600/30 sticky top-0 bg-slate-800/95 backdrop-blur-md z-10">
+                          <div className="p-3 border-b border-white/20 sticky top-0 z-10">
                             <div className="relative">
                               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/80" />
                               <Input
@@ -461,12 +461,12 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
 
                           {/* Result indicator */}
                           {searchTerm && (
-                            <div className="px-4 py-2 text-sm text-white/90 bg-slate-800/50 border-b border-slate-600/20">
+                            <div className="px-4 py-2 text-sm text-white/90 border-b border-white/20">
                               Visar <span className="text-white font-medium">{filteredTemplates.length}</span> av <span className="text-white font-medium">{templates.length}</span> mallar
                             </div>
                           )}
 
-                          <div className="bg-slate-800/95 flex-1 pb-2">
+                          <div className="flex-1 pb-2">
                             <DropdownMenuItem
                               onClick={() => {
                                 setTemplateMenuOpen(false);
@@ -479,7 +479,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                   e.preventDefault();
                                 }
                               }}
-                              className="px-4 py-2 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20"
+                              className="px-4 py-2 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-white/20"
                             >
                               <div className="flex flex-col">
                                 <span className="font-medium text-white">+ Skapa en ny mall</span>
@@ -497,7 +497,7 @@ const CreateJobSimpleDialog = ({ onJobCreated }: CreateJobSimpleDialogProps) => 
                                     e.preventDefault();
                                   }
                                 }}
-                                className="px-4 py-2 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-slate-600/20 last:border-b-0"
+                                className="px-4 py-2 text-white hover:bg-white/10 focus:bg-white/10 focus:text-white cursor-pointer transition-colors border-b border-white/20 last:border-b-0"
                               >
                                 <div className="flex items-center justify-between w-full gap-3">
                                   <button
