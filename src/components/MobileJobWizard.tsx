@@ -2913,14 +2913,12 @@ const MobileJobWizard = ({
                 {/* Desktop Preview - Monitor mockup EXACTLY like ProfilePreview */}
                 {previewMode === 'desktop' && (
                   <div className="flex flex-col items-center space-y-4">
-                    {/* Desktop monitor frame - professional iMac-style mockup */}
+                    {/* Desktop monitor frame - professional mockup */}
                     <div className="relative">
-                      {/* Outer silver/metallic frame */}
-                      <div className="relative w-[520px] rounded-xl bg-gradient-to-b from-gray-300 via-gray-400 to-gray-500 p-1 shadow-2xl" style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.3)' }}>
-                        {/* Inner black bezel */}
-                        <div className="relative w-full rounded-lg bg-black p-2">
-                          {/* Screen area */}
-                          <div className="relative w-full h-[280px] rounded-md overflow-hidden bg-black border border-gray-800">
+                      {/* Monitor screen */}
+                      <div className="relative w-[500px] rounded-t-lg bg-black p-2.5 shadow-2xl">
+                        {/* Screen bezel */}
+                        <div className="relative w-full h-[260px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
                           {/* Innehåll med Parium bakgrund */}
                           <div 
                             className="absolute inset-0"
@@ -3142,21 +3140,14 @@ const MobileJobWizard = ({
                             )}
                           </div>
                         </div>
-                        </div>
                       </div>
                       
-                      {/* Monitor chin - silver bottom bezel like iMac */}
-                      <div className="w-[520px] h-6 bg-gradient-to-b from-gray-400 to-gray-500 rounded-b-xl flex items-center justify-center" style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2)' }}>
-                        {/* Apple-style logo or camera dot */}
-                        <div className="w-2 h-2 rounded-full bg-gray-600/50"></div>
-                      </div>
-                      
-                      {/* Monitor stand - aluminum style */}
+                      {/* Monitor stand */}
                       <div className="flex flex-col items-center">
                         {/* Stand neck */}
-                        <div className="w-16 h-10 bg-gradient-to-b from-gray-400 via-gray-500 to-gray-600 rounded-b-sm" style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2)' }}></div>
+                        <div className="w-12 h-6 bg-gradient-to-b from-gray-700 to-gray-800 rounded-b-sm"></div>
                         {/* Stand base */}
-                        <div className="w-40 h-3 bg-gradient-to-b from-gray-400 to-gray-600 rounded-full shadow-lg" style={{ boxShadow: '0 4px 15px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)' }}></div>
+                        <div className="w-32 h-2.5 bg-gradient-to-b from-gray-800 to-gray-900 rounded-full shadow-lg"></div>
                       </div>
                     </div>
                   </div>
