@@ -17,7 +17,7 @@ import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES, getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Minus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users, GripVertical, ArrowDown, Pencil, Smartphone, Monitor } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Minus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users, GripVertical, ArrowDown, Pencil, Smartphone, Monitor, RotateCcw } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
@@ -752,6 +752,40 @@ const MobileJobWizard = ({
       throw error; // Re-throw så ImageEditor vet att det misslyckades
     }
   };
+
+  // Återställ till originalbilden (ta bort justeringar)
+  const handleResetToOriginal = async () => {
+    if (!originalImageUrl) return;
+    
+    try {
+      // Hämta original storage path från formData.job_image_url
+      // Om originalImageUrl är en signerad URL, behöver vi extrahera pathen
+      let originalPath = formData.job_image_url;
+      
+      // Om nuvarande job_image_url är en redigerad bild, försök hitta originalpathen
+      if (originalPath && originalPath.includes('-edited-')) {
+        // Redigerade bilder har format: userId/timestamp-edited-job-image.png
+        // Originalet kan vara: userId/originalTimestamp-randomId.ext
+        // Vi behöver återställa till originalImageUrl som URL
+      }
+      
+      // Sätt jobImageDisplayUrl till originalImageUrl
+      setJobImageDisplayUrl(originalImageUrl);
+      
+      // Nollställ manualFocus
+      setManualFocus(null);
+      
+      toast({
+        title: "Bild återställd",
+        description: "Bilden har återställts till originalet",
+      });
+    } catch (error) {
+      console.error('Failed to reset to original:', error);
+    }
+  };
+
+  // Kontrollera om bilden har blivit redigerad (dvs om displayUrl skiljer sig från originalUrl)
+  const isImageEdited = jobImageDisplayUrl && originalImageUrl && jobImageDisplayUrl !== originalImageUrl;
 
   // Öppna editor med ALLTID originalbildens URL (inte den redigerade versionen)
   const openImageEditor = async () => {
@@ -3217,13 +3251,22 @@ const MobileJobWizard = ({
                       
                       {/* Bildkontroller */}
                       <div className="mt-4 space-y-3">
-                        <div className="flex justify-center">
+                        <div className="flex justify-center gap-2">
                           <button
                             onClick={openImageEditor}
                             className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium"
                           >
                             Justera bild
                           </button>
+                          {isImageEdited && (
+                            <button
+                              onClick={handleResetToOriginal}
+                              className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-1.5"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5" />
+                              Återställ
+                            </button>
+                          )}
                         </div>
                         <p className="text-sm text-white text-center">
                           Klicka för att zooma, panorera och justera bilden
