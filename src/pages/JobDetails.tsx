@@ -250,7 +250,7 @@ const JobDetails = () => {
   }
 
   return (
-    <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12 py-4 pb-safe min-h-screen animate-fade-in">
+    <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12 py-4 pb-safe min-h-screen">
         {/* Job Title and Stats */}
         <div className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg p-3 md:p-6">
           <div className="flex items-start justify-between mb-3">
