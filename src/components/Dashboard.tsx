@@ -39,7 +39,7 @@ const Dashboard = memo(() => {
   ], [stats]);
 
   return (
-    <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12">
+    <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12 animate-fade-in">
       <div className="text-center">
         <h1 className="text-xl md:text-2xl font-semibold text-white">Dashboard</h1>
       </div>
