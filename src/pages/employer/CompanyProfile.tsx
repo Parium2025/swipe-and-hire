@@ -63,7 +63,8 @@ const CompanyProfile = () => {
     company_description: profile?.company_description || '',
     employee_count: profile?.employee_count || '',
     company_logo_url: (profile as any)?.company_logo_url || '',
-    company_social_media_links: (profile as any)?.company_social_media_links || [] as SocialMediaLink[],
+    // Use social_media_links from DB (correct field name)
+    social_media_links: ((profile as any)?.social_media_links || []) as SocialMediaLink[],
   });
 
   const [newSocialLink, setNewSocialLink] = useState({
@@ -88,7 +89,7 @@ const CompanyProfile = () => {
         company_description: profile.company_description || '',
         employee_count: profile.employee_count || '',
         company_logo_url: (profile as any)?.company_logo_url || '',
-        company_social_media_links: (profile as any)?.company_social_media_links || [],
+        social_media_links: ((profile as any)?.social_media_links || []) as SocialMediaLink[],
       };
       
       setFormData(values);
@@ -101,10 +102,10 @@ const CompanyProfile = () => {
     if (!originalValues.company_name) return false; // Not loaded yet
     
     const hasChanges = Object.keys(formData).some(key => {
-      if (key === 'company_social_media_links') {
+      if (key === 'social_media_links') {
         return JSON.stringify(formData[key]) !== JSON.stringify(originalValues[key]);
       }
-      return formData[key] !== originalValues[key];
+      return formData[key as keyof typeof formData] !== originalValues[key];
     });
 
     setHasUnsavedChanges(hasChanges);
@@ -263,7 +264,7 @@ const CompanyProfile = () => {
 
     // Check if platform already exists (except for "annat" which can have multiple entries)
     if (newSocialLink.platform !== 'annat') {
-      const existingPlatform = formData.company_social_media_links.find(link => link.platform === newSocialLink.platform);
+      const existingPlatform = formData.social_media_links.find(link => link.platform === newSocialLink.platform);
       if (existingPlatform) {
         toast({
           title: "Plattform finns redan",
@@ -274,12 +275,12 @@ const CompanyProfile = () => {
       }
     }
 
-    const updatedLinks = [...formData.company_social_media_links, newSocialLink as SocialMediaLink];
+    const updatedLinks = [...formData.social_media_links, newSocialLink as SocialMediaLink];
     
     // Update local state and mark as unsaved
     setFormData({
       ...formData,
-      company_social_media_links: updatedLinks
+      social_media_links: updatedLinks
     });
     setHasUnsavedChanges(true);
     
@@ -292,7 +293,7 @@ const CompanyProfile = () => {
   };
 
   const handleRemoveLinkClick = (index: number) => {
-    const link = formData.company_social_media_links[index];
+    const link = formData.social_media_links[index];
     setLinkToDelete({ link, index });
     setDeleteDialogOpen(true);
   };
@@ -300,11 +301,11 @@ const CompanyProfile = () => {
   const confirmRemoveSocialLink = () => {
     if (!linkToDelete) return;
 
-    const updatedLinks = formData.company_social_media_links.filter((_, i) => i !== linkToDelete.index);
+    const updatedLinks = formData.social_media_links.filter((_, i) => i !== linkToDelete.index);
     
     const updatedFormData = { 
       ...formData, 
-      company_social_media_links: [...updatedLinks]
+      social_media_links: [...updatedLinks]
     };
 
     // Update local state only - user must save manually
@@ -332,7 +333,7 @@ const CompanyProfile = () => {
     }
 
     // Validate all social media URLs
-    for (const link of formData.company_social_media_links) {
+    for (const link of formData.social_media_links) {
       if (!validateUrl(link.url, link.platform)) {
         toast({
           title: "Ogiltig URL",
@@ -350,7 +351,7 @@ const CompanyProfile = () => {
       // Deep clone to ensure proper comparison
       const updatedValues = {
         ...formData,
-        company_social_media_links: JSON.parse(JSON.stringify(formData.company_social_media_links)),
+        social_media_links: JSON.parse(JSON.stringify(formData.social_media_links)),
       };
 
       // Sync form with saved values to avoid second click
@@ -480,7 +481,7 @@ const CompanyProfile = () => {
                   id="company_name"
                   value={formData.company_name}
                   onChange={(e) => setFormData({...formData, company_name: e.target.value})}
-                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 h-9"
+                  className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 h-9 [&]:text-white"
                 />
               </div>
 
@@ -505,7 +506,7 @@ const CompanyProfile = () => {
                   placeholder="XXXXXX-XXXX"
                   inputMode="numeric"
                   maxLength={11}
-                  className={`bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 ${orgNumberError ? 'border-red-500/50' : ''}`}
+                  className={`bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 [&]:text-white ${orgNumberError ? 'border-red-500/50' : ''}`}
                 />
                 {orgNumberError && (
                   <p className="text-red-400/80 text-sm mt-1">{orgNumberError}</p>
@@ -631,7 +632,7 @@ const CompanyProfile = () => {
                   value={formData.address}
                   onChange={(e) => setFormData({...formData, address: e.target.value})}
                   placeholder="Hammarby Backen 89555"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 [&]:text-white"
                 />
               </div>
 
@@ -642,7 +643,7 @@ const CompanyProfile = () => {
                   value={formData.website}
                   onChange={(e) => setFormData({...formData, website: e.target.value})}
                   placeholder="https://din-webbsida.se"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40 h-9 [&]:text-white"
                 />
               </div>
             </div>
@@ -655,7 +656,7 @@ const CompanyProfile = () => {
                 onChange={(e) => setFormData({...formData, company_description: e.target.value})}
                 placeholder="Vi säljer bilar"
                 rows={4}
-                className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 resize-none"
+                className="bg-white/5 border-white/10 hover:border-white/50 text-white placeholder:text-white/40 resize-none [&]:text-white"
               />
             </div>
 
@@ -667,10 +668,10 @@ const CompanyProfile = () => {
               </div>
 
               {/* Existing social media links */}
-              {formData.company_social_media_links.length > 0 && (
+              {formData.social_media_links.length > 0 && (
                 <div className="space-y-2">
                   <Label className="text-sm text-white">Företagets sociala medier</Label>
-                  {formData.company_social_media_links.map((link, index) => {
+                  {formData.social_media_links.map((link, index) => {
                     const Icon = getPlatformIcon(link.platform);
                     return (
                       <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/50 rounded-lg p-2 gap-2">
