@@ -82,7 +82,7 @@ const CandidatesContent = () => {
                 placeholder="Sök på namn, email, telefon, plats, jobb..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-white/60"
+                className="pl-10 bg-white/5 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 transition-colors"
               />
             </div>
           </div>
