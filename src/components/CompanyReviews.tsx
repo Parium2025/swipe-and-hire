@@ -173,10 +173,10 @@ const CompanyReviews = () => {
         {/* Header med Logo och Namn */}
         <div className="mb-6">
           <div className="flex items-center gap-3">
-            <Avatar className="h-12 w-12">
+            <Avatar className="h-12 w-12 bg-transparent">
               <AvatarImage src={company.company_logo_url} alt={company.company_name} />
-              <AvatarFallback>
-                <Building2 className="h-6 w-6" />
+              <AvatarFallback className="bg-transparent">
+                <Building2 className="h-8 w-8 text-white" />
               </AvatarFallback>
             </Avatar>
             <div>
