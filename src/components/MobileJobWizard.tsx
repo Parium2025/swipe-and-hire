@@ -460,7 +460,7 @@ const MobileJobWizard = ({
   }, [showHingePreview]);
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
-  const [imageVersion, setImageVersion] = useState(0); // Force re-render on image change
+  
   const [bgPosition, setBgPosition] = useState<string>('center 50%');
   const [manualFocus, setManualFocus] = useState<number | null>(null);
   const [showImageEditor, setShowImageEditor] = useState(false);
@@ -729,7 +729,6 @@ const MobileJobWizard = ({
       // Uppdatera med storage path (fileName) istället för blob URL
       handleInputChange('job_image_url', fileName);
       setJobImageDisplayUrl(publicUrl);
-      setImageVersion(v => v + 1); // Increment version to force image refresh
       // Behåll originalImageUrl oförändrad så vi alltid kan fortsätta redigera från originalet
       setManualFocus(null);
       
@@ -3100,14 +3099,14 @@ const MobileJobWizard = ({
                             {/* Tinder-style Card View (initial) - IDENTICAL to mobile */}
                             {!showDesktopApplicationForm && (
                               <div className="absolute inset-0 z-10">
-                                {/* Job Image */}
+                                {/* Job Image - identisk med mobil */}
                                 {jobImageDisplayUrl ? (
                                   <img
-                                    key={`${jobImageDisplayUrl}-${imageVersion}`}
-                                    src={`${jobImageDisplayUrl}${jobImageDisplayUrl.includes('?') ? '&' : '?'}v=${imageVersion}`}
+                                    src={jobImageDisplayUrl}
                                     alt={`Jobbbild för ${formData.title}`}
                                     className="absolute inset-0 w-full h-full object-cover select-none"
                                     loading="eager"
+                                    decoding="async"
                                   />
                                 ) : null}
                                 
