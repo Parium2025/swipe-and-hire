@@ -2495,7 +2495,7 @@ const MobileJobWizard = ({
                                        onClick={() => {
                                          setShowCompanyProfile(true);
                                        }}
-                                       className="text-xs font-bold text-white hover:text-primary transition-colors cursor-pointer whitespace-normal break-words leading-tight"
+                                       className="text-xs font-bold text-white hover:text-white/70 transition-colors cursor-pointer whitespace-normal break-words leading-tight"
                                      >
                                        {profile?.company_name || 'Företagsnamn'}
                                      </button>
@@ -2877,7 +2877,7 @@ const MobileJobWizard = ({
                   <>
                     <button 
                       onClick={() => setShowCompanyProfile(true)}
-                      className={`${textSizes.company} text-white font-medium mb-1 hover:text-primary transition-colors cursor-pointer text-left`}
+                      className={`${textSizes.company} text-white font-medium mb-1 hover:text-white/70 transition-colors cursor-pointer text-left`}
                     >
                       {profile?.company_name || 'Företag'}
                     </button>
@@ -2958,7 +2958,7 @@ const MobileJobWizard = ({
                                         )}
                                         <button 
                                           onClick={() => setShowCompanyProfile(true)}
-                                          className="text-sm font-bold text-white hover:text-primary transition-colors cursor-pointer"
+                                          className="text-sm font-bold text-white hover:text-white/70 transition-colors cursor-pointer"
                                         >
                                           {profile?.company_name || 'Företagsnamn'}
                                         </button>
@@ -3098,7 +3098,7 @@ const MobileJobWizard = ({
                                   {/* Company name at top */}
                                   <button 
                                     onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
-                                    className="text-sm text-white font-medium mb-1 hover:text-primary transition-colors cursor-pointer"
+                                    className="text-sm text-white font-medium mb-1 hover:text-white/70 transition-colors cursor-pointer"
                                   >
                                     {profile?.company_name || 'Företag'}
                                   </button>
