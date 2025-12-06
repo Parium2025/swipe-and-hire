@@ -2299,9 +2299,8 @@ const MobileJobWizard = ({
                             ))}
                             <Button
                               onClick={addOption}
-                              variant="outline"
                               size="sm"
-                              className="border border-white/30 text-white bg-transparent hover:bg-white/10 hover:border-white/50 hover:text-white transition-all duration-300"
+                              className="border border-white/30 text-white bg-transparent transition-all duration-300 md:hover:bg-white/10 md:hover:border-white/50 md:hover:text-white [&_svg]:text-white active:scale-95 active:bg-white/20 active:duration-75"
                             >
                               Lägg till alternativ
                               <Plus className="h-4 w-4 ml-1" />
