@@ -1698,7 +1698,7 @@ const MobileJobWizard = ({
                     
                     {/* Occupation Dropdown */}
                     {showOccupationDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-white/10 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg">
+                      <div className="absolute top-full left-0 right-0 z-50 bg-white/5 backdrop-blur-md border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg">
                         {/* Show filtered occupations */}
                         {filteredOccupations.map((occupation, index) => (
                           <button
