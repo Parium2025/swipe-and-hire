@@ -255,6 +255,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     canvasRef.current.toBlob((blob) => {
       if (blob) {
         onSave(blob);
+        onClose(); // Close dialog after saving
       }
     }, 'image/png', 1.0);
   };
