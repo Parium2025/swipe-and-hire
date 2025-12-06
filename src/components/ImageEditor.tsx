@@ -31,6 +31,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [minScale, setMinScale] = useState(0.1);
   const [isSaving, setIsSaving] = useState(false);
+  const [wasReset, setWasReset] = useState(false); // Track if reset was pressed
   
 
   const BASE_CANVAS_HEIGHT = 400; // Output canvas height in px
@@ -38,10 +39,11 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const CANVAS_WIDTH = Math.round(BASE_CANVAS_HEIGHT * aspectRatio);
   const MAX_SCALE = 3;
 
-  // Reset saving state when dialog opens/closes
+  // Reset saving state and wasReset when dialog opens/closes
   useEffect(() => {
     if (!isOpen) {
       setIsSaving(false);
+      setWasReset(false);
     }
   }, [isOpen]);
 
@@ -198,6 +200,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     const newY = e.clientY - rect.top - dragStart.y;
     
     setPosition({ x: newX, y: newY });
+    setWasReset(false); // User made manual change
   };
 
   const handleMouseUp = () => {
@@ -230,6 +233,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     const newY = touch.clientY - rect.top - dragStart.y;
     
     setPosition({ x: newX, y: newY });
+    setWasReset(false); // User made manual change
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
@@ -241,16 +245,19 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const zoomIn = () => {
     if (isSaving) return;
     setScale(prev => Math.min(prev + 0.2, MAX_SCALE));
+    setWasReset(false); // User made manual change
   };
 
   const zoomOut = () => {
     if (isSaving) return;
     setScale(prev => Math.max(prev - 0.2, minScale));
+    setWasReset(false); // User made manual change
   };
 
   const resetPosition = () => {
     if (isSaving) return;
     setPosition({ x: 0, y: 0 });
+    setWasReset(true); // Mark that reset was pressed
     if (imageRef.current) {
       const img = imageRef.current;
       const containerWidth = CANVAS_WIDTH;
@@ -272,6 +279,21 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
     }
     
     setIsSaving(true);
+    
+    // Om reset trycktes och onRestoreOriginal finns, återställ originalet automatiskt
+    if (wasReset && onRestoreOriginal) {
+      console.log('ImageEditor: Reset was pressed, restoring original...');
+      try {
+        await onRestoreOriginal();
+        console.log('ImageEditor: Original restored successfully');
+        onClose();
+      } catch (error) {
+        console.error('ImageEditor: Restore original failed:', error);
+        setIsSaving(false);
+      }
+      return;
+    }
+    
     console.log('ImageEditor: Starting save process...');
     
     try {
@@ -378,56 +400,32 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           </p>
 
           {/* Action buttons */}
-          <div className="flex flex-col space-y-2">
-            {/* Restore original button - only show if callback is provided */}
-            {onRestoreOriginal && (
-              <Button 
-                type="button"
-                onClick={async () => {
-                  setIsSaving(true);
-                  try {
-                    await onRestoreOriginal();
-                    onClose();
-                  } finally {
-                    setIsSaving(false);
-                  }
-                }}
-                disabled={isSaving}
-                className="w-full transition-all duration-200 !text-white bg-primary/20 border-primary/30 hover:bg-primary/30 hover:!text-white hover:border-primary/50 md:hover:bg-primary/30 md:hover:!text-white md:hover:border-primary/50 disabled:opacity-50"
-                variant="outline"
-              >
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Återställ till original
-              </Button>
-            )}
-            
-            <div className="flex space-x-2">
-              <Button 
-                type="button"
-                onClick={handleCancelClick}
-                disabled={isSaving}
-                className="flex-1 transition-all duration-200 !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 disabled:opacity-50"
-                variant="outline"
-              >
-                Avbryt
-              </Button>
-              <Button 
-                type="button"
-                onClick={handleSaveClick}
-                disabled={isSaving}
-                className="flex-1 transition-all duration-200 !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 disabled:opacity-50"
-                variant="outline"
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Sparar...
-                  </>
-                ) : (
-                  'Spara'
-                )}
-              </Button>
-            </div>
+          <div className="flex space-x-2">
+            <Button 
+              type="button"
+              onClick={handleCancelClick}
+              disabled={isSaving}
+              className="flex-1 transition-all duration-200 !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 disabled:opacity-50"
+              variant="outline"
+            >
+              Avbryt
+            </Button>
+            <Button 
+              type="button"
+              onClick={handleSaveClick}
+              disabled={isSaving}
+              className="flex-1 transition-all duration-200 !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 disabled:opacity-50"
+              variant="outline"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Sparar...
+                </>
+              ) : (
+                'Spara'
+              )}
+            </Button>
           </div>
         </div>
       </DialogContent>
