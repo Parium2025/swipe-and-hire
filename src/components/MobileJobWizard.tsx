@@ -460,6 +460,7 @@ const MobileJobWizard = ({
   }, [showHingePreview]);
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
+  const [imageTimestamp, setImageTimestamp] = useState<number>(Date.now()); // For cache busting
   
   const [bgPosition, setBgPosition] = useState<string>('center 50%');
   const [manualFocus, setManualFocus] = useState<number | null>(null);
@@ -729,6 +730,7 @@ const MobileJobWizard = ({
       // Uppdatera med storage path (fileName) istället för blob URL
       handleInputChange('job_image_url', fileName);
       setJobImageDisplayUrl(publicUrl);
+      setImageTimestamp(Date.now()); // Force cache refresh for all img elements
       // Behåll originalImageUrl oförändrad så vi alltid kan fortsätta redigera från originalet
       setManualFocus(null);
       
@@ -2940,7 +2942,7 @@ const MobileJobWizard = ({
                       {/* Monitor screen */}
                       <div className="relative w-[520px] rounded-t-lg bg-black p-2.5 shadow-2xl">
                         {/* Screen bezel */}
-                        <div className="relative w-full h-[200px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
+                        <div className="relative w-full h-[300px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
                           {/* Innehåll med Parium bakgrund */}
                           <div 
                             className="absolute inset-0"
@@ -3099,10 +3101,11 @@ const MobileJobWizard = ({
                             {/* Tinder-style Card View (initial) - IDENTICAL to mobile */}
                             {!showDesktopApplicationForm && (
                               <div className="absolute inset-0 z-10">
-                                {/* Job Image - identisk med mobil */}
+                                {/* Job Image - med cache-busting för desktop */}
                                 {jobImageDisplayUrl ? (
                                   <img
-                                    src={jobImageDisplayUrl}
+                                    key={`desktop-${jobImageDisplayUrl}-${imageTimestamp}`}
+                                    src={`${jobImageDisplayUrl}${jobImageDisplayUrl.includes('?') ? '&' : '?'}t=${imageTimestamp}`}
                                     alt={`Jobbbild för ${formData.title}`}
                                     className="absolute inset-0 w-full h-full object-cover select-none"
                                     loading="eager"
