@@ -2176,7 +2176,7 @@ const MobileJobWizard = ({
                             onChange={(e) => handleQuestionTypeSearch(e.target.value)}
                             onClick={handleQuestionTypeClick}
                             placeholder="Välj frågetyp"
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-primary focus:ring-2 focus:ring-primary/50 focus:ring-offset-0"
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-white/40 focus:ring-0 focus:ring-offset-0"
                             readOnly
                           />
                           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
@@ -2286,7 +2286,7 @@ const MobileJobWizard = ({
                                   value={option}
                                   onChange={(e) => updateOption(index, e.target.value)}
                                   placeholder={`Alternativ ${index + 1}`}
-                                  className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
+                                  className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm"
                                 />
                                 <button
                                   type="button"
