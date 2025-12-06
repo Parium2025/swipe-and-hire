@@ -225,7 +225,7 @@ const EmployerDashboard = memo(() => {
                       </TableCell>
                     </TableRow>
                   ) : filteredAndSortedJobs.length === 0 ? (
-                    <TableRow>
+                    <TableRow className="hover:bg-transparent">
                       <TableCell colSpan={8} className="text-center !text-white py-8 font-medium text-sm">
                         {searchTerm.trim() ? 'Inga annonser matchar din sökning' : 'Inga jobbannonser än. Skapa din första annons!'}
                       </TableCell>
