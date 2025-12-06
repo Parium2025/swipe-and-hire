@@ -2342,7 +2342,7 @@ const MobileJobWizard = ({
                   <div className="relative inline-flex bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20">
                     {/* Sliding background */}
                     <motion.div
-                      className="absolute top-1 bottom-1 bg-primary rounded-md"
+                      className="absolute top-1 bottom-1 bg-white/20 rounded-md"
                       initial={false}
                       animate={{
                         left: previewMode === 'mobile' ? '4px' : '50%',
