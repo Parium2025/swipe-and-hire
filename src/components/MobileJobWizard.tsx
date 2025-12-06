@@ -1698,14 +1698,14 @@ const MobileJobWizard = ({
                     
                     {/* Occupation Dropdown */}
                     {showOccupationDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 z-50 bg-white/10 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg">
                         {/* Show filtered occupations */}
                         {filteredOccupations.map((occupation, index) => (
                           <button
                             key={`${occupation}-${index}`}
                             type="button"
                             onClick={() => handleOccupationSelect(occupation)}
-                            className="w-full px-3 py-2 text-left hover:bg-gray-700 text-white text-sm border-b border-gray-700 last:border-b-0"
+                            className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
                           >
                             <div className="font-medium">{occupation}</div>
                           </button>
@@ -1717,7 +1717,7 @@ const MobileJobWizard = ({
                           <button
                             type="button"
                             onClick={() => handleOccupationSelect(occupationSearchTerm)}
-                            className="w-full px-3 py-2 text-left hover:bg-gray-700 text-white text-sm border-t border-gray-700/30"
+                            className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-t border-white/10 transition-colors"
                           >
                             <span className="font-medium">Använd "{occupationSearchTerm}"</span>
                           </button>
