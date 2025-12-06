@@ -7,7 +7,7 @@ interface ImageEditorProps {
   isOpen: boolean;
   onClose: () => void;
   imageSrc: string;
-  onSave: (editedImageBlob: Blob) => void;
+  onSave: (editedImageBlob: Blob) => void | Promise<void>;
   isCircular?: boolean;
   aspectRatio?: number; // width/height ratio
 }
@@ -249,15 +249,33 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   };
 
   // Save edited image
-  const handleSave = () => {
-    if (!canvasRef.current) return;
+  const handleSave = async () => {
+    if (!canvasRef.current) {
+      console.error('ImageEditor: Canvas ref is null');
+      return;
+    }
     
-    canvasRef.current.toBlob((blob) => {
-      if (blob) {
-        onSave(blob);
-        onClose(); // Close dialog after saving
+    console.log('ImageEditor: Starting save process...');
+    
+    // Använd Promise för att vänta på blob-generering
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvasRef.current!.toBlob((result) => {
+        resolve(result);
+      }, 'image/png', 1.0);
+    });
+    
+    if (blob) {
+      console.log('ImageEditor: Blob generated, size:', blob.size);
+      try {
+        await onSave(blob);
+        console.log('ImageEditor: onSave completed successfully');
+      } catch (error) {
+        console.error('ImageEditor: onSave failed:', error);
       }
-    }, 'image/png', 1.0);
+      onClose(); // Close dialog after saving completes
+    } else {
+      console.error('ImageEditor: Failed to generate blob');
+    }
   };
 
   const handleCancelClick = () => {
