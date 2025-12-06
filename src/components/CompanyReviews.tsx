@@ -79,6 +79,7 @@ const CompanyReviews = () => {
 
       return data ? {
         ...data,
+        // Map the correct field names from profiles table
         social_media_links: (data.social_media_links as unknown as SocialMediaLink[]) || []
       } as CompanyProfile : null;
     },
@@ -92,15 +93,10 @@ const CompanyReviews = () => {
     queryFn: async () => {
       if (!user?.id) return [];
       
+      // Fetch reviews without JOIN since there's no FK relationship
       const { data, error } = await supabase
         .from('company_reviews')
-        .select(`
-          *,
-          profiles:user_id (
-            first_name,
-            last_name
-          )
-        `)
+        .select('*')
         .eq('company_id', user.id)
         .order('created_at', { ascending: false });
 
