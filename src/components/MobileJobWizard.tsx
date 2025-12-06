@@ -460,6 +460,7 @@ const MobileJobWizard = ({
   }, [showHingePreview]);
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
+  const [originalStoragePath, setOriginalStoragePath] = useState<string | null>(null); // Original storage path before editing
   const [imageTimestamp, setImageTimestamp] = useState<number>(Date.now()); // For cache busting
   
   const [bgPosition, setBgPosition] = useState<string>('center 50%');
@@ -758,17 +759,18 @@ const MobileJobWizard = ({
 
   // Återställ till originalbilden (ingen croppning)
   const handleRestoreOriginal = async () => {
-    if (!originalImageUrl) {
-      console.log('No original image URL to restore');
+    if (!originalImageUrl || !originalStoragePath) {
+      console.log('No original image URL or storage path to restore');
       return;
     }
     
-    console.log('Restoring to original image:', originalImageUrl);
+    console.log('Restoring to original image:', originalImageUrl, 'with storage path:', originalStoragePath);
     
-    // Återställ jobImageDisplayUrl till originalbilden
+    // Återställ BÅDE visnings-URL OCH storage path till originalet
     setJobImageDisplayUrl(originalImageUrl);
-    handleInputChange('job_image_url', formData.job_image_url); // Keep the storage path unchanged
+    handleInputChange('job_image_url', originalStoragePath);
     setManualFocus(null);
+    setImageTimestamp(Date.now()); // Force cache refresh
     
     toast({
       title: "Bild återställd",
@@ -1503,6 +1505,7 @@ const MobileJobWizard = ({
       setCustomQuestions([]);
       setJobImageDisplayUrl(null);
       setOriginalImageUrl(null);
+      setOriginalStoragePath(null);
       setCachedPostalCodeInfo(null);
       setInitialFormData(null);
       setHasUnsavedChanges(false);
@@ -1545,6 +1548,7 @@ const MobileJobWizard = ({
     setCustomQuestions([]);
     setJobImageDisplayUrl(null);
     setOriginalImageUrl(null);
+    setOriginalStoragePath(null);
     setCachedPostalCodeInfo(null);
     setInitialFormData(null);
     setHasUnsavedChanges(false);
@@ -3209,7 +3213,8 @@ const MobileJobWizard = ({
                       mediaType="job-image"
                       onFileUploaded={async (storagePath, fileName) => {
                         handleInputChange('job_image_url', storagePath);
-                        // Hämta signerad URL för originalet direkt och spara den
+                        // Spara originalets storage path och URL
+                        setOriginalStoragePath(storagePath);
                         const { getMediaUrl } = await import('@/lib/mediaManager');
                         const signedUrl = await getMediaUrl(storagePath, 'job-image', 86400);
                         setOriginalImageUrl(signedUrl || storagePath);
@@ -3231,6 +3236,7 @@ const MobileJobWizard = ({
                             onClick={() => {
                               handleInputChange('job_image_url', '');
                               setOriginalImageUrl(null);
+                              setOriginalStoragePath(null);
                               setManualFocus(null);
                             }}
                             className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 transition-colors md:hover:bg-red-600"
