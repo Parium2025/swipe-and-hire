@@ -211,7 +211,7 @@ const EmployerLayout = memo(({ children, developerView, onViewChange }: Employer
             </div>
           </div>
           
-          <main className="flex-1 overflow-hidden p-3 animate-fade-in">
+          <main className="flex-1 overflow-hidden p-3">
             {children}
           </main>
         </div>
