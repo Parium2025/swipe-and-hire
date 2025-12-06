@@ -687,7 +687,8 @@ const MobileJobWizard = ({
     }
   }, [currentStep, open]);
 
-  const handleImageEdit = async (editedImageBlob: Blob) => {
+  const handleImageEdit = async (editedImageBlob: Blob): Promise<void> => {
+    console.log('MobileJobWizard handleImageEdit: Received blob, size:', editedImageBlob.size);
     try {
       const user = await supabase.auth.getUser();
       if (!user.data.user) {
@@ -698,17 +699,26 @@ const MobileJobWizard = ({
       const fileExt = 'png'; // ImageEditor sparar alltid som PNG
       const fileName = `${user.data.user.id}/${Date.now()}-edited-job-image.${fileExt}`;
 
+      console.log('MobileJobWizard handleImageEdit: Uploading to path:', fileName);
+
       // Ladda upp den redigerade bilden till Supabase Storage
       const { error: uploadError } = await supabase.storage
         .from('job-images')
         .upload(fileName, editedImageBlob);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('MobileJobWizard handleImageEdit: Upload error:', uploadError);
+        throw uploadError;
+      }
+
+      console.log('MobileJobWizard handleImageEdit: Upload successful');
 
       // Hämta public URL för job-images (public bucket)
       const { data: { publicUrl } } = supabase.storage
         .from('job-images')
         .getPublicUrl(fileName);
+
+      console.log('MobileJobWizard handleImageEdit: Public URL:', publicUrl);
 
       // Förladdda bilden direkt i Service Worker
       const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
@@ -728,12 +738,13 @@ const MobileJobWizard = ({
         description: "Din bild har justerats och sparats framgångsrikt",
       });
     } catch (error) {
-      console.error('Error saving edited image:', error);
+      console.error('MobileJobWizard handleImageEdit: Error:', error);
       toast({
         title: "Fel",
         description: error instanceof Error ? error.message : "Kunde inte spara den redigerade bilden",
         variant: "destructive",
       });
+      throw error; // Re-throw så ImageEditor vet att det misslyckades
     }
   };
 
