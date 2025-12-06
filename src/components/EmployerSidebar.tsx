@@ -317,7 +317,7 @@ export function EmployerSidebar() {
           <SidebarGroupLabel className="text-white text-sm uppercase tracking-wide px-4">
             Huvudmeny
           </SidebarGroupLabel>
-          <SidebarGroupContent>
+          <SidebarGroupContent className="animate-fade-in">
             <SidebarMenu>
               {employerNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
@@ -354,7 +354,7 @@ export function EmployerSidebar() {
           <SidebarGroupLabel className="text-white text-sm uppercase tracking-wide px-4">
             Företag
           </SidebarGroupLabel>
-          <SidebarGroupContent>
+          <SidebarGroupContent className="animate-fade-in">
             <SidebarMenu>
               {businessNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
@@ -389,7 +389,7 @@ export function EmployerSidebar() {
           <SidebarGroupLabel className="text-white text-sm uppercase tracking-wide px-4">
             Support
           </SidebarGroupLabel>
-          <SidebarGroupContent>
+          <SidebarGroupContent className="animate-fade-in">
             <SidebarMenu>
               {supportNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
