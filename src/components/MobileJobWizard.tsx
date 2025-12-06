@@ -242,6 +242,7 @@ const MobileJobWizard = ({
   const [showCompanyTooltip, setShowCompanyTooltip] = useState(false);
   const [isScrolledTop, setIsScrolledTop] = useState(true);
   const [previewMode, setPreviewMode] = useState<'mobile' | 'desktop'>('mobile');
+  const [showDesktopApplicationForm, setShowDesktopApplicationForm] = useState(false);
 
   // Utility function to truncate text for better display
   const truncateText = (text: string, maxLength: number = 35) => {
@@ -2909,163 +2910,234 @@ const MobileJobWizard = ({
                 </div>
                 )}
 
-                {/* Desktop Preview - Monitor mockup like ProfilePreview */}
+                {/* Desktop Preview - Monitor mockup with IDENTICAL content to mobile */}
                 {previewMode === 'desktop' && (
                   <div className="flex flex-col items-center space-y-4">
-                    {/* Desktop monitor frame - professional mockup */}
+                    {/* Desktop monitor frame - professional mockup like ProfilePreview */}
                     <div className="relative">
                       {/* Monitor screen */}
                       <div className="relative w-[500px] max-w-full rounded-t-lg bg-black p-2.5 shadow-2xl">
                         {/* Screen bezel */}
                         <div className="relative w-full h-[320px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
-                          {/* Innehåll med Parium bakgrund */}
+                          {/* Parium gradient bakgrund */}
                           <div 
-                            className="absolute inset-0 overflow-y-auto custom-scrollbar"
+                            className="absolute inset-0"
                             style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}
                           >
-                            <div className="p-4 space-y-3">
-                              {/* Hero Section with Image */}
-                              <div className="relative h-32 rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 to-secondary/20">
-                                {jobImageDisplayUrl ? (
-                                  <img 
-                                    src={jobImageDisplayUrl} 
-                                    alt={`Jobbbild för ${formData.title}`}
-                                    className="absolute inset-0 w-full h-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="absolute inset-0 flex items-center justify-center">
-                                    <Building2 className="h-12 w-12 text-white/30" />
-                                  </div>
-                                )}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                                <div className="absolute bottom-3 left-3 right-3">
-                                  <h1 className="text-lg font-bold text-white mb-0.5">{formData.title || 'Jobbtitel'}</h1>
+                            {/* Application Form View (when clicked) - IDENTICAL to mobile */}
+                            {showDesktopApplicationForm && (
+                              <div className="flex flex-col h-full">
+                                <div className="flex items-center justify-between px-4 py-2 bg-black/20 border-b border-white/20 flex-shrink-0">
+                                  <div className="text-sm font-bold text-white">Ansökningsformulär</div>
                                   <button 
-                                    onClick={() => setShowCompanyProfile(true)}
-                                    className="text-white/90 hover:text-primary transition-colors text-xs font-medium"
+                                    onClick={() => setShowDesktopApplicationForm(false)} 
+                                    className="text-sm text-white hover:text-white"
+                                    aria-label="Stäng ansökningsformulär"
                                   >
-                                    {profile?.company_name || 'Företagsnamn'}
+                                    ✕
                                   </button>
                                 </div>
-                              </div>
 
-                              {/* Job Details Grid */}
-                              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                                {formData.workplace_city && (
-                                  <div className="bg-white/5 backdrop-blur-md rounded-lg p-2 border border-white/10">
-                                    <div className="flex items-center gap-1 text-white/60 text-[10px] mb-0.5">
-                                      <MapPin className="h-2.5 w-2.5" />
-                                      <span>Plats</span>
-                                    </div>
-                                    <p className="text-white text-xs font-medium">{formData.workplace_city}</p>
-                                  </div>
-                                )}
-                                {formData.employment_type && (
-                                  <div className="bg-white/5 backdrop-blur-md rounded-lg p-2 border border-white/10">
-                                    <div className="flex items-center gap-1 text-white/60 text-[10px] mb-0.5">
-                                      <Clock className="h-2.5 w-2.5" />
-                                      <span>Anställning</span>
-                                    </div>
-                                    <p className="text-white text-xs font-medium">
-                                      {EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label || formData.employment_type}
-                                    </p>
-                                  </div>
-                                )}
-                                {(formData.salary_min || formData.salary_max) && (
-                                  <div className="bg-white/5 backdrop-blur-md rounded-lg p-2 border border-white/10">
-                                    <div className="flex items-center gap-1 text-white/60 text-[10px] mb-0.5">
-                                      <Banknote className="h-2.5 w-2.5" />
-                                      <span>Lön</span>
-                                    </div>
-                                    <p className="text-white text-xs font-medium">
-                                      {formData.salary_min && formData.salary_max 
-                                        ? `${parseInt(formData.salary_min).toLocaleString()} - ${parseInt(formData.salary_max).toLocaleString()} kr`
-                                        : formData.salary_min 
-                                          ? `Från ${parseInt(formData.salary_min).toLocaleString()} kr`
-                                          : `Upp till ${parseInt(formData.salary_max).toLocaleString()} kr`
-                                      }
-                                    </p>
-                                  </div>
-                                )}
-                                {formData.occupation && (
-                                  <div className="bg-white/5 backdrop-blur-md rounded-lg p-2 border border-white/10">
-                                    <div className="flex items-center gap-1 text-white/60 text-[10px] mb-0.5">
-                                      <Briefcase className="h-2.5 w-2.5" />
-                                      <span>Yrke</span>
-                                    </div>
-                                    <p className="text-white text-xs font-medium truncate">{formData.occupation}</p>
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Description */}
-                              {formData.description && (
-                                <div className="bg-white/5 backdrop-blur-md rounded-lg p-3 border border-white/10">
-                                  <h3 className="text-white font-semibold mb-1.5 flex items-center gap-1.5 text-xs">
-                                    <FileText className="h-3 w-3" />
-                                    Jobbeskrivning
-                                  </h3>
-                                  <p className="text-white/80 text-[10px] leading-relaxed whitespace-pre-wrap">
-                                    {formData.description.length > 200 
-                                      ? formData.description.substring(0, 200) + '...' 
-                                      : formData.description
-                                    }
-                                  </p>
-                                </div>
-                              )}
-
-                              {/* Requirements */}
-                              {formData.requirements && (
-                                <div className="bg-white/5 backdrop-blur-md rounded-lg p-3 border border-white/10">
-                                  <h3 className="text-white font-semibold mb-1.5 flex items-center gap-1.5 text-xs">
-                                    <CheckSquare className="h-3 w-3" />
-                                    Kvalifikationer
-                                  </h3>
-                                  <p className="text-white/80 text-[10px] leading-relaxed whitespace-pre-wrap">
-                                    {formData.requirements.length > 150 
-                                      ? formData.requirements.substring(0, 150) + '...' 
-                                      : formData.requirements
-                                    }
-                                  </p>
-                                </div>
-                              )}
-
-                              {/* Questions Preview */}
-                              {customQuestions.length > 0 && (
-                                <div className="bg-white/5 backdrop-blur-md rounded-lg p-3 border border-white/10">
-                                  <h3 className="text-white font-semibold mb-2 flex items-center gap-1.5 text-xs">
-                                    <List className="h-3 w-3" />
-                                    Ansökningsfrågor ({customQuestions.length} st)
-                                  </h3>
-                                  <div className="space-y-1">
-                                    {customQuestions.slice(0, 2).map((q, i) => (
-                                      <div key={i} className="flex items-start gap-1 text-[10px]">
-                                        <span className="text-white/40">{i + 1}.</span>
-                                        <span className="text-white/80">{q.question_text}</span>
-                                        {q.is_required && <span className="text-red-300 text-[8px]">*</span>}
+                                <div className="px-4 py-3 overflow-y-auto flex-1 custom-scrollbar">
+                                  <div className="space-y-2">
+                                    {/* Företagsinformation */}
+                                    <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                      <div className="flex items-center">
+                                        {profile?.company_logo_url ? (
+                                          <div className="w-5 h-5 rounded-full mr-2 overflow-hidden bg-white/10 flex items-center justify-center">
+                                            <img 
+                                              src={profile.company_logo_url} 
+                                              alt="Företagslogotyp" 
+                                              className="w-full h-full object-contain"
+                                            />
+                                          </div>
+                                        ) : (
+                                          <div className="w-5 h-5 bg-primary/20 rounded-full mr-2 flex items-center justify-center">
+                                            <Building2 className="h-3 w-3 text-primary-foreground" />
+                                          </div>
+                                        )}
+                                        <button 
+                                          onClick={() => setShowCompanyProfile(true)}
+                                          className="text-sm font-bold text-white hover:text-primary transition-colors cursor-pointer"
+                                        >
+                                          {profile?.company_name || 'Företagsnamn'}
+                                        </button>
                                       </div>
-                                    ))}
-                                    {customQuestions.length > 2 && (
-                                      <p className="text-white/50 text-[9px]">+{customQuestions.length - 2} fler frågor</p>
+                                    </div>
+
+                                    {/* Yrke */}
+                                    {formData.occupation && (
+                                      <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                        <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                          <Briefcase className="h-3 w-3 mr-1 text-white" />
+                                          Yrke
+                                        </h5>
+                                        <p className="text-xs text-white/80">{formData.occupation}</p>
+                                      </div>
+                                    )}
+
+                                    {/* Jobbeskrivning */}
+                                    {formData.description && (
+                                      <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                        <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                          <FileText className="h-3 w-3 mr-1 text-white" />
+                                          Jobbeskrivning
+                                        </h5>
+                                        <p className="text-xs text-white/80 whitespace-pre-wrap">
+                                          {formData.description.length > 150 
+                                            ? formData.description.substring(0, 150) + '...' 
+                                            : formData.description}
+                                        </p>
+                                      </div>
+                                    )}
+
+                                    {/* Lön */}
+                                    {(formData.salary_min || formData.salary_max) && (
+                                      <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                        <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                          <Banknote className="h-3 w-3 mr-1 text-white" />
+                                          Lön
+                                        </h5>
+                                        <p className="text-xs text-white/80">
+                                          {formData.salary_min && formData.salary_max 
+                                            ? `${parseInt(formData.salary_min).toLocaleString()} - ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
+                                            : formData.salary_min 
+                                              ? `Från ${parseInt(formData.salary_min).toLocaleString()} kr/mån`
+                                              : `Upp till ${parseInt(formData.salary_max).toLocaleString()} kr/mån`
+                                          }
+                                        </p>
+                                      </div>
+                                    )}
+
+                                    {/* Arbetsplats */}
+                                    {(formData.workplace_city || formData.location) && (
+                                      <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                        <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                          <MapPin className="h-3 w-3 mr-1 text-white" />
+                                          Arbetsplats
+                                        </h5>
+                                        <p className="text-xs text-white/80">{formData.workplace_city || formData.location}</p>
+                                      </div>
+                                    )}
+
+                                    {/* Anställningsform */}
+                                    {formData.employment_type && (
+                                      <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                        <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                          <Clock className="h-3 w-3 mr-1 text-white" />
+                                          Anställningsform
+                                        </h5>
+                                        <p className="text-xs text-white/80">
+                                          {EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label || formData.employment_type}
+                                        </p>
+                                      </div>
+                                    )}
+
+                                    {/* Krav */}
+                                    {formData.requirements && (
+                                      <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                        <h5 className="text-xs font-medium text-white mb-0.5 flex items-center">
+                                          <CheckSquare className="h-3 w-3 mr-1 text-white" />
+                                          Kvalifikationer
+                                        </h5>
+                                        <p className="text-xs text-white/80 whitespace-pre-wrap">
+                                          {formData.requirements.length > 100 
+                                            ? formData.requirements.substring(0, 100) + '...' 
+                                            : formData.requirements}
+                                        </p>
+                                      </div>
+                                    )}
+
+                                    {/* Ansökningsfrågor */}
+                                    {customQuestions.length > 0 && (
+                                      <div className="bg-white/10 rounded-lg p-2 border border-white/20">
+                                        <h5 className="text-xs font-medium text-white mb-1 flex items-center">
+                                          <List className="h-3 w-3 mr-1 text-white" />
+                                          Ansökningsfrågor ({customQuestions.length} st)
+                                        </h5>
+                                        <div className="space-y-1">
+                                          {customQuestions.slice(0, 2).map((q, i) => (
+                                            <div key={i} className="flex items-start gap-1 text-xs">
+                                              <span className="text-white/40">{i + 1}.</span>
+                                              <span className="text-white/80">{q.question_text}</span>
+                                              {q.is_required && <span className="text-red-300 text-[10px]">*</span>}
+                                            </div>
+                                          ))}
+                                          {customQuestions.length > 2 && (
+                                            <p className="text-white/50 text-[10px]">+{customQuestions.length - 2} fler frågor</p>
+                                          )}
+                                        </div>
+                                      </div>
                                     )}
                                   </div>
                                 </div>
-                              )}
+                              </div>
+                            )}
 
-                              {/* Apply Buttons */}
-                              <div className="flex justify-center pt-1">
-                                <div className="flex items-center gap-2">
-                                  <button className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-white rounded-full transition-colors flex items-center gap-1.5 border border-red-500/30 text-xs">
-                                    <X className="h-3.5 w-3.5" />
-                                    <span className="font-medium">Nej tack</span>
+                            {/* Tinder-style Card View (initial) - IDENTICAL to mobile */}
+                            {!showDesktopApplicationForm && (
+                              <div className="absolute inset-0 z-10">
+                                {/* Job Image */}
+                                {jobImageDisplayUrl ? (
+                                  <img
+                                    src={jobImageDisplayUrl}
+                                    alt={`Jobbbild för ${formData.title}`}
+                                    className="absolute inset-0 w-full h-full object-cover select-none"
+                                    loading="eager"
+                                  />
+                                ) : null}
+                                
+                                {/* Gradient overlay */}
+                                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                                
+                                {/* Content - clickable to show form */}
+                                <div 
+                                  className="absolute inset-0 flex flex-col items-center justify-center p-4 text-white text-center cursor-pointer"
+                                  onClick={() => setShowDesktopApplicationForm(true)}
+                                >
+                                  {/* Company name at top */}
+                                  <button 
+                                    onClick={(e) => { e.stopPropagation(); setShowCompanyProfile(true); }}
+                                    className="text-sm text-white font-medium mb-1 hover:text-primary transition-colors cursor-pointer"
+                                  >
+                                    {profile?.company_name || 'Företag'}
                                   </button>
-                                  <button className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full transition-colors flex items-center gap-1.5 shadow-lg text-xs">
-                                    <Heart className="h-3.5 w-3.5" />
-                                    <span className="font-medium">Ansök nu</span>
+                                  
+                                  {/* Job title */}
+                                  <h3 className="text-xl font-bold text-white leading-tight mb-1">
+                                    {formData.title || 'Jobbtitel'}
+                                  </h3>
+                                  
+                                  {/* Meta line: employment type • location */}
+                                  <div className="text-sm text-white">
+                                    {getMetaLine(formData.employment_type, formData.workplace_city || formData.location)}
+                                  </div>
+                                </div>
+                                
+                                {/* Action buttons at bottom - IDENTICAL to mobile */}
+                                <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-3 pointer-events-none">
+                                  <button 
+                                    aria-label="Nej tack" 
+                                    className="w-10 h-10 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto"
+                                  >
+                                    <X className="h-5 w-5 text-white" />
+                                  </button>
+                                  <button 
+                                    aria-label="Spara" 
+                                    className="w-10 h-10 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto"
+                                  >
+                                    <Bookmark className="h-5 w-5 text-white" />
+                                  </button>
+                                  <button 
+                                    onClick={() => setShowDesktopApplicationForm(true)} 
+                                    aria-label="Ansök" 
+                                    className="w-10 h-10 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto"
+                                  >
+                                    <Heart className="h-5 w-5 text-white fill-white" />
                                   </button>
                                 </div>
                               </div>
-                            </div>
+                            )}
                           </div>
                         </div>
                       </div>
