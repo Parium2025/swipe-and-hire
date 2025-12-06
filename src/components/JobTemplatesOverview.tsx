@@ -320,7 +320,7 @@ const JobTemplatesOverview = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-white">Jobbmallar</h1>
