@@ -105,7 +105,7 @@ const CandidatesContent = () => {
             </CardContent>
           </Card>
         ) : safeApplications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 bg-white/5 border border-white/10 hover:border-white/50 rounded-lg">
+          <div className="flex flex-col items-center justify-center py-16 bg-white/5 border border-white/10 rounded-lg">
             <p className="text-white text-center">
               Inga kandidater än.<br />
               När någon söker till dina jobb så kommer deras ansökning att visas här.
