@@ -206,7 +206,7 @@ const EmployerDashboard = memo(() => {
             <div className="overflow-x-auto -mx-2">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-white/20 hover:bg-white/5 hover:border-white/50">
+                  <TableRow className="border-white/20 hover:bg-transparent">
                     <TableHead className="text-white font-semibold text-sm px-2 w-[28%]">Titel</TableHead>
                     <TableHead className="text-white font-semibold text-sm px-2 w-[10%]">Status</TableHead>
                     <TableHead className="text-white font-semibold text-sm text-center px-2 w-[8%]">Visningar</TableHead>
