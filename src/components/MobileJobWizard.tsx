@@ -1762,13 +1762,13 @@ const MobileJobWizard = ({
                     
                     {/* Employment Type Dropdown */}
                     {showEmploymentTypeDropdown && (
-                       <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 shadow-lg">
+                       <div className="absolute top-full left-0 right-0 z-50 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-white/20 rounded-md mt-1 shadow-lg">
                         {filteredEmploymentTypes.map((type) => (
                           <button
                             key={type.value}
                             type="button"
                             onClick={() => handleEmploymentTypeSelect(type)}
-                            className="w-full px-3 py-2 text-left hover:bg-gray-700 text-white text-sm border-b border-gray-700 last:border-b-0"
+                            className="w-full px-3 py-2 text-left hover:bg-white/10 text-white text-sm border-b border-white/20 last:border-b-0"
                           >
                             <div className="font-medium">{type.label}</div>
                           </button>
@@ -1793,13 +1793,13 @@ const MobileJobWizard = ({
                     
                     {/* Salary Type Dropdown */}
                     {showSalaryTypeDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 z-50 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
                         {filteredSalaryTypes.map((type) => (
                           <button
                             key={type.value}
                             type="button"
                             onClick={() => handleSalaryTypeSelect(type)}
-                            className="w-full px-3 py-2 text-left hover:bg-gray-700 text-white text-sm border-b border-gray-700 last:border-b-0"
+                            className="w-full px-3 py-2 text-left hover:bg-white/10 text-white text-sm border-b border-white/20 last:border-b-0"
                           >
                             <div className="font-medium">{type.label}</div>
                           </button>
@@ -1842,13 +1842,13 @@ const MobileJobWizard = ({
                     
                     {/* Work Location Dropdown */}
                     {showWorkLocationDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 z-50 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
                         {filteredWorkLocationTypes.map((type) => (
                           <button
                             key={type.value}
                             type="button"
                             onClick={() => handleWorkLocationSelect(type)}
-                            className="w-full px-3 py-2 text-left hover:bg-gray-700 text-white text-sm border-b border-gray-700 last:border-b-0"
+                            className="w-full px-3 py-2 text-left hover:bg-white/10 text-white text-sm border-b border-white/20 last:border-b-0"
                           >
                             <div className="font-medium">{type.label}</div>
                           </button>
@@ -1873,13 +1873,13 @@ const MobileJobWizard = ({
                     
                     {/* Remote Work Dropdown */}
                     {showRemoteWorkDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 z-50 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
                         {filteredRemoteWorkOptions.map((type) => (
                           <button
                             key={type.value}
                             type="button"
                             onClick={() => handleRemoteWorkSelect(type)}
-                            className="w-full px-3 py-2 text-left hover:bg-gray-700 text-white text-sm border-b border-gray-700 last:border-b-0"
+                            className="w-full px-3 py-2 text-left hover:bg-white/10 text-white text-sm border-b border-white/20 last:border-b-0"
                           >
                             <div className="font-medium">{type.label}</div>
                           </button>
@@ -2183,13 +2183,13 @@ const MobileJobWizard = ({
                           
                           {/* Question Type Dropdown */}
                           {showQuestionTypeDropdown && (
-                            <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                            <div className="absolute top-full left-0 right-0 z-50 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
                               {filteredQuestionTypes.map((type) => (
                                 <button
                                   key={type.value}
                                   type="button"
                                   onClick={() => handleQuestionTypeSelect(type)}
-                                  className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                                  className="w-full px-3 py-3 text-left hover:bg-white/10 text-white text-base border-b border-white/20 last:border-b-0"
                                 >
                                   <div className="font-medium">{type.label}</div>
                                 </button>
@@ -2421,7 +2421,7 @@ const MobileJobWizard = ({
                                className="px-2 py-2 overflow-y-auto relative z-10 custom-scrollbar flex-1"
                                onClick={(e) => {
                                  // Close all dropdowns when clicking anywhere in the scroll area
-                                 const dropdowns = e.currentTarget.querySelectorAll('.bg-gray-800.border.border-gray-600');
+                                 const dropdowns = e.currentTarget.querySelectorAll('.backdrop-blur-xl.border.border-white\\/20');
                                  dropdowns.forEach(dropdown => {
                                    if (!dropdown.classList.contains('hidden')) {
                                      dropdown.classList.add('hidden');
