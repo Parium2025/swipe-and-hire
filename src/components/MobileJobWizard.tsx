@@ -2910,16 +2910,16 @@ const MobileJobWizard = ({
                 </div>
                 )}
 
-                {/* Desktop Preview - Monitor mockup matching ProfilePreview exactly */}
+                {/* Desktop Preview - Monitor mockup EXACTLY like ProfilePreview */}
                 {previewMode === 'desktop' && (
-                  <div className="flex flex-col items-center">
-                    {/* Desktop monitor frame - professional mockup like ProfilePreview */}
+                  <div className="flex flex-col items-center space-y-4">
+                    {/* Desktop monitor frame - professional mockup COPIED from ProfilePreview */}
                     <div className="relative">
-                      {/* Monitor screen with thick bezel */}
-                      <div className="relative w-[580px] max-w-full rounded-2xl bg-gradient-to-b from-gray-800 via-gray-900 to-black p-3 shadow-2xl border border-gray-700/50">
-                        {/* Inner screen bezel */}
-                        <div className="relative w-full h-[300px] rounded-xl overflow-hidden bg-black border border-gray-800/50">
-                          {/* Parium gradient bakgrund */}
+                      {/* Monitor screen */}
+                      <div className="relative w-[500px] rounded-t-lg bg-black p-2.5 shadow-2xl">
+                        {/* Screen bezel */}
+                        <div className="relative w-full h-[260px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
+                          {/* Innehåll med Parium bakgrund */}
                           <div 
                             className="absolute inset-0"
                             style={{ background: 'linear-gradient(135deg, hsl(215 100% 8%) 0%, hsl(215 90% 15%) 25%, hsl(200 70% 25%) 75%, hsl(200 100% 60%) 100%)' }}
@@ -3142,13 +3142,12 @@ const MobileJobWizard = ({
                         </div>
                       </div>
                       
-                      {/* Monitor stand - more prominent like iMac */}
+                      {/* Monitor stand - EXACTLY like ProfilePreview */}
                       <div className="flex flex-col items-center">
-                        {/* Stand neck - taller and gradient */}
-                        <div className="w-20 h-12 bg-gradient-to-b from-gray-700 via-gray-800 to-gray-900 rounded-b-lg shadow-inner"></div>
-                        {/* Stand base - oval/ellipse shape */}
-                        <div className="w-40 h-3 bg-gradient-to-b from-gray-700 to-gray-900 rounded-full shadow-xl" 
-                             style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)' }}></div>
+                        {/* Stand neck */}
+                        <div className="w-12 h-6 bg-gradient-to-b from-gray-700 to-gray-800 rounded-b-sm"></div>
+                        {/* Stand base */}
+                        <div className="w-32 h-2.5 bg-gradient-to-b from-gray-800 to-gray-900 rounded-full shadow-lg"></div>
                       </div>
                     </div>
                   </div>
