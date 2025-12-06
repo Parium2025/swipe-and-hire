@@ -2359,7 +2359,7 @@ const MobileJobWizard = ({
                     <button
                       type="button"
                       onClick={() => setPreviewMode('mobile')}
-                      className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white"
+                      className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white/70"
                     >
                       <Smartphone className="h-3.5 w-3.5" />
                       Mobilvy
@@ -2367,7 +2367,7 @@ const MobileJobWizard = ({
                     <button
                       type="button"
                       onClick={() => setPreviewMode('desktop')}
-                      className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white"
+                      className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white/70"
                     >
                       <Monitor className="h-3.5 w-3.5" />
                       Datorvy
@@ -2377,7 +2377,7 @@ const MobileJobWizard = ({
                   <h3 className="text-white font-medium text-center text-sm">
                     {previewMode === 'mobile' 
                       ? 'Så kommer ansökningsformuläret att se ut på mobil. (Testa att trycka på mobilens skärm)'
-                      : 'Så kommer annonsen att se ut på dator för jobbsökare.'
+                      : 'Så kommer annonsen att se ut på dator för jobbsökare. (Testa att trycka på datorns skärm)'
                     }
                   </h3>
                 </div>
@@ -3114,26 +3114,26 @@ const MobileJobWizard = ({
                                   </div>
                                 </div>
                                 
-                                {/* Action buttons at bottom - IDENTICAL to mobile */}
-                                <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-3 pointer-events-none">
+                                {/* Action buttons at bottom - smaller for realism */}
+                                <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2 pointer-events-none">
                                   <button 
                                     aria-label="Nej tack" 
-                                    className="w-10 h-10 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto"
+                                    className="w-7 h-7 rounded-full bg-red-500 shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors pointer-events-auto"
                                   >
-                                    <X className="h-5 w-5 text-white" />
+                                    <X className="h-3.5 w-3.5 text-white" />
                                   </button>
                                   <button 
                                     aria-label="Spara" 
-                                    className="w-10 h-10 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto"
+                                    className="w-7 h-7 rounded-full bg-blue-500 shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors pointer-events-auto"
                                   >
-                                    <Bookmark className="h-5 w-5 text-white" />
+                                    <Bookmark className="h-3.5 w-3.5 text-white" />
                                   </button>
                                   <button 
                                     onClick={() => setShowDesktopApplicationForm(true)} 
                                     aria-label="Ansök" 
-                                    className="w-10 h-10 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto"
+                                    className="w-7 h-7 rounded-full bg-emerald-500 shadow-lg flex items-center justify-center hover:bg-emerald-600 transition-colors pointer-events-auto"
                                   >
-                                    <Heart className="h-5 w-5 text-white fill-white" />
+                                    <Heart className="h-3.5 w-3.5 text-white fill-white" />
                                   </button>
                                 </div>
                               </div>
