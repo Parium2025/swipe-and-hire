@@ -313,9 +313,9 @@ export function CompanyProfileDialog({ open, onOpenChange, companyId }: CompanyP
           <div className="p-6 text-white">
             <DialogHeader className="mb-6">
               <div className="flex items-center gap-4">
-                <Avatar className="h-16 w-16 bg-primary">
+                <Avatar className="h-16 w-16">
                   <AvatarImage src={company.company_logo_url} alt={company.company_name} />
-                  <AvatarFallback className="bg-primary text-white text-xl font-bold">
+                  <AvatarFallback className="bg-white/20 text-white text-xl font-bold">
                     {company.company_name?.split(' ').map(word => word[0]).join('').slice(0, 2).toUpperCase() || 'AB'}
                   </AvatarFallback>
                 </Avatar>
