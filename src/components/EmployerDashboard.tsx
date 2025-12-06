@@ -48,6 +48,15 @@ const EmployerDashboard = memo(() => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { user, profile } = useAuth();
   const { toast } = useToast();
+  const [isReady, setIsReady] = useState(false);
+
+  // Delay fade-in until after initial render to prevent layout shift
+  useEffect(() => {
+    const timer = requestAnimationFrame(() => {
+      setIsReady(true);
+    });
+    return () => cancelAnimationFrame(timer);
+  }, []);
   
   const {
     searchInput,
@@ -165,7 +174,7 @@ const EmployerDashboard = memo(() => {
   ], [jobs]);
 
   return (
-    <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12 animate-fade-in">
+    <div className={`space-y-4 max-w-6xl mx-auto px-3 md:px-12 transition-opacity duration-500 ease-out ${isReady ? 'opacity-100' : 'opacity-0'}`}>
       <div className="flex justify-center items-center mb-4">
         <h1 className="text-xl md:text-2xl font-semibold text-white">Mina jobbannonser</h1>
       </div>
