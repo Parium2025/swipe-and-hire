@@ -8,6 +8,7 @@ interface ImageEditorProps {
   onClose: () => void;
   imageSrc: string;
   onSave: (editedImageBlob: Blob) => void | Promise<void>;
+  onRestoreOriginal?: () => void | Promise<void>; // New: callback to restore original image
   isCircular?: boolean;
   aspectRatio?: number; // width/height ratio
 }
@@ -17,6 +18,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   onClose,
   imageSrc,
   onSave,
+  onRestoreOriginal,
   isCircular = true,
   aspectRatio = 1
 }) => {
@@ -376,32 +378,56 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           </p>
 
           {/* Action buttons */}
-          <div className="flex space-x-2">
-            <Button 
-              type="button"
-              onClick={handleCancelClick}
-              disabled={isSaving}
-              className="flex-1 transition-all duration-200 !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 disabled:opacity-50"
-              variant="outline"
-            >
-              Avbryt
-            </Button>
-            <Button 
-              type="button"
-              onClick={handleSaveClick}
-              disabled={isSaving}
-              className="flex-1 transition-all duration-200 !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 disabled:opacity-50"
-              variant="outline"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Sparar...
-                </>
-              ) : (
-                'Spara'
-              )}
-            </Button>
+          <div className="flex flex-col space-y-2">
+            {/* Restore original button - only show if callback is provided */}
+            {onRestoreOriginal && (
+              <Button 
+                type="button"
+                onClick={async () => {
+                  setIsSaving(true);
+                  try {
+                    await onRestoreOriginal();
+                    onClose();
+                  } finally {
+                    setIsSaving(false);
+                  }
+                }}
+                disabled={isSaving}
+                className="w-full transition-all duration-200 !text-white bg-primary/20 border-primary/30 hover:bg-primary/30 hover:!text-white hover:border-primary/50 md:hover:bg-primary/30 md:hover:!text-white md:hover:border-primary/50 disabled:opacity-50"
+                variant="outline"
+              >
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Återställ till original
+              </Button>
+            )}
+            
+            <div className="flex space-x-2">
+              <Button 
+                type="button"
+                onClick={handleCancelClick}
+                disabled={isSaving}
+                className="flex-1 transition-all duration-200 !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 disabled:opacity-50"
+                variant="outline"
+              >
+                Avbryt
+              </Button>
+              <Button 
+                type="button"
+                onClick={handleSaveClick}
+                disabled={isSaving}
+                className="flex-1 transition-all duration-200 !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 disabled:opacity-50"
+                variant="outline"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Sparar...
+                  </>
+                ) : (
+                  'Spara'
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>

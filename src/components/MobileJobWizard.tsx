@@ -756,6 +756,26 @@ const MobileJobWizard = ({
     }
   };
 
+  // Återställ till originalbilden (ingen croppning)
+  const handleRestoreOriginal = async () => {
+    if (!originalImageUrl) {
+      console.log('No original image URL to restore');
+      return;
+    }
+    
+    console.log('Restoring to original image:', originalImageUrl);
+    
+    // Återställ jobImageDisplayUrl till originalbilden
+    setJobImageDisplayUrl(originalImageUrl);
+    handleInputChange('job_image_url', formData.job_image_url); // Keep the storage path unchanged
+    setManualFocus(null);
+    
+    toast({
+      title: "Bild återställd",
+      description: "Originalbilden har återställts",
+    });
+  };
+
   // Öppna editor med ALLTID originalbildens URL (inte den redigerade versionen)
   const openImageEditor = async () => {
     try {
@@ -3296,6 +3316,7 @@ const MobileJobWizard = ({
             }}
             imageSrc={editingImageUrl}
             onSave={handleImageEdit}
+            onRestoreOriginal={handleRestoreOriginal}
             isCircular={false}
             aspectRatio={1/2} // Telefonens skärmyta (w/h) för perfekt matchning
           />
