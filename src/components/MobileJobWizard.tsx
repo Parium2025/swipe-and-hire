@@ -2916,9 +2916,9 @@ const MobileJobWizard = ({
                     {/* Desktop monitor frame - professional mockup */}
                     <div className="relative">
                       {/* Monitor screen */}
-                      <div className="relative w-[500px] rounded-t-lg bg-black p-2.5 shadow-2xl">
+                      <div className="relative w-[520px] rounded-t-lg bg-black p-2.5 shadow-2xl">
                         {/* Screen bezel */}
-                        <div className="relative w-full h-[260px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
+                        <div className="relative w-full h-[200px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
                           {/* Innehåll med Parium bakgrund */}
                           <div 
                             className="absolute inset-0"
