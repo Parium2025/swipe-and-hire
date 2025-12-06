@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Loader2 } from 'lucide-react';
 
 interface ImageEditorProps {
   isOpen: boolean;
@@ -28,12 +28,20 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
   const [minScale, setMinScale] = useState(0.1);
+  const [isSaving, setIsSaving] = useState(false);
   
 
   const BASE_CANVAS_HEIGHT = 400; // Output canvas height in px
   const CANVAS_HEIGHT = BASE_CANVAS_HEIGHT;
   const CANVAS_WIDTH = Math.round(BASE_CANVAS_HEIGHT * aspectRatio);
   const MAX_SCALE = 3;
+
+  // Reset saving state when dialog opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setIsSaving(false);
+    }
+  }, [isOpen]);
 
   // Load and setup image
   useEffect(() => {
@@ -169,6 +177,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
 
   // Mouse events for dragging
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (isSaving) return;
     setIsDragging(true);
     const rect = canvasRef.current?.getBoundingClientRect();
     if (rect) {
@@ -180,7 +189,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !canvasRef.current) return;
+    if (!isDragging || !canvasRef.current || isSaving) return;
     
     const rect = canvasRef.current.getBoundingClientRect();
     const newX = e.clientX - rect.left - dragStart.x;
@@ -195,6 +204,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
 
   // Touch events for mobile
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (isSaving) return;
     e.preventDefault();
     const touch = e.touches[0];
     setIsDragging(true);
@@ -208,6 +218,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    if (isSaving) return;
     e.preventDefault();
     if (!isDragging || !canvasRef.current) return;
     
@@ -226,14 +237,17 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
 
   // Zoom functions
   const zoomIn = () => {
+    if (isSaving) return;
     setScale(prev => Math.min(prev + 0.2, MAX_SCALE));
   };
 
   const zoomOut = () => {
+    if (isSaving) return;
     setScale(prev => Math.max(prev - 0.2, minScale));
   };
 
   const resetPosition = () => {
+    if (isSaving) return;
     setPosition({ x: 0, y: 0 });
     if (imageRef.current) {
       const img = imageRef.current;
@@ -249,45 +263,45 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
   };
 
   // Save edited image
-  const handleSave = async () => {
-    if (!canvasRef.current) {
-      console.error('ImageEditor: Canvas ref is null');
+  const handleSaveClick = async () => {
+    if (isSaving || !canvasRef.current) {
+      console.log('ImageEditor: Already saving or no canvas');
       return;
     }
     
+    setIsSaving(true);
     console.log('ImageEditor: Starting save process...');
     
-    // Använd Promise för att vänta på blob-generering
-    const blob = await new Promise<Blob | null>((resolve) => {
-      canvasRef.current!.toBlob((result) => {
-        resolve(result);
-      }, 'image/png', 1.0);
-    });
-    
-    if (blob) {
-      console.log('ImageEditor: Blob generated, size:', blob.size);
-      try {
+    try {
+      // Använd Promise för att vänta på blob-generering
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvasRef.current!.toBlob((result) => {
+          resolve(result);
+        }, 'image/png', 1.0);
+      });
+      
+      if (blob) {
+        console.log('ImageEditor: Blob generated, size:', blob.size);
         await onSave(blob);
         console.log('ImageEditor: onSave completed successfully');
-      } catch (error) {
-        console.error('ImageEditor: onSave failed:', error);
+        onClose(); // Close dialog after saving completes
+      } else {
+        console.error('ImageEditor: Failed to generate blob');
+        setIsSaving(false);
       }
-      onClose(); // Close dialog after saving completes
-    } else {
-      console.error('ImageEditor: Failed to generate blob');
+    } catch (error) {
+      console.error('ImageEditor: onSave failed:', error);
+      setIsSaving(false);
     }
   };
 
   const handleCancelClick = () => {
+    if (isSaving) return;
     onClose();
   };
 
-  const handleSaveClick = () => {
-    handleSave();
-  };
-
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => !isSaving && !open && onClose()}>
       <DialogContent className="max-w-md bg-white/5 border-white/20 backdrop-blur-sm">
         <DialogHeader>
           <DialogTitle className="text-center text-white">
@@ -303,7 +317,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
                 ref={canvasRef}
                 width={CANVAS_WIDTH}
                 height={CANVAS_HEIGHT}
-                className={`cursor-${isDragging ? 'grabbing' : 'grab'} ${isCircular ? 'rounded-full' : 'rounded-lg'}`}
+                className={`cursor-${isDragging ? 'grabbing' : 'grab'} ${isCircular ? 'rounded-full' : 'rounded-lg'} ${isSaving ? 'opacity-50' : ''}`}
                 style={{ backgroundColor: 'transparent' }}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
@@ -313,35 +327,44 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
               />
+              {isSaving && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Loader2 className="h-8 w-8 text-white animate-spin" />
+                </div>
+              )}
             </div>
           </div>
 
           {/* Controls */}
           <div className="flex justify-center space-x-2">
             <Button
+              type="button"
               variant="outline"
               size="sm"
               onClick={zoomOut}
-              disabled={scale <= minScale}
+              disabled={scale <= minScale || isSaving}
               className="bg-white/5 border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 disabled:opacity-50 disabled:hover:bg-white/5"
             >
               <ZoomOut className="h-4 w-4" />
             </Button>
             
             <Button
+              type="button"
               variant="outline"
               size="sm"
               onClick={resetPosition}
+              disabled={isSaving}
               className="bg-white/5 border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
             >
               <RotateCcw className="h-4 w-4" />
             </Button>
             
             <Button
+              type="button"
               variant="outline"
               size="sm"
               onClick={zoomIn}
-              disabled={scale >= MAX_SCALE}
+              disabled={scale >= MAX_SCALE || isSaving}
               className="bg-white/5 border-white/10 !text-white hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 disabled:opacity-50 disabled:hover:bg-white/5"
             >
               <ZoomIn className="h-4 w-4" />
@@ -355,18 +378,29 @@ const ImageEditor: React.FC<ImageEditorProps> = ({
           {/* Action buttons */}
           <div className="flex space-x-2">
             <Button 
+              type="button"
               onClick={handleCancelClick}
-              className="flex-1 transition-all duration-200 !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
+              disabled={isSaving}
+              className="flex-1 transition-all duration-200 !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 disabled:opacity-50"
               variant="outline"
             >
               Avbryt
             </Button>
             <Button 
+              type="button"
               onClick={handleSaveClick}
-              className="flex-1 transition-all duration-200 !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50"
+              disabled={isSaving}
+              className="flex-1 transition-all duration-200 !text-white bg-white/5 border-white/10 hover:bg-white/10 hover:!text-white hover:border-white/50 md:hover:bg-white/10 md:hover:!text-white md:hover:border-white/50 disabled:opacity-50"
               variant="outline"
             >
-              Spara
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Sparar...
+                </>
+              ) : (
+                'Spara'
+              )}
             </Button>
           </div>
         </div>
