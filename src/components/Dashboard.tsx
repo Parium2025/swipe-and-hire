@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useEffect } from 'react';
+import { memo, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Briefcase, Users, Eye, TrendingUp, MapPin, Calendar } from 'lucide-react';
 import { useJobsData } from '@/hooks/useJobsData';
@@ -19,15 +19,6 @@ const Dashboard = memo(() => {
   const { jobs, stats, recruiters, isLoading } = useJobsData();
   const { profile } = useAuth();
   const navigate = useNavigate();
-  const [isReady, setIsReady] = useState(false);
-
-  // Delay fade-in until after initial render to prevent layout shift
-  useEffect(() => {
-    const timer = requestAnimationFrame(() => {
-      setIsReady(true);
-    });
-    return () => cancelAnimationFrame(timer);
-  }, []);
 
   const {
     searchInput,
@@ -47,8 +38,17 @@ const Dashboard = memo(() => {
     { icon: Users, title: 'Ansökningar', value: stats.totalApplications, loading: false },
   ], [stats]);
 
+  // Wait for data before showing content with fade
+  if (isLoading) {
+    return (
+      <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12 opacity-0">
+        {/* Invisible placeholder to prevent layout shift */}
+      </div>
+    );
+  }
+
   return (
-    <div className={`space-y-4 max-w-6xl mx-auto px-3 md:px-12 transition-opacity duration-500 ease-out ${isReady ? 'opacity-100' : 'opacity-0'}`}>
+    <div className="space-y-4 max-w-6xl mx-auto px-3 md:px-12 animate-fade-in">
       <div className="text-center">
         <h1 className="text-xl md:text-2xl font-semibold text-white">Dashboard</h1>
       </div>
