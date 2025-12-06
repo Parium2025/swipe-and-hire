@@ -2291,7 +2291,7 @@ const MobileJobWizard = ({
                                 <button
                                   type="button"
                                   onClick={() => removeOption(index)}
-                                  className="p-2 text-white hover:bg-white/10 rounded-full transition-all duration-300"
+                                  className="p-2 text-white hover:text-red-300 hover:bg-red-500/10 rounded-full transition-all duration-300"
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </button>
@@ -2301,10 +2301,10 @@ const MobileJobWizard = ({
                               onClick={addOption}
                               variant="outline"
                               size="sm"
-                              className="border border-white/30 text-white bg-transparent hover:bg-white/10 hover:border-white/50 transition-all duration-300"
+                              className="border border-white/30 text-white bg-transparent hover:bg-white/10 hover:border-white/50 hover:text-white transition-all duration-300"
                             >
                               Lägg till alternativ
-                              <Plus className="h-4 w-4 ml-1 text-white" />
+                              <Plus className="h-4 w-4 ml-1" />
                             </Button>
                           </div>
                         </div>
