@@ -869,7 +869,7 @@ export default function ProfilePreview() {
           <div className="relative inline-flex bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20">
             {/* Sliding background */}
             <motion.div
-              className="absolute top-1 bottom-1 bg-primary rounded-md"
+              className="absolute top-1 bottom-1 bg-white/20 rounded-md"
               initial={false}
               animate={{
                 left: viewMode === 'mobile' ? '4px' : '50%',
@@ -885,14 +885,14 @@ export default function ProfilePreview() {
             {/* Buttons */}
             <button
               onClick={() => setViewMode('mobile')}
-              className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white"
+              className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white/70"
             >
               <Smartphone className="h-3.5 w-3.5" />
               Mobilvy
             </button>
             <button
               onClick={() => setViewMode('desktop')}
-              className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white"
+              className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-md transition-colors text-sm text-white hover:text-white/70"
             >
               <Monitor className="h-3.5 w-3.5" />
               Datorvy
