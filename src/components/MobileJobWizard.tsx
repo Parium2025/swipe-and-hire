@@ -720,9 +720,10 @@ const MobileJobWizard = ({
 
       console.log('MobileJobWizard handleImageEdit: Public URL:', publicUrl);
 
-      // Förladdda bilden direkt i Service Worker
-      const { preloadSingleFile } = await import('@/lib/serviceWorkerManager');
-      await preloadSingleFile(publicUrl);
+      // Förladdda bilden direkt i Service Worker (fire-and-forget, don't wait)
+      import('@/lib/serviceWorkerManager').then(({ preloadSingleFile }) => {
+        preloadSingleFile(publicUrl).catch(e => console.log('Preload error (non-blocking):', e));
+      });
 
       // Uppdatera med storage path (fileName) istället för blob URL
       handleInputChange('job_image_url', fileName);
@@ -733,10 +734,14 @@ const MobileJobWizard = ({
       setShowImageEditor(false);
       setEditingImageUrl(null);
       
+      console.log('MobileJobWizard handleImageEdit: Done, showing toast');
+      
       toast({
         title: "Bild justerad",
         description: "Din bild har justerats och sparats framgångsrikt",
       });
+      
+      console.log('MobileJobWizard handleImageEdit: Function complete');
     } catch (error) {
       console.error('MobileJobWizard handleImageEdit: Error:', error);
       toast({
