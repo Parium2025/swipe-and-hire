@@ -737,14 +737,18 @@ const MobileJobWizard = ({
     }
   };
 
-  // Öppna editor med originalbildens signerade URL
+  // Öppna editor med ALLTID originalbildens URL (inte den redigerade versionen)
   const openImageEditor = async () => {
     try {
-      const source = originalImageUrl || formData.job_image_url || jobImageDisplayUrl;
-      if (!source) return;
+      // ALLTID prioritera originalImageUrl för att redigera från originalet
+      const source = originalImageUrl;
+      if (!source) {
+        console.log('No original image URL available');
+        return;
+      }
 
       let urlToEdit = source;
-      if (!source.startsWith('http')) {
+      if (!source.startsWith('http') && !source.startsWith('blob:') && !source.startsWith('data:')) {
         // Try job-images first (new public bucket), then job-applications as fallback (old private bucket)
         let signed = await createSignedUrl('job-images', source, 86400);
         if (!signed) {
@@ -752,6 +756,7 @@ const MobileJobWizard = ({
         }
         if (signed) urlToEdit = signed;
       }
+      console.log('Opening image editor with:', urlToEdit);
       setEditingImageUrl(urlToEdit);
       setShowImageEditor(true);
     } catch (e) {
@@ -3162,9 +3167,12 @@ const MobileJobWizard = ({
                   {!jobImageDisplayUrl && (
                     <FileUpload
                       mediaType="job-image"
-                      onFileUploaded={(url, fileName) => {
-                        handleInputChange('job_image_url', url);
-                        setOriginalImageUrl(url); // Spara originalbilden
+                      onFileUploaded={async (storagePath, fileName) => {
+                        handleInputChange('job_image_url', storagePath);
+                        // Hämta signerad URL för originalet direkt och spara den
+                        const { getMediaUrl } = await import('@/lib/mediaManager');
+                        const signedUrl = await getMediaUrl(storagePath, 'job-image', 86400);
+                        setOriginalImageUrl(signedUrl || storagePath);
                       }}
                       acceptedFileTypes={['image/*']}
                       maxFileSize={5 * 1024 * 1024}
