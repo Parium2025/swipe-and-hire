@@ -76,7 +76,7 @@ const Dashboard = memo(() => {
           <div className="hidden md:block overflow-x-auto -mx-2">
             <Table>
               <TableHeader>
-                <TableRow className="border-white/20 hover:bg-white/5 hover:border-white/50">
+                <TableRow className="border-white/20 hover:bg-transparent">
                   <TableHead className="text-white font-semibold text-sm px-2">Titel</TableHead>
                   <TableHead className="text-white font-semibold text-sm px-2">Status</TableHead>
                   <TableHead className="text-white font-semibold text-sm text-center px-2">Visningar</TableHead>
