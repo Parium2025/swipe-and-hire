@@ -2044,7 +2044,7 @@ const MobileJobWizard = ({
 
                         if (filteredTemplates.length === 0) {
                           return (
-                            <div className="text-white/60 text-sm text-center py-8">
+                            <div className="text-white text-sm text-center py-8">
                               Du har inga sparade frågor än
                             </div>
                           );
@@ -2288,24 +2288,23 @@ const MobileJobWizard = ({
                                   placeholder={`Alternativ ${index + 1}`}
                                   className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm"
                                 />
-                                <Button
+                                <button
+                                  type="button"
                                   onClick={() => removeOption(index)}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                  className="p-2 text-white hover:bg-white/10 rounded-full transition-all duration-300"
                                 >
                                   <Trash2 className="h-4 w-4" />
-                                </Button>
+                                </button>
                               </div>
                             ))}
                             <Button
                               onClick={addOption}
                               variant="outline"
                               size="sm"
-                              className="border-white/40 text-white bg-transparent hover:bg-transparent hover:border-white/60"
+                              className="border border-white/30 text-white bg-transparent hover:bg-white/10 hover:border-white/50 transition-all duration-300"
                             >
                               Lägg till alternativ
-                              <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
+                              <Plus className="h-4 w-4 ml-1 text-white" />
                             </Button>
                           </div>
                         </div>
