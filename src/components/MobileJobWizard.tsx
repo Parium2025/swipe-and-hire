@@ -461,6 +461,7 @@ const MobileJobWizard = ({
   const [jobImageDisplayUrl, setJobImageDisplayUrl] = useState<string | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
   const [originalStoragePath, setOriginalStoragePath] = useState<string | null>(null); // Original storage path before editing
+  const [imageIsEdited, setImageIsEdited] = useState<boolean>(false); // Track if image has been cropped/edited
   const [imageTimestamp, setImageTimestamp] = useState<number>(Date.now()); // For cache busting
   
   const [bgPosition, setBgPosition] = useState<string>('center 50%');
@@ -731,6 +732,7 @@ const MobileJobWizard = ({
       // Uppdatera med storage path (fileName) istället för blob URL
       handleInputChange('job_image_url', fileName);
       setJobImageDisplayUrl(publicUrl);
+      setImageIsEdited(true); // Mark that image has been edited/cropped
       setImageTimestamp(Date.now()); // Force cache refresh for all img elements
       // Behåll originalImageUrl oförändrad så vi alltid kan fortsätta redigera från originalet
       setManualFocus(null);
@@ -769,6 +771,7 @@ const MobileJobWizard = ({
     // Återställ BÅDE visnings-URL OCH storage path till originalet
     setJobImageDisplayUrl(originalImageUrl);
     handleInputChange('job_image_url', originalStoragePath);
+    setImageIsEdited(false); // Reset - now showing original
     setManualFocus(null);
     setImageTimestamp(Date.now()); // Force cache refresh
     
@@ -1506,6 +1509,7 @@ const MobileJobWizard = ({
       setJobImageDisplayUrl(null);
       setOriginalImageUrl(null);
       setOriginalStoragePath(null);
+      setImageIsEdited(false);
       setCachedPostalCodeInfo(null);
       setInitialFormData(null);
       setHasUnsavedChanges(false);
@@ -1549,6 +1553,7 @@ const MobileJobWizard = ({
     setJobImageDisplayUrl(null);
     setOriginalImageUrl(null);
     setOriginalStoragePath(null);
+    setImageIsEdited(false);
     setCachedPostalCodeInfo(null);
     setInitialFormData(null);
     setHasUnsavedChanges(false);
@@ -2965,8 +2970,8 @@ const MobileJobWizard = ({
                     <div className="relative">
                       {/* Monitor screen */}
                       <div className="relative w-[520px] rounded-t-lg bg-black p-2.5 shadow-2xl">
-                        {/* Screen bezel */}
-                        <div className="relative w-full h-[200px] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
+                        {/* Screen bezel - använder aspect ratio liknande mobil för bättre bildvisning */}
+                        <div className="relative w-full aspect-[16/10] rounded-lg overflow-hidden bg-black border-2 border-gray-800">
                           {/* Innehåll med Parium bakgrund */}
                           <div 
                             className="absolute inset-0"
@@ -3125,12 +3130,13 @@ const MobileJobWizard = ({
                             {/* Tinder-style Card View (initial) - IDENTICAL to mobile */}
                             {!showDesktopApplicationForm && (
                               <div className="absolute inset-0 z-10">
-                                {/* Job Image - EXAKT samma som mobil */}
+                                {/* Job Image - använd object-cover för redigerade bilder, object-contain för original */}
                                 {jobImageDisplayUrl ? (
                                   <img
-                                    src={jobImageDisplayUrl}
+                                    key={`${jobImageDisplayUrl}-${imageTimestamp}`}
+                                    src={`${jobImageDisplayUrl}?v=${imageTimestamp}`}
                                     alt={`Jobbbild för ${formData.title}`}
-                                    className="absolute inset-0 w-full h-full object-cover select-none"
+                                    className={`absolute inset-0 w-full h-full select-none ${imageIsEdited ? 'object-cover' : 'object-contain'}`}
                                     loading="eager"
                                     decoding="async"
                                   />
@@ -3215,6 +3221,7 @@ const MobileJobWizard = ({
                         handleInputChange('job_image_url', storagePath);
                         // Spara originalets storage path och URL
                         setOriginalStoragePath(storagePath);
+                        setImageIsEdited(false); // Fresh upload, not edited
                         const { getMediaUrl } = await import('@/lib/mediaManager');
                         const signedUrl = await getMediaUrl(storagePath, 'job-image', 86400);
                         setOriginalImageUrl(signedUrl || storagePath);
@@ -3237,6 +3244,7 @@ const MobileJobWizard = ({
                               handleInputChange('job_image_url', '');
                               setOriginalImageUrl(null);
                               setOriginalStoragePath(null);
+                              setImageIsEdited(false);
                               setManualFocus(null);
                             }}
                             className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 transition-colors md:hover:bg-red-600"
