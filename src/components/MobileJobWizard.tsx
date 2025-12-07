@@ -2027,7 +2027,7 @@ const MobileJobWizard = ({
                   )}
 
                   {/* Övrigt / Custom benefit */}
-                  <div className="flex gap-2 mt-2">
+                  <div className="flex gap-2">
                     <Input
                       type="text"
                       value={customBenefitInput}
@@ -2040,7 +2040,7 @@ const MobileJobWizard = ({
                         }
                       }}
                       placeholder="Lägg till egen förmån..."
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40 flex-1"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40 flex-1 py-0"
                     />
                     <Button
                       type="button"
@@ -2052,7 +2052,7 @@ const MobileJobWizard = ({
                           setCustomBenefitInput('');
                         }
                       }}
-                      className="bg-white/10 border-white/20 text-white/60 hover:bg-white/10 hover:text-white h-9 px-3"
+                      className="bg-white/10 border-white/20 text-white/60 hover:bg-white/10 hover:text-white h-9 w-9 p-0 flex items-center justify-center"
                     >
                       <Plus className="w-4 h-4" />
                     </Button>
