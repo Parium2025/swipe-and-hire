@@ -1500,6 +1500,33 @@ const MobileJobWizard = ({
     return true;
   };
 
+  const getMissingFieldsMessage = (): string[] => {
+    const missing: string[] = [];
+    
+    if (currentStep === 0) {
+      if (!formData.title.trim()) missing.push('Jobbtitel');
+      if (!formData.occupation.trim()) missing.push('Yrkeskategori');
+      if (!formData.description.trim()) missing.push('Beskrivning');
+      if (!formData.employment_type) missing.push('Anställningsform');
+      if (!formData.salary_type) missing.push('Lönetyp');
+      if (!formData.salary_transparency) missing.push('Lönetransparens');
+      if (!(parseInt(formData.positions_count) > 0)) missing.push('Antal personer att rekrytera');
+      if (!formData.work_start_time.trim()) missing.push('Arbetstid (starttid)');
+      if (!formData.work_end_time.trim()) missing.push('Arbetstid (sluttid)');
+    }
+    
+    if (currentStep === 1) {
+      if (!formData.work_location_type) missing.push('Var utförs arbetet');
+      if (!formData.remote_work_possible) missing.push('Distansarbete');
+      if (!formData.workplace_name.trim()) missing.push('Arbetsplatsens namn');
+      if (!formData.contact_email.trim()) missing.push('Kontakt e-post');
+      if (!formData.workplace_postal_code.trim()) missing.push('Postnummer');
+      if (!formData.workplace_city.trim()) missing.push('Ort');
+    }
+    
+    return missing;
+  };
+
   const nextStep = () => {
     if (validateCurrentStep() && currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -1512,6 +1539,15 @@ const MobileJobWizard = ({
           });
         }
       }, 0);
+    } else if (!validateCurrentStep()) {
+      const missingFields = getMissingFieldsMessage();
+      if (missingFields.length > 0) {
+        toast({
+          title: "Fyll i obligatoriska fält",
+          description: `Saknas: ${missingFields.join(', ')}`,
+          variant: "destructive",
+        });
+      }
     }
   };
 
