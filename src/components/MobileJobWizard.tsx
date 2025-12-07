@@ -17,7 +17,7 @@ import { categorizeJob } from '@/lib/jobCategorization';
 import { EMPLOYMENT_TYPES, getEmploymentTypeLabel } from '@/lib/employmentTypes';
 import { filterCities, swedishCities } from '@/lib/swedishCities';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Minus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users, GripVertical, ArrowDown, Pencil, Smartphone, Monitor } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, X, ChevronDown, MapPin, Building, Building2, Briefcase, Heart, Bookmark, Plus, Minus, Trash2, Clock, Banknote, FileText, CheckSquare, List, Video, Mail, Users, GripVertical, ArrowDown, Pencil, Smartphone, Monitor, Check } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { getCachedPostalCodeInfo, formatPostalCodeInput, isValidSwedishPostalCode } from '@/lib/postalCodeAPI';
 import WorkplacePostalCodeSelector from '@/components/WorkplacePostalCodeSelector';
@@ -437,6 +437,8 @@ const MobileJobWizard = ({
   const [showSalaryTypeDropdown, setShowSalaryTypeDropdown] = useState(false);
   const [salaryTransparencySearchTerm, setSalaryTransparencySearchTerm] = useState('');
   const [showSalaryTransparencyDropdown, setShowSalaryTransparencyDropdown] = useState(false);
+  const [showBenefitsDropdown, setShowBenefitsDropdown] = useState(false);
+  const [customBenefitInput, setCustomBenefitInput] = useState('');
   const [workLocationSearchTerm, setWorkLocationSearchTerm] = useState('');
   const [showWorkLocationDropdown, setShowWorkLocationDropdown] = useState(false);
   const [remoteWorkSearchTerm, setRemoteWorkSearchTerm] = useState('');
@@ -1181,11 +1183,14 @@ const MobileJobWizard = ({
       if (showRemoteWorkDropdown && !(event.target as Element).closest('.remote-work-dropdown')) {
         setShowRemoteWorkDropdown(false);
       }
+      if (showBenefitsDropdown && !(event.target as Element).closest('.benefits-dropdown')) {
+        setShowBenefitsDropdown(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showQuestionTypeDropdown, showOccupationDropdown, showEmploymentTypeDropdown, showSalaryTypeDropdown, showWorkLocationDropdown, showRemoteWorkDropdown]);
+  }, [showQuestionTypeDropdown, showOccupationDropdown, showEmploymentTypeDropdown, showSalaryTypeDropdown, showWorkLocationDropdown, showRemoteWorkDropdown, showBenefitsDropdown]);
   const questionTypes = [
     { value: 'text', label: 'Text' },
     { value: 'yes_no', label: 'Ja/Nej' },
@@ -1922,40 +1927,129 @@ const MobileJobWizard = ({
                 {/* Förmåner / Benefits */}
                 <div className="space-y-3">
                   <Label className="text-white font-medium text-sm">Förmåner som erbjuds</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { value: 'friskvard', label: 'Friskvårdsbidrag' },
-                      { value: 'tjanstepension', label: 'Tjänstepension' },
-                      { value: 'flexibla-tider', label: 'Flexibla arbetstider' },
-                      { value: 'bonus', label: 'Bonus' },
-                      { value: 'tjanstebil', label: 'Tjänstebil' },
-                      { value: 'mobiltelefon', label: 'Mobiltelefon' },
-                      { value: 'utbildning', label: 'Utbildning/kompetensutveckling' },
-                      { value: 'forsakringar', label: 'Försäkringar' },
-                      { value: 'extra-semester', label: 'Extra semesterdagar' },
-                      { value: 'gym', label: 'Gym/träning' },
-                      { value: 'foraldraledithet', label: 'Föräldraledighetstillägg' },
-                      { value: 'lunch', label: 'Lunch/mat' },
-                    ].map((benefit) => (
-                      <label
-                        key={benefit.value}
-                        className="flex items-center gap-2 p-2 rounded-md bg-white/5 hover:bg-white/10 cursor-pointer transition-colors border border-white/10"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={formData.benefits.includes(benefit.value)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setFormData(prev => ({ ...prev, benefits: [...prev.benefits, benefit.value] }));
-                            } else {
-                              setFormData(prev => ({ ...prev, benefits: prev.benefits.filter(b => b !== benefit.value) }));
-                            }
-                          }}
-                          className="rounded border-white/30 bg-white/10 text-primary focus:ring-primary/50"
-                        />
-                        <span className="text-white text-xs">{benefit.label}</span>
-                      </label>
-                    ))}
+                  <div className="relative benefits-dropdown">
+                    <div
+                      onClick={() => setShowBenefitsDropdown(!showBenefitsDropdown)}
+                      className="flex items-center justify-between bg-white/10 border border-white/20 rounded-md px-3 py-2 cursor-pointer hover:border-white/40 transition-colors min-h-[36px]"
+                    >
+                      <span className={`text-sm ${formData.benefits.length > 0 ? 'text-white' : 'text-white/60'}`}>
+                        {formData.benefits.length > 0 
+                          ? `${formData.benefits.length} förmån${formData.benefits.length > 1 ? 'er' : ''} valda`
+                          : 'Välj förmåner...'}
+                      </span>
+                      <ChevronDown className={`h-4 w-4 text-white/60 transition-transform ${showBenefitsDropdown ? 'rotate-180' : ''}`} />
+                    </div>
+                    
+                    {showBenefitsDropdown && (
+                      <div className="absolute top-full left-0 right-0 z-50 bg-white/10 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                        {[
+                          { value: 'friskvard', label: 'Friskvårdsbidrag' },
+                          { value: 'tjanstepension', label: 'Tjänstepension' },
+                          { value: 'flexibla-tider', label: 'Flexibla arbetstider' },
+                          { value: 'bonus', label: 'Bonus' },
+                          { value: 'tjanstebil', label: 'Tjänstebil' },
+                          { value: 'mobiltelefon', label: 'Mobiltelefon' },
+                          { value: 'utbildning', label: 'Utbildning/kompetensutveckling' },
+                          { value: 'forsakringar', label: 'Försäkringar' },
+                          { value: 'extra-semester', label: 'Extra semesterdagar' },
+                          { value: 'gym', label: 'Gym/träning' },
+                          { value: 'foraldraledithet', label: 'Föräldraledighetstillägg' },
+                          { value: 'lunch', label: 'Lunch/mat' },
+                        ].map((benefit) => (
+                          <button
+                            key={benefit.value}
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (formData.benefits.includes(benefit.value)) {
+                                setFormData(prev => ({ ...prev, benefits: prev.benefits.filter(b => b !== benefit.value) }));
+                              } else {
+                                setFormData(prev => ({ ...prev, benefits: [...prev.benefits, benefit.value] }));
+                              }
+                            }}
+                            className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 flex items-center gap-2"
+                          >
+                            <div className={`w-4 h-4 rounded border ${formData.benefits.includes(benefit.value) ? 'bg-primary border-primary' : 'border-white/30 bg-white/10'} flex items-center justify-center`}>
+                              {formData.benefits.includes(benefit.value) && (
+                                <Check className="w-3 h-3 text-white" />
+                              )}
+                            </div>
+                            <span>{benefit.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Valda förmåner som badges */}
+                  {formData.benefits.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {formData.benefits.map((benefitValue) => {
+                        const benefitOptions = [
+                          { value: 'friskvard', label: 'Friskvårdsbidrag' },
+                          { value: 'tjanstepension', label: 'Tjänstepension' },
+                          { value: 'flexibla-tider', label: 'Flexibla arbetstider' },
+                          { value: 'bonus', label: 'Bonus' },
+                          { value: 'tjanstebil', label: 'Tjänstebil' },
+                          { value: 'mobiltelefon', label: 'Mobiltelefon' },
+                          { value: 'utbildning', label: 'Utbildning/kompetensutveckling' },
+                          { value: 'forsakringar', label: 'Försäkringar' },
+                          { value: 'extra-semester', label: 'Extra semesterdagar' },
+                          { value: 'gym', label: 'Gym/träning' },
+                          { value: 'foraldraledithet', label: 'Föräldraledighetstillägg' },
+                          { value: 'lunch', label: 'Lunch/mat' },
+                        ];
+                        const benefit = benefitOptions.find(b => b.value === benefitValue);
+                        const label = benefit ? benefit.label : benefitValue;
+                        return (
+                          <span
+                            key={benefitValue}
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-primary/20 text-white text-xs rounded-full border border-primary/30"
+                          >
+                            {label}
+                            <button
+                              type="button"
+                              onClick={() => setFormData(prev => ({ ...prev, benefits: prev.benefits.filter(b => b !== benefitValue) }))}
+                              className="hover:text-white/60"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Övrigt / Custom benefit */}
+                  <div className="flex gap-2 mt-2">
+                    <Input
+                      type="text"
+                      value={customBenefitInput}
+                      onChange={(e) => setCustomBenefitInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && customBenefitInput.trim()) {
+                          e.preventDefault();
+                          setFormData(prev => ({ ...prev, benefits: [...prev.benefits, customBenefitInput.trim()] }));
+                          setCustomBenefitInput('');
+                        }
+                      }}
+                      placeholder="Lägg till egen förmån..."
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40 flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (customBenefitInput.trim()) {
+                          setFormData(prev => ({ ...prev, benefits: [...prev.benefits, customBenefitInput.trim()] }));
+                          setCustomBenefitInput('');
+                        }
+                      }}
+                      className="border-white/20 text-white hover:bg-white/10 h-9 px-3"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
 
