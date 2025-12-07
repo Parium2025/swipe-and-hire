@@ -3130,13 +3130,12 @@ const MobileJobWizard = ({
                             {/* Tinder-style Card View (initial) - IDENTICAL to mobile */}
                             {!showDesktopApplicationForm && (
                               <div className="absolute inset-0 z-10">
-                                {/* Job Image - använd object-cover för redigerade bilder, object-contain för original */}
+                                {/* Job Image - always object-cover like mobile */}
                                 {jobImageDisplayUrl ? (
                                   <img
-                                    key={`${jobImageDisplayUrl}-${imageTimestamp}`}
-                                    src={`${jobImageDisplayUrl}?v=${imageTimestamp}`}
+                                    src={jobImageDisplayUrl}
                                     alt={`Jobbbild för ${formData.title}`}
-                                    className={`absolute inset-0 w-full h-full select-none ${imageIsEdited ? 'object-cover' : 'object-contain'}`}
+                                    className="absolute inset-0 w-full h-full object-cover select-none"
                                     loading="eager"
                                     decoding="async"
                                   />
