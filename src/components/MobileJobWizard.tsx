@@ -1930,7 +1930,7 @@ const MobileJobWizard = ({
                   <div className="relative benefits-dropdown">
                     <div
                       onClick={() => setShowBenefitsDropdown(!showBenefitsDropdown)}
-                      className="flex items-center justify-between bg-white/10 border border-white/20 rounded-md px-3 py-2 cursor-pointer hover:border-white/40 transition-colors min-h-[36px]"
+                      className="flex items-center justify-between bg-white/10 border border-white/20 rounded-md px-3 h-9 cursor-pointer hover:border-white/40 transition-colors"
                     >
                       <span className={`text-sm ${formData.benefits.length > 0 ? 'text-white' : 'text-white/60'}`}>
                         {formData.benefits.length > 0 
@@ -2052,7 +2052,7 @@ const MobileJobWizard = ({
                           setCustomBenefitInput('');
                         }
                       }}
-                      className="border-white/20 text-white hover:bg-white/10 h-9 px-3"
+                      className="bg-white/10 border-white/20 text-white/60 hover:bg-white/10 hover:text-white h-9 px-3"
                     >
                       <Plus className="w-4 h-4" />
                     </Button>
