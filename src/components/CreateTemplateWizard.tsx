@@ -1188,26 +1188,26 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
             {showQuestionForm && editingQuestion && (
               <div className="space-y-1.5">
                 <div className="space-y-2">
-                  <Label className="text-white font-medium">Frågetyp *</Label>
+                  <Label className="text-white font-medium text-sm">Frågetyp *</Label>
                   <div className="relative question-type-dropdown">
                     <Input
                       value={questionTypeSearchTerm || questionTypes.find(t => t.value === editingQuestion.question_type)?.label || ''}
                       onChange={(e) => handleQuestionTypeSearch(e.target.value)}
                       onClick={handleQuestionTypeClick}
                       placeholder="Välj frågetyp"
-                      className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                     
                     {showQuestionTypeDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 z-50 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
                         {filteredQuestionTypes.map((type) => (
                           <button
                             key={type.value}
                             type="button"
                             onClick={() => handleQuestionTypeSelect(type)}
-                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                            className="w-full px-3 py-2 text-left hover:bg-white/10 text-white text-sm border-b border-white/20 last:border-b-0"
                           >
                             <div className="font-medium">{type.label}</div>
                           </button>
@@ -1219,24 +1219,24 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
 
                 {editingQuestion.question_type === 'text' && (
                   <div className="space-y-2">
-                    <Label className="text-white font-medium">Rubrik *</Label>
+                    <Label className="text-white font-medium text-sm">Rubrik *</Label>
                     <Input
                       value={editingQuestion.question_text}
                       onChange={(e) => updateQuestionField('question_text', e.target.value)}
                       placeholder="T.ex. Beskriv dina erfarenheter inom..."
-                      className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 h-9 text-sm"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                     />
                   </div>
                 )}
 
                 {editingQuestion.question_type === 'yes_no' && (
                   <div className="space-y-2">
-                    <Label className="text-white font-medium">Rubrik *</Label>
+                    <Label className="text-white font-medium text-sm">Rubrik *</Label>
                     <Input
                       value={editingQuestion.question_text}
                       onChange={(e) => updateQuestionField('question_text', e.target.value)}
                       placeholder="T.ex. Har du körkort?, Kan du arbeta helger?..."
-                      className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 h-9 text-sm"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                     />
                   </div>
                 )}
@@ -1244,34 +1244,34 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                 {editingQuestion.question_type === 'number' && (
                   <>
                     <div className="space-y-2">
-                      <Label className="text-white font-medium">Rubrik *</Label>
+                      <Label className="text-white font-medium text-sm">Rubrik *</Label>
                       <Input
                         value={editingQuestion.question_text}
                         onChange={(e) => updateQuestionField('question_text', e.target.value)}
                         placeholder="T.ex. Ålder, Antal års erfarenhet..."
-                        className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 h-9 text-sm"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                       />
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-white font-medium">Min värde</Label>
+                        <Label className="text-white font-medium text-sm">Min värde</Label>
                         <Input
                           type="number"
                           value={editingQuestion.min_value ?? ''}
                           onChange={(e) => updateQuestionField('min_value', e.target.value ? parseInt(e.target.value) : undefined)}
                           placeholder="0"
-                          className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 h-9 text-sm"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-white font-medium">Max värde</Label>
+                        <Label className="text-white font-medium text-sm">Max värde</Label>
                         <Input
                           type="number"
                           value={editingQuestion.max_value ?? ''}
                           onChange={(e) => updateQuestionField('max_value', e.target.value ? parseInt(e.target.value) : undefined)}
                           placeholder="100"
-                          className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 h-9 text-sm"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                         />
                       </div>
                     </div>
@@ -1281,17 +1281,17 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                 {editingQuestion.question_type === 'multiple_choice' && (
                   <>
                     <div className="space-y-2">
-                      <Label className="text-white font-medium">Rubrik *</Label>
+                      <Label className="text-white font-medium text-sm">Rubrik *</Label>
                       <Input
                         value={editingQuestion.question_text}
                         onChange={(e) => updateQuestionField('question_text', e.target.value)}
                         placeholder="T.ex. Vilka behörigheter har du?"
-                        className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 h-9 text-sm"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-white font-medium">Svarsalternativ</Label>
+                      <Label className="text-white font-medium text-sm">Svarsalternativ</Label>
                       <div className="space-y-2">
                         {(editingQuestion.options || []).map((option, index) => (
                           <div key={index} className="flex items-center space-x-2">
@@ -1299,27 +1299,25 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                               value={option}
                               onChange={(e) => updateOption(index, e.target.value)}
                               placeholder={`Alternativ ${index + 1}`}
-                              className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 h-9 text-sm"
+                              className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                             />
-                            <Button
+                            <button
+                              type="button"
                               onClick={() => removeOption(index)}
-                              variant="ghost"
-                              size="sm"
-                              className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                              className="p-1.5 text-white hover:text-red-300 hover:bg-red-500/10 rounded-full transition-all duration-300"
                             >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                              <Trash2 className="h-3 w-3" />
+                            </button>
                           </div>
                         ))}
-                        <Button
+                        <button
+                          type="button"
                           onClick={addOption}
-                          variant="outline"
-                          size="sm"
-                          className="border-white/40 text-white bg-transparent hover:bg-transparent hover:border-white/60"
+                          className="bg-white/10 border border-white/20 text-white hover:border-white/40 px-3 py-2 rounded-md text-sm flex items-center gap-1 transition-all duration-300"
                         >
                           Lägg till alternativ
-                          <Plus className="h-4 w-4 ml-1 text-[hsl(var(--pure-white))]" />
-                        </Button>
+                          <Plus className="h-4 w-4 text-white" />
+                        </button>
                       </div>
                     </div>
                   </>
@@ -1330,7 +1328,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     checked={editingQuestion.is_required || false}
                     onCheckedChange={(checked) => updateQuestionField('is_required', checked)}
                   />
-                  <Label className="text-white font-medium">Obligatorisk fråga</Label>
+                  <Label className="text-white font-medium text-sm">Obligatorisk fråga</Label>
                 </div>
 
                 <div className="flex justify-end pt-4">
@@ -1364,17 +1362,17 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
             {!showQuestionForm && currentStep === 1 && (
               <div className="space-y-1.5 max-w-2xl mx-auto w-full">
                 <div className="space-y-2">
-                  <Label className="text-white font-medium">Jobbtitel *</Label>
+                  <Label className="text-white font-medium text-sm">Jobbtitel *</Label>
                   <Input
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
                     placeholder="t.ex. Lagerarbetare"
-                    className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium">Yrke *</Label>
+                  <Label className="text-white font-medium text-sm">Yrke *</Label>
                   <div className="relative occupation-dropdown">
                     <Input
                       value={formData.occupation}
@@ -1386,13 +1384,13 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
                     
                     {showOccupationDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 z-50 bg-white/5 backdrop-blur-md border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg">
                         {filteredOccupations.map((occupation, index) => (
                           <button
                             key={`${occupation}-${index}`}
                             type="button"
                             onClick={() => handleOccupationSelect(occupation)}
-                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                            className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 transition-colors"
                           >
                             <div className="font-medium">{occupation}</div>
                           </button>
@@ -1403,14 +1401,14 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                           <button
                             type="button"
                             onClick={() => handleOccupationSelect(occupationSearchTerm)}
-                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-t border-gray-700/30"
+                            className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-t border-white/10 transition-colors"
                           >
                             <span className="font-medium">Använd "{occupationSearchTerm}"</span>
                           </button>
                         )}
                         
                         {occupationSearchTerm.trim().length > 0 && occupationSearchTerm.trim().length < 2 && (
-                          <div className="py-4 px-3 text-center text-white not-italic text-sm">
+                          <div className="py-3 px-3 text-center text-white not-italic text-sm">
                             Skriv minst 2 bokstäver för att söka
                           </div>
                         )}
@@ -1420,37 +1418,136 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium">Jobbeskrivning *</Label>
+                  <Label className="text-white font-medium text-sm">Jobbeskrivning *</Label>
                   <Textarea
                     value={formData.description}
                     onChange={(e) => handleInputChange('description', e.target.value)}
                     placeholder="Beskriv jobbet, arbetsuppgifter och vad ni erbjuder..."
-                    rows={4}
-                    className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 text-base resize-none leading-relaxed focus:border-white/40"
+                    rows={3}
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 p-2 text-sm resize-none leading-tight focus:border-white/40 min-h-[80px] sm:min-h-[200px]"
                   />
                 </div>
 
+                {/* Förmåner / Benefits */}
                 <div className="space-y-2">
-                  <Label className="text-white font-medium">Anställningsform *</Label>
+                  <Label className="text-white font-medium text-sm">Förmåner som erbjuds</Label>
+                  <div className="relative benefits-dropdown">
+                    <div
+                      onClick={() => setShowBenefitsDropdown(!showBenefitsDropdown)}
+                      className="flex items-center justify-between bg-white/10 border border-white/20 rounded-md px-3 py-2 h-11 cursor-pointer hover:border-white/40 transition-colors"
+                    >
+                      <span className="text-sm text-white">
+                        {formData.benefits.length > 0 
+                          ? `${formData.benefits.length} förmån${formData.benefits.length > 1 ? 'er' : ''} valda`
+                          : 'Välj förmåner'}
+                      </span>
+                      <ChevronDown className="h-4 w-4 text-white/60" />
+                    </div>
+                    
+                    {showBenefitsDropdown && (
+                      <div className="absolute top-full left-0 right-0 z-50 bg-white/10 backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                        {benefitOptions.map((benefit) => (
+                          <button
+                            key={benefit.value}
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (formData.benefits.includes(benefit.value)) {
+                                setFormData(prev => ({ ...prev, benefits: prev.benefits.filter(b => b !== benefit.value) }));
+                              } else {
+                                setFormData(prev => ({ ...prev, benefits: [...prev.benefits, benefit.value] }));
+                              }
+                            }}
+                            className="w-full px-3 py-2 text-left hover:bg-white/20 text-white text-sm border-b border-white/10 last:border-b-0 flex items-center gap-2"
+                          >
+                            <div className={`w-4 h-4 rounded border ${formData.benefits.includes(benefit.value) ? 'bg-primary border-primary' : 'border-white/30 bg-white/10'} flex items-center justify-center`}>
+                              {formData.benefits.includes(benefit.value) && (
+                                <Check className="w-3 h-3 text-white" />
+                              )}
+                            </div>
+                            <span>{benefit.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Valda förmåner som badges */}
+                  {formData.benefits.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {formData.benefits.map((benefitValue) => {
+                        const benefit = benefitOptions.find(b => b.value === benefitValue);
+                        const label = benefit ? benefit.label : benefitValue;
+                        return (
+                          <span
+                            key={benefitValue}
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-primary/20 text-white text-xs rounded-full border border-primary/30"
+                          >
+                            {label}
+                            <button
+                              type="button"
+                              onClick={() => setFormData(prev => ({ ...prev, benefits: prev.benefits.filter(b => b !== benefitValue) }))}
+                              className="hover:text-white/60"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Övrigt / Custom benefit */}
+                  <div className="flex gap-2">
+                    <Input
+                      type="text"
+                      value={customBenefitInput}
+                      onChange={(e) => setCustomBenefitInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && customBenefitInput.trim()) {
+                          e.preventDefault();
+                          setFormData(prev => ({ ...prev, benefits: [...prev.benefits, customBenefitInput.trim()] }));
+                          setCustomBenefitInput('');
+                        }
+                      }}
+                      placeholder="Lägg till egen förmån"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-11 text-sm focus:border-white/40 flex-1"
+                    />
+                    <div
+                      onClick={() => {
+                        if (customBenefitInput.trim()) {
+                          setFormData(prev => ({ ...prev, benefits: [...prev.benefits, customBenefitInput.trim()] }));
+                          setCustomBenefitInput('');
+                        }
+                      }}
+                      className="bg-white/10 border border-white/20 text-white/60 hover:border-white/40 h-11 w-11 flex items-center justify-center rounded-md cursor-pointer transition-all duration-300"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white font-medium text-sm">Anställningsform *</Label>
                   <div className="relative employment-type-dropdown">
                     <Input
                       value={employmentTypeSearchTerm || (formData.employment_type ? EMPLOYMENT_TYPES.find(t => t.value === formData.employment_type)?.label || '' : '')}
                       onChange={(e) => handleEmploymentTypeSearch(e.target.value)}
                       onClick={handleEmploymentTypeClick}
                       placeholder="Välj anställningsform"
-                      className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 h-9 text-sm pr-10 focus:border-white/40"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                     
                     {showEmploymentTypeDropdown && (
-                       <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 shadow-lg">
+                       <div className="absolute top-full left-0 right-0 z-50 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-white/20 rounded-md mt-1 shadow-lg">
                         {filteredEmploymentTypes.map((type) => (
                           <button
                             key={type.value}
                             type="button"
                             onClick={() => handleEmploymentTypeSelect(type)}
-                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                            className="w-full px-3 py-2 text-left hover:bg-white/10 text-white text-sm border-b border-white/20 last:border-b-0"
                           >
                             <div className="font-medium">{type.label}</div>
                           </button>
@@ -1461,26 +1558,26 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium">Lönetyp</Label>
+                  <Label className="text-white font-medium text-sm">Lönetyp *</Label>
                   <div className="relative salary-type-dropdown">
                     <Input
                       value={salaryTypeSearchTerm || (formData.salary_type ? salaryTypes.find(t => t.value === formData.salary_type)?.label || '' : '')}
                       onChange={(e) => handleSalaryTypeSearch(e.target.value)}
                       onClick={handleSalaryTypeClick}
                       placeholder="Välj lönetyp"
-                      className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                     
                     {showSalaryTypeDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 z-50 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
                         {filteredSalaryTypes.map((type) => (
                           <button
                             key={type.value}
                             type="button"
                             onClick={() => handleSalaryTypeSelect(type)}
-                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                            className="w-full px-3 py-2 text-left hover:bg-white/10 text-white text-sm border-b border-white/20 last:border-b-0"
                           >
                             <div className="font-medium">{type.label}</div>
                           </button>
@@ -1491,15 +1588,102 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium">Antal personer att rekrytera</Label>
+                  <Label className="text-white font-medium text-sm">Lönetransparens (EU 2026) *</Label>
+                  <div className="relative salary-transparency-dropdown">
+                    <Input
+                      value={salaryTransparencySearchTerm || (formData.salary_transparency ? salaryTransparencyOptions.find(t => t.value === formData.salary_transparency)?.label || '' : '')}
+                      onChange={(e) => handleSalaryTransparencySearch(e.target.value)}
+                      onClick={handleSalaryTransparencyClick}
+                      placeholder="Välj lönespann"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
+                      readOnly
+                    />
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
+                    
+                    {showSalaryTransparencyDropdown && (
+                      <div className="absolute top-full left-0 right-0 z-50 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
+                        {filteredSalaryTransparencyOptions.map((option) => (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => handleSalaryTransparencySelect(option)}
+                            className="w-full px-3 py-2 text-left hover:bg-white/10 text-white text-sm border-b border-white/20 last:border-b-0"
+                          >
+                            <div className="font-medium">{option.label}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white font-medium text-sm">Antal personer att rekrytera *</Label>
                   <Input
                     type="number"
                     min="1"
                     value={formData.positions_count}
                     onChange={(e) => handleInputChange('positions_count', e.target.value)}
                     placeholder="1"
-                    className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white font-medium text-sm">Arbetstider (starttid – sluttid) *</Label>
+                  <div className="flex gap-3 items-center">
+                    <div className="flex-1">
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        value={formData.work_start_time}
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+                          const formatted = digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
+                          handleInputChange('work_start_time', formatted);
+                        }}
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          if (value && !value.includes(':')) {
+                            const padded = value.padStart(2, '0') + ':00';
+                            handleInputChange('work_start_time', padded);
+                          } else if (value && value.includes(':') && value.split(':')[1].length < 2) {
+                            const [hours, mins] = value.split(':');
+                            handleInputChange('work_start_time', `${hours}:${mins.padEnd(2, '0')}`);
+                          }
+                        }}
+                        placeholder="08:00"
+                        maxLength={5}
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                      />
+                    </div>
+                    <span className="text-white/60 text-sm">–</span>
+                    <div className="flex-1">
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        value={formData.work_end_time}
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+                          const formatted = digits.length > 2 ? `${digits.slice(0, 2)}:${digits.slice(2)}` : digits;
+                          handleInputChange('work_end_time', formatted);
+                        }}
+                        onBlur={(e) => {
+                          const value = e.target.value;
+                          if (value && !value.includes(':')) {
+                            const padded = value.padStart(2, '0') + ':00';
+                            handleInputChange('work_end_time', padded);
+                          } else if (value && value.includes(':') && value.split(':')[1].length < 2) {
+                            const [hours, mins] = value.split(':');
+                            handleInputChange('work_end_time', `${hours}:${mins.padEnd(2, '0')}`);
+                          }
+                        }}
+                        placeholder="17:00"
+                        maxLength={5}
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -1508,26 +1692,26 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
             {!showQuestionForm && currentStep === 2 && (
               <div className="space-y-1.5 max-w-2xl mx-auto w-full">
                 <div className="space-y-2">
-                  <Label className="text-white font-medium">Var utförs arbetet? *</Label>
+                  <Label className="text-white font-medium text-sm">Var utförs arbetet? *</Label>
                   <div className="relative work-location-dropdown">
                     <Input
                       value={workLocationSearchTerm || (formData.work_location_type ? workLocationTypes.find(t => t.value === formData.work_location_type)?.label || '' : '')}
                       onChange={(e) => handleWorkLocationSearch(e.target.value)}
                       onClick={handleWorkLocationClick}
                       placeholder="Välj arbetsplats"
-                      className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                     
                     {showWorkLocationDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 z-50 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
                         {filteredWorkLocationTypes.map((type) => (
                           <button
                             key={type.value}
                             type="button"
                             onClick={() => handleWorkLocationSelect(type)}
-                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                            className="w-full px-3 py-2 text-left hover:bg-white/10 text-white text-sm border-b border-white/20 last:border-b-0"
                           >
                             <div className="font-medium">{type.label}</div>
                           </button>
@@ -1538,26 +1722,26 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium">Är distansarbete möjligt? *</Label>
+                  <Label className="text-white font-medium text-sm">Är distansarbete möjligt? *</Label>
                   <div className="relative remote-work-dropdown">
                     <Input
                       value={remoteWorkSearchTerm || (formData.remote_work_possible ? remoteWorkOptions.find(t => t.value === formData.remote_work_possible)?.label || '' : '')}
                       onChange={(e) => handleRemoteWorkSearch(e.target.value)}
                       onClick={handleRemoteWorkClick}
                       placeholder="Välj alternativ"
-                      className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm pr-10 cursor-pointer focus:border-white/40"
                       readOnly
                     />
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60 pointer-events-none" />
                     
                     {showRemoteWorkDropdown && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-gray-800 border border-gray-600 rounded-md mt-1 max-h-60 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 z-50 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-white/20 rounded-md mt-1 max-h-60 overflow-y-auto">
                         {filteredRemoteWorkOptions.map((type) => (
                           <button
                             key={type.value}
                             type="button"
                             onClick={() => handleRemoteWorkSelect(type)}
-                            className="w-full px-3 py-3 text-left hover:bg-gray-700 text-white text-base border-b border-gray-700 last:border-b-0"
+                            className="w-full px-3 py-2 text-left hover:bg-white/10 text-white text-sm border-b border-white/20 last:border-b-0"
                           >
                             <div className="font-medium">{type.label}</div>
                           </button>
@@ -1568,33 +1752,33 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium">Arbetsplatsens namn *</Label>
+                  <Label className="text-white font-medium text-sm">Arbetsplatsens namn *</Label>
                   <Input
                     value={formData.workplace_name}
                     onChange={(e) => handleInputChange('workplace_name', e.target.value)}
                     placeholder={profile?.company_name ? `t.ex. ${profile.company_name}` : "t.ex. IKEA Kungens Kurva"}
-                    className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium">Kontakt e-mail *</Label>
+                  <Label className="text-white font-medium text-sm">Kontakt e-mail *</Label>
                   <Input
                     type="email"
                     value={formData.contact_email}
                     onChange={(e) => handleInputChange('contact_email', e.target.value)}
                     placeholder={user?.email || "kontakt@företag.se"}
-                    className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-white font-medium">Gatuadress (frivilligt)</Label>
+                  <Label className="text-white font-medium text-sm">Gatuadress (frivilligt)</Label>
                   <Input
                     value={formData.workplace_address}
                     onChange={(e) => handleInputChange('workplace_address', e.target.value)}
                     placeholder="t.ex. Modulvägen 1"
-                    className="bg-white/10 border-white/20 hover:border-white/50 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/60 h-9 text-sm focus:border-white/40"
                   />
                 </div>
               </div>
