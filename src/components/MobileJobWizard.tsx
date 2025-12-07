@@ -1945,6 +1945,7 @@ const MobileJobWizard = ({
                         {[
                           { value: 'friskvard', label: 'Friskvårdsbidrag' },
                           { value: 'tjanstepension', label: 'Tjänstepension' },
+                          { value: 'kollektivavtal', label: 'Kollektivavtal' },
                           { value: 'flexibla-tider', label: 'Flexibla arbetstider' },
                           { value: 'bonus', label: 'Bonus' },
                           { value: 'tjanstebil', label: 'Tjänstebil' },
@@ -1955,6 +1956,8 @@ const MobileJobWizard = ({
                           { value: 'gym', label: 'Gym/träning' },
                           { value: 'foraldraledithet', label: 'Föräldraledighetstillägg' },
                           { value: 'lunch', label: 'Lunch/mat' },
+                          { value: 'fri-parkering', label: 'Fri parkering' },
+                          { value: 'personalrabatter', label: 'Personalrabatter' },
                         ].map((benefit) => (
                           <button
                             key={benefit.value}
@@ -1988,6 +1991,7 @@ const MobileJobWizard = ({
                         const benefitOptions = [
                           { value: 'friskvard', label: 'Friskvårdsbidrag' },
                           { value: 'tjanstepension', label: 'Tjänstepension' },
+                          { value: 'kollektivavtal', label: 'Kollektivavtal' },
                           { value: 'flexibla-tider', label: 'Flexibla arbetstider' },
                           { value: 'bonus', label: 'Bonus' },
                           { value: 'tjanstebil', label: 'Tjänstebil' },
@@ -1998,6 +2002,8 @@ const MobileJobWizard = ({
                           { value: 'gym', label: 'Gym/träning' },
                           { value: 'foraldraledithet', label: 'Föräldraledighetstillägg' },
                           { value: 'lunch', label: 'Lunch/mat' },
+                          { value: 'fri-parkering', label: 'Fri parkering' },
+                          { value: 'personalrabatter', label: 'Personalrabatter' },
                         ];
                         const benefit = benefitOptions.find(b => b.value === benefitValue);
                         const label = benefit ? benefit.label : benefitValue;
