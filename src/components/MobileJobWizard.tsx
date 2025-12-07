@@ -3130,12 +3130,12 @@ const MobileJobWizard = ({
                             {/* Tinder-style Card View (initial) - IDENTICAL to mobile */}
                             {!showDesktopApplicationForm && (
                               <div className="absolute inset-0 z-10">
-                                {/* Job Image - object-contain för att visa hela bilden utan hård croppning */}
+                                {/* Job Image - object-cover för att fylla hela skärmen kant till kant */}
                                 {jobImageDisplayUrl ? (
                                   <img
                                     src={jobImageDisplayUrl}
                                     alt={`Jobbbild för ${formData.title}`}
-                                    className="absolute inset-0 w-full h-full object-contain select-none"
+                                    className="absolute inset-0 w-full h-full object-cover select-none"
                                     loading="eager"
                                     decoding="async"
                                   />
