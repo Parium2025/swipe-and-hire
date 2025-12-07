@@ -406,14 +406,11 @@ const CompanyProfile = () => {
             </div>
           ) : (
             <div className="w-32 h-32 rounded-full bg-white/5 border border-dashed border-white/20 flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-2xl font-semibold text-white/60 mb-1">
-                  {formData.company_name ? 
-                    formData.company_name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2) : 
-                    'HM'
-                  }
-                </div>
-                <Building2 className="h-5 w-5 text-white/40 mx-auto" />
+              <div className="text-2xl font-semibold text-white/60">
+                {formData.company_name ? 
+                  formData.company_name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2) : 
+                  'HM'
+                }
               </div>
             </div>
           )}
