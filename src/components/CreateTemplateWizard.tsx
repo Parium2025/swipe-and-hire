@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/hooks/use-toast';
 import { EMPLOYMENT_TYPES } from '@/lib/employmentTypes';
 import { searchOccupations } from '@/lib/occupations';
-import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, GripVertical, Search, Pencil } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, X, ChevronDown, Plus, Trash2, GripVertical, Search, Pencil, Check } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { Switch } from '@/components/ui/switch';
@@ -59,6 +59,7 @@ interface TemplateFormData {
   salary_max: string;
   employment_type: string;
   salary_type: string;
+  salary_transparency: string;
   positions_count: string;
   work_location_type: string;
   remote_work_possible: string;
@@ -67,9 +68,12 @@ interface TemplateFormData {
   workplace_postal_code: string;
   workplace_city: string;
   work_schedule: string;
+  work_start_time: string;
+  work_end_time: string;
   contact_email: string;
   application_instructions: string;
   pitch: string;
+  benefits: string[];
 }
 
 interface CreateTemplateWizardProps {
@@ -173,6 +177,10 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
   const [showWorkLocationDropdown, setShowWorkLocationDropdown] = useState(false);
   const [remoteWorkSearchTerm, setRemoteWorkSearchTerm] = useState('');
   const [showRemoteWorkDropdown, setShowRemoteWorkDropdown] = useState(false);
+  const [salaryTransparencySearchTerm, setSalaryTransparencySearchTerm] = useState('');
+  const [showSalaryTransparencyDropdown, setShowSalaryTransparencyDropdown] = useState(false);
+  const [showBenefitsDropdown, setShowBenefitsDropdown] = useState(false);
+  const [customBenefitInput, setCustomBenefitInput] = useState('');
   const [questionSearchQuery, setQuestionSearchQuery] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
@@ -205,6 +213,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
     salary_max: '',
     employment_type: '',
     salary_type: '',
+    salary_transparency: '',
     positions_count: '1',
     work_location_type: 'på-plats',
     remote_work_possible: 'nej',
@@ -213,9 +222,12 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
     workplace_postal_code: '',
     workplace_city: '',
     work_schedule: '',
+    work_start_time: '',
+    work_end_time: '',
     contact_email: '',
     application_instructions: '',
-    pitch: ''
+    pitch: '',
+    benefits: []
   });
 
   // Load user profile for company info
@@ -294,6 +306,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         employment_type: templateToEdit.employment_type || '',
         work_schedule: templateToEdit.work_schedule || '',
         salary_type: templateToEdit.salary_type || '',
+        salary_transparency: templateToEdit.salary_transparency || '',
         salary_min: templateToEdit.salary_min?.toString() || '',
         salary_max: templateToEdit.salary_max?.toString() || '',
         positions_count: templateToEdit.positions_count || '1',
@@ -304,9 +317,12 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         workplace_postal_code: templateToEdit.workplace_postal_code || '',
         workplace_city: templateToEdit.workplace_city || '',
         requirements: templateToEdit.requirements || '',
+        work_start_time: templateToEdit.work_start_time || '',
+        work_end_time: templateToEdit.work_end_time || '',
         contact_email: templateToEdit.contact_email || '',
         application_instructions: templateToEdit.application_instructions || '',
-        location: ''
+        location: '',
+        benefits: templateToEdit.benefits || []
       };
       setFormData(loadedFormData);
       setInitialFormData(loadedFormData);
@@ -328,7 +344,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       setHasUnsavedChanges(false);
     } else if (open && !templateToEdit) {
       // New template - set empty initial state
-      const emptyFormData = {
+      const emptyFormData: TemplateFormData = {
         name: '',
         title: '',
         description: '',
@@ -339,6 +355,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         salary_max: '',
         employment_type: '',
         salary_type: '',
+        salary_transparency: '',
         positions_count: '1',
         work_location_type: 'på-plats',
         remote_work_possible: 'nej',
@@ -347,9 +364,12 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         workplace_postal_code: '',
         workplace_city: '',
         work_schedule: '',
+        work_start_time: '',
+        work_end_time: '',
         contact_email: '',
         application_instructions: '',
-        pitch: ''
+        pitch: '',
+        benefits: []
       };
       setInitialFormData(emptyFormData);
       setInitialCustomQuestions([]);
@@ -367,6 +387,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         salary_max: '',
         employment_type: '',
         salary_type: '',
+        salary_transparency: '',
         positions_count: '1',
         work_location_type: 'på-plats',
         remote_work_possible: 'nej',
@@ -375,9 +396,12 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         workplace_postal_code: '',
         workplace_city: '',
         work_schedule: '',
+        work_start_time: '',
+        work_end_time: '',
         contact_email: '',
         application_instructions: '',
-        pitch: ''
+        pitch: '',
+        benefits: []
       });
       setCustomQuestions([]);
       setCurrentStep(0);
@@ -458,6 +482,46 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
     { value: 'nej', label: 'Nej' },
     { value: 'delvis', label: 'Delvis' },
     { value: 'ja', label: 'Ja, helt' }
+  ];
+
+  const salaryTransparencyOptions = [
+    { value: '0-5000', label: '0 - 5 000 kr' },
+    { value: '5000-10000', label: '5 000 - 10 000 kr' },
+    { value: '10000-15000', label: '10 000 - 15 000 kr' },
+    { value: '15000-20000', label: '15 000 - 20 000 kr' },
+    { value: '20000-25000', label: '20 000 - 25 000 kr' },
+    { value: '25000-30000', label: '25 000 - 30 000 kr' },
+    { value: '30000-40000', label: '30 000 - 40 000 kr' },
+    { value: '40000-45000', label: '40 000 - 45 000 kr' },
+    { value: '45000-50000', label: '45 000 - 50 000 kr' },
+    { value: '50000-55000', label: '50 000 - 55 000 kr' },
+    { value: '55000-60000', label: '55 000 - 60 000 kr' },
+    { value: '60000-65000', label: '60 000 - 65 000 kr' },
+    { value: '65000-70000', label: '65 000 - 70 000 kr' },
+    { value: '70000-75000', label: '70 000 - 75 000 kr' },
+    { value: '75000-80000', label: '75 000 - 80 000 kr' },
+    { value: '80000-85000', label: '80 000 - 85 000 kr' },
+    { value: '85000-90000', label: '85 000 - 90 000 kr' },
+    { value: '90000-100000', label: '90 000 - 100 000 kr' },
+    { value: '100000+', label: '100 000+ kr' }
+  ];
+
+  const benefitOptions = [
+    { value: 'friskvard', label: 'Friskvårdsbidrag' },
+    { value: 'tjanstepension', label: 'Tjänstepension' },
+    { value: 'kollektivavtal', label: 'Kollektivavtal' },
+    { value: 'flexibla-tider', label: 'Flexibla arbetstider' },
+    { value: 'bonus', label: 'Bonus' },
+    { value: 'tjanstebil', label: 'Tjänstebil' },
+    { value: 'mobiltelefon', label: 'Mobiltelefon' },
+    { value: 'utbildning', label: 'Utbildning/kompetensutveckling' },
+    { value: 'forsakringar', label: 'Försäkringar' },
+    { value: 'extra-semester', label: 'Extra semesterdagar' },
+    { value: 'gym', label: 'Gym/träning' },
+    { value: 'foraldraledithet', label: 'Föräldraledighetstillägg' },
+    { value: 'lunch', label: 'Lunch/mat' },
+    { value: 'fri-parkering', label: 'Fri parkering' },
+    { value: 'personalrabatter', label: 'Personalrabatter' },
   ];
 
   const handleInputChange = (field: keyof TemplateFormData, value: string) => {
@@ -543,6 +607,22 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
     setShowRemoteWorkDropdown(!showRemoteWorkDropdown);
   };
 
+  const handleSalaryTransparencySearch = (value: string) => {
+    setSalaryTransparencySearchTerm(value);
+    setShowSalaryTransparencyDropdown(value.length >= 0);
+  };
+
+  const handleSalaryTransparencySelect = (option: { value: string, label: string }) => {
+    handleInputChange('salary_transparency', option.value);
+    setSalaryTransparencySearchTerm(option.label);
+    setShowSalaryTransparencyDropdown(false);
+  };
+
+  const handleSalaryTransparencyClick = () => {
+    setSalaryTransparencySearchTerm('');
+    setShowSalaryTransparencyDropdown(!showSalaryTransparencyDropdown);
+  };
+
   const handleWorkplacePostalCodeChange = useCallback((postalCode: string) => {
     handleInputChange('workplace_postal_code', postalCode);
   }, []);
@@ -578,6 +658,12 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
         type.label.toLowerCase().includes(remoteWorkSearchTerm.toLowerCase())
       )
     : remoteWorkOptions;
+
+  const filteredSalaryTransparencyOptions = salaryTransparencySearchTerm.length > 0
+    ? salaryTransparencyOptions.filter(option => 
+        option.label.toLowerCase().includes(salaryTransparencySearchTerm.toLowerCase())
+      )
+    : salaryTransparencyOptions;
 
   const filteredOccupations = occupationSearchTerm.length > 0 ? searchOccupations(occupationSearchTerm) : [];
 
@@ -674,6 +760,7 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       salary_max: '',
       employment_type: '',
       salary_type: '',
+      salary_transparency: '',
       positions_count: '1',
       work_location_type: 'på-plats',
       remote_work_possible: 'nej',
@@ -682,9 +769,12 @@ const CreateTemplateWizard = ({ open, onOpenChange, onTemplateCreated, templateT
       workplace_postal_code: '',
       workplace_city: '',
       work_schedule: '',
+      work_start_time: '',
+      work_end_time: '',
       contact_email: '',
       application_instructions: '',
-      pitch: ''
+      pitch: '',
+      benefits: []
     });
     setCustomQuestions([]);
     setHasUnsavedChanges(false);
