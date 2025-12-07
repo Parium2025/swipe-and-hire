@@ -2969,25 +2969,11 @@ const MobileJobWizard = ({
                   <div className="flex flex-col items-center space-y-4">
                     {/* Desktop monitor frame - professional mockup */}
                     <div className="relative">
-                      {/* Tooltips for desktop - pointing to the screen */}
+                      {/* Tooltips for desktop - X button (right) and company name (left) */}
                       {showCompanyTooltip && showDesktopApplicationForm && (
                         <>
-                          {/* Left tooltip */}
-                          <div className="pointer-events-none absolute z-[999] top-24 -left-[120px] flex items-center gap-1">
-                            <div className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
-                              Obs, tryck här!
-                            </div>
-                            <svg width="24" height="20" viewBox="0 0 40 24" className="text-white" style={{ overflow: 'visible' }}>
-                              <defs>
-                                <marker id="arrowheadRight_desktop" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
-                                  <polygon points="0 0, 12 6, 0 12" fill="currentColor" />
-                                </marker>
-                              </defs>
-                              <path d="M2 12 L 38 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerEnd="url(#arrowheadRight_desktop)" />
-                            </svg>
-                          </div>
-                          {/* Right tooltip */}
-                          <div className="pointer-events-none absolute z-[999] top-12 -right-[120px] flex items-center gap-1">
+                          {/* Right tooltip - pointing at X button (header row) */}
+                          <div className="pointer-events-none absolute z-[999] top-[52px] -right-[120px] flex items-center gap-1">
                             <svg width="24" height="20" viewBox="0 0 40 24" className="text-white" style={{ overflow: 'visible' }}>
                               <defs>
                                 <marker id="arrowheadLeft_desktop" markerWidth="12" markerHeight="12" refX="3" refY="6" orient="auto">
@@ -2999,6 +2985,20 @@ const MobileJobWizard = ({
                             <div className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
                               Obs, tryck här!
                             </div>
+                          </div>
+                          {/* Left tooltip - pointing at company name (below header) */}
+                          <div className="pointer-events-none absolute z-[999] top-[90px] -left-[120px] flex items-center gap-1">
+                            <div className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded shadow-md font-medium border border-primary/30 whitespace-nowrap">
+                              Obs, tryck här!
+                            </div>
+                            <svg width="24" height="20" viewBox="0 0 40 24" className="text-white" style={{ overflow: 'visible' }}>
+                              <defs>
+                                <marker id="arrowheadRight_desktop" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
+                                  <polygon points="0 0, 12 6, 0 12" fill="currentColor" />
+                                </marker>
+                              </defs>
+                              <path d="M2 12 L 38 12" stroke="currentColor" strokeWidth="1.5" fill="none" markerEnd="url(#arrowheadRight_desktop)" />
+                            </svg>
                           </div>
                         </>
                       )}
